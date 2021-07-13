@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -154,14 +156,21 @@ func (rC RPCConn) Clone() (cln *RPCConn) {
 
 // RemoteHost connection config
 type RemoteHost struct {
-	ID          string
-	Address     string
-	Transport   string
-	Synchronous bool
-	TLS         bool
+	ID             string
+	Address        string
+	Transport      string
+	Synchronous    bool
+	TLS            bool
+	KeyPath        string
+	CertPath       string
+	CaPath         string
+	ConnAttempts   int
+	Reconnects     int
+	ConnectTimeout time.Duration
+	ReplyTimeout   time.Duration
 }
 
-func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
+func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -183,6 +192,32 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
 	if jsnCfg.Tls != nil {
 		rh.TLS = *jsnCfg.Tls
 	}
+	if jsnCfg.Key_path != nil {
+		rh.KeyPath = *jsnCfg.Key_path
+	}
+	if jsnCfg.Cert_path != nil {
+		rh.CertPath = *jsnCfg.Cert_path
+	}
+	if jsnCfg.Ca_path != nil {
+		rh.CaPath = *jsnCfg.Ca_path
+	}
+	if jsnCfg.Conn_attempts != nil {
+		rh.ConnAttempts = *jsnCfg.Conn_attempts
+	}
+	if jsnCfg.Reconnects != nil {
+		rh.Reconnects = *jsnCfg.Reconnects
+	}
+	if jsnCfg.Connect_timeout != nil {
+		if rh.ConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Connect_timeout); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Reply_timeout != nil {
+		if rh.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Reply_timeout); err != nil {
+			return err
+		}
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
@@ -198,7 +233,28 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 		mp[utils.SynchronousCfg] = rh.Synchronous
 	}
 	if rh.TLS {
-		mp[utils.TLS] = rh.TLS
+		mp[utils.TLSNoCaps] = rh.TLS
+	}
+	if rh.KeyPath != utils.EmptyString {
+		mp[utils.KeyPathCgr] = rh.KeyPath
+	}
+	if rh.CertPath != utils.EmptyString {
+		mp[utils.CertPathCgr] = rh.CertPath
+	}
+	if rh.CaPath != utils.EmptyString {
+		mp[utils.CAPathCgr] = rh.CaPath
+	}
+	if rh.ConnAttempts != 0 {
+		mp[utils.ConnectAttemptsCfg] = rh.ConnAttempts
+	}
+	if rh.Reconnects != 0 {
+		mp[utils.ReconnectsCfg] = rh.Reconnects
+	}
+	if rh.ConnectTimeout != 0 {
+		mp[utils.ConnectTimeoutCfg] = rh.ConnectTimeout
+	}
+	if rh.ReplyTimeout != 0 {
+		mp[utils.ReplyTimeoutCfg] = rh.ReplyTimeout
 	}
 	return
 }
@@ -206,11 +262,18 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 // Clone returns a deep copy of RemoteHost
 func (rh RemoteHost) Clone() (cln *RemoteHost) {
 	return &RemoteHost{
-		ID:          rh.ID,
-		Address:     rh.Address,
-		Transport:   rh.Transport,
-		Synchronous: rh.Synchronous,
-		TLS:         rh.TLS,
+		ID:             rh.ID,
+		Address:        rh.Address,
+		Transport:      rh.Transport,
+		Synchronous:    rh.Synchronous,
+		TLS:            rh.TLS,
+		KeyPath:        rh.KeyPath,
+		CertPath:       rh.CertPath,
+		CaPath:         rh.CaPath,
+		ConnAttempts:   rh.ConnAttempts,
+		Reconnects:     rh.Reconnects,
+		ConnectTimeout: rh.ConnectTimeout,
+		ReplyTimeout:   rh.ReplyTimeout,
 	}
 }
 
@@ -229,6 +292,13 @@ func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs 
 			rh.Transport = newHost.Transport
 			rh.Synchronous = newHost.Synchronous
 			rh.TLS = newHost.TLS
+			rh.KeyPath = newHost.KeyPath
+			rh.CertPath = newHost.CertPath
+			rh.CaPath = newHost.CaPath
+			rh.ConnAttempts = newHost.ConnAttempts
+			rh.Reconnects = newHost.Reconnects
+			rh.ConnectTimeout = newHost.ConnectTimeout
+			rh.ReplyTimeout = newHost.ReplyTimeout
 		}
 	}
 	return
@@ -248,6 +318,13 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 			rh.Transport = ""
 			rh.Synchronous = false
 			rh.TLS = false
+			rh.KeyPath = ""
+			rh.CertPath = ""
+			rh.CaPath = ""
+			rh.ConnAttempts = 0
+			rh.Reconnects = 0
+			rh.ConnectTimeout = 0
+			rh.ReplyTimeout = 0
 		}
 	}
 	return
@@ -255,11 +332,18 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 
 // Represents one connection instance towards a rater/cdrs server
 type RemoteHostJson struct {
-	Id          *string
-	Address     *string
-	Transport   *string
-	Synchronous *bool
-	Tls         *bool
+	Id              *string
+	Address         *string
+	Transport       *string
+	Synchronous     *bool
+	Tls             *bool
+	Key_path        *string
+	Cert_path       *string
+	Ca_path         *string
+	Conn_attempts   *int
+	Reconnects      *int
+	Connect_timeout *string
+	Reply_timeout   *string
 }
 
 func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {
@@ -278,6 +362,27 @@ func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {
 	}
 	if v1.TLS != v2.TLS {
 		d.Tls = utils.BoolPointer(v2.TLS)
+	}
+	if v1.KeyPath != v2.KeyPath {
+		d.Key_path = utils.StringPointer(v2.KeyPath)
+	}
+	if v1.CertPath != v2.CertPath {
+		d.Cert_path = utils.StringPointer(v2.CertPath)
+	}
+	if v1.CaPath != v2.CaPath {
+		d.Ca_path = utils.StringPointer(v2.CaPath)
+	}
+	if v1.ConnAttempts != v2.ConnAttempts {
+		d.Conn_attempts = utils.IntPointer(v2.ConnAttempts)
+	}
+	if v1.Reconnects != v2.Reconnects {
+		d.Reconnects = utils.IntPointer(v2.Reconnects)
+	}
+	if v1.ConnectTimeout != v2.ConnectTimeout {
+		d.Connect_timeout = utils.StringPointer(v2.ConnectTimeout.String())
+	}
+	if v1.ReplyTimeout != v2.ReplyTimeout {
+		d.Reply_timeout = utils.StringPointer(v2.ReplyTimeout.String())
 	}
 	return
 }
@@ -318,7 +423,14 @@ func equalsRemoteHosts(v1, v2 []*RemoteHost) bool {
 			v1[i].Address != v2[i].Address ||
 			v1[i].Transport != v2[i].Transport ||
 			v1[i].Synchronous != v2[i].Synchronous ||
-			v1[i].TLS != v2[i].TLS {
+			v1[i].TLS != v2[i].TLS ||
+			v1[i].KeyPath != v2[i].KeyPath ||
+			v1[i].CertPath != v2[i].CertPath ||
+			v1[i].CaPath != v2[i].CaPath ||
+			v1[i].ConnAttempts != v2[i].ConnAttempts ||
+			v1[i].Reconnects != v2[i].Reconnects ||
+			v1[i].ConnectTimeout != v2[i].ConnectTimeout ||
+			v1[i].ReplyTimeout != v2[i].ReplyTimeout {
 			return false
 		}
 	}
