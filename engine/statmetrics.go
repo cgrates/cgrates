@@ -81,6 +81,7 @@ type StatMetric interface {
 	GetMinItems() (minIts int)
 	Compress(queueLen int64, defaultID string, roundingDec int) (eventIDs []string)
 	GetCompressFactor(events map[string]int) map[string]int
+	Clone() StatMetric
 }
 
 func NewASR(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -227,6 +228,20 @@ func (asr *StatASR) GetCompressFactor(events map[string]int) map[string]int {
 	return events
 }
 
+func (asr *StatASR) Clone() StatMetric {
+	cln := &StatASR{
+		FilterIDs: utils.CloneStringSlice(asr.FilterIDs),
+		Answered:  asr.Answered,
+		Count:     asr.Count,
+		Events:    make(map[string]*StatWithCompress),
+		MinItems:  asr.MinItems,
+	}
+	for k, v := range asr.Events {
+		cln.Events[k] = &(*v)
+	}
+	return cln
+}
+
 func NewACD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatACD{Events: make(map[string]*DurationWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
@@ -361,6 +376,20 @@ func (acd *StatACD) GetCompressFactor(events map[string]int) map[string]int {
 		}
 	}
 	return events
+}
+
+func (acd *StatACD) Clone() StatMetric {
+	cln := &StatACD{
+		FilterIDs: utils.CloneStringSlice(acd.FilterIDs),
+		Sum:       acd.Sum,
+		Count:     acd.Count,
+		Events:    make(map[string]*DurationWithCompress),
+		MinItems:  acd.MinItems,
+	}
+	for k, v := range acd.Events {
+		cln.Events[k] = &(*v)
+	}
+	return cln
 }
 
 func NewTCD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -501,6 +530,20 @@ func (tcd *StatTCD) GetCompressFactor(events map[string]int) map[string]int {
 	return events
 }
 
+func (tcd *StatTCD) Clone() StatMetric {
+	cln := &StatTCD{
+		FilterIDs: utils.CloneStringSlice(tcd.FilterIDs),
+		Sum:       tcd.Sum,
+		Count:     tcd.Count,
+		Events:    make(map[string]*DurationWithCompress),
+		MinItems:  tcd.MinItems,
+	}
+	for k, v := range tcd.Events {
+		cln.Events[k] = &(*v)
+	}
+	return cln
+}
+
 func NewACC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatACC{Events: make(map[string]*StatWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
@@ -631,6 +674,20 @@ func (acc *StatACC) GetCompressFactor(events map[string]int) map[string]int {
 		}
 	}
 	return events
+}
+
+func (acc *StatACC) Clone() StatMetric {
+	cln := &StatACC{
+		FilterIDs: utils.CloneStringSlice(acc.FilterIDs),
+		Sum:       acc.Sum,
+		Count:     acc.Count,
+		Events:    make(map[string]*StatWithCompress),
+		MinItems:  acc.MinItems,
+	}
+	for k, v := range acc.Events {
+		cln.Events[k] = &(*v)
+	}
+	return cln
 }
 
 func NewTCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -765,6 +822,20 @@ func (tcc *StatTCC) GetCompressFactor(events map[string]int) map[string]int {
 		}
 	}
 	return events
+}
+
+func (tcc *StatTCC) Clone() StatMetric {
+	cln := &StatTCC{
+		FilterIDs: utils.CloneStringSlice(tcc.FilterIDs),
+		Sum:       tcc.Sum,
+		Count:     tcc.Count,
+		Events:    make(map[string]*StatWithCompress),
+		MinItems:  tcc.MinItems,
+	}
+	for k, v := range tcc.Events {
+		cln.Events[k] = &(*v)
+	}
+	return cln
 }
 
 func NewPDD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -903,6 +974,20 @@ func (pdd *StatPDD) GetCompressFactor(events map[string]int) map[string]int {
 	return events
 }
 
+func (pdd *StatPDD) Clone() StatMetric {
+	cln := &StatPDD{
+		FilterIDs: utils.CloneStringSlice(pdd.FilterIDs),
+		Sum:       pdd.Sum,
+		Count:     pdd.Count,
+		Events:    make(map[string]*DurationWithCompress),
+		MinItems:  pdd.MinItems,
+	}
+	for k, v := range pdd.Events {
+		cln.Events[k] = &(*v)
+	}
+	return cln
+}
+
 func NewDDC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatDDC{Events: make(map[string]map[string]int64), FieldValues: make(map[string]utils.StringSet),
 		MinItems: minItems, FilterIDs: filterIDs}, nil
@@ -1026,8 +1111,6 @@ func (ddc *StatDDC) Compress(queueLen int64, defaultID string, roundingDecimal i
 	return
 }
 
-////////////////////
-
 // Compress is part of StatMetric interface
 func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
 	for id, ev := range ddc.Events {
@@ -1043,6 +1126,26 @@ func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
 		}
 	}
 	return events
+}
+
+func (ddc *StatDDC) Clone() StatMetric {
+	cln := &StatDDC{
+		FilterIDs:   utils.CloneStringSlice(ddc.FilterIDs),
+		FieldValues: make(map[string]utils.StringSet),
+		Count:       ddc.Count,
+		Events:      make(map[string]map[string]int64),
+		MinItems:    ddc.MinItems,
+	}
+	for k, v := range ddc.Events {
+		cln.Events[k] = make(map[string]int64)
+		for d, n := range v {
+			cln.Events[k][d] = n
+		}
+	}
+	for k, v := range ddc.FieldValues {
+		cln.FieldValues[k] = v.Clone()
+	}
+	return cln
 }
 
 func NewStatSum(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -1178,6 +1281,21 @@ func (sum *StatSum) GetCompressFactor(events map[string]int) map[string]int {
 	return events
 }
 
+func (sum *StatSum) Clone() StatMetric {
+	cln := &StatSum{
+		FilterIDs: utils.CloneStringSlice(sum.FilterIDs),
+		Sum:       sum.Sum,
+		Count:     sum.Count,
+		Events:    make(map[string]*StatWithCompress),
+		MinItems:  sum.MinItems,
+		FieldName: sum.FieldName,
+	}
+	for k, v := range sum.Events {
+		cln.Events[k] = &(*v)
+	}
+	return cln
+}
+
 func NewStatAverage(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatAverage{Events: make(map[string]*StatWithCompress),
 		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
@@ -1310,6 +1428,21 @@ func (avg *StatAverage) GetCompressFactor(events map[string]int) map[string]int 
 		}
 	}
 	return events
+}
+
+func (avg *StatAverage) Clone() StatMetric {
+	cln := &StatAverage{
+		FilterIDs: utils.CloneStringSlice(avg.FilterIDs),
+		Sum:       avg.Sum,
+		Count:     avg.Count,
+		Events:    make(map[string]*StatWithCompress),
+		MinItems:  avg.MinItems,
+		FieldName: avg.FieldName,
+	}
+	for k, v := range avg.Events {
+		cln.Events[k] = &(*v)
+	}
+	return cln
 }
 
 func NewStatDistinct(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -1456,4 +1589,25 @@ func (dst *StatDistinct) GetCompressFactor(events map[string]int) map[string]int
 		}
 	}
 	return events
+}
+
+func (dst *StatDistinct) Clone() StatMetric {
+	cln := &StatDistinct{
+		FilterIDs:   utils.CloneStringSlice(dst.FilterIDs),
+		Count:       dst.Count,
+		Events:      make(map[string]map[string]int64),
+		MinItems:    dst.MinItems,
+		FieldName:   dst.FieldName,
+		FieldValues: make(map[string]utils.StringSet),
+	}
+	for k, v := range dst.Events {
+		cln.Events[k] = make(map[string]int64)
+		for d, n := range v {
+			cln.Events[k][d] = n
+		}
+	}
+	for k, v := range dst.FieldValues {
+		cln.FieldValues[k] = v.Clone()
+	}
+	return cln
 }

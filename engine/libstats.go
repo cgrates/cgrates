@@ -437,3 +437,24 @@ func (sq *StatQueue) GobEncode() (rply []byte, err error) {
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
 	return buf.Bytes(), nil
 }
+
+func (sq *StatQueue) Clone() (cln *StatQueue) {
+	cln = &StatQueue{
+		Tenant:    sq.Tenant,
+		ID:        sq.ID,
+		SQItems:   make([]SQItem, len(sq.SQItems)),
+		SQMetrics: make(map[string]StatMetric),
+	}
+	for i, itm := range sq.SQItems {
+		var exp *time.Time
+		if itm.ExpiryTime != nil {
+			exp = new(time.Time)
+			*exp = *itm.ExpiryTime
+		}
+		cln.SQItems[i] = SQItem{EventID: itm.EventID, ExpiryTime: exp}
+	}
+	for k, m := range sq.SQMetrics {
+		cln.SQMetrics[k] = m.Clone()
+	}
+	return
+}
