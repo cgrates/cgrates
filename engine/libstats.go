@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -339,4 +341,55 @@ type StatQueues []*StatQueue
 // Sort is part of sort interface, sort based on Weight
 func (sis StatQueues) Sort() {
 	sort.Slice(sis, func(i, j int) bool { return sis[i].sqPrfl.Weight > sis[j].sqPrfl.Weight })
+}
+
+// UnmarshalJSON here only to fully support json for StatQueue
+func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
+	var tmp struct {
+		Tenant    string
+		ID        string
+		SQItems   []SQItem
+		SQMetrics map[string]json.RawMessage
+	}
+	if err = json.Unmarshal(data, &tmp); err != nil {
+		return
+	}
+	sq.Tenant = tmp.Tenant
+	sq.ID = tmp.ID
+	sq.SQItems = tmp.SQItems
+	sq.SQMetrics = make(map[string]StatMetric)
+	for metricID, val := range tmp.SQMetrics {
+		metricSplit := strings.Split(metricID, utils.HashtagSep)
+		var metric StatMetric
+		switch metricSplit[0] {
+		case utils.MetaASR:
+			metric = new(StatASR)
+		case utils.MetaACD:
+			metric = new(StatACD)
+		case utils.MetaTCD:
+			metric = new(StatTCD)
+		case utils.MetaACC:
+			metric = new(StatACC)
+		case utils.MetaTCC:
+			metric = new(StatTCC)
+		case utils.MetaPDD:
+			metric = new(StatPDD)
+		case utils.MetaDDC:
+			metric = new(StatDDC)
+		case utils.MetaSum:
+			metric = new(StatSum)
+		case utils.MetaAverage:
+			metric = new(StatAverage)
+		case utils.MetaDistinct:
+			metric = new(StatDistinct)
+		default:
+			return fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
+		}
+		if err = json.Unmarshal([]byte(val), metric); err != nil {
+			fmt.Println(1)
+			return
+		}
+		sq.SQMetrics[metricID] = metric
+	}
+	return
 }

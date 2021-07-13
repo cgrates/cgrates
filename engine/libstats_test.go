@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
@@ -1223,4 +1224,21 @@ func TestLibstatsaddStatEventNoPass(t *testing.T) {
 	if !reflect.DeepEqual(sq, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq)
 	}
+}
+
+func TestStatQueueJSONMarshall(t *testing.T) {
+	rply := new(StatQueue)
+	exp, err := NewStatQueue("cgrates.org", "STS", []*MetricWithFilters{
+		{MetricID: utils.MetaASR},
+		{MetricID: utils.MetaTCD},
+	}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal([]byte(utils.ToJSON(exp)), rply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rply, exp) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
 }
