@@ -77,6 +77,7 @@ func (rC *RPCConn) AsMapInterface() map[string]interface{} {
 
 // One connection to Rater
 type RemoteHost struct {
+	ID          string
 	Address     string
 	Transport   string
 	Synchronous bool
@@ -86,6 +87,12 @@ type RemoteHost struct {
 func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) error {
 	if jsnCfg == nil {
 		return nil
+	}
+	if jsnCfg.Id != nil {
+		self.ID = *jsnCfg.Id
+		// ignore defaults if we have ID
+		self.Address = utils.EmptyString
+		self.Transport = utils.EmptyString
 	}
 	if jsnCfg.Address != nil {
 		self.Address = *jsnCfg.Address

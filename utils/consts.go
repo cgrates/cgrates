@@ -1517,6 +1517,7 @@ const (
 	CacheRPCConnections          = "*rpc_connections"
 	CacheCDRIDs                  = "*cdr_ids"
 	CacheRatingProfilesTmp       = "*tmp_rating_profiles"
+	CacheReplicationHosts        = "*replication_hosts"
 )
 
 // Prefix for indexing
@@ -1616,15 +1617,16 @@ const (
 
 // DataDbCfg
 const (
-	DataDbTypeCfg         = "db_type"
-	DataDbHostCfg         = "db_host"
-	DataDbPortCfg         = "db_port"
-	DataDbNameCfg         = "db_name"
-	DataDbUserCfg         = "db_user"
-	DataDbPassCfg         = "db_password"
-	DataDbSentinelNameCfg = "redis_sentinel"
-	RmtConnsCfg           = "remote_conns"
-	RplConnsCfg           = "replication_conns"
+	DataDbTypeCfg          = "db_type"
+	DataDbHostCfg          = "db_host"
+	DataDbPortCfg          = "db_port"
+	DataDbNameCfg          = "db_name"
+	DataDbUserCfg          = "db_user"
+	DataDbPassCfg          = "db_password"
+	DataDbSentinelNameCfg  = "redis_sentinel"
+	RmtConnsCfg            = "remote_conns"
+	RplConnsCfg            = "replication_conns"
+	ReplicationFilteredCfg = "replication_filtered"
 )
 
 // ItemOpt

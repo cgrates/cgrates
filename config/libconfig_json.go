@@ -97,6 +97,7 @@ type DbJsonCfg struct {
 	Remote_conns          *[]string
 	Replication_conns     *[]string
 	Items                 *map[string]*ItemOptJson
+	Replication_filtered  *bool
 }
 
 type ItemOptJson struct {
@@ -249,6 +250,7 @@ type RPCConnsJson struct {
 
 // Represents one connection instance towards a rater/cdrs server
 type RemoteHostJson struct {
+	Id          *string
 	Address     *string
 	Transport   *string
 	Synchronous *bool
