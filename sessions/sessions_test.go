@@ -2684,3 +2684,549 @@ func TestBiJClntID(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
 }
+
+func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.AttributeSCfg().Enabled = true
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*engine.AttrSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = engine.AttrSProcessEventReply{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
+				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
+				},
+			},
+		}
+
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &V1AuthorizeArgs{
+		GetAttributes: true,
+		CGREvent: &utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+	}
+
+	rply := &V1AuthorizeReply{
+		Attributes: new(engine.AttrSProcessEventReply),
+	}
+	if err := ss.BiRPCv1AuthorizeEvent(nil, args,
+		rply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.AttributeSCfg().Enabled = true
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*engine.AttrSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = engine.AttrSProcessEventReply{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
+				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
+				},
+			},
+		}
+
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &V1AuthorizeArgs{
+		GetAttributes: true,
+		CGREvent: &utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+	}
+
+	rply := &V1AuthorizeReplyWithDigest{}
+	if err := ss.BiRPCv1AuthorizeEventWithDigest(nil, args,
+		rply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.AttributeSCfg().Enabled = true
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*engine.AttrSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = engine.AttrSProcessEventReply{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
+				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
+				},
+			},
+		}
+
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &V1InitSessionArgs{
+		GetAttributes: true,
+		CGREvent: &utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+	}
+	reply := &V1InitSessionReply{
+		Attributes: new(engine.AttrSProcessEventReply),
+	}
+	if err := ss.BiRPCv1InitiateSession(nil, args, reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.AttributeSCfg().Enabled = true
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*engine.AttrSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = engine.AttrSProcessEventReply{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
+				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
+				},
+			},
+		}
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &V1InitSessionArgs{
+		GetAttributes: true,
+		CGREvent: &utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+	}
+	reply := &V1InitReplyWithDigest{}
+	if err := ss.BiRPCv1InitiateSessionWithDigest(nil, args, reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.AttributeSCfg().Enabled = true
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*engine.AttrSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = engine.AttrSProcessEventReply{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
+				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
+				},
+			},
+		}
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &V1UpdateSessionArgs{
+		GetAttributes: true,
+		CGREvent: &utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+	}
+	rply := &V1UpdateSessionReply{}
+	if err := ss.BiRPCv1UpdateSession(nil, args, rply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.ChargerSCfg().Enabled = true
+	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*utils.CGREventWithArgDispatcher)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = []*engine.ChrgSProcessEventReply{}
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent: &utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+	}
+	var reply string
+	if err := ss.BiRPCv1TerminateSession(nil, args,
+		&reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.AttributeSCfg().Enabled = true
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*engine.AttrSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = engine.AttrSProcessEventReply{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
+				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
+				},
+			},
+		}
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &V1ProcessMessageArgs{
+		GetAttributes: true,
+		CGREvent: &utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+	}
+	reply := &V1ProcessMessageReply{
+		Attributes: new(engine.AttrSProcessEventReply),
+	}
+	if err := ss.BiRPCv1ProcessMessage(nil, args,
+		reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.AttributeSCfg().Enabled = true
+	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*engine.AttrSProcessEventReply)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		}
+		*rply = engine.AttrSProcessEventReply{
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
+				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
+				},
+			},
+		}
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &V1ProcessEventArgs{
+		Flags: []string{utils.MetaAttributes},
+		CGREvent: &utils.CGREvent{
+			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1003",
+				"OriginHost":  "local",
+				"OriginID":    "123456",
+				"ToR":         "*voice",
+				"Usage":       "10s",
+			},
+		},
+	}
+	reply := &V1ProcessEventReply{
+		Attributes: new(engine.AttrSProcessEventReply),
+	}
+	if err := ss.BiRPCv1ProcessEvent(nil, args, reply); err != nil {
+		t.Error(err)
+	}
+}
