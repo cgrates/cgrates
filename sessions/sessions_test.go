@@ -2686,10 +2686,7 @@ func TestBiJClntID(t *testing.T) {
 }
 
 func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
@@ -2728,7 +2725,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2759,10 +2756,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 }
 
 func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
@@ -2801,7 +2795,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2830,10 +2824,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 }
 
 func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
@@ -2872,7 +2863,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2901,10 +2892,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 }
 
 func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
@@ -2942,7 +2930,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2969,10 +2957,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 }
 
 func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
@@ -3010,7 +2995,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3037,10 +3022,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 }
 
 func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.ChargerSCfg().Enabled = true
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
@@ -3048,7 +3030,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*utils.CGREventWithArgDispatcher)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -3063,7 +3045,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3091,10 +3073,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
@@ -3132,7 +3111,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3162,10 +3141,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 }
 
 func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
+	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().AttrSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes)}
 	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
@@ -3203,7 +3179,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3224,7 +3200,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 		},
 	}
 	reply := &V1ProcessEventReply{
-		Attributes: new(engine.AttrSProcessEventReply),
+		Attributes: make(map[string]*engine.AttrSProcessEventReply),
 	}
 	if err := ss.BiRPCv1ProcessEvent(nil, args, reply); err != nil {
 		t.Error(err)
