@@ -891,11 +891,12 @@ type SetFilterIndexesArg struct {
 }
 
 func CastRPCErr(err error) error {
-	if _, has := ErrMap[err.Error()]; has {
-		return ErrMap[err.Error()]
-	} else {
-		return err
+	if err != nil {
+		if _, has := ErrMap[err.Error()]; has {
+			return ErrMap[err.Error()]
+		}
 	}
+	return err
 }
 
 // RandomInteger returns a random integer between min and max values
