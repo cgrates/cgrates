@@ -1592,7 +1592,7 @@ type DispatcherHostMdls []*DispatcherHostMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps DispatcherHostMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.TLS}
+	return []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.SynchronousCfg, utils.ConnectAttemptsCfg, utils.ReconnectsCfg, utils.ConnectTimeoutCfg, utils.ReplyTimeoutCfg, utils.TLS, utils.ClientKeyCfg, utils.ClientCerificateCfg, utils.CaCertificateCfg}
 }
 
 func (tps DispatcherHostMdls) AsTPDispatcherHosts() (result []*utils.TPDispatcherHost, err error) {
