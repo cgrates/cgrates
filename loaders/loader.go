@@ -521,7 +521,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return
 				}
 			}
-			for _, tpDsp := range dispModels.AsTPDispatcherHosts() {
+			tpDsps, err := dispModels.AsTPDispatcherHosts()
+			if err != nil {
+				return err
+			}
+			for _, tpDsp := range tpDsps {
 				dsp := engine.APItoDispatcherHost(tpDsp)
 				if ldr.dryRun {
 					utils.Logger.Info(

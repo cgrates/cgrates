@@ -1285,10 +1285,66 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
 			},
 			{
-				Tag:   "TLS",
-				Path:  "TLS",
+				Tag:   "Synchronous",
+				Path:  "Synchronous",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
+			},
+			{
+				Tag:       "ConnectAttempts",
+				Path:      "ConnectAttempts",
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
+				Mandatory: true,
+			},
+			{
+				Tag:       "Reconnects",
+				Path:      "Reconnects",
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
+				Mandatory: true,
+			},
+			{
+				Tag:       "ConnectTimeout",
+				Path:      "ConnectTimeout",
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
+				Mandatory: true,
+			},
+			{
+				Tag:       "ReplyTimeout",
+				Path:      "ReplyTimeout",
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
+				Mandatory: true,
+			},
+			{
+				Tag:       "TLS",
+				Path:      "TLS",
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
+				Mandatory: true,
+			},
+			{
+				Tag:       "ClientKey",
+				Path:      "ClientKey",
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
+				Mandatory: true,
+			},
+			{
+				Tag:       "ClientCertificate",
+				Path:      "ClientCertificate",
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
+				Mandatory: true,
+			},
+			{
+				Tag:       "CaCertificate",
+				Path:      "CaCertificate",
+				Type:      utils.MetaComposed,
+				Value:     config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
+				Mandatory: true,
 			},
 		},
 	}
@@ -1313,14 +1369,22 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 	eDispHost := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
 		RemoteHost: &config.RemoteHost{
-			ID:        "ALL1",
-			Address:   "127.0.0.1:2012",
-			Transport: utils.MetaJSON,
-			TLS:       true,
+			ID:                "ALL",
+			Address:           "127.0.0.1:6012",
+			Transport:         utils.MetaJSON,
+			Synchronous:       false,
+			ConnectAttempts:   1,
+			Reconnects:        3,
+			ConnectTimeout:    1 * time.Minute,
+			ReplyTimeout:      2 * time.Minute,
+			TLS:               true,
+			ClientKey:         "key2",
+			ClientCertificate: "cert2",
+			CaCertificate:     "ca_cert2",
 		},
 	}
 
-	rcv, err := ldr.dm.GetDispatcherHost("cgrates.org", "ALL1",
+	rcv, err := ldr.dm.GetDispatcherHost("cgrates.org", "ALL",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)
