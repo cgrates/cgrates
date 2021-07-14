@@ -21,6 +21,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -32,10 +33,17 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 		PoolSize: utils.IntPointer(1),
 		Conns: &[]*RemoteHostJson{
 			{
-				Address:     utils.StringPointer("127.0.0.1:2012"),
-				Transport:   utils.StringPointer("*json"),
-				Synchronous: utils.BoolPointer(false),
-				Tls:         utils.BoolPointer(false),
+				Address:         utils.StringPointer("127.0.0.1:2012"),
+				Transport:       utils.StringPointer("*json"),
+				Synchronous:     utils.BoolPointer(false),
+				Tls:             utils.BoolPointer(false),
+				Key_path:        utils.StringPointer("key_path"),
+				Cert_path:       utils.StringPointer("cert_path"),
+				Ca_path:         utils.StringPointer("ca_path"),
+				Conn_attempts:   utils.IntPointer(5),
+				Reconnects:      utils.IntPointer(2),
+				Connect_timeout: utils.StringPointer("1m"),
+				Reply_timeout:   utils.StringPointer("1m"),
 			},
 		},
 	}
@@ -78,10 +86,17 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 			PoolSize: 1,
 			Conns: []*RemoteHost{
 				{
-					Address:     "127.0.0.1:2012",
-					Transport:   "*json",
-					Synchronous: false,
-					TLS:         false,
+					Address:           "127.0.0.1:2012",
+					Transport:         "*json",
+					Synchronous:       false,
+					ConnectAttempts:   5,
+					Reconnects:        2,
+					ConnectTimeout:    1 * time.Minute,
+					ReplyTimeout:      1 * time.Minute,
+					TLS:               false,
+					ClientKey:         "key_path",
+					ClientCertificate: "cert_path",
+					CaCertificate:     "ca_path",
 				},
 			},
 		},
@@ -135,10 +150,17 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 			PoolSize: 0,
 			Conns: []*RemoteHost{
 				{
-					Address:     "127.0.0.1:2012",
-					Transport:   "*json",
-					Synchronous: false,
-					TLS:         false,
+					Address:           "127.0.0.1:2012",
+					Transport:         "*json",
+					Synchronous:       false,
+					ConnectAttempts:   0,
+					Reconnects:        0,
+					ConnectTimeout:    0 * time.Minute,
+					ReplyTimeout:      0 * time.Minute,
+					TLS:               false,
+					ClientKey:         "",
+					ClientCertificate: "",
+					CaCertificate:     "",
 				},
 			},
 		},
@@ -154,7 +176,22 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"rpc_conns": {
 			"*localhost": {
-				"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+				"conns": [
+					{
+						"address": "127.0.0.1:2012", 
+						"transport":"*json",
+						"id": "id_example",
+						"synchronous": true,
+						"tls": true,
+						"key_path": "path_to_key",
+						"cert_path": "path_to_cert",
+						"ca_path":	"path_to_ca",
+						"connect_attempts": 5,
+						"reconnects": 3,
+						"connect_timeout": "1m",
+						"reply_timeout": "1m"
+					}
+				],
 			},
 		},	
 }`
@@ -174,8 +211,17 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 			utils.StrategyCfg: utils.MetaFirst,
 			utils.Conns: []map[string]interface{}{
 				{
-					utils.AddressCfg:   "127.0.0.1:2012",
-					utils.TransportCfg: "*json",
+					utils.AddressCfg:        "127.0.0.1:2012",
+					utils.TransportCfg:      "*json",
+					utils.IDCfg:             "id_example",
+					utils.SynchronousCfg:    true,
+					utils.TLSNoCaps:         true,
+					utils.KeyPathCgr:        "path_to_key",
+					utils.CertPathCgr:       "path_to_cert",
+					utils.CAPathCgr:         "path_to_ca",
+					utils.ReconnectsCfg:     3,
+					utils.ConnectTimeoutCfg: 1 * time.Minute,
+					utils.ReplyTimeoutCfg:   1 * time.Minute,
 				},
 			},
 		},
@@ -212,7 +258,7 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
      "rpc_conns": {
 	     "*localhost": {
 		     "conns": [
-                  {"address": "127.0.0.1:2018", "TLS": true, "synchronous": true, "transport": "*json"},
+                  {"address": "127.0.0.1:2018", "tls": true, "synchronous": true, "transport": "*json"},
              ],
              "poolSize": 2,
 	      },
@@ -252,7 +298,7 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 		utils.MetaLocalHost: map[string]interface{}{
 			utils.Conns: []map[string]interface{}{
 				{
-					utils.TLS:            true,
+					utils.TLSNoCaps:      true,
 					utils.AddressCfg:     "127.0.0.1:2018",
 					utils.SynchronousCfg: true,
 					utils.TransportCfg:   "*json",
@@ -288,10 +334,17 @@ func TestRPCConnsClone(t *testing.T) {
 			PoolSize: 1,
 			Conns: []*RemoteHost{
 				{
-					Address:     "127.0.0.1:2012",
-					Transport:   "*json",
-					Synchronous: false,
-					TLS:         false,
+					Address:           "127.0.0.1:2012",
+					Transport:         "*json",
+					Synchronous:       false,
+					ConnectAttempts:   0,
+					Reconnects:        0,
+					ConnectTimeout:    1 * time.Minute,
+					ReplyTimeout:      1 * time.Minute,
+					TLS:               false,
+					ClientKey:         "",
+					ClientCertificate: "",
+					CaCertificate:     "",
 				},
 			},
 		},
@@ -331,11 +384,18 @@ func TestUpdateRPCCons(t *testing.T) {
 
 	newHosts := map[string]*RemoteHost{
 		"RPC1": {
-			ID:          "RPC1",
-			Address:     utils.MetaInternal,
-			Transport:   utils.EmptyString,
-			Synchronous: true,
-			TLS:         true,
+			ID:                "RPC1",
+			Address:           utils.MetaInternal,
+			Transport:         utils.EmptyString,
+			Synchronous:       true,
+			ConnectAttempts:   2,
+			Reconnects:        2,
+			ConnectTimeout:    1 * time.Minute,
+			ReplyTimeout:      1 * time.Minute,
+			TLS:               true,
+			ClientKey:         "key",
+			ClientCertificate: "cert",
+			CaCertificate:     "ca",
 		},
 	}
 	expectedID := utils.StringSet{utils.MetaInternal: {}}
@@ -345,11 +405,18 @@ func TestUpdateRPCCons(t *testing.T) {
 			PoolSize: 0,
 			Conns: []*RemoteHost{
 				{
-					ID:          "RPC1",
-					Address:     utils.MetaInternal,
-					Transport:   utils.EmptyString,
-					Synchronous: true,
-					TLS:         true,
+					ID:                "RPC1",
+					Address:           utils.MetaInternal,
+					Transport:         utils.EmptyString,
+					Synchronous:       true,
+					ConnectAttempts:   2,
+					Reconnects:        2,
+					ConnectTimeout:    1 * time.Minute,
+					ReplyTimeout:      1 * time.Minute,
+					TLS:               true,
+					ClientKey:         "key",
+					ClientCertificate: "cert",
+					CaCertificate:     "ca",
 				},
 				{
 					ID:          "RPC2",
@@ -383,11 +450,18 @@ func TestRemoveRPCCons(t *testing.T) {
 					TLS:         false,
 				},
 				{
-					ID:          "RPC2",
-					Address:     utils.MetaInternal,
-					Transport:   utils.EmptyString,
-					Synchronous: false,
-					TLS:         false,
+					ID:                "RPC2",
+					Address:           utils.MetaInternal,
+					Transport:         utils.EmptyString,
+					Synchronous:       false,
+					ConnectAttempts:   2,
+					Reconnects:        2,
+					ConnectTimeout:    1 * time.Minute,
+					ReplyTimeout:      1 * time.Minute,
+					TLS:               false,
+					ClientKey:         "key",
+					ClientCertificate: "cert",
+					CaCertificate:     "ca",
 				},
 			},
 		},

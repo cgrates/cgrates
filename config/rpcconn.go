@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -117,14 +119,21 @@ func (rC RPCConn) Clone() (cln *RPCConn) {
 
 // RemoteHost connection config
 type RemoteHost struct {
-	ID          string
-	Address     string
-	Transport   string
-	Synchronous bool
-	TLS         bool
+	ID                string
+	Address           string
+	Transport         string
+	Synchronous       bool
+	ConnectAttempts   int
+	Reconnects        int
+	ConnectTimeout    time.Duration
+	ReplyTimeout      time.Duration
+	TLS               bool
+	ClientKey         string
+	ClientCertificate string
+	CaCertificate     string
 }
 
-func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
+func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -146,6 +155,32 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
 	if jsnCfg.Tls != nil {
 		rh.TLS = *jsnCfg.Tls
 	}
+	if jsnCfg.Key_path != nil {
+		rh.ClientKey = *jsnCfg.Key_path
+	}
+	if jsnCfg.Cert_path != nil {
+		rh.ClientCertificate = *jsnCfg.Cert_path
+	}
+	if jsnCfg.Ca_path != nil {
+		rh.CaCertificate = *jsnCfg.Ca_path
+	}
+	if jsnCfg.Conn_attempts != nil {
+		rh.ConnectAttempts = *jsnCfg.Conn_attempts
+	}
+	if jsnCfg.Reconnects != nil {
+		rh.Reconnects = *jsnCfg.Reconnects
+	}
+	if jsnCfg.Connect_timeout != nil {
+		if rh.ConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Connect_timeout); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Reply_timeout != nil {
+		if rh.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Reply_timeout); err != nil {
+			return err
+		}
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
@@ -161,7 +196,28 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 		mp[utils.SynchronousCfg] = rh.Synchronous
 	}
 	if rh.TLS {
-		mp[utils.TLS] = rh.TLS
+		mp[utils.TLSNoCaps] = rh.TLS
+	}
+	if rh.ClientKey != utils.EmptyString {
+		mp[utils.KeyPathCgr] = rh.ClientKey
+	}
+	if rh.ClientCertificate != utils.EmptyString {
+		mp[utils.CertPathCgr] = rh.ClientCertificate
+	}
+	if rh.CaCertificate != utils.EmptyString {
+		mp[utils.CAPathCgr] = rh.CaCertificate
+	}
+	if rh.ConnectAttempts != 0 {
+		mp[utils.ConnectAttemptsCfg] = rh.ConnectAttempts
+	}
+	if rh.Reconnects != 0 {
+		mp[utils.ReconnectsCfg] = rh.Reconnects
+	}
+	if rh.ConnectTimeout != 0 {
+		mp[utils.ConnectTimeoutCfg] = rh.ConnectTimeout
+	}
+	if rh.ReplyTimeout != 0 {
+		mp[utils.ReplyTimeoutCfg] = rh.ReplyTimeout
 	}
 	return
 }
@@ -169,11 +225,18 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 // Clone returns a deep copy of RemoteHost
 func (rh RemoteHost) Clone() (cln *RemoteHost) {
 	return &RemoteHost{
-		ID:          rh.ID,
-		Address:     rh.Address,
-		Transport:   rh.Transport,
-		Synchronous: rh.Synchronous,
-		TLS:         rh.TLS,
+		ID:                rh.ID,
+		Address:           rh.Address,
+		Transport:         rh.Transport,
+		Synchronous:       rh.Synchronous,
+		ConnectAttempts:   rh.ConnectAttempts,
+		Reconnects:        rh.Reconnects,
+		ConnectTimeout:    rh.ConnectTimeout,
+		ReplyTimeout:      rh.ReplyTimeout,
+		TLS:               rh.TLS,
+		ClientKey:         rh.ClientKey,
+		ClientCertificate: rh.ClientCertificate,
+		CaCertificate:     rh.CaCertificate,
 	}
 }
 
@@ -191,7 +254,14 @@ func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs 
 			rh.Address = newHost.Address
 			rh.Transport = newHost.Transport
 			rh.Synchronous = newHost.Synchronous
+			rh.ConnectAttempts = newHost.ConnectAttempts
+			rh.Reconnects = newHost.Reconnects
+			rh.ConnectTimeout = newHost.ConnectTimeout
+			rh.ReplyTimeout = newHost.ReplyTimeout
 			rh.TLS = newHost.TLS
+			rh.ClientKey = newHost.ClientKey
+			rh.ClientCertificate = newHost.ClientCertificate
+			rh.CaCertificate = newHost.CaCertificate
 		}
 	}
 	return
@@ -210,7 +280,14 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 			rh.Address = ""
 			rh.Transport = ""
 			rh.Synchronous = false
+			rh.ConnectAttempts = 0
+			rh.Reconnects = 0
+			rh.ConnectTimeout = 0
+			rh.ReplyTimeout = 0
 			rh.TLS = false
+			rh.ClientKey = ""
+			rh.ClientCertificate = ""
+			rh.CaCertificate = ""
 		}
 	}
 	return
