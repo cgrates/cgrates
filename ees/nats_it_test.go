@@ -43,7 +43,13 @@ func TestNatsEE(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	evExp, err := NewEventExporter(cfg, 5, new(engine.FilterS))
+	var idx int
+	for idx = range cfg.EEsCfg().Exporters {
+		if cfg.EEsCfg().Exporters[idx].ID == "NatsJsonMapExporter" {
+			break
+		}
+	}
+	evExp, err := NewEventExporter(cfg, idx, new(engine.FilterS))
 	if err != nil {
 		t.Fatal(err)
 	}

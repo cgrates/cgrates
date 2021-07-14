@@ -1227,7 +1227,7 @@ func TestLibstatsaddStatEventNoPass(t *testing.T) {
 }
 
 func TestStatQueueJSONMarshall(t *testing.T) {
-	rply := new(StatQueue)
+	var rply *StatQueue
 	exp, err := NewStatQueue("cgrates.org", "STS", []*MetricWithFilters{
 		{MetricID: utils.MetaASR},
 		{MetricID: utils.MetaTCD},
@@ -1235,10 +1235,31 @@ func TestStatQueueJSONMarshall(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = json.Unmarshal([]byte(utils.ToJSON(exp)), rply); err != nil {
+	if err = json.Unmarshal([]byte(utils.ToJSON(exp)), &rply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rply, exp) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+}
+
+func TestStatQueueWithAPIOptsJSONMarshall(t *testing.T) {
+	rply := &StatQueueWithAPIOpts{ /*StatQueue: &StatQueue{}*/ }
+	exp, err := NewStatQueue("cgrates.org", "STS", []*MetricWithFilters{
+		{MetricID: utils.MetaASR},
+		{MetricID: utils.MetaTCD},
+	}, 1)
+	exp2 := &StatQueueWithAPIOpts{
+		StatQueue: exp,
+		APIOpts:   map[string]interface{}{"a": "a"},
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal([]byte(utils.ToJSON(exp2)), rply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rply, exp2) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp2), utils.ToJSON(rply))
 	}
 
 }

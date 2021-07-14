@@ -386,10 +386,26 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 			return fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
 		}
 		if err = json.Unmarshal([]byte(val), metric); err != nil {
-			fmt.Println(1)
 			return
 		}
 		sq.SQMetrics[metricID] = metric
 	}
+	return
+}
+
+// UnmarshalJSON here only to fully support json for StatQueue
+func (ssq *StatQueueWithAPIOpts) UnmarshalJSON(data []byte) (err error) {
+	sq := new(StatQueue)
+	if err = json.Unmarshal(data, &sq); err != nil {
+		return
+	}
+	i := struct {
+		APIOpts map[string]interface{}
+	}{}
+	if err = json.Unmarshal(data, &i); err != nil {
+		return
+	}
+	ssq.StatQueue = sq
+	ssq.APIOpts = i.APIOpts
 	return
 }
