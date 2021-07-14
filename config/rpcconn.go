@@ -156,18 +156,18 @@ func (rC RPCConn) Clone() (cln *RPCConn) {
 
 // RemoteHost connection config
 type RemoteHost struct {
-	ID             string
-	Address        string
-	Transport      string
-	Synchronous    bool
-	TLS            bool
-	KeyPath        string
-	CertPath       string
-	CaPath         string
-	ConnAttempts   int
-	Reconnects     int
-	ConnectTimeout time.Duration
-	ReplyTimeout   time.Duration
+	ID                string
+	Address           string
+	Transport         string
+	Synchronous       bool
+	ConnectAttempts   int
+	Reconnects        int
+	ConnectTimeout    time.Duration
+	ReplyTimeout      time.Duration
+	TLS               bool
+	ClientKey         string
+	ClientCertificate string
+	CaCertificate     string
 }
 
 func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
@@ -193,16 +193,16 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 		rh.TLS = *jsnCfg.Tls
 	}
 	if jsnCfg.Client_key != nil {
-		rh.KeyPath = *jsnCfg.Client_key
+		rh.ClientKey = *jsnCfg.Client_key
 	}
 	if jsnCfg.Client_certificate != nil {
-		rh.CertPath = *jsnCfg.Client_certificate
+		rh.ClientCertificate = *jsnCfg.Client_certificate
 	}
 	if jsnCfg.Ca_certificate != nil {
-		rh.CaPath = *jsnCfg.Ca_certificate
+		rh.CaCertificate = *jsnCfg.Ca_certificate
 	}
 	if jsnCfg.Connect_attempts != nil {
-		rh.ConnAttempts = *jsnCfg.Connect_attempts
+		rh.ConnectAttempts = *jsnCfg.Connect_attempts
 	}
 	if jsnCfg.Reconnects != nil {
 		rh.Reconnects = *jsnCfg.Reconnects
@@ -235,17 +235,17 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 	if rh.TLS {
 		mp[utils.TLSNoCaps] = rh.TLS
 	}
-	if rh.KeyPath != utils.EmptyString {
-		mp[utils.KeyPathCgr] = rh.KeyPath
+	if rh.ClientKey != utils.EmptyString {
+		mp[utils.KeyPathCgr] = rh.ClientKey
 	}
-	if rh.CertPath != utils.EmptyString {
-		mp[utils.CertPathCgr] = rh.CertPath
+	if rh.ClientCertificate != utils.EmptyString {
+		mp[utils.CertPathCgr] = rh.ClientCertificate
 	}
-	if rh.CaPath != utils.EmptyString {
-		mp[utils.CAPathCgr] = rh.CaPath
+	if rh.CaCertificate != utils.EmptyString {
+		mp[utils.CAPathCgr] = rh.CaCertificate
 	}
-	if rh.ConnAttempts != 0 {
-		mp[utils.ConnectAttemptsCfg] = rh.ConnAttempts
+	if rh.ConnectAttempts != 0 {
+		mp[utils.ConnectAttemptsCfg] = rh.ConnectAttempts
 	}
 	if rh.Reconnects != 0 {
 		mp[utils.ReconnectsCfg] = rh.Reconnects
@@ -262,18 +262,18 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 // Clone returns a deep copy of RemoteHost
 func (rh RemoteHost) Clone() (cln *RemoteHost) {
 	return &RemoteHost{
-		ID:             rh.ID,
-		Address:        rh.Address,
-		Transport:      rh.Transport,
-		Synchronous:    rh.Synchronous,
-		TLS:            rh.TLS,
-		KeyPath:        rh.KeyPath,
-		CertPath:       rh.CertPath,
-		CaPath:         rh.CaPath,
-		ConnAttempts:   rh.ConnAttempts,
-		Reconnects:     rh.Reconnects,
-		ConnectTimeout: rh.ConnectTimeout,
-		ReplyTimeout:   rh.ReplyTimeout,
+		ID:                rh.ID,
+		Address:           rh.Address,
+		Transport:         rh.Transport,
+		Synchronous:       rh.Synchronous,
+		TLS:               rh.TLS,
+		ClientKey:         rh.ClientKey,
+		ClientCertificate: rh.ClientCertificate,
+		CaCertificate:     rh.CaCertificate,
+		ConnectAttempts:   rh.ConnectAttempts,
+		Reconnects:        rh.Reconnects,
+		ConnectTimeout:    rh.ConnectTimeout,
+		ReplyTimeout:      rh.ReplyTimeout,
 	}
 }
 
@@ -292,10 +292,10 @@ func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs 
 			rh.Transport = newHost.Transport
 			rh.Synchronous = newHost.Synchronous
 			rh.TLS = newHost.TLS
-			rh.KeyPath = newHost.KeyPath
-			rh.CertPath = newHost.CertPath
-			rh.CaPath = newHost.CaPath
-			rh.ConnAttempts = newHost.ConnAttempts
+			rh.ClientKey = newHost.ClientKey
+			rh.ClientCertificate = newHost.ClientCertificate
+			rh.CaCertificate = newHost.CaCertificate
+			rh.ConnectAttempts = newHost.ConnectAttempts
 			rh.Reconnects = newHost.Reconnects
 			rh.ConnectTimeout = newHost.ConnectTimeout
 			rh.ReplyTimeout = newHost.ReplyTimeout
@@ -318,10 +318,10 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 			rh.Transport = ""
 			rh.Synchronous = false
 			rh.TLS = false
-			rh.KeyPath = ""
-			rh.CertPath = ""
-			rh.CaPath = ""
-			rh.ConnAttempts = 0
+			rh.ClientKey = ""
+			rh.ClientCertificate = ""
+			rh.CaCertificate = ""
+			rh.ConnectAttempts = 0
 			rh.Reconnects = 0
 			rh.ConnectTimeout = 0
 			rh.ReplyTimeout = 0
@@ -363,17 +363,17 @@ func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {
 	if v1.TLS != v2.TLS {
 		d.Tls = utils.BoolPointer(v2.TLS)
 	}
-	if v1.KeyPath != v2.KeyPath {
-		d.Client_key = utils.StringPointer(v2.KeyPath)
+	if v1.ClientKey != v2.ClientKey {
+		d.Client_key = utils.StringPointer(v2.ClientKey)
 	}
-	if v1.CertPath != v2.CertPath {
-		d.Client_certificate = utils.StringPointer(v2.CertPath)
+	if v1.ClientCertificate != v2.ClientCertificate {
+		d.Client_certificate = utils.StringPointer(v2.ClientCertificate)
 	}
-	if v1.CaPath != v2.CaPath {
-		d.Ca_certificate = utils.StringPointer(v2.CaPath)
+	if v1.ClientCertificate != v2.ClientCertificate {
+		d.Ca_certificate = utils.StringPointer(v2.CaCertificate)
 	}
-	if v1.ConnAttempts != v2.ConnAttempts {
-		d.Connect_attempts = utils.IntPointer(v2.ConnAttempts)
+	if v1.ConnectAttempts != v2.ConnectAttempts {
+		d.Connect_attempts = utils.IntPointer(v2.ConnectAttempts)
 	}
 	if v1.Reconnects != v2.Reconnects {
 		d.Reconnects = utils.IntPointer(v2.Reconnects)
@@ -424,10 +424,10 @@ func equalsRemoteHosts(v1, v2 []*RemoteHost) bool {
 			v1[i].Transport != v2[i].Transport ||
 			v1[i].Synchronous != v2[i].Synchronous ||
 			v1[i].TLS != v2[i].TLS ||
-			v1[i].KeyPath != v2[i].KeyPath ||
-			v1[i].CertPath != v2[i].CertPath ||
-			v1[i].CaPath != v2[i].CaPath ||
-			v1[i].ConnAttempts != v2[i].ConnAttempts ||
+			v1[i].ClientKey != v2[i].ClientKey ||
+			v1[i].ClientCertificate != v2[i].ClientCertificate ||
+			v1[i].CaCertificate != v2[i].CaCertificate ||
+			v1[i].ConnectAttempts != v2[i].ConnectAttempts ||
 			v1[i].Reconnects != v2[i].Reconnects ||
 			v1[i].ConnectTimeout != v2[i].ConnectTimeout ||
 			v1[i].ReplyTimeout != v2[i].ReplyTimeout {
