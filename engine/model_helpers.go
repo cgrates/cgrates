@@ -1604,30 +1604,30 @@ func (tps DispatcherHostMdls) AsTPDispatcherHosts() (result []*utils.TPDispatche
 		if len(tp.Transport) == 0 {
 			tp.Transport = utils.MetaJSON
 		}
-		hostsMap[utils.ConcatenatedKey(tp.Tenant, tp.ID)] = &utils.TPDispatcherHost{
+		tntId := utils.ConcatenatedKey(tp.Tenant, tp.ID) // Made separate variable in order to call ConcatenatedKey only once per TP
+		hostsMap[tntId] = &utils.TPDispatcherHost{
 			TPid:   tp.Tpid,
 			Tenant: tp.Tenant,
 			ID:     tp.ID,
 			Conn: &utils.TPDispatcherHostConn{
-				Address:         tp.Address,
-				Transport:       tp.Transport,
-				Synchronous:     tp.Synchronous,
-				TLS:             tp.TLS,
-				ConnectAttempts: tp.ConnAttempts,
-				// ConnectTimeout:    tp.ConnectTimeout,
-				// ReplyTimeout:      tp.ReplyTimeout,
-				ClientKey:         tp.KeyPath,
-				ClientCertificate: tp.CertPath,
-				CaCertificate:     tp.CaPath,
+				Address:           tp.Address,
+				Transport:         tp.Transport,
+				Synchronous:       tp.Synchronous,
+				TLS:               tp.TLS,
+				ConnectAttempts:   tp.ConnectAttempts,
+				Reconnects:        tp.Reconnects,
+				ClientKey:         tp.ClientKey,
+				ClientCertificate: tp.ClientCertificate,
+				CaCertificate:     tp.CaCertificate,
 			},
 		}
 		if tp.ConnectTimeout != utils.EmptyString {
-			if hostsMap[utils.ConcatenatedKey(tp.Tenant, tp.ID)].Conn.ConnectTimeout, err = utils.ParseDurationWithNanosecs(tp.ConnectTimeout); err != nil {
+			if hostsMap[tntId].Conn.ConnectTimeout, err = utils.ParseDurationWithNanosecs(tp.ConnectTimeout); err != nil {
 				return nil, err
 			}
 		}
 		if tp.ReplyTimeout != utils.EmptyString {
-			if hostsMap[utils.ConcatenatedKey(tp.Tenant, tp.ID)].Conn.ReplyTimeout, err = utils.ParseDurationWithNanosecs(tp.ReplyTimeout); err != nil {
+			if hostsMap[tntId].Conn.ReplyTimeout, err = utils.ParseDurationWithNanosecs(tp.ReplyTimeout); err != nil {
 				return nil, err
 			}
 		}
@@ -1644,20 +1644,20 @@ func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *Dispatcher
 		return
 	}
 	return &DispatcherHostMdl{
-		Tpid:           tpDPH.TPid,
-		Tenant:         tpDPH.Tenant,
-		ID:             tpDPH.ID,
-		Address:        tpDPH.Conn.Address,
-		Transport:      tpDPH.Conn.Transport,
-		Synchronous:    tpDPH.Conn.Synchronous,
-		ConnAttempts:   tpDPH.Conn.ConnectAttempts,
-		Reconnects:     tpDPH.Conn.Reconnects,
-		ConnectTimeout: tpDPH.Conn.ConnectTimeout,
-		ReplyTimeout:   tpDPH.Conn.ReplyTimeout,
-		TLS:            tpDPH.Conn.TLS,
-		KeyPath:        tpDPH.Conn.ClientKey,
-		CertPath:       tpDPH.Conn.ClientCertificate,
-		CaPath:         tpDPH.Conn.CaCertificate,
+		Tpid:              tpDPH.TPid,
+		Tenant:            tpDPH.Tenant,
+		ID:                tpDPH.ID,
+		Address:           tpDPH.Conn.Address,
+		Transport:         tpDPH.Conn.Transport,
+		Synchronous:       tpDPH.Conn.Synchronous,
+		ConnectAttempts:   tpDPH.Conn.ConnectAttempts,
+		Reconnects:        tpDPH.Conn.Reconnects,
+		ConnectTimeout:    tpDPH.Conn.ConnectTimeout.String(),
+		ReplyTimeout:      tpDPH.Conn.ReplyTimeout.String(),
+		TLS:               tpDPH.Conn.TLS,
+		ClientKey:         tpDPH.Conn.ClientKey,
+		ClientCertificate: tpDPH.Conn.ClientCertificate,
+		CaCertificate:     tpDPH.Conn.CaCertificate,
 	}
 }
 
@@ -1668,18 +1668,18 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 	return &DispatcherHost{
 		Tenant: tpDPH.Tenant,
 		RemoteHost: &config.RemoteHost{
-			ID:             tpDPH.ID,
-			Address:        tpDPH.Conn.Address,
-			Transport:      tpDPH.Conn.Transport,
-			Synchronous:    tpDPH.Conn.Synchronous,
-			ConnAttempts:   tpDPH.Conn.ConnectAttempts,
-			Reconnects:     tpDPH.Conn.Reconnects,
-			ConnectTimeout: tpDPH.Conn.ConnectTimeout,
-			ReplyTimeout:   tpDPH.Conn.ReplyTimeout,
-			TLS:            tpDPH.Conn.TLS,
-			KeyPath:        tpDPH.Conn.ClientKey,
-			CertPath:       tpDPH.Conn.ClientCertificate,
-			CaPath:         tpDPH.Conn.CaCertificate,
+			ID:                tpDPH.ID,
+			Address:           tpDPH.Conn.Address,
+			Transport:         tpDPH.Conn.Transport,
+			Synchronous:       tpDPH.Conn.Synchronous,
+			ConnectAttempts:   tpDPH.Conn.ConnectAttempts,
+			Reconnects:        tpDPH.Conn.Reconnects,
+			ConnectTimeout:    tpDPH.Conn.ConnectTimeout,
+			ReplyTimeout:      tpDPH.Conn.ReplyTimeout,
+			TLS:               tpDPH.Conn.TLS,
+			ClientKey:         tpDPH.Conn.ClientKey,
+			ClientCertificate: tpDPH.Conn.ClientCertificate,
+			CaCertificate:     tpDPH.Conn.CaCertificate,
 		},
 	}
 }
@@ -1692,14 +1692,14 @@ func DispatcherHostToAPI(dph *DispatcherHost) (tpDPH *utils.TPDispatcherHost) {
 			Address:           dph.Address,
 			Transport:         dph.Transport,
 			Synchronous:       dph.Synchronous,
-			ConnectAttempts:   dph.ConnAttempts,
+			ConnectAttempts:   dph.ConnectAttempts,
 			Reconnects:        dph.Reconnects,
 			ConnectTimeout:    dph.ConnectTimeout,
 			ReplyTimeout:      dph.ReplyTimeout,
 			TLS:               dph.TLS,
-			ClientKey:         dph.KeyPath,
-			ClientCertificate: dph.CertPath,
-			CaCertificate:     dph.CaPath,
+			ClientKey:         dph.ClientKey,
+			ClientCertificate: dph.ClientCertificate,
+			CaCertificate:     dph.CaCertificate,
 		},
 	}
 }

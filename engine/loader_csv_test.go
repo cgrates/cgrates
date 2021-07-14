@@ -667,7 +667,7 @@ func TestLoadDispatcherHosts(t *testing.T) {
 			Synchronous:       false,
 			ConnectAttempts:   1,
 			Reconnects:        3,
-			ConnectTimeout:    2 * time.Minute,
+			ConnectTimeout:    1 * time.Minute,
 			ReplyTimeout:      2 * time.Minute,
 			TLS:               true,
 			ClientKey:         "key2",
