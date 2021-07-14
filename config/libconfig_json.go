@@ -265,11 +265,18 @@ type RPCConnsJson struct {
 
 // Represents one connection instance towards a rater/cdrs server
 type RemoteHostJson struct {
-	Id          *string
-	Address     *string
-	Transport   *string
-	Synchronous *bool
-	Tls         *bool
+	Id              *string
+	Address         *string
+	Transport       *string
+	Synchronous     *bool
+	Tls             *bool
+	Key_path        *string
+	Cert_path       *string
+	Ca_path         *string
+	Conn_attempts   *int
+	Reconnects      *int
+	Connect_timeout *string
+	Reply_timeout   *string
 }
 
 type AstConnJsonCfg struct {
