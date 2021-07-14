@@ -1280,6 +1280,7 @@ const (
 	APIerSv1ComputeFilterIndexIDs             = "APIerSv1.ComputeFilterIndexIDs"
 	APIerSv1GetAccountActionPlansIndexHealth  = "APIerSv1.GetAccountActionPlansIndexHealth"
 	APIerSv1GetReverseDestinationsIndexHealth = "APIerSv1.GetReverseDestinationsIndexHealth"
+	APIerSv1GetThresholdsIndexesHealth = "APIerSv1.GetThresholdsIndexesHealth"
 	APIerSv1Ping                              = "APIerSv1.Ping"
 	APIerSv1SetDispatcherProfile              = "APIerSv1.SetDispatcherProfile"
 	APIerSv1GetDispatcherProfile              = "APIerSv1.GetDispatcherProfile"
