@@ -10,7 +10,7 @@
 
 
 "listen": {
-		"rpc_json": ":6012",
+	"rpc_json": ":6012",
 	"rpc_gob": ":6013",
 	"http": ":6080",
 },
@@ -31,6 +31,10 @@
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:6012", "transport":"*json"}],
 	},
+	"rplConn": {
+		"strategy": "*broadcast_sync",
+		"conns": [{"address": "127.0.0.1:7012", "transport":"*json"}],
+	}
 },
 
 

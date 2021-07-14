@@ -1030,7 +1030,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 
 	processedEv := &engine.AttrSProcessEventReply{
 		AlteredFields:   []string{"*req.CustomField"},
-		MatchedProfiles: []string{"cgrates.org:ATTR_1001"},
+		MatchedProfiles: []string{"cgrates.new:ATTR_1001"},
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.new",
