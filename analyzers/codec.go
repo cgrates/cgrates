@@ -145,8 +145,8 @@ func (c *AnalyzerBiRPCCodec) ReadRequestBody(x interface{}) (err error) {
 func (c *AnalyzerBiRPCCodec) ReadResponseBody(x interface{}) (err error) {
 	err = c.sc.ReadResponseBody(x)
 	c.repsLk.Lock()
-	api := c.reqs[c.repIdx]
-	delete(c.reqs, c.repIdx)
+	api := c.reps[c.repIdx]
+	delete(c.reps, c.repIdx)
 	c.repsLk.Unlock()
 	go c.aS.logTrafic(api.ID, api.Method, api.Params, x, api.Error, c.enc, c.to, c.from, api.StartTime, time.Now())
 	return
@@ -156,7 +156,7 @@ func (c *AnalyzerBiRPCCodec) ReadResponseBody(x interface{}) (err error) {
 func (c *AnalyzerBiRPCCodec) WriteRequest(req *birpc.Request, x interface{}) error {
 	c.repsLk.Lock()
 	c.reqIdx = req.Seq
-	c.reqs[c.reqIdx] = &rpcAPI{
+	c.reps[c.reqIdx] = &rpcAPI{
 		ID:        req.Seq,
 		Method:    req.ServiceMethod,
 		StartTime: time.Now(),
