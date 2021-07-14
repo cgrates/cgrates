@@ -346,25 +346,14 @@ func (sis StatQueues) Sort() {
 	sort.Slice(sis, func(i, j int) bool { return sis[i].sqPrfl.Weight > sis[j].sqPrfl.Weight })
 }
 
-type encStatQueue struct {
-	Tenant    string
-	ID        string
-	SQItems   []SQItem
-	SQMetrics map[string]StatMetric
-}
-
 func (sq *StatQueue) MarshalJSON() (rply []byte, err error) {
 	if sq == nil {
 		return []byte("null"), nil
 	}
+	type tmp StatQueue
 	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
 		sq.RLock()
-		rply, err = json.Marshal(&encStatQueue{
-			Tenant:    sq.Tenant,
-			ID:        sq.ID,
-			SQItems:   sq.SQItems,
-			SQMetrics: sq.SQMetrics,
-		})
+		rply, err = json.Marshal(tmp(*sq))
 		sq.RUnlock()
 		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
@@ -414,7 +403,6 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 			return fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
 		}
 		if err = json.Unmarshal([]byte(val), metric); err != nil {
-			fmt.Println(1)
 			return
 		}
 		sq.SQMetrics[metricID] = metric
@@ -424,14 +412,10 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 
 func (sq *StatQueue) GobEncode() (rply []byte, err error) {
 	buf := bytes.NewBuffer(rply)
+	type tmp StatQueue
 	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
 		sq.RLock()
-		err = gob.NewEncoder(buf).Encode(&encStatQueue{
-			Tenant:    sq.Tenant,
-			ID:        sq.ID,
-			SQItems:   sq.SQItems,
-			SQMetrics: sq.SQMetrics,
-		})
+		err = gob.NewEncoder(buf).Encode(tmp(*sq))
 		sq.RUnlock()
 		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
@@ -456,5 +440,60 @@ func (sq *StatQueue) Clone() (cln *StatQueue) {
 	for k, m := range sq.SQMetrics {
 		cln.SQMetrics[k] = m.Clone()
 	}
+	return
+}
+
+func (ssq *StatQueueWithAPIOpts) MarshalJSON() (rply []byte, err error) {
+	if ssq == nil {
+		return []byte("null"), nil
+	}
+	type tmp struct {
+		StatQueue
+		APIOpts map[string]interface{}
+	}
+	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
+		ssq.RLock()
+		rply, err = json.Marshal(tmp{
+			StatQueue: *ssq.StatQueue,
+			APIOpts:   ssq.APIOpts,
+		})
+		ssq.RUnlock()
+		return
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+ssq.TenantID())
+	return
+}
+
+func (ssq *StatQueueWithAPIOpts) GobEncode() (rply []byte, err error) {
+	buf := bytes.NewBuffer(rply)
+	type tmp struct {
+		StatQueue
+		APIOpts map[string]interface{}
+	}
+	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
+		ssq.RLock()
+		err = gob.NewEncoder(buf).Encode(tmp{
+			StatQueue: *ssq.StatQueue,
+			APIOpts:   ssq.APIOpts,
+		})
+		ssq.RUnlock()
+		return
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+ssq.TenantID())
+	return buf.Bytes(), nil
+}
+
+// UnmarshalJSON here only to fully support json for StatQueue
+func (ssq *StatQueueWithAPIOpts) UnmarshalJSON(data []byte) (err error) {
+	sq := new(StatQueue)
+	if err = json.Unmarshal(data, &sq); err != nil {
+		return
+	}
+	i := struct {
+		APIOpts map[string]interface{}
+	}{}
+	if err = json.Unmarshal(data, &i); err != nil {
+		return
+	}
+	ssq.StatQueue = sq
+	ssq.APIOpts = i.APIOpts
 	return
 }
