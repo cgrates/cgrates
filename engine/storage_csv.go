@@ -413,7 +413,11 @@ func (csvs *CSVStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.
 	}); err != nil {
 		return nil, err
 	}
-	return tpDDHs.AsTPDispatcherHosts(), nil
+	result, err := tpDDHs.AsTPDispatcherHosts()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (csvs *CSVStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*utils.TPRateProfile, error) {

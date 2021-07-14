@@ -1294,14 +1294,14 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 	eDispHost := &engine.DispatcherHost{
 		Tenant: "cgrates.org",
 		RemoteHost: &config.RemoteHost{
-			ID:        "ALL1",
-			Address:   "127.0.0.1:2012",
+			ID:        "ALL",
+			Address:   "127.0.0.1:6012",
 			Transport: utils.MetaJSON,
-			TLS:       true,
+			TLS:       false,
 		},
 	}
 
-	rcv, err := ldr.dm.GetDispatcherHost(context.TODO(), "cgrates.org", "ALL1",
+	rcv, err := ldr.dm.GetDispatcherHost(context.TODO(), "cgrates.org", "ALL",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)
