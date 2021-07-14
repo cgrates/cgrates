@@ -26,8 +26,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type mockServerCodec struct{}
@@ -81,6 +83,132 @@ func TestNewServerCodec(t *testing.T) {
 		Seq:           0,
 		ServiceMethod: utils.CoreSv1Ping,
 	}, "reply"); err != nil {
+		t.Fatal(err)
+	}
+	if err = codec.Close(); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(200 * time.Millisecond)
+	runtime.Gosched()
+	if cnt, err := anz.db.DocCount(); err != nil {
+		t.Fatal(err)
+	} else if cnt != 1 {
+		t.Errorf("Expected only one document received:%v", cnt)
+	}
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
+}
+
+type mockBiRPCCodec struct{}
+
+func (mockBiRPCCodec) ReadHeader(r *rpc2.Request, _ *rpc2.Response) error {
+	r.Seq = 0
+	r.Method = utils.CoreSv1Ping
+	return nil
+}
+func (mockBiRPCCodec) ReadRequestBody(interface{}) error               { return nil }
+func (mockBiRPCCodec) ReadResponseBody(interface{}) error              { return nil }
+func (mockBiRPCCodec) WriteRequest(*rpc2.Request, interface{}) error   { return nil }
+func (mockBiRPCCodec) WriteResponse(*rpc2.Response, interface{}) error { return nil }
+func (mockBiRPCCodec) Close() error                                    { return nil }
+
+func TestNewBiRPCCodec(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
+	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
+		t.Fatal(err)
+	}
+	anz, err := NewAnalyzerService(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	codec := NewAnalyzerBiRPCCodec(new(mockBiRPCCodec), anz, rpcclient.BiRPCJSON, "127.0.0.1:5565", "127.0.0.1:2012")
+	r := new(rpc2.Request)
+	expR := &rpc2.Request{
+		Seq:    0,
+		Method: utils.CoreSv1Ping,
+	}
+	if err = codec.ReadHeader(r, nil); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %v ,received:%v", expR, r)
+	}
+
+	if err = codec.ReadRequestBody("args"); err != nil {
+		t.Fatal(err)
+	}
+	if err = codec.WriteResponse(&rpc2.Response{
+		Error: "error",
+		Seq:   0,
+	}, "reply"); err != nil {
+		t.Fatal(err)
+	}
+	if err = codec.Close(); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(200 * time.Millisecond)
+	runtime.Gosched()
+	if cnt, err := anz.db.DocCount(); err != nil {
+		t.Fatal(err)
+	} else if cnt != 1 {
+		t.Errorf("Expected only one document received:%v", cnt)
+	}
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
+}
+
+type mockBiRPCCodec2 struct{}
+
+func (mockBiRPCCodec2) ReadHeader(_ *rpc2.Request, r *rpc2.Response) error {
+	r.Seq = 0
+	r.Error = "error"
+	return nil
+}
+func (mockBiRPCCodec2) ReadRequestBody(interface{}) error               { return nil }
+func (mockBiRPCCodec2) ReadResponseBody(interface{}) error              { return nil }
+func (mockBiRPCCodec2) WriteRequest(*rpc2.Request, interface{}) error   { return nil }
+func (mockBiRPCCodec2) WriteResponse(*rpc2.Response, interface{}) error { return nil }
+func (mockBiRPCCodec2) Close() error                                    { return nil }
+
+func TestNewBiRPCCodec2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
+	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
+	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
+		t.Fatal(err)
+	}
+	anz, err := NewAnalyzerService(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	codec := NewAnalyzerBiRPCCodec(new(mockBiRPCCodec2), anz, rpcclient.BiRPCJSON, "127.0.0.1:5565", "127.0.0.1:2012")
+	if err = codec.WriteRequest(&rpc2.Request{Seq: 0, Method: utils.CoreSv1Ping}, "args"); err != nil {
+		t.Fatal(err)
+	}
+	r := new(rpc2.Response)
+	expR := &rpc2.Response{
+		Seq:   0,
+		Error: "error",
+	}
+
+	if err = codec.ReadHeader(&rpc2.Request{}, r); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %v ,received:%v", expR, r)
+	}
+
+	if err = codec.ReadResponseBody("args"); err != nil {
 		t.Fatal(err)
 	}
 	if err = codec.Close(); err != nil {

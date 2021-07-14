@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type conn interface {
@@ -122,7 +123,7 @@ func newCapsBiRPCGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerS
 		if to != nil {
 			tostr = to.String()
 		}
-		return analyzers.NewAnalyzerBiRPCCodec(r, anz, utils.MetaGOB, fromstr, tostr)
+		return analyzers.NewAnalyzerBiRPCCodec(r, anz, rpcclient.BiRPCGOB, fromstr, tostr)
 	}
 	return
 }
@@ -140,7 +141,7 @@ func newCapsBiRPCJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.Analyzer
 		if to != nil {
 			tostr = to.String()
 		}
-		return analyzers.NewAnalyzerBiRPCCodec(r, anz, utils.MetaJSON, fromstr, tostr)
+		return analyzers.NewAnalyzerBiRPCCodec(r, anz, rpcclient.BiRPCJSON, fromstr, tostr)
 	}
 	return
 }
