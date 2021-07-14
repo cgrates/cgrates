@@ -1396,15 +1396,23 @@ func TestLoadDispatcherHosts(t *testing.T) {
 	eDispatcherHosts := &utils.TPDispatcherHost{
 		TPid:   testTPID,
 		Tenant: "cgrates.org",
-		ID:     "ALL1",
+		ID:     "ALL",
 		Conn: &utils.TPDispatcherHostConn{
-			Address:   "127.0.0.1:2012",
-			Transport: utils.MetaJSON,
-			TLS:       true,
+			Address:           "127.0.0.1:6012",
+			Transport:         utils.MetaJSON,
+			Synchronous:       false,
+			ConnectAttempts:   1,
+			Reconnects:        3,
+			ConnectTimeout:    1 * time.Minute,
+			ReplyTimeout:      2 * time.Minute,
+			TLS:               true,
+			ClientKey:         "key2",
+			ClientCertificate: "cert2",
+			CaCertificate:     "ca_cert2",
 		},
 	}
 
-	dphKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALL1"}
+	dphKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALL"}
 	if len(csvr.dispatcherHosts) != 1 {
 		t.Fatalf("Failed to load DispatcherHosts: %v", len(csvr.dispatcherHosts))
 	}

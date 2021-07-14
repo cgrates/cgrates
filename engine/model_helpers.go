@@ -2796,10 +2796,10 @@ type DispatcherHostMdls []*DispatcherHostMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps DispatcherHostMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.TLS}
+	return []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.SynchronousCfg, utils.ConnectAttemptsCfg, utils.ReconnectsCfg, utils.ConnectTimeoutCfg, utils.ReplyTimeoutCfg, utils.TLS, utils.ClientKeyCfg, utils.ClientCerificateCfg, utils.CaCertificateCfg}
 }
 
-func (tps DispatcherHostMdls) AsTPDispatcherHosts() (result []*utils.TPDispatcherHost) {
+func (tps DispatcherHostMdls) AsTPDispatcherHosts() (result []*utils.TPDispatcherHost, err error) {
 	hostsMap := make(map[string]*utils.TPDispatcherHost)
 	for _, tp := range tps {
 		if len(tp.Address) == 0 { // empty addres do not populate conns
@@ -2808,15 +2808,32 @@ func (tps DispatcherHostMdls) AsTPDispatcherHosts() (result []*utils.TPDispatche
 		if len(tp.Transport) == 0 {
 			tp.Transport = utils.MetaJSON
 		}
-		hostsMap[utils.ConcatenatedKey(tp.Tenant, tp.ID)] = &utils.TPDispatcherHost{
+		tntId := utils.ConcatenatedKey(tp.Tenant, tp.ID)
+		hostsMap[tntId] = &utils.TPDispatcherHost{
 			TPid:   tp.Tpid,
 			Tenant: tp.Tenant,
 			ID:     tp.ID,
 			Conn: &utils.TPDispatcherHostConn{
-				Address:   tp.Address,
-				Transport: tp.Transport,
-				TLS:       tp.TLS,
+				Address:           tp.Address,
+				Transport:         tp.Transport,
+				Synchronous:       tp.Synchronous,
+				ConnectAttempts:   tp.ConnectAttempts,
+				Reconnects:        tp.Reconnects,
+				TLS:               tp.TLS,
+				ClientKey:         tp.ClientKey,
+				ClientCertificate: tp.ClientCertificate,
+				CaCertificate:     tp.CaCertificate,
 			},
+		}
+		if tp.ConnectTimeout != utils.EmptyString {
+			if hostsMap[tntId].Conn.ConnectTimeout, err = utils.ParseDurationWithNanosecs(tp.ConnectTimeout); err != nil {
+				return nil, err
+			}
+		}
+		if tp.ReplyTimeout != utils.EmptyString {
+			if hostsMap[tntId].Conn.ReplyTimeout, err = utils.ParseDurationWithNanosecs(tp.ReplyTimeout); err != nil {
+				return nil, err
+			}
 		}
 		continue
 	}
@@ -2831,12 +2848,20 @@ func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *Dispatcher
 		return
 	}
 	return &DispatcherHostMdl{
-		Tpid:      tpDPH.TPid,
-		Tenant:    tpDPH.Tenant,
-		ID:        tpDPH.ID,
-		Address:   tpDPH.Conn.Address,
-		Transport: tpDPH.Conn.Transport,
-		TLS:       tpDPH.Conn.TLS,
+		Tpid:              tpDPH.TPid,
+		Tenant:            tpDPH.Tenant,
+		ID:                tpDPH.ID,
+		Address:           tpDPH.Conn.Address,
+		Transport:         tpDPH.Conn.Transport,
+		Synchronous:       tpDPH.Conn.Synchronous,
+		ConnectAttempts:   tpDPH.Conn.ConnectAttempts,
+		Reconnects:        tpDPH.Conn.Reconnects,
+		ConnectTimeout:    tpDPH.Conn.ConnectTimeout.String(),
+		ReplyTimeout:      tpDPH.Conn.ReplyTimeout.String(),
+		TLS:               tpDPH.Conn.TLS,
+		ClientKey:         tpDPH.Conn.ClientKey,
+		ClientCertificate: tpDPH.Conn.ClientCertificate,
+		CaCertificate:     tpDPH.Conn.CaCertificate,
 	}
 }
 
@@ -2847,10 +2872,18 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 	return &DispatcherHost{
 		Tenant: tpDPH.Tenant,
 		RemoteHost: &config.RemoteHost{
-			ID:        tpDPH.ID,
-			Address:   tpDPH.Conn.Address,
-			Transport: tpDPH.Conn.Transport,
-			TLS:       tpDPH.Conn.TLS,
+			ID:                tpDPH.ID,
+			Address:           tpDPH.Conn.Address,
+			Transport:         tpDPH.Conn.Transport,
+			Synchronous:       tpDPH.Conn.Synchronous,
+			ConnectAttempts:   tpDPH.Conn.ConnectAttempts,
+			Reconnects:        tpDPH.Conn.Reconnects,
+			ConnectTimeout:    tpDPH.Conn.ConnectTimeout,
+			ReplyTimeout:      tpDPH.Conn.ReplyTimeout,
+			TLS:               tpDPH.Conn.TLS,
+			ClientKey:         tpDPH.Conn.ClientKey,
+			ClientCertificate: tpDPH.Conn.ClientCertificate,
+			CaCertificate:     tpDPH.Conn.CaCertificate,
 		},
 	}
 }
@@ -2860,9 +2893,17 @@ func DispatcherHostToAPI(dph *DispatcherHost) (tpDPH *utils.TPDispatcherHost) {
 		Tenant: dph.Tenant,
 		ID:     dph.ID,
 		Conn: &utils.TPDispatcherHostConn{
-			Address:   dph.Address,
-			Transport: dph.Transport,
-			TLS:       dph.TLS,
+			Address:           dph.Address,
+			Transport:         dph.Transport,
+			Synchronous:       dph.Synchronous,
+			ConnectAttempts:   dph.ConnectAttempts,
+			Reconnects:        dph.Reconnects,
+			ConnectTimeout:    dph.ConnectTimeout,
+			ReplyTimeout:      dph.ReplyTimeout,
+			TLS:               dph.TLS,
+			ClientKey:         dph.ClientKey,
+			ClientCertificate: dph.ClientCertificate,
+			CaCertificate:     dph.CaCertificate,
 		},
 	}
 }

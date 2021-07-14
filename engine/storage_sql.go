@@ -1544,7 +1544,10 @@ func (sqls *SQLStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.
 	if err := q.Find(&dpps).Error; err != nil {
 		return nil, err
 	}
-	arls := dpps.AsTPDispatcherHosts()
+	arls, err := dpps.AsTPDispatcherHosts()
+	if err != nil {
+		return nil, err
+	}
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}
