@@ -144,6 +144,9 @@ func newCapsBiRPCJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.Analyzer
 }
 
 func newCapsBiRPCCodec(sc birpc.BirpcCodec, caps *engine.Caps) birpc.BirpcCodec {
+	if !caps.IsLimited() {
+		return sc
+	}
 	return &capsBiRPCCodec{
 		sc:   sc,
 		caps: caps,

@@ -244,7 +244,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 	}
 
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1002_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -447,7 +447,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	}
 
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1001_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
 
 		CGREvent: &utils.CGREvent{
@@ -530,7 +530,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	}
 
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1002_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -602,7 +602,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 	}
 
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1003_SIMPLEAUTH"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1003_SIMPLEAUTH"},
 		AlteredFields:   []string{"*req.Password"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

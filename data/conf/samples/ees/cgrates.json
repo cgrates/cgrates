@@ -414,7 +414,7 @@
 			]
 		},
 		{
-			"id": "HTTPJsonMapExporter",
+			"id": "NatsJsonMapExporter",
 			"type": "*natsJSONMap",
 			"export_path": "nats://localhost:4222",
 			"attempts": 1,
