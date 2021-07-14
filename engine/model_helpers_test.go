@@ -1765,7 +1765,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 
 func TestTPDispatcherHostsCSVHeader(t *testing.T) {
 	tps := &DispatcherHostMdls{}
-	eOut := []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.TLS}
+	eOut := []string{"#" + utils.Tenant, utils.ID, utils.Address, utils.Transport, utils.SynchronousCfg, utils.ConnectAttemptsCfg, utils.ReconnectsCfg, utils.ConnectTimeoutCfg, utils.ReplyTimeoutCfg, utils.TLS, utils.ClientKeyCfg, utils.ClientCerificateCfg, utils.CaCertificateCfg}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
@@ -2022,19 +2022,33 @@ func TestDispatcherHostToAPI(t *testing.T) {
 	dph := &DispatcherHost{
 		Tenant: "Tenant1",
 		RemoteHost: &config.RemoteHost{
-			ID:        "ID1",
-			Address:   "Address1",
-			Transport: "*json",
-			TLS:       true,
+			Address:           "127.0.0.1:2012",
+			Transport:         "*json",
+			Synchronous:       false,
+			ConnectAttempts:   0,
+			Reconnects:        0,
+			ConnectTimeout:    1 * time.Minute,
+			ReplyTimeout:      1 * time.Minute,
+			TLS:               false,
+			ClientKey:         "",
+			ClientCertificate: "",
+			CaCertificate:     "",
 		},
 	}
 	eOut := &utils.TPDispatcherHost{
 		Tenant: "Tenant1",
-		ID:     "ID1",
 		Conn: &utils.TPDispatcherHostConn{
-			Address:   "Address1",
-			Transport: "*json",
-			TLS:       true,
+			Address:           "127.0.0.1:2012",
+			Transport:         "*json",
+			Synchronous:       false,
+			ConnectAttempts:   0,
+			Reconnects:        0,
+			ConnectTimeout:    1 * time.Minute,
+			ReplyTimeout:      1 * time.Minute,
+			TLS:               false,
+			ClientKey:         "",
+			ClientCertificate: "",
+			CaCertificate:     "",
 		},
 	}
 	if rcv := DispatcherHostToAPI(dph); !reflect.DeepEqual(eOut, rcv) {
