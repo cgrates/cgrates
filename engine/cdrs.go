@@ -666,8 +666,11 @@ type ArgV1ProcessEvent struct {
 
 // V1ProcessEvent will process the CGREvent
 func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (err error) {
-	if arg.CGREvent.ID == "" {
+	if arg.CGREvent.ID == utils.EmptyString {
 		arg.CGREvent.ID = utils.GenUUID()
+	}
+	if arg.CGREvent.Tenant == utils.EmptyString {
+		arg.CGREvent.Tenant = cdrS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
@@ -895,6 +898,9 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	}
 	for _, cdr := range cdrs {
 		cdr.Cost = -1 // the cost will be recalculated
+		if cdr.Tenant == utils.EmptyString {
+			cdr.Tenant = cdrS.cgrCfg.GeneralCfg().DefaultTenant
+		}
 		cgrEv := &utils.CGREventWithArgDispatcher{
 			CGREvent:      cdr.AsCGREvent(),
 			ArgDispatcher: arg.ArgDispatcher,
