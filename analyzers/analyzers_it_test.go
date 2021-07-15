@@ -23,6 +23,7 @@ package analyzers
 import (
 	"errors"
 	"flag"
+	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -32,8 +33,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cenkalti/rpc2"
+	jsonrpc2 "github.com/cenkalti/rpc2/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -41,6 +45,7 @@ var (
 	anzCfgPath string
 	anzCfg     *config.CGRConfig
 	anzRPC     *rpc.Client
+	anzBiRPC   *rpc2.Client
 
 	sTestsAlsPrf = []func(t *testing.T){
 		testAnalyzerSInitCfg,
@@ -53,6 +58,7 @@ var (
 		testAnalyzerSV1Search,
 		testAnalyzerSV1Search2,
 		testAnalyzerSV1SearchWithContentFilters,
+		testAnalyzerSV1BirPCSession,
 		testAnalyzerSKillEngine,
 	}
 )
@@ -123,6 +129,13 @@ func testAnalyzerSRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	conn, err := net.Dial(utils.TCP, anzCfg.SessionSCfg().ListenBijson)
+	if err != nil {
+		t.Fatal(err)
+	}
+	anzBiRPC = rpc2.NewClientWithCodec(jsonrpc2.NewJSONCodec(conn))
+	anzBiRPC.Handle(utils.SessionSv1DisconnectPeer, func(clnt *rpc2.Client, args interface{}, rply *string) (err error) { return utils.ErrNotFound })
+	go anzBiRPC.Run()
 }
 
 func testAnalyzerSLoadTarrifPlans(t *testing.T) {
@@ -227,6 +240,22 @@ func testAnalyzerSV1SearchWithContentFilters(t *testing.T) {
 	}
 }
 
+func testAnalyzerSV1BirPCSession(t *testing.T) {
+	var rply string
+	anzBiRPC.Call(utils.SessionSv1STIRIdentity,
+		&sessions.V1STIRIdentityArgs{}, &rply) // only call to register the birpc
+	if err := anzRPC.Call(utils.SessionSv1DisconnectPeer, &utils.DPRArgs{}, &rply); err == nil ||
+		err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Fatal(err)
+	}
+	time.Sleep(10 * time.Second)
+	var result []map[string]interface{}
+	if err := anzRPC.Call(utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
+		t.Error(err)
+	} else if len(result) != 1 {
+		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
+	}
+}
 func testAnalyzerSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)

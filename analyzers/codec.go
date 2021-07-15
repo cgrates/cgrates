@@ -155,8 +155,8 @@ func (c *AnalyzerBiRPCCodec) ReadResponseBody(x interface{}) (err error) {
 // WriteRequest must be safe for concurrent use by multiple goroutines.
 func (c *AnalyzerBiRPCCodec) WriteRequest(req *birpc.Request, x interface{}) error {
 	c.repsLk.Lock()
-	c.reqIdx = req.Seq
-	c.reps[c.reqIdx] = &rpcAPI{
+	c.repIdx = req.Seq
+	c.reps[c.repIdx] = &rpcAPI{
 		ID:        req.Seq,
 		Method:    req.ServiceMethod,
 		StartTime: time.Now(),
