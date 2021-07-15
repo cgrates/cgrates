@@ -3709,6 +3709,9 @@ func (sS *SessionS) BiRPCv1STIRAuthenticate(ctx *context.Context,
 // BiRPCv1STIRIdentity the API for STIR header creation
 func (sS *SessionS) BiRPCv1STIRIdentity(ctx *context.Context,
 	args *V1STIRIdentityArgs, identity *string) (err error) {
+	if args == nil || args.Payload == nil {
+		return utils.NewErrMandatoryIeMissing("Payload")
+	}
 	if args.Payload.ATTest == utils.EmptyString {
 		args.Payload.ATTest = sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
 	}
