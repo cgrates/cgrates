@@ -25,6 +25,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -65,6 +66,87 @@ func TestLibengineNewRPCPoolNoAddress(t *testing.T) {
 	}
 }
 
+// For the purpose of this test, we don't need our client to establish a connection
+// we only want to check if the client loaded with the given config where needed
+func TestLibengineNewRPCConnection(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := &config.RemoteHost{
+		ID:              "a4f3f",
+		Address:         "localhost:6012",
+		Transport:       "*json",
+		Synchronous:     false,
+		ConnectAttempts: 2,
+		Reconnects:      5,
+		ConnectTimeout:  2 * time.Minute,
+		ReplyTimeout:    3 * time.Minute,
+		TLS:             true,
+		ClientKey:       "key1",
+	}
+	expectedErr := "dial tcp [::1]:6012: connect: connection refused"
+	cM := NewConnManager(config.NewDefaultCGRConfig(), nil)
+	exp, err := rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
+		cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+		cfg.Transport, nil, false, nil)
+
+	if err.Error() != expectedErr {
+		t.Errorf("Expected %v \n but received \n %v", expectedErr, err)
+	}
+
+	conn, err := NewRPCConnection(cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
+		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
+		nil, false, nil, "*localhost", "a4f3f", new(ltcache.Cache))
+	if err.Error() != expectedErr {
+		t.Errorf("Expected %v \n but received \n %v", expectedErr, err)
+	}
+	if !reflect.DeepEqual(exp, conn) {
+		t.Error("Connections don't match")
+	}
+}
+
+func TestLibengineNewRPCConnectionInternal(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := &config.RemoteHost{
+		ID:              "a4f3f",
+		Address:         rpcclient.InternalRPC,
+		Transport:       "",
+		Synchronous:     false,
+		ConnectAttempts: 2,
+		Reconnects:      5,
+		ConnectTimeout:  2 * time.Minute,
+		ReplyTimeout:    3 * time.Minute,
+		TLS:             true,
+		ClientKey:       "key1",
+	}
+	cM := NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan rpcclient.ClientConnector))
+	exp, err := rpcclient.NewRPCClient("", "", cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
+		cM.cfg.TLSCfg().ClientCerificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+		rpcclient.InternalRPC, cM.rpcInternal["a4f3f"], false, nil)
+
+	// We only want to check if the client loaded with the correct config,
+	// therefore connection is not mandatory
+	if err != rpcclient.ErrInternallyDisconnected {
+		t.Error(err)
+	}
+
+	conn, err := NewRPCConnection(cfg, cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
+		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
+		cM.rpcInternal["a4f3f"], false, nil, "*internal", "a4f3f", new(ltcache.Cache))
+
+	if err != rpcclient.ErrInternallyDisconnected {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(exp, conn) {
+		t.Error("Connections don't match")
+	}
+}
 func TestLibengineNewRPCPoolUnsupportedTransport(t *testing.T) {
 	tmp := Cache
 	defer func() {
