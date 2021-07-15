@@ -1365,11 +1365,24 @@ func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
 // 		},
 // 	}
 // 	reply := &AttrSProcessEventReply{}
+// 	exp := &AttrSProcessEventReply{
+// 		MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2"},
+// 		AlteredFields:   []string{"*req.Password", "*req.RequestType"},
+// 		CGREvent: &utils.CGREvent{
+// 			Tenant: "cgrates.org",
+// 			ID:     "AttrProcessEventMultipleRuns",
+// 			Event: map[string]interface{}{
+// 				utils.Password:    "CGRateS.org",
+// 				utils.RequestType: utils.MetaPostpaid,
+// 			},
+// 		},
+// 	}
 
 // 	if err := alS.V1ProcessEvent(args, reply); err != nil {
 // 		t.Error(err)
+// 	} else if !reflect.DeepEqual(reply, exp) {
+// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(reply))
 // 	}
-// 	fmt.Println(utils.ToJSON(reply))
 // }
 
 // func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
@@ -1455,10 +1468,25 @@ func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
 // 			Event:  map[string]interface{}{},
 // 		},
 // 	}
-// 	reply := &AttrSProcessEventReply{}
 
+// 	reply := &AttrSProcessEventReply{}
+// 	exp := &AttrSProcessEventReply{
+// 		MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2", "cgrates.org:ATTR3"},
+// 		AlteredFields:   []string{"*req.Password", "*req.RequestType", "*req.PaypalAccount"},
+// 		CGREvent: &utils.CGREvent{
+// 			Tenant: "cgrates.org",
+// 			ID:     "AttrProcessEventMultipleRuns",
+// 			Event: map[string]interface{}{
+// 				utils.Password:    "CGRateS.org",
+// 				"PaypalAccount":   "cgrates@paypal.com",
+// 				utils.RequestType: utils.MetaPostpaid,
+// 			},
+// 		},
+// 	}
 // 	if err := alS.V1ProcessEvent(args, reply); err != nil {
 // 		t.Error(err)
+// 	} else if !reflect.DeepEqual(reply, exp) {
+// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+// 			utils.ToJSON(exp), utils.ToJSON(reply))
 // 	}
-// 	fmt.Println(utils.ToJSON(reply))
 // }
