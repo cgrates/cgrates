@@ -302,16 +302,20 @@ func TestHealthFilter(t *testing.T) {
 	}
 
 	if err := dm.SetIndexes(utils.CacheAttributeFilterIndexes, "cgrates.org:*any",
-		map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}},
+		map[string]utils.StringSet{"*string:*req.Account:1002": {
+		"ATTR1": {},
+		"ATTR2": {},
+		}},
 		true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	}
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*any:*string:*req.Account:1001": {"ATTR1"},
-			"cgrates.org:*any:*string:*req.Account:1002": {"ATTR1"},
 		},
-		BrokenIndexes: make(map[string][]string),
+		BrokenIndexes: map[string][]string{
+			"cgrates.org:*string:*req.Account:1002": {"ATTR1"},
+		},
 		MissingFilters: map[string][]string{
 			"cgrates.org:Fltr1": {"ATTR1"},
 		},
