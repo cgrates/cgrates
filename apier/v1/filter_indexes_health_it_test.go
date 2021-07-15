@@ -44,10 +44,15 @@ var (
 		testV1FIdxHLoadFromFolderTutorial2,
 		testV1FIdxHAccountActionPlansHealth,
 		testV1FIdxHReverseDestinationHealth,
+
 		testV1FIdxHdxInitDataDb,
 		testV1FIdxHResetStorDb,
 		testV1FIdxHLoadFromFolderTutorial,
 		testV1FIdxGetThresholdsIndexesHealth,
+		testV1FIdxGetResourcesIndexesHealth,
+		testV1FIdxGetStatsIndexesHealth,
+		testV1FIdxGetRoutesIndexesHealth,
+		testV1FIdxGetChargersIndexesHealth,
 
 		testV1FIdxHStopEngine,
 	}
@@ -160,6 +165,7 @@ func testV1FIdxHLoadFromFolderTutorial(t *testing.T) {
 }
 
 func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
+	// set another threshold profile different than the one from tariffplan
 	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
@@ -182,6 +188,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 		t.Error("Unexpected reply returned", rplyok)
 	}
 
+	// check all the indexes for thresholds
 	expiIdx := []string{
 		"*string:*req.Account:1002:THD_ACNT_1002",
 		"*string:*req.Account:1001:THD_ACNT_1001",
@@ -192,7 +199,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	var result []string
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds,
-		Tenant: "cgrates.org",
+		//Tenant: "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -203,15 +210,10 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 		}
 	}
 
+	// all indexes are set and points to their objects correctly
 	args := &engine.IndexHealthArgsWith3Ch{}
 	expRPly := &engine.FilterIHReply{
-		MissingIndexes: map[string][]string{
-			"cgrates.org:*prefix:*opts.Destination:+442": {"TEST_PROFILE1"},
-			"cgrates.org:*prefix:*opts.Destination:+554": {"TEST_PROFILE1"},
-			"cgrates.org:*string:*req.Account:1001": {"THD_ACNT_1001"},
-			"cgrates.org:*string:*req.Account:1002": {"THD_ACNT_1002"},
-			"cgrates.org:*string:*req.Account:1004": {"TEST_PROFILE1"},
-		},
+		MissingIndexes: map[string][]string{},
 		BrokenIndexes: map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
@@ -222,6 +224,367 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	} else if !reflect.DeepEqual(rply, expRPly) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rply))
 	}
+
+	// removing a profile + their indexes
+	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+		&utils.TenantIDWithAPIOpts{
+		  TenantID: &utils.TenantID{
+		  	Tenant: "cgrates.org",
+		  	ID: "THD_ACNT_1002",
+		  },
+		}, &rplyok); err != nil {
+		t.Error(err)
+	} else if rplyok != utils. OK {
+		t.Errorf("UNexpected reply returned")
+	}
+
+	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
+	expRPly = &engine.FilterIHReply{
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes: map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetThresholdsIndexesHealth,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rply))
+	}
+}
+
+func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
+	// set another resource profile different than the one from tariffplan
+	var reply string
+	rlsPrf := &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup2",
+			FilterIDs: []string{"*string:~*req.Account:1001",
+				"*prefix:~*opts.Destination:+334|+122"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			UsageTTL:          -1,
+			Limit:             7,
+			AllocationMessage: "",
+			Stored:            true,
+			Weight:            10,
+			ThresholdIDs:      []string{utils.MetaNone},
+		},
+	}
+	if err := tFIdxHRpc.Call(utils.APIerSv1SetResourceProfile, rlsPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	// check all the indexes for resources
+    expIdx := []string{
+		"*string:*req.Account:1001:ResGroup2",
+		"*prefix:*opts.Destination:+334:ResGroup2",
+		"*prefix:*opts.Destination:+122:ResGroup2",
+		"*string:*req.Account:1001:ResGroup1",
+		"*string:*req.Account:1002:ResGroup1",
+		"*string:*req.Account:1003:ResGroup1",
+	}
+	var result []string
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaResources,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	// all indexes are set and points to their objects correctly
+	expRPly := &engine.FilterIHReply{
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes: map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	args := &engine.IndexHealthArgsWith3Ch{}
+	var rply *engine.FilterIHReply
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetResourcesIndexesHealth,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rply))
+	}
+
+	// removing a profile + their indexes
+	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveResourceProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID: "ResGroup2",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils. OK {
+		t.Errorf("UNexpected reply returned")
+	}
+
+	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetResourcesIndexesHealth,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rply))
+	}
+}
+
+func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
+	// set another stats profile different than the one from tariffplan
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_STATPROFILE_1",
+			FilterIDs: []string{"*string:~*req.OriginID:RandomID",
+				"*suffix:~*opts.Destination:+332|+234"},
+			QueueLength: 10,
+			TTL:         10 * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: "*sum#~*req.Val",
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	var rply string
+	if err := tFIdxHRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils.OK {
+		t.Error("Unexpected reply returned", rply)
+	}
+
+	// check all the indexes for statsQueue
+	expIdx := []string{
+		"*string:*req.OriginID:RandomID:TEST_STATPROFILE_1",
+		"*suffix:*opts.Destination:+332:TEST_STATPROFILE_1",
+		"*suffix:*opts.Destination:+234:TEST_STATPROFILE_1",
+		"*string:*req.Account:1001:Stats2",
+		"*string:*req.Account:1002:Stats2",
+		"*string:*req.RunID:*default:Stats2",
+		"*string:*req.Destination:1001:Stats2",
+		"*string:*req.Destination:1002:Stats2",
+		"*string:*req.Destination:1003:Stats2",
+		"*string:*req.Account:1003:Stats2_1",
+		"*string:*req.RunID:*default:Stats2_1",
+		"*string:*req.Destination:1001:Stats2_1",
+	}
+	var result []string
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaStats,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	// all indexes are set and points to their objects correctly
+	expRPly := &engine.FilterIHReply{
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes: map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	args := &engine.IndexHealthArgsWith3Ch{}
+	var rplyFl *engine.FilterIHReply
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetStatsIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
+
+	// removing a profile + their indexes
+	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID: "Stats2",
+			},
+		}, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils. OK {
+		t.Errorf("UNexpected reply returned")
+	}
+
+	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetStatsIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
+}
+
+func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
+	// set another routes profile different than the one from tariffplan
+	rPrf := &RouteWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			Tenant:            tenant,
+			ID:                "TEST_PROFILE1",
+			FilterIDs:         []string{"*suffix:~*req.Destination:+23331576354"},
+			Sorting:           "Sort1",
+			SortingParameters: []string{"Param1", "Param2"},
+			Routes: []*engine.Route{{
+				ID:            "SPL1",
+				RatingPlanIDs: []string{"RP1"},
+				FilterIDs:     []string{"FLTR_1"},
+				Weight:        20,
+				Blocker:       false,
+			}},
+			Weight: 10,
+		},
+	}
+    var reply string
+	if err := tFIdxHRpc.Call(utils.APIerSv1SetRouteProfile, rPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	// check all the indexes for routes
+	expIdx := []string{
+		"*suffix:*req.Destination:+23331576354:TEST_PROFILE1",
+		"*string:*req.Account:1001:ROUTE_ACNT_1001",
+		"*string:*req.Account:1002:ROUTE_ACNT_1002",
+		"*string:*req.Account:1003:ROUTE_ACNT_1003",
+	}
+	var result []string
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaRoutes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	// all indexes are set and points to their objects correctly
+	expRPly := &engine.FilterIHReply{
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes: map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	args := &engine.IndexHealthArgsWith3Ch{}
+	var rplyFl *engine.FilterIHReply
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetRoutesIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
+
+	// removing a profile + their indexes
+	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveRouteProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID: "TEST_PROFILE1",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils. OK {
+		t.Errorf("UNexpected reply returned")
+	}
+
+	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetRoutesIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
+}
+
+func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
+	// set another charger profile different than the one from tariffplan
+	chargerProfile := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "Default",
+			FilterIDs: []string{"*string:~*req.Destination:+1442",
+				"*prefix:~*opts.Accounts:1002|1004"},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+	}
+	var reply string
+	if err := tFIdxHRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	// check all the indexes for chargers
+	expIdx := []string{
+		"*string:*req.Destination:+1442:Default",
+		"*prefix:*opts.Accounts:1002:Default",
+		"*prefix:*opts.Accounts:1004:Default",
+		"*none:*any:*any:DEFAULT",
+		"*none:*any:*any:Raw",
+	}
+	var result []string
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaChargers,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	/*
+	// all indexes are set and points to their objects correctly
+	expRPly := &engine.FilterIHReply{
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes: map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	args := &engine.IndexHealthArgsWith3Ch{}
+	var rplyFl *engine.FilterIHReply
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetChargersIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
+
+	// removing a profile + their indexes
+	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveChargerProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID: "Raw",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils. OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	 */
 }
 
 func testV1FIdxHStopEngine(t *testing.T) {
