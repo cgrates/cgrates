@@ -138,17 +138,16 @@ func (cdrS *CDRServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 	smCost.CostDetails.Compute()                                              // make sure the total cost reflect the increment
 	lockKey := utils.MetaCDRs + smCost.CGRID + smCost.RunID + smCost.OriginID // Will lock on this ID
 	if checkDuplicate {
-		_, err := cdrS.guard.Guard(func() (interface{}, error) {
+		return cdrS.guard.Guard(func() error {
 			smCosts, err := cdrS.cdrDb.GetSMCosts(smCost.CGRID, smCost.RunID, "", "")
 			if err != nil && err.Error() != utils.NotFoundCaps {
-				return nil, err
+				return err
 			}
 			if len(smCosts) != 0 {
-				return nil, utils.ErrExists
+				return utils.ErrExists
 			}
-			return nil, cdrS.cdrDb.SetSMCost(smCost)
+			return cdrS.cdrDb.SetSMCost(smCost)
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lockKey) // FixMe: Possible deadlock with Guard from SMG session close()
-		return err
 	}
 	return cdrS.cdrDb.SetSMCost(smCost)
 }

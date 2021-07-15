@@ -95,7 +95,7 @@ func (sS *StatService) storeStats() {
 		if sID == "" {
 			break // no more keys, backup completed
 		}
-		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(func() (_ error) {
 			if sqIf, ok := Cache.Get(utils.CacheStatQueues, sID); !ok || sqIf == nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
@@ -173,7 +173,7 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 			continue
 		}
 		var sq *StatQueue
-		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(func() (_ error) {
 			sq, err = sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sqPrfl.TenantID())
@@ -246,7 +246,7 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 
 func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
 	var removed int
-	guardian.Guardian.Guard(func() (_ interface{}, _ error) {
+	guardian.Guardian.Guard(func() (_ error) {
 		if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
 			return
 		}
@@ -296,7 +296,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 	var withErrors bool
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
-		guardian.Guardian.Guard(func() (_ interface{}, _ error) {
+		guardian.Guardian.Guard(func() (_ error) {
 			err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
@@ -505,7 +505,7 @@ func (sS *StatService) StartLoop() {
 // V1ResetStatQueue resets the stat queue
 func (sS *StatService) V1ResetStatQueue(tntID *utils.TenantID, rply *string) (err error) {
 	var sq *StatQueue
-	guardian.Guardian.Guard(func() (_ interface{}, _ error) {
+	guardian.Guardian.Guard(func() (_ error) {
 		if sq, err = sS.dm.GetStatQueue(tntID.Tenant, tntID.ID,
 			true, true, utils.NonTransactional); err != nil {
 			return

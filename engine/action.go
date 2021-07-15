@@ -555,40 +555,36 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 		return err
 	}
 
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	return guardian.Guardian.Guard(func() error {
 		acntAPids, err := dm.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
-			return 0, err
+			return err
 		}
 		for _, apID := range acntAPids {
 			ap, err := dm.GetActionPlan(apID, true, true, utils.NonTransactional)
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf("Could not retrieve action plan: %s: %v", apID, err))
-				return 0, err
+				return err
 			}
 			delete(ap.AccountIDs, accID)
 			if err := dm.SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Could not save action plan: %s: %v", apID, err))
-				return 0, err
+				return err
 			}
 		}
 		if err = dm.CacheDataFromDB(utils.ActionPlanPrefix, acntAPids, true); err != nil {
-			return 0, err
+			return err
 		}
 		if err = dm.RemAccountActionPlans(accID, nil); err != nil {
-			return 0, err
+			return err
 		}
 		if err = dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
-			return 0, err
+			return err
 		}
-		return 0, nil
+		return nil
 
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func removeBalanceAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {

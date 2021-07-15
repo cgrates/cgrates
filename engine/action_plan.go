@@ -202,12 +202,12 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 	}
 	var partialyExecuted bool
 	for accID := range at.accountIDs {
-		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+		err = guardian.Guardian.Guard(func() error {
 			acc, err := dm.GetAccount(accID)
 			if err != nil { // create account
 				if err != utils.ErrNotFound {
 					utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))
-					return 0, err
+					return err
 				}
 				err = nil
 				acc = &Account{
@@ -222,7 +222,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 					matched, err := acc.matchActionFilter(a.Filter)
 					//log.Print("Checkng: ", a.Filter, matched)
 					if err != nil {
-						return 0, err
+						return err
 					}
 					if !matched {
 						continue
@@ -270,7 +270,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 			if !transactionFailed && !removeAccountActionFound {
 				dm.SetAccount(acc)
 			}
-			return 0, nil
+			return nil
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	}
 	//reset the error in case that the account is not found

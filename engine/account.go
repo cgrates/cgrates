@@ -156,7 +156,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	}
 	// modify if necessary the shared groups here
 	if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
-		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+		err := guardian.Guardian.Guard(func() error {
 			i := 0
 			for sgID := range balance.SharedGroups {
 				// add shared group member
@@ -176,7 +176,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 				}
 				i++
 			}
-			return 0, nil
+			return nil
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, balance.SharedGroups.Slice()...)
 		if err != nil {
 			return err
@@ -246,7 +246,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) e
 			}
 		}
 		acc.BalanceMap[balanceType] = append(acc.BalanceMap[balanceType], bClone)
-		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+		err := guardian.Guardian.Guard(func() error {
 			sgs := make([]string, len(bClone.SharedGroups))
 			i := 0
 			for sgID := range bClone.SharedGroups {
@@ -268,7 +268,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) e
 				i++
 			}
 			dm.CacheDataFromDB(utils.SharedGroupPrefix, sgs, true)
-			return 0, nil
+			return nil
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, bClone.SharedGroups.Slice()...)
 		if err != nil {
 			return err

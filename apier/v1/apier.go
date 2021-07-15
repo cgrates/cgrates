@@ -765,12 +765,12 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), at.ActionsId, missing)
 		}
 	}
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	err = guardian.Guardian.Guard(func() error {
 		var prevAccountIDs utils.StringMap
 		if prevAP, err := apierSv1.DataManager.GetActionPlan(attrs.Id, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return 0, utils.NewErrServerError(err)
+			return utils.NewErrServerError(err)
 		} else if err == nil && !attrs.Overwrite {
-			return 0, utils.ErrExists
+			return utils.ErrExists
 		} else if prevAP != nil {
 			prevAccountIDs = prevAP.AccountIDs
 		}
@@ -779,13 +779,13 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 		}
 		for _, apiAtm := range attrs.ActionPlan {
 			if exists, err := apierSv1.DataManager.HasData(utils.ActionPrefix, apiAtm.ActionsId, ""); err != nil {
-				return 0, utils.NewErrServerError(err)
+				return utils.NewErrServerError(err)
 			} else if !exists {
-				return 0, fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
+				return fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
 			}
 			timing, err := apiAtm.getRITiming(apierSv1.DataManager)
 			if err != nil {
-				return 0, err
+				return err
 			}
 			ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
 				Uuid:      utils.GenUUID(),
@@ -795,17 +795,17 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 			})
 		}
 		if err := apierSv1.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
-			return 0, utils.NewErrServerError(err)
+			return utils.NewErrServerError(err)
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 				ArgsCache: map[string][]string{utils.ActionPlanIDs: {ap.Id}},
 			}, reply); err != nil {
-			return 0, err
+			return err
 		}
 		for acntID := range prevAccountIDs {
 			if err := apierSv1.DataManager.RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
-				return 0, utils.NewErrServerError(err)
+				return utils.NewErrServerError(err)
 			}
 		}
 		if len(prevAccountIDs) != 0 {
@@ -814,10 +814,10 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: sl},
 				}, reply); err != nil {
-				return 0, err
+				return err
 			}
 		}
-		return 0, nil
+		return nil
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 	if err != nil {
 		return err
@@ -979,19 +979,19 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	if err = guardian.Guardian.Guard(func() error {
 		var prevAccountIDs utils.StringMap
 		if prevAP, err := apierSv1.DataManager.GetActionPlan(attr.ID, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return 0, err
+			return err
 		} else if prevAP != nil {
 			prevAccountIDs = prevAP.AccountIDs
 		}
 		if err := apierSv1.DataManager.RemoveActionPlan(attr.ID, utils.NonTransactional); err != nil {
-			return 0, err
+			return err
 		}
 		for acntID := range prevAccountIDs {
 			if err := apierSv1.DataManager.RemAccountActionPlans(acntID, []string{attr.ID}); err != nil {
-				return 0, utils.NewErrServerError(err)
+				return utils.NewErrServerError(err)
 			}
 		}
 		if len(prevAccountIDs) != 0 {
@@ -1000,10 +1000,10 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: sl},
 				}, reply); err != nil {
-				return 0, err
+				return err
 			}
 		}
-		return 0, nil
+		return nil
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
 		return err
 	}
@@ -1023,8 +1023,8 @@ func (apierSv1 *APIerSv1) LoadAccountActions(attrs *utils.TPAccountActions, repl
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, dbReader.LoadAccountActionsFiltered(attrs)
+	if err := guardian.Guardian.Guard(func() error {
+		return dbReader.LoadAccountActionsFiltered(attrs)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.LoadId); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1254,8 +1254,8 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, rep
 		(attr.Category != "" && attr.Tenant == "") {
 		return utils.ErrMandatoryIeMissing
 	}
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, apierSv1.DataManager.RemoveRatingProfile(attr.GetId())
+	err := guardian.Guardian.Guard(func() error {
+		return apierSv1.DataManager.RemoveRatingProfile(attr.GetId())
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()

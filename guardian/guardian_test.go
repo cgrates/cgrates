@@ -27,9 +27,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func delayHandler() (interface{}, error) {
+func delayHandler() error {
 	time.Sleep(100 * time.Millisecond)
-	return nil, nil
+	return nil
 }
 
 // Forks 3 groups of workers and makes sure that the time for execution is the one we expect for all 15 goroutines (with 100ms )
@@ -245,23 +245,23 @@ func BenchmarkGuard(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		go func() {
-			Guardian.Guard(func() (interface{}, error) {
+			Guardian.Guard(func() error {
 				time.Sleep(time.Microsecond)
-				return 0, nil
+				return nil
 			}, 0, "1")
 			wg.Done()
 		}()
 		go func() {
-			Guardian.Guard(func() (interface{}, error) {
+			Guardian.Guard(func() error {
 				time.Sleep(time.Microsecond)
-				return 0, nil
+				return nil
 			}, 0, "2")
 			wg.Done()
 		}()
 		go func() {
-			Guardian.Guard(func() (interface{}, error) {
+			Guardian.Guard(func() error {
 				time.Sleep(time.Microsecond)
-				return 0, nil
+				return nil
 			}, 0, "1")
 			wg.Done()
 		}()
@@ -277,9 +277,9 @@ func BenchmarkGuardian(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		go func(n int) {
-			Guardian.Guard(func() (interface{}, error) {
+			Guardian.Guard(func() error {
 				time.Sleep(time.Microsecond)
-				return 0, nil
+				return nil
 			}, 0, strconv.Itoa(n))
 			wg.Done()
 		}(n)
@@ -317,7 +317,7 @@ func TestGuardianLockItemUnlockItem(t *testing.T) {
 func TestGuardianLockUnlockWithReference(t *testing.T) {
 	//for coverage purposes
 	refID := utils.EmptyString
-	Guardian.lockWithReference(refID, []string{})
+	Guardian.lockWithReference(refID, 0, []string{}...)
 	Guardian.unlockWithReference(refID)
 	if refID != utils.EmptyString {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.EmptyString, refID)
@@ -338,8 +338,8 @@ func TestGuardianGuardUnguardIDs(t *testing.T) {
 func TestGuardianGuardUnguardIDsCase2(t *testing.T) {
 	//for coverage purposes
 	lkIDs := []string{"test1", "test2", "test3"}
-	_, err := Guardian.Guard(func() (interface{}, error) {
-		return nil, utils.ErrNotFound
+	err := Guardian.Guard(func() error {
+		return utils.ErrNotFound
 	}, 10*time.Millisecond, lkIDs...)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)

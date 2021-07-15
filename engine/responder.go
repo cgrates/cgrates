@@ -97,14 +97,16 @@ func (rs *Responder) GetCost(arg *CallDescriptorWithAPIOpts, reply *CallCost) (e
 	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
-	r, e := guardian.Guardian.Guard(func() (interface{}, error) {
-		return arg.GetCost()
+	var r *CallCost
+	guardian.Guardian.Guard(func() (_ error) {
+		r, err = arg.GetCost()
+		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+arg.GetAccountKey())
-	if r != nil {
-		*reply = *r.(*CallCost)
+	if err != nil {
+		return
 	}
-	if e != nil {
-		return e
+	if r != nil {
+		*reply = *r
 	}
 	return
 }
@@ -128,12 +130,11 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 			},
 		}
 		var cc *CallCost
-		if _, errGuard := guardian.Guardian.Guard(func() (_ interface{}, errGuard error) { // prevent cache data concurrency
-
+		if errGuard := guardian.Guardian.Guard(func() (errGuard error) { // prevent cache data concurrency
 			// force cache set so it can be picked by calldescriptor for cost calculation
 			if errGuard := Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
 				true, utils.NonTransactional); errGuard != nil {
-				return nil, errGuard
+				return errGuard
 			}
 			cd := &CallDescriptor{
 				Category:      utils.MetaTmp,
@@ -146,11 +147,8 @@ func (rs *Responder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, r
 				DurationIndex: arg.Usage,
 			}
 			cc, err = cd.GetCost()
-			if errGuard := Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
-				true, utils.NonTransactional); errGuard != nil { // Remove here so we don't overload memory
-				return nil, errGuard
-			}
-			return
+			return Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
+				true, utils.NonTransactional) // Remove here so we don't overload memory
 
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ConcatenatedKey(utils.CacheRatingProfilesTmp, rPrfl.Id)); errGuard != nil {
 			return errGuard
