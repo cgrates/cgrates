@@ -93,8 +93,8 @@ func (apiv2 *APIerSv2) LoadAccountActions(attrs *AttrLoadAccountActions, reply *
 	}
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
-	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, dbReader.LoadAccountActionsFiltered(tpAa)
+	if err := guardian.Guardian.Guard(func() error {
+		return dbReader.LoadAccountActionsFiltered(tpAa)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)
 	}

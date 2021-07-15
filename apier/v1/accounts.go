@@ -46,21 +46,21 @@ func (apierSv1 *APIerSv1) GetAccountActionPlan(attrs *utils.TenantAccount, reply
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	acntID := utils.ConcatenatedKey(tnt, attrs.Account)
-	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	accountATs := make([]*AccountActionTiming, 0) // needs to be initialized if remains empty
+	if err := guardian.Guardian.Guard(func() error {
 		acntAPids, err := apierSv1.DataManager.GetAccountActionPlans(acntID, true, true, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
-			return nil, utils.NewErrServerError(err)
+			return utils.NewErrServerError(err)
 		}
 		var acntAPs []*engine.ActionPlan
 		for _, apID := range acntAPids {
 			if ap, err := apierSv1.DataManager.GetActionPlan(apID, true, true, utils.NonTransactional); err != nil {
-				return nil, err
+				return err
 			} else if ap != nil {
 				acntAPs = append(acntAPs, ap)
 			}
 		}
 
-		accountATs := make([]*AccountActionTiming, 0) // needs to be initialized if remains empty
 		for _, ap := range acntAPs {
 			for _, at := range ap.ActionTimings {
 				accountATs = append(accountATs, &AccountActionTiming{
@@ -71,12 +71,11 @@ func (apierSv1 *APIerSv1) GetAccountActionPlan(attrs *utils.TenantAccount, reply
 				})
 			}
 		}
-		return accountATs, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
-	if err != nil {
+		return nil
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
 		return err
 	}
-	*reply = acntATsIf.([]*AccountActionTiming)
+	*reply = accountATs
 	return nil
 }
 
@@ -106,12 +105,12 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 	}
 
 	var remAcntAPids []string // list of accounts who's indexes need modification
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	if err = guardian.Guardian.Guard(func() error {
 		ap, err := apierSv1.DataManager.GetActionPlan(attrs.ActionPlanId, true, true, utils.NonTransactional)
 		if err != nil {
-			return 0, err
+			return err
 		} else if ap == nil {
-			return 0, utils.ErrNotFound
+			return utils.ErrNotFound
 		}
 		if accID != "" {
 			delete(ap.AccountIDs, accID)
@@ -141,17 +140,17 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 
 	UPDATE:
 		if err != nil {
-			return 0, err
+			return err
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 				ArgsCache: map[string][]string{utils.ActionPlanIDs: {attrs.ActionPlanId}},
 			}, reply); err != nil {
-			return 0, err
+			return err
 		}
 		for _, acntID := range remAcntAPids {
 			if err = apierSv1.DataManager.RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
-				return 0, nil
+				return nil
 			}
 		}
 		if len(remAcntAPids) != 0 {
@@ -159,12 +158,11 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: remAcntAPids},
 				}, reply); err != nil {
-				return 0, err
+				return err
 			}
 		}
-		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
-	if err != nil {
+		return nil
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
 	}
@@ -190,7 +188,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 	}
 	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	if err = guardian.Guardian.Guard(func() error {
 		var ub *engine.Account
 		if bal, _ := apierSv1.DataManager.GetAccount(accID); bal != nil {
 			ub = bal
@@ -200,10 +198,10 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 			}
 		}
 		if attr.ActionPlanID != "" {
-			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+			if err := guardian.Guardian.Guard(func() error {
 				acntAPids, err := apierSv1.DataManager.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
-					return 0, err
+					return err
 				}
 				// clean previous action plans
 				for i := 0; i < len(acntAPids); {
@@ -214,7 +212,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 					}
 					ap, err := apierSv1.DataManager.GetActionPlan(apID, true, true, utils.NonTransactional)
 					if err != nil {
-						return 0, err
+						return err
 					}
 					delete(ap.AccountIDs, accID)
 					dirtyActionPlans[apID] = ap
@@ -223,7 +221,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 				if !utils.IsSliceMember(acntAPids, attr.ActionPlanID) { // Account not yet attached to action plan, do it here
 					ap, err := apierSv1.DataManager.GetActionPlan(attr.ActionPlanID, true, true, utils.NonTransactional)
 					if err != nil {
-						return 0, err
+						return err
 					}
 					if ap.AccountIDs == nil {
 						ap.AccountIDs = make(utils.StringMap)
@@ -240,7 +238,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 								ActionsID: at.ActionsID,
 							}
 							if err = apierSv1.DataManager.DataDB().PushTask(t); err != nil {
-								return 0, err
+								return err
 							}
 						}
 					}
@@ -249,31 +247,27 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 				i := 0
 				for actionPlanID, ap := range dirtyActionPlans {
 					if err := apierSv1.DataManager.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
-						return 0, err
+						return err
 					}
 					apIDs[i] = actionPlanID
 					i++
 				}
 				if err := apierSv1.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
-					return 0, err
+					return err
 				}
-				if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+				return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 					utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 						ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}, utils.ActionPlanIDs: apIDs},
-					}, reply); err != nil {
-					return 0, err
-				}
-				return 0, nil
-			}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
-			if err != nil {
-				return 0, err
+					}, reply)
+			}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
+				return err
 			}
 		}
 
 		if attr.ActionTriggersID != "" {
 			atrs, err := apierSv1.DataManager.GetActionTriggers(attr.ActionTriggersID, false, utils.NonTransactional)
 			if err != nil {
-				return 0, err
+				return err
 			}
 			ub.ActionTriggers = atrs
 			ub.InitCounters()
@@ -286,12 +280,8 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 			ub.Disabled = dis
 		}
 		// All prepared, save account
-		if err := apierSv1.DataManager.SetAccount(ub); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
-	if err != nil {
+		return apierSv1.DataManager.SetAccount(ub)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if attr.ReloadScheduler && len(dirtyActionPlans) != 0 {
@@ -315,16 +305,16 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 	}
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	accID := utils.ConcatenatedKey(tnt, attr.Account)
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	if err = guardian.Guardian.Guard(func() error {
 		// remove it from all action plans
-		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+		if err := guardian.Guardian.Guard(func() error {
 			actionPlansMap, err := apierSv1.DataManager.GetAllActionPlans()
 			if err == utils.ErrNotFound {
 				// no action plans
-				return 0, nil
+				return nil
 			}
 			if err != nil {
-				return 0, err
+				return err
 			}
 
 			for actionPlanID, ap := range actionPlansMap {
@@ -337,20 +327,15 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 			for actionPlanID, ap := range dirtyActionPlans {
 				if err := apierSv1.DataManager.SetActionPlan(actionPlanID, ap, true,
 					utils.NonTransactional); err != nil {
-					return 0, err
+					return err
 				}
 			}
-			return 0, nil
-		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
-		if err != nil {
-			return 0, err
+			return nil
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
+			return err
 		}
-		if err := apierSv1.DataManager.RemoveAccount(accID); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
-	if err != nil {
+		return apierSv1.DataManager.RemoveAccount(accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if err = apierSv1.DataManager.RemAccountActionPlans(accID, nil); err != nil &&

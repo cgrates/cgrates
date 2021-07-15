@@ -74,9 +74,9 @@ func (apierSv1 *APIerSv1) AddAccountActionTriggers(attr *AttrAddAccountActionTri
 	}
 	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	var account *engine.Account
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	err = guardian.Guardian.Guard(func() error {
 		if account, err = apierSv1.DataManager.GetAccount(accID); err != nil {
-			return 0, err
+			return err
 		}
 		if attr.ActionTriggerOverwrite {
 			account.ActionTriggers = make(engine.ActionTriggers, 0)
@@ -84,7 +84,7 @@ func (apierSv1 *APIerSv1) AddAccountActionTriggers(attr *AttrAddAccountActionTri
 		for _, actionTriggerID := range attr.ActionTriggerIDs {
 			atrs, err := apierSv1.DataManager.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
 			if err != nil {
-				return 0, err
+				return err
 			}
 			for _, at := range atrs {
 				var found bool
@@ -102,7 +102,7 @@ func (apierSv1 *APIerSv1) AddAccountActionTriggers(attr *AttrAddAccountActionTri
 			}
 		}
 		account.InitCounters()
-		return 0, apierSv1.DataManager.SetAccount(account)
+		return apierSv1.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		return
@@ -127,12 +127,12 @@ func (apierSv1 *APIerSv1) RemoveAccountActionTriggers(attr *AttrRemoveAccountAct
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	accID := utils.ConcatenatedKey(tnt, attr.Account)
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	err := guardian.Guardian.Guard(func() error {
 		var account *engine.Account
 		if acc, err := apierSv1.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
-			return 0, err
+			return err
 		}
 		var newActionTriggers engine.ActionTriggers
 		for _, at := range account.ActionTriggers {
@@ -145,7 +145,7 @@ func (apierSv1 *APIerSv1) RemoveAccountActionTriggers(attr *AttrRemoveAccountAct
 		}
 		account.ActionTriggers = newActionTriggers
 		account.InitCounters()
-		return 0, apierSv1.DataManager.SetAccount(account)
+		return apierSv1.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
 	if err != nil {
 		*reply = err.Error()
@@ -173,11 +173,11 @@ func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr *AttrResetAccountActio
 	}
 	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	var account *engine.Account
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	err := guardian.Guardian.Guard(func() error {
 		if acc, err := apierSv1.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
-			return 0, err
+			return err
 		}
 		for _, at := range account.ActionTriggers {
 			if (attr.UniqueID == "" || at.UniqueID == attr.UniqueID) &&
@@ -190,7 +190,7 @@ func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr *AttrResetAccountActio
 		if attr.Executed == false {
 			account.ExecuteActionTriggers(nil)
 		}
-		return 0, apierSv1.DataManager.SetAccount(account)
+		return apierSv1.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		*reply = err.Error()
@@ -361,17 +361,17 @@ func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr *AttrSetAccountActionTri
 	}
 	accID := utils.ConcatenatedKey(tnt, attr.Account)
 	var account *engine.Account
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	err := guardian.Guardian.Guard(func() error {
 		if acc, err := apierSv1.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
-			return 0, err
+			return err
 		}
 		var foundOne bool
 		for _, at := range account.ActionTriggers {
 			if updated, err := attr.UpdateActionTrigger(at,
 				apierSv1.Config.GeneralCfg().DefaultTimezone); err != nil {
-				return 0, err
+				return err
 			} else if updated && !foundOne {
 				foundOne = true
 			}
@@ -380,13 +380,13 @@ func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr *AttrSetAccountActionTri
 			at := new(engine.ActionTrigger)
 			if updated, err := attr.UpdateActionTrigger(at,
 				apierSv1.Config.GeneralCfg().DefaultTimezone); err != nil {
-				return 0, err
+				return err
 			} else if updated { // Adding a new AT
 				account.ActionTriggers = append(account.ActionTriggers, at)
 			}
 		}
 		account.ExecuteActionTriggers(nil)
-		return 0, apierSv1.DataManager.SetAccount(account)
+		return apierSv1.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {
 		*reply = err.Error()
@@ -587,14 +587,14 @@ func (apierSv1 *APIerSv1) AddTriggeredAction(attr AttrAddActionTrigger, reply *s
 		at.Balance.SharedGroups = &utils.StringMap{attr.BalanceSharedGroup: true}
 	}
 	acntID := utils.ConcatenatedKey(tnt, attr.Account)
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
+	err := guardian.Guardian.Guard(func() error {
 		acnt, err := apierSv1.DataManager.GetAccount(acntID)
 		if err != nil {
-			return 0, err
+			return err
 		}
 		acnt.ActionTriggers = append(acnt.ActionTriggers, at)
 
-		return 0, apierSv1.DataManager.SetAccount(acnt)
+		return apierSv1.DataManager.SetAccount(acnt)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+acntID)
 	if err != nil {
 		return err

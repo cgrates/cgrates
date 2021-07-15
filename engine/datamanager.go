@@ -171,7 +171,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.StatQueuePrefix:
 			tntID := utils.NewTenantID(dataID)
-			// guardian.Guardian.Guard(func() (_ interface{}, _ error) { // lock the get
+			// guardian.Guardian.Guard(func() ( _ error) { // lock the get
 			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			// return
 			// }, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+dataID)
@@ -1179,7 +1179,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		oldSts.TTL != sqp.TTL ||
 		oldSts.MinItems != sqp.MinItems ||
 		(oldSts.Stored != sqp.Stored && oldSts.Stored) { // reset the stats queue if the profile changed this fields
-		guardian.Guardian.Guard(func() (_ interface{}, _ error) { // we change the queue so lock it
+		guardian.Guardian.Guard(func() (_ error) { // we change the queue so lock it
 			var sq *StatQueue
 			if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
 				sqp.MinItems); err != nil {
@@ -1189,7 +1189,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sqp.TenantID())
 	} else {
-		guardian.Guardian.Guard(func() (_ interface{}, _ error) { // we change the queue so lock it
+		guardian.Guardian.Guard(func() (_ error) { // we change the queue so lock it
 			oSq, errRs := dm.GetStatQueue(sqp.Tenant, sqp.ID, // do not try to get the stats queue if the configuration changed
 				true, false, utils.NonTransactional)
 			if errRs == utils.ErrNotFound { // the stats queue does not exist

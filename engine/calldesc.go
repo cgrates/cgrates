@@ -682,14 +682,14 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	cd.account = nil // make sure it's not cached
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+	err = guardian.Guardian.Guard(func() (_ error) {
 		account, err := cd.getAccount()
 		if err != nil {
-			return 0, err
+			return err
 		}
 		acntIDs, err := account.GetUniqueSharedGroupMembers(cd)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		var lkIDs []string
 		for acntID := range acntIDs {
@@ -697,11 +697,10 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 				lkIDs = append(lkIDs, utils.AccountPrefix+acntID)
 			}
 		}
-		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+		return guardian.Guardian.Guard(func() error {
 			duration, err = cd.getMaxSessionDuration(account)
-			return
+			return err
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
-		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+cd.GetAccountKey())
 	return
 }
@@ -754,16 +753,16 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+	err = guardian.Guardian.Guard(func() (_ error) {
 		// lock all group members
 		account, err := cd.getAccount()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		initialAcnt := account.AsAccountSummary()
 		acntIDs, sgerr := account.GetUniqueSharedGroupMembers(cd)
 		if sgerr != nil {
-			return nil, sgerr
+			return sgerr
 		}
 		var lkIDs []string
 		for acntID := range acntIDs {
@@ -771,12 +770,12 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 				lkIDs = append(lkIDs, utils.AccountPrefix+acntID)
 			}
 		}
-		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+		return guardian.Guardian.Guard(func() (err error) {
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
-			return
+			return err
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
 		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+cd.GetAccountKey())
@@ -789,15 +788,15 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+	err = guardian.Guardian.Guard(func() (err error) {
 		account, err := cd.getAccount()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		initialAcnt := account.AsAccountSummary()
 		acntIDs, err := account.GetUniqueSharedGroupMembers(cd)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		var lkIDs []string
 		for acntID := range acntIDs {
@@ -805,14 +804,14 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				lkIDs = append(lkIDs, utils.AccountPrefix+acntID)
 			}
 		}
-		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+		return guardian.Guardian.Guard(func() (err error) {
 			remainingDuration, err := cd.getMaxSessionDuration(account)
 			if err != nil && cd.GetDuration() > 0 {
-				return nil, err
+				return err
 			}
 			// check ForceDuartion
 			if cd.ForceDuration && !account.AllowNegative && remainingDuration < cd.GetDuration() {
-				return nil, utils.ErrInsufficientCredit
+				return utils.ErrInsufficientCredit
 			}
 			if err != nil || remainingDuration == 0 {
 				cc = cd.CreateCallCost()
@@ -841,9 +840,8 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
-			return
+			return err
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
-		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+cd.GetAccountKey())
 	return cc, err
 }
@@ -911,7 +909,7 @@ func (cd *CallDescriptor) RefundIncrements() (acnt *Account, err error) {
 			accMap[utils.AccountPrefix+increment.BalanceInfo.AccountID] = true
 		}
 	}
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+	guardian.Guardian.Guard(func() (_ error) {
 		acnt, err = cd.refundIncrements()
 		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, accMap.Slice()...)
@@ -954,11 +952,9 @@ func (cd *CallDescriptor) RefundRounding() (err error) {
 	for _, inc := range cd.Increments {
 		accMap[utils.AccountPrefix+inc.BalanceInfo.AccountID] = true
 	}
-	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
-		err = cd.refundRounding()
-		return
+	return guardian.Guardian.Guard(func() error {
+		return cd.refundRounding()
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, accMap.Slice()...)
-	return
 }
 
 // Creates a CallCost structure copying related data from CallDescriptor

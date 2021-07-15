@@ -88,13 +88,12 @@ func AddFailedPost(expPath, format, module string, ev interface{}, opts map[stri
 // used only on replay failed post
 func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
 	var fileContent []byte
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	if err = guardian.Guardian.Guard(func() error {
 		if fileContent, err = os.ReadFile(filePath); err != nil {
-			return 0, err
+			return err
 		}
-		return 0, os.Remove(filePath)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
-	if err != nil {
+		return os.Remove(filePath)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath); err != nil {
 		return
 	}
 	dec := gob.NewDecoder(bytes.NewBuffer(fileContent))
@@ -126,17 +125,16 @@ func (expEv *ExportEvents) SetModule(mod string) {
 
 // WriteToFile writes the events to file
 func (expEv *ExportEvents) WriteToFile(filePath string) (err error) {
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	return guardian.Guardian.Guard(func() error {
 		fileOut, err := os.Create(filePath)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		encd := gob.NewEncoder(fileOut)
 		err = encd.Encode(expEv)
 		fileOut.Close()
-		return nil, err
+		return err
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
-	return
 }
 
 // AddEvent adds one event

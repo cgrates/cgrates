@@ -36,7 +36,7 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 	}
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	guardian.Guardian.Guard(func() (_ interface{}, _ error) {
+	guardian.Guardian.Guard(func() (_ error) {
 		if !indexedSelects {
 			var keysWithID []string
 			if keysWithID, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID]); err != nil {
