@@ -581,7 +581,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 				err = nil
 				continue
 			}
-			if ctx != nil ||
+			if ctx != nil &&
 				(obj.contexts == nil || !utils.IsSliceMember(*obj.contexts, *ctx)) { // check the contexts if present
 				key := utils.ConcatenatedKey(tntCtx, idxKey)
 				rply.MissingIndexes[key] = append(rply.MissingIndexes[key], itmID)
