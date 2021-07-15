@@ -300,17 +300,17 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 	if marshaled, err = rs.ms.Marshal(&ldInst); err != nil {
 		return
 	}
-	_, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
+	err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error { // Make sure we do it locked since other instance can modify history while we read it
 		var histLen int
 		if err := rs.Cmd(&histLen, redisLLEN, utils.LoadInstKey); err != nil {
-			return nil, err
+			return err
 		}
 		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
 			if err = rs.Cmd(nil, redisRPOP, utils.LoadInstKey); err != nil {
-				return nil, err
+				return err
 			}
 		}
-		return nil, rs.Cmd(nil, redisLPUSH, utils.LoadInstKey, string(marshaled))
+		return rs.Cmd(nil, redisLPUSH, utils.LoadInstKey, string(marshaled))
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
 
 	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, "",

@@ -373,8 +373,8 @@ func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsAct
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
-	if _, err = guardian.Guardian.Guard(ctx, func(_ *context.Context) (interface{}, error) {
-		return nil, actSetAccount(ctx, aS.dm, tnt, args.AccountID, args.Diktats, args.Reset)
+	if err = guardian.Guardian.Guard(ctx, func(ctx *context.Context) error {
+		return actSetAccount(ctx, aS.dm, tnt, args.AccountID, args.Diktats, args.Reset)
 	}, aS.cfg.GeneralCfg().LockingTimeout,
 		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return
@@ -396,15 +396,15 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
-	if _, err = guardian.Guardian.Guard(ctx, func(_ *context.Context) (interface{}, error) {
+	if err = guardian.Guardian.Guard(ctx, func(ctx *context.Context) error {
 		qAcnt, err := aS.dm.GetAccount(ctx, tnt, args.AccountID)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		for _, balID := range args.BalanceIDs {
 			delete(qAcnt.Balances, balID)
 		}
-		return nil, aS.dm.SetAccount(ctx, qAcnt, false)
+		return aS.dm.SetAccount(ctx, qAcnt, false)
 	}, aS.cfg.GeneralCfg().LockingTimeout,
 		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return

@@ -96,7 +96,7 @@ func (sS *StatService) storeStats(ctx *context.Context) {
 		if sID == "" {
 			break // no more keys, backup completed
 		}
-		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ interface{}, _ error) {
+		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 			if sqIf, ok := Cache.Get(utils.CacheStatQueues, sID); !ok || sqIf == nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
@@ -170,7 +170,7 @@ func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt stri
 			continue
 		}
 		var sq *StatQueue
-		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ interface{}, _ error) {
+		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 			sq, err = sS.dm.GetStatQueue(ctx, sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sqPrfl.TenantID())
@@ -237,7 +237,7 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 
 func (sS *StatService) getStatQueue(ctx *context.Context, tnt, id string) (sq *StatQueue, err error) {
 	var removed int
-	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ interface{}, _ error) {
+	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 		if sq, err = sS.dm.GetStatQueue(ctx, tnt, id, true, true, utils.EmptyString); err != nil {
 			return
 		}
@@ -287,7 +287,7 @@ func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *Stat
 	var withErrors bool
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
-		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ interface{}, _ error) {
+		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 			err = sq.ProcessEvent(ctx, tnt, args.ID, sS.filterS, evNm)
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
@@ -496,7 +496,7 @@ func (sS *StatService) StartLoop(ctx *context.Context) {
 // V1ResetStatQueue resets the stat queue
 func (sS *StatService) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantID, rply *string) (err error) {
 	var sq *StatQueue
-	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ interface{}, _ error) {
+	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 		if sq, err = sS.dm.GetStatQueue(ctx, tntID.Tenant, tntID.ID,
 			true, true, utils.NonTransactional); err != nil {
 			return

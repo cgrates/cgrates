@@ -284,7 +284,7 @@ func (rs Resources) allocateResource(ctx *context.Context, ru *ResourceUsage, dr
 		return "", utils.ErrResourceUnavailable
 	}
 	lockIDs := utils.PrefixSliceItems(rs.tenatIDs(), utils.ResourcesPrefix)
-	guardian.Guardian.Guard(ctx, func(_ *context.Context) (gRes interface{}, gErr error) {
+	guardian.Guardian.Guard(ctx, func(_ *context.Context) (_ error) {
 		// Simulate resource usage
 		for _, r := range rs {
 			r.removeExpiredUnits()
@@ -494,7 +494,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ctx *context.Context, tnt s
 		}
 	}
 	lockIDs := utils.PrefixSliceItems(rs.IDs(), utils.ResourcesPrefix)
-	guardian.Guardian.Guard(ctx, func(_ *context.Context) (gIface interface{}, gErr error) {
+	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 		for resName := range rIDs {
 			var rPrf *ResourceProfile
 			if rPrf, err = rS.dm.GetResourceProfile(ctx, tnt, resName,
@@ -504,15 +504,16 @@ func (rS *ResourceService) matchingResourcesForEvent(ctx *context.Context, tnt s
 				}
 				return
 			}
-			if pass, err := rS.filterS.Pass(ctx, tnt, rPrf.FilterIDs,
+			var pass bool
+			if pass, err = rS.filterS.Pass(ctx, tnt, rPrf.FilterIDs,
 				evNm); err != nil {
-				return nil, err
+				return
 			} else if !pass {
 				continue
 			}
-			r, err := rS.dm.GetResource(ctx, rPrf.Tenant, rPrf.ID, true, true, "")
-			if err != nil {
-				return nil, err
+			var r *Resource
+			if r, err = rS.dm.GetResource(ctx, rPrf.Tenant, rPrf.ID, true, true, ""); err != nil {
+				return err
 			}
 			if rPrf.Stored && r.dirty == nil {
 				r.dirty = utils.BoolPointer(false)

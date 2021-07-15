@@ -28,9 +28,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func delayHandler(_ *context.Context) (interface{}, error) {
+func delayHandler(_ *context.Context) error {
 	time.Sleep(100 * time.Millisecond)
-	return nil, nil
+	return nil
 }
 
 // Forks 3 groups of workers and makes sure that the time for execution is the one we expect for all 15 goroutines (with 100ms )
@@ -241,43 +241,68 @@ func TestGuardianGuardIDsTimeoutConcurrent(t *testing.T) {
 
 // BenchmarkGuard-8      	  200000	     13759 ns/op
 func BenchmarkGuard(b *testing.B) {
+	wg := new(sync.WaitGroup)
+	wg.Add(b.N * 3)
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		go Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
-			time.Sleep(time.Microsecond)
-			return 0, nil
-		}, 0, "1")
-		go Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
-			time.Sleep(time.Microsecond)
-			return 0, nil
-		}, 0, "2")
-		go Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
-			time.Sleep(time.Microsecond)
-			return 0, nil
-		}, 0, "1")
+		go func() {
+			Guardian.Guard(context.TODO(), func(*context.Context) error {
+				time.Sleep(time.Microsecond)
+				return nil
+			}, 0, "1")
+			wg.Done()
+		}()
+		go func() {
+			Guardian.Guard(context.TODO(), func(*context.Context) error {
+				time.Sleep(time.Microsecond)
+				return nil
+			}, 0, "2")
+			wg.Done()
+		}()
+		go func() {
+			Guardian.Guard(context.TODO(), func(*context.Context) error {
+				time.Sleep(time.Microsecond)
+				return nil
+			}, 0, "1")
+			wg.Done()
+		}()
 	}
 
+	wg.Wait()
 }
 
 // BenchmarkGuardian-8   	 1000000	      5794 ns/op
 func BenchmarkGuardian(b *testing.B) {
+	wg := new(sync.WaitGroup)
+	wg.Add(b.N)
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		go Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
-			time.Sleep(time.Microsecond)
-			return 0, nil
-		}, 0, strconv.Itoa(n))
+		go func(n int) {
+			Guardian.Guard(context.TODO(), func(*context.Context) error {
+				time.Sleep(time.Microsecond)
+				return nil
+			}, 0, strconv.Itoa(n))
+			wg.Done()
+		}(n)
 	}
+	wg.Wait()
 }
 
 // BenchmarkGuardIDs-8   	 1000000	      8732 ns/op
 func BenchmarkGuardIDs(b *testing.B) {
+	wg := new(sync.WaitGroup)
+	wg.Add(b.N)
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		go func(i int) {
 			if refID := Guardian.GuardIDs("", 0, strconv.Itoa(i)); refID != "" {
 				time.Sleep(time.Microsecond)
 				Guardian.UnguardIDs(refID)
 			}
+			wg.Done()
 		}(n)
 	}
+	wg.Wait()
 }
 
 func TestGuardianLockItemUnlockItem(t *testing.T) {
@@ -293,7 +318,7 @@ func TestGuardianLockItemUnlockItem(t *testing.T) {
 func TestGuardianLockUnlockWithReference(t *testing.T) {
 	//for coverage purposes
 	refID := utils.EmptyString
-	Guardian.lockWithReference(refID, []string{})
+	Guardian.lockWithReference(refID, 0, []string{}...)
 	Guardian.unlockWithReference(refID)
 	if refID != utils.EmptyString {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.EmptyString, refID)
@@ -314,8 +339,8 @@ func TestGuardianGuardUnguardIDs(t *testing.T) {
 func TestGuardianGuardUnguardIDsCase2(t *testing.T) {
 	//for coverage purposes
 	lkIDs := []string{"test1", "test2", "test3"}
-	_, err := Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
-		return nil, utils.ErrNotFound
+	err := Guardian.Guard(context.TODO(), func(_ *context.Context) error {
+		return utils.ErrNotFound
 	}, 10*time.Millisecond, lkIDs...)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)

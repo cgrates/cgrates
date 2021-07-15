@@ -697,7 +697,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	if kv.Value != nil {
 		existingLoadHistory = kv.Value
 	}
-	_, err := guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
+	err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) error { // Make sure we do it locked since other instance can modify history while we read it
 		// insert on first position
 		existingLoadHistory = append(existingLoadHistory, nil)
 		copy(existingLoadHistory[1:], existingLoadHistory[0:])
@@ -708,7 +708,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
 			existingLoadHistory = existingLoadHistory[:loadHistSize]
 		}
-		return nil, ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+		return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 			_, err = ms.getCol(ColLht).UpdateOne(sctx, bson.M{"key": utils.LoadInstKey},
 				bson.M{"$set": struct {
 					Key   string
