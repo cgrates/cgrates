@@ -126,7 +126,7 @@ func (aS *AnalyzerService) logTrafic(id uint64, method string,
 	if strings.HasPrefix(method, utils.AnalyzerSv1) {
 		return nil
 	}
-	return aS.db.Index(utils.ConcatenatedKey(method, strconv.FormatInt(sTime.Unix(), 10)),
+	return aS.db.Index(utils.ConcatenatedKey(enc, from, to, method, strconv.FormatInt(sTime.Unix(), 10)),
 		NewInfoRPC(id, method, params, result, err, enc, from, to, sTime, eTime))
 }
 

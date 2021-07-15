@@ -4064,6 +4064,9 @@ func (sS *SessionS) BiRPCv1STIRAuthenticate(clnt rpcclient.ClientConnector,
 // BiRPCv1STIRIdentity the API for STIR header creation
 func (sS *SessionS) BiRPCv1STIRIdentity(clnt rpcclient.ClientConnector,
 	args *V1STIRIdentityArgs, identity *string) (err error) {
+	if args == nil || args.Payload == nil {
+		return utils.NewErrMandatoryIeMissing("Payload")
+	}
 	if args.Payload.ATTest == utils.EmptyString {
 		args.Payload.ATTest = sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
 	}
