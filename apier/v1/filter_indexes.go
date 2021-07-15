@@ -103,7 +103,7 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]s
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	tntCtx := arg.Tenant
+	tntCtx := tnt
 	switch arg.ItemType {
 	case utils.MetaThresholds:
 		arg.ItemType = utils.CacheThresholdFilterIndexes
