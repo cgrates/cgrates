@@ -57,6 +57,57 @@ func TestFirstNonEmpty(t *testing.T) {
 	}
 }
 
+func TestFirstIntNonEmpty(t *testing.T) {
+	//check for default value
+	rcv := FirstIntNonEmpty(0)
+	if rcv != 0 {
+		t.Errorf("Expected 0 \n but received \n %d", rcv)
+	}
+
+	//case the first non empty value is on the first position
+	rcv = FirstIntNonEmpty(21, 0, 0)
+	if rcv != 21 {
+		t.Errorf("Expected 21 \n but received \n %d", rcv)
+	}
+
+	//case the first non empty value is on the second position
+	rcv = FirstIntNonEmpty(0, 21, 0)
+	if rcv != 21 {
+		t.Errorf("Expected 21 \n but received \n %d", rcv)
+	}
+
+	//case the first non empty value is on the third position
+	rcv = FirstIntNonEmpty(0, 0, 21)
+	if rcv != 21 {
+		t.Errorf("Expected 21 \n but received \n %d", rcv)
+	}
+}
+
+func TestFirstDurationNonEmpty(t *testing.T) {
+	//check for default value
+	rcv := FirstDurationNonEmpty(0)
+	if rcv != 0 {
+		t.Errorf("Expected 0 \n but received \n %d", rcv)
+	}
+
+	//case the first non empty value is on the first position
+	rcv = FirstDurationNonEmpty(2*time.Minute, 0, 0)
+	if rcv != 2*time.Minute {
+		t.Errorf("Expected 2m \n but received \n %d", rcv)
+	}
+
+	//case the first non empty value is on the second position
+	rcv = FirstDurationNonEmpty(0, 2*time.Minute, 0)
+	if rcv != 2*time.Minute {
+		t.Errorf("Expected 2m \n but received \n %d", rcv)
+	}
+
+	//case the first non empty value is on the third position
+	rcv = FirstDurationNonEmpty(0, 0, 2*time.Minute)
+	if rcv != 2*time.Minute {
+		t.Errorf("Expected 2m \n but received \n %d", rcv)
+	}
+}
 func TestSha1(t *testing.T) {
 	//empty check
 	rcv := Sha1(" ")
