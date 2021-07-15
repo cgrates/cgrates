@@ -39,10 +39,10 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 	}
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	guardian.Guardian.Guard(ctx, func(guardCtx *context.Context) (_ interface{}, _ error) {
+	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 		if !indexedSelects {
 			var keysWithID []string
-			if keysWithID, err = dm.DataDB().GetKeysForPrefix(guardCtx, utils.CacheIndexesToPrefix[cacheID]); err != nil {
+			if keysWithID, err = dm.DataDB().GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[cacheID]); err != nil {
 				return
 			}
 			var sliceIDs []string
@@ -79,7 +79,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 				for _, val := range fldVals {
 					var dbIndexes map[string]utils.StringSet // list of items matched in DB
 					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName, val)
-					if dbIndexes, err = dm.GetIndexes(guardCtx, cacheID, itemIDPrefix, key, true, true); err != nil {
+					if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, key, true, true); err != nil {
 						if err == utils.ErrNotFound {
 							err = nil
 							continue

@@ -237,21 +237,21 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 
 // asapExecuteActions executes the scheduledActs and removes the executed from database
 // uses locks to avoid concurrent access
-func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs) (err error) {
-	_, err = guardian.Guardian.Guard(ctx, func(_ *context.Context) (gRes interface{}, gErr error) {
+func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs) error {
+	return guardian.Guardian.Guard(ctx, func(ctx *context.Context) (err error) {
 		var ap *engine.ActionProfile
-		if ap, gErr = aS.dm.GetActionProfile(ctx, sActs.tenant, sActs.apID, true, true, utils.NonTransactional); gErr != nil {
+		if ap, err = aS.dm.GetActionProfile(ctx, sActs.tenant, sActs.apID, true, true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> querying ActionProfile with id: <%s:%s>, error: <%s>",
 					utils.ActionS, sActs.tenant, sActs.apID, err))
 			return
 		}
-		if gErr = sActs.Execute(); gErr != nil { // cannot remove due to errors on execution
+		if err = sActs.Execute(); err != nil { // cannot remove due to errors on execution
 			return
 		}
 		delete(ap.Targets[sActs.trgTyp], sActs.trgID)
-		if gErr = aS.dm.SetActionProfile(ctx, ap, true); gErr != nil {
+		if err = aS.dm.SetActionProfile(ctx, ap, true); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> saving ActionProfile with id: <%s:%s>, error: <%s>",
@@ -259,7 +259,6 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 		}
 		return
 	}, aS.cfg.GeneralCfg().LockingTimeout, utils.ActionProfilePrefix+sActs.apID)
-	return
 }
 
 // V1ScheduleActions will be called to schedule actions matching the arguments

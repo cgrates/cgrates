@@ -351,7 +351,7 @@ func (sq *StatQueue) MarshalJSON() (rply []byte, err error) {
 		return []byte("null"), nil
 	}
 	type tmp StatQueue
-	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
+	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ error) {
 		sq.RLock()
 		rply, err = json.Marshal(tmp(*sq))
 		sq.RUnlock()
@@ -413,7 +413,7 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 func (sq *StatQueue) GobEncode() (rply []byte, err error) {
 	buf := bytes.NewBuffer(rply)
 	type tmp StatQueue
-	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
+	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ error) {
 		sq.RLock()
 		err = gob.NewEncoder(buf).Encode(tmp(*sq))
 		sq.RUnlock()
@@ -451,7 +451,7 @@ func (ssq *StatQueueWithAPIOpts) MarshalJSON() (rply []byte, err error) {
 		StatQueue
 		APIOpts map[string]interface{}
 	}
-	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
+	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ error) {
 		ssq.RLock()
 		rply, err = json.Marshal(tmp{
 			StatQueue: *ssq.StatQueue,
@@ -469,7 +469,7 @@ func (ssq *StatQueueWithAPIOpts) GobEncode() (rply []byte, err error) {
 		StatQueue
 		APIOpts map[string]interface{}
 	}
-	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
+	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ error) {
 		ssq.RLock()
 		err = gob.NewEncoder(buf).Encode(tmp{
 			StatQueue: *ssq.StatQueue,
