@@ -3204,7 +3204,7 @@ func TestResourcesStoreResourceNotDirty(t *testing.T) {
 		dirty: utils.BoolPointer(false),
 	}
 
-	err := rS.StoreResource(context.TODO(), r)
+	err := rS.storeResource(context.TODO(), r)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -3220,7 +3220,7 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 		dirty: utils.BoolPointer(true),
 	}
 
-	err := rS.StoreResource(context.TODO(), r)
+	err := rS.storeResource(context.TODO(), r)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -3265,7 +3265,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 
 	explog := `CGRateS <> [WARNING] <ResourceS> failed caching Resource with ID: cgrates.org:RES1, error: NOT_IMPLEMENTED
 `
-	if err := rS.StoreResource(context.Background(), r); err == nil ||
+	if err := rS.storeResource(context.Background(), r); err == nil ||
 		err.Error() != utils.ErrNotImplemented.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
 	}
