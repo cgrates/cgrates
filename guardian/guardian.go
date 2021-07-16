@@ -56,17 +56,11 @@ func (gl *GuardianLocker) lockItem(itmID string) {
 	gl.lkMux.Lock()
 	itmLock, exists := gl.locks[itmID]
 	if !exists {
-		itmLock = &itemLock{lk: make(chan struct{}, 1)}
-		gl.locks[itmID] = itmLock
-		itmLock.lk <- struct{}{}
-	}
-	itmLock.cnt++
-	select {
-	case <-itmLock.lk:
+		gl.locks[itmID] = &itemLock{lk: make(chan struct{}, 1), cnt: 1}
 		gl.lkMux.Unlock()
 		return
-	default: // move further so we can unlock
 	}
+	itmLock.cnt++
 	gl.lkMux.Unlock()
 	<-itmLock.lk
 }
