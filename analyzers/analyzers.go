@@ -31,6 +31,7 @@ import (
 
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search"
+	"github.com/blevesearch/bleve/search/query"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -142,7 +143,13 @@ type QueryArgs struct {
 
 // V1StringQuery returns a list of API that match the query
 func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]interface{}) error {
-	s := bleve.NewSearchRequest(bleve.NewQueryStringQuery(args.HeaderFilters))
+	var q query.Query
+	if args.HeaderFilters == utils.EmptyString {
+		q = bleve.NewMatchAllQuery()
+	} else {
+		q = bleve.NewQueryStringQuery(args.HeaderFilters)
+	}
+	s := bleve.NewSearchRequest(q)
 	s.Fields = []string{utils.Meta} // return all fields
 	searchResults, err := aS.db.Search(s)
 	if err != nil {
