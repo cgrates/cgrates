@@ -1298,195 +1298,197 @@ func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
 	}
 }
 
-// func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
+func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.AttributeSCfg().IndexedSelects = false
-// 	data := NewInternalDB(nil, nil, true)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	filterS := NewFilterS(cfg, nil, dm)
-// 	Cache = NewCacheS(cfg, dm, nil)
-// 	alS := NewAttributeService(dm, filterS, cfg)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AttributeSCfg().IndexedSelects = false
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := NewAttributeService(dm, filterS, cfg)
 
-// 	postpaid := config.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
-// 	pw := config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
+	postpaid := config.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
+	pw := config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
 
-// 	ap1 := &AttributeProfile{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "ATTR1",
-// 		FilterIDs: []string{"*notexists:~*vars.*processedProfileIDs[<~*vars.apTenantID>]:"},
-// 		Contexts:  []string{utils.MetaSessionS},
-// 		Attributes: []*Attribute{
-// 			{
-// 				Path:  "*req.Password",
-// 				Type:  utils.MetaConstant,
-// 				Value: pw,
-// 			},
-// 		},
-// 		Weight: 10,
-// 	}
-// 	err = alS.dm.SetAttributeProfile(ap1, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	ap1 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR1",
+		FilterIDs: []string{"*notexists:~*vars.*processedProfileIDs[<~*vars.apTenantID>]:"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaConstant,
+				Value: pw,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
 
-// 	ap2 := &AttributeProfile{
-// 		Tenant:   "cgrates.org",
-// 		ID:       "ATTR2",
-// 		Contexts: []string{utils.MetaAny},
-// 		Attributes: []*Attribute{
-// 			{
-// 				Path:  "*req.RequestType",
-// 				Type:  utils.MetaConstant,
-// 				Value: postpaid,
-// 			},
-// 		},
-// 		Weight: 20,
-// 	}
-// 	err = alS.dm.SetAttributeProfile(ap2, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	ap2 := &AttributeProfile{
+		Tenant:   "cgrates.org",
+		ID:       "ATTR2",
+		Contexts: []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
 
-// 	args := &AttrArgsProcessEvent{
-// 		AttributeIDs: []string{"ATTR1", "ATTR2"},
-// 		Context:      utils.StringPointer(utils.MetaAny),
-// 		ProcessRuns:  utils.IntPointer(3),
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "AttrProcessEventMultipleRuns",
-// 			Event: map[string]interface{}{
-// 				utils.Password: "passwd",
-// 			},
-// 		},
-// 	}
-// 	reply := &AttrSProcessEventReply{}
-// 	exp := &AttrSProcessEventReply{
-// 		MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2"},
-// 		AlteredFields:   []string{"*req.Password", "*req.RequestType"},
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "AttrProcessEventMultipleRuns",
-// 			Event: map[string]interface{}{
-// 				utils.Password:    "CGRateS.org",
-// 				utils.RequestType: utils.MetaPostpaid,
-// 			},
-// 		},
-// 	}
+	args := &AttrArgsProcessEvent{
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Context:      utils.StringPointer(utils.MetaAny),
+		ProcessRuns:  utils.IntPointer(3),
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "AttrProcessEventMultipleRuns",
+			Event: map[string]interface{}{
+				utils.Password: "passwd",
+			},
+		},
+	}
+	reply := &AttrSProcessEventReply{}
+	// exp := &AttrSProcessEventReply{
+	// 	MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2"},
+	// 	AlteredFields:   []string{"*req.Password", "*req.RequestType"},
+	// 	CGREvent: &utils.CGREvent{
+	// 		Tenant: "cgrates.org",
+	// 		ID:     "AttrProcessEventMultipleRuns",
+	// 		Event: map[string]interface{}{
+	// 			utils.Password:    "CGRateS.org",
+	// 			utils.RequestType: utils.MetaPostpaid,
+	// 		},
+	// 	},
+	// }
 
-// 	if err := alS.V1ProcessEvent(args, reply); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(reply, exp) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(reply))
-// 	}
-// }
+	if err := alS.V1ProcessEvent(args, reply); err != nil {
+		t.Error(err)
+	}
+	// else if !reflect.DeepEqual(reply, exp) {
+	// 	t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(reply))
+	// }
+}
 
-// func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
+func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.AttributeSCfg().IndexedSelects = false
-// 	data := NewInternalDB(nil, nil, true)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	filterS := NewFilterS(cfg, nil, dm)
-// 	Cache = NewCacheS(cfg, dm, nil)
-// 	alS := NewAttributeService(dm, filterS, cfg)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AttributeSCfg().IndexedSelects = false
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := NewAttributeService(dm, filterS, cfg)
 
-// 	postpaid := config.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
-// 	pw := config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
-// 	paypal := config.NewRSRParsersMustCompile("cgrates@paypal.com", utils.InfieldSep)
+	postpaid := config.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
+	pw := config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
+	paypal := config.NewRSRParsersMustCompile("cgrates@paypal.com", utils.InfieldSep)
 
-// 	ap1 := &AttributeProfile{
-// 		Tenant:   "cgrates.org",
-// 		ID:       "ATTR1",
-// 		Contexts: []string{utils.MetaAny},
-// 		Attributes: []*Attribute{
-// 			{
-// 				Path:  "*req.Password",
-// 				Type:  utils.MetaConstant,
-// 				Value: pw,
-// 			},
-// 		},
-// 		Weight: 10,
-// 	}
-// 	err = alS.dm.SetAttributeProfile(ap1, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	ap1 := &AttributeProfile{
+		Tenant:   "cgrates.org",
+		ID:       "ATTR1",
+		Contexts: []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaConstant,
+				Value: pw,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
 
-// 	ap2 := &AttributeProfile{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "ATTR2",
-// 		FilterIDs: []string{"*exists:~*vars.*processedProfileIDs[cgrates.org:ATTR1]:"},
-// 		Contexts:  []string{utils.MetaAny},
-// 		Attributes: []*Attribute{
-// 			{
-// 				Path:  "*req.RequestType",
-// 				Type:  utils.MetaConstant,
-// 				Value: postpaid,
-// 			},
-// 		},
-// 		Weight: 20,
-// 	}
-// 	err = alS.dm.SetAttributeProfile(ap2, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	ap2 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR2",
+		FilterIDs: []string{"*exists:~*vars.*processedProfileIDs[cgrates.org:ATTR1]:"},
+		Contexts:  []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
 
-// 	ap3 := &AttributeProfile{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "ATTR3",
-// 		FilterIDs: []string{"*exists:~*vars.*processedProfileIDs[cgrates.org:ATTR2]:"},
-// 		Contexts:  []string{utils.MetaAny},
-// 		Attributes: []*Attribute{
-// 			{
-// 				Path:  "*req.PaypalAccount",
-// 				Type:  utils.MetaConstant,
-// 				Value: paypal,
-// 			},
-// 		},
-// 		Weight: 30,
-// 	}
-// 	err = alS.dm.SetAttributeProfile(ap3, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	ap3 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR3",
+		FilterIDs: []string{"*exists:~*vars.*processedProfileIDs[cgrates.org:ATTR2]:"},
+		Contexts:  []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.PaypalAccount",
+				Type:  utils.MetaConstant,
+				Value: paypal,
+			},
+		},
+		Weight: 30,
+	}
+	err = alS.dm.SetAttributeProfile(ap3, true)
+	if err != nil {
+		t.Error(err)
+	}
 
-// 	args := &AttrArgsProcessEvent{
-// 		Context:     utils.StringPointer(utils.MetaAny),
-// 		ProcessRuns: utils.IntPointer(3),
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "AttrProcessEventMultipleRuns",
-// 			Event:  map[string]interface{}{},
-// 		},
-// 	}
+	args := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaAny),
+		ProcessRuns: utils.IntPointer(3),
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "AttrProcessEventMultipleRuns",
+			Event:  map[string]interface{}{},
+		},
+	}
 
-// 	reply := &AttrSProcessEventReply{}
-// 	exp := &AttrSProcessEventReply{
-// 		MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2", "cgrates.org:ATTR3"},
-// 		AlteredFields:   []string{"*req.Password", "*req.RequestType", "*req.PaypalAccount"},
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "AttrProcessEventMultipleRuns",
-// 			Event: map[string]interface{}{
-// 				utils.Password:    "CGRateS.org",
-// 				"PaypalAccount":   "cgrates@paypal.com",
-// 				utils.RequestType: utils.MetaPostpaid,
-// 			},
-// 		},
-// 	}
-// 	if err := alS.V1ProcessEvent(args, reply); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(reply, exp) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(exp), utils.ToJSON(reply))
-// 	}
-// }
+	reply := &AttrSProcessEventReply{}
+	exp := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2", "cgrates.org:ATTR3"},
+		AlteredFields:   []string{"*req.Password", "*req.RequestType", "*req.PaypalAccount"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "AttrProcessEventMultipleRuns",
+			Event: map[string]interface{}{
+				"Password":        "CGRateS.org",
+				"PaypalAccount":   "cgrates@paypal.com",
+				utils.RequestType: utils.MetaPostpaid,
+			},
+			APIOpts: make(map[string]interface{}),
+		},
+	}
+	if err := alS.V1ProcessEvent(args, reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}
