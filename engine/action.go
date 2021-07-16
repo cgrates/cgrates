@@ -754,7 +754,13 @@ func publishAccount(ub *Account, a *Action, acs Actions, extraData interface{}) 
 	if ub == nil {
 		return errors.New("nil account")
 	}
-	ub.Publish()
+	initBal := make(map[string]float64)
+	for _, bals := range ub.BalanceMap {
+		for _, bal := range bals {
+			initBal[bal.Uuid] = bal.Value
+		}
+	}
+	ub.Publish(initBal)
 	return nil
 }
 
