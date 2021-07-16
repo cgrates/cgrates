@@ -473,7 +473,7 @@ func updateFilterIHMisingIndx(dm *DataManager, fltrCache, fltrIdxCache *ltcache.
 	if len(filterIDs) == 0 { // no filter so check the *none:*any:*any index
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
 		var rcvIndx utils.StringSet
-		if rcvIndx, err = getIHFltrIdxFromCache(dm, nil, indxType, tntCtx, idxKey); err != nil {
+		if rcvIndx, err = getIHFltrIdxFromCache(dm, fltrCache, indxType, tntCtx, idxKey); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}

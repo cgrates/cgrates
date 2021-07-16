@@ -863,12 +863,11 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheThresholdProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
-
 			}
 			return nil, err
 		}

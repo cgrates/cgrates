@@ -1,5 +1,5 @@
 #Tenant[0],ID[1],Address[2],Transport[3],Synchronous[4],ConnectAttempts[5],Reconnects[6],ConnectTimeout[7],ReplyTimeout[8],Tls[9],ClientKey[10],ClientCertificate[11],CaCertificate[12]
 cgrates.org,SELF,*internal,,false,1,3,"1m","2m",true,"key1","cert1","ca_cert1"
 cgrates.org,ALL,127.0.0.1:6012,*json,false,1,3,"1m","2m",true,"key2","cert2","ca_cert2"
-cgrates.org,ALL2,127.0.0.1:7012,*json,false,1,3,"1m","2m",true,"key3","cert3","ca_cert3",
+cgrates.org,ALL2,127.0.0.1:7012,*json,false,1,3,"1m","2m",true,"key3","cert3","ca_cert3"
 cgrates.org,NonexistingHost,127.0.0.1:10012,*json,false,1,3,"1m","2m",true,"key4","cert4","ca_cert4"

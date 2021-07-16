@@ -49,10 +49,19 @@ var (
 		testV1FIdxHResetStorDb,
 		testV1FIdxHLoadFromFolderTutorial,
 		testV1FIdxGetThresholdsIndexesHealth,
+		/*
 		testV1FIdxGetResourcesIndexesHealth,
 		testV1FIdxGetStatsIndexesHealth,
 		testV1FIdxGetRoutesIndexesHealth,
 		testV1FIdxGetChargersIndexesHealth,
+		testV1FIdxGetAttributesIndexesHealth,
+
+		testV1FIdxHdxInitDataDb,
+		testV1FIdxHResetStorDb,
+		testV1FIdxHLoadFromFolderDispatchers,
+		testV1FIdxHGetDispatchersIndexesHealth,
+
+		 */
 
 		testV1FIdxHStopEngine,
 	}
@@ -238,6 +247,24 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 		t.Errorf("UNexpected reply returned")
 	}
 
+	// check all the indexes for thresholds
+	expiIdx = []string{
+		"*string:*req.Account:1001:THD_ACNT_1001",
+		"*string:*req.Account:1004:TEST_PROFILE1",
+		"*prefix:*opts.Destination:+442:TEST_PROFILE1",
+		"*prefix:*opts.Destination:+554:TEST_PROFILE1",
+	}
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaThresholds,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expiIdx)
+		if !reflect.DeepEqual(expiIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expiIdx, result)
+		}
+	}
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
 	expRPly = &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
@@ -555,7 +582,6 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 		}
 	}
 
-	/*
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
@@ -584,8 +610,188 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 		t.Errorf("Unexpected reply returned")
 	}
 
-	 */
+	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetRoutesIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
 }
+
+func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
+	// Attributes.csv from tutorial tariffplan got lots of profiles, so we will not set another attribute for this test
+	// check all the indexes for attributes
+	// simpleauth context
+	expIdx := []string{
+		"*string:*req.Account:1001:ATTR_1001_SIMPLEAUTH",
+		"*string:*req.Account:1002:ATTR_1002_SIMPLEAUTH",
+		"*string:*req.Account:1003:ATTR_1003_SIMPLEAUTH",
+	}
+	var result []string
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaAttributes,
+		Context: "simpleauth",
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	//*sessions context
+	expIdx = []string{
+		"*string:*req.Account:1001:ATTR_1001_SESSIONAUTH",
+		"*string:*req.Account:1002:ATTR_1002_SESSIONAUTH",
+		"*string:*req.Account:1003:ATTR_1003_SESSIONAUTH",
+	}
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaAttributes,
+		Context: utils.MetaSessionS,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	// *any context tenant: cgrates.org
+	expIdx = []string{
+		"*string:*req.SubscriberId:1006:ATTR_ACC_ALIAS",
+	}
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaAttributes,
+		Context: utils.MetaAny,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	// *any context tenant: cgrates.com
+	expIdx = []string{
+		"*string:*req.SubscriberId:1006:ATTR_TNT_ALIAS",
+		"*string:*req.Account:1001:ATTR_TNT_1001",
+		"*string:*req.Account:testDiamInitWithSessionDisconnect:ATTR_TNT_DISC",
+		"*string:*req.SubscriberId:testDiamItEmulateTerminate:ATTR_ACC_EMULATE_TERMINATE",
+	}
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant: "cgrates.com",
+		ItemType: utils.MetaAttributes,
+		Context: utils.MetaAny,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
+	expRPly := &engine.FilterIHReply{
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes: map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	args := &engine.IndexHealthArgsWith3Ch{}
+	var rplyFl *engine.FilterIHReply
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetAttributesIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
+}
+
+func testV1FIdxHLoadFromFolderDispatchers(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "dispatchers")}
+	if err := tFIdxHRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
+	// *any context
+	expIdx := []string{
+		"*none:*any:*any:PING1",
+		"*string:*req.EventName:NonexistingHost:PING2",
+		"*string:*req.EventName:Event1:EVENT1",
+		"*string:*req.EventName:RoundRobin:EVENT2",
+		"*string:*req.EventName:Random:EVENT3",
+		"*string:*req.EventName:Broadcast:EVENT4",
+		"*string:*req.EventName:Internal:EVENT5",
+		"*string:*opts.*method:DispatcherSv1.GetProfilesForEvent:EVENT6",
+		"*string:*opts.EventType:LoadDispatcher:EVENT7",
+	}
+	var result []string
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Context: utils.MetaAny,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		sort.Strings(expIdx)
+		if !reflect.DeepEqual(expIdx, result) {
+			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+		}
+	}
+
+	// all indexes are set and points to their objects correctly
+	expRPly := &engine.FilterIHReply{
+		MissingIndexes: map[string][]string{},
+		BrokenIndexes: map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	args := &engine.IndexHealthArgsWith3Ch{}
+	var rplyFl *engine.FilterIHReply
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetDispatchersIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
+
+
+	var reply string
+	// removing a profile + their indexes
+	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveDispatcherProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID: "PING2",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils. OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
+	args = &engine.IndexHealthArgsWith3Ch{}
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetDispatchersIndexesHealth,
+		args, &rplyFl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFl, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
+	}
+}
+
+
 
 func testV1FIdxHStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
