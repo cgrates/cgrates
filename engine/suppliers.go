@@ -383,7 +383,7 @@ func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsag
 					fmt.Sprintf("<SupplierS> error: %s getting resource for ID : %s", err.Error(), resID))
 				continue
 			}
-			tUsage += res.totalUsage()
+			tUsage += res.TotalUsage()
 		}
 	}
 	return
