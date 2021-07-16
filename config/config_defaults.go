@@ -66,7 +66,21 @@ const CGRATES_CFG_JSON = `
 
 "rpc_conns": {
 	//"*localhost": {
-		//"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+		//"conns": [
+			{
+				"address": "127.0.0.1:2012", 
+				"transport":"*json",
+				"synchronous": false,
+				"connect_attempts": 5,
+				"reconnects": -1,
+				"connect_timeout": "1s",
+				"reply_timeout": "2s",
+				"TLS": false,
+				"client_key": "",
+				"client_certificate": "",
+				"ca_certificate": ""
+			}
+		],
 	//},
 },							// rpc connections definitions
 
