@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestNewAnalyzerService(t *testing.T) {
@@ -242,14 +243,25 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t1.Add(-24*time.Hour), t1.Add(-23*time.Hour)); err != nil {
 		t.Fatal(err)
 	}
+	if err = anz.logTrafic(3, utils.CoreSv1Status,
+		&utils.CGREvent{
+			APIOpts: map[string]interface{}{
+				utils.EventSource: utils.MetaEEs,
+			},
+		}, utils.Pong, nil,
+
+		rpcclient.BiRPCJSON, "127.0.0.1:5566", "127.0.0.1:2013",
+		t1.Add(-11*time.Hour), t1.Add(-10*time.Hour-30*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
 	reply := []map[string]interface{}{}
-	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: utils.CoreSv1Ping}, &reply); err != nil {
+	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: `"` + utils.CoreSv1Ping + `"`}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
 	}
 	reply = []map[string]interface{}{}
-	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: "RequestMethod:" + utils.CoreSv1Ping}, &reply); err != nil {
+	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: "RequestMethod:" + `"` + utils.CoreSv1Ping + `"`}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {
 		t.Errorf("Expected 4 hits received: %v", len(reply))
@@ -323,6 +335,26 @@ func TestAnalyzersV1Search(t *testing.T) {
 	} else if !reflect.DeepEqual(expRply, reply) {
 		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
 	}
+	expRply = []map[string]interface{}{{
+		"RequestDestination": "127.0.0.1:2013",
+		"RequestDuration":    "30m0s",
+		"RequestEncoding":    "*birpc_json",
+		"RequestID":          3.,
+		"RequestMethod":      "CoreSv1.Status",
+		"RequestParams":      json.RawMessage(`{"Tenant":"","ID":"","Time":null,"Event":null,"APIOpts":{"EventSource":"*ees"}}`),
+		"Reply":              json.RawMessage(`"Pong"`),
+		"RequestSource":      "127.0.0.1:5566",
+		"RequestStartTime":   t1.Add(-11 * time.Hour).UTC().Format(time.RFC3339),
+		"ReplyError":         nil,
+	}}
+	reply = []map[string]interface{}{}
+	if err = anz.V1StringQuery(&QueryArgs{
+		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*ees"},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
 
 	expRply = []map[string]interface{}{}
 	reply = []map[string]interface{}{}
@@ -337,6 +369,13 @@ func TestAnalyzersV1Search(t *testing.T) {
 	if err = anz.V1StringQuery(&QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
 		ContentFilters: []string{"*notstring:~*req.APIOpts.EventSource:*attributes"},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expRply, reply) {
+		t.Errorf("Expected %s received: %s", utils.ToJSON(expRply), utils.ToJSON(reply))
+	}
+	if err = anz.V1StringQuery(&QueryArgs{
+		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*sessions"},
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
