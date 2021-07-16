@@ -757,7 +757,7 @@ func (bc Balances) HasBalance(balance *Balance) bool {
 	return false
 }
 
-func (bc Balances) SaveDirtyBalances(acc *Account) {
+func (bc Balances) SaveDirtyBalances(acc *Account, initBal map[string]float64) {
 	savedAccounts := utils.StringSet{}
 	for _, b := range bc {
 		if b.account == nil || !b.dirty || savedAccounts.Has(b.account.ID) {
@@ -767,7 +767,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 		if b.account != acc {
 			dm.SetAccount(b.account)
 		}
-		b.account.Publish()
+		b.account.Publish(initBal)
 	}
 }
 

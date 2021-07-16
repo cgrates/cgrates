@@ -376,6 +376,9 @@ func (acc *Account) getAlldBalancesForPrefix(destination, category,
 func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	usefulUnitBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, cd.TimeStart)
 	usefulMoneyBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MetaMonetary, cd.TimeStart)
+	// intiValues map[UUID]float64 and pass them to publish updating initial value
+	initUnitBal, initMoneyBal := balancesValues(usefulUnitBalances), balancesValues(usefulMoneyBalances)
+
 	var leftCC *CallCost
 	cc = cd.CreateCallCost()
 	var hadBalanceSubj bool
@@ -578,8 +581,8 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 COMMIT:
 	if !dryRun {
 		// save darty shared balances
-		usefulMoneyBalances.SaveDirtyBalances(acc)
-		usefulUnitBalances.SaveDirtyBalances(acc)
+		usefulMoneyBalances.SaveDirtyBalances(acc, initMoneyBal)
+		usefulUnitBalances.SaveDirtyBalances(acc, initUnitBal)
 	}
 	//log.Printf("Final CC: %+v", cc)
 	return
@@ -1091,8 +1094,11 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 }
 
 // Publish sends the account to stats and threshold
-func (acc *Account) Publish() {
+func (acc *Account) Publish(initBal map[string]float64) {
 	acntSummary := acc.AsAccountSummary()
+	for _, currentBal := range acntSummary.BalanceSummaries {
+		currentBal.Initial = initBal[currentBal.UUID]
+	}
 	cgrEv := &utils.CGREvent{
 		Tenant: acntSummary.Tenant,
 		ID:     utils.GenUUID(),
@@ -1120,7 +1126,14 @@ func (acc *Account) Publish() {
 				fmt.Sprintf("<AccountS> error: %s processing account event %+v with StatS.", err.Error(), cgrEv))
 		}
 	}
+}
 
+func balancesValues(bals Balances) (init map[string]float64) {
+	init = make(map[string]float64)
+	for _, bal := range bals {
+		init[bal.Uuid] = bal.Value
+	}
+	return
 }
 
 // NewAccountSummaryFromJSON creates a new AcccountSummary from a json string
