@@ -711,6 +711,7 @@ const (
 	MetaString2Hex          = "*string2hex"
 	MetaUnixTime            = "*unixtime"
 	MetaLen                 = "*len"
+	MetaSlice               = "*slice"
 	MetaSIPURIMethod        = "*sipuri_method"
 	MetaSIPURIHost          = "*sipuri_host"
 	MetaSIPURIUser          = "*sipuri_user"

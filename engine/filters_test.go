@@ -545,6 +545,15 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
+
+	pEv = utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.AccountField: "[1,2,3]"}}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*eq:~*req.Account{*slice&*len}:3"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+
 }
 
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {

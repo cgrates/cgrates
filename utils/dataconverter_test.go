@@ -1031,8 +1031,104 @@ func TestLenTimeConverter3(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
 	}
 
-	expected := 0
+	expected := 2
+	if rcv, err := cnv.Convert([]int{0, 0}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
 	if rcv, err := cnv.Convert("[]"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	expected = 0
+	if rcv, err := cnv.Convert([]string{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]interface{}{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]bool{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]int{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]int8{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]int16{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]int32{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]int64{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]uint{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]uint8{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]uint16{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]uint32{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]uint64{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]uintptr{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]float32{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]float64{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]complex64{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert([]complex128{}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
@@ -1061,5 +1157,28 @@ func TestFloat64Converter(t *testing.T) {
 		t.Error("Expected error")
 	} else if !reflect.DeepEqual(expected2, err.Error()) {
 		t.Errorf("Expecting: %+v, received: %+v", expected2, err.Error())
+	}
+}
+
+func TestSliceConverter(t *testing.T) {
+	exp := new(SliceConverter)
+	cnv, err := NewDataConverter(MetaSlice)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+	expected := []string{"A", "B"}
+	if rcv, err := cnv.Convert([]string{"A", "B"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	expected2 := []interface{}{"A", "B"}
+	if rcv, err := cnv.Convert(`["A","B"]`); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected2, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
