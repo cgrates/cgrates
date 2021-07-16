@@ -1285,6 +1285,8 @@ const (
 	APIerSv1GetStatsIndexesHealth             = "APIerSv1.GetStatsIndexesHealth"
 	APIerSv1GetRoutesIndexesHealth            = "APIerSv1.GetRoutesIndexesHealth"
 	APIerSv1GetChargersIndexesHealth          = "APIerSv1.GetChargersIndexesHealth"
+	APIerSv1GetAttributesIndexesHealth        = "APIerSv1.GetAttributesIndexesHealth"
+	APIerSv1GetDispatchersIndexesHealth       = "APIerSv1.GetDispatchersIndexesHealth"
 	APIerSv1Ping                              = "APIerSv1.Ping"
 	APIerSv1SetDispatcherProfile              = "APIerSv1.SetDispatcherProfile"
 	APIerSv1GetDispatcherProfile              = "APIerSv1.GetDispatcherProfile"
