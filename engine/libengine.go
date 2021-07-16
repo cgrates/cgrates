@@ -76,11 +76,12 @@ func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, cer
 	}
 	if cfg.Address == rpcclient.InternalRPC ||
 		cfg.Address == rpcclient.BiRPCInternal {
-		client, err = rpcclient.NewRPCClient(ctx, "", "", cfg.TLS, keyPath, certPath, caPath, connAttempts,
-			reconnects, connectTimeout, replyTimeout, cfg.Address, internalConnChan, lazyConnect, biRPCClient)
+		client, err = rpcclient.NewRPCClient(ctx, "", "", cfg.TLS, utils.FirstNonEmpty(cfg.ClientKey, keyPath), utils.FirstNonEmpty(cfg.ClientCertificate, certPath), utils.FirstNonEmpty(cfg.CaCertificate, caPath), utils.FirstIntNonEmpty(cfg.ConnectAttempts, connAttempts),
+			utils.FirstIntNonEmpty(cfg.Reconnects, reconnects), utils.FirstDurationNonEmpty(cfg.ConnectTimeout, connectTimeout), utils.FirstDurationNonEmpty(cfg.ReplyTimeout, replyTimeout), cfg.Address, internalConnChan, lazyConnect, biRPCClient)
 	} else {
-		client, err = rpcclient.NewRPCClient(ctx, utils.TCP, cfg.Address, cfg.TLS, keyPath, certPath, caPath,
-			connAttempts, reconnects, connectTimeout, replyTimeout,
+		client, err = rpcclient.NewRPCClient(ctx, utils.TCP, cfg.Address, cfg.TLS, utils.FirstNonEmpty(cfg.ClientKey, keyPath), utils.FirstNonEmpty(cfg.ClientCertificate, certPath), utils.FirstNonEmpty(cfg.CaCertificate, caPath),
+			utils.FirstIntNonEmpty(cfg.ConnectAttempts, connAttempts),
+			utils.FirstIntNonEmpty(cfg.Reconnects, reconnects), utils.FirstDurationNonEmpty(cfg.ConnectTimeout, connectTimeout), utils.FirstDurationNonEmpty(cfg.ReplyTimeout, replyTimeout),
 			utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect, biRPCClient)
 	}
 	if connID != utils.EmptyString &&
