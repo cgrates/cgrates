@@ -117,6 +117,24 @@ func FirstNonEmpty(vals ...string) string {
 	return EmptyString
 }
 
+func FirstIntNonEmpty(vals ...int) int {
+	for _, val := range vals {
+		if val != 0 {
+			return val
+		}
+	}
+	return 0
+}
+
+func FirstDurationNonEmpty(vals ...time.Duration) time.Duration {
+	for _, val := range vals {
+		if val != 0 {
+			return val
+		}
+	}
+	return 0
+}
+
 // Sha1 generate the SHA1 hash from any string
 // the order of string matters
 func Sha1(attrs ...string) string {
