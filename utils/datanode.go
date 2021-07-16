@@ -43,7 +43,7 @@ func CompilePathSlice(spath []string) (path []string) {
 
 // CompilePath returns the path as a slice
 func CompilePath(spath string) (path []string) {
-	return CompilePathSlice(strings.Split(spath, NestingSep))
+	return CompilePathSlice(SplitPath(spath, NestingSep[0], -1))
 }
 
 // NewDataNode using the compiled path creates a node

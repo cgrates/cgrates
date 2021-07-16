@@ -1790,3 +1790,39 @@ func TestTenantIDConcatenated(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", rcvExpect, concTnt)
 	}
 }
+
+func TestCoreUtilsSplitPath(t *testing.T) {
+	exp := []string{"*string", "~*req.Account", "1001"}
+	if rcv := SplitPath("*string:~*req.Account:1001",
+		InInFieldSep[0], -1); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	exp = []string{"~*req", "Account"}
+	if rcv := SplitPath("~*req.Account", NestingSep[0], -1); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	exp = []string{"*exists", "~*vars.*processedProfileIDs[cgrates.org:ATTR]", ""}
+	if rcv := SplitPath("*exists:~*vars.*processedProfileIDs[cgrates.org:ATTR]:",
+		InInFieldSep[0], -1); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	exp = []string{"~*vars", "*processedProfileIDs[cgrates.org:ATTR]"}
+	if rcv := SplitPath("~*vars.*processedProfileIDs[cgrates.org:ATTR]",
+		NestingSep[0], -1); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	exp = []string{"*notexists", "~*vars.*processedProfileIDs[<~*vars.apTenantID>]", ""}
+	if rcv := SplitPath("*notexists:~*vars.*processedProfileIDs[<~*vars.apTenantID>]:", InInFieldSep[0], -1); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	exp = []string{"~*vars", "*processedProfileIDs[<~*vars.apTenantID>]"}
+	if rcv := SplitPath("~*vars.*processedProfileIDs[<~*vars.apTenantID>]",
+		NestingSep[0], -1); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
