@@ -90,6 +90,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(UnixTimeConverter), nil
 	case params == MetaLen:
 		return new(LengthConverter), nil
+	case params == MetaSlice:
+		return new(SliceConverter), nil
 	case params == MetaFloat64:
 		return new(Float64Converter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
@@ -452,20 +454,91 @@ func (rC *RandomConverter) Convert(in interface{}) (
 	}
 }
 
-// LengthConverter converts the interface in the unix time
+// LengthConverter returns the lenght of the slice
 type LengthConverter struct{}
 
 // Convert implements DataConverter interface
 func (LengthConverter) Convert(in interface{}) (out interface{}, err error) {
-	src := IfaceAsString(in)
-	if strings.HasPrefix(src, IdxStart) &&
-		strings.HasSuffix(src, IdxEnd) { // it has a similar structure to a json marshaled slice
-		var slice []interface{}
-		if err := json.Unmarshal([]byte(src), &slice); err == nil { // no error when unmarshal safe to asume that this is a slice
-			return len(slice), nil
-		}
+	switch val := in.(type) {
+	case string:
+		return len(val), nil
+	case []string:
+		return len(val), nil
+	case []interface{}:
+		return len(val), nil
+	case []bool:
+		return len(val), nil
+	case []int:
+		return len(val), nil
+	case []int8:
+		return len(val), nil
+	case []int16:
+		return len(val), nil
+	case []int32:
+		return len(val), nil
+	case []int64:
+		return len(val), nil
+	case []uint:
+		return len(val), nil
+	case []uint8:
+		return len(val), nil
+	case []uint16:
+		return len(val), nil
+	case []uint32:
+		return len(val), nil
+	case []uint64:
+		return len(val), nil
+	case []uintptr:
+		return len(val), nil
+	case []float32:
+		return len(val), nil
+	case []float64:
+		return len(val), nil
+	case []complex64:
+		return len(val), nil
+	case []complex128:
+		return len(val), nil
+	default:
+		return len(IfaceAsString(val)), nil
 	}
-	return len(src), nil
+}
+
+// SliceConverter converts the interface in the unix time
+type SliceConverter struct{}
+
+// Convert implements DataConverter interface
+func (SliceConverter) Convert(in interface{}) (out interface{}, err error) {
+	switch val := in.(type) {
+	case []string,
+		[]interface{},
+		[]bool,
+		[]int,
+		[]int8,
+		[]int16,
+		[]int32,
+		[]int64,
+		[]uint,
+		[]uint8,
+		[]uint16,
+		[]uint32,
+		[]uint64,
+		[]uintptr,
+		[]float32,
+		[]float64,
+		[]complex64,
+		[]complex128:
+		return val, nil
+	default:
+		src := IfaceAsString(in)
+		if strings.HasPrefix(src, IdxStart) &&
+			strings.HasSuffix(src, IdxEnd) { // it has a similar structure to a json marshaled slice
+			var slice []interface{}
+			if err := json.Unmarshal([]byte(src), &slice); err == nil { // no error when unmarshal safe to asume that this is a slice
+				return slice, nil
+			}
+		}
+		return src, nil
+	}
 }
 
 type Float64Converter struct{}
