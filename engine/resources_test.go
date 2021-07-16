@@ -215,7 +215,7 @@ func TestResourceUsedUnits(t *testing.T) {
 		ru1.ID: ru1,
 	}
 	r1.tUsage = nil
-	if usedUnits := r1.totalUsage(); usedUnits != 1 {
+	if usedUnits := r1.TotalUsage(); usedUnits != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, usedUnits)
 	}
 }
@@ -261,7 +261,7 @@ func TestResourceClearUsage(t *testing.T) {
 	if len(r1.Usages) != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, len(r1.Usages))
 	}
-	if r1.totalUsage() != 0 {
+	if r1.TotalUsage() != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, r1.tUsage)
 	}
 	if err := r2.clearUsage(ru2.ID); err != nil {
