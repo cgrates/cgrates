@@ -3385,7 +3385,7 @@ func TestResourcesStoreResourceNotDirty(t *testing.T) {
 		dirty: utils.BoolPointer(false),
 	}
 
-	err := rS.StoreResource(r)
+	err := rS.storeResource(r)
 
 	if err != nil {
 		t.Error(err)
@@ -3401,7 +3401,7 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 		dirty: utils.BoolPointer(true),
 	}
 
-	err := rS.StoreResource(r)
+	err := rS.storeResource(r)
 
 	if err != nil {
 		t.Error(err)
@@ -3446,7 +3446,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 
 	explog := `CGRateS <> [WARNING] <ResourceS> failed caching Resource with ID: cgrates.org:RES1, error: NOT_IMPLEMENTED
 `
-	if err := rS.StoreResource(r); err == nil ||
+	if err := rS.storeResource(r); err == nil ||
 		err.Error() != utils.ErrNotImplemented.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
 	}

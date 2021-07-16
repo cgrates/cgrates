@@ -366,7 +366,7 @@ func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage f
 					fmt.Sprintf("<%s> error: %s getting resource for ID : %s", utils.RouteS, err.Error(), resID))
 				continue
 			}
-			tUsage += res.totalUsage()
+			tUsage += res.TotalUsage()
 		}
 	}
 	return
