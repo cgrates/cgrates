@@ -168,6 +168,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [RSRParsers] Added *len dataconverter  
   * [ERs] Added *nats_json_map
   * [EEs] Added *nats_json_map
+  * [RSRParsers] Added *slice dataconverter  
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
