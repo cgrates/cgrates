@@ -225,7 +225,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 		MaxUsage: (*time.Duration)(utils.Int64Pointer(60000000000)),
 	}
 	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
-		t.Errorf("Expecting : %T, received: %T", utils.ToJSON(&expected), utils.ToJSON(&rply))
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
 	}
 }
 
