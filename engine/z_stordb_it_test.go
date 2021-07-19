@@ -226,7 +226,7 @@ func testStorDBitCRUDTPDispatcherHosts(t *testing.T) {
 		{
 			TPid:   "TP_ID",
 			Tenant: "cgrates.org",
-			ID:     "ALL1",
+			ID:     "ALL",
 			Conn: &utils.TPDispatcherHostConn{
 				Address:   "127.0.0.1:2012",
 				Transport: utils.MetaJSON,
