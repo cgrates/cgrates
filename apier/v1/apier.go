@@ -1058,28 +1058,29 @@ type AttrRemoveRatingProfile struct {
 
 func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 	result = utils.META_OUT + utils.CONCATENATED_KEY_SEP
-	if arrp.Tenant != "" && arrp.Tenant != utils.ANY {
+	if arrp.Tenant != utils.EmptyString && arrp.Tenant != utils.ANY {
 		result += arrp.Tenant + utils.CONCATENATED_KEY_SEP
 	} else {
 		return
 	}
 
-	if arrp.Category != "" && arrp.Category != utils.ANY {
+	if arrp.Category != utils.EmptyString && arrp.Category != utils.ANY {
 		result += arrp.Category + utils.CONCATENATED_KEY_SEP
 	} else {
 		return
 	}
-	if arrp.Subject != "" && arrp.Subject != utils.ANY {
+	if arrp.Subject != utils.EmptyString {
 		result += arrp.Subject
 	}
 	return
 }
 
 func (apiv1 *APIerSv1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
-	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "")) ||
-		(attr.Category != "" && attr.Tenant == "") {
+	if (attr.Subject != utils.EmptyString && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "")) ||
+		(attr.Category != utils.EmptyString && attr.Tenant == utils.EmptyString) {
 		return utils.ErrMandatoryIeMissing
 	}
+	utils.Logger.Debug(fmt.Sprintf("%v", attr.GetId()))
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		return 0, apiv1.DataManager.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")

@@ -2074,3 +2074,16 @@ func testApierStopEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestAttrRemoveRatingProfileGetID(t *testing.T) {
+	attr := &AttrRemoveRatingProfile{
+		Tenant: "cgrates.org",
+		Category: "sms",
+		Subject: "*any",
+	}
+	expRes := "*out:cgrates.org:sms:*any"
+	if rply := attr.GetId(); rply != expRes {
+		t.Errorf("Expected %+v, received %v", expRes, rply)
+	}
+}
+

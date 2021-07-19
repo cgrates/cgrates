@@ -22,6 +22,7 @@ package v1
 
 import (
 	"net/rpc"
+	"os/exec"
 	"path"
 	"reflect"
 	"sort"
@@ -57,6 +58,14 @@ var (
 		testAPIerGetRatingPlanCost3,
 		testAPIerGetActionPlanIDs,
 		testAPIerGetRatingPlanIDs,
+		testAPIerKillEngine,
+
+		testAPIerInitDataDb,
+		testAPIerResetStorDb,
+		testAPIerStartEngine,
+		testAPIerRPCConn,
+		testAPIerSleep,
+		testApierSetAndRemoveRatingProfileAnySubject,
 		testAPIerKillEngine,
 	}
 )
@@ -316,6 +325,85 @@ func testAPIerGetRatingPlanIDs(t *testing.T) {
 		}
 	}
 }
+
+func testAPIerSleep(t *testing.T) {
+	var rply string
+	if err := apierRPC.Call(utils.CoreSv1Sleep,
+		&DurationArgs{DurationTime: time.Duration(100 * time.Millisecond)},
+		&rply); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
+	var rply string
+	if err := apierRPC.Call(utils.CoreSv1Sleep,
+		&DurationArgs{DurationTime: time.Duration(100 * time.Millisecond)},
+		&rply); err != nil {
+		t.Error(err)
+		return
+	}
+
+	loader := exec.Command("cgr-loader", "-config_path", apierCfgPath, "-path", path.Join(*dataDir, "tariffplans", "tutorial"))
+	if err := loader.Run(); err != nil {
+		t.Error(err)
+	}
+
+	rpf := &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "SUPPLIER1",
+		RatingPlanActivations: []*utils.TPRatingActivation{
+			{
+				ActivationTime: "2018-01-01T00:00:00Z",
+				RatingPlanId:   "RP_SMS",
+			},
+		},
+		Overwrite: true,
+	}
+	var reply string
+	if err := apierRPC.Call(utils.APIerSv1SetRatingProfile, rpf, &reply); err != nil {
+		t.Error("Got error on APIerSv1.SetRatingProfile: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling APIerSv1.SetRatingProfile got reply: ", reply)
+	}
+
+	expected := engine.RatingProfile{
+		Id: "*out:cgrates.org:call:SUPPLIER1",
+		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: time.Date(2018, 1, 1, 0, 0, 0,0, time.UTC),
+				RatingPlanId:   "RP_SMS",
+			},
+		},
+	}
+	attrGetRatingPlan := &utils.AttrGetRatingProfile{
+		Tenant: "cgrates.org", Category: "call", Subject: "SUPPLIER1"}
+	var rpl engine.RatingProfile
+	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
+		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
+	}
+
+	if err := apierRPC.Call(utils.APIerSv1RemoveRatingProfile, &AttrRemoveRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: utils.CALL,
+		Subject:  utils.ANY,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected: %s, received: %s ", utils.OK, reply)
+	}
+
+	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
+		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
+	}
+}
+
 
 func testAPIerKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
