@@ -349,7 +349,7 @@ func (dm *DataManager) GetDestination(key string, cacheRead, cacheWrite bool, tr
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheDestinations, key, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -477,7 +477,7 @@ func (dm *DataManager) GetReverseDestination(prefix string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -646,7 +646,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 			}
 			if err != nil {
 				err = utils.CastRPCErr(err)
-				if err == utils.ErrNotFound && cacheWrite {
+				if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 					if errCh := Cache.Set(utils.CacheFilters, tntID, nil, nil,
 						cacheCommit(transactionID), transactionID); errCh != nil {
 						return nil, errCh
@@ -774,7 +774,7 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheThresholds, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -975,7 +975,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id string, withIndex bool)
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
-	return dm.RemoveThreshold(tenant, id) // remove the thrshold
+	return dm.RemoveThreshold(tenant, id) // remove the threshold
 }
 
 // GetStatQueue retrieves a StatQueue from dataDB
@@ -1016,7 +1016,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 			}
 		}
 		if err != nil {
-			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite {
+			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheStatQueues, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1115,7 +1115,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheStatQueueProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1385,7 +1385,7 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheResources, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1474,7 +1474,7 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheResourceProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1922,7 +1922,7 @@ func (dm *DataManager) GetActionPlan(key string, cacheRead, cacheWrite bool, tra
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheActionPlans, key, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -2059,7 +2059,7 @@ func (dm *DataManager) GetAccountActionPlans(acntID string, cacheRead, cacheWrit
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -2389,7 +2389,7 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheRouteProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -2523,7 +2523,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 			}
 			if err != nil {
 				err = utils.CastRPCErr(err)
-				if err == utils.ErrNotFound && cacheWrite {
+				if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 					if errCh := Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
 						cacheCommit(transactionID), transactionID); errCh != nil {
 						return nil, errCh
@@ -2658,7 +2658,7 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheChargerProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -2785,7 +2785,7 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheDispatcherProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -2916,7 +2916,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(utils.CacheDispatcherHosts, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -3004,7 +3004,7 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				for key := range loadIDs {
 					if errCh := Cache.Set(utils.CacheLoadIDs, key, nil, nil,
 						cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
@@ -3101,12 +3101,10 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound {
-				if cacheWrite && idxKey != utils.EmptyString {
-					if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, []string{tntCtx},
-						true, utils.NonTransactional); errCh != nil {
-						return nil, errCh
-					}
+			if err == utils.ErrNotFound && cacheWrite && idxKey != utils.EmptyString && dm.dataDB.GetStorageType() != utils.INTERNAL {
+				if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, []string{tntCtx},
+				true, utils.NonTransactional); errCh != nil {
+					return nil, errCh
 				}
 			}
 			return nil, err

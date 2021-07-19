@@ -49,7 +49,6 @@ var (
 		testV1FIdxHResetStorDb,
 		testV1FIdxHLoadFromFolderTutorial,
 		testV1FIdxGetThresholdsIndexesHealth,
-		/*
 		testV1FIdxGetResourcesIndexesHealth,
 		testV1FIdxGetStatsIndexesHealth,
 		testV1FIdxGetRoutesIndexesHealth,
@@ -60,8 +59,6 @@ var (
 		testV1FIdxHResetStorDb,
 		testV1FIdxHLoadFromFolderDispatchers,
 		testV1FIdxHGetDispatchersIndexesHealth,
-
-		 */
 
 		testV1FIdxHStopEngine,
 	}
@@ -123,6 +120,13 @@ func testV1FIdxHRpcConn(t *testing.T) {
 
 func testV1FIdxHLoadFromFolderTutorial2(t *testing.T) {
 	var reply string
+	if err := tFIdxHRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+		CacheIDs: nil,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Reply: ", reply)
+	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial2")}
 	if err := tFIdxHRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
@@ -166,6 +170,13 @@ func testV1FIdxHReverseDestinationHealth(t *testing.T) {
 
 func testV1FIdxHLoadFromFolderTutorial(t *testing.T) {
 	var reply string
+	if err := tFIdxHRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+		CacheIDs: nil,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Reply: ", reply)
+	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := tFIdxHRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)

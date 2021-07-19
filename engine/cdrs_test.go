@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-
 package engine
 
 import (
@@ -52,8 +51,8 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		*rply = AttrSProcessEventReply{
 			AlteredFields: []string{utils.AccountField},
 			CGREvent: &utils.CGREvent{
-				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
-				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+				Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 				Event: map[string]interface{}{
 					"Account":     "1002",
 					"Category":    "call",
@@ -75,10 +74,10 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 	db := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
-		cgrCfg: cfg,
+		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb: NewInternalDB(nil, nil, true),
-		dm: dm,
+		cdrDb:   NewInternalDB(nil, nil, true),
+		dm:      dm,
 	}
 	cdr := &CDRWithAPIOpts{ // no tenant, take the default
 		CDR: &CDR{
@@ -131,24 +130,24 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 	db := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
-		cgrCfg: cfg,
+		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb: NewInternalDB(nil, nil, true),
-		dm: dm,
+		cdrDb:   NewInternalDB(nil, nil, true),
+		dm:      dm,
 	}
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
 		CGREvent: utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]interface{}{
-				utils.CGRID:       "test1",
-				utils.RunID:       utils.MetaDefault,
-				utils.OriginID:    "testV1CDRsRefundOutOfSessionCost",
-				utils.RequestType: utils.MetaPrepaid,
-				utils.AccountField:     "testV1CDRsRefundOutOfSessionCost",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-				utils.Usage:       123 * time.Minute,
+				utils.CGRID:        "test1",
+				utils.RunID:        utils.MetaDefault,
+				utils.OriginID:     "testV1CDRsRefundOutOfSessionCost",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "testV1CDRsRefundOutOfSessionCost",
+				utils.Destination:  "+4986517174963",
+				utils.AnswerTime:   time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:        123 * time.Minute,
 			},
 		},
 	}
@@ -185,10 +184,10 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 	db := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
-		cgrCfg: cfg,
+		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb: NewInternalDB(nil, nil, true),
-		dm: dm,
+		cdrDb:   NewInternalDB(nil, nil, true),
+		dm:      dm,
 	}
 
 	args := &ExternalCDRWithAPIOpts{
@@ -215,4 +214,3 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 		t.Error(err)
 	}
 }
-
