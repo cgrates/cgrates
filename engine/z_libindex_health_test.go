@@ -303,8 +303,8 @@ func TestHealthFilter(t *testing.T) {
 
 	if err := dm.SetIndexes(utils.CacheAttributeFilterIndexes, "cgrates.org:*any",
 		map[string]utils.StringSet{"*string:*req.Account:1002": {
-		"ATTR1": {},
-		"ATTR2": {},
+			"ATTR1": {},
+			"ATTR2": {},
 		}},
 		true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
