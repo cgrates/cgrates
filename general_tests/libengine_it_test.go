@@ -95,29 +95,32 @@ func testLibengITStartEngine(t *testing.T) {
 func testLibengITRPCConnection(t *testing.T) {
 	cgrCfg := &config.RemoteHost{
 		ID:              "a4f3f",
-		Address:         "localhost:6012",
+		Address:         "localhost:2012",
 		Transport:       "*json",
 		ConnectAttempts: 2,
 		Reconnects:      5,
 		ConnectTimeout:  1 * time.Second,
 		ReplyTimeout:    25 * time.Millisecond,
 		TLS:             false,
-		// ClientKey:       "key1",
 	}
-	cM := engine.NewConnManager(config.NewDefaultCGRConfig(), nil)
 	args := &utils.DurationArgs{
 		Duration: 50 * time.Millisecond,
 		APIOpts:  make(map[string]interface{}),
 		Tenant:   "cgrates.org",
 	}
 	var reply string
-	cM.Call([]string{"a4f3f"}, nil, utils.CoreSv1Sleep, args, &reply)
-	_, err := engine.NewRPCConnection(cgrCfg, "", "", "",
+	conn, err := engine.NewRPCConnection(cgrCfg, "", "", "",
 		cgrCfg.ConnectAttempts, cgrCfg.Reconnects, cgrCfg.ConnectTimeout, cgrCfg.ReplyTimeout, nil, false, nil, "*localhost",
 		"a4f3f", new(ltcache.Cache))
 	if err != nil {
 		t.Error(err)
 	}
+	//We check if we get a reply timeout error when calling a sleep bigger than the reply timeout from connection config.
+	errExpect := "REPLY_TIMEOUT"
+	if err := conn.Call(utils.CoreSv1Sleep, args, &reply); err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+
 }
 
 func testLibengITStopEngine(t *testing.T) {
