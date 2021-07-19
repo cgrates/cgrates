@@ -175,9 +175,9 @@ func (gl *GuardianLocker) GuardIDs(refID string, timeout time.Duration, lkIDs ..
 }
 
 // UnguardIDs attempts to unlock a set of locks based on their reference ID received on lock
-func (gl *GuardianLocker) UnguardIDs(refID string) (_ []string) {
-	if refID == "" {
-		return
+func (gl *GuardianLocker) UnguardIDs(refID string) []string {
+	if refID != "" {
+		return gl.unlockWithReference(refID)
 	}
-	return gl.unlockWithReference(refID)
+	return nil
 }
