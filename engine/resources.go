@@ -260,7 +260,7 @@ func (rs Resources) resIDsMp() (mp utils.StringSet) {
 	return mp
 }
 
-func (rs Resources) tenatIDs() []string {
+func (rs Resources) tenantIDs() []string {
 	ids := make([]string, len(rs))
 	for i, r := range rs {
 		ids[i] = r.TenantID()
@@ -283,7 +283,7 @@ func (rs Resources) allocateResource(ctx *context.Context, ru *ResourceUsage, dr
 	if len(rs) == 0 {
 		return "", utils.ErrResourceUnavailable
 	}
-	lockIDs := utils.PrefixSliceItems(rs.tenatIDs(), utils.ResourcesPrefix)
+	lockIDs := utils.PrefixSliceItems(utils.ResourcesPrefix, rs.tenantIDs())
 	guardian.Guardian.Guard(ctx, func(_ *context.Context) (_ error) {
 		// Simulate resource usage
 		for _, r := range rs {
@@ -493,7 +493,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ctx *context.Context, tnt s
 			return
 		}
 	}
-	lockIDs := utils.PrefixSliceItems(rs.IDs(), utils.ResourcesPrefix)
+	lockIDs := utils.PrefixSliceItems(utils.ResourcesPrefix, rs.IDs())
 	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 		for resName := range rIDs {
 			var rPrf *ResourceProfile

@@ -37,10 +37,12 @@ func SliceHasMember(ss []string, s string) bool {
 }
 
 // PrefixSliceItems iterates through slice and add a prefix before every element
-func PrefixSliceItems(slc []string, prfx string) (out []string) {
-	out = make([]string, len(slc))
-	for i, itm := range slc {
-		out[i] = prfx + itm
+func PrefixSliceItems(prfx string, slc []string) (out []string) {
+	out = make([]string, 0, len(slc))
+	for _, itm := range slc {
+		if itm != EmptyString {
+			out = append(out, prfx+itm)
+		}
 	}
 	return
 }
