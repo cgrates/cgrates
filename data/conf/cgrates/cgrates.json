@@ -289,7 +289,7 @@
 // 			"opts": {
 // 				// Partial
 // 				// "partialPath": "/",							// the path were the partial events will be sent
-// 				// "partialCacheAction": "*none",				// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
+// 				"partialCacheAction": "*none",					// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
 // 				"partialOrderField": "~*req.AnswerTime",		// the field after what the events are order when merged
 // 				// "partialcsvFieldSeparator": ","				// separator used when dumping the fields
 				
@@ -354,6 +354,27 @@
 // 				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
 				
 // 				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
+
+// 				// nats
+// 				// "natsJetStream": false,						// controls if the nats reader uses the JetStream
+// 				// "natsConsumerName": "cgrates",				// in case of JetStream the name of the consumer
+// 				"natsSubject": "cgrates_cdrs",					// the subject from were the events are read
+// 				// "natsQueueID": "",							// the queue id the consumer listen to
+// 				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
+// 				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+// 				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
+// 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
+// 				// "natsClientKey": "",							// the path to a client key( used by tls)
+// 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
+
+// 				// "natsJetStreamProcessed": false,				// controls if the nats poster uses the JetStream
+// 				// "natsSubjectProcessed": "cgrates_cdrs",		// the subject were the events are posted
+// 				// "natsJWTFileProcessed": "",					// the path to the JWT file( can be the chained file or the user file)
+// 				// "natsSeedFileProcessed": "",					// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+// 				// "natsCertificateAuthorityProcessed": "",		// the path to a custom certificate authority file( used by tls)
+// 				// "natsClientCertificateProcessed": "",		// the path to a client certificate( used by tls)
+// 				// "natsClientKeyProcessed": "",				// the path to a client key( used by tls)
+// 				// "natsJetStreamMaxWaitProcessed": "5s	",		// the maximum amount of time to wait for a response
 // 			},
 // 			"tenant": "",										// tenant used by import
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -444,6 +465,15 @@
 // 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
 // 				// "s3FolderPath": "",							// S3FolderPath 
 
+// 				// Nats
+// 				// "natsJetStream": false,						// controls if the nats poster uses the JetStream
+// 				// "natsSubject": "cgrates_cdrs",				// the subject were the events are exported
+// 				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
+// 				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+// 				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
+// 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
+// 				// "natsClientKey": "",							// the path to a client key( used by tls)
+// 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
 // 			},													// extra options for exporter
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 // 			"filters": [],										// limit parsing based on the filters
@@ -679,6 +709,17 @@
 // 		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed TPs will be moved
 // 		"data":[											// data profiles to load
 // 			{
+// 				"type": "*filters",						// data source type
+// 				"file_name": "Filters.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+// 					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.2"},
+// 					{"tag": "Element", "path": "Element", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Values", "path": "Values", "type": "*variable", "value": "~*req.4"},
+// 				],
+// 			},
+// 			{
 // 				"type": "*attributes",						// data source type
 // 				"file_name": "Attributes.csv",				// file name in the tp_in_dir
 // 				"fields": [
@@ -691,17 +732,6 @@
 // 					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.6"},
 // 					{"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.7"},
 // 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.8"},
-// 				],
-// 			},
-// 			{
-// 				"type": "*filters",						// data source type
-// 				"file_name": "Filters.csv",				// file name in the tp_in_dir
-// 				"fields": [
-// 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
-// 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-// 					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.2"},
-// 					{"tag": "Element", "path": "Element", "type": "*variable", "value": "~*req.3"},
-// 					{"tag": "Values", "path": "Values", "type": "*variable", "value": "~*req.4"},
 // 				],
 // 			},
 // 			{
@@ -972,13 +1002,13 @@
 //     "rpc":{
 //         "enabled": false,
 //         "registrars_conns": [],
-//         "hosts": [],
+//         "hosts": [],  
 //         "refresh_interval": "5m",
 //     },
 //     "dispatchers":{
 //         "enabled": false,
 //         "registrars_conns": [],
-//         "hosts": [],
+//         "hosts": [],  
 //         "refresh_interval": "5m",
 //     },
 // },
@@ -1173,15 +1203,15 @@
 // 	"db_user": "",		 					// username to use when connecting to data_db
 // 	"db_password": "", 						// password to use when connecting to data_db
 // 	"opts":{
-// 		"redis_sentinel": "",					// the name of sentinel when used
-// 		"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster
-// 		"redis_cluster_sync": "5s",				// the sync interval for the redis cluster
-// 		"redis_cluster_ondown_delay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-// 		"query_timeout":"10s",
-// 		"redis_tls": false,						// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
-// 		"redis_client_certificate":"",			// path to client certificate
-// 		"redis_client_key":"",					// path to client key
-// 		"redis_ca_certificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"redisSentinel": "",					// the name of sentinel when used
+// 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
+// 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
+// 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+// 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
+// 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+// 		"redisClientCertificate":"",			// path to client certificate
+// 		"redisClientKey":"",					// path to client key
+// 		"redisCACertificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 // 	}
 // },
 
