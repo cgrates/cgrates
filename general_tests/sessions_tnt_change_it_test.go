@@ -101,6 +101,15 @@ func testSesTntChngRPCConn(t *testing.T) {
 	}
 }
 
+func testSesTntChngLoadFromFolder(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	if err := sesTntChngRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
 func testSesTntChngSetChargerProfile1(t *testing.T) {
 	var reply *engine.ChargerProfile
 	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
@@ -113,7 +122,7 @@ func testSesTntChngSetChargerProfile1(t *testing.T) {
 			Tenant:       "cgrates.org",
 			ID:           "Charger1",
 			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*constant:*tenant:cgrates.ro;*constant:*req.Account:1234"},
+			AttributeIDs: []string{"*constant:*tenant:cgrates.ro"},
 		},
 	}
 
@@ -144,7 +153,7 @@ func testSesTntChngSetChargerProfile2(t *testing.T) {
 			Tenant:       "cgrates.org",
 			ID:           "Charger2",
 			RunID:        utils.MetaRaw,
-			AttributeIDs: []string{},
+			AttributeIDs: []string{utils.META_NONE},
 		},
 	}
 
@@ -183,7 +192,7 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 
 	attrSetBalance2 := utils.AttrSetBalance{
 		Tenant:      "cgrates.ro",
-		Account:     "1234",
+		Account:     "1001",
 		BalanceType: utils.VOICE,
 		Value:       float64(2 * time.Minute),
 		Balance: map[string]interface{}{
@@ -218,9 +227,11 @@ func testChargerSAuthProcessEventAuth(t *testing.T) {
 	if err := sesTntChngRPC.Call(utils.SessionSv1AuthorizeEvent, ev, &rply); err != nil {
 		t.Fatal(err)
 	}
-	expected := &sessions.V1AuthorizeReply{}
+	expected := &sessions.V1AuthorizeReply{
+		MaxUsage: time.Duration(60000000000),
+	}
 	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
-		t.Errorf("Expecting : %T, received: %T", utils.ToJSON(&expected), utils.ToJSON(&rply))
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
 	}
 }
 
