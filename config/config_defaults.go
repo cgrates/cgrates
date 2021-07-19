@@ -66,21 +66,7 @@ const CGRATES_CFG_JSON = `
 
 "rpc_conns": {
 	//"*localhost": {
-		//"conns": [
-			{
-				"address": "127.0.0.1:2012", 
-				"transport":"*json",
-				"synchronous": false,
-				"connect_attempts": 5,
-				"reconnects": -1,
-				"connect_timeout": "1s",
-				"reply_timeout": "2s",
-				"TLS": false,
-				"client_key": "",
-				"client_certificate": "",
-				"ca_certificate": ""
-			}
-		],
+		//"conns": [{"address": "127.0.0.1:2012", "transport":"*json",}],
 	//},
 },							// rpc connections definitions
 
@@ -948,7 +934,15 @@ const CGRATES_CFG_JSON = `
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~*req.2"},
 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
-					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.4"},
+					{"tag": "Synchronous", "path": "Synchronous", "type": "*variable", "value":"~*req.4"},
+					{"tag": "ConnectAttemmpts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.5"},
+					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.6"},
+					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.7"},
+					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.8"},
+					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.9"},
+					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.10"},
+					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.11"},
+					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.12"},
 				],
 			},
 		],
