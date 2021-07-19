@@ -547,7 +547,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 
 	pEv = utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.AccountField: "[1,2,3]"}}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*eq:~*req.Account{*slice&*len}:3"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
