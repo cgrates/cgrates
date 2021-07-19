@@ -935,7 +935,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~*req.2"},
 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
 					{"tag": "Synchronous", "path": "Synchronous", "type": "*variable", "value":"~*req.4"},
-					{"tag": "ConnectAttemmpts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.5"},
+					{"tag": "ConnectAttempts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.5"},
 					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.6"},
 					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.7"},
 					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.8"},
