@@ -116,7 +116,7 @@ func testAccWThdSetThresholdProfile(t *testing.T) {
 	ThdPrf := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
-			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate", "*string:~*asm.ID:1002", "*lt:~*asm.BalanceSummaries.testBalanceID.Value:56m"},
+			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate", "*string:~*asm.ID:1002", "*lt:~*asm.BalanceSummaries.testBalanceID.Value:56m", "*gte:~*asm.BalanceSummaries.testBalanceID.Initial:58m"},
 			ID:        "THD_ACNT_1002",
 			MaxHits:   1,
 		},

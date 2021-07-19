@@ -588,6 +588,7 @@ const (
 	ExpiryTime            = "ExpiryTime"
 	AllowNegative         = "AllowNegative"
 	Disabled              = "Disabled"
+	Initial               = "Initial"
 	Action                = "Action"
 
 	SessionSCosts            = "SessionSCosts"

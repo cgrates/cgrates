@@ -822,5 +822,7 @@ func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 		return bl.Value, nil
 	case utils.Disabled:
 		return bl.Disabled, nil
+	case utils.Initial:
+		return bl.Initial, nil
 	}
 }
