@@ -184,10 +184,3 @@ func TestNatsEE(t *testing.T) {
 		t.Fatal("Time limit exceeded")
 	}
 }
-
-func TestNatsEEJetStreamRepeat(t *testing.T) {
-	for i := 0; i < 20; i++ {
-		time.Sleep(1 * time.Second)
-		t.Run("TestNatsEEJetStream", TestNatsEEJetStream)
-	}
-}
