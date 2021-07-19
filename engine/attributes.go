@@ -86,7 +86,6 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 				utils.ConcatenatedKey(tnt, utils.MetaAny),
 				alS.cgrcfg.AttributeSCfg().IndexedSelects,
 				alS.cgrcfg.AttributeSCfg().NestedFields)
-
 			if aPrflIDs.Size() == 0 {
 				if err != nil { // return the error if no attribute matched the needed context
 					return nil, err
@@ -335,7 +334,6 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.OptsAttributesProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(tnt, args, eNV, dynDP, lastID)
-
 		if err != nil {
 			if err != utils.ErrNotFound {
 				err = utils.NewErrServerError(err)

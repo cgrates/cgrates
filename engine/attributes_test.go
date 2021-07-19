@@ -1318,8 +1318,8 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	ap1 := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
-		FilterIDs: []string{"*notexists:~*vars.*processedProfileIDs[<~*vars.apTenantID>]:"},
-		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*notexists:~*vars.*processedProfileIDs[<~*vars.*apTenantID>]:"},
+		Contexts:  []string{utils.MetaAny},
 		Attributes: []*Attribute{
 			{
 				Path:  "*req.Password",
@@ -1360,30 +1360,33 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
 			Event: map[string]interface{}{
-				utils.Password: "passwd",
+				"Password": "passwd",
 			},
 		},
 	}
 	reply := &AttrSProcessEventReply{}
-	// exp := &AttrSProcessEventReply{
-	// 	MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2"},
-	// 	AlteredFields:   []string{"*req.Password", "*req.RequestType"},
-	// 	CGREvent: &utils.CGREvent{
-	// 		Tenant: "cgrates.org",
-	// 		ID:     "AttrProcessEventMultipleRuns",
-	// 		Event: map[string]interface{}{
-	// 			utils.Password:    "CGRateS.org",
-	// 			utils.RequestType: utils.MetaPostpaid,
-	// 		},
-	// 	},
-	// }
+	exp := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:ATTR2", "cgrates.org:ATTR1", "cgrates.org:ATTR2"},
+		AlteredFields:   []string{"*req.Password", "*req.RequestType"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "AttrProcessEventMultipleRuns",
+			Event: map[string]interface{}{
+				"Password":        "CGRateS.org",
+				utils.RequestType: utils.MetaPostpaid,
+			},
+			APIOpts: make(map[string]interface{}),
+		},
+	}
 
 	if err := alS.V1ProcessEvent(args, reply); err != nil {
 		t.Error(err)
+	} else {
+		sort.Strings(reply.AlteredFields)
+		if !reflect.DeepEqual(reply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(reply))
+		}
 	}
-	// else if !reflect.DeepEqual(reply, exp) {
-	// 	t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(reply))
-	// }
 }
 
 func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
@@ -1473,7 +1476,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	reply := &AttrSProcessEventReply{}
 	exp := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR1", "cgrates.org:ATTR2", "cgrates.org:ATTR3"},
-		AlteredFields:   []string{"*req.Password", "*req.RequestType", "*req.PaypalAccount"},
+		AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
@@ -1487,8 +1490,11 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	}
 	if err := alS.V1ProcessEvent(args, reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(exp), utils.ToJSON(reply))
+	} else {
+		sort.Strings(reply.AlteredFields)
+		if !reflect.DeepEqual(reply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(reply))
+		}
 	}
 }
