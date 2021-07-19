@@ -2236,7 +2236,7 @@ func TestResourceResIDsMp(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
-func TestResourceTenatIDs(t *testing.T) {
+func TestResourceTenantIDs(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2306,7 +2306,7 @@ func TestResourceTenatIDs(t *testing.T) {
 		"cgrates.org:ResourceProfile2",
 		"cgrates.org:ResourceProfile3",
 	}
-	if rcv := resourceTest.tenatIDs(); !reflect.DeepEqual(rcv, expected) {
+	if rcv := resourceTest.tenantIDs(); !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
