@@ -299,7 +299,6 @@
 // 	"enabled": false,						// enable Rating/Accounting service: <true|false>
 // 	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"stats_conns": [],						// connections to StatS for account/balance updates, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-// 	"caches_conns":["*internal"],			// connections to CacheS for account/balance updates
 // 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
 // 	"remove_expired":true,					// enables automatic removal of expired balances
 // 	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
@@ -314,6 +313,7 @@
 // 		"*any": "*zero1ns",
 // 		"*voice": "*zero1s"
 // 	},
+
 // },
 
 
@@ -348,7 +348,7 @@
 // 			"opts": {
 // 				// Partial
 // 				// "partialPath": "/",							// the path were the partial events will be sent
-// 				// "partialCacheAction": "*none",				// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
+// 				"partialCacheAction": "*none",					// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
 // 				"partialOrderField": "~*req.AnswerTime",		// the field after what the events are order when merged
 // 				// "partialcsvFieldSeparator": ","				// separator used when dumping the fields
 				
@@ -413,6 +413,27 @@
 // 				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
 				
 // 				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
+
+// 				// nats
+// 				// "natsJetStream": false,						// controls if the nats reader uses the JetStream
+// 				// "natsConsumerName": "cgrates",				// in case of JetStream the name of the consumer
+// 				"natsSubject": "cgrates_cdrs",					// the subject from were the events are read
+// 				// "natsQueueID": "",							// the queue id the consumer listen to
+// 				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
+// 				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+// 				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
+// 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
+// 				// "natsClientKey": "",							// the path to a client key( used by tls)
+// 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
+
+// 				// "natsJetStreamProcessed": false,				// controls if the nats poster uses the JetStream
+// 				// "natsSubjectProcessed": "cgrates_cdrs",		// the subject were the events are posted
+// 				// "natsJWTFileProcessed": "",					// the path to the JWT file( can be the chained file or the user file)
+// 				// "natsSeedFileProcessed": "",					// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+// 				// "natsCertificateAuthorityProcessed": "",		// the path to a custom certificate authority file( used by tls)
+// 				// "natsClientCertificateProcessed": "",		// the path to a client certificate( used by tls)
+// 				// "natsClientKeyProcessed": "",				// the path to a client key( used by tls)
+// 				// "natsJetStreamMaxWaitProcessed": "5s	",		// the maximum amount of time to wait for a response
 // 			},
 // 			"tenant": "",										// tenant used by import
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -503,6 +524,15 @@
 // 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
 // 				// "s3FolderPath": "",							// S3FolderPath 
 
+// 				// Nats
+// 				// "natsJetStream": false,						// controls if the nats poster uses the JetStream
+// 				// "natsSubject": "cgrates_cdrs",				// the subject were the events are exported
+// 				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
+// 				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+// 				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
+// 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
+// 				// "natsClientKey": "",							// the path to a client key( used by tls)
+// 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
 // 			},													// extra options for exporter
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 // 			"filters": [],										// limit parsing based on the filters
@@ -660,6 +690,7 @@
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"process_runs": 1,						// number of run loops when processing event
+// 	"any_context": true,					// if we match the *any context
 // },
 
 
@@ -977,6 +1008,7 @@
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
+// 	"any_subsystem": true,					// if we match the *any subsystem
 // },
 
 
@@ -984,13 +1016,13 @@
 //     "rpc":{
 //         "enabled": false,
 //         "registrars_conns": [],
-//         "hosts": [],
+//         "hosts": [],  
 //         "refresh_interval": "5m",
 //     },
 //     "dispatchers":{
 //         "enabled": false,
 //         "registrars_conns": [],
-//         "hosts": [],
+//         "hosts": [],  
 //         "refresh_interval": "5m",
 //     },
 // },
