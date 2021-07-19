@@ -297,7 +297,7 @@ func (rs Resources) resIDsMp() (mp utils.StringSet) {
 	return mp
 }
 
-func (rs Resources) tenatIDs() []string {
+func (rs Resources) tenantIDs() []string {
 	ids := make([]string, len(rs))
 	for i, r := range rs {
 		ids[i] = r.TenantID()
