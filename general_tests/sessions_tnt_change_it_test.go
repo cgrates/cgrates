@@ -46,11 +46,8 @@ var (
 		testSesTntChngResetStorDb,
 		testSesTntChngStartEngine,
 		testSesTntChngRPCConn,
-		//testSesTntChngLoadFromFolder,
 		testSesTntChngSetChargerProfile1,
 		testSesTntChngSetChargerProfile2,
-		//testSesTntChngChargersForEvent,
-		//testSesTntChngChargersForEvent2,
 		testChargerSAuthProcessEventAuth,
 		testSesTntChngStopCgrEngine,
 	}
@@ -105,15 +102,6 @@ func testSesTntChngRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-func testSesTntChngLoadFromFolder(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := sesTntChngRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testSesTntChngSetChargerProfile1(t *testing.T) {
@@ -175,78 +163,6 @@ func testSesTntChngSetChargerProfile2(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
-	}
-}
-
-func testSesTntChngChargersForEvent(t *testing.T) {
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.ro",
-		ID:     "TestEv1",
-		Event: map[string]interface{}{
-			utils.Tenant:       "cgrates.ro",
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "TestSSv1It1",
-			utils.RequestType:  utils.MetaRated,
-			utils.AccountField: "1001",
-			utils.Subject:      "1001",
-			utils.Destination:  "1002",
-		},
-	}
-	chargerProfiles := &engine.ChargerProfiles{
-		&engine.ChargerProfile{
-			Tenant:    "cgrates.ro",
-			ID:        "Charger1",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.Tenant:cgrates.ro"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-			},
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*constant:*tenant:cgrates.ro2"},
-			Weight:       20,
-		},
-	}
-	var result *engine.ChargerProfiles
-	if err := sesTntChngRPC.Call(utils.ChargerSv1GetChargersForEvent,
-		ev, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, chargerProfiles) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(chargerProfiles), utils.ToJSON(result))
-	}
-}
-
-func testSesTntChngChargersForEvent2(t *testing.T) {
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.ro2",
-		ID:     "TestEv1",
-		Event: map[string]interface{}{
-			utils.Tenant:       "cgrates.ro2",
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "TestSSv1It1",
-			utils.RequestType:  utils.MetaRated,
-			utils.AccountField: "1001",
-			utils.Subject:      "1001",
-			utils.Destination:  "1002",
-		},
-	}
-	chargerProfiles := &engine.ChargerProfiles{
-		&engine.ChargerProfile{
-			Tenant:    "cgrates.ro2",
-			ID:        "Charger2",
-			FilterIDs: []string{"*string:~*req.Tenant:cgrates.ro2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-			},
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{},
-			Weight:       20,
-		},
-	}
-	var result *engine.ChargerProfiles
-	if err := sesTntChngRPC.Call(utils.ChargerSv1GetChargersForEvent,
-		ev, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, chargerProfiles) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(chargerProfiles), utils.ToJSON(result))
 	}
 }
 
