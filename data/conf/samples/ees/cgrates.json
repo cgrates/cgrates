@@ -422,6 +422,15 @@
 				"natsJetStream": true,
 				"natsSubject": "processed_cdrs",
 			}
+		},
+		{
+			"id": "NatsJsonMapExporter2",										
+			"type": "*nats_json_map",													
+			"export_path": "nats://localhost:4222",		
+			"attempts": 1,		
+			"opts": {
+				"natsSubject": "processed_cdrs",
+			}
 		}
 	]
 },
