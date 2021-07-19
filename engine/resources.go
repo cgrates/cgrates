@@ -297,7 +297,7 @@ func (rs Resources) resIDsMp() (mp utils.StringSet) {
 	return mp
 }
 
-func (rs Resources) tenatIDs() []string {
+func (rs Resources) tenantIDs() []string {
 	ids := make([]string, len(rs))
 	for i, r := range rs {
 		ids[i] = r.TenantID()
@@ -453,6 +453,7 @@ func (rS *ResourceService) storeResources(ctx *context.Context) {
 		rIf, ok := Cache.Get(utils.CacheResources, rID)
 		if !ok || rIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache resource with ID: %s", utils.ResourceS, rID))
+			continue
 		}
 		r := rIf.(*Resource)
 		r.lock(utils.EmptyString)
@@ -562,7 +563,6 @@ func (rS *ResourceService) matchingResourcesForEvent(ctx *context.Context, tnt s
 					err = errCh
 				}
 			}
-			return
 		}()
 
 	} else { // select the resourceIDs out of dataDB
