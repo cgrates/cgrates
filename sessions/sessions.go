@@ -1100,7 +1100,7 @@ func (sS *SessionS) forkSession(s *Session, forceDuration bool) (err error) {
 				CgrID:         s.CGRID,
 				RunID:         me.GetStringIgnoreErrors(utils.RunID),
 				ToR:           me.GetStringIgnoreErrors(utils.ToR),
-				Tenant:        s.Tenant,
+				Tenant:        chrgr.CGREvent.Tenant,
 				Category:      category,
 				Subject:       subject,
 				Account:       me.GetStringIgnoreErrors(utils.Account),
