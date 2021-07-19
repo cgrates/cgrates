@@ -498,6 +498,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[0].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[0].ID, mres[0].ID) {
@@ -511,6 +512,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[1].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[1].ID, mres[0].ID) {
@@ -524,6 +526,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[2].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[2].ID, mres[0].ID) {
@@ -550,6 +553,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[0].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[0].ID, mres[0].ID) {
@@ -578,6 +582,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[0].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[0].ID, mres[0].ID) {
@@ -606,6 +611,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[0].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[0].ID, mres[0].ID) {
@@ -634,6 +640,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[0].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[0].ID, mres[0].ID) {
@@ -653,6 +660,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[0].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[0].ID, mres[0].ID) {
@@ -666,6 +674,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[1].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[1].ID, mres[0].ID) {
@@ -679,6 +688,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resourceTest[2].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resourceTest[2].ID, mres[0].ID) {
@@ -781,6 +791,7 @@ func TestResourceCaching(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	mres.unlock()
 	if !reflect.DeepEqual(resources[0].Tenant, mres[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", resources[0].Tenant, mres[0].Tenant)
 	} else if !reflect.DeepEqual(resources[0].ID, mres[0].ID) {

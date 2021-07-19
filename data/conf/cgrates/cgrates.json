@@ -215,7 +215,6 @@
 // 	"enabled": false,						// enable Rating/Accounting service: <true|false>
 // 	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 // 	"stats_conns": [],						// connections to StatS for account/balance updates, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-// 	"caches_conns":["*internal"],			// connections to CacheS for account/balance updates
 // 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
 // 	"remove_expired":true,					// enables automatic removal of expired balances
 // 	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
