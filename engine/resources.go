@@ -438,6 +438,7 @@ func (rS *ResourceService) storeResources() {
 		rIf, ok := Cache.Get(utils.CacheResources, rID)
 		if !ok || rIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache resource with ID: %s", utils.ResourceS, rID))
+			continue
 		}
 		r := rIf.(*Resource)
 		r.lock(utils.EmptyString)
@@ -539,7 +540,6 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 				Cache.Remove(utils.CacheEventResources, evUUID,
 					cacheCommit(utils.NonTransactional), utils.NonTransactional)
 			}
-			return
 		}()
 	} else { // select the resourceIDs out of dataDB
 		rIDs, err = MatchingItemIDsForEvent(ev.Event,
