@@ -329,7 +329,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithAPIOpts, reply *ti
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
 	}
-	if arg.Subject == "" {
+	if arg.Subject == utils.EmptyString {
 		arg.Subject = arg.Account
 	}
 	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
