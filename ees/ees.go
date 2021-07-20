@@ -183,13 +183,13 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		eeCache, hasCache := eeS.eesChs[eeCfg.Type]
 		eeS.eesMux.RUnlock()
 		var isCached bool
-		var ee EventExporter
 		if hasCache {
 			var x interface{}
 			if x, isCached = eeCache.Get(eeCfg.ID); isCached {
 				ee = x.(EventExporter)
 			}
 		}
+		var ee EventExporter
 		if !isCached {
 			if ee, err = NewEventExporter(eeS.cfg, cfgIdx, eeS.filterS); err != nil {
 				return
@@ -198,12 +198,15 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 				eeCache.Set(eeCfg.ID, ee, nil)
 			}
 		}
-		if eeCfg.Synchronous {
-			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
-		}
+
 		metricMapLock.Lock()
-		metricsMap[ee.ID()] = utils.MapStorage{}
+		metricsMap[ee.ID()] = utils.MapStorage{} // will return the ID for all processed exporters
 		metricMapLock.Unlock()
+
+		if eeCfg.Synchronous {
+			wg.Add(1) // wait for sync to complete before returning
+		}
+
 		// log the message before starting the gorutine, but still execute the exporter
 		if hasVerbose && !eeCfg.Synchronous {
 			utils.Logger.Warning(
