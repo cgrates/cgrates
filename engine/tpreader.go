@@ -909,7 +909,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	return tpr.dm.SetLoadIDs(context.TODO(), loadIDs)
 }
 
-func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose bool, opts map[string]interface{}) (err error) {
+func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose bool, opts map[string]interface{}, tenant string) (err error) {
 	if tpr.isInternalDB {
 		return
 	}
@@ -986,7 +986,7 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 		cacheIDs = append(cacheIDs, utils.CacheReverseFilterIndexes)
 	}
 
-	if err = CallCache(connMgr, ctx, tpr.cacheConns, caching, cacheArgs, cacheIDs, opts, verbose); err != nil {
+	if err = CallCache(connMgr, ctx, tpr.cacheConns, caching, cacheArgs, cacheIDs, opts, verbose, tenant); err != nil {
 		return
 	}
 	//get loadIDs for all types
@@ -1005,7 +1005,7 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 }
 
 // CallCache call the cache reload after data load
-func CallCache(connMgr *ConnManager, ctx *context.Context, cacheConns []string, caching string, args map[string][]string, cacheIDs []string, opts map[string]interface{}, verbose bool) (err error) {
+func CallCache(connMgr *ConnManager, ctx *context.Context, cacheConns []string, caching string, args map[string][]string, cacheIDs []string, opts map[string]interface{}, verbose bool, tenant string) (err error) {
 	for k, v := range args {
 		if len(v) == 0 {
 			delete(args, k)
@@ -1015,6 +1015,7 @@ func CallCache(connMgr *ConnManager, ctx *context.Context, cacheConns []string, 
 	var cacheArgs interface{} = &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:   opts,
 		ArgsCache: args,
+		Tenant:    tenant,
 	}
 	switch caching {
 	case utils.MetaNone:
@@ -1027,7 +1028,7 @@ func CallCache(connMgr *ConnManager, ctx *context.Context, cacheConns []string, 
 		method = utils.CacheSv1RemoveItems
 	case utils.MetaClear:
 		method = utils.CacheSv1Clear
-		cacheArgs = &utils.AttrCacheIDsWithAPIOpts{APIOpts: opts}
+		cacheArgs = &utils.AttrCacheIDsWithAPIOpts{APIOpts: opts, Tenant: tenant}
 	}
 	if verbose {
 		log.Print("Reloading cache")
@@ -1044,6 +1045,7 @@ func CallCache(connMgr *ConnManager, ctx *context.Context, cacheConns []string, 
 		if err = connMgr.Call(ctx, cacheConns, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 			APIOpts:  opts,
 			CacheIDs: cacheIDs,
+			Tenant:   tenant,
 		}, &reply); err != nil {
 			if verbose {
 				log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())

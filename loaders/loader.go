@@ -658,7 +658,7 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 		}
 	}
 	if len(ldr.cacheConns) != 0 {
-		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false)
+		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, "")
 	}
 	return
 }
@@ -970,7 +970,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 	}
 
 	if len(ldr.cacheConns) != 0 {
-		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false)
+		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, "")
 	}
 	return
 }
