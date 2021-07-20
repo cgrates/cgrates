@@ -568,11 +568,10 @@ func TestLibDispatcherSingleResultDispatcherCastError(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     "",
-			Transport:   "",
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   "",
+			Transport: "",
+			TLS:       false,
 		},
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
@@ -601,11 +600,10 @@ func TestLibDispatcherSingleResultDispatcherCastError2(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 
@@ -635,11 +633,10 @@ func TestLibDispatcherBroadcastDispatcherDispatchError1(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     "",
-			Transport:   "",
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   "",
+			Transport: "",
+			TLS:       false,
 		},
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
@@ -680,11 +677,10 @@ func TestLibDispatcherBroadcastDispatcherDispatchError3(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     "",
-			Transport:   "",
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   "",
+			Transport: "",
+			TLS:       false,
 		},
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
@@ -706,11 +702,10 @@ func TestLibDispatcherLoadDispatcherCacheError(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     "",
-			Transport:   "",
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   "",
+			Transport: "",
+			TLS:       false,
 		},
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
@@ -733,11 +728,10 @@ func TestLibDispatcherLoadDispatcherCacheError2(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 
@@ -767,11 +761,10 @@ func TestLibDispatcherLoadDispatcherCacheError3(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 
@@ -825,11 +818,10 @@ func TestLibDispatcherLoadDispatcherCacheError4(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:          "testID",
-				Address:     "",
-				Transport:   "",
-				Synchronous: false,
-				TLS:         false,
+				ID:        "testID",
+				Address:   "",
+				Transport: "",
+				TLS:       false,
 			},
 		},
 	}
@@ -842,11 +834,10 @@ func TestLibDispatcherLoadDispatcherCacheError4(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 
@@ -901,11 +892,10 @@ func TestLibDispatcherLoadDispatcherCacheError5(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 
@@ -947,11 +937,10 @@ func TestLibDispatcherSingleResultDispatcherCase1(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 	tmp := engine.IntRPC
@@ -985,11 +974,10 @@ func TestLibDispatcherSingleResultDispatcherCase2(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 	tmp := engine.IntRPC
@@ -1018,11 +1006,10 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:          "testID",
-				Address:     "",
-				Transport:   "",
-				Synchronous: false,
-				TLS:         false,
+				ID:        "testID",
+				Address:   "",
+				Transport: "",
+				TLS:       false,
 			},
 		},
 	}
@@ -1034,11 +1021,10 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 	tmp := engine.IntRPC

@@ -122,7 +122,6 @@ type RemoteHost struct {
 	ID                string
 	Address           string
 	Transport         string
-	Synchronous       bool
 	ConnectAttempts   int
 	Reconnects        int
 	ConnectTimeout    time.Duration
@@ -148,9 +147,6 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 	}
 	if jsnCfg.Transport != nil {
 		rh.Transport = *jsnCfg.Transport
-	}
-	if jsnCfg.Synchronous != nil {
-		rh.Synchronous = *jsnCfg.Synchronous
 	}
 	if jsnCfg.Tls != nil {
 		rh.TLS = *jsnCfg.Tls
@@ -192,9 +188,6 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 	if rh.ID != utils.EmptyString {
 		mp[utils.IDCfg] = rh.ID
 	}
-	if rh.Synchronous {
-		mp[utils.SynchronousCfg] = rh.Synchronous
-	}
 	if rh.TLS {
 		mp[utils.TLSNoCaps] = rh.TLS
 	}
@@ -228,7 +221,6 @@ func (rh RemoteHost) Clone() (cln *RemoteHost) {
 		ID:                rh.ID,
 		Address:           rh.Address,
 		Transport:         rh.Transport,
-		Synchronous:       rh.Synchronous,
 		ConnectAttempts:   rh.ConnectAttempts,
 		Reconnects:        rh.Reconnects,
 		ConnectTimeout:    rh.ConnectTimeout,
@@ -253,7 +245,6 @@ func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs 
 			connIDs.Add(rpcKey)
 			rh.Address = newHost.Address
 			rh.Transport = newHost.Transport
-			rh.Synchronous = newHost.Synchronous
 			rh.ConnectAttempts = newHost.ConnectAttempts
 			rh.Reconnects = newHost.Reconnects
 			rh.ConnectTimeout = newHost.ConnectTimeout
@@ -279,7 +270,6 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 			connIDs.Add(rpcKey)
 			rh.Address = ""
 			rh.Transport = ""
-			rh.Synchronous = false
 			rh.ConnectAttempts = 0
 			rh.Reconnects = 0
 			rh.ConnectTimeout = 0

@@ -56,9 +56,8 @@ func TestSessionSReload1(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				Address:     "127.0.0.1:9999",
-				Transport:   utils.MetaGOB,
-				Synchronous: true,
+				Address:   "127.0.0.1:9999",
+				Transport: utils.MetaGOB,
 			},
 		},
 	}
