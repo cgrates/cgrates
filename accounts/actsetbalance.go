@@ -43,7 +43,7 @@ func actSetAccount(ctx *context.Context, dm *engine.DataManager, tnt, acntID str
 	}
 	for _, dk := range diktats {
 		// check if we have a valid path(e.g. *balance.Test.ID)
-		path := strings.Split(dk.Path, utils.NestingSep)
+		path := utils.SplitPath(dk.Path, utils.NestingSep[0], -1)
 		// check the path to be a valid one
 
 		switch path[0] {

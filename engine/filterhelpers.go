@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"strings"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -60,7 +58,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 			}
 			for _, fldName := range *fieldIDs {
 				var fieldValIf interface{}
-				fieldValIf, err = ev.FieldAsInterface(strings.Split(fldName, utils.NestingSep))
+				fieldValIf, err = ev.FieldAsInterface(utils.SplitPath(fldName, utils.NestingSep[0], -1))
 				if err != nil && filterIndexTypes[i] != utils.MetaNone {
 					continue
 				}

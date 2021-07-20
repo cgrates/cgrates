@@ -89,7 +89,7 @@ func NewProcessedIdentity(identity string) (pi *ProcessedStirIdentity, err error
 		return
 	}
 	pi.Tokens = hdrtoken[1:]
-	btoken := strings.Split(hdrtoken[0], utils.NestingSep)
+	btoken := utils.SplitPath(hdrtoken[0], utils.NestingSep[0], -1)
 	if len(btoken) != 3 {
 		err = errors.New("wrong header format")
 		return
