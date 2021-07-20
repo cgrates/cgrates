@@ -240,10 +240,9 @@ func TestRegister(t *testing.T) {
 		PoolSize: 1,
 		Conns: []*config.RemoteHost{
 			{
-				Address:     "127.0.0.1:5612",
-				Transport:   "*json",
-				Synchronous: false,
-				TLS:         false,
+				Address:   "127.0.0.1:5612",
+				Transport: "*json",
+				TLS:       false,
 			},
 		},
 	}
@@ -510,10 +509,9 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 		PoolSize: 1,
 		Conns: []*config.RemoteHost{
 			{
-				ID:          "Host1",
-				Address:     "127.0.0.1:9999",
-				Transport:   "*json",
-				Synchronous: true,
+				ID:        "Host1",
+				Address:   "127.0.0.1:9999",
+				Transport: "*json",
 			},
 		},
 	}
@@ -612,10 +610,9 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 		PoolSize: 1,
 		Conns: []*config.RemoteHost{
 			{
-				ID:          "Host1",
-				Address:     "127.0.0.1:9999",
-				Transport:   "*json",
-				Synchronous: true,
+				ID:        "Host1",
+				Address:   "127.0.0.1:9999",
+				Transport: "*json",
 			},
 		},
 	}

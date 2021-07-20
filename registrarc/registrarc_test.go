@@ -40,10 +40,9 @@ func TestDispatcherHostsService(t *testing.T) {
 	cfg.RPCConns()["conn1"] = &config.RPCConn{
 		Strategy: rpcclient.PoolFirst,
 		Conns: []*config.RemoteHost{{
-			Address:     ts.URL,
-			Synchronous: true,
-			TLS:         false,
-			Transport:   rpcclient.HTTPjson,
+			Address:   ts.URL,
+			TLS:       false,
+			Transport: rpcclient.HTTPjson,
 		}},
 	}
 	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
@@ -145,11 +144,10 @@ func TestRegistrarcregisterRPCHostsErr(t *testing.T) {
 	cfg.RegistrarCCfg().RPC.Hosts = map[string][]*config.RemoteHost{
 		utils.MetaDefault: {
 			{
-				ID:          "",
-				Address:     "",
-				Transport:   "",
-				Synchronous: false,
-				TLS:         false,
+				ID:        "",
+				Address:   "",
+				Transport: "",
+				TLS:       false,
 			},
 		},
 	}
@@ -168,10 +166,9 @@ func TestRegisterRPCHosts(t *testing.T) {
 		PoolSize: 1,
 		Conns: []*config.RemoteHost{
 			{
-				ID:          "errCon1",
-				Address:     "127.0.0.1:9999",
-				Transport:   "*json",
-				Synchronous: true,
+				ID:        "errCon1",
+				Address:   "127.0.0.1:9999",
+				Transport: "*json",
 			},
 		},
 	}
