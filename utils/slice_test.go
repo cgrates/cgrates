@@ -60,9 +60,9 @@ func TestHasPrefixSlice(t *testing.T) {
 }
 
 func TestPrefixSliceItems(t *testing.T) {
-	rcv := PrefixSliceItems("*", []string{"1", "2", "3", "4", "5"})
+	rcv := PrefixSliceItems("*", []string{"1", "2", "3", "", "5"})
 	sort.Strings(rcv)
-	eOut := []string{"*1", "*2", "*3", "*4", "*5"}
+	eOut := []string{"*1", "*2", "*3", "*5"}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
