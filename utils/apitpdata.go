@@ -1146,7 +1146,6 @@ type TPDispatcherHost struct {
 type TPDispatcherHostConn struct {
 	Address           string
 	Transport         string
-	Synchronous       bool
 	ConnectAttempts   int
 	Reconnects        int
 	ConnectTimeout    time.Duration

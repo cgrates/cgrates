@@ -461,7 +461,6 @@ CREATE TABLE tp_dispatcher_hosts (
   `id` varchar(64) NOT NULL,
   `address` varchar(64) NOT NULL,
   `transport` varchar(64) NOT NULL,
-  `synchronous` BOOLEAN NOT NULL,
   `connect_attempts` int(11) NOT NULL,
   `reconnects` int(11) NOT NULL,
   `connect_timeout` varchar(64) NOT NULL,
