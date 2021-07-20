@@ -183,13 +183,14 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		eeCache, hasCache := eeS.eesChs[eeCfg.Type]
 		eeS.eesMux.RUnlock()
 		var isCached bool
+		var ee EventExporter
 		if hasCache {
 			var x interface{}
 			if x, isCached = eeCache.Get(eeCfg.ID); isCached {
 				ee = x.(EventExporter)
 			}
 		}
-		var ee EventExporter
+
 		if !isCached {
 			if ee, err = NewEventExporter(eeS.cfg, cfgIdx, eeS.filterS); err != nil {
 				return
