@@ -18,12 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -800,5 +802,396 @@ func TestResourceCaching(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resources[0].rPrf, mres[0].rPrf)
 	} else if !reflect.DeepEqual(resources[0].ttl, mres[0].ttl) {
 		t.Errorf("Expecting: %+v, received: %+v", resources[0].ttl, mres[0].ttl)
+	}
+}
+
+func TestResourcesStoreResourceError(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = -1
+	cfg.RPCConns()["test"] = &config.RPCConn{
+		Conns: []*config.RemoteHost{{}},
+	}
+	cfg.DataDbCfg().RplConns = []string{"test"}
+	dft := config.CgrConfig()
+	config.SetCgrConfig(cfg)
+	defer config.SetCgrConfig(dft)
+
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector)))
+
+	rS, _ := NewResourceService(dm, cfg, NewFilterS(cfg, nil, dm), nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.META_NONE},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+		Stored:            true,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = dm.SetResource(&Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: make(map[string]*ResourceUsage),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				"Account": "1001",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	expErr := "dial tcp: missing address"
+	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true
+	var reply string
+	if err := rS.V1AllocateResource(args, &reply); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = false
+
+	if err := rS.V1AllocateResource(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Errorf("Unexpected reply returned: %q", reply)
+	}
+
+	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true
+	if err := rS.V1ReleaseResource(args, &reply); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+}
+
+func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmRES := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	rS, _ := NewResourceService(dmRES, cfg,
+		&FilterS{dm: dmRES, cfg: cfg}, nil)
+
+	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInCache", nil, nil, true, utils.NonTransactional)
+	_, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
+		"TestResourceMatchingResourcesForEventNotFoundInCache", utils.DurationPointer(10*time.Second))
+	if err != utils.ErrNotFound {
+		t.Errorf("Error: %+v", err)
+	}
+}
+
+func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmRES := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	rS, _ := NewResourceService(dmRES, cfg,
+		&FilterS{dm: dmRES, cfg: cfg}, nil)
+
+	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", utils.StringMap{"Res2": true}, nil, true, utils.NonTransactional)
+	_, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
+		"TestResourceMatchingResourcesForEventNotFoundInDB", utils.DurationPointer(10*time.Second))
+	if err != utils.ErrNotFound {
+		t.Errorf("Error: %+v", err)
+	}
+}
+
+func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	rS, _ := NewResourceService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	prfs := make([]*ResourceProfile, 0)
+	ids := utils.StringMap{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                fmt.Sprintf("RES%d", i),
+			UsageTTL:          10 * time.Second,
+			Limit:             10.00,
+			AllocationMessage: "AllocationMessage",
+			Weight:            20.00,
+			ThresholdIDs:      []string{utils.META_NONE},
+		}
+		dm.SetResourceProfile(rPrf, true)
+		if rPrf.ID != "RES1" {
+			err = dm.SetResource(&Resource{
+				Tenant: "cgrates.org",
+				ID:     rPrf.ID,
+				Usages: make(map[string]*ResourceUsage),
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		prfs = append(prfs, rPrf)
+		ids[rPrf.ID] = true
+	}
+	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks", ids, nil, true, utils.NonTransactional)
+	mres, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
+		"TestResourceMatchingResourcesForEventLocks", utils.DurationPointer(10*time.Second))
+	if err != utils.ErrNotFound {
+		t.Errorf("Error: %+v", err)
+	}
+	mres.unlock()
+	for _, rPrf := range prfs {
+		if rPrf.isLocked() {
+			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if rPrf.ID == "RES1" {
+			continue
+		}
+		if r, err := dm.GetResource(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected resource to not be locked %q", rPrf.ID)
+		}
+	}
+
+}
+
+func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	rS, _ := NewResourceService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	prfs := make([]*ResourceProfile, 0)
+	ids := utils.StringMap{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                fmt.Sprintf("RES%d", i),
+			UsageTTL:          10 * time.Second,
+			Limit:             10.00,
+			AllocationMessage: "AllocationMessage",
+			Weight:            20.00,
+			ThresholdIDs:      []string{utils.META_NONE},
+		}
+		err = dm.SetResource(&Resource{
+			Tenant: "cgrates.org",
+			ID:     rPrf.ID,
+			Usages: make(map[string]*ResourceUsage),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		dm.SetResourceProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids[rPrf.ID] = true
+	}
+	rPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES20",
+		FilterIDs:         []string{"FLTR_RES_201"},
+		UsageTTL:          10 * time.Second,
+		Limit:             10.00,
+		AllocationMessage: "AllocationMessage",
+		Weight:            20.00,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+	err = db.SetResourceProfileDrv(rPrf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = dm.SetResource(&Resource{
+		Tenant: "cgrates.org",
+		ID:     rPrf.ID,
+		Usages: make(map[string]*ResourceUsage),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	prfs = append(prfs, rPrf)
+	ids[rPrf.ID] = true
+	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
+	_, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
+		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
+	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
+	if err == nil || err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
+	}
+	for _, rPrf := range prfs {
+		if rPrf.isLocked() {
+			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if rPrf.ID == "RES20" {
+			continue
+		}
+		if r, err := dm.GetResource(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected resource to not be locked %q", rPrf.ID)
+		}
+	}
+}
+
+func TestResourceMatchingResourcesForEventLocksBlocker(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	rS, _ := NewResourceService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	prfs := make([]*ResourceProfile, 0)
+	ids := utils.StringMap{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                fmt.Sprintf("RES%d", i),
+			UsageTTL:          10 * time.Second,
+			Limit:             10.00,
+			AllocationMessage: "AllocationMessage",
+			Weight:            float64(10 - i),
+			Blocker:           i == 4,
+			ThresholdIDs:      []string{utils.META_NONE},
+		}
+		err = dm.SetResource(&Resource{
+			Tenant: "cgrates.org",
+			ID:     rPrf.ID,
+			Usages: make(map[string]*ResourceUsage),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		dm.SetResourceProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids[rPrf.ID] = true
+	}
+	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocksBlocker", ids, nil, true, utils.NonTransactional)
+	mres, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
+		"TestResourceMatchingResourcesForEventLocksBlocker", utils.DurationPointer(10*time.Second))
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mres.unlock()
+	if len(mres) != 5 {
+		t.Fatal("Expected 6 resources")
+	}
+	for _, rPrf := range prfs[5:] {
+		if rPrf.isLocked() {
+			t.Errorf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetResource(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected resource to not be locked %q", rPrf.ID)
+		}
+	}
+	for _, rPrf := range prfs[:5] {
+		if !rPrf.isLocked() {
+			t.Errorf("Expected profile to be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetResource(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if !r.isLocked() {
+			t.Fatalf("Expected resource to be locked %q", rPrf.ID)
+		}
+	}
+}
+
+func TestResourceMatchingResourcesForEventLocksActivationInterval(t *testing.T) {
+	Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ResourceSCfg().StoreInterval = 1
+	cfg.ResourceSCfg().StringIndexedFields = nil
+	cfg.ResourceSCfg().PrefixIndexedFields = nil
+	rS, _ := NewResourceService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	ids := utils.StringMap{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                fmt.Sprintf("RES%d", i),
+			UsageTTL:          10 * time.Second,
+			Limit:             10.00,
+			AllocationMessage: "AllocationMessage",
+			Weight:            20.00,
+			ThresholdIDs:      []string{utils.META_NONE},
+		}
+		err = dm.SetResource(&Resource{
+			Tenant: "cgrates.org",
+			ID:     rPrf.ID,
+			Usages: make(map[string]*ResourceUsage),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		dm.SetResourceProfile(rPrf, true)
+		ids[rPrf.ID] = true
+	}
+	rPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES21",
+		UsageTTL:          10 * time.Second,
+		Limit:             10.00,
+		AllocationMessage: "AllocationMessage",
+		Weight:            20.00,
+		ThresholdIDs:      []string{utils.META_NONE},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Now().Add(-5 * time.Second),
+		},
+	}
+	err = dm.SetResource(&Resource{
+		Tenant: "cgrates.org",
+		ID:     rPrf.ID,
+		Usages: make(map[string]*ResourceUsage),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dm.SetResourceProfile(rPrf, true)
+	ids[rPrf.ID] = true
+	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
+	mres, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org", Time: utils.TimePointer(time.Now())},
+		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mres.unlock()
+	if rPrf.isLocked() {
+		t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+	}
+	if r, err := dm.GetResource(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+		t.Errorf("error %s for <%s>", err, rPrf.ID)
+	} else if r.isLocked() {
+		t.Fatalf("Expected resource to not be locked %q", rPrf.ID)
 	}
 }
