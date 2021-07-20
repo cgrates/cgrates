@@ -213,18 +213,18 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 			continue
 		}
 		if substitute == utils.MetaRemove {
-			evNm.Remove(strings.Split(attribute.Path, utils.NestingSep))
+			evNm.Remove(utils.SplitPath(attribute.Path, utils.NestingSep[0], -1))
 			continue
 		}
 		if attribute.Type == utils.MetaComposed {
 			var val string
-			if val, err = evNm.FieldAsString(strings.Split(attribute.Path, utils.NestingSep)); err != nil && err != utils.ErrNotFound {
+			if val, err = evNm.FieldAsString(utils.SplitPath(attribute.Path, utils.NestingSep[0], -1)); err != nil && err != utils.ErrNotFound {
 				rply = nil
 				return
 			}
 			substitute = val + substitute
 		}
-		if err = evNm.Set(strings.Split(attribute.Path, utils.NestingSep), substitute); err != nil {
+		if err = evNm.Set(utils.SplitPath(attribute.Path, utils.NestingSep[0], -1), substitute); err != nil {
 			rply = nil
 			return
 		}

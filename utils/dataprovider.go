@@ -59,7 +59,7 @@ func DPDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
 	if strings.HasPrefix(dnVal, DynamicDataPrefix) &&
 		dnVal != DynamicDataPrefix {
 		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
-		return dP.FieldAsInterface(strings.Split(dnVal, NestingSep))
+		return dP.FieldAsInterface(SplitPath(dnVal, NestingSep[0], -1))
 	}
 	return StringToInterface(dnVal), nil
 }
@@ -69,7 +69,7 @@ func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
 	if strings.HasPrefix(dnVal, DynamicDataPrefix) &&
 		dnVal != DynamicDataPrefix {
 		dnVal = strings.TrimPrefix(dnVal, DynamicDataPrefix)
-		return dP.FieldAsString(strings.Split(dnVal, NestingSep))
+		return dP.FieldAsString(SplitPath(dnVal, NestingSep[0], -1))
 	}
 	return dnVal, nil
 }
@@ -78,7 +78,7 @@ func IsPathValid(path string) (err error) {
 	if !strings.HasPrefix(path, DynamicDataPrefix) {
 		return nil
 	}
-	paths := strings.Split(path, NestingSep)
+	paths := SplitPath(path, NestingSep[0], -1)
 	if len(paths) <= 1 {
 		return errors.New("Path is missing ")
 	}
@@ -94,7 +94,7 @@ func IsPathValidForExporters(path string) (err error) {
 	if !strings.HasPrefix(path, DynamicDataPrefix) {
 		return nil
 	}
-	paths := strings.Split(path, NestingSep)
+	paths := SplitPath(path, NestingSep[0], -1)
 	for _, newPath := range paths {
 		if strings.TrimSpace(newPath) == EmptyString {
 			return errors.New("Empty field path ")
