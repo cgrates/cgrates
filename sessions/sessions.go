@@ -1929,10 +1929,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
 	}
-	if args.CGREvent.Tenant == "" {
+	if args.CGREvent.Tenant == utils.EmptyString {
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
