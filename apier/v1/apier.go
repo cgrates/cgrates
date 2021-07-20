@@ -1080,7 +1080,7 @@ func (apiv1 *APIerSv1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *
 		(attr.Category != utils.EmptyString && attr.Tenant == utils.EmptyString) {
 		return utils.ErrMandatoryIeMissing
 	}
-	utils.Logger.Debug(fmt.Sprintf("%v", attr.GetId()))
+	utils.Logger.Debug(fmt.Sprintf("id: %v", attr.GetId()))
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		return 0, apiv1.DataManager.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")
