@@ -1229,18 +1229,18 @@ type AttrRemoveRatingProfile struct {
 
 func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 	result = utils.MetaOut + utils.ConcatenatedKeySep
-	if arrp.Tenant != "" && arrp.Tenant != utils.MetaAny {
+	if arrp.Tenant != utils.EmptyString && arrp.Tenant != utils.MetaAny {
 		result += arrp.Tenant + utils.ConcatenatedKeySep
 	} else {
 		return
 	}
 
-	if arrp.Category != "" && arrp.Category != utils.MetaAny {
+	if arrp.Category != utils.EmptyString && arrp.Category != utils.MetaAny {
 		result += arrp.Category + utils.ConcatenatedKeySep
 	} else {
 		return
 	}
-	if arrp.Subject != "" && arrp.Subject != utils.MetaAny {
+	if arrp.Subject != utils.EmptyString {
 		result += arrp.Subject
 	}
 	return
@@ -1250,8 +1250,8 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, rep
 	if attr.Tenant == utils.EmptyString {
 		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "")) ||
-		(attr.Category != "" && attr.Tenant == "") {
+	if (attr.Subject != utils.EmptyString && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, utils.EmptyString)) ||
+		(attr.Category != utils.EmptyString && attr.Tenant == utils.EmptyString) {
 		return utils.ErrMandatoryIeMissing
 	}
 	err := guardian.Guardian.Guard(func() error {
