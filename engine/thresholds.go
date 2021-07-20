@@ -323,9 +323,9 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 		return nil, err
 	}
 	var withErrors bool
-	var tIDs []string
+	thresholdsIDs = make([]string, 0, len(matchTS))
 	for _, t := range matchTS {
-		tIDs = append(tIDs, t.ID)
+		thresholdsIDs = append(thresholdsIDs, t.ID)
 		t.Hits++
 		if err = processEventWithThreshold(ctx, tS.connMgr,
 			tS.cgrcfg.ThresholdSCfg().ActionSConns, args.CGREvent, t); err != nil {
@@ -362,10 +362,6 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 			tS.stMux.Unlock()
 		}
 	}
-	if len(tIDs) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	thresholdsIDs = append(thresholdsIDs, tIDs...)
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
