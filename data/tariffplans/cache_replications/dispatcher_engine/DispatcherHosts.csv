@@ -1,2 +1,2 @@
-#Tenant[0],ID[1],Address[2],Transport[3],TLS[4]
-cgrates.org,Engine1,127.0.0.1:6012,*json,false
+#Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],ConnectTimeout[6],ReplyTimeout[7],Tls[8],ClientKey[9],ClientCertificate[10],CaCertificate[11]
+cgrates.org,Engine1,127.0.0.1:6012,*json,1,3,"1m","2m",false,,,

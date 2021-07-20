@@ -348,11 +348,10 @@ func TestDiffRegistrarCJsonCfg(t *testing.T) {
 		Hosts: map[string][]*RemoteHost{
 			"HOST_1": {
 				{
-					ID:          "host1_ID",
-					Address:     "127.0.0.1:8080",
-					Transport:   "tcp",
-					Synchronous: false,
-					TLS:         false,
+					ID:        "host1_ID",
+					Address:   "127.0.0.1:8080",
+					Transport: "tcp",
+					TLS:       false,
 				},
 			},
 		},
@@ -364,11 +363,10 @@ func TestDiffRegistrarCJsonCfg(t *testing.T) {
 		Hosts: map[string][]*RemoteHost{
 			"HOST_1": {
 				{
-					ID:          "host2_ID",
-					Address:     "0.0.0.0:8080",
-					Transport:   "udp",
-					Synchronous: true,
-					TLS:         true,
+					ID:        "host2_ID",
+					Address:   "0.0.0.0:8080",
+					Transport: "udp",
+					TLS:       true,
 				},
 			},
 		},
@@ -381,11 +379,10 @@ func TestDiffRegistrarCJsonCfg(t *testing.T) {
 			{
 				Tenant: utils.StringPointer("HOST_1"),
 				RemoteHostJson: &RemoteHostJson{
-					Id:          utils.StringPointer("host2_ID"),
-					Address:     utils.StringPointer("0.0.0.0:8080"),
-					Transport:   utils.StringPointer("udp"),
-					Synchronous: utils.BoolPointer(true),
-					Tls:         utils.BoolPointer(true),
+					Id:        utils.StringPointer("host2_ID"),
+					Address:   utils.StringPointer("0.0.0.0:8080"),
+					Transport: utils.StringPointer("udp"),
+					Tls:       utils.BoolPointer(true),
 				},
 			},
 		},
@@ -403,11 +400,10 @@ func TestDiffRegistrarCJsonCfg(t *testing.T) {
 			{
 				Tenant: utils.StringPointer("HOST_1"),
 				RemoteHostJson: &RemoteHostJson{
-					Id:          utils.StringPointer("host2_ID"),
-					Address:     utils.StringPointer("0.0.0.0:8080"),
-					Transport:   utils.StringPointer("udp"),
-					Synchronous: utils.BoolPointer(true),
-					Tls:         utils.BoolPointer(true),
+					Id:        utils.StringPointer("host2_ID"),
+					Address:   utils.StringPointer("0.0.0.0:8080"),
+					Transport: utils.StringPointer("udp"),
+					Tls:       utils.BoolPointer(true),
 				},
 			},
 		},
@@ -427,11 +423,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 			Hosts: map[string][]*RemoteHost{
 				"HOST_1": {
 					{
-						ID:          "host1_ID",
-						Address:     "127.0.0.1:8080",
-						Transport:   "tcp",
-						Synchronous: false,
-						TLS:         false,
+						ID:        "host1_ID",
+						Address:   "127.0.0.1:8080",
+						Transport: "tcp",
+						TLS:       false,
 					},
 				},
 			},
@@ -442,11 +437,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 			Hosts: map[string][]*RemoteHost{
 				"HOST_1": {
 					{
-						ID:          "host1_ID",
-						Address:     "127.0.0.1:8080",
-						Transport:   "tcp",
-						Synchronous: false,
-						TLS:         false,
+						ID:        "host1_ID",
+						Address:   "127.0.0.1:8080",
+						Transport: "tcp",
+						TLS:       false,
 					},
 				},
 			},
@@ -460,11 +454,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 			Hosts: map[string][]*RemoteHost{
 				"HOST_1": {
 					{
-						ID:          "host2_ID",
-						Address:     "0.0.0.0:8080",
-						Transport:   "udp",
-						Synchronous: true,
-						TLS:         true,
+						ID:        "host2_ID",
+						Address:   "0.0.0.0:8080",
+						Transport: "udp",
+						TLS:       true,
 					},
 				},
 			},
@@ -475,11 +468,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 			Hosts: map[string][]*RemoteHost{
 				"HOST_1": {
 					{
-						ID:          "host2_ID",
-						Address:     "0.0.0.0:8080",
-						Transport:   "udp",
-						Synchronous: true,
-						TLS:         true,
+						ID:        "host2_ID",
+						Address:   "0.0.0.0:8080",
+						Transport: "udp",
+						TLS:       true,
 					},
 				},
 			},
@@ -494,11 +486,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 				{
 					Tenant: utils.StringPointer("HOST_1"),
 					RemoteHostJson: &RemoteHostJson{
-						Id:          utils.StringPointer("host2_ID"),
-						Address:     utils.StringPointer("0.0.0.0:8080"),
-						Transport:   utils.StringPointer("udp"),
-						Synchronous: utils.BoolPointer(true),
-						Tls:         utils.BoolPointer(true),
+						Id:        utils.StringPointer("host2_ID"),
+						Address:   utils.StringPointer("0.0.0.0:8080"),
+						Transport: utils.StringPointer("udp"),
+						Tls:       utils.BoolPointer(true),
 					},
 				},
 			},
@@ -510,11 +501,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 				{
 					Tenant: utils.StringPointer("HOST_1"),
 					RemoteHostJson: &RemoteHostJson{
-						Id:          utils.StringPointer("host2_ID"),
-						Address:     utils.StringPointer("0.0.0.0:8080"),
-						Transport:   utils.StringPointer("udp"),
-						Synchronous: utils.BoolPointer(true),
-						Tls:         utils.BoolPointer(true),
+						Id:        utils.StringPointer("host2_ID"),
+						Address:   utils.StringPointer("0.0.0.0:8080"),
+						Transport: utils.StringPointer("udp"),
+						Tls:       utils.BoolPointer(true),
 					},
 				},
 			},
@@ -535,11 +525,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 				{
 					Tenant: utils.StringPointer("HOST_1"),
 					RemoteHostJson: &RemoteHostJson{
-						Id:          utils.StringPointer("host2_ID"),
-						Address:     utils.StringPointer("0.0.0.0:8080"),
-						Transport:   utils.StringPointer("udp"),
-						Synchronous: utils.BoolPointer(true),
-						Tls:         utils.BoolPointer(true),
+						Id:        utils.StringPointer("host2_ID"),
+						Address:   utils.StringPointer("0.0.0.0:8080"),
+						Transport: utils.StringPointer("udp"),
+						Tls:       utils.BoolPointer(true),
 					},
 				},
 			},
@@ -549,11 +538,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 				{
 					Tenant: utils.StringPointer("HOST_1"),
 					RemoteHostJson: &RemoteHostJson{
-						Id:          utils.StringPointer("host2_ID"),
-						Address:     utils.StringPointer("0.0.0.0:8080"),
-						Transport:   utils.StringPointer("udp"),
-						Synchronous: utils.BoolPointer(true),
-						Tls:         utils.BoolPointer(true),
+						Id:        utils.StringPointer("host2_ID"),
+						Address:   utils.StringPointer("0.0.0.0:8080"),
+						Transport: utils.StringPointer("udp"),
+						Tls:       utils.BoolPointer(true),
 					},
 				},
 			},

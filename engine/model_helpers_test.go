@@ -1796,7 +1796,6 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 			Tenant:            "Tenant1",
 			Address:           "localhost:6012",
 			Transport:         "*json",
-			Synchronous:       true,
 			ConnectAttempts:   2,
 			Reconnects:        5,
 			ConnectTimeout:    "2m",
@@ -1813,7 +1812,6 @@ func TestTPDispatcherHostsAsTPDispatcherHosts(t *testing.T) {
 			Conn: &utils.TPDispatcherHostConn{
 				Address:           "localhost:6012",
 				Transport:         "*json",
-				Synchronous:       true,
 				ConnectAttempts:   2,
 				Reconnects:        5,
 				ConnectTimeout:    2 * time.Minute,
@@ -1918,7 +1916,6 @@ func TestAPItoModelTPDispatcherHost(t *testing.T) {
 		Conn: &utils.TPDispatcherHostConn{
 			Address:           "Address1",
 			Transport:         "*json",
-			Synchronous:       true,
 			ConnectAttempts:   3,
 			Reconnects:        5,
 			ConnectTimeout:    1 * time.Minute,
@@ -1934,7 +1931,6 @@ func TestAPItoModelTPDispatcherHost(t *testing.T) {
 		Transport:         "*json",
 		Tenant:            "Tenant",
 		ID:                "ID",
-		Synchronous:       true,
 		ConnectAttempts:   3,
 		Reconnects:        5,
 		ConnectTimeout:    "1m0s",
@@ -1962,7 +1958,6 @@ func TestAPItoDispatcherHost(t *testing.T) {
 		Conn: &utils.TPDispatcherHostConn{
 			Address:           "localhost:6012",
 			Transport:         "*json",
-			Synchronous:       true,
 			ConnectAttempts:   3,
 			Reconnects:        5,
 			ConnectTimeout:    1 * time.Minute,
@@ -1980,7 +1975,6 @@ func TestAPItoDispatcherHost(t *testing.T) {
 			ID:                "ID1",
 			Address:           "localhost:6012",
 			Transport:         "*json",
-			Synchronous:       true,
 			Reconnects:        5,
 			ConnectTimeout:    1 * time.Minute,
 			ReplyTimeout:      2 * time.Minute,
@@ -2024,7 +2018,6 @@ func TestDispatcherHostToAPI(t *testing.T) {
 		RemoteHost: &config.RemoteHost{
 			Address:           "127.0.0.1:2012",
 			Transport:         "*json",
-			Synchronous:       false,
 			ConnectAttempts:   0,
 			Reconnects:        0,
 			ConnectTimeout:    1 * time.Minute,
@@ -2040,7 +2033,6 @@ func TestDispatcherHostToAPI(t *testing.T) {
 		Conn: &utils.TPDispatcherHostConn{
 			Address:           "127.0.0.1:2012",
 			Transport:         "*json",
-			Synchronous:       false,
 			ConnectAttempts:   0,
 			Reconnects:        0,
 			ConnectTimeout:    1 * time.Minute,

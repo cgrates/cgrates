@@ -196,11 +196,10 @@ func TestDispatcherAuthorizeError(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:          "",
-				Address:     "error",
-				Transport:   "",
-				Synchronous: false,
-				TLS:         false,
+				ID:        "",
+				Address:   "error",
+				Transport: "",
+				TLS:       false,
 			},
 		},
 	}
@@ -221,11 +220,10 @@ func TestDispatcherAuthorizeError2(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:          "",
-				Address:     "error",
-				Transport:   "",
-				Synchronous: false,
-				TLS:         false,
+				ID:        "",
+				Address:   "error",
+				Transport: "",
+				TLS:       false,
 			},
 		},
 	}
@@ -275,11 +273,10 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     "",
-			Transport:   "",
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   "",
+			Transport: "",
+			TLS:       false,
 		},
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
@@ -320,11 +317,10 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -372,11 +368,10 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -422,11 +417,10 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -474,11 +468,10 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
-			ID:          "testID",
-			Address:     rpcclient.InternalRPC,
-			Transport:   utils.MetaInternal,
-			Synchronous: false,
-			TLS:         false,
+			ID:        "testID",
+			Address:   rpcclient.InternalRPC,
+			Transport: utils.MetaInternal,
+			TLS:       false,
 		},
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)

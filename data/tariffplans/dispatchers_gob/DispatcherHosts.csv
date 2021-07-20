@@ -1,5 +1,5 @@
-#Tenant[0],ID[1],Address[2],Transport[3],TLS[4]
-cgrates.org,SELF,*internal,,
-cgrates.org,ALL,127.0.0.1:6013,*gob,false
-cgrates.org,ALL2,127.0.0.1:7013,*gob,false
-cgrates.org,NonexistingHost,127.0.0.1:10012,*json,false
+#Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],ConnectTimeout[6],ReplyTimeout[7],Tls[8],ClientKey[9],ClientCertificate[10],CaCertificate[11]
+cgrates.org,SELF,*internal,,1,3,"1m","2m",false,,,
+cgrates.org,ALL,127.0.0.1:6013,*gob,1,3,"1m","2m",false,,,
+cgrates.org,ALL2,127.0.0.1:7013,*gob,1,3,"1m","2m",false,,,
+cgrates.org,NonexistingHost,127.0.0.1:10012,*json,1,3,"1m","2m",false,,,

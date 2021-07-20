@@ -1612,7 +1612,6 @@ func (tps DispatcherHostMdls) AsTPDispatcherHosts() (result []*utils.TPDispatche
 			Conn: &utils.TPDispatcherHostConn{
 				Address:           tp.Address,
 				Transport:         tp.Transport,
-				Synchronous:       tp.Synchronous,
 				TLS:               tp.TLS,
 				ConnectAttempts:   tp.ConnectAttempts,
 				Reconnects:        tp.Reconnects,
@@ -1649,7 +1648,6 @@ func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls *Dispatcher
 		ID:                tpDPH.ID,
 		Address:           tpDPH.Conn.Address,
 		Transport:         tpDPH.Conn.Transport,
-		Synchronous:       tpDPH.Conn.Synchronous,
 		ConnectAttempts:   tpDPH.Conn.ConnectAttempts,
 		Reconnects:        tpDPH.Conn.Reconnects,
 		ConnectTimeout:    tpDPH.Conn.ConnectTimeout.String(),
@@ -1671,7 +1669,6 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 			ID:                tpDPH.ID,
 			Address:           tpDPH.Conn.Address,
 			Transport:         tpDPH.Conn.Transport,
-			Synchronous:       tpDPH.Conn.Synchronous,
 			ConnectAttempts:   tpDPH.Conn.ConnectAttempts,
 			Reconnects:        tpDPH.Conn.Reconnects,
 			ConnectTimeout:    tpDPH.Conn.ConnectTimeout,
@@ -1691,7 +1688,6 @@ func DispatcherHostToAPI(dph *DispatcherHost) (tpDPH *utils.TPDispatcherHost) {
 		Conn: &utils.TPDispatcherHostConn{
 			Address:           dph.Address,
 			Transport:         dph.Transport,
-			Synchronous:       dph.Synchronous,
 			ConnectAttempts:   dph.ConnectAttempts,
 			Reconnects:        dph.Reconnects,
 			ConnectTimeout:    dph.ConnectTimeout,

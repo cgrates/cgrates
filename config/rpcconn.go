@@ -159,7 +159,6 @@ type RemoteHost struct {
 	ID                string
 	Address           string
 	Transport         string
-	Synchronous       bool
 	ConnectAttempts   int
 	Reconnects        int
 	ConnectTimeout    time.Duration
@@ -185,9 +184,6 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 	}
 	if jsnCfg.Transport != nil {
 		rh.Transport = *jsnCfg.Transport
-	}
-	if jsnCfg.Synchronous != nil {
-		rh.Synchronous = *jsnCfg.Synchronous
 	}
 	if jsnCfg.Tls != nil {
 		rh.TLS = *jsnCfg.Tls
@@ -229,9 +225,6 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]interface{}) {
 	if rh.ID != utils.EmptyString {
 		mp[utils.IDCfg] = rh.ID
 	}
-	if rh.Synchronous {
-		mp[utils.SynchronousCfg] = rh.Synchronous
-	}
 	if rh.TLS {
 		mp[utils.TLSNoCaps] = rh.TLS
 	}
@@ -265,7 +258,6 @@ func (rh RemoteHost) Clone() (cln *RemoteHost) {
 		ID:                rh.ID,
 		Address:           rh.Address,
 		Transport:         rh.Transport,
-		Synchronous:       rh.Synchronous,
 		TLS:               rh.TLS,
 		ClientKey:         rh.ClientKey,
 		ClientCertificate: rh.ClientCertificate,
@@ -290,7 +282,6 @@ func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs 
 			connIDs.Add(rpcKey)
 			rh.Address = newHost.Address
 			rh.Transport = newHost.Transport
-			rh.Synchronous = newHost.Synchronous
 			rh.TLS = newHost.TLS
 			rh.ClientKey = newHost.ClientKey
 			rh.ClientCertificate = newHost.ClientCertificate
@@ -316,7 +307,6 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 			connIDs.Add(rpcKey)
 			rh.Address = ""
 			rh.Transport = ""
-			rh.Synchronous = false
 			rh.TLS = false
 			rh.ClientKey = ""
 			rh.ClientCertificate = ""
@@ -335,7 +325,6 @@ type RemoteHostJson struct {
 	Id                 *string
 	Address            *string
 	Transport          *string
-	Synchronous        *bool
 	Connect_attempts   *int
 	Reconnects         *int
 	Connect_timeout    *string
@@ -356,9 +345,6 @@ func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {
 	}
 	if v1.Transport != v2.Transport {
 		d.Transport = utils.StringPointer(v2.Transport)
-	}
-	if v1.Synchronous != v2.Synchronous {
-		d.Synchronous = utils.BoolPointer(v2.Synchronous)
 	}
 	if v1.TLS != v2.TLS {
 		d.Tls = utils.BoolPointer(v2.TLS)
@@ -422,7 +408,6 @@ func equalsRemoteHosts(v1, v2 []*RemoteHost) bool {
 		if v1[i].ID != v2[i].ID ||
 			v1[i].Address != v2[i].Address ||
 			v1[i].Transport != v2[i].Transport ||
-			v1[i].Synchronous != v2[i].Synchronous ||
 			v1[i].TLS != v2[i].TLS ||
 			v1[i].ClientKey != v2[i].ClientKey ||
 			v1[i].ClientCertificate != v2[i].ClientCertificate ||
