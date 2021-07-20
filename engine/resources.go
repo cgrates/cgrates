@@ -113,16 +113,15 @@ func (ru *ResourceUsage) Clone() (cln *ResourceUsage) {
 // Resource represents a resource in the system
 // not thread safe, needs locking at process level
 type Resource struct {
-	Tenant   string
-	ID       string
-	Usages   map[string]*ResourceUsage
-	TTLIdx   []string         // holds ordered list of ResourceIDs based on their TTL, empty if feature is disableda
-	lkID     string           // ID of the lock used when matching the resource
-	prflLkID string           // ID of the lock used for the profile
-	ttl      *time.Duration   // time to leave for this resource, picked up on each Resource initialization out of config
-	tUsage   *float64         // sum of all usages
-	dirty    *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
-	rPrf     *ResourceProfile // for ordering purposes
+	Tenant string
+	ID     string
+	Usages map[string]*ResourceUsage
+	TTLIdx []string         // holds ordered list of ResourceIDs based on their TTL, empty if feature is disableda
+	lkID   string           // ID of the lock used when matching the resource
+	ttl    *time.Duration   // time to leave for this resource, picked up on each Resource initialization out of config
+	tUsage *float64         // sum of all usages
+	dirty  *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
+	rPrf   *ResourceProfile // for ordering purposes
 }
 
 // resourceLockKey returns the ID used to lock a resource with guardian
@@ -338,14 +337,9 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 			err = fmt.Errorf("empty configuration for resourceID: %s", r.TenantID())
 			return
 		}
-		if r.rPrf.Limit >= r.TotalUsage()+ru.Units || r.rPrf.Limit == -1 {
-			if alcMessage == "" {
-				if r.rPrf.AllocationMessage != "" {
-					alcMessage = r.rPrf.AllocationMessage
-				} else {
-					alcMessage = r.rPrf.ID
-				}
-			}
+		if alcMessage == utils.EmptyString &&
+			(r.rPrf.Limit >= r.TotalUsage()+ru.Units || r.rPrf.Limit == -1) {
+			alcMessage = utils.FirstNonEmpty(r.rPrf.AllocationMessage, r.rPrf.ID)
 		}
 	}
 	if alcMessage == "" {
@@ -480,6 +474,31 @@ func (rS *ResourceService) storeResource(r *Resource) (err error) {
 	return
 }
 
+// storeMatchedResources will store the list of resources based on the StoreInterval
+func (rS *ResourceService) storeMatchedResources(mtcRLs Resources) (err error) {
+	if rS.cgrcfg.ResourceSCfg().StoreInterval == 0 {
+		return
+	}
+	if rS.cgrcfg.ResourceSCfg().StoreInterval > 0 {
+		rS.srMux.Lock()
+		defer rS.srMux.Unlock()
+	}
+	for _, r := range mtcRLs {
+		if r.dirty != nil {
+			*r.dirty = true // mark it to be saved
+			if rS.cgrcfg.ResourceSCfg().StoreInterval > 0 {
+				rS.storedResources[r.TenantID()] = true
+				continue
+			}
+			if err = rS.storeResource(r); err != nil {
+				return
+			}
+		}
+
+	}
+	return
+}
+
 // processThresholds will pass the event for resource to ThresholdS
 func (rS *ResourceService) processThresholds(rs Resources, argDispatcher *utils.ArgDispatcher) (err error) {
 	if len(rS.cgrcfg.ResourceSCfg().ThresholdSConns) == 0 {
@@ -528,7 +547,6 @@ func (rS *ResourceService) processThresholds(rs Resources, argDispatcher *utils.
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 	evUUID string, usageTTL *time.Duration) (rs Resources, err error) {
-	matchingResources := make(map[string]*Resource)
 	var rIDs utils.StringMap
 	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringMap{"resID":bool}
 		if x == nil {
@@ -557,6 +575,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		}
 	}
 	evNm := utils.MapStorage{utils.MetaReq: ev.Event}
+	rs = make(Resources, 0, len(rIDs))
 	for resName := range rIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -568,6 +587,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 			if err == utils.ErrNotFound {
 				continue
 			}
+			rs.unlock()
 			return
 		}
 		rPrf.lock(lkPrflID)
@@ -579,6 +599,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		if pass, err := rS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
 			evNm); err != nil {
 			rPrf.unlock()
+			rs.unlock()
 			return nil, err
 		} else if !pass {
 			rPrf.unlock()
@@ -590,7 +611,8 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		r, err := rS.dm.GetResource(rPrf.Tenant, rPrf.ID, true, true, "")
 		if err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
-			guardian.Guardian.UnguardIDs(lkPrflID)
+			rPrf.unlock()
+			rs.unlock()
 			return nil, err
 		}
 		r.lock(lkID) // pass the lock into resource so we have it as reference
@@ -605,19 +627,13 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 			r.ttl = utils.DurationPointer(rPrf.UsageTTL)
 		}
 		r.rPrf = rPrf
-		matchingResources[rPrf.ID] = r
+		rs = append(rs, r)
 	}
 
-	if len(matchingResources) == 0 {
+	if len(rs) == 0 {
 		return nil, utils.ErrNotFound
 	}
 	// All good, convert from Map to Slice so we can sort
-	rs = make(Resources, len(matchingResources))
-	i := 0
-	for _, r := range matchingResources {
-		rs[i] = r
-		i++
-	}
 	rs.Sort()
 	for i, r := range rs {
 		if r.rPrf.Blocker && i != len(rs)-1 { // blocker will stop processing and we are not at last index
@@ -765,21 +781,8 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	}
 
 	// index it for storing
-	for _, r := range mtcRLs {
-		if rS.cgrcfg.ResourceSCfg().StoreInterval != 0 && r.dirty != nil {
-			if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
-				*r.dirty = true
-				if err = rS.storeResource(r); err != nil {
-					return
-				}
-			} else {
-				*r.dirty = true // mark it to be saved
-				rS.srMux.Lock()
-				rS.storedResources[r.TenantID()] = true
-				rS.srMux.Unlock()
-			}
-		}
-
+	if err = rS.storeMatchedResources(mtcRLs); err != nil {
+		return
 	}
 	if err = rS.processThresholds(mtcRLs, args.ArgDispatcher); err != nil {
 		return
@@ -821,7 +824,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	var mtcRLs Resources
 	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID,
 		args.UsageTTL); err != nil {
-		return err
+		return
 	}
 	defer mtcRLs.unlock()
 
@@ -830,23 +833,9 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	}
 
 	// Handle storing
-	if rS.cgrcfg.ResourceSCfg().StoreInterval != -1 {
-		rS.srMux.Lock()
+	if err = rS.storeMatchedResources(mtcRLs); err != nil {
+		return
 	}
-	for _, r := range mtcRLs {
-		if r.dirty != nil {
-			if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
-				if err = rS.storeResource(r); err != nil {
-					return
-				}
-			} else {
-				*r.dirty = true // mark it to be saved
-				rS.storedResources[r.TenantID()] = true
-			}
-		}
-
-	}
-
 	if err = rS.processThresholds(mtcRLs, args.ArgDispatcher); err != nil {
 		return
 	}
