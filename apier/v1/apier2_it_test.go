@@ -62,9 +62,8 @@ var (
 
 		testAPIerInitDataDb,
 		testAPIerResetStorDb,
-		testAPIerStartEngine,
+		testAPIerStartEngineSleep,
 		testAPIerRPCConn,
-		testAPIerSleep,
 		testApierSetAndRemoveRatingProfileAnySubject,
 		testAPIerKillEngine,
 	}
@@ -76,6 +75,7 @@ func TestApierIT2(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		APIerSv2ConfigDIR = "tutinternal"
+		sTestsAPIer = sTestsAPIer[:len(sTestsAPIer)-6]
 	case utils.MetaMySQL:
 		APIerSv2ConfigDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -110,6 +110,14 @@ func testAPIerInitDataDb(t *testing.T) {
 // Wipe out the cdr database
 func testAPIerResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(apierCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Start CGR Engine
+func testAPIerStartEngineSleep(t *testing.T) {
+	time.Sleep(500*time.Millisecond)
+	if _, err := engine.StopStartEngine(apierCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -326,25 +334,7 @@ func testAPIerGetRatingPlanIDs(t *testing.T) {
 	}
 }
 
-func testAPIerSleep(t *testing.T) {
-	var rply string
-	if err := apierRPC.Call(utils.CoreSv1Sleep,
-		&DurationArgs{DurationTime: time.Duration(100 * time.Millisecond)},
-		&rply); err != nil {
-		t.Error(err)
-		return
-	}
-}
-
 func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
-	var rply string
-	if err := apierRPC.Call(utils.CoreSv1Sleep,
-		&DurationArgs{DurationTime: time.Duration(100 * time.Millisecond)},
-		&rply); err != nil {
-		t.Error(err)
-		return
-	}
-
 	loader := exec.Command("cgr-loader", "-config_path", apierCfgPath, "-path", path.Join(*dataDir, "tariffplans", "tutorial"))
 	if err := loader.Run(); err != nil {
 		t.Error(err)
@@ -370,16 +360,16 @@ func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
 	}
 
 	expected := engine.RatingProfile{
-		Id: "*out:cgrates.org:call:SUPPLIER1",
+		Id: "*out:cgrates.org:sms:*any",
 		RatingPlanActivations: engine.RatingPlanActivations{
 			{
-				ActivationTime: time.Date(2018, 1, 1, 0, 0, 0,0, time.UTC),
+				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0,0, time.UTC),
 				RatingPlanId:   "RP_SMS",
 			},
 		},
 	}
 	attrGetRatingPlan := &utils.AttrGetRatingProfile{
-		Tenant: "cgrates.org", Category: "call", Subject: "SUPPLIER1"}
+		Tenant: "cgrates.org", Category: "sms", Subject: utils.ANY}
 	var rpl engine.RatingProfile
 	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
 		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
@@ -389,7 +379,7 @@ func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
 
 	if err := apierRPC.Call(utils.APIerSv1RemoveRatingProfile, &AttrRemoveRatingProfile{
 		Tenant:   "cgrates.org",
-		Category: utils.CALL,
+		Category: "sms",
 		Subject:  utils.ANY,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -397,10 +387,9 @@ func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s ", utils.OK, reply)
 	}
 
-	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
-		t.Errorf("Got error on APIerSv1.GetRatingProfile: %+v", err)
-	} else if !reflect.DeepEqual(expected, rpl) {
-		t.Errorf("Calling APIerSv1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
+	if err := apierRPC.Call(utils.APIerSv1GetRatingProfile,
+		attrGetRatingPlan, &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %v, \n but received %v", utils.ErrNotFound, err)
 	}
 }
 
