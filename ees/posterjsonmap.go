@@ -35,6 +35,7 @@ func NewPosterJSONMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Fi
 		cfgIdx:  cfgIdx,
 		filterS: filterS,
 		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
 	}
 	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
 	case utils.MetaAMQPjsonMap:
@@ -68,6 +69,7 @@ type PosterJSONMapEE struct {
 	filterS *engine.FilterS
 	poster  engine.Poster
 	dc      *utils.SafeMapStorage
+	reqs    *concReq
 }
 
 // ID returns the identificator of this exporter
@@ -82,9 +84,11 @@ func (pstrEE *PosterJSONMapEE) OnEvicted(string, interface{}) {
 
 // ExportEvent implements EventExporter
 func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	pstrEE.reqs.get()
 	defer func() {
 		updateEEMetrics(pstrEE.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,
 			pstrEE.cgrCfg.GeneralCfg().DefaultTimezone))
+		pstrEE.reqs.done()
 	}()
 	pstrEE.dc.Lock()
 	pstrEE.dc.MapStorage[utils.NumberOfEvents] = pstrEE.dc.MapStorage[utils.NumberOfEvents].(int64) + 1

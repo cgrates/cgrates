@@ -26,8 +26,14 @@ import (
 
 func NewVirtualExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc *utils.SafeMapStorage) (vEe *VirtualEe, err error) {
-	vEe = &VirtualEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+	vEe = &VirtualEe{
+		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg:  cgrCfg,
+		cfgIdx:  cfgIdx,
+		filterS: filterS,
+		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+	}
 	err = vEe.init()
 	return
 }
@@ -39,6 +45,7 @@ type VirtualEe struct {
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
 	dc      *utils.SafeMapStorage
+	reqs    *concReq
 }
 
 // init will create all the necessary dependencies, including opening the file
@@ -56,9 +63,11 @@ func (vEe *VirtualEe) OnEvicted(_ string, _ interface{}) {}
 
 // ExportEvent implements EventExporter
 func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	vEe.reqs.get()
 	defer func() {
 		updateEEMetrics(vEe.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Timezone,
 			vEe.cgrCfg.GeneralCfg().DefaultTimezone))
+		vEe.reqs.done()
 	}()
 	vEe.dc.Lock()
 	vEe.dc.MapStorage[utils.NumberOfEvents] = vEe.dc.MapStorage[utils.NumberOfEvents].(int64) + 1

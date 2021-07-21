@@ -189,18 +189,19 @@ type EEsJsonCfg struct {
 
 // EventExporterJsonCfg is the configuration of a single EventExporter
 type EventExporterJsonCfg struct {
-	Id                *string
-	Type              *string
-	Export_path       *string
-	Opts              map[string]interface{}
-	Timezone          *string
-	Filters           *[]string
-	Flags             *[]string
-	Attribute_ids     *[]string
-	Attribute_context *string
-	Synchronous       *bool
-	Attempts          *int
-	Fields            *[]*FcTemplateJsonCfg
+	Id                  *string
+	Type                *string
+	Export_path         *string
+	Opts                map[string]interface{}
+	Timezone            *string
+	Filters             *[]string
+	Flags               *[]string
+	Attribute_ids       *[]string
+	Attribute_context   *string
+	Synchronous         *bool
+	Attempts            *int
+	Concurrent_requests *int
+	Fields              *[]*FcTemplateJsonCfg
 }
 
 // SessionSJsonCfg config section

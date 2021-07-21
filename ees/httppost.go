@@ -30,8 +30,14 @@ import (
 
 func NewHTTPPostEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc *utils.SafeMapStorage) (httpPost *HTTPPost, err error) {
-	httpPost = &HTTPPost{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+	httpPost = &HTTPPost{
+		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg:  cgrCfg,
+		cfgIdx:  cfgIdx,
+		filterS: filterS,
+		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+	}
 	httpPost.httpPoster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
 		cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
 		utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type],
@@ -47,6 +53,7 @@ type HTTPPost struct {
 	filterS    *engine.FilterS
 	httpPoster *engine.HTTPPoster
 	dc         *utils.SafeMapStorage
+	reqs       *concReq
 }
 
 // ID returns the identificator of this exporter
@@ -59,9 +66,11 @@ func (httpPost *HTTPPost) OnEvicted(_ string, _ interface{}) {}
 
 // ExportEvent implements EventExporter
 func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	httpPost.reqs.get()
 	defer func() {
 		updateEEMetrics(httpPost.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
 			httpPost.cgrCfg.GeneralCfg().DefaultTimezone))
+		httpPost.reqs.done()
 	}()
 	httpPost.dc.Lock()
 	httpPost.dc.MapStorage[utils.NumberOfEvents] = httpPost.dc.MapStorage[utils.NumberOfEvents].(int64) + 1

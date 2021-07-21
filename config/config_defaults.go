@@ -491,6 +491,7 @@ const CGRATES_CFG_JSON = `
 			"id": "*default",									// identifier of the EventReader profile
 			"type": "*none",									// exporter type 
 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
+			"concurrent_requests": 0,							// maximum simultaneous requests to process, 0 for unlimited
 			"opts": {
 
 				// CSV

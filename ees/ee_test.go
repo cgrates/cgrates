@@ -31,6 +31,7 @@ import (
 func TestNewEventExporter(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaFileCSV
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg, 0, filterS)
 	errExpect := "open /var/spool/cgrates/ees/*default_"
@@ -63,6 +64,7 @@ func TestNewEventExporter(t *testing.T) {
 func TestNewEventExporterCase2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaFileFWV
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg, 0, filterS)
 	errExpect := "open /var/spool/cgrates/ees/*default_"
@@ -92,6 +94,7 @@ func TestNewEventExporterCase2(t *testing.T) {
 func TestNewEventExporterCase3(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg, 0, filterS)
 	if err != nil {
@@ -116,6 +119,7 @@ func TestNewEventExporterCase3(t *testing.T) {
 func TestNewEventExporterCase4(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjsonMap
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg, 0, filterS)
 	if err != nil {
@@ -140,6 +144,7 @@ func TestNewEventExporterCase4(t *testing.T) {
 func TestNewEventExporterCase5(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaAMQPjsonMap
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg, 0, filterS)
 	if err != nil {
@@ -164,6 +169,7 @@ func TestNewEventExporterCase5(t *testing.T) {
 func TestNewEventExporterCase6(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaVirt
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg, 0, filterS)
 	if err != nil {
@@ -191,6 +197,7 @@ func TestNewEventExporterCase6(t *testing.T) {
 func TestNewEventExporterDefaultCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaNone
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	_, err := NewEventExporter(cgrCfg, 0, filterS)
 	errExpect := fmt.Sprintf("unsupported exporter type: <%s>", utils.MetaNone)
@@ -203,6 +210,7 @@ func TestNewEventExporterDefaultCase(t *testing.T) {
 func TestNewEventExporterCase7(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaElastic
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = "/invalid/path"
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg, 0, filterS)
@@ -233,6 +241,7 @@ func TestNewEventExporterCase7(t *testing.T) {
 func TestNewEventExporterCase8(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQL
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	_, err := NewEventExporter(cgrCfg, 0, filterS)
 	errExpect := "MANDATORY_IE_MISSING: [sqlTableName]"
