@@ -227,7 +227,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 			if sync {
 				if hasVerbose {
 					metricMapLock.Lock()
-					metricsMap[ee.ID()] = ee.GetMetrics()
+					metricsMap[ee.ID()] = ee.GetMetrics().MapStorage
 					metricMapLock.Unlock()
 				}
 				wg.Done()
@@ -265,86 +265,93 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 	return
 }
 
-func newEEMetrics(location string) (utils.MapStorage, error) {
+func newEEMetrics(location string) (*utils.SafeMapStorage, error) {
 	tNow := time.Now()
 	loc, err := time.LoadLocation(location)
 	if err != nil {
 		return nil, err
 	}
-	return utils.MapStorage{
+	return &utils.SafeMapStorage{MapStorage: utils.MapStorage{
 		utils.NumberOfEvents:  int64(0),
 		utils.PositiveExports: utils.StringSet{},
 		utils.NegativeExports: utils.StringSet{},
 		utils.TimeNow: time.Date(tNow.Year(), tNow.Month(), tNow.Day(),
 			tNow.Hour(), tNow.Minute(), tNow.Second(), tNow.Nanosecond(), loc),
-	}, nil
+	}}, nil
 }
 
-func updateEEMetrics(dc utils.MapStorage, ev engine.MapEvent, timezone string) {
+func updateEEMetrics(dc *utils.SafeMapStorage, cgrID string, ev engine.MapEvent, hasError bool, timezone string) {
+	dc.Lock()
+	defer dc.Unlock()
+	if hasError {
+		dc.MapStorage[utils.NegativeExports].(utils.StringSet).Add(cgrID)
+	} else {
+		dc.MapStorage[utils.PositiveExports].(utils.StringSet).Add(cgrID)
+	}
 	if aTime, err := ev.GetTime(utils.AnswerTime, timezone); err == nil {
-		if _, has := dc[utils.FirstEventATime]; !has {
-			dc[utils.FirstEventATime] = time.Time{}
+		if _, has := dc.MapStorage[utils.FirstEventATime]; !has {
+			dc.MapStorage[utils.FirstEventATime] = time.Time{}
 		}
-		if _, has := dc[utils.LastEventATime]; !has {
-			dc[utils.LastEventATime] = time.Time{}
+		if _, has := dc.MapStorage[utils.LastEventATime]; !has {
+			dc.MapStorage[utils.LastEventATime] = time.Time{}
 		}
-		if dc[utils.FirstEventATime].(time.Time).IsZero() ||
-			aTime.Before(dc[utils.FirstEventATime].(time.Time)) {
-			dc[utils.FirstEventATime] = aTime
+		if dc.MapStorage[utils.FirstEventATime].(time.Time).IsZero() ||
+			aTime.Before(dc.MapStorage[utils.FirstEventATime].(time.Time)) {
+			dc.MapStorage[utils.FirstEventATime] = aTime
 		}
-		if aTime.After(dc[utils.LastEventATime].(time.Time)) {
-			dc[utils.LastEventATime] = aTime
+		if aTime.After(dc.MapStorage[utils.LastEventATime].(time.Time)) {
+			dc.MapStorage[utils.LastEventATime] = aTime
 		}
 	}
 	if oID, err := ev.GetTInt64(utils.OrderID); err == nil {
-		if _, has := dc[utils.FirstExpOrderID]; !has {
-			dc[utils.FirstExpOrderID] = int64(0)
+		if _, has := dc.MapStorage[utils.FirstExpOrderID]; !has {
+			dc.MapStorage[utils.FirstExpOrderID] = int64(0)
 		}
-		if _, has := dc[utils.LastExpOrderID]; !has {
-			dc[utils.LastExpOrderID] = int64(0)
+		if _, has := dc.MapStorage[utils.LastExpOrderID]; !has {
+			dc.MapStorage[utils.LastExpOrderID] = int64(0)
 		}
-		if dc[utils.FirstExpOrderID].(int64) == 0 ||
-			dc[utils.FirstExpOrderID].(int64) > oID {
-			dc[utils.FirstExpOrderID] = oID
+		if dc.MapStorage[utils.FirstExpOrderID].(int64) == 0 ||
+			dc.MapStorage[utils.FirstExpOrderID].(int64) > oID {
+			dc.MapStorage[utils.FirstExpOrderID] = oID
 		}
-		if dc[utils.LastExpOrderID].(int64) < oID {
-			dc[utils.LastExpOrderID] = oID
+		if dc.MapStorage[utils.LastExpOrderID].(int64) < oID {
+			dc.MapStorage[utils.LastExpOrderID] = oID
 		}
 	}
 	if cost, err := ev.GetFloat64(utils.Cost); err == nil {
-		if _, has := dc[utils.TotalCost]; !has {
-			dc[utils.TotalCost] = float64(0.0)
+		if _, has := dc.MapStorage[utils.TotalCost]; !has {
+			dc.MapStorage[utils.TotalCost] = float64(0.0)
 		}
-		dc[utils.TotalCost] = dc[utils.TotalCost].(float64) + cost
+		dc.MapStorage[utils.TotalCost] = dc.MapStorage[utils.TotalCost].(float64) + cost
 	}
 	if tor, err := ev.GetString(utils.ToR); err == nil {
 		if usage, err := ev.GetDuration(utils.Usage); err == nil {
 			switch tor {
 			case utils.MetaVoice:
-				if _, has := dc[utils.TotalDuration]; !has {
-					dc[utils.TotalDuration] = time.Duration(0)
+				if _, has := dc.MapStorage[utils.TotalDuration]; !has {
+					dc.MapStorage[utils.TotalDuration] = time.Duration(0)
 				}
-				dc[utils.TotalDuration] = dc[utils.TotalDuration].(time.Duration) + usage
+				dc.MapStorage[utils.TotalDuration] = dc.MapStorage[utils.TotalDuration].(time.Duration) + usage
 			case utils.MetaSMS:
-				if _, has := dc[utils.TotalSMSUsage]; !has {
-					dc[utils.TotalSMSUsage] = time.Duration(0)
+				if _, has := dc.MapStorage[utils.TotalSMSUsage]; !has {
+					dc.MapStorage[utils.TotalSMSUsage] = time.Duration(0)
 				}
-				dc[utils.TotalSMSUsage] = dc[utils.TotalSMSUsage].(time.Duration) + usage
+				dc.MapStorage[utils.TotalSMSUsage] = dc.MapStorage[utils.TotalSMSUsage].(time.Duration) + usage
 			case utils.MetaMMS:
-				if _, has := dc[utils.TotalMMSUsage]; !has {
-					dc[utils.TotalMMSUsage] = time.Duration(0)
+				if _, has := dc.MapStorage[utils.TotalMMSUsage]; !has {
+					dc.MapStorage[utils.TotalMMSUsage] = time.Duration(0)
 				}
-				dc[utils.TotalMMSUsage] = dc[utils.TotalMMSUsage].(time.Duration) + usage
+				dc.MapStorage[utils.TotalMMSUsage] = dc.MapStorage[utils.TotalMMSUsage].(time.Duration) + usage
 			case utils.MetaGeneric:
-				if _, has := dc[utils.TotalGenericUsage]; !has {
-					dc[utils.TotalGenericUsage] = time.Duration(0)
+				if _, has := dc.MapStorage[utils.TotalGenericUsage]; !has {
+					dc.MapStorage[utils.TotalGenericUsage] = time.Duration(0)
 				}
-				dc[utils.TotalGenericUsage] = dc[utils.TotalGenericUsage].(time.Duration) + usage
+				dc.MapStorage[utils.TotalGenericUsage] = dc.MapStorage[utils.TotalGenericUsage].(time.Duration) + usage
 			case utils.MetaData:
-				if _, has := dc[utils.TotalDataUsage]; !has {
-					dc[utils.TotalDataUsage] = time.Duration(0)
+				if _, has := dc.MapStorage[utils.TotalDataUsage]; !has {
+					dc.MapStorage[utils.TotalDataUsage] = time.Duration(0)
 				}
-				dc[utils.TotalDataUsage] = dc[utils.TotalDataUsage].(time.Duration) + usage
+				dc.MapStorage[utils.TotalDataUsage] = dc.MapStorage[utils.TotalDataUsage].(time.Duration) + usage
 			}
 		}
 	}

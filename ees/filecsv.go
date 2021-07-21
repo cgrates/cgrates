@@ -24,7 +24,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"sync"
 
 	"github.com/cgrates/cgrates/engine"
 
@@ -33,7 +32,7 @@ import (
 )
 
 func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (fCsv *FileCSVee, err error) {
+	dc *utils.SafeMapStorage) (fCsv *FileCSVee, err error) {
 	fCsv = &FileCSVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = fCsv.init()
@@ -48,8 +47,7 @@ type FileCSVee struct {
 	filterS   *engine.FilterS
 	file      io.WriteCloser
 	csvWriter *csv.Writer
-	sync.RWMutex
-	dc utils.MapStorage
+	dc        *utils.SafeMapStorage
 }
 
 // init will create all the necessary dependencies, including opening the file
@@ -57,9 +55,9 @@ func (fCsv *FileCSVee) init() (err error) {
 	// create the file
 	filePath := path.Join(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ExportPath,
 		fCsv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)
-	fCsv.Lock()
-	fCsv.dc[utils.ExportPath] = filePath
-	fCsv.Unlock()
+	fCsv.dc.Lock()
+	fCsv.dc.MapStorage[utils.ExportPath] = filePath
+	fCsv.dc.Unlock()
 	if fCsv.file, err = os.Create(filePath); err != nil {
 		return
 	}
@@ -92,16 +90,13 @@ func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	fCsv.Lock()
 	defer func() {
-		if err != nil {
-			fCsv.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
-		} else {
-			fCsv.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
-		}
-		fCsv.Unlock()
+		updateEEMetrics(fCsv.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
+			fCsv.cgrCfg.GeneralCfg().DefaultTimezone))
 	}()
-	fCsv.dc[utils.NumberOfEvents] = fCsv.dc[utils.NumberOfEvents].(int64) + 1
+	fCsv.dc.Lock()
+	fCsv.dc.MapStorage[utils.NumberOfEvents] = fCsv.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
+	fCsv.dc.Unlock()
 
 	var csvRecord []string
 	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()) == 0 {
@@ -113,10 +108,10 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-			utils.MetaReq:  cgrEv.Event,
+		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 			utils.MetaDC:   fCsv.dc,
-			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 			utils.MetaCfg:  fCsv.cgrCfg.GetDataProvider(),
 		}, utils.FirstNonEmpty(cgrEv.Tenant, fCsv.cgrCfg.GeneralCfg().DefaultTenant),
 			fCsv.filterS, oNm)
@@ -127,8 +122,6 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		csvRecord = eeReq.ExpData[utils.MetaExp].OrderedFieldsAsStrings()
 	}
 
-	updateEEMetrics(fCsv.dc, cgrEv.Event, utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
-		fCsv.cgrCfg.GeneralCfg().DefaultTimezone))
 	return fCsv.csvWriter.Write(csvRecord)
 }
 
@@ -140,7 +133,7 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaHdr: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaDC:  fCsv.dc,
 		utils.MetaCfg: fCsv.cgrCfg.GetDataProvider(),
 	}, fCsv.cgrCfg.GeneralCfg().DefaultTenant,
@@ -159,7 +152,7 @@ func (fCsv *FileCSVee) composeTrailer() (err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaTrl: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaDC:  fCsv.dc,
 		utils.MetaCfg: fCsv.cgrCfg.GetDataProvider(),
 	}, fCsv.cgrCfg.GeneralCfg().DefaultTenant,
@@ -171,6 +164,6 @@ func (fCsv *FileCSVee) composeTrailer() (err error) {
 	return fCsv.csvWriter.Write(eeReq.ExpData[utils.MetaTrl].OrderedFieldsAsStrings())
 }
 
-func (fCsv *FileCSVee) GetMetrics() utils.MapStorage {
+func (fCsv *FileCSVee) GetMetrics() *utils.SafeMapStorage {
 	return fCsv.dc.Clone()
 }

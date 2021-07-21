@@ -325,12 +325,12 @@ func (mockEventExporter) ExportEvent(cgrEv *utils.CGREvent) error { return nil }
 func (mockEventExporter) OnEvicted(itdmID string, value interface{}) {
 	utils.Logger.Warning("NOT IMPLEMENTED")
 }
-func (mockEventExporter) GetMetrics() utils.MapStorage {
-	return utils.MapStorage{
+func (mockEventExporter) GetMetrics() *utils.SafeMapStorage {
+	return &utils.SafeMapStorage{MapStorage: utils.MapStorage{
 		utils.NumberOfEvents:  int64(0),
 		utils.PositiveExports: utils.StringSet{},
 		utils.NegativeExports: 5,
-	}
+	}}
 }
 
 func TestV1ProcessEventMockMetrics(t *testing.T) {
@@ -470,14 +470,15 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.Usage:      time.Second,
 	}
 	exp, _ := newEEMetrics(utils.EmptyString)
-	exp[utils.FirstEventATime] = tnow
-	exp[utils.LastEventATime] = tnow
-	exp[utils.FirstExpOrderID] = int64(1)
-	exp[utils.LastExpOrderID] = int64(1)
-	exp[utils.TotalCost] = float64(5.5)
-	exp[utils.TotalDuration] = time.Second
-	exp[utils.TimeNow] = dc[utils.TimeNow]
-	if updateEEMetrics(dc, ev, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
+	exp.MapStorage[utils.FirstEventATime] = tnow
+	exp.MapStorage[utils.LastEventATime] = tnow
+	exp.MapStorage[utils.FirstExpOrderID] = int64(1)
+	exp.MapStorage[utils.LastExpOrderID] = int64(1)
+	exp.MapStorage[utils.TotalCost] = float64(5.5)
+	exp.MapStorage[utils.TotalDuration] = time.Second
+	exp.MapStorage[utils.TimeNow] = dc.MapStorage[utils.TimeNow]
+	exp.MapStorage[utils.PositiveExports] = utils.StringSet{"": {}}
+	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
 		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
 	}
 
@@ -489,11 +490,11 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.ToR:        utils.MetaSMS,
 		utils.Usage:      time.Second,
 	}
-	exp[utils.LastEventATime] = tnow
-	exp[utils.LastExpOrderID] = int64(2)
-	exp[utils.TotalCost] = float64(11)
-	exp[utils.TotalSMSUsage] = time.Second
-	if updateEEMetrics(dc, ev, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
+	exp.MapStorage[utils.LastEventATime] = tnow
+	exp.MapStorage[utils.LastExpOrderID] = int64(2)
+	exp.MapStorage[utils.TotalCost] = float64(11)
+	exp.MapStorage[utils.TotalSMSUsage] = time.Second
+	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
 		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
 	}
 
@@ -505,11 +506,11 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.ToR:        utils.MetaMMS,
 		utils.Usage:      time.Second,
 	}
-	exp[utils.LastEventATime] = tnow
-	exp[utils.LastExpOrderID] = int64(3)
-	exp[utils.TotalCost] = float64(16.5)
-	exp[utils.TotalMMSUsage] = time.Second
-	if updateEEMetrics(dc, ev, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
+	exp.MapStorage[utils.LastEventATime] = tnow
+	exp.MapStorage[utils.LastExpOrderID] = int64(3)
+	exp.MapStorage[utils.TotalCost] = float64(16.5)
+	exp.MapStorage[utils.TotalMMSUsage] = time.Second
+	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
 		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
 	}
 
@@ -521,11 +522,11 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.ToR:        utils.MetaGeneric,
 		utils.Usage:      time.Second,
 	}
-	exp[utils.LastEventATime] = tnow
-	exp[utils.LastExpOrderID] = int64(4)
-	exp[utils.TotalCost] = float64(22)
-	exp[utils.TotalGenericUsage] = time.Second
-	if updateEEMetrics(dc, ev, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
+	exp.MapStorage[utils.LastEventATime] = tnow
+	exp.MapStorage[utils.LastExpOrderID] = int64(4)
+	exp.MapStorage[utils.TotalCost] = float64(22)
+	exp.MapStorage[utils.TotalGenericUsage] = time.Second
+	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
 		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
 	}
 
@@ -537,11 +538,11 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.ToR:        utils.MetaData,
 		utils.Usage:      time.Second,
 	}
-	exp[utils.LastEventATime] = tnow
-	exp[utils.LastExpOrderID] = int64(5)
-	exp[utils.TotalCost] = float64(27.5)
-	exp[utils.TotalDataUsage] = time.Second
-	if updateEEMetrics(dc, ev, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
+	exp.MapStorage[utils.LastEventATime] = tnow
+	exp.MapStorage[utils.LastExpOrderID] = int64(5)
+	exp.MapStorage[utils.TotalCost] = float64(27.5)
+	exp.MapStorage[utils.TotalDataUsage] = time.Second
+	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
 		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
 	}
 }

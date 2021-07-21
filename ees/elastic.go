@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/elastic/go-elasticsearch/esapi"
 
@@ -34,7 +33,7 @@ import (
 )
 
 func NewElasticExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (eEe *ElasticEe, err error) {
+	dc *utils.SafeMapStorage) (eEe *ElasticEe, err error) {
 	eEe = &ElasticEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = eEe.init()
@@ -48,9 +47,8 @@ type ElasticEe struct {
 	cgrCfg  *config.CGRConfig
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
-	sync.RWMutex
-	dc   utils.MapStorage
-	opts esapi.IndexRequest // this variable is used only for storing the options from OptsMap
+	dc      *utils.SafeMapStorage
+	opts    esapi.IndexRequest // this variable is used only for storing the options from OptsMap
 }
 
 // init will create all the necessary dependencies, including opening the file
@@ -122,17 +120,13 @@ func (eEe *ElasticEe) OnEvicted(_ string, _ interface{}) {}
 
 // ExportEvent implements EventExporter
 func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	eEe.Lock()
 	defer func() {
-		if err != nil {
-			eEe.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
-		} else {
-			eEe.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
-		}
-		eEe.Unlock()
+		updateEEMetrics(eEe.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
+			eEe.cgrCfg.GeneralCfg().DefaultTimezone))
 	}()
-	eEe.dc[utils.NumberOfEvents] = eEe.dc[utils.NumberOfEvents].(int64) + 1
-
+	eEe.dc.Lock()
+	eEe.dc.MapStorage[utils.NumberOfEvents] = eEe.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
+	eEe.dc.Unlock()
 	valMp := make(map[string]interface{})
 	if len(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ContentFields()) == 0 {
 		valMp = cgrEv.Event
@@ -140,10 +134,10 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-			utils.MetaReq:  cgrEv.Event,
+		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 			utils.MetaDC:   eEe.dc,
-			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 			utils.MetaCfg:  eEe.cgrCfg.GetDataProvider(),
 		}, utils.FirstNonEmpty(cgrEv.Tenant, eEe.cgrCfg.GeneralCfg().DefaultTenant),
 			eEe.filterS, oNm)
@@ -157,8 +151,7 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
 		}
 	}
-	updateEEMetrics(eEe.dc, cgrEv.Event, utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
-		eEe.cgrCfg.GeneralCfg().DefaultTimezone))
+
 	// Set up the request object
 	cgrID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID())
 	runID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault)
@@ -196,6 +189,6 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	return
 }
 
-func (eEe *ElasticEe) GetMetrics() utils.MapStorage {
+func (eEe *ElasticEe) GetMetrics() *utils.SafeMapStorage {
 	return eEe.dc.Clone()
 }
