@@ -21,7 +21,6 @@ package ees
 import (
 	"encoding/json"
 	"strings"
-	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -29,7 +28,7 @@ import (
 )
 
 func NewPosterJSONMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (pstrJSON *PosterJSONMapEE, err error) {
+	dc *utils.SafeMapStorage) (pstrJSON *PosterJSONMapEE, err error) {
 	pstrJSON = &PosterJSONMapEE{
 		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg:  cgrCfg,
@@ -68,8 +67,7 @@ type PosterJSONMapEE struct {
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
 	poster  engine.Poster
-	dc      utils.MapStorage
-	sync.RWMutex
+	dc      *utils.SafeMapStorage
 }
 
 // ID returns the identificator of this exporter
@@ -84,17 +82,13 @@ func (pstrEE *PosterJSONMapEE) OnEvicted(string, interface{}) {
 
 // ExportEvent implements EventExporter
 func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	pstrEE.Lock()
 	defer func() {
-		if err != nil {
-			pstrEE.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
-		} else {
-			pstrEE.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
-		}
-		pstrEE.Unlock()
+		updateEEMetrics(pstrEE.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,
+			pstrEE.cgrCfg.GeneralCfg().DefaultTimezone))
 	}()
-
-	pstrEE.dc[utils.NumberOfEvents] = pstrEE.dc[utils.NumberOfEvents].(int64) + 1
+	pstrEE.dc.Lock()
+	pstrEE.dc.MapStorage[utils.NumberOfEvents] = pstrEE.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
+	pstrEE.dc.Unlock()
 
 	valMp := make(map[string]interface{})
 	if len(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ContentFields()) == 0 {
@@ -103,10 +97,10 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-			utils.MetaReq:  cgrEv.Event,
+		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 			utils.MetaDC:   pstrEE.dc,
-			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 			utils.MetaCfg:  pstrEE.cgrCfg.GetDataProvider(),
 		}, utils.FirstNonEmpty(cgrEv.Tenant, pstrEE.cgrCfg.GeneralCfg().DefaultTenant),
 			pstrEE.filterS, oNm)
@@ -121,8 +115,7 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
 		}
 	}
-	updateEEMetrics(pstrEE.dc, cgrEv.Event, utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,
-		pstrEE.cgrCfg.GeneralCfg().DefaultTimezone))
+
 	cgrID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID())
 	runID := utils.FirstNonEmpty(engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault)
 	var body []byte
@@ -138,6 +131,6 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	return
 }
 
-func (pstrEE *PosterJSONMapEE) GetMetrics() utils.MapStorage {
+func (pstrEE *PosterJSONMapEE) GetMetrics() *utils.SafeMapStorage {
 	return pstrEE.dc.Clone()
 }

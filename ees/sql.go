@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-	"sync"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -35,7 +34,7 @@ import (
 )
 
 func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (sqlEe *SQLEe, err error) {
+	dc *utils.SafeMapStorage) (sqlEe *SQLEe, err error) {
 	sqlEe = &SQLEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 
@@ -58,8 +57,7 @@ type SQLEe struct {
 
 	tableName string
 
-	sync.RWMutex
-	dc utils.MapStorage
+	dc *utils.SafeMapStorage
 }
 
 func (sqlEe *SQLEe) NewSQLEeUrl(cgrCfg *config.CGRConfig) (dialect gorm.Dialector, err error) {
@@ -144,26 +142,23 @@ func (sqlEe *SQLEe) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	sqlEe.Lock()
 	defer func() {
-		if err != nil {
-			sqlEe.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
-		} else {
-			sqlEe.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
-		}
-		sqlEe.Unlock()
+		updateEEMetrics(sqlEe.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Timezone,
+			sqlEe.cgrCfg.GeneralCfg().DefaultTimezone))
 	}()
-	sqlEe.dc[utils.NumberOfEvents] = sqlEe.dc[utils.NumberOfEvents].(int64) + 1
+	sqlEe.dc.Lock()
+	sqlEe.dc.MapStorage[utils.NumberOfEvents] = sqlEe.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
+	sqlEe.dc.Unlock()
 
 	var vals []interface{}
 	var colNames []string
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaExp: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-		utils.MetaReq:  cgrEv.Event,
+	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+		utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 		utils.MetaDC:   sqlEe.dc,
-		utils.MetaOpts: cgrEv.APIOpts,
+		utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 		utils.MetaCfg:  sqlEe.cgrCfg.GetDataProvider(),
 	}, utils.FirstNonEmpty(cgrEv.Tenant, sqlEe.cgrCfg.GeneralCfg().DefaultTenant),
 		sqlEe.filterS, oNm)
@@ -194,12 +189,10 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	}
 
 	sqlEe.db.Table(sqlEe.tableName).Exec(sqlQuery, vals...)
-	updateEEMetrics(sqlEe.dc, cgrEv.Event, utils.FirstNonEmpty(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Timezone,
-		sqlEe.cgrCfg.GeneralCfg().DefaultTimezone))
 
 	return
 }
 
-func (sqlEe *SQLEe) GetMetrics() utils.MapStorage {
+func (sqlEe *SQLEe) GetMetrics() *utils.SafeMapStorage {
 	return sqlEe.dc.Clone()
 }

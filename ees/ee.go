@@ -30,12 +30,12 @@ type EventExporter interface {
 	ID() string                                    // return the exporter identificator
 	ExportEvent(cgrEv *utils.CGREvent) (err error) // called on each event to be exported
 	OnEvicted(itmID string, value interface{})     // called when the exporter needs to terminate
-	GetMetrics() utils.MapStorage                  // called to get metrics
+	GetMetrics() *utils.SafeMapStorage             // called to get metrics
 }
 
 // NewEventExporter produces exporters
 func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (ee EventExporter, err error) {
-	var dc utils.MapStorage
+	var dc *utils.SafeMapStorage
 	if dc, err = newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone)); err != nil {

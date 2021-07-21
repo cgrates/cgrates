@@ -23,14 +23,13 @@ import (
 	"io"
 	"os"
 	"path"
-	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFileFWVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS, dc utils.MapStorage) (fFwv *FileFWVee, err error) {
+func NewFileFWVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS, dc *utils.SafeMapStorage) (fFwv *FileFWVee, err error) {
 	fFwv = &FileFWVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = fFwv.init()
@@ -44,17 +43,16 @@ type FileFWVee struct {
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
 	file    io.WriteCloser
-	dc      utils.MapStorage
-	sync.RWMutex
+	dc      *utils.SafeMapStorage
 }
 
 // init will create all the necessary dependencies, including opening the file
 func (fFwv *FileFWVee) init() (err error) {
 	filePath := path.Join(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ExportPath,
 		fFwv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.FWVSuffix)
-	fFwv.Lock()
-	fFwv.dc[utils.ExportPath] = filePath
-	fFwv.Unlock()
+	fFwv.dc.Lock()
+	fFwv.dc.MapStorage[utils.ExportPath] = filePath
+	fFwv.dc.Unlock()
 	// create the file
 	if fFwv.file, err = os.Create(filePath); err != nil {
 		return
@@ -82,16 +80,13 @@ func (fFwv *FileFWVee) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	fFwv.Lock()
 	defer func() {
-		if err != nil {
-			fFwv.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
-		} else {
-			fFwv.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
-		}
-		fFwv.Unlock()
+		updateEEMetrics(fFwv.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
+			fFwv.cgrCfg.GeneralCfg().DefaultTimezone))
 	}()
-	fFwv.dc[utils.NumberOfEvents] = fFwv.dc[utils.NumberOfEvents].(int64) + 1
+	fFwv.dc.Lock()
+	fFwv.dc.MapStorage[utils.NumberOfEvents] = fFwv.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
+	fFwv.dc.Unlock()
 	var records []string
 	if len(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].ContentFields()) == 0 {
 		records = make([]string, 0, len(cgrEv.Event))
@@ -102,10 +97,10 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-			utils.MetaReq:  cgrEv.Event,
+		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 			utils.MetaDC:   fFwv.dc,
-			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 			utils.MetaCfg:  fFwv.cgrCfg.GetDataProvider(),
 		}, utils.FirstNonEmpty(cgrEv.Tenant, fFwv.cgrCfg.GeneralCfg().DefaultTenant),
 			fFwv.filterS, oNm)
@@ -116,8 +111,6 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		records = eeReq.ExpData[utils.MetaExp].OrderedFieldsAsStrings()
 	}
 
-	updateEEMetrics(fFwv.dc, cgrEv.Event, utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
-		fFwv.cgrCfg.GeneralCfg().DefaultTimezone))
 	for _, record := range records {
 		if _, err = io.WriteString(fFwv.file, record); err != nil {
 			return
@@ -135,7 +128,7 @@ func (fFwv *FileFWVee) composeHeader() (err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaHdr: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaDC:  fFwv.dc,
 		utils.MetaCfg: fFwv.cgrCfg.GetDataProvider(),
 	}, fFwv.cgrCfg.GeneralCfg().DefaultTenant,
@@ -160,7 +153,7 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaTrl: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaDC:  fFwv.dc,
 		utils.MetaCfg: fFwv.cgrCfg.GetDataProvider(),
 	}, fFwv.cgrCfg.GeneralCfg().DefaultTenant,
@@ -177,6 +170,6 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 	return
 }
 
-func (fFwv *FileFWVee) GetMetrics() utils.MapStorage {
+func (fFwv *FileFWVee) GetMetrics() *utils.SafeMapStorage {
 	return fFwv.dc.Clone()
 }

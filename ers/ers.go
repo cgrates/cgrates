@@ -414,9 +414,9 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 			return
 		}
 		// convert the event to record
-		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-			utils.MetaReq:  cgrEv.Event,
-			utils.MetaOpts: cgrEv.APIOpts,
+		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
+			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 			utils.MetaCfg:  erS.cfg.GetDataProvider(),
 		}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
 			erS.filterS, map[string]*utils.OrderedNavigableMap{

@@ -27,8 +27,8 @@ import (
 	"time"
 )
 
-// dataStorage is the DataProvider that can be updated
-type dataStorage interface {
+// DataStorage is the DataProvider that can be updated
+type DataStorage interface {
 	DataProvider
 
 	Set(fldPath []string, val interface{}) error
@@ -194,7 +194,7 @@ func (ms MapStorage) Set(fldPath []string, val interface{}) (err error) {
 		return nMap.Set(fldPath[1:], val)
 	}
 	switch dp := ms[fldPath[0]].(type) {
-	case dataStorage:
+	case DataStorage:
 		return dp.Set(fldPath[1:], val)
 	case map[string]interface{}:
 		return MapStorage(dp).Set(fldPath[1:], val)
@@ -232,7 +232,7 @@ func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys 
 		for k, v := range ms { // in case of nested on false we take in consideraton the nestedLimit
 			//keys = append(keys, prefix+k)
 			switch rv := v.(type) { // and for performance we only take in consideration a limited set of types for nested false
-			case dataStorage:
+			case DataStorage:
 				keys = append(keys, rv.GetKeys(nested, nestedLimit-1, prefix+k)...)
 			case map[string]interface{}:
 				keys = append(keys, MapStorage(rv).GetKeys(nested, nestedLimit-1, prefix+k)...)
@@ -247,7 +247,7 @@ func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys 
 	for k, v := range ms {
 		//keys = append(keys, prefix+k)
 		switch rv := v.(type) {
-		case dataStorage:
+		case DataStorage:
 			keys = append(keys, rv.GetKeys(nested, nestedLimit, prefix+k)...)
 		case map[string]interface{}:
 			keys = append(keys, MapStorage(rv).GetKeys(nested, nestedLimit, prefix+k)...)
@@ -257,7 +257,7 @@ func (ms MapStorage) GetKeys(nested bool, nestedLimit int, prefix string) (keys 
 				// keys = append(keys, pref)
 				keys = append(keys, dp.GetKeys(nested, nestedLimit, pref)...)
 			}
-		case []dataStorage:
+		case []DataStorage:
 			for i, dp := range rv {
 				pref := prefix + k + fmt.Sprintf("[%v]", i)
 				// keys = append(keys, pref)
@@ -304,7 +304,7 @@ func (ms MapStorage) Remove(fldPath []string) (err error) {
 		return
 	}
 	switch dp := val.(type) {
-	case dataStorage:
+	case DataStorage:
 		return dp.Remove(fldPath[1:])
 	case map[string]interface{}:
 		return MapStorage(dp).Remove(fldPath[1:])

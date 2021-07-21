@@ -27,7 +27,7 @@ import (
 )
 
 // NewExportRequest returns a new EventRequest
-func NewExportRequest(inData map[string]utils.MapStorage,
+func NewExportRequest(inData map[string]utils.DataStorage,
 	tnt string,
 	filterS *FilterS, oNM map[string]*utils.OrderedNavigableMap) (eeR *ExportRequest) {
 	eeR = &ExportRequest{
@@ -42,7 +42,7 @@ func NewExportRequest(inData map[string]utils.MapStorage,
 // ExportRequest represents data related to one request towards agent
 // implements utils.DataProvider so we can pass it to filters
 type ExportRequest struct {
-	inData  map[string]utils.MapStorage           // request
+	inData  map[string]utils.DataStorage          // request
 	ExpData map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
 	tnt     string
 	filterS *FilterS
