@@ -35,8 +35,14 @@ import (
 
 func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc *utils.SafeMapStorage) (sqlEe *SQLEe, err error) {
-	sqlEe = &SQLEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+	sqlEe = &SQLEe{
+		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg:  cgrCfg,
+		cfgIdx:  cfgIdx,
+		filterS: filterS,
+		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+	}
 
 	dialect, err := sqlEe.NewSQLEeUrl(cgrCfg)
 	if err != nil {
@@ -57,7 +63,8 @@ type SQLEe struct {
 
 	tableName string
 
-	dc *utils.SafeMapStorage
+	dc   *utils.SafeMapStorage
+	reqs *concReq
 }
 
 func (sqlEe *SQLEe) NewSQLEeUrl(cgrCfg *config.CGRConfig) (dialect gorm.Dialector, err error) {
@@ -142,9 +149,11 @@ func (sqlEe *SQLEe) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	sqlEe.reqs.get()
 	defer func() {
 		updateEEMetrics(sqlEe.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Timezone,
 			sqlEe.cgrCfg.GeneralCfg().DefaultTimezone))
+		sqlEe.reqs.done()
 	}()
 	sqlEe.dc.Lock()
 	sqlEe.dc.MapStorage[utils.NumberOfEvents] = sqlEe.dc.MapStorage[utils.NumberOfEvents].(int64) + 1

@@ -634,13 +634,14 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.OptsCfg: map[string]interface{}{
 					utils.KafkaGroupID: "test",
 				},
-				utils.TimezoneCfg:         "UTC",
-				utils.FiltersCfg:          []string{},
-				utils.FlagsCfg:            []string{"randomFlag"},
-				utils.AttributeIDsCfg:     []string{},
-				utils.AttributeContextCfg: utils.EmptyString,
-				utils.SynchronousCfg:      false,
-				utils.AttemptsCfg:         1,
+				utils.TimezoneCfg:           "UTC",
+				utils.FiltersCfg:            []string{},
+				utils.FlagsCfg:              []string{"randomFlag"},
+				utils.AttributeIDsCfg:       []string{},
+				utils.AttributeContextCfg:   utils.EmptyString,
+				utils.SynchronousCfg:        false,
+				utils.AttemptsCfg:           1,
+				utils.ConcurrentRequestsCfg: 0,
 				utils.FieldsCfg: []map[string]interface{}{
 					{
 						utils.TagCfg:   utils.CGRID,
@@ -667,7 +668,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.FieldsCfg] = nil
 		if !reflect.DeepEqual(rcv[utils.ExportersCfg].([]map[string]interface{})[1],
 			eMap[utils.ExportersCfg].([]map[string]interface{})[0]) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]interface{})[1]),
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]interface{})[0]),
 				utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[0]))
 		}
 		rcv[utils.ExportersCfg] = nil
