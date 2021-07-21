@@ -211,6 +211,8 @@ var (
 		testLoadItResetDataDB,
 		testLoadItResetStorDb,
 		testLoadItStartLoader,
+		// testLoadItStartLoaderFlushStorDB,
+		testLoadItStartLoaderWithTenant,
 		testLoadItConnectToDB,
 		testLoadItCheckAttributes,
 		testLoadItStartLoaderRemove,
@@ -358,6 +360,17 @@ func testLoadItStartLoaderFromStorDB(t *testing.T) {
 		t.Log(cmd.Args)
 		t.Log(output.String())
 		t.Log(outerr.String())
+		t.Fatal(err)
+	}
+}
+
+func testLoadItStartLoaderWithTenant(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", `-tenant="tenant.com"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
 		t.Fatal(err)
 	}
 }

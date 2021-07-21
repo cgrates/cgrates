@@ -332,7 +332,7 @@ func (apierSv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply 
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]interface{})); err != nil {
+	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]interface{}), attrs.Tenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -406,7 +406,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts, apierSv1.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1088,7 +1088,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromFolder, reloading cache.")
-	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.APIOpts, apierSv1.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1154,7 +1154,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromFolder, reloading cache.")
-	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.APIOpts, apierSv1.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1206,7 +1206,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply 
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromStorDB, reloading cache.")
-	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts, apierSv1.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {

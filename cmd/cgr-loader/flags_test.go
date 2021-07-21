@@ -243,6 +243,12 @@ func TestCGRLoaderFlags(t *testing.T) {
 		t.Errorf("Expected route_idss, received %+v", *routeID)
 	}
 
+	if err := cgrLoaderFlags.Parse([]string{"-tenant", "tenant.com"}); err != nil {
+		t.Error(err)
+	} else if *tenant != "tenant.com" {
+		t.Errorf("Expected tenant.com, received %+v", *tenant)
+	}
+
 	if err := cgrLoaderFlags.Parse([]string{"-from_stordb", "true"}); err != nil {
 		t.Error(err)
 	} else if *fromStorDB != true {
