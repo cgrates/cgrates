@@ -546,7 +546,7 @@ func (rS *ResourceService) processThresholds(rs Resources, opts map[string]inter
 			},
 		}
 		var tIDs []string
-		if err = rS.connMgr.Call(rS.cgrcfg.ResourceSCfg().ThresholdSConns, nil,
+		if err := rS.connMgr.Call(rS.cgrcfg.ResourceSCfg().ThresholdSConns, nil,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -622,7 +622,8 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 			rPrf.unlock()
 			continue
 		}
-		if pass, err := rS.filterS.Pass(tnt, rPrf.FilterIDs,
+		var pass bool
+		if pass, err = rS.filterS.Pass(tnt, rPrf.FilterIDs,
 			evNm); err != nil {
 			rPrf.unlock()
 			rs.unlock()
@@ -634,8 +635,8 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout,
 			resourceLockKey(rPrf.Tenant, rPrf.ID))
-		r, err := rS.dm.GetResource(rPrf.Tenant, rPrf.ID, true, true, "")
-		if err != nil {
+		var r *Resource
+		if r, err = rS.dm.GetResource(rPrf.Tenant, rPrf.ID, true, true, ""); err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			rPrf.unlock()
 			rs.unlock()
