@@ -68,7 +68,7 @@ func (ldrs LoaderSCfgs) Clone() (cln LoaderSCfgs) {
 type LoaderSCfg struct {
 	ID             string
 	Enabled        bool
-	Tenant         RSRParsers
+	Tenant         string
 	DryRun         bool
 	RunDelay       time.Duration
 	LockFileName   string
@@ -124,9 +124,7 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 		l.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Tenant != nil {
-		if l.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, separator); err != nil {
-			return err
-		}
+		l.Tenant = *jsnCfg.Tenant
 	}
 	if jsnCfg.Dry_run != nil {
 		l.DryRun = *jsnCfg.Dry_run
@@ -231,7 +229,7 @@ func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[str
 func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.IDCfg:           l.ID,
-		utils.TenantCfg:       l.Tenant.GetRule(separator),
+		utils.TenantCfg:       l.Tenant,
 		utils.EnabledCfg:      l.Enabled,
 		utils.DryRunCfg:       l.DryRun,
 		utils.LockFileNameCfg: l.LockFileName,

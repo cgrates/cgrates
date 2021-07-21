@@ -80,7 +80,7 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 	}
 	lData := make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
-		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
+		"cgrates.org", nil); err != nil {
 		t.Error(err)
 	}
 	eLData := LoaderData{"Tenant": "cgrates.org",
@@ -99,7 +99,7 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 	}
 	lData = make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds,
-		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
+		"cgrates.org", nil); err != nil {
 		t.Error(err)
 	}
 	eLData = LoaderData{"Tenant": "cgrates.org",
@@ -170,7 +170,7 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 	}
 	lData := make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
-		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
+		"cgrates.org", nil); err != nil {
 		t.Error(err)
 	}
 	eLData := LoaderData{"Tenant": "cgrates.org",
@@ -189,7 +189,7 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 	}
 	lData = make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds,
-		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
+		"cgrates.org", nil); err != nil {
 		t.Error(err)
 	}
 	eLData = LoaderData{"Tenant": "cgrates.org",
@@ -253,7 +253,7 @@ func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 	lData := make(LoaderData)
 	for fName, record := range loadRun1 {
 		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
-			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
+			"cgrates.org", nil); err != nil {
 			t.Error(err)
 		}
 	}
@@ -282,16 +282,16 @@ func TestGetRateIDsLoaderData(t *testing.T) {
 	}
 }
 
-func TestUpdateFromCsvParseValueError(t *testing.T) {
-	ldrData := LoaderData{
-		"File1.csv": []string{"Subject", "*any", "1001"},
-	}
-	tnt := config.NewRSRParsersMustCompile("asd{*duration_seconds}", utils.InfieldSep)
-	expected := "time: invalid duration \"asd\""
-	if err := ldrData.UpdateFromCSV("File1.csv", nil, nil, tnt, nil); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
+// func TestUpdateFromCsvParseValueError(t *testing.T) {
+// 	ldrData := LoaderData{
+// 		"File1.csv": []string{"Subject", "*any", "1001"},
+// 	}
+// 	tnt := config.NewRSRParsersMustCompile("asd{*duration_seconds}", utils.InfieldSep)
+// 	expected := "time: invalid duration \"asd\""
+// 	if err := ldrData.UpdateFromCSV("File1.csv", nil, nil, tnt, nil); err == nil || err.Error() != expected {
+// 		t.Errorf("Expected %+v, received %+v", expected, err)
+// 	}
+// }
 
 func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 	attrSFlds := []*config.FCTemplate{
@@ -321,7 +321,7 @@ func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 	for fName, record := range loadRunStr {
 		expected := "Ignoring record: [\"cgrates.org\" \"TEST_1\"] with error : strconv.Atoi: parsing \"Account\": invalid syntax"
 		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
-			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), filterS); err == nil || err.Error() != expected {
+			"cgrates.org", filterS); err == nil || err.Error() != expected {
 			t.Errorf("Expected %+v, received %+v", expected, err)
 		}
 	}
@@ -354,7 +354,7 @@ func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
 
 	for fName, record := range loadRunStr {
 		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
-			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), filterS); err != nil {
+			"cgrates.org", filterS); err != nil {
 			t.Error(err)
 		}
 	}

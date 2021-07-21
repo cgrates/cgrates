@@ -54,10 +54,8 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ten, err := NewRSRParsers("cgrates.org", utils.InfieldSep)
-	if err != nil {
-		t.Error(err)
-	}
+	ten := "cgrates.org"
+
 	expected := LoaderSCfgs{
 		{
 			Enabled:        true,
@@ -100,18 +98,18 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 }
 
-func TestLoaderSCfgloadFromJsonCfgCase2(t *testing.T) {
-	cfgJSON := &LoaderJsonCfg{
-		Tenant: utils.StringPointer("a{*"),
-	}
-	expected := "invalid converter terminator in rule: <a{*>"
-	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
+// func TestLoaderSCfgloadFromJsonCfgCase2(t *testing.T) {
+// 	cfgJSON := &LoaderJsonCfg{
+// 		Tenant: utils.StringPointer("a{*"),
+// 	}
+// 	expected := "invalid converter terminator in rule: <a{*>"
+// 	jsonCfg := NewDefaultCGRConfig()
+// 	if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+// 		t.Error(err)
+// 	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+// 		t.Errorf("Expected %+v, received %+v", expected, err)
+// 	}
+// }
 
 func TestLoaderSCfgloadFromJsonCfgCase3(t *testing.T) {
 	cfg := &LoaderJsonCfg{
@@ -406,7 +404,7 @@ func TestLoaderSCfgsClone(t *testing.T) {
 	ban := LoaderSCfgs{{
 		Enabled:        true,
 		ID:             utils.MetaDefault,
-		Tenant:         NewRSRParsersMustCompile("cgrate.org", utils.InfieldSep),
+		Tenant:         "cgrate.org",
 		LockFileName:   ".cgr.lck",
 		CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		FieldSeparator: ",",

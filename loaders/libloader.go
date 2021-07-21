@@ -48,12 +48,9 @@ func (ld LoaderData) GetRateIDs() ([]string, error) {
 // UpdateFromCSV will update LoaderData with data received from fileName,
 // contained in record and processed with cfgTpl
 func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
-	cfgTpl []*config.FCTemplate, tnt config.RSRParsers, filterS *engine.FilterS) (err error) {
+	cfgTpl []*config.FCTemplate, tnt string, filterS *engine.FilterS) (err error) {
 	csvProvider := newCsvProvider(record, fileName)
-	tenant, err := tnt.ParseValue("")
-	if err != nil {
-		return err
-	}
+	tenant := tnt
 	for _, cfgFld := range cfgTpl {
 		// Make sure filters are matching
 		if len(cfgFld.Filters) != 0 {

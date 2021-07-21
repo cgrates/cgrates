@@ -57,7 +57,7 @@ func TestCallCacheNoCaching(t *testing.T) {
 	expArgs := map[string][]string{
 		utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
-	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, true)
+	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, true, "cgrates.org")
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -89,6 +89,7 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 					ArgsCache: map[string][]string{
 						utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 					},
+					Tenant: "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -123,7 +124,7 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 
 	explog := "Reloading cache\n"
 	experr := utils.ErrUnsupporteServiceMethod
-	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, true)
+	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, true, "cgrates.org")
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -157,6 +158,7 @@ func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 						utils.Subsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
+					Tenant:   "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -193,7 +195,7 @@ func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	explog2 := "Clearing indexes"
 	experr := utils.ErrUnsupporteServiceMethod
 	explog3 := fmt.Sprintf("WARNING: Got error on cache clear: %s\n", experr)
-	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, true)
+	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, true, "cgrates.org")
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -236,6 +238,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 					ArgsCache: map[string][]string{
 						utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 					},
+					Tenant: "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -252,6 +255,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 						utils.Subsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
+					Tenant:   "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -278,7 +282,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 		utils.Subsys: utils.MetaChargers,
 	}
 
-	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, false)
+	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, false, "cgrates.org")
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -306,6 +310,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 					ArgsCache: map[string][]string{
 						utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 					},
+					Tenant: "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -322,6 +327,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 						utils.Subsys: utils.MetaChargers,
 					},
 					CacheIDs: []string{"cacheID"},
+					Tenant:   "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -348,7 +354,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 		utils.Subsys: utils.MetaChargers,
 	}
 
-	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, false)
+	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, false, "cgrates.org")
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -373,6 +379,7 @@ func TestCallCacheClear(t *testing.T) {
 					APIOpts: map[string]interface{}{
 						utils.Subsys: utils.MetaChargers,
 					},
+					Tenant: "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -399,7 +406,7 @@ func TestCallCacheClear(t *testing.T) {
 		utils.Subsys: utils.MetaChargers,
 	}
 
-	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, false)
+	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, false, "cgrates.org")
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -941,7 +948,7 @@ func TestReloadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: map[string]interface{}{},
-		Tenant:  "",
+		Tenant:  "cgrates.org",
 		ArgsCache: map[string][]string{
 			"ActionIDs":            {"ActionsID"},
 			"ActionPlanIDs":        {"ActionPlansID"},
@@ -1042,7 +1049,7 @@ func TestReloadCache(t *testing.T) {
 		dm: NewDataManager(data, config.CgrConfig().CacheCfg(), cnMgr),
 	}
 	tpr.cacheConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	if err := tpr.ReloadCache(utils.MetaReload, false, make(map[string]interface{})); err != nil {
+	if err := tpr.ReloadCache(utils.MetaReload, false, make(map[string]interface{}), "cgrates.org"); err != nil {
 		t.Error(err)
 	}
 }

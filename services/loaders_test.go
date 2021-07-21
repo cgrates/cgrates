@@ -57,7 +57,7 @@ func TestLoaderSCoverage(t *testing.T) {
 		[]*config.LoaderSCfg{{
 			ID:             "test_id",
 			Enabled:        true,
-			Tenant:         nil,
+			Tenant:         "",
 			DryRun:         false,
 			RunDelay:       0,
 			LockFileName:   "",
