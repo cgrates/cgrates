@@ -229,6 +229,7 @@ func TestPosterJsonMapExportEvent1(t *testing.T) {
 		filterS: filterS,
 		dc:      dc,
 		poster:  tstPstr,
+		reqs:    newConcReq(0),
 	}
 	// pstrEE.poster = tstPstr
 	cgrEv.Event = map[string]interface{}{
