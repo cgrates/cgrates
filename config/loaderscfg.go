@@ -67,7 +67,7 @@ func (ldrs LoaderSCfgs) Clone() (cln LoaderSCfgs) {
 type LoaderSCfg struct {
 	ID             string
 	Enabled        bool
-	Tenant         RSRParsers
+	Tenant         string
 	DryRun         bool
 	RunDelay       time.Duration
 	LockFileName   string
@@ -123,9 +123,7 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 		l.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Tenant != nil {
-		if l.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, separator); err != nil {
-			return err
-		}
+		l.Tenant = *jsnCfg.Tenant
 	}
 	if jsnCfg.Dry_run != nil {
 		l.DryRun = *jsnCfg.Dry_run
@@ -232,7 +230,7 @@ func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[str
 func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.IDCfg:           l.ID,
-		utils.TenantCfg:       l.Tenant.GetRule(separator),
+		utils.TenantCfg:       l.Tenant,
 		utils.EnabledCfg:      l.Enabled,
 		utils.DryRunCfg:       l.DryRun,
 		utils.LockFileNameCfg: l.LockFileName,
@@ -301,8 +299,8 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) 
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	tnt1 := v1.Tenant.GetRule(separator)
-	tnt2 := v2.Tenant.GetRule(separator)
+	tnt1 := v1.Tenant
+	tnt2 := v2.Tenant
 	if tnt1 != tnt2 {
 		d.Tenant = utils.StringPointer(tnt2)
 	}
@@ -351,7 +349,7 @@ func equalsLoadersJsonCfg(v1, v2 LoaderSCfgs) bool {
 	for i := range v2 {
 		if v1[i].ID != v2[i].ID ||
 			v1[i].Enabled != v2[i].Enabled ||
-			!utils.SliceStringEqual(v1[i].Tenant.AsStringSlice(), v2[i].Tenant.AsStringSlice()) ||
+			v1[i].Tenant != v2[i].Tenant ||
 			v1[i].DryRun != v2[i].DryRun ||
 			v1[i].RunDelay != v2[i].RunDelay ||
 			v1[i].LockFileName != v2[i].LockFileName ||

@@ -54,10 +54,7 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ten, err := NewRSRParsers("cgrates.org", utils.InfieldSep)
-	if err != nil {
-		t.Error(err)
-	}
+	ten := "cgrates.org"
 	var flags utils.FlagsWithParams
 	expected := LoaderSCfgs{
 		{
@@ -1334,18 +1331,18 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 }
 
-func TestLoaderSCfgloadFromJsonCfgCase2(t *testing.T) {
-	cfgJSON := &LoaderJsonCfg{
-		Tenant: utils.StringPointer("a{*"),
-	}
-	expected := "invalid converter terminator in rule: <a{*>"
-	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
-		t.Error(err)
-	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
+// func TestLoaderSCfgloadFromJsonCfgCase2(t *testing.T) {
+// 	cfgJSON := &LoaderJsonCfg{
+// 		Tenant: utils.StringPointer("a{*"),
+// 	}
+// 	expected := "invalid converter terminator in rule: <a{*>"
+// 	jsonCfg := NewDefaultCGRConfig()
+// 	if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+// 		t.Error(err)
+// 	} else if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+// 		t.Errorf("Expected %+v, received %+v", expected, err)
+// 	}
+// }
 
 func TestLoaderSCfgloadFromJsonCfgCase3(t *testing.T) {
 	cfg := &LoaderJsonCfg{
@@ -2507,7 +2504,7 @@ func TestLoaderSCfgsClone(t *testing.T) {
 	ban := LoaderSCfgs{{
 		Enabled:        true,
 		ID:             utils.MetaDefault,
-		Tenant:         NewRSRParsersMustCompile("cgrate.org", utils.InfieldSep),
+		Tenant:         "cgrates.org",
 		LockFileName:   ".cgr.lck",
 		CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		FieldSeparator: ",",
@@ -2523,7 +2520,7 @@ func TestLoaderSCfgsClone(t *testing.T) {
 					Path:      "Tenant",
 					pathSlice: []string{"Tenant"},
 					Type:      utils.MetaComposed,
-					Value:     NewRSRParsersMustCompile("cgrate.org", utils.InfieldSep),
+					Value:     NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 					Mandatory: true,
 					Layout:    time.RFC3339,
 				},
@@ -2597,13 +2594,9 @@ func TestEqualsLoaderDatasType(t *testing.T) {
 func TestDiffLoaderJsonCfg(t *testing.T) {
 
 	v1 := &LoaderSCfg{
-		ID:      "LoaderID",
-		Enabled: true,
-		Tenant: RSRParsers{
-			{
-				Rules: "cgrates.org",
-			},
-		},
+		ID:             "LoaderID",
+		Enabled:        true,
+		Tenant:         "cgrates.org",
 		DryRun:         false,
 		RunDelay:       1 * time.Millisecond,
 		LockFileName:   "lockFileName",
@@ -2615,13 +2608,9 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 	}
 
 	v2 := &LoaderSCfg{
-		ID:      "LoaderID2",
-		Enabled: false,
-		Tenant: RSRParsers{
-			{
-				Rules: "itsyscom.com",
-			},
-		},
+		ID:             "LoaderID2",
+		Enabled:        false,
+		Tenant:         "itsyscom.com",
 		DryRun:         true,
 		RunDelay:       2 * time.Millisecond,
 		LockFileName:   "lockFileName2",
@@ -2692,13 +2681,9 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 func TestEqualsLoadersJsonCfg(t *testing.T) {
 	v1 := LoaderSCfgs{
 		{
-			ID:      "LoaderID",
-			Enabled: true,
-			Tenant: RSRParsers{
-				{
-					Rules: "cgrates.org",
-				},
-			},
+			ID:             "LoaderID",
+			Enabled:        true,
+			Tenant:         "cgrates.org",
 			DryRun:         false,
 			RunDelay:       1 * time.Millisecond,
 			LockFileName:   "lockFileName",
@@ -2712,13 +2697,9 @@ func TestEqualsLoadersJsonCfg(t *testing.T) {
 
 	v2 := LoaderSCfgs{
 		{
-			ID:      "LoaderID2",
-			Enabled: false,
-			Tenant: RSRParsers{
-				{
-					Rules: "itsyscom.com",
-				},
-			},
+			ID:             "LoaderID2",
+			Enabled:        false,
+			Tenant:         "cgrates.org",
 			DryRun:         true,
 			RunDelay:       2 * time.Millisecond,
 			LockFileName:   "lockFileName2",
@@ -2766,13 +2747,9 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 
 	v1 := LoaderSCfgs{
 		{
-			ID:      "LoaderID",
-			Enabled: false,
-			Tenant: RSRParsers{
-				{
-					Rules: "cgrates.org",
-				},
-			},
+			ID:             "LoaderID",
+			Enabled:        false,
+			Tenant:         "cgrates.org",
 			DryRun:         false,
 			RunDelay:       1 * time.Millisecond,
 			LockFileName:   "lockFileName",
@@ -2786,13 +2763,9 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 
 	v2 := LoaderSCfgs{
 		{
-			ID:      "LoaderID2",
-			Enabled: true,
-			Tenant: RSRParsers{
-				{
-					Rules: "itsyscom.com",
-				},
-			},
+			ID:             "LoaderID2",
+			Enabled:        true,
+			Tenant:         "itsyscom.com",
 			DryRun:         true,
 			RunDelay:       2 * time.Millisecond,
 			LockFileName:   "lockFileName2",

@@ -89,7 +89,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 // Loader is one instance loading from a folder
 type Loader struct {
 	enabled       bool
-	tenant        config.RSRParsers
+	tenant        string
 	dryRun        bool
 	ldrID         string
 	tpInDir       string
@@ -658,7 +658,7 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 		}
 	}
 	if len(ldr.cacheConns) != 0 {
-		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, "")
+		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, ldr.tenant)
 	}
 	return
 }
@@ -970,7 +970,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 	}
 
 	if len(ldr.cacheConns) != 0 {
-		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, "")
+		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false, ldr.tenant)
 	}
 	return
 }
