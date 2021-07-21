@@ -739,7 +739,7 @@ func TestATDUsage(t *testing.T) {
 		CGREvent: &CGREvent{
 			ID: "testID",
 			APIOpts: map[string]interface{}{
-				MetaUsage: true,
+				OptsRatesUsage: true,
 			},
 		},
 	}

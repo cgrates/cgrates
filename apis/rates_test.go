@@ -1802,7 +1802,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 				utils.Destination:  "+332145",
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaUsage:        "1m24s",
+				utils.OptsRatesUsage: "1m24s",
 			},
 		},
 	}
