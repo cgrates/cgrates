@@ -64,3 +64,30 @@ func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
 	}
 }
+
+func newConcReq(limit int) (c *concReq) {
+	c = &concReq{limit: limit}
+	if limit > 0 {
+		c.reqs = make(chan struct{}, limit)
+		for i := 0; i < limit; i++ {
+			c.reqs <- struct{}{}
+		}
+	}
+	return
+}
+
+type concReq struct {
+	reqs  chan struct{}
+	limit int
+}
+
+func (c *concReq) get() {
+	if c.limit > 0 {
+		<-c.reqs
+	}
+}
+func (c *concReq) done() {
+	if c.limit > 0 {
+		c.reqs <- struct{}{}
+	}
+}

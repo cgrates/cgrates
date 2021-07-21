@@ -213,6 +213,7 @@ func TestFileCsvExportEvent(t *testing.T) {
 		file:      nopCloser{byteBuff},
 		csvWriter: csvNW,
 		dc:        dc,
+		reqs:      newConcReq(0),
 	}
 	cgrEv.Event = map[string]interface{}{
 		"test1": "value",

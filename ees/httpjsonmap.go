@@ -36,6 +36,7 @@ func NewHTTPjsonMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 		cfgIdx:  cfgIdx,
 		filterS: filterS,
 		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
 	}
 
 	pstrJSON.pstr = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
@@ -53,6 +54,7 @@ type HTTPjsonMapEE struct {
 	filterS *engine.FilterS
 	pstr    *engine.HTTPPoster
 	dc      *utils.SafeMapStorage
+	reqs    *concReq
 }
 
 // ID returns the identificator of this exporter
@@ -66,9 +68,11 @@ func (httpEE *HTTPjsonMapEE) OnEvicted(string, interface{}) {
 
 // ExportEvent implements EventExporter
 func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	httpEE.reqs.get()
 	defer func() {
 		updateEEMetrics(httpEE.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,
 			httpEE.cgrCfg.GeneralCfg().DefaultTimezone))
+		httpEE.reqs.done()
 	}()
 	httpEE.dc.Lock()
 	httpEE.dc.MapStorage[utils.NumberOfEvents] = httpEE.dc.MapStorage[utils.NumberOfEvents].(int64) + 1

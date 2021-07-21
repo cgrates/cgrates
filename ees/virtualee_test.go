@@ -71,6 +71,7 @@ func TestVirtualEeExportEvent(t *testing.T) {
 		cfgIdx:  0,
 		filterS: filterS,
 		dc:      dc,
+		reqs:    newConcReq(0),
 	}
 	cgrEv.Event = map[string]interface{}{
 		"test1": "value",

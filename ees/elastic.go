@@ -34,8 +34,14 @@ import (
 
 func NewElasticExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc *utils.SafeMapStorage) (eEe *ElasticEe, err error) {
-	eEe = &ElasticEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+	eEe = &ElasticEe{
+		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg:  cgrCfg,
+		cfgIdx:  cfgIdx,
+		filterS: filterS,
+		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+	}
 	err = eEe.init()
 	return
 }
@@ -49,6 +55,7 @@ type ElasticEe struct {
 	filterS *engine.FilterS
 	dc      *utils.SafeMapStorage
 	opts    esapi.IndexRequest // this variable is used only for storing the options from OptsMap
+	reqs    *concReq
 }
 
 // init will create all the necessary dependencies, including opening the file
@@ -122,9 +129,11 @@ func (eEe *ElasticEe) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	eEe.reqs.get()
 	defer func() {
 		updateEEMetrics(eEe.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
 			eEe.cgrCfg.GeneralCfg().DefaultTimezone))
+		eEe.reqs.done()
 	}()
 	eEe.dc.Lock()
 	eEe.dc.MapStorage[utils.NumberOfEvents] = eEe.dc.MapStorage[utils.NumberOfEvents].(int64) + 1

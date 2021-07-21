@@ -33,8 +33,14 @@ import (
 
 func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	dc *utils.SafeMapStorage) (fCsv *FileCSVee, err error) {
-	fCsv = &FileCSVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+	fCsv = &FileCSVee{
+		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg:  cgrCfg,
+		cfgIdx:  cfgIdx,
+		filterS: filterS,
+		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+	}
 	err = fCsv.init()
 	return
 }
@@ -48,6 +54,7 @@ type FileCSVee struct {
 	file      io.WriteCloser
 	csvWriter *csv.Writer
 	dc        *utils.SafeMapStorage
+	reqs      *concReq
 }
 
 // init will create all the necessary dependencies, including opening the file
@@ -90,9 +97,11 @@ func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	fCsv.reqs.get()
 	defer func() {
 		updateEEMetrics(fCsv.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
 			fCsv.cgrCfg.GeneralCfg().DefaultTimezone))
+		fCsv.reqs.done()
 	}()
 	fCsv.dc.Lock()
 	fCsv.dc.MapStorage[utils.NumberOfEvents] = fCsv.dc.MapStorage[utils.NumberOfEvents].(int64) + 1

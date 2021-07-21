@@ -30,8 +30,14 @@ import (
 )
 
 func NewFileFWVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS, dc *utils.SafeMapStorage) (fFwv *FileFWVee, err error) {
-	fFwv = &FileFWVee{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+	fFwv = &FileFWVee{
+		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg:  cgrCfg,
+		cfgIdx:  cfgIdx,
+		filterS: filterS,
+		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+	}
 	err = fFwv.init()
 	return
 }
@@ -44,6 +50,7 @@ type FileFWVee struct {
 	filterS *engine.FilterS
 	file    io.WriteCloser
 	dc      *utils.SafeMapStorage
+	reqs    *concReq
 }
 
 // init will create all the necessary dependencies, including opening the file
@@ -80,9 +87,11 @@ func (fFwv *FileFWVee) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
+	fFwv.reqs.get()
 	defer func() {
 		updateEEMetrics(fFwv.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,
 			fFwv.cgrCfg.GeneralCfg().DefaultTimezone))
+		fFwv.reqs.done()
 	}()
 	fFwv.dc.Lock()
 	fFwv.dc.MapStorage[utils.NumberOfEvents] = fFwv.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
