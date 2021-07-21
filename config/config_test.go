@@ -2105,10 +2105,7 @@ func TestFilterSConfig(t *testing.T) {
 }
 
 func TestLoaderConfig(t *testing.T) {
-	ten, err := NewRSRParsers("", utils.InfieldSep)
-	if err != nil {
-		t.Error(err)
-	}
+	ten := ""
 	expected := LoaderSCfgs{
 		{
 			Enabled:        false,
