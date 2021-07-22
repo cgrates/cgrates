@@ -1,0 +1,2 @@
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],ThresholdIDs[10]
+cgrates.org,ResGroup1,FLTR_RES,2019-03-01T00:00:00Z,-1,7,,false,true,10,*none
