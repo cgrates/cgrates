@@ -20,10 +20,8 @@ package engine
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -277,143 +275,6 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 func (cdr *CDR) String() string {
 	mrsh, _ := json.Marshal(cdr)
 	return string(mrsh)
-}
-
-// combimedCdrFieldVal groups together CDRs with same CGRID and combines their values matching filter field ID
-func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*CDR, filterS *FilterS) (string, error) {
-	var combimedVal string // Will result as combination of the field values, filters must match
-
-	for _, grpCDR := range groupCDRs {
-		if cdr.CGRID != grpCDR.CGRID {
-			continue // We only care about cdrs with same primary cdr behind
-		}
-		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, grpCDR.AsMapStorage()); err != nil {
-			return utils.EmptyString, err
-		} else if !pass {
-			continue
-		}
-		combimedVal += grpCDR.FieldsAsString(cfgCdrFld.Value)
-
-	}
-	return combimedVal, nil
-}
-
-// Extracts the value specified by cfgHdr out of cdr, used for export values
-func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS) (retVal string, err error) {
-	for _, rsrFld := range cfgCdrFld.Value {
-		var cdrVal string
-		var roundDec int
-		switch cfgCdrFld.Path {
-		case utils.MetaExp + utils.NestingSep + utils.Cost:
-			roundDec = config.CgrConfig().GeneralCfg().RoundingDecimals
-			if cfgCdrFld.RoundingDecimals != nil {
-				roundDec = *cfgCdrFld.RoundingDecimals
-			}
-			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits, roundDec)
-		case utils.MetaExp + utils.NestingSep + utils.SetupTime:
-			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
-		case utils.MetaExp + utils.NestingSep + utils.AnswerTime: // Format time based on layout
-			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
-		case utils.MetaExp + utils.NestingSep + utils.Destination:
-			cdrVal, err = cdr.FieldAsString(rsrFld)
-			if err != nil {
-				return "", err
-			}
-			if cfgCdrFld.MaskLen != -1 && len(cfgCdrFld.MaskDestID) != 0 &&
-				CachedDestHasPrefix(cfgCdrFld.MaskDestID, cdrVal) {
-				cdrVal = utils.MaskSuffix(cdrVal, cfgCdrFld.MaskLen)
-			}
-		default:
-			cdrVal, err = cdr.FieldAsString(rsrFld)
-			if err != nil {
-				return "", err
-			}
-		}
-		retVal += cdrVal
-	}
-	return
-}
-
-func (cdr *CDR) formatField(cfgFld *config.FCTemplate, groupedCDRs []*CDR,
-	filterS *FilterS) (outVal string, err error) {
-	switch cfgFld.Type {
-	case utils.MetaFiller:
-		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
-		cfgFld.Padding = utils.MetaRight
-	case utils.MetaConstant:
-		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
-	case utils.MetaDateTime: // Convert the requested field value into datetime with layout
-		rawVal, err := cdr.exportFieldValue(cfgFld, filterS)
-		if err != nil {
-			return "", err
-		}
-		dtFld, err := utils.ParseTimeDetectLayout(rawVal, cfgFld.Timezone)
-		if err != nil { // Only one rule makes sense here
-			return "", err
-		}
-		outVal = dtFld.Format(cfgFld.Layout)
-	case utils.MetaHTTPPost:
-		var outValByte []byte
-		var httpAddr string
-		httpAddr, err = cfgFld.Value.ParseValue(utils.EmptyString)
-		if err != nil {
-			return "", err
-		}
-		var jsn []byte
-		jsn, err = json.Marshal(cdr)
-		if err != nil {
-			return "", err
-		}
-		if len(httpAddr) == 0 {
-			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-		} else if outValByte, err = HTTPPostJSON(httpAddr, jsn); err == nil {
-			outVal = string(outValByte)
-			if len(outVal) == 0 && cfgFld.Mandatory {
-				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
-			}
-		}
-	case utils.MetaCombimed:
-		outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs, filterS)
-	case utils.MetaComposed, utils.MetaVariable:
-		outVal, err = cdr.exportFieldValue(cfgFld, filterS)
-	case utils.MetaMaskedDestination:
-		if len(cfgFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgFld.MaskDestID, cdr.Destination) {
-			outVal = "1"
-		} else {
-			outVal = "0"
-		}
-	}
-	if err != nil &&
-		(err != utils.ErrNotFound || cfgFld.Mandatory) {
-		return "", err
-	}
-	return utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
-}
-
-// AsExportRecord is used in place where we need to export the CDR based on an export template
-// ExportRecord is a []string to keep it compatible with encoding/csv Writer
-func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate, groupedCDRs []*CDR,
-	filterS *FilterS) (expRecord []string, err error) {
-	nM := cdr.AsMapStorage()
-	for _, cfgFld := range exportFields {
-		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
-			continue
-		}
-		if pass, err := filterS.Pass(cdr.Tenant,
-			cfgFld.Filters, nM); err != nil {
-			return []string{}, err
-		} else if !pass {
-			continue
-		}
-		var fmtOut string
-		if fmtOut, err = cdr.formatField(cfgFld, groupedCDRs, filterS); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
-				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
-			return nil, err
-		}
-		expRecord = append(expRecord, fmtOut)
-	}
-	return expRecord, nil
 }
 
 // AsCDRsql converts the CDR into the format used for SQL storage
