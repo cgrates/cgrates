@@ -1799,8 +1799,10 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 				utils.RequestType:  "*postpaid",
-				utils.Usage:        "1m24s",
 				utils.Destination:  "+332145",
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaUsage:        "1m24s",
 			},
 		},
 	}

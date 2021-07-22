@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"github.com/ericlagergren/decimal"
 	"reflect"
 	"strings"
 	"testing"
@@ -336,9 +337,9 @@ func TestCGREventOptAsInt64(t *testing.T) {
 func TestCGREventOptAsDurationEmpty(t *testing.T) {
 	ev := &CGREvent{}
 
-	var expdur time.Duration
+	var expdur *decimal.Big
 	experr := ErrNotFound
-	received, err := ev.OptAsDuration("testString")
+	received, err := ev.OptsAsDecimal("testString")
 
 	if !reflect.DeepEqual(received, expdur) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expdur, received)
@@ -351,17 +352,17 @@ func TestCGREventOptAsDurationEmpty(t *testing.T) {
 func TestCGREventOptAsDuration(t *testing.T) {
 	ev := &CGREvent{
 		APIOpts: map[string]interface{}{
-			"testKey": 30,
+			"*usage": 30,
 		},
 	}
 
-	received, err := ev.OptAsDuration("testKey")
+	received, err := ev.OptsAsDecimal("*usage")
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, err)
 	}
-	expected := 30 * time.Nanosecond
+	expected := decimal.New(int64(30 * time.Nanosecond), 0)
 
-	if received != expected {
+	if !reflect.DeepEqual(received, expected) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
