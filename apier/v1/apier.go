@@ -364,7 +364,7 @@ func (apiv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, repl
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher, apiv1.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -919,7 +919,7 @@ func (apiv1 *APIerSv1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromFolder, reloading cache.")
-	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher, apiv1.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -984,7 +984,7 @@ func (apiv1 *APIerSv1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, repl
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromFolder, reloading cache.")
-	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher, apiv1.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1035,7 +1035,7 @@ func (apiv1 *APIerSv1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *str
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromStorDB, reloading cache.")
-	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher, apiv1.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {

@@ -2373,7 +2373,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	return
 }
 
-func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *utils.ArgDispatcher) (err error) {
+func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *utils.ArgDispatcher, tenant string) (err error) {
 	if len(tpr.cacheConns) == 0 {
 		log.Print("Disabled automatic reload")
 		return
@@ -2488,7 +2488,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	}
 	clearArgs := &utils.AttrCacheIDsWithArgDispatcher{
 		TenantArg: utils.TenantArg{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: tenant,
 		},
 		ArgDispatcher: argDispatcher,
 		CacheIDs:      cacheIDs,
