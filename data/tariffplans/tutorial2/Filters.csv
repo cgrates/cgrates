@@ -1,0 +1,7 @@
+#Tenant[0],ID[1],Type[2],Element[3],Values[4],ActivationInterval[5]
+cgrates.org,FLTR_RES,*string,~*req.Account,1001;1002;1003,2019-03-01T00:00:00Z
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.Account,1001;1002,2019-03-01T00:00:00Z
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.RunID,*default,
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.Destination,1001;1002,
+cgrates.org,FLTR_ACNT_1001,*string,~*req.Account,1001,2019-03-01T00:00:00Z
+cgrates.org,FLTR_ACNT_1002,*string,~*req.Account,1002,2019-03-01T00:00:00Z

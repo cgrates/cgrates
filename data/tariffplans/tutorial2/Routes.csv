@@ -1,0 +1,5 @@
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters,Weight
+
+cgrates.org,ROUTE_ACNT_1001,FLTR_ACNT_1001,2019-03-01T00:00:00Z,*weight,,,,,,,,,,,10
+cgrates.org,ROUTE_ACNT_1001,,,,,route1,,,,,,10,,,10
+cgrates.org,ROUTE_ACNT_1001,,,,,route2,,,,,,20,,,20

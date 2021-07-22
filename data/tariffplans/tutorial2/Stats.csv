@@ -1,0 +1,2 @@
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
+cgrates.org,Stats,FLTR_ACNT_1001_1002,2019-03-01T00:00:00Z,100,-1,0,*tcc;*tcd,,false,true,30,*none
