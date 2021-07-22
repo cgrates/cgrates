@@ -57,7 +57,7 @@ type CoreService struct {
 	shdWg      *sync.WaitGroup
 	stopMemPrf chan struct{}
 	shdChan    *utils.SyncedChan
-	fileMEM string
+	fileMEM    string
 	fileCPU    io.Closer
 	fileMx     sync.Mutex
 }
