@@ -133,22 +133,24 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	usage := decimal.New(int64(72*time.Hour), 0)
-	var usgEv time.Duration
-	if usgEv, err = cgrEv.FieldAsDuration(utils.Usage); err != nil {
+
+	var usgEve *decimal.Big
+	// first we try from opts to search in *usage
+	if usgEve, err = cgrEv.OptsAsDecimal(utils.MetaUsage); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
-		// not found, try at opts level
-		if usgEv, err = cgrEv.OptAsDuration(utils.MetaUsage); err != nil {
+		// not found/ will try in *ratesUsage
+		if usgEve, err = cgrEv.OptsAsDecimal(utils.OptsRatesUsage); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
 			err = nil
 		} else { // found, overwrite usage
-			usage = decimal.New(int64(usgEv), 0)
+			usage = usgEve
 		}
-	} else {
-		usage = decimal.New(int64(usgEv), 0)
+	} else { // not found either in *usage or *ratesUsage, use default
+		usage = usgEve
 	}
 	dbted := decimal.New(0, 0)
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))

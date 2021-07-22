@@ -896,17 +896,20 @@ func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error)
 	if tIface, has := args.APIOpts[OptsRatesStartTime]; has {
 		return IfaceAsTime(tIface, tmz)
 	}
+	if tIface, has := args.APIOpts[MetaStartTime]; has {
+		return IfaceAsTime(tIface, tmz)
+	}
 	return time.Now(), nil
 }
 
 // usage returns the event time used to check active rate profiles
 func (args *ArgsCostForEvent) Usage() (usage *decimal.Big, err error) {
-	// first search for the usage in opts
+	// first search for the rateUsage in opts
 	if uIface, has := args.APIOpts[OptsRatesUsage]; has {
 		return IfaceAsBig(uIface)
 	}
-	// if the usage is not present in opts search in event
-	if uIface, has := args.Event[Usage]; has {
+	// second search for the usage in opts
+	if uIface, has := args.APIOpts[MetaUsage]; has {
 		return IfaceAsBig(uIface)
 	}
 	// if the usage is not found in the event populate with default value and overwrite the NOT_FOUND error with nil

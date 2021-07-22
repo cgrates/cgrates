@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"github.com/ericlagergren/decimal"
 	"strings"
 	"time"
 )
@@ -83,14 +84,14 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 	return IfaceAsDuration(iface)
 }
 
-// OptAsDuration returns an option as Duration instance
-func (ev *CGREvent) OptAsDuration(optName string) (d time.Duration, err error) {
+// OptsAsDecimal OptAsDecimal returns an option as decimal.Big instance
+func (ev *CGREvent) OptsAsDecimal(optName string) (d *decimal.Big, err error) {
 	iface, has := ev.APIOpts[optName]
 	if !has {
 		err = ErrNotFound
 		return
 	}
-	return IfaceAsDuration(iface)
+	return IfaceAsBig(iface)
 }
 
 func (ev *CGREvent) Clone() (clned *CGREvent) {
