@@ -41,7 +41,7 @@ func TestNewCoreService(t *testing.T) {
 		stopMemPrf: stopchan,
 		cfg:        cfgDflt,
 		CapsStats:  sts,
-		fileMEM: "/tmp",
+		fileMEM:    "/tmp",
 		shdChan:    shdChan,
 	}
 	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopMemChan, nil, stopchan, shdChan)

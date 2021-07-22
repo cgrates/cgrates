@@ -1852,4 +1852,3 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRpCost), utils.ToJSON(rpCost))
 	}
 }
-
