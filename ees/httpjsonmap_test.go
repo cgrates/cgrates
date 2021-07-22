@@ -83,8 +83,8 @@ func TestHttpJsonMapExportEvent1(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
@@ -143,8 +143,8 @@ func TestHttpJsonMapExportEvent2(t *testing.T) {
 		t.Error(err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
@@ -190,8 +190,8 @@ func TestHttpJsonMapExportEvent3(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 func TestHttpJsonMapExportEvent4(t *testing.T) {
@@ -239,8 +239,8 @@ func TestHttpJsonMapExportEvent4(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
@@ -292,8 +292,8 @@ func TestHttpJsonMapExportEvent5(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 	httpEE.OnEvicted("test", "test")
 }

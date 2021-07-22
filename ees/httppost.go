@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -30,7 +29,7 @@ import (
 )
 
 func NewHTTPPostEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (httpPost *HTTPPost, err error) {
+	dc *utils.SafeMapStorage) (httpPost *HTTPPost, err error) {
 	httpPost = &HTTPPost{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	httpPost.httpPoster = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
@@ -47,8 +46,7 @@ type HTTPPost struct {
 	cfgIdx     int // index of config instance within ERsCfg.Readers
 	filterS    *engine.FilterS
 	httpPoster *engine.HTTPPoster
-	sync.RWMutex
-	dc utils.MapStorage
+	dc         *utils.SafeMapStorage
 }
 
 // ID returns the identificator of this exporter
@@ -62,16 +60,13 @@ func (httpPost *HTTPPost) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	httpPost.Lock()
 	defer func() {
-		if err != nil {
-			httpPost.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
-		} else {
-			httpPost.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
-		}
-		httpPost.Unlock()
+		updateEEMetrics(httpPost.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
+			httpPost.cgrCfg.GeneralCfg().DefaultTimezone))
 	}()
-	httpPost.dc[utils.NumberOfEvents] = httpPost.dc[utils.NumberOfEvents].(int64) + 1
+	httpPost.dc.Lock()
+	httpPost.dc.MapStorage[utils.NumberOfEvents] = httpPost.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
+	httpPost.dc.Unlock()
 
 	urlVals := url.Values{}
 	hdr := http.Header{}
@@ -83,10 +78,10 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-			utils.MetaReq:  cgrEv.Event,
+		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 			utils.MetaDC:   httpPost.dc,
-			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 			utils.MetaCfg:  httpPost.cgrCfg.GetDataProvider(),
 		}, utils.FirstNonEmpty(cgrEv.Tenant, httpPost.cgrCfg.GeneralCfg().DefaultTenant),
 			httpPost.filterS, oNm)
@@ -103,8 +98,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			return
 		}
 	}
-	updateEEMetrics(httpPost.dc, cgrEv.Event, utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
-		httpPost.cgrCfg.GeneralCfg().DefaultTimezone))
+
 	if err = httpPost.httpPoster.PostValues(urlVals, hdr); err != nil &&
 		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.MetaNone {
 		engine.AddFailedPost(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ExportPath,
@@ -117,7 +111,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	return
 }
 
-func (httpPost *HTTPPost) GetMetrics() utils.MapStorage {
+func (httpPost *HTTPPost) GetMetrics() *utils.SafeMapStorage {
 	return httpPost.dc.Clone()
 }
 
@@ -130,7 +124,7 @@ func (httpPost *HTTPPost) composeHeader() (hdr http.Header, err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaHdr: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaDC:  httpPost.dc,
 		utils.MetaCfg: httpPost.cgrCfg.GetDataProvider(),
 	}, httpPost.cgrCfg.GeneralCfg().DefaultTenant,

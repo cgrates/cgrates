@@ -53,11 +53,11 @@ func TestNewEventExporter(t *testing.T) {
 		t.Error("\nExpected an error")
 	}
 	newEE := ee.(*FileCSVee)
-	newEE.dc[utils.TimeNow] = nil
-	newEE.dc[utils.ExportPath] = nil
+	newEE.dc.MapStorage[utils.TimeNow] = nil
+	newEE.dc.MapStorage[utils.ExportPath] = nil
 	eeExpect.csvWriter = nil
-	eeExpect.dc[utils.TimeNow] = nil
-	eeExpect.dc[utils.ExportPath] = nil
+	eeExpect.dc.MapStorage[utils.TimeNow] = nil
+	eeExpect.dc.MapStorage[utils.ExportPath] = nil
 	if !reflect.DeepEqual(eeExpect, newEE) {
 		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(newEE))
 	}
@@ -89,10 +89,10 @@ func TestNewEventExporterCase2(t *testing.T) {
 		t.Error("\nExpected an error")
 	}
 	newEE := ee.(*FileFWVee)
-	newEE.dc[utils.TimeNow] = nil
-	newEE.dc[utils.ExportPath] = nil
-	eeExpect.dc[utils.TimeNow] = nil
-	eeExpect.dc[utils.ExportPath] = nil
+	newEE.dc.MapStorage[utils.TimeNow] = nil
+	newEE.dc.MapStorage[utils.ExportPath] = nil
+	eeExpect.dc.MapStorage[utils.TimeNow] = nil
+	eeExpect.dc.MapStorage[utils.ExportPath] = nil
 	if !reflect.DeepEqual(eeExpect, newEE) {
 		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(newEE))
 	}
@@ -118,8 +118,8 @@ func TestNewEventExporterCase3(t *testing.T) {
 		t.Error(err)
 	}
 	newEE := ee.(*HTTPPost)
-	newEE.dc[utils.TimeNow] = nil
-	eeExpect.dc[utils.TimeNow] = nil
+	newEE.dc.MapStorage[utils.TimeNow] = nil
+	eeExpect.dc.MapStorage[utils.TimeNow] = nil
 	if !reflect.DeepEqual(eeExpect, newEE) {
 		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(newEE))
 	}
@@ -145,8 +145,8 @@ func TestNewEventExporterCase4(t *testing.T) {
 		t.Error(err)
 	}
 	newEE := ee.(*HTTPjsonMapEE)
-	newEE.dc[utils.TimeNow] = nil
-	eeExpect.dc[utils.TimeNow] = nil
+	newEE.dc.MapStorage[utils.TimeNow] = nil
+	eeExpect.dc.MapStorage[utils.TimeNow] = nil
 	if !reflect.DeepEqual(eeExpect, newEE) {
 		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(newEE))
 	}
@@ -172,8 +172,8 @@ func TestNewEventExporterCase5(t *testing.T) {
 		t.Error(err)
 	}
 	newEE := ee.(*PosterJSONMapEE)
-	newEE.dc[utils.TimeNow] = nil
-	eeExpect.dc[utils.TimeNow] = nil
+	newEE.dc.MapStorage[utils.TimeNow] = nil
+	eeExpect.dc.MapStorage[utils.TimeNow] = nil
 	if !reflect.DeepEqual(eeExpect, newEE) {
 		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(newEE))
 	}
@@ -199,8 +199,8 @@ func TestNewEventExporterCase6(t *testing.T) {
 		t.Error(err)
 	}
 	newEE := ee.(*VirtualEe)
-	newEE.dc[utils.TimeNow] = nil
-	eeExpect.dc[utils.TimeNow] = nil
+	newEE.dc.MapStorage[utils.TimeNow] = nil
+	eeExpect.dc.MapStorage[utils.TimeNow] = nil
 	if !reflect.DeepEqual(eeExpect, newEE) {
 		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(newEE))
 	}
@@ -239,8 +239,8 @@ func TestNewEventExporterCase7(t *testing.T) {
 		t.Error(err)
 	}
 	newEE := ee.(*ElasticEe)
-	newEE.dc[utils.TimeNow] = nil
-	eeExpect.dc[utils.TimeNow] = nil
+	newEE.dc.MapStorage[utils.TimeNow] = nil
+	eeExpect.dc.MapStorage[utils.TimeNow] = nil
 	eeExpect.eClnt = newEE.eClnt
 	if !reflect.DeepEqual(eeExpect, newEE) {
 		t.Errorf("Expected %+v \n but got %+v", eeExpect, newEE)

@@ -631,7 +631,7 @@ func TestNavMapFieldAsInterface3(t *testing.T) {
 
 func TestNavMapGetKeys2(t *testing.T) {
 	navMp := MapStorage{
-		"FirstLevel": dataStorage(MapStorage{
+		"FirstLevel": DataStorage(MapStorage{
 			"SecondLevel": map[string]interface{}{
 				"ThirdLevel": MapStorage{
 					"Fld1": 123.123,
@@ -654,7 +654,7 @@ func TestNavMapGetKeys2(t *testing.T) {
 		},
 		"Field6":  []string{"1", "2"},
 		"Field7":  []interface{}{"1", "2"},
-		"Field8":  []dataStorage{MapStorage{"A": 1}},
+		"Field8":  []DataStorage{MapStorage{"A": 1}},
 		"Field9":  []MapStorage{{"A": 1}},
 		"Field10": []map[string]interface{}{{"A": 1}},
 	}
