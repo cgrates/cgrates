@@ -71,8 +71,8 @@ func TestNatsEE(t *testing.T) {
 		t.Fatal(err)
 	}
 	for name := range js.StreamNames() {
-		if name == "test" {
-			if err = js.DeleteStream("test"); err != nil {
+		if name == "test2" {
+			if err = js.DeleteStream("test2"); err != nil {
 				t.Fatal(err)
 			}
 			break
@@ -80,13 +80,13 @@ func TestNatsEE(t *testing.T) {
 	}
 
 	if _, err = js.AddStream(&nats.StreamConfig{
-		Name:     "test",
+		Name:     "test2",
 		Subjects: []string{"processed_cdrs"},
 	}); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = js.PurgeStream("test"); err != nil {
+	if err = js.PurgeStream("test2"); err != nil {
 		t.Fatal(err)
 	}
 
