@@ -43,6 +43,7 @@
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":["*internal"],
+	"rals_conns": ["*internal"]
 },
 
 
