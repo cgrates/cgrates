@@ -548,7 +548,7 @@ func (rS *ResourceService) processThresholds(rs Resources, opts map[string]inter
 		var tIDs []string
 		if err := rS.connMgr.Call(rS.cgrcfg.ResourceSCfg().ThresholdSConns, nil,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
+			(len(thIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with %s.",
 					utils.ResourceS, err.Error(), thEv, utils.ThresholdS))
