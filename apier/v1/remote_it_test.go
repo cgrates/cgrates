@@ -497,12 +497,20 @@ func testInternalRemoteITGetRatingProfile(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	actTime1, err := utils.ParseTimeDetectLayout("2010-01-14T00:00:00Z", "")
+	if err != nil {
+		t.Error(err)
+	}
 	expected := engine.RatingProfile{
 		Id: "*out:cgrates.org:call:1001",
 		RatingPlanActivations: engine.RatingPlanActivations{
 			{
 				ActivationTime: actTime,
 				RatingPlanId:   "RP_1001",
+			},
+			{
+				ActivationTime: actTime1,
+				RatingPlanId:   "RP_1002",
 			},
 		},
 	}
