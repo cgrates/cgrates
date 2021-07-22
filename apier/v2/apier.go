@@ -140,7 +140,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder
 	if attrs.Caching != nil {
 		caching = *attrs.Caching
 	}
-	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher, apiv2.Config.GeneralCfg().DefaultTenant); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apiv2.Config.ApierCfg().SchedulerConns) != 0 {

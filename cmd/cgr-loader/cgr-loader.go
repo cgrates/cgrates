@@ -95,6 +95,7 @@ var (
 	remove         = cgrLoaderFlags.Bool("remove", false, "Will remove instead of adding data from DB")
 	apiKey         = cgrLoaderFlags.String("api_key", "", "Api Key used to comosed ArgDispatcher")
 	routeID        = cgrLoaderFlags.String("route_id", "", "RouteID used to comosed ArgDispatcher")
+	tenant         = cgrLoaderFlags.String(utils.TenantCfg, dfltCfg.GeneralCfg().DefaultTenant, "")
 
 	fromStorDB    = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
@@ -339,7 +340,7 @@ func main() {
 	if err := tpReader.ReloadCache(caching, *verbose, &utils.ArgDispatcher{
 		APIKey:  apiKey,
 		RouteID: routeID,
-	}); err != nil {
+	}, *tenant); err != nil {
 		log.Fatal("Could not reload cache: ", err)
 	}
 	if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 {
