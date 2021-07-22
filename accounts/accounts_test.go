@@ -385,20 +385,20 @@ func TestAccountsDebit(t *testing.T) {
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
 			utils.AccountField: "1004",
-			utils.Usage:        "not_time_format",
 		},
-		APIOpts: map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesUsage:  "not_time_format",
+		},
 	}
 
-	expected := "time: invalid duration \"not_time_format\""
+	expected := "can't convert <not_time_format> to decimal"
 	if _, err := accnts.accountsDebit(context.Background(), accntsPrf,
 		cgrEvent, false, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	delete(cgrEvent.Event, utils.Usage)
+	delete(cgrEvent.APIOpts, utils.OptsRatesUsage)
 
 	cgrEvent.APIOpts[utils.MetaUsage] = "not_time_format"
-	expected = "time: invalid duration \"not_time_format\""
 	if _, err := accnts.accountsDebit(context.Background(), accntsPrf,
 		cgrEvent, false, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -577,7 +577,9 @@ func TestV1MaxAbstracts(t *testing.T) {
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.AccountField: "1004",
-				utils.Usage:        "210ns",
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaUsage: "210ns",
 			},
 		},
 	}

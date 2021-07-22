@@ -738,8 +738,8 @@ func TestATDUsage(t *testing.T) {
 	args := &ArgsCostForEvent{
 		CGREvent: &CGREvent{
 			ID: "testID",
-			Event: map[string]interface{}{
-				Usage: true,
+			APIOpts: map[string]interface{}{
+				MetaUsage: true,
 			},
 		},
 	}
