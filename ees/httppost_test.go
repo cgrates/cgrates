@@ -82,8 +82,8 @@ func TestHttpPostExportEvent(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpPost.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
@@ -140,8 +140,8 @@ func TestHttpPostExportEvent2(t *testing.T) {
 		t.Error(err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpPost.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
@@ -187,8 +187,8 @@ func TestHttpPostExportEvent3(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpPost.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
@@ -237,8 +237,8 @@ func TestHttpPostExportEvent4(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpPost.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents])
 	}
 	httpPost.OnEvicted("test", "test")
 }

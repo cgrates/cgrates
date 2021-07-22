@@ -76,7 +76,7 @@ func TestFileCsvComposeHeader(t *testing.T) {
 		filterS:   filterS,
 		file:      nopCloser{byteBuff},
 		csvWriter: csvNW,
-		dc:        utils.MapStorage{},
+		dc:        &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields = []*config.FCTemplate{
 		{
@@ -140,7 +140,7 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 		filterS:   filterS,
 		file:      nopCloser{byteBuff},
 		csvWriter: csvNW,
-		dc:        utils.MapStorage{},
+		dc:        &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields = []*config.FCTemplate{
 		{
@@ -286,7 +286,7 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 		filterS:   filterS,
 		file:      nopCloserWrite{byteBuff},
 		csvWriter: csvNW,
-		dc:        utils.MapStorage{},
+		dc:        &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields = []*config.FCTemplate{
 		{
@@ -321,7 +321,7 @@ func TestFileCsvOnEvictedClose(t *testing.T) {
 		filterS:   filterS,
 		file:      nopCloserError{byteBuff},
 		csvWriter: csvNW,
-		dc:        utils.MapStorage{},
+		dc:        &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Fields = []*config.FCTemplate{
 		{

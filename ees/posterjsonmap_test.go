@@ -183,16 +183,16 @@ func TestPosterJsonMapExportEvent(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, pstrEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 	cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].ComputeFields()
 	if err := pstrEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect = int64(2)
-	if !reflect.DeepEqual(dcExpect, pstrEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
@@ -252,8 +252,8 @@ func TestPosterJsonMapExportEvent1(t *testing.T) {
 		t.Error(err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, pstrEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 	bodyExpect := map[string]interface{}{
 		"2": "*req.field2",
@@ -310,8 +310,8 @@ func TestPosterJsonMapExportEvent2(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, pstrEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
@@ -350,8 +350,8 @@ func TestPosterJsonMapExportEvent3(t *testing.T) {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, pstrEE.dc[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc[utils.NumberOfEvents])
+	if !reflect.DeepEqual(dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents]) {
+		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 	pstrEE.OnEvicted("test", "test")
 }

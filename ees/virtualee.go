@@ -19,15 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"sync"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func NewVirtualExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (vEe *VirtualEe, err error) {
+	dc *utils.SafeMapStorage) (vEe *VirtualEe, err error) {
 	vEe = &VirtualEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 	err = vEe.init()
@@ -40,8 +38,7 @@ type VirtualEe struct {
 	cgrCfg  *config.CGRConfig
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
-	sync.RWMutex
-	dc utils.MapStorage
+	dc      *utils.SafeMapStorage
 }
 
 // init will create all the necessary dependencies, including opening the file
@@ -60,35 +57,31 @@ func (vEe *VirtualEe) OnEvicted(_ string, _ interface{}) {
 
 // ExportEvent implements EventExporter
 func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	vEe.Lock()
 	defer func() {
-		if err != nil {
-			vEe.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
-		} else {
-			vEe.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
-		}
-		vEe.Unlock()
+		updateEEMetrics(vEe.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Timezone,
+			vEe.cgrCfg.GeneralCfg().DefaultTimezone))
 	}()
-	vEe.dc[utils.NumberOfEvents] = vEe.dc[utils.NumberOfEvents].(int64) + 1
+	vEe.dc.Lock()
+	vEe.dc.MapStorage[utils.NumberOfEvents] = vEe.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
+	vEe.dc.Unlock()
 
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaExp: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-		utils.MetaReq:  cgrEv.Event,
+	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+		utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 		utils.MetaDC:   vEe.dc,
-		utils.MetaOpts: cgrEv.APIOpts,
+		utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 		utils.MetaCfg:  vEe.cgrCfg.GetDataProvider(),
 	}, utils.FirstNonEmpty(cgrEv.Tenant, vEe.cgrCfg.GeneralCfg().DefaultTenant),
 		vEe.filterS, oNm)
 	if err = eeReq.SetFields(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].ContentFields()); err != nil {
 		return
 	}
-	updateEEMetrics(vEe.dc, cgrEv.Event, utils.FirstNonEmpty(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Timezone,
-		vEe.cgrCfg.GeneralCfg().DefaultTimezone))
+
 	return
 }
 
-func (vEe *VirtualEe) GetMetrics() utils.MapStorage {
+func (vEe *VirtualEe) GetMetrics() *utils.SafeMapStorage {
 	return vEe.dc.Clone()
 }

@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -30,7 +29,7 @@ import (
 )
 
 func NewHTTPjsonMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (pstrJSON *HTTPjsonMapEE, err error) {
+	dc *utils.SafeMapStorage) (pstrJSON *HTTPjsonMapEE, err error) {
 	pstrJSON = &HTTPjsonMapEE{
 		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg:  cgrCfg,
@@ -53,8 +52,7 @@ type HTTPjsonMapEE struct {
 	cfgIdx  int // index of config instance within ERsCfg.Readers
 	filterS *engine.FilterS
 	pstr    *engine.HTTPPoster
-	dc      utils.MapStorage
-	sync.RWMutex
+	dc      *utils.SafeMapStorage
 }
 
 // ID returns the identificator of this exporter
@@ -68,17 +66,13 @@ func (httpEE *HTTPjsonMapEE) OnEvicted(string, interface{}) {
 
 // ExportEvent implements EventExporter
 func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	httpEE.Lock()
 	defer func() {
-		if err != nil {
-			httpEE.dc[utils.NegativeExports].(utils.StringSet).Add(cgrEv.ID)
-		} else {
-			httpEE.dc[utils.PositiveExports].(utils.StringSet).Add(cgrEv.ID)
-		}
-		httpEE.Unlock()
+		updateEEMetrics(httpEE.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,
+			httpEE.cgrCfg.GeneralCfg().DefaultTimezone))
 	}()
-
-	httpEE.dc[utils.NumberOfEvents] = httpEE.dc[utils.NumberOfEvents].(int64) + 1
+	httpEE.dc.Lock()
+	httpEE.dc.MapStorage[utils.NumberOfEvents] = httpEE.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
+	httpEE.dc.Unlock()
 
 	valMp := make(map[string]interface{})
 	hdr := http.Header{}
@@ -88,10 +82,10 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
-			utils.MetaReq:  cgrEv.Event,
+		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 			utils.MetaDC:   httpEE.dc,
-			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 			utils.MetaCfg:  httpEE.cgrCfg.GetDataProvider(),
 		}, utils.FirstNonEmpty(cgrEv.Tenant, httpEE.cgrCfg.GeneralCfg().DefaultTenant),
 			httpEE.filterS, oNm)
@@ -109,8 +103,7 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			return
 		}
 	}
-	updateEEMetrics(httpEE.dc, cgrEv.Event, utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,
-		httpEE.cgrCfg.GeneralCfg().DefaultTimezone))
+
 	var body []byte
 	if body, err = json.Marshal(valMp); err != nil {
 		return
@@ -125,7 +118,7 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	return
 }
 
-func (httpEE *HTTPjsonMapEE) GetMetrics() utils.MapStorage {
+func (httpEE *HTTPjsonMapEE) GetMetrics() *utils.SafeMapStorage {
 	return httpEE.dc.Clone()
 }
 
@@ -138,7 +131,7 @@ func (httpEE *HTTPjsonMapEE) composeHeader() (hdr http.Header, err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaHdr: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaDC:  httpEE.dc,
 		utils.MetaCfg: httpEE.cgrCfg.GetDataProvider(),
 	}, httpEE.cgrCfg.GeneralCfg().DefaultTenant,

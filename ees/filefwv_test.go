@@ -78,7 +78,7 @@ func TestFileFwvComposeHeader(t *testing.T) {
 		cfgIdx:  0,
 		filterS: filterS,
 		file:    nopCloser{byteBuff},
-		dc:      utils.MapStorage{},
+		dc:      &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
 		{
@@ -141,7 +141,7 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 		cfgIdx:  0,
 		filterS: filterS,
 		file:    nopCloser{byteBuff},
-		dc:      utils.MapStorage{},
+		dc:      &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
 		{
@@ -327,7 +327,7 @@ func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 		cfgIdx:  0,
 		filterS: filterS,
 		file:    nopCloserWrite{byteBuff},
-		dc:      utils.MapStorage{},
+		dc:      &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
 		{
@@ -360,7 +360,7 @@ func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 		cfgIdx:  0,
 		filterS: filterS,
 		file:    nopCloserWrite{byteBuff},
-		dc:      utils.MapStorage{},
+		dc:      &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
 		{
@@ -392,7 +392,7 @@ func TestFileFwvOnEvictedTrailer(t *testing.T) {
 		cfgIdx:  0,
 		filterS: filterS,
 		file:    nopCloserWrite{byteBuff},
-		dc:      utils.MapStorage{},
+		dc:      &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
 		{
@@ -431,7 +431,7 @@ func TestFileFwvOnEvictedClose(t *testing.T) {
 		cfgIdx:  0,
 		filterS: filterS,
 		file:    nopCloserError{byteBuff},
-		dc:      utils.MapStorage{},
+		dc:      &utils.SafeMapStorage{},
 	}
 	cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Fields = []*config.FCTemplate{
 		{
