@@ -1,9 +1,9 @@
 #Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,
+cgrates.org,call,1001,2010-01-14T00:00:00Z,RP_1002,
 cgrates.org,call,1002,2014-01-14T00:00:00Z,RP_1002,
 cgrates.org,call,1003,2014-01-14T00:00:00Z,RP_1003,
 cgrates.org,sms,*any,2014-01-14T00:00:00Z,RP_SMS,
 cgrates.org,mms,*any,2014-01-14T00:00:00Z,RP_MMS,
 cgrates.com,custom_charger,*any,2014-01-14T00:00:00Z,RP_1001,
 cgrates.com,call,*any,2014-01-14T00:00:00Z,RP_1001,
-
