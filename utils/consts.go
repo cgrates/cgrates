@@ -850,6 +850,7 @@ const (
 	MetaExporterIDs         = "*exporterIDs"
 	MetaAsync               = "*async"
 	MetaUsage               = "*usage"
+	MetaStartTime           = "*startTime"
 	Weights                 = "Weights"
 	UnitFactors             = "UnitFactors"
 	CostIncrements          = "CostIncrements"
