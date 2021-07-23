@@ -1,24 +1,36 @@
 ---
+- name: Add users
+  become: true
+  template:
+    src: "{{ users_filename }}"
+    dest: "/etc/nginx/conf.d/nginx.htpasswd"
+    mode: '0644'
+    owner: "{{ rootUser }}"
+  when: users_filename|length > 0
+
 - name: Delete default page
   become: true
   file:
     path: "/etc/nginx/sites-enabled/default"
     state: absent
+  when: nginxConfig.stdout_lines|length < 1
 
-- name: Add apt.cgrates.vhost in nginx
+- name: Add {{ registry_site }}.vhost in nginx
   become: true
   template:
     src: nginx.conf.j2
-    dest: "/etc/nginx/sites-available/dkr.cgrates.org.vhost"
+    dest: "/etc/nginx/sites-available/{{ registry_site }}.vhost"
     mode: '0600'
     owner: "{{ rootUser }}"
+  when: nginxConfig.stdout_lines|length < 1
 
-- name: Create a symlink for docker.cgrates.org
+- name: Create a symlink for {{ registry_site }}
   become: true
   file:
-    src: "/etc/nginx/sites-available/dkr.cgrates.org.vhost"
-    dest: "/etc/nginx/sites-enabled/dkr.cgrates.org.vhost"
+    src: "/etc/nginx/sites-available/{{ registry_site }}.vhost"
+    dest: "/etc/nginx/sites-enabled/{{ registry_site }}.vhost"
     state: link
+  when: nginxConfig.stdout_lines|length < 1
 
 - name: Restart the nginx so the change take effects
   become: true
