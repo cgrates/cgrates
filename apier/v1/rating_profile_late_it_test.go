@@ -31,9 +31,9 @@ import (
 )
 
 var (
-	rpLateCfGPath     string
-	rpLateCfg          *config.CGRConfig
-	rpLateRPC          *rpc.Client
+	rpLateCfGPath   string
+	rpLateCfg       *config.CGRConfig
+	rpLateRPC       *rpc.Client
 	rpLateConfigDIR string //run tests for specific configuration
 
 	rpLateAPIer = []func(t *testing.T){
@@ -92,7 +92,7 @@ func testRpLateResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testRpLateStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rpLateCfGPath , *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rpLateCfGPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -142,13 +142,13 @@ func testRpLateCDRProcessEvent(t *testing.T) {
 	var replyy []*engine.CDR
 	req := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{
 		/*
-		CGRIDs: []string{"RandomCgrId"},
-		//RunIDs: []string{utils.MetaRaw, utils.MetaDefault},
-		Tenants: []string{"cgrates.org"},
-		Categories: []string{"call"},
-		Subjects: []string{"1001"},
+			CGRIDs: []string{"RandomCgrId"},
+			//RunIDs: []string{utils.MetaRaw, utils.MetaDefault},
+			Tenants: []string{"cgrates.org"},
+			Categories: []string{"call"},
+			Subjects: []string{"1001"},
 
-		 */
+		*/
 	}}
 	if err := rpLateRPC.Call(utils.CDRsV1GetCDRs, &req, &replyy); err != nil {
 		t.Error("Unexpected error: ", err.Error())
