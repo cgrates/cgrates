@@ -162,10 +162,14 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
+			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, resourceProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			guardian.Guardian.UnguardIDs(lkID)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
+			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, resourceLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetResource(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
