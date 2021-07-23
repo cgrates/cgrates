@@ -1,23 +1,12 @@
 ---
-- name: Check and set python version on APT server
-  hosts: dkr
-  remote_user: '{{ user }}'
-  gather_facts: false
-  tasks:
-    - name: symlink /usr/bin/python -> /usr/bin/python3
-      raw: |
-        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
-          ln --symbolic /usr/bin/python3 /usr/bin/python; 
-        fi
-      become: true
-
 - hosts: dkr
   vars:
+    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
     ###############################################################
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.16.3'
+    golang_version: '1.16.6'
     go_version_target: "go version go{{ golang_version }} linux/amd64"
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'
@@ -33,9 +22,12 @@
     ###############################################################
     # CGRateS vars
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
-    cgrates_branch: "master"
+    cgrates_branch: "1.0"
     cgrates_distribution: "nightly"
     docker_tag: "latest"
+    registry_site: "dkr.cgrates.org"      # the web site
+    registry_name: "registry"             # the name of the registry container
+    users_filename: ""                    # the file containing the htpasswd users
 
     dependencies:
       - build-essential
@@ -50,6 +42,15 @@
       - python3-pip
       - virtualenv
       - python3-setuptools
+      - apache2-utils
+
+    build_execs:
+      - cgr-engine
+      - cgr-console
+      - cgr-loader
+      - cgr-migrator
+      - cgr-tester
+
     rootUser : root
     
   remote_user: '{{ user }}'
@@ -57,7 +58,7 @@
     - name: set cgrates distribution
       set_fact:
         cgrates_distribution: "{{ cgrates_branch }}"
-      when: cgrates_branch != "master"
+      when: cgrates_branch != "master" or cgrates_branch != "1.0"
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
@@ -69,13 +70,13 @@
 # Prepare for configuration
     - name: Check if NGINX needs to be configured
       become: true
-      shell: "ls /etc/nginx/sites-enabled | grep 'dkr.cgrates.org.vhost'"
+      shell: "ls /etc/nginx/sites-enabled | grep '{{ registry_site }}.vhost'"
       ignore_errors: true
       register: nginxConfig
 
     - name: Configure NGINX server
       include: nginx.yaml
-      when: nginxConfig.stdout_lines|length < 1
+      when: nginxConfig.stdout_lines|length < 1 or users_filename|length > 0
 
     - name: Configure docker 
       include: docker.yaml
@@ -130,20 +131,24 @@
       environment:
         PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-    - name: sync the go mod with vendor
-      become: yes
-      shell: "go mod vendor"
-      environment:
-        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-      args:
-        chdir: '{{ cgrates_dir }}'
-
     - name:  build cgrates for docker
       shell: "sh {{ cgrates_dir }}/data/docker/scratch/build.sh"
       environment:
         PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
       args:
         chdir: '{{ cgrates_dir }}/data/docker/scratch'
+
+    - name: clean go cache after build
+      become: yes
+      shell: "go clean --cache"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    - name: clean go modcache after build
+      become: yes
+      shell: "go clean --modcache"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
     - name: copy certificate authority
       copy:
@@ -162,71 +167,53 @@
       args:
         chdir: '{{ cgrates_dir }}'
       register: gitCommit 
-      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" or gitTagVar.stdout_lines|length == 0
    
     - name: get commit
       shell: date +%Y%m%d%H%M%S --date="@$(git log -n1 --format=format:%ct)"
       args:
         chdir: '{{ cgrates_dir }}'
       register: gitDate 
-      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" or gitTagVar.stdout_lines|length == 0
 
     - name: set cgrates docker_tag
       set_fact:
         docker_tag: "{{ gitDate.stdout }}{{ gitCommit.stdout }}"
-      when: cgrates_branch == "master" or gitTagVar.stdout_lines|length == 0
-
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" or gitTagVar.stdout_lines|length == 0
 
     - name: build Docker image
       become: yes
       shell: 
-        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }} -f="cgr-engine.doker" {{ cgrates_dir }}/data/docker/scratch/;
-        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }} -f="cgr-console.doker" {{ cgrates_dir }}/data/docker/scratch/;
-        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }} -f="cgr-loader.doker" {{ cgrates_dir }}/data/docker/scratch/;
-        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }} -f="cgr-migrator.doker" {{ cgrates_dir }}/data/docker/scratch/;
-        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }} -f="cgr-tester.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} -f="{{ item }}.doker" {{ cgrates_dir }}/data/docker/scratch/;
       args:
         chdir: '{{ cgrates_dir }}/data/docker/scratch'
+      with_items: "{{ build_execs }}"
 
     - name: push docker image to repo
       become: yes
       shell: 
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }};
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }};
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }};
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }};
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }};
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }};
+      with_items: "{{ build_execs }}"
 
     - name: tag docker master image
       become: yes
       shell: 
-        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:latest;
-        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:latest;
-        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:latest;
-        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:latest;
-        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:latest;
-      when: cgrates_branch == "master"
+        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:latest;
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" 
+      with_items: "{{ build_execs }}"
 
     - name: push docker master image to repo
       become: yes
       shell: 
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-engine:latest;
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-console:latest;
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-loader:latest;
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-migrator:latest;
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/cgr-tester:latest;
-      when: cgrates_branch == "master"
+        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:latest;
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" 
+      with_items: "{{ build_execs }}"
 
     - name: clean binar files
       file:
         path: "{{ cgrates_dir }}/data/docker/scratch/{{ item }}"
         state: absent
-      with_items:
-        - cgr-engine
-        - cgr-console
-        - cgr-loader
-        - cgr-migrator
-        - cgr-tester
+      with_items: "{{ build_execs }}"
 
     - name: remove local docker images
       become: yes
