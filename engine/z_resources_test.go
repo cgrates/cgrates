@@ -3110,27 +3110,27 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 
 func TestResourcesStoreResourceErrCache(t *testing.T) {
 	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
 
 	utils.Logger.SetLogLevel(6)
 	utils.Logger.SetSyslog(nil)
-	defer func() {
-		utils.Logger.SetLogLevel(0)
-	}()
 
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
 	defer func() {
+		Cache = tmp
+		utils.Logger.SetLogLevel(0)
 		log.SetOutput(os.Stderr)
 	}()
 
+	dft := config.CgrConfig()
+	defer config.SetCgrConfig(dft)
+
 	cfg := config.NewDefaultCGRConfig()
-	dm := NewDataManager(&DataDBMock{
-		SetResourceDrvF: func(ctx *context.Context, r *Resource) error {
-			return nil
-		}}, cfg.CacheCfg(), nil)
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	config.SetCgrConfig(cfg)
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 	rS := NewResourceService(dm, cfg, nil, nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	r := &Resource{
@@ -3140,11 +3140,11 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	}
 	Cache.Set(context.Background(), utils.CacheResources, r.TenantID(), r, nil, true, "")
 
-	explog := `CGRateS <> [WARNING] <ResourceS> failed caching Resource with ID: cgrates.org:RES1, error: NOT_IMPLEMENTED
+	explog := `CGRateS <> [WARNING] <ResourceS> failed caching Resource with ID: cgrates.org:RES1, error: DISCONNECTED
 `
 	if err := rS.storeResource(context.Background(), r); err == nil ||
-		err.Error() != utils.ErrNotImplemented.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
+		err.Error() != rpcclient.ErrDisconnected.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", rpcclient.ErrDisconnected, err)
 	}
 
 	if *r.dirty != true {
@@ -3157,7 +3157,6 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", explog, rcvlog)
 	}
 }
-
 func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
 	rs := Resources{
 		{
