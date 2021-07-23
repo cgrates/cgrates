@@ -260,3 +260,35 @@ func TestNewEventExporterDcCase(t *testing.T) {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
 }
+
+func TestNewConcReq(t *testing.T) {
+	if reply := newConcReq(5); len(reply.reqs) != 5 {
+		t.Errorf("Expected 5 \n but received \n %v", len(reply.reqs))
+	}
+}
+
+func TestGet(t *testing.T) {
+	c := &concReq{
+		reqs:  make(chan struct{}, 2),
+		limit: 2,
+	}
+	c.reqs <- struct{}{}
+	c.reqs <- struct{}{}
+	c.get()
+	if len(c.reqs) != 1 {
+		t.Error("Expected length of 1")
+	}
+}
+
+func TestDone(t *testing.T) {
+	c := &concReq{
+		reqs:  make(chan struct{}, 3),
+		limit: 3,
+	}
+	c.reqs <- struct{}{}
+	c.reqs <- struct{}{}
+	c.done()
+	if len(c.reqs) != 3 {
+		t.Error("Expected length of 3")
+	}
+}
