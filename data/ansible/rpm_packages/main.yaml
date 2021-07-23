@@ -1,22 +1,12 @@
-- name: Check and set python version on PKG server
-  hosts: pkg
-  remote_user: '{{ user }}'
-  gather_facts: false
-  tasks:
-    - name: symlink /usr/bin/python -> /usr/bin/python3
-      raw: |
-        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
-          ln --symbolic /usr/bin/python3 /usr/bin/python;
-        fi
-      become: true
-
+---
 - hosts: yum
   vars:
+    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
     ###############################################################
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.16.3'
+    golang_version: '1.16.6'
     go_version_target: "go version go{{ golang_version }} linux/amd64"
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'
@@ -323,6 +313,8 @@
       shell: "sudo chcon -t httpd_sys_rw_content_t /var/packages/ -R"
 
 - hosts: pkg
+  vars:
+    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
   remote_user: '{{ user }}'
   tasks:
     - name: set cgrates cgrates_distribution

@@ -5,10 +5,14 @@ map $upstream_http_docker_distribution_api_version $docker_distribution_api_vers
 
 server {
   listen 80;
-  server_name dkr.cgrates.org;
+  autoindex_localtime on;
+  server_name {{ registry_site }};
 
   access_log /var/log/nginx/docker-error.log;
   error_log /var/log/nginx/docker-error.log;
+  
+  # disable any limits to avoid HTTP 413 for large image uploads
+  client_max_body_size 0;
 
   # required to avoid HTTP 411: see Issue #1486 (https://github.com/moby/moby/issues/1486)
   chunked_transfer_encoding on;
@@ -23,9 +27,11 @@ server {
     # To add basic authentication to v2 use auth_basic setting.
     limit_except GET HEAD OPTIONS {
       deny all;
-      # auth_basic "Registry realm";
-      # auth_basic_user_file /etc/nginx/conf.d/nginx.htpasswd;
     }
+    {% if users_filename|length > 0 %}
+    auth_basic "Registry realm";
+    auth_basic_user_file /etc/nginx/conf.d/nginx.htpasswd;
+    {% endif %}
 
     ## If $docker_distribution_api_version is empty, the header is not added.
     ## See the map directive above where this variable is defined.
