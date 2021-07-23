@@ -333,6 +333,124 @@ func TestAccountDebit(t *testing.T) {
 	}
 }
 
+func TestAccountsDebitGetUsage(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accntsPrf := []*utils.AccountWithWeight{
+		{
+			Account: &utils.Account{
+				Tenant:    "cgrates.org",
+				ID:        "TestAccountsDebitGetUsage",
+				FilterIDs: []string{"*prefix:~*req.Destination:+44"},
+				Balances: map[string]*utils.Balance{
+					"ConcreteBal1": {
+						ID: "ConcreteBal1",
+						Weights: utils.DynamicWeights{
+							{
+								Weight: 10,
+							},
+						},
+						Type:  utils.MetaConcrete,
+						Units: &utils.Decimal{decimal.New(90, 0)},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    &utils.Decimal{decimal.New(1, 0)},
+								FixedFee:     &utils.Decimal{decimal.New(2, 1)},
+								RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	evChExp := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(89, 0),
+		Concretes: utils.NewDecimal(1484,1),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID: "CHARGING1",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"CHARGING1": {
+				AccountID: "TestAccountsDebitGetUsage",
+				BalanceID: "*transabstract",
+				Units: utils.NewDecimal(89,0),
+				RatingID: "RATING1",
+				JoinedChargeIDs: []string{"JND_CHRG1", "JND_CHRG2"},
+			},
+			"JND_CHRG1": {
+				AccountID: "TestAccountsDebitGetUsage",
+				BalanceID: "ConcreteBal1",
+				Units: utils.NewDecimal(592,1),
+			},
+			"JND_CHRG2": {
+				AccountID: "TestAccountsDebitGetUsage",
+				BalanceID: "ConcreteBal1",
+				Units: utils.NewDecimal(892,1),
+			},
+		},
+		Rating: map[string]*utils.RateSInterval{
+			"RATING1": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rates: map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
+			"TestAccountsDebitGetUsage": accntsPrf[0].Account,
+		},
+	}
+
+	// get usage from *ratesUsage
+	cgrEvent := &utils.CGREvent{
+		ID:     "TEST_EVENT_get_usage",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Destination: "+445643",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesUsage:  "2s",
+		},
+	}
+	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
+		cgrEvent, false, false); err != nil {
+		t.Error(err)
+	} else if rcv.Equals(evChExp) {
+		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
+	}
+
+	/*
+	// get usage from *usage
+	delete(cgrEvent.APIOpts, utils.OptsRatesUsage)
+	cgrEvent.APIOpts = map[string]interface{}{
+	    utils.MetaUsage: "2s",
+	}
+	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
+		cgrEvent, false, false); err != nil {
+		t.Error(err)
+	} else if rcv.Equals(evChExp) {
+		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
+	}
+
+	 */
+}
+
 func TestAccountsDebit(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
