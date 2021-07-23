@@ -555,7 +555,7 @@ func (iDB *InternalDB) SetIndexesDrv(_ *context.Context, idxItmType, tntCtx stri
 			dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 		}
 		if len(indx) == 0 {
-			Cache.SetWithoutReplicate(idxItmType, dbKey, nil, []string{tntCtx},
+			Cache.RemoveWithoutReplicate(idxItmType, dbKey,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 			continue
 		}
