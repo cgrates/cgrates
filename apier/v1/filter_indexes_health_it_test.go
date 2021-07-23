@@ -41,12 +41,13 @@ var (
 		testV1FIdxHResetStorDb,
 		testV1FIdxHStartEngine,
 		testV1FIdxHRpcConn,
+
 		testV1FIdxHLoadFromFolderTutorial2,
 		testV1FIdxHAccountActionPlansHealth,
 		testV1FIdxHReverseDestinationHealth,
-
 		testV1FIdxHdxInitDataDb,
 		testV1FIdxHResetStorDb,
+
 		testV1FIdxHLoadFromFolderTutorial,
 		testV1FIdxGetThresholdsIndexesHealth,
 		testV1FIdxGetResourcesIndexesHealth,
@@ -54,6 +55,7 @@ var (
 		testV1FIdxGetRoutesIndexesHealth,
 		testV1FIdxGetChargersIndexesHealth,
 		testV1FIdxGetAttributesIndexesHealth,
+		testV1FIdxGetReverseFilterHealth,
 
 		testV1FIdxHdxInitDataDb,
 		testV1FIdxHResetStorDb,
@@ -184,12 +186,25 @@ func testV1FIdxHLoadFromFolderTutorial(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
+func testV1FIdxGetReverseFilterHealth(t *testing.T) {
+	// check reverse filter health after all subsystems changes
+	args := &engine.IndexHealthArgsWith3Ch{}
+	expRPly := map[string]*engine.ReverseFilterIHReply{}
+	var rply map[string]*engine.ReverseFilterIHReply
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetReverseFilterHealth,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expRPly) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rply))
+	}
+}
+
 func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	// set another threshold profile different than the one from tariffplan
 	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    tenant,
-			ID:        "TEST_PROFILE1",
+			Tenant: tenant,
+			ID:     "TEST_PROFILE1",
 			FilterIDs: []string{"*string:~*req.Account:1004",
 				"*prefix:~*opts.Destination:+442|+554"},
 			MaxHits:   1,
@@ -234,10 +249,10 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	args := &engine.IndexHealthArgsWith3Ch{}
 	expRPly := &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
-		BrokenIndexes: map[string][]string{},
+		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
-		var rply *engine.FilterIHReply
+	var rply *engine.FilterIHReply
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetThresholdsIndexesHealth,
 		args, &rply); err != nil {
 		t.Error(err)
@@ -248,13 +263,13 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	// removing a profile + their indexes
 	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveThresholdProfile,
 		&utils.TenantIDWithAPIOpts{
-		  TenantID: &utils.TenantID{
-		  	Tenant: "cgrates.org",
-		  	ID: "THD_ACNT_1002",
-		  },
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "THD_ACNT_1002",
+			},
 		}, &rplyok); err != nil {
 		t.Error(err)
-	} else if rplyok != utils. OK {
+	} else if rplyok != utils.OK {
 		t.Errorf("UNexpected reply returned")
 	}
 
@@ -279,7 +294,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
 	expRPly = &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
-		BrokenIndexes: map[string][]string{},
+		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetThresholdsIndexesHealth,
@@ -295,8 +310,8 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 	var reply string
 	rlsPrf := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "ResGroup2",
+			Tenant: "cgrates.org",
+			ID:     "ResGroup2",
 			FilterIDs: []string{"*string:~*req.Account:1001",
 				"*prefix:~*opts.Destination:+334|+122"},
 			ActivationInterval: &utils.ActivationInterval{
@@ -317,7 +332,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 	}
 
 	// check all the indexes for resources
-    expIdx := []string{
+	expIdx := []string{
 		"*string:*req.Account:1001:ResGroup2",
 		"*prefix:*opts.Destination:+334:ResGroup2",
 		"*prefix:*opts.Destination:+122:ResGroup2",
@@ -341,7 +356,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
-		BrokenIndexes: map[string][]string{},
+		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
@@ -358,11 +373,11 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID: "ResGroup2",
+				ID:     "ResGroup2",
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils. OK {
+	} else if reply != utils.OK {
 		t.Errorf("UNexpected reply returned")
 	}
 
@@ -379,8 +394,8 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 	// set another stats profile different than the one from tariffplan
 	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant:    "cgrates.org",
-			ID:        "TEST_STATPROFILE_1",
+			Tenant: "cgrates.org",
+			ID:     "TEST_STATPROFILE_1",
 			FilterIDs: []string{"*string:~*req.OriginID:RandomID",
 				"*suffix:~*opts.Destination:+332|+234"},
 			QueueLength: 10,
@@ -435,7 +450,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
-		BrokenIndexes: map[string][]string{},
+		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
@@ -452,11 +467,11 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID: "Stats2",
+				ID:     "Stats2",
 			},
 		}, &rply); err != nil {
 		t.Error(err)
-	} else if rply != utils. OK {
+	} else if rply != utils.OK {
 		t.Errorf("UNexpected reply returned")
 	}
 
@@ -488,7 +503,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 			Weight: 10,
 		},
 	}
-    var reply string
+	var reply string
 	if err := tFIdxHRpc.Call(utils.APIerSv1SetRouteProfile, rPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -518,7 +533,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
-		BrokenIndexes: map[string][]string{},
+		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
@@ -535,11 +550,11 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID: "TEST_PROFILE1",
+				ID:     "TEST_PROFILE1",
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils. OK {
+	} else if reply != utils.OK {
 		t.Errorf("UNexpected reply returned")
 	}
 
@@ -556,8 +571,8 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 	// set another charger profile different than the one from tariffplan
 	chargerProfile := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "Default",
+			Tenant: "cgrates.org",
+			ID:     "Default",
 			FilterIDs: []string{"*string:~*req.Destination:+1442",
 				"*prefix:~*opts.Accounts:1002|1004"},
 			RunID:        utils.MetaDefault,
@@ -596,7 +611,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
-		BrokenIndexes: map[string][]string{},
+		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
@@ -613,11 +628,11 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID: "Raw",
+				ID:     "Raw",
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils. OK {
+	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
 
@@ -642,7 +657,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	var result []string
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
-		Context: "simpleauth",
+		Context:  "simpleauth",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -661,7 +676,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
-		Context: utils.MetaSessionS,
+		Context:  utils.MetaSessionS,
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -678,7 +693,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
-		Context: utils.MetaAny,
+		Context:  utils.MetaAny,
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -697,9 +712,9 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 		"*string:*req.SubscriberId:testDiamItEmulateTerminate:ATTR_ACC_EMULATE_TERMINATE",
 	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
-		Tenant: "cgrates.com",
+		Tenant:   "cgrates.com",
 		ItemType: utils.MetaAttributes,
-		Context: utils.MetaAny,
+		Context:  utils.MetaAny,
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -713,7 +728,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
 	expRPly := &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
-		BrokenIndexes: map[string][]string{},
+		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
@@ -751,7 +766,7 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 	var result []string
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
-		Context: utils.MetaAny,
+		Context:  utils.MetaAny,
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -765,7 +780,7 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
 		MissingIndexes: map[string][]string{},
-		BrokenIndexes: map[string][]string{},
+		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
 	args := &engine.IndexHealthArgsWith3Ch{}
@@ -777,18 +792,17 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
 	}
 
-
 	var reply string
 	// removing a profile + their indexes
 	if err := tFIdxHRpc.Call(utils.APIerSv1RemoveDispatcherProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID: "PING2",
+				ID:     "PING2",
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils. OK {
+	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
 
@@ -801,8 +815,6 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRPly), utils.ToJSON(rplyFl))
 	}
 }
-
-
 
 func testV1FIdxHStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {

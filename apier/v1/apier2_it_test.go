@@ -73,7 +73,6 @@ var (
 		testAPIerRPCConn,
 		testApierSetAndRemoveRatingProfileAnySubject,
 		testAPIerKillEngine,
-
 	}
 )
 
@@ -122,7 +121,7 @@ func testAPIerResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAPIerStartEngineSleep(t *testing.T) {
-	time.Sleep(500*time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	if _, err := engine.StopStartEngine(apierCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -705,7 +704,7 @@ func testApierSetAndRemoveRatingProfileAnySubject(t *testing.T) {
 		Id: "*out:cgrates.org:sms:*any",
 		RatingPlanActivations: engine.RatingPlanActivations{
 			{
-				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0,0, time.UTC),
+				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
 				RatingPlanId:   "RP_SMS",
 			},
 		},
