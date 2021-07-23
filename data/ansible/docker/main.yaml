@@ -28,6 +28,7 @@
     registry_site: "dkr.cgrates.org"      # the web site
     registry_name: "registry"             # the name of the registry container
     users_filename: ""                    # the file containing the htpasswd users
+    registry_port: 5000
 
     dependencies:
       - build-essential
@@ -99,6 +100,13 @@
 ###########################################################################################################################
 ###########################################################################################################################
 # Install CGRateS
+    - name: create cgrates directory
+      become: yes
+      file:
+        state: absent
+        dest: '{{ cgrates_dir }}'
+      become_user: "{{ user }}"
+
     - name: create cgrates directory
       become: yes
       file:
@@ -184,7 +192,7 @@
     - name: build Docker image
       become: yes
       shell: 
-        docker build -t 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} -f="{{ item }}.doker" {{ cgrates_dir }}/data/docker/scratch/;
+        docker build -t 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} -f="{{ item }}.doker" {{ cgrates_dir }}/data/docker/scratch/;
       args:
         chdir: '{{ cgrates_dir }}/data/docker/scratch'
       with_items: "{{ build_execs }}"
@@ -192,20 +200,20 @@
     - name: push docker image to repo
       become: yes
       shell: 
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }};
+        docker image push 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }};
       with_items: "{{ build_execs }}"
 
     - name: tag docker master image
       become: yes
       shell: 
-        docker tag 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:latest;
+        docker tag 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:latest;
       when: cgrates_branch == "master" or cgrates_branch == "1.0" 
       with_items: "{{ build_execs }}"
 
     - name: push docker master image to repo
       become: yes
       shell: 
-        docker image push 127.0.0.1:5000/{{ cgrates_distribution }}/{{ item }}:latest;
+        docker image push 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:latest;
       when: cgrates_branch == "master" or cgrates_branch == "1.0" 
       with_items: "{{ build_execs }}"
 
