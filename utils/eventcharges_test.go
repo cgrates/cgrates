@@ -27,12 +27,13 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
-/*
 func TestECNewEventCharges(t *testing.T) {
 	expected := &EventCharges{
 		Accounting:  make(map[string]*AccountCharge),
 		UnitFactors: make(map[string]*UnitFactor),
 		Rating:      make(map[string]*RateSInterval),
+		Rates:       make(map[string]*IntervalRate),
+		Accounts:    make(map[string]*Account),
 	}
 	received := NewEventCharges()
 
@@ -40,7 +41,6 @@ func TestECNewEventCharges(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
-*/
 
 func TestECMergeAbstractsEmpty(t *testing.T) {
 	ec1 := &EventCharges{
@@ -602,14 +602,14 @@ func TestEventChargesEquals(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*AccountCharge{
-			"GENUUID_GHOST1": {
+			"THIS_GENUUID1": {
 				AccountID:    "TestEventChargesEquals",
 				BalanceID:    "CONCRETE1",
 				Units:        NewDecimal(8, 1),
 				BalanceLimit: NewDecimal(200, 0),
 				UnitFactorID: "GENUUID_FACTOR1",
 			},
-			"GENUUID3": {
+			"GENUUID1": {
 				AccountID:       "TestEventChargesEquals",
 				BalanceID:       "ABSTRACT2",
 				BalanceLimit:    NewDecimal(0, 0),
@@ -779,14 +779,14 @@ func TestEventChargesEquals(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*AccountCharge{
-			"GENUUID_GHOST1": {
+			"THIS_GENUUID1": {
 				AccountID:    "TestEventChargesEquals",
 				BalanceID:    "CONCRETE1",
 				Units:        NewDecimal(8, 1),
 				BalanceLimit: NewDecimal(200, 0),
 				UnitFactorID: "GENUUID_FACTOR1",
 			},
-			"GENUUID3": {
+			"GENUUID1": {
 				AccountID:       "TestEventChargesEquals",
 				BalanceID:       "ABSTRACT2",
 				BalanceLimit:    NewDecimal(0, 0),
@@ -962,14 +962,14 @@ func TestEqualsExtEventCharges(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*AccountCharge{
-			"GENUUID_GHOST1": {
+			"THIS_GENUUID1": {
 				AccountID:    "TestEventChargesEquals",
 				BalanceID:    "CONCRETE1",
 				Units:        NewDecimal(8, 1),
 				BalanceLimit: NewDecimal(200, 0),
 				UnitFactorID: "GENUUID_FACTOR1",
 			},
-			"GENUUID3": {
+			"GENUUID1": {
 				AccountID:       "TestEventChargesEquals",
 				BalanceID:       "ABSTRACT2",
 				BalanceLimit:    NewDecimal(0, 0),
@@ -1145,14 +1145,14 @@ func TestEqualsExtEventCharges(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*ExtAccountCharge{
-			"GENUUID_GHOST1": {
+			"THIS_GENUUID1": {
 				AccountID:    "TestEventChargesEquals",
 				BalanceID:    "CONCRETE1",
 				Units:        Float64Pointer(0.8),
 				BalanceLimit: Float64Pointer(200),
 				UnitFactorID: "GENUUID_FACTOR1",
 			},
-			"GENUUID3": {
+			"GENUUID1": {
 				AccountID:       "TestEventChargesEquals",
 				BalanceID:       "ABSTRACT2",
 				BalanceLimit:    Float64Pointer(0),

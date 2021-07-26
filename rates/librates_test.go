@@ -1973,7 +1973,6 @@ func TestComputeRateSIntervals(t *testing.T) {
 		for idx, val := range rtIvls {
 			if !val.Equals(eRtIvls[idx], cstRts, expCstRts) {
 				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
-				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
 			}
 		}
 	}

@@ -116,43 +116,6 @@ func (eRt *ExtRate) Equals(extRT *ExtRate) (eq bool) {
 	return true
 }
 
-// Equals returns the equality between two Rate
-func (rT *Rate) Equals(rte *Rate) (eq bool) {
-	if (rT.ID != rte.ID ||
-		rT.ActivationTimes != rte.ActivationTimes ||
-		rT.Blocker != rte.Blocker) ||
-		(rT.FilterIDs == nil && rte.FilterIDs != nil ||
-			rT.FilterIDs != nil && rte.FilterIDs == nil) ||
-		(rT.Weights == nil && rte.Weights != nil ||
-			rT.Weights != nil && rte.Weights == nil ||
-			len(rT.Weights) != len(rte.Weights)) ||
-		(rT.IntervalRates == nil && rte.IntervalRates != nil ||
-			rT.IntervalRates != nil && rte.IntervalRates == nil ||
-			len(rT.IntervalRates) != len(rte.IntervalRates)) {
-		return
-	}
-	for idx, val := range rT.FilterIDs {
-		if val != rte.FilterIDs[idx] {
-			return
-		}
-	}
-	if rT.Weights != nil && rte.Weights != nil {
-		for idx, val := range rT.Weights {
-			if ok := val.Equals(rte.Weights[idx]); !ok {
-				return
-			}
-		}
-	}
-	if rT.IntervalRates != nil && rte.IntervalRates != nil {
-		for idx, val := range rT.IntervalRates {
-			if ok := val.Equals(rte.IntervalRates[idx]); !ok {
-				return
-			}
-		}
-	}
-	return true
-}
-
 // AsExtRate converts Rate to ExtRate
 func (rT *Rate) AsExtRate() (eRt *ExtRate, err error) {
 	eRt = &ExtRate{
@@ -265,8 +228,16 @@ func (eIr *ExtIntervalRate) Equals(extIr *ExtIntervalRate) (eq bool) {
 
 // Equals returns the equality between two IntervalRate
 func (iR *IntervalRate) Equals(inRt *IntervalRate) (eq bool) {
-	if ((iR != nil || inRt != nil) &&
-		(iR == nil || inRt == nil)) ||
+	if iR == nil && inRt == nil {
+		return true
+	}
+	if iR == nil && inRt != nil ||
+		iR != nil && inRt == nil {
+		return
+	}
+
+	return !(//((iR != nil) != (inRt != nil)) ||
+	//	(iR == nil || inRt == nil) ||
 		(iR.RecurrentFee == nil && inRt.RecurrentFee != nil) ||
 		(iR.RecurrentFee != nil && inRt.RecurrentFee == nil) ||
 		(iR.FixedFee == nil && inRt.FixedFee != nil) ||
@@ -276,30 +247,17 @@ func (iR *IntervalRate) Equals(inRt *IntervalRate) (eq bool) {
 		(iR.Unit == nil && inRt.Unit != nil) ||
 		(iR.Unit != nil && inRt.Unit == nil) ||
 		(iR.IntervalStart == nil && inRt.IntervalStart != nil) ||
-		(iR.IntervalStart != nil && inRt.IntervalStart == nil) {
-		return
-	}
-	if iR.RecurrentFee != nil && inRt.RecurrentFee != nil &&
-		iR.RecurrentFee.Compare(inRt.RecurrentFee) != 0 {
-		return
-	}
-	if iR.FixedFee != nil && inRt.FixedFee != nil &&
-		iR.FixedFee.Compare(inRt.FixedFee) != 0 {
-		return
-	}
-	if iR.Increment != nil && inRt.Increment != nil &&
-		iR.Increment.Compare(inRt.Increment) != 0 {
-		return
-	}
-	if iR.Unit != nil && inRt.Unit != nil &&
-		iR.Unit.Compare(inRt.Unit) != 0 {
-		return
-	}
-	if iR.IntervalStart != nil && inRt.IntervalStart != nil &&
-		iR.IntervalStart.Compare(inRt.IntervalStart) != 0 {
-		return
-	}
-	return true
+		(iR.IntervalStart != nil && inRt.IntervalStart == nil) ||
+		(iR.RecurrentFee != nil && inRt.RecurrentFee != nil &&
+		iR.RecurrentFee.Compare(inRt.RecurrentFee) != 0) ||
+		(iR.FixedFee != nil && inRt.FixedFee != nil &&
+		iR.FixedFee.Compare(inRt.FixedFee) != 0) ||
+		(iR.Increment != nil && inRt.Increment != nil &&
+		iR.Increment.Compare(inRt.Increment) != 0) ||
+		(iR.Unit != nil && inRt.Unit != nil &&
+		iR.Unit.Compare(inRt.Unit) != 0) ||
+		(iR.IntervalStart != nil && inRt.IntervalStart != nil &&
+		iR.IntervalStart.Compare(inRt.IntervalStart) != 0))
 }
 
 func (rt *Rate) Compile() (err error) {
@@ -492,6 +450,9 @@ func (eRI *ExtRateSIncrement) Equals(extRI *ExtRateSIncrement, exInRt, exInRtRef
 
 // Equals compares two RateSIntervals
 func (rIl *RateSInterval) Equals(nRil *RateSInterval, rIlRef, nRilRef map[string]*IntervalRate) (eq bool) {
+    if rIl == nil && nRil == nil {
+    	return true
+	}
 	if rIl.IntervalStart == nil && nRil.IntervalStart != nil ||
 		rIl.IntervalStart != nil && nRil.IntervalStart == nil ||
 		(rIl.IntervalStart != nil && nRil.IntervalStart != nil &&
@@ -524,7 +485,9 @@ func (rI *RateSIncrement) Equals(rtIn *RateSIncrement, rIRef, rtInRef map[string
 				rI.IncrementStart.Compare(rtIn.IncrementStart) != 0)) ||
 		rI.CompressFactor != rtIn.CompressFactor ||
 		rI.RateIntervalIndex != rtIn.RateIntervalIndex ||
-		!rIRef[rI.RateID].Equals(rtInRef[rtIn.RateID]))
+		(rIRef != nil && rtInRef != nil &&
+			rI.RateID != EmptyString && rtIn.RateID != EmptyString &&
+		!rIRef[rI.RateID].Equals(rtInRef[rtIn.RateID])))
 }
 
 // RateProfileCost is the cost returned by RateS at cost queries

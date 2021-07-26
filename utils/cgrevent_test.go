@@ -360,7 +360,7 @@ func TestCGREventOptAsDuration(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, err)
 	}
-	expected := decimal.New(int64(30 * time.Nanosecond), 0)
+	expected := decimal.New(int64(30*time.Nanosecond), 0)
 
 	if !reflect.DeepEqual(received, expected) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
