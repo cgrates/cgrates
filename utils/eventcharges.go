@@ -101,12 +101,6 @@ func (cE *ChargeEntry) CompressEquals(chEn *ChargeEntry) bool {
 	return cE.ChargingID == chEn.ChargingID
 }
 
-// Equals return the equality between two ChargeEntry
-func (cE *ChargeEntry) Equals(chEn *ChargeEntry) (eq bool) {
-	return cE.ChargingID == chEn.ChargingID &&
-		cE.CompressFactor == chEn.CompressFactor
-}
-
 // SyncIDs will repopulate Accounting, UnitFactors and  Rating IDs if they equal the references in ec
 func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
 	for _, nEc := range eCs {
@@ -258,16 +252,19 @@ func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
 			len(eEc.Accounts) != len(exCh.Accounts)) {
 		return
 	}
-	for idx, val := range exCh.Charges {
-		if ok := val.Equals(exCh.Charges[idx]); !ok {
-			return
+	/*
+		for idx, val := range exCh.Charges {
+			if ok := val.Equals(exCh.Charges[idx], eEc.Accounting, exCh.Accounting); !ok {
+				return
+			}
 		}
-	}
-	for key, val := range eEc.Accounting {
-		if ok := val.Equals(exCh.Accounting[key]); !ok {
-			return
+		for key, val := range eEc.Accounting {
+			if ok := val.Equals(exCh.Accounting[key]); !ok {
+				return
+			}
 		}
-	}
+
+	*/
 	for key, val := range eEc.UnitFactors {
 		if ok := val.Equals(exCh.UnitFactors[key]); !ok {
 			return
@@ -316,28 +313,38 @@ func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
 			len(eC.Accounts) != len(evCh.Accounts)) {
 		return
 	}
-	for idx, val := range eC.Charges {
-		if ok := val.Equals(evCh.Charges[idx]); !ok {
-			return
-		}
-	}
-	for key, val := range eC.Accounting {
-		if ok := val.Equals(evCh.Accounting[key]); !ok {
-			return
-		}
-	}
-	for key, val := range eC.UnitFactors {
-		if ok := val.Equals(evCh.UnitFactors[key]); !ok {
-			return
-		}
-	}
-	for key, val := range eC.Rating {
-		if ok := val.Equals(evCh.Rating[key], eC.Rates, evCh.Rates); !ok {
+	for idx, ch1 := range eC.Charges {
+		if ch2 := evCh.Charges[idx]; ch1.CompressFactor != ch2.CompressFactor ||
+			!equalsAccounting(eC.Accounting[ch1.ChargingID], evCh.Accounting[ch2.ChargingID],
+			eC.Accounting, evCh.Accounting, eC.UnitFactors, evCh.UnitFactors,
+			eC.Rating, evCh.Rating, eC.Rates, evCh.Rates) {
 			return
 		}
 	}
 	for key, val := range eC.Accounts {
 		if ok := val.Equals(evCh.Accounts[key]); !ok {
+			return
+		}
+	}
+	return true
+}
+
+func equalsAccounting(acc1, acc2 *AccountCharge,
+	accM1, accM2 map[string]*AccountCharge,
+	uf1, uf2 map[string]*UnitFactor,
+	rat1, rat2 map[string]*RateSInterval,
+	rts1, rts2 map[string]*IntervalRate) (_ bool) {
+	if !acc1.equals(acc2) ||
+		(uf1 != nil && uf2 != nil &&
+			acc1.UnitFactorID != EmptyString && acc2.UnitFactorID != EmptyString &&
+			!uf1[acc1.UnitFactorID].Equals(uf2[acc2.UnitFactorID])) ||
+		!rat1[acc1.RatingID].Equals(rat2[acc2.RatingID], rts1, rts2) {
+		return
+	}
+	for idx, jc1 := range acc1.JoinedChargeIDs {
+		jc2 := acc2.JoinedChargeIDs[idx]
+		if !equalsAccounting(accM1[jc1], accM2[jc2], accM1, accM2,
+			uf1, uf2, rat1, rat2, rts1, rts2) {
 			return
 		}
 	}
@@ -367,7 +374,7 @@ func (ec *EventCharges) ratingID(rIl *RateSInterval, nIrRef map[string]*Interval
 // accountChargeID returns the ID of the matching AccountCharge within ec.Accounting
 func (ec *EventCharges) accountChargeID(ac *AccountCharge) (acID string) {
 	for ecID, ecAc := range ec.Accounting {
-		if ecAc.Equals(ac) {
+		if ecAc.equals(ac) {
 			return ecID
 		}
 	}
@@ -486,7 +493,10 @@ func (eAc *ExtAccountCharge) Equals(extAc *ExtAccountCharge) (eq bool) {
 }
 
 // Equals compares two AccountCharges
-func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
+func (ac *AccountCharge) equals(nAc *AccountCharge) (eq bool) {
+	if ac == nil && nAc == nil {
+		return true
+	}
 	if (ac.AttributeIDs == nil && nAc.AttributeIDs != nil ||
 		ac.AttributeIDs != nil && nAc.AttributeIDs == nil ||
 		len(ac.AttributeIDs) != len(nAc.AttributeIDs)) ||
@@ -494,9 +504,9 @@ func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
 		ac.JoinedChargeIDs != nil && nAc.JoinedChargeIDs == nil ||
 		len(ac.JoinedChargeIDs) != len(nAc.JoinedChargeIDs) ||
 		(ac.AccountID != nAc.AccountID ||
-			ac.BalanceID != nAc.BalanceID ||
-			ac.UnitFactorID != nAc.UnitFactorID ||
-			ac.RatingID != nAc.RatingID) ||
+			ac.BalanceID != nAc.BalanceID) ||
+		((len(ac.UnitFactorID) == 0) != (len(nAc.UnitFactorID) == 0)) ||
+		((len(ac.RatingID) == 0) != (len(nAc.RatingID) == 0)) ||
 		(ac.Units == nil && nAc.Units != nil ||
 			ac.Units != nil && nAc.Units == nil ||
 			(ac.Units != nil && nAc.Units != nil &&
@@ -509,11 +519,6 @@ func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
 	}
 	for idx, val := range ac.AttributeIDs {
 		if val != nAc.AttributeIDs[idx] {
-			return
-		}
-	}
-	for i := range ac.JoinedChargeIDs {
-		if ac.JoinedChargeIDs[i] != nAc.JoinedChargeIDs[i] {
 			return
 		}
 	}
