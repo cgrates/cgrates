@@ -146,3 +146,116 @@ func TestHealthReverseFilter(t *testing.T) {
 		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 }
+
+func TestHealthIndexThreshold(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	// we will set this threshold but without indexing
+	thPrf := &ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &ThresholdProfile{
+			Tenant: "cgrates.org",
+			ID:     "TestHealthIndexThreshold",
+			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
+				"*string:~*asm.ID:1002",
+				"*suffix:BrokenFilter:Invalid"},
+			MaxHits: 1,
+		},
+	}
+	if err := dm.SetThresholdProfile(thPrf.ThresholdProfile, false); err != nil {
+		t.Error(err)
+	}
+
+	args := &IndexHealthArgsWith3Ch{}
+	exp := &FilterIHReply{
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*string:*asm.ID:1002":                   {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
+		},
+		BrokenIndexes:  map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheThresholdFilterIndexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+	indexes := map[string]utils.StringSet{
+		"*prefix:req.InvalidIdx:10": { // obj exist but the index don't
+			"TestHealthIndexThreshold": {},
+		},
+		"*string:*req.Destination:123": { // index is valid but the obj does not exist
+			"InexistingThreshold": {},
+		},
+    }
+
+	// we will set manually some indexes that points to an nil object or index is valid but the obj is missing
+	if err := dm.SetIndexes(utils.CacheThresholdFilterIndexes, "cgrates.org",
+		indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	exp = &FilterIHReply{
+		MissingObjects: []string{"cgrates.org:InexistingThreshold"},
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*string:*asm.ID:1002":                   {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
+		},
+		BrokenIndexes:  map[string][]string{
+			"cgrates.org:*prefix:req.InvalidIdx:10": {"TestHealthIndexThreshold"},
+		},
+		MissingFilters: map[string][]string{},
+	}
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheThresholdFilterIndexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+	//we will use an inexisting Filter(not inline) for the same ThresholdProfile
+	thPrf = &ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &ThresholdProfile{
+			Tenant: "cgrates.org",
+			ID:     "TestHealthIndexThreshold",
+			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
+				"*string:~*asm.ID:1002",
+				"FLTR_1_DOES_NOT_EXIST"},
+			MaxHits: 1,
+		},
+	}
+	if err := dm.SetThresholdProfile(thPrf.ThresholdProfile, false); err != nil {
+		t.Error(err)
+	}
+	exp = &FilterIHReply{
+		MissingObjects: []string{"cgrates.org:InexistingThreshold"},
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*string:*asm.ID:1002":                   {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
+		},
+		BrokenIndexes:  map[string][]string{
+			"cgrates.org:*prefix:req.InvalidIdx:10": {"TestHealthIndexThreshold"},
+		},
+		MissingFilters: map[string][]string{
+			"cgrates.org:FLTR_1_DOES_NOT_EXIST": {"TestHealthIndexThreshold"},
+		},
+	}
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheThresholdFilterIndexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
