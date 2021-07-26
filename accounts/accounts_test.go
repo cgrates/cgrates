@@ -388,16 +388,16 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 				JoinedChargeIDs: []string{"JND_CHRG1", "JND_CHRG2"},
 			},
 			"JND_CHRG1": {
-				AccountID: "TestAccountsDebitGetUsage",
-				BalanceID: "ConcreteBal1",
+				AccountID:    "TestAccountsDebitGetUsage",
+				BalanceID:    "ConcreteBal1",
 				BalanceLimit: utils.NewDecimal(0, 0),
-				Units:     utils.NewDecimal(592, 1),
+				Units:        utils.NewDecimal(592, 1),
 			},
 			"JND_CHRG2": {
-				AccountID: "TestAccountsDebitGetUsage",
-				BalanceID: "ConcreteBal1",
+				AccountID:    "TestAccountsDebitGetUsage",
+				BalanceID:    "ConcreteBal1",
 				BalanceLimit: utils.NewDecimal(0, 0),
-				Units:     utils.NewDecimal(892, 1),
+				Units:        utils.NewDecimal(892, 1),
 			},
 		},
 		Rating: map[string]*utils.RateSInterval{
@@ -437,20 +437,26 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
 	}
 
-	/*
-		// get usage from *usage
-		delete(cgrEvent.APIOpts, utils.OptsRatesUsage)
-		cgrEvent.APIOpts = map[string]interface{}{
-		    utils.MetaUsage: "2s",
-		}
-		if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
-			cgrEvent, false, false); err != nil {
-			t.Error(err)
-		} else if rcv.Equals(evChExp) {
-			t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
-		}
+/*
+	// get usage from *usage
+	cgrEvent = &utils.CGREvent{
+		ID:     "TEST_EVENT_get_usage",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Destination: "+445643",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "2s",
+		},
+	}
+	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
+		cgrEvent, false, false); err != nil {
+		t.Error(err)
+	} else if rcv.Equals(evChExp) {
+		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
+	}
 
-	*/
+ */
 }
 
 func TestAccountsDebit(t *testing.T) {

@@ -316,8 +316,8 @@ func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
 	for idx, ch1 := range eC.Charges {
 		if ch2 := evCh.Charges[idx]; ch1.CompressFactor != ch2.CompressFactor ||
 			!equalsAccounting(eC.Accounting[ch1.ChargingID], evCh.Accounting[ch2.ChargingID],
-			eC.Accounting, evCh.Accounting, eC.UnitFactors, evCh.UnitFactors,
-			eC.Rating, evCh.Rating, eC.Rates, evCh.Rates) {
+				eC.Accounting, evCh.Accounting, eC.UnitFactors, evCh.UnitFactors,
+				eC.Rating, evCh.Rating, eC.Rates, evCh.Rates) {
 			return
 		}
 	}
