@@ -3103,7 +3103,7 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && idxKey != utils.EmptyString && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, []string{tntCtx},
-				true, utils.NonTransactional); errCh != nil {
+					true, utils.NonTransactional); errCh != nil {
 					return nil, errCh
 				}
 			}
