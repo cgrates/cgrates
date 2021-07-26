@@ -164,11 +164,10 @@ func TestHealthIndexThreshold(t *testing.T) {
 			MaxHits: 1,
 		},
 	}
-	if err := dm.SetThresholdProfile(thPrf.ThresholdProfile, false); err != nil {
+	if err := dm.SetThresholdProfile(context.Background(), thPrf.ThresholdProfile, false); err != nil {
 		t.Error(err)
 	}
 
-	args := &IndexHealthArgsWith3Ch{}
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:*asm.ID:1002":                   {"TestHealthIndexThreshold"},
@@ -177,10 +176,10 @@ func TestHealthIndexThreshold(t *testing.T) {
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 	}
-	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+	if rply, err := GetFltrIdxHealth(context.Background(), dm,
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -197,7 +196,7 @@ func TestHealthIndexThreshold(t *testing.T) {
     }
 
 	// we will set manually some indexes that points to an nil object or index is valid but the obj is missing
-	if err := dm.SetIndexes(utils.CacheThresholdFilterIndexes, "cgrates.org",
+	if err := dm.SetIndexes(context.Background(), utils.CacheThresholdFilterIndexes, "cgrates.org",
 		indexes, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -212,10 +211,10 @@ func TestHealthIndexThreshold(t *testing.T) {
 		},
 		MissingFilters: map[string][]string{},
 	}
-	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+	if rply, err := GetFltrIdxHealth(context.Background(), dm,
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -233,7 +232,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 			MaxHits: 1,
 		},
 	}
-	if err := dm.SetThresholdProfile(thPrf.ThresholdProfile, false); err != nil {
+	if err := dm.SetThresholdProfile(context.Background(), thPrf.ThresholdProfile, false); err != nil {
 		t.Error(err)
 	}
 	exp = &FilterIHReply{
@@ -249,10 +248,10 @@ func TestHealthIndexThreshold(t *testing.T) {
 			"cgrates.org:FLTR_1_DOES_NOT_EXIST": {"TestHealthIndexThreshold"},
 		},
 	}
-	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+	if rply, err := GetFltrIdxHealth(context.Background(), dm,
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
