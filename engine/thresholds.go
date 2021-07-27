@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -48,11 +49,43 @@ type ThresholdProfile struct {
 	Weight             float64 // Weight to sort the thresholds
 	ActionIDs          []string
 	Async              bool
+
+	lkID string // holds the reference towards guardian lock key
 }
 
 // TenantID returns the concatenated key beteen tenant and ID
 func (tp *ThresholdProfile) TenantID() string {
 	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
+}
+
+// thresholdProfileLockKey returns the ID used to lock a ThresholdProfile with guardian
+func thresholdProfileLockKey(tnt, id string) string {
+	return utils.ConcatenatedKey(utils.CacheThresholdProfiles, tnt, id)
+}
+
+// lock will lock the ThresholdProfile using guardian and store the lock within r.lkID
+// if lkID is passed as argument, the lock is considered as executed
+func (tp *ThresholdProfile) lock(lkID string) {
+	if lkID == utils.EmptyString {
+		lkID = guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			thresholdProfileLockKey(tp.Tenant, tp.ID))
+	}
+	tp.lkID = lkID
+}
+
+// unlock will unlock the ThresholdProfile and clear rp.lkID
+func (tp *ThresholdProfile) unlock() {
+	if tp.lkID == utils.EmptyString {
+		return
+	}
+	guardian.Guardian.UnguardIDs(tp.lkID)
+	tp.lkID = utils.EmptyString
+}
+
+// isLocked returns the locks status of this ThresholdProfile
+func (tp *ThresholdProfile) isLocked() bool {
+	return tp.lkID != utils.EmptyString
 }
 
 // ThresholdWithAPIOpts is used in replicatorV1 for dispatcher
@@ -68,6 +101,7 @@ type Threshold struct {
 	Hits   int       // number of hits for this threshold
 	Snooze time.Time // prevent threshold to run too early
 
+	lkID  string // ID of the lock used when matching the threshold
 	tPrfl *ThresholdProfile
 	dirty *bool // needs save
 }
@@ -75,6 +109,36 @@ type Threshold struct {
 // TenantID returns the concatenated key beteen tenant and ID
 func (t *Threshold) TenantID() string {
 	return utils.ConcatenatedKey(t.Tenant, t.ID)
+}
+
+// thresholdLockKey returns the ID used to lock a threshold with guardian
+func thresholdLockKey(tnt, id string) string {
+	return utils.ConcatenatedKey(utils.CacheThresholds, tnt, id)
+}
+
+// lock will lock the threshold using guardian and store the lock within r.lkID
+// if lkID is passed as argument, the lock is considered as executed
+func (t *Threshold) lock(lkID string) {
+	if lkID == utils.EmptyString {
+		lkID = guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			thresholdLockKey(t.Tenant, t.ID))
+	}
+	t.lkID = lkID
+}
+
+// unlock will unlock the threshold and clear r.lkID
+func (t *Threshold) unlock() {
+	if t.lkID == utils.EmptyString {
+		return
+	}
+	guardian.Guardian.UnguardIDs(t.lkID)
+	t.lkID = utils.EmptyString
+}
+
+// isLocked returns the locks status of this threshold
+func (t *Threshold) isLocked() bool {
+	return t.lkID != utils.EmptyString
 }
 
 // ProcessEvent processes an ThresholdEvent
@@ -128,9 +192,20 @@ func (ts Thresholds) Sort() {
 	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
 }
 
+// unlock will unlock thresholds part of this slice
+func (ts Thresholds) unlock() {
+	for _, t := range ts {
+		t.unlock()
+		if t.tPrfl != nil {
+			t.tPrfl.unlock()
+		}
+	}
+}
+
 // NewThresholdService the constructor for ThresoldS service
-func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) (tS *ThresholdService) {
-	return &ThresholdService{dm: dm,
+func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) *ThresholdService {
+	return &ThresholdService{
+		dm:          dm,
 		cgrcfg:      cgrcfg,
 		filterS:     filterS,
 		stopBackup:  make(chan struct{}),
@@ -150,6 +225,19 @@ type ThresholdService struct {
 	stMux       sync.RWMutex    // protects storedTdIDs
 }
 
+// Reload stops the backupLoop and restarts it
+func (tS *ThresholdService) Reload() {
+	close(tS.stopBackup)
+	<-tS.loopStoped // wait until the loop is done
+	tS.stopBackup = make(chan struct{})
+	go tS.runBackup()
+}
+
+// StartLoop starts the gorutine with the backup loop
+func (tS *ThresholdService) StartLoop() {
+	go tS.runBackup()
+}
+
 // Shutdown is called to shutdown the service
 func (tS *ThresholdService) Shutdown() {
 	utils.Logger.Info("<ThresholdS> shutdown initialized")
@@ -158,7 +246,7 @@ func (tS *ThresholdService) Shutdown() {
 	utils.Logger.Info("<ThresholdS> shutdown complete")
 }
 
-// backup will regularly store resources changed to dataDB
+// backup will regularly store thresholds changed to dataDB
 func (tS *ThresholdService) runBackup() {
 	storeInterval := tS.cgrcfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -179,7 +267,7 @@ func (tS *ThresholdService) runBackup() {
 // storeThresholds represents one task of complete backup
 func (tS *ThresholdService) storeThresholds() {
 	var failedTdIDs []string
-	for { // don't stop until we store all dirty resources
+	for { // don't stop until we store all dirty thresholds
 		tS.stMux.Lock()
 		tID := tS.storedTdIDs.GetOne()
 		if tID != "" {
@@ -189,11 +277,17 @@ func (tS *ThresholdService) storeThresholds() {
 		if tID == "" {
 			break // no more keys, backup completed
 		}
-		if tIf, ok := Cache.Get(utils.CacheThresholds, tID); !ok || tIf == nil {
+		tIf, ok := Cache.Get(utils.CacheThresholds, tID)
+		if !ok || tIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache treshold with ID: %s", tID))
-		} else if err := tS.StoreThreshold(tIf.(*Threshold)); err != nil {
+			continue
+		}
+		t := tIf.(*Threshold)
+		t.lock(utils.EmptyString)
+		if err := tS.StoreThreshold(t); err != nil {
 			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
 		}
+		t.unlock()
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -214,6 +308,16 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
 				t.Tenant, t.ID, err.Error()))
 		return
+	}
+	//since we no longer handle cache in DataManager do here a manual caching
+	if tntID := t.TenantID(); Cache.HasItem(utils.CacheThresholds, tntID) { // only cache if previously there
+		if err = Cache.Set(utils.CacheThresholds, tntID, t, nil,
+			true, utils.NonTransactional); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<ThresholdService> failed caching Threshold with ID: %s, error: %s",
+					t.TenantID(), err.Error()))
+			return
+		}
 	}
 	*t.dirty = false
 	return
@@ -241,30 +345,50 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *Thresho
 	}
 	ts = make(Thresholds, 0, len(tIDs))
 	for tID := range tIDs {
-		tPrfl, err := tS.dm.GetThresholdProfile(tnt, tID, true, true, utils.NonTransactional)
-		if err != nil {
+		lkPrflID := guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			thresholdProfileLockKey(tnt, tID))
+		var tPrfl *ThresholdProfile
+		if tPrfl, err = tS.dm.GetThresholdProfile(tnt, tID, true, true, utils.NonTransactional); err != nil {
+			guardian.Guardian.UnguardIDs(lkPrflID)
 			if err == utils.ErrNotFound {
+				err = nil
 				continue
 			}
+			ts.unlock()
 			return nil, err
 		}
+		tPrfl.lock(lkPrflID)
 		if tPrfl.ActivationInterval != nil && args.Time != nil &&
 			!tPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
+			tPrfl.unlock()
 			continue
 		}
-		if pass, err := tS.filterS.Pass(tnt, tPrfl.FilterIDs,
+		var pass bool
+		if pass, err = tS.filterS.Pass(tnt, tPrfl.FilterIDs,
 			evNm); err != nil {
+			tPrfl.unlock()
+			ts.unlock()
 			return nil, err
 		} else if !pass {
+			tPrfl.unlock()
 			continue
 		}
-		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, true, true, "")
-		if err != nil {
+		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			thresholdLockKey(tPrfl.Tenant, tPrfl.ID))
+		var t *Threshold
+		if t, err = tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, true, true, ""); err != nil {
+			guardian.Guardian.UnguardIDs(lkID)
+			tPrfl.unlock()
 			if err == utils.ErrNotFound { // corner case where the threshold was removed due to MaxHits
+				err = nil
 				continue
 			}
+			ts.unlock()
 			return nil, err
 		}
+		t.lock(lkID)
 		if t.dirty == nil || tPrfl.MaxHits == -1 || t.Hits < tPrfl.MaxHits {
 			t.dirty = utils.BoolPointer(false)
 		}
@@ -277,7 +401,8 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *Thresho
 	}
 	ts.Sort()
 	for i, t := range ts {
-		if t.tPrfl.Blocker { // blocker will stop processing
+		if t.tPrfl.Blocker && i != len(ts)-1 { // blocker will stop processing and we are not at last index
+			Thresholds(ts[i+1:]).unlock()
 			ts = ts[:i+1]
 			break
 		}
@@ -309,10 +434,7 @@ func (attr *ThresholdsArgsProcessEvent) RPCClone() (interface{}, error) {
 func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
 	var thIDs []string
 	if attr.ThresholdIDs != nil {
-		thIDs = make([]string, len(attr.ThresholdIDs))
-		for i, id := range attr.ThresholdIDs {
-			thIDs[i] = id
-		}
+		thIDs = utils.CloneStringSlice(attr.ThresholdIDs)
 	}
 	return &ThresholdsArgsProcessEvent{
 		ThresholdIDs: thIDs,
@@ -322,8 +444,8 @@ func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
 
 // processEvent processes a new event, dispatching to matching thresholds
 func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcessEvent) (thresholdsIDs []string, err error) {
-	matchTs, err := tS.matchingThresholdsForEvent(tnt, args)
-	if err != nil {
+	var matchTs Thresholds
+	if matchTs, err = tS.matchingThresholdsForEvent(tnt, args); err != nil {
 		return nil, err
 	}
 	var withErrors bool
@@ -331,8 +453,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcess
 	for _, t := range matchTs {
 		thresholdsIDs = append(thresholdsIDs, t.ID)
 		t.Hits++
-		err = t.ProcessEvent(args, tS.dm)
-		if err != nil {
+		if err = t.ProcessEvent(args, tS.dm); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
 					t.TenantID(), utils.ConcatenatedKey(tnt, args.CGREvent.ID), err.Error()))
@@ -347,11 +468,14 @@ func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcess
 				withErrors = true
 			}
 			//since we don't handle in DataManager caching we do a manual remove here
-			if err = tS.dm.CacheDataFromDB(utils.ThresholdPrefix, []string{t.TenantID()}, true); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<ThresholdService> failed removing from cache non-recurrent threshold: %s, error: %s",
-						t.TenantID(), err.Error()))
-				withErrors = true
+			if tntID := t.TenantID(); Cache.HasItem(utils.CacheThresholds, tntID) { // only cache if previously there
+				if err = Cache.Set(utils.CacheThresholds, tntID, nil, nil,
+					true, utils.NonTransactional); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<ThresholdService> failed removing from cache non-recurrent threshold: %s, error: %s",
+							t.TenantID(), err.Error()))
+					withErrors = true
+				}
 			}
 			continue
 		}
@@ -366,6 +490,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcess
 			tS.stMux.Unlock()
 		}
 	}
+	matchTs.unlock()
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
@@ -411,6 +536,7 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(args *ThresholdsArgsProcessE
 	var ts Thresholds
 	if ts, err = tS.matchingThresholdsForEvent(tnt, args); err == nil {
 		*reply = ts
+		ts.unlock()
 	}
 	return
 }
@@ -440,24 +566,16 @@ func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) 
 	if tnt == utils.EmptyString {
 		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
 	}
+	// make sure threshold is locked at process level
+	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
+		config.CgrConfig().GeneralCfg().LockingTimeout,
+		thresholdLockKey(tnt, tntID.ID))
+	defer guardian.Guardian.UnguardIDs(lkID)
 	if thd, err = tS.dm.GetThreshold(tnt, tntID.ID, true, true, ""); err != nil {
 		return
 	}
 	*t = *thd
 	return
-}
-
-// Reload stops the backupLoop and restarts it
-func (tS *ThresholdService) Reload() {
-	close(tS.stopBackup)
-	<-tS.loopStoped // wait until the loop is done
-	tS.stopBackup = make(chan struct{})
-	go tS.runBackup()
-}
-
-// StartLoop starts the gorutine with the backup loop
-func (tS *ThresholdService) StartLoop() {
-	go tS.runBackup()
 }
 
 // V1ResetThreshold resets the threshold hits
@@ -467,6 +585,11 @@ func (tS *ThresholdService) V1ResetThreshold(tntID *utils.TenantID, rply *string
 	if tnt == utils.EmptyString {
 		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
 	}
+	// make sure threshold is locked at process level
+	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
+		config.CgrConfig().GeneralCfg().LockingTimeout,
+		thresholdLockKey(tnt, tntID.ID))
+	defer guardian.Guardian.UnguardIDs(lkID)
 	if thd, err = tS.dm.GetThreshold(tnt, tntID.ID, true, true, ""); err != nil {
 		return
 	}
