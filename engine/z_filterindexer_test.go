@@ -127,3 +127,40 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))
 	}
 }
+
+func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	// set 1 charger profile with different *libphonenumber filter to index
+	cghPfr := &ChargerProfile{
+		Tenant: "cgrates.org",
+		ID:     "CHARGER_2",
+		FilterIDs: []string{
+			"*prefix:~*req.CGRID:TEST_ID",
+			"*string:~*opts.TotalCost:~*stats.STS_PRF1.*tcc",
+			"*string:~*libphonenumber.<~*req.Destination>:1233",
+		},
+		RunID:        "RAW",
+		AttributeIDs: []string{"attr_1"},
+		Weight:       10,
+	}
+
+	if err := dm.SetChargerProfile(context.Background(), cghPfr, true); err != nil {
+		t.Error(err)
+	}
+
+	expIDx := map[string]utils.StringSet{
+		"*prefix:*req.CGRID:TEST_ID": {
+			"CHARGER_2": {},
+		},
+	}
+	if fltrIDx, err := dm.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes,
+		"cgrates.org", utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIDx, fltrIDx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))
+	}
+}
