@@ -5293,107 +5293,6 @@ func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
 	}
 }
 
-// func TestResourcesV1AllocateResourcesResStoreErr(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
-
-// 	Cache.Clear(nil)
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.ResourceSCfg().StoreInterval = -1
-// 	data := &DataDBMock{
-// 		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
-// 			return map[string]utils.StringSet{
-// 				"*string": {
-// 					"*req.Account": {},
-// 				},
-// 			}, nil
-// 		},
-// 		GetResourceProfileDrvF: func(tnt, id string) (*ResourceProfile, error) {
-// 			return &ResourceProfile{
-// 				Tenant:            "cgrates.org",
-// 				ID:                "RES1",
-// 				FilterIDs:         []string{"*string:~*req.Account:1001"},
-// 				ThresholdIDs:      []string{utils.MetaNone},
-// 				AllocationMessage: "Approved",
-// 				Weight:            10,
-// 				Limit:             -1,
-// 				UsageTTL:          time.Minute,
-// 			}, nil
-// 		},
-// 		SetResourceProfileDrvF: func(rp *ResourceProfile) error {
-// 			return nil
-// 		},
-// 		SetResourceDrvF: func(r *Resource) error {
-// 			return nil
-// 		},
-// 		GetKeysForPrefixF: func(s string) ([]string, error) {
-// 			return []string{"index"}, nil
-// 		},
-// 	}
-// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	Cache = NewCacheS(cfg, dm, nil)
-
-// 	rsPrf := &ResourceProfile{
-// 		Tenant:            "cgrates.org",
-// 		ID:                "RES1",
-// 		FilterIDs:         []string{"*string:~*req.Account:1001"},
-// 		ThresholdIDs:      []string{utils.MetaNone},
-// 		AllocationMessage: "Approved",
-// 		Weight:            10,
-// 		Limit:             -1,
-// 		UsageTTL:          time.Minute,
-// 	}
-// 	rs := &Resource{
-// 		rPrf:   rsPrf,
-// 		Tenant: "cgrates.org",
-// 		ID:     "RES1",
-// 		Usages: map[string]*ResourceUsage{
-// 			"RU1": {
-// 				Tenant: "cgrates.org",
-// 				ID:     "RU1",
-// 				Units:  10,
-// 			},
-// 		},
-// 		dirty:  utils.BoolPointer(false),
-// 		tUsage: utils.Float64Pointer(10),
-// 		ttl:    utils.DurationPointer(time.Minute),
-// 		TTLIdx: []string{},
-// 	}
-
-// 	err := dm.SetResourceProfile(rsPrf, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	err = dm.SetResource(rs)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	rS := NewResourceService(dm, cfg, fltrs, nil)
-
-// 	args := utils.ArgRSv1ResourceUsage{
-// 		CGREvent: &utils.CGREvent{
-// 			ID: "EventAuthorizeResource",
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 		},
-// 		UsageID:  "RU_Test",
-// 		UsageTTL: utils.DurationPointer(time.Minute),
-// 		Units:    5,
-// 	}
-// 	var reply string
-
-// 	if err := rS.V1AllocateResources(args, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != "Approved" {
-// 		t.Errorf("Unexpected reply returned: %q", reply)
-// 	}
-// }
-
 func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	tmp := Cache
 	defer func() {
@@ -6384,4 +6283,243 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 		}
 	}
 
+}
+
+// func TestResourcesMatchingResourcesForEvent2(t *testing.T) {
+// 	tmp := Cache
+// 	tmpC := config.CgrConfig()
+// 	defer func() {
+// 		Cache = tmp
+// 		config.SetCgrConfig(tmpC)
+// 	}()
+
+// 	Cache.Clear(nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.CacheCfg().ReplicationConns = []string{"test"}
+// 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
+// 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+// 	config.SetCgrConfig(cfg)
+// 	data := NewInternalDB(nil, nil, true)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+// 	Cache = NewCacheS(cfg, dm, nil)
+
+// 	fltrs := NewFilterS(cfg, nil, dm)
+
+// 	rsPrf := &ResourceProfile{
+// 		Tenant:            "cgrates.org",
+// 		ID:                "RES1",
+// 		FilterIDs:         []string{"*string:~*req.Account:1001"},
+// 		ThresholdIDs:      []string{utils.MetaNone},
+// 		AllocationMessage: "Approved",
+// 		Weight:            10,
+// 		Limit:             10,
+// 		UsageTTL:          time.Minute,
+// 		Stored:            true,
+// 	}
+
+// 	err := dm.SetResourceProfile(rsPrf, true)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+
+// 	rS := NewResourceService(dm, cfg, fltrs, connMgr)
+// 	ev := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TestMatchingResourcesForEvent",
+// 		Event: map[string]interface{}{
+// 			utils.AccountField: "1001",
+// 		},
+// 		APIOpts: map[string]interface{}{},
+// 	}
+
+// 	Cache.SetWithoutReplicate(utils.CacheEventResources, "TestMatchingResourcesForEvent", utils.StringSet{
+// 		"RES1": struct{}{},
+// 	}, nil, true, utils.NonTransactional)
+// 	_, err = rS.matchingResourcesForEvent("cgrates.org", ev, "TestMatchingResourcesForEvent", utils.DurationPointer(10*time.Second))
+// 	fmt.Println(err)
+// }
+
+func TestResourcesLockUnlockResourceProfiles(t *testing.T) {
+	rp := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "rsPrf",
+		Limit:             10,
+		AllocationMessage: "Approved",
+		Weight:            10,
+		ThresholdIDs:      []string{utils.MetaNone},
+	}
+
+	//lock profile with empty lkID parameter
+	rp.lock(utils.EmptyString)
+
+	if !rp.isLocked() {
+		t.Fatal("expected profile to be locked")
+	} else if rp.lkID == utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be non-empty")
+	}
+
+	//unlock previously locked profile
+	rp.unlock()
+
+	if rp.isLocked() {
+		t.Fatal("expected profile to be unlocked")
+	} else if rp.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+
+	//unlock an already unlocked profile - nothing happens
+	rp.unlock()
+
+	if rp.isLocked() {
+		t.Fatal("expected profile to be unlocked")
+	} else if rp.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+}
+
+func TestResourcesLockUnlockResources(t *testing.T) {
+	rs := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "rsPrf",
+	}
+
+	//lock resource with empty lkID parameter
+	rs.lock(utils.EmptyString)
+
+	if !rs.isLocked() {
+		t.Fatal("expected resource to be locked")
+	} else if rs.lkID == utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be non-empty")
+	}
+
+	//unlock previously locked resource
+	rs.unlock()
+
+	if rs.isLocked() {
+		t.Fatal("expected resource to be unlocked")
+	} else if rs.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+
+	//unlock an already unlocked resource - nothing happens
+	rs.unlock()
+
+	if rs.isLocked() {
+		t.Fatal("expected resource to be unlocked")
+	} else if rs.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+}
+
+func TestResourcesRunBackupStoreIntervalLessThanZero(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = -1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	rS := &ResourceService{
+		dm:              dm,
+		storedResources: make(utils.StringSet),
+		cgrcfg:          cfg,
+		filterS:         filterS,
+		loopStopped:     make(chan struct{}, 1),
+		stopBackup:      make(chan struct{}),
+	}
+
+	rS.runBackup()
+
+	if len(rS.loopStopped) != 1 {
+		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	}
+}
+
+func TestResourcesRunBackupStop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	rS := &ResourceService{
+		dm: dm,
+		storedResources: utils.StringSet{
+			"Res1": struct{}{},
+		},
+		cgrcfg:      cfg,
+		filterS:     filterS,
+		loopStopped: make(chan struct{}, 1),
+		stopBackup:  make(chan struct{}),
+	}
+
+	value := &Resource{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "Res1",
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheResources, "Res1", value, nil, true,
+		utils.NonTransactional)
+
+	exp := &Resource{
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "Res1",
+	}
+
+	go func() {
+		time.Sleep(9 * time.Millisecond)
+		close(rS.stopBackup)
+		// rS.stopBackup <- struct{}{}
+	}()
+	rS.runBackup()
+
+	if rcv, err := rS.dm.GetResource("cgrates.org", "Res1", true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	if len(rS.loopStopped) != 1 {
+		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	}
+}
+
+func TestResourcesReload(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	rS := &ResourceService{
+		dm:          dm,
+		filterS:     filterS,
+		stopBackup:  make(chan struct{}),
+		loopStopped: make(chan struct{}, 1),
+		cgrcfg:      cfg,
+	}
+	rS.loopStopped <- struct{}{}
+	rS.Reload()
+	close(rS.stopBackup)
+}
+
+func TestResourcesStartLoop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = -1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	rS := &ResourceService{
+		dm:          dm,
+		filterS:     filterS,
+		stopBackup:  make(chan struct{}),
+		loopStopped: make(chan struct{}, 1),
+		cgrcfg:      cfg,
+	}
+
+	rS.StartLoop()
+	time.Sleep(10 * time.Millisecond)
+
+	if len(rS.loopStopped) != 1 {
+		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	}
 }
