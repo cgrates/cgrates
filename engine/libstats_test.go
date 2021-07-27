@@ -19,6 +19,7 @@ package engine
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -693,6 +694,539 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 	if len(sq.SQItems) != 2 && sq.SQItems[0].EventID != "TestStatAddStatEvent_2" &&
 		sq.SQItems[1].EventID != "TestStatAddStatEvent_3" {
 		t.Errorf("Expecting: 2, received: %+v", len(sq.SQItems))
+	}
+}
+
+func TestLibstatsSqID(t *testing.T) {
+	ssq := &StoredStatQueue{
+		ID:     "testID",
+		Tenant: "testTenant",
+	}
+
+	exp := "testTenant:testID"
+	rcv := ssq.SqID()
+
+	if rcv != exp {
+		t.Errorf("\nexpected: %q, \nreceived: %q", exp, rcv)
+	}
+}
+
+type statMetricMock struct {
+	testcase string
+}
+
+func (sMM *statMetricMock) GetValue(roundingDecimal int) interface{} {
+	return nil
+}
+
+func (sMM *statMetricMock) GetStringValue(roundingDecimal int) (val string) {
+	return
+}
+
+func (sMM *statMetricMock) GetFloat64Value(roundingDecimal int) (val float64) {
+	return
+}
+
+func (sMM *statMetricMock) AddEvent(evID string, ev utils.DataProvider) error {
+	return nil
+}
+
+func (sMM *statMetricMock) RemEvent(evTenantID string) error {
+	switch sMM.testcase {
+	case "remExpired error":
+		return fmt.Errorf("remExpired mock error")
+	}
+	return nil
+}
+
+func (sMM *statMetricMock) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	err = fmt.Errorf("marshal mock error")
+	return
+}
+
+func (sMM *statMetricMock) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return nil
+}
+
+func (sMM *statMetricMock) GetFilterIDs() (filterIDs []string) {
+	switch sMM.testcase {
+	case "pass error":
+		filterIDs = []string{"filter1", "filter2"}
+		return
+	}
+	return
+}
+
+func (sMM *statMetricMock) GetMinItems() (minIts int) {
+	return 0
+}
+
+func (sMM *statMetricMock) Compress(queueLen int64, defaultID string, roundingDec int) (eventIDs []string) {
+	switch sMM.testcase {
+	case "populate idMap":
+		eventIDs = []string{"id1", "id2", "id3", "id4", "id5", "id6"}
+		return
+	}
+	return
+}
+
+func (sMM *statMetricMock) GetCompressFactor(events map[string]int) map[string]int {
+	return nil
+}
+func (sMM *statMetricMock) Clone() StatMetric {
+	return &statMetricMock{testcase: sMM.testcase}
+}
+
+func TestLibstatsNewStoredStatQueue(t *testing.T) {
+	sq := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			"key": &statMetricMock{},
+		},
+	}
+	var ms Marshaler
+
+	experr := "marshal mock error"
+	rcv, err := NewStoredStatQueue(sq, ms)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nreceived: %q, \nexpected: %q", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nreceived: <%+v>, \nexpected: <%+v>", nil, rcv)
+	}
+}
+
+func TestLibstatsAsStatQueueNilStoredSq(t *testing.T) {
+	var ssq *StoredStatQueue
+	var ms Marshaler
+
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestLibstatsAsStatQueueSuccess(t *testing.T) {
+	ssq := &StoredStatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+	}
+	var ms Marshaler
+
+	exp := &StatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+		SQMetrics: map[string]StatMetric{},
+	}
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestLibstatsAsStatQueueUnsupportedMetric(t *testing.T) {
+	ssq := &StoredStatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+		SQMetrics: map[string][]byte{
+			"key": []byte("sqmetric"),
+		},
+	}
+	var ms Marshaler
+
+	experr := fmt.Sprintf("unsupported metric type <%s>", "key")
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestLibstatsAsStatQueueErrLoadMarshaled(t *testing.T) {
+	ssq := &StoredStatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+		SQMetrics: map[string][]byte{
+			utils.MetaTCD: []byte(""),
+		},
+		Compressed: true,
+	}
+	ms, err := NewMarshaler(utils.JSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	experr := "unexpected end of JSON input"
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestLibstatsAsStatQueueOK(t *testing.T) {
+	ms, err := NewMarshaler(utils.JSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	msm, err := sm.Marshal(ms)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ssq := &StoredStatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+		SQMetrics: map[string][]byte{
+			utils.MetaTCD: msm,
+		},
+		Compressed: true,
+	}
+
+	exp := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: sm,
+		},
+	}
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestLibstatsNewStatQueue(t *testing.T) {
+	tnt := "tenant"
+	id := "id"
+	metrics := []*MetricWithFilters{
+		{
+			MetricID: "invalid",
+		},
+	}
+	minItems := 0
+
+	experr := fmt.Sprintf("unsupported metric type <%s>", metrics[0].MetricID)
+	exp := &StatQueue{
+		Tenant: tnt,
+		ID:     id,
+		SQMetrics: map[string]StatMetric{
+			"invalid": nil,
+		},
+	}
+	rcv, err := NewStatQueue(tnt, id, metrics, minItems)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: %q, \nreceived: %q", experr, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestLibstatsProcessEventremExpiredErr(t *testing.T) {
+	tnt, evID := "tenant", "eventID"
+	filters := &FilterS{}
+	expiry := time.Date(2021, 1, 1, 23, 59, 59, 10, time.UTC)
+	evNm := utils.MapStorage{
+		"key": nil,
+	}
+
+	sq := &StatQueue{
+		sqPrfl: &StatQueueProfile{
+			QueueLength: -1,
+		},
+		SQItems: []SQItem{
+			{
+				EventID:    evID,
+				ExpiryTime: &expiry,
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			"key": &statMetricMock{
+				testcase: "remExpired error",
+			},
+		},
+	}
+
+	experr := "remExpired mock error"
+	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, evNm)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
+	}
+}
+
+func TestLibstatsProcessEventremOnQueueLengthErr(t *testing.T) {
+	tnt, evID := "tenant", "eventID"
+	filters := &FilterS{}
+	evNm := utils.MapStorage{
+		"key": nil,
+	}
+
+	sq := &StatQueue{
+		sqPrfl: &StatQueueProfile{
+			QueueLength: 1,
+		},
+		SQItems: []SQItem{
+			{
+				EventID: evID,
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			"key": &statMetricMock{
+				testcase: "remExpired error",
+			},
+		},
+	}
+
+	experr := "remExpired mock error"
+	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, evNm)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
+	}
+}
+
+func TestLibstatsProcessEventaddStatEvent(t *testing.T) {
+	tnt, evID := "tenant", "eventID"
+	filters := &FilterS{}
+	evNm := utils.MapStorage{
+		"key": nil,
+	}
+
+	sq := &StatQueue{
+		sqPrfl: &StatQueueProfile{
+			QueueLength: 1,
+		},
+		SQItems: []SQItem{
+			{
+				EventID: evID,
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
+		},
+	}
+
+	experr := utils.ErrWrongPath
+	err := sq.ProcessEvent(context.Background(), tnt, evID, filters, evNm)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: %q, \nreceived: %q", experr, err)
+	}
+}
+
+func TestLibstatsCompress(t *testing.T) {
+	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ttl := time.Millisecond
+	expiryTime1 := time.Date(2021, 1, 1, 23, 59, 59, 0, time.UTC)
+	expiryTime2 := time.Date(2021, 1, 2, 23, 59, 59, 0, time.UTC)
+	expiryTime3 := time.Date(2021, 1, 3, 23, 59, 59, 0, time.UTC)
+	expiryTime4 := time.Date(2021, 1, 4, 23, 59, 59, 0, time.UTC)
+	sq := &StatQueue{
+		SQItems: []SQItem{
+			{
+				EventID:    "id1",
+				ExpiryTime: &expiryTime1,
+			},
+			{
+				EventID:    "id2",
+				ExpiryTime: &expiryTime2,
+			},
+			{
+				EventID:    "id3",
+				ExpiryTime: &expiryTime3,
+			},
+			{
+				EventID:    "id4",
+				ExpiryTime: &expiryTime4,
+			},
+			{
+				EventID: "id5",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &statMetricMock{
+				testcase: "populate idMap",
+			},
+			utils.MetaReq: sm,
+		},
+		ttl: &ttl,
+	}
+
+	maxQL := int64(1)
+	roundDec := 1
+
+	exp := []SQItem{
+		{
+			EventID:    "id1",
+			ExpiryTime: &expiryTime1,
+		},
+		{
+			EventID:    "id2",
+			ExpiryTime: &expiryTime2,
+		},
+		{
+			EventID:    "id3",
+			ExpiryTime: &expiryTime3,
+		},
+		{
+			EventID:    "id4",
+			ExpiryTime: &expiryTime4,
+		},
+		{
+			EventID: "id5",
+		},
+		{
+			EventID: "id6",
+		},
+	}
+	rcv := sq.Compress(maxQL, roundDec)
+	if rcv != true {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
+	}
+
+	if len(sq.SQItems) != len(exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq.SQItems)
+	}
+	// if !reflect.DeepEqual(sq.SQItems, exp) {
+	// 	t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq.SQItems)
+	// }
+}
+
+func TestLibstatsaddStatEventPassErr(t *testing.T) {
+	sq := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &statMetricMock{
+				testcase: "pass error",
+			},
+		},
+	}
+	tnt, evID := "tenant", "eventID"
+	filters := &FilterS{
+		cfg: config.CgrConfig(),
+		dm: &DataManager{
+			dataDB: NewInternalDB(nil, nil, true),
+		},
+		connMgr: &ConnManager{},
+	}
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.MetaReq: nil,
+		},
+		utils.MetaOpts: nil,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+
+	experr := "NOT_FOUND:filter1"
+	err := sq.addStatEvent(context.Background(), tnt, evID, filters, evNm)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibstatsaddStatEventNoPass(t *testing.T) {
+	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sq := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: sm,
+		},
+	}
+	sq.lock(utils.EmptyString)
+
+	tnt, evID := "cgrates.org", "eventID"
+	filters := &FilterS{
+		cfg: config.CgrConfig(),
+		dm: &DataManager{
+			dataDB: NewInternalDB(nil, nil, true),
+		},
+		connMgr: &ConnManager{},
+	}
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.MetaReq: nil,
+		},
+		utils.MetaOpts: nil,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+
+	exp := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: sm,
+		},
+		SQItems: []SQItem{
+			{
+				EventID: "eventID",
+			},
+		},
+	}
+	err = sq.addStatEvent(context.Background(), tnt, evID, filters, evNm)
+	sq.unlock()
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if !reflect.DeepEqual(sq, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq)
 	}
 }
 
