@@ -1,0 +1,40 @@
+{
+  // CGRateS Configuration file
+  //
+  // Used in apier/v1/rating_profile_late_it_test
+
+
+  "data_db":{
+    "db_type": "*internal"
+  },
+
+
+  "stor_db": {
+    "db_type": "*internal"
+  },
+
+  "rals": {
+    "enabled": true,
+  },
+
+  "cdrs": {
+    "enabled": true,
+    "rals_conns": ["*localhost"],
+    "chargers_conns":["*internal"],
+  },
+
+  "chargers": {
+    "enabled": true,
+    "attributes_conns": ["*internal"],
+  },
+
+  "attributes": {
+    "enabled": true,
+    "apiers_conns": ["*internal"]
+  },
+
+  "apiers": {
+    "enabled": true,
+  },
+
+}

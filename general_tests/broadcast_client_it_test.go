@@ -205,7 +205,7 @@ func testbrodcastItGetCDRs(t *testing.T) {
 	cdrs[0].SetupTime = cdrs[0].SetupTime.UTC()   // uniform time
 	cdrs[0].AnswerTime = cdrs[0].AnswerTime.UTC() // uniform time
 	if !reflect.DeepEqual(eCDR, cdrs[0]) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(eCDR), utils.ToJSON(cdrs[0]))
+		t.Errorf("Expected: %s \n,received: %s", utils.ToJSON(eCDR), utils.ToJSON(cdrs[0]))
 	}
 }
 

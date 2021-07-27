@@ -1,0 +1,43 @@
+{
+  // CGRateS Configuration file
+  //
+  // Used in apier/v1/rating_profile_late_it_test
+
+
+  "data_db": {
+    "db_type": "mongo",
+    "db_name": "10",
+    "db_port": 27017,
+  },
+
+  "stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017,
+  },
+
+  "rals": {
+    "enabled": true,
+  },
+
+  "cdrs": {
+    "enabled": true,
+    "rals_conns": ["*localhost"],
+    "chargers_conns":["*internal"],
+  },
+
+  "chargers": {
+    "enabled": true,
+    "attributes_conns": ["*internal"],
+  },
+
+  "attributes": {
+    "enabled": true,
+    "apiers_conns": ["*internal"]
+  },
+
+  "apiers": {
+    "enabled": true,
+  },
+
+}
