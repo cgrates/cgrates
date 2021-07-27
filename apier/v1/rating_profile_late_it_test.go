@@ -53,11 +53,11 @@ func TestRPLateIT2(t *testing.T) {
 	// no need for a new config with *gob transport in this case
 	switch *dbType {
 	case utils.MetaInternal:
-		rpLateConfigDIR = "tutinternal"
+		rpLateConfigDIR = "processcdrs_late_internal"
 	case utils.MetaMySQL:
-		rpLateConfigDIR = "tutmysql"
+		rpLateConfigDIR = "processcdrs_late_mysql"
 	case utils.MetaMongo:
-		rpLateConfigDIR = "tutmongo"
+		rpLateConfigDIR = "processcdrs_late_mongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

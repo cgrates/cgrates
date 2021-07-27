@@ -1,0 +1,40 @@
+{
+  // CGRateS Configuration file
+  //
+  // Used in apier/v1/rating_profile_late_it_test
+
+
+  "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+    "db_type": "redis",						// data_db type: <redis|mongo>
+    "db_port": 6379, 						// data_db port to reach the database
+    "db_name": "10", 						// data_db database name to connect to
+  },
+
+  "stor_db": {
+    "db_password": "CGRateS.org",
+  },
+
+  "rals": {
+    "enabled": true,
+  },
+
+  "cdrs": {
+    "enabled": true,
+    "rals_conns": ["*localhost"],
+    "chargers_conns":["*internal"],
+  },
+
+  "chargers": {
+    "enabled": true,
+    "attributes_conns": ["*internal"],
+  },
+
+  "attributes": {
+    "enabled": true,
+    "apiers_conns": ["*internal"]
+  },
+
+  "apiers": {
+    "enabled": true,
+  }
+}
