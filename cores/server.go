@@ -273,7 +273,7 @@ func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(*rpc2.Client),
 		}
 		defer lgob.Close()
 	}
-	<-s.stopbiRPCServer // wait until server is stoped to close the listener
+	<-s.stopbiRPCServer // wait until server is stopped to close the listener
 	return
 }
 
@@ -295,7 +295,7 @@ func (s *Server) acceptBiRPC(srv *rpc2.Server, l net.Listener, codecName string,
 				return
 			}
 			s.stopbiRPCServer <- struct{}{}
-			utils.Logger.Crit(fmt.Sprintf("Stoped Bi%s server beacause %s", codecName, err))
+			utils.Logger.Crit(fmt.Sprintf("Stopped Bi%s server beacause %s", codecName, err))
 			return // stop if we get Accept error
 		}
 		go srv.ServeCodec(newCodec(conn, s.caps, s.anz))

@@ -49,7 +49,7 @@ import (
  *     	- configure the cluster with the following command:
  *         	`./redis-trib.rb create --replicas 1 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 127.0.0.1:7006`
  *
- * To run the tests you need to specify the `redisCluster` flag and have the redis stoped:
+ * To run the tests you need to specify the `redisCluster` flag and have the redis stopped:
  *    	`go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mysql -run=TestRedisCluster -redisCluster  -v`
  *
  * The configuration of the cluster is the following:

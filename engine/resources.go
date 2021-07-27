@@ -370,7 +370,7 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 		storedResources: make(utils.StringSet),
 		cgrcfg:          cgrcfg,
 		filterS:         filterS,
-		loopStoped:      make(chan struct{}),
+		loopStopped:     make(chan struct{}),
 		stopBackup:      make(chan struct{}),
 		connMgr:         connMgr,
 	}
@@ -385,14 +385,14 @@ type ResourceService struct {
 	srMux           sync.RWMutex    // protects storedResources
 	cgrcfg          *config.CGRConfig
 	stopBackup      chan struct{} // control storing process
-	loopStoped      chan struct{}
+	loopStopped     chan struct{}
 	connMgr         *ConnManager
 }
 
 // Reload stops the backupLoop and restarts it
 func (rS *ResourceService) Reload() {
 	close(rS.stopBackup)
-	<-rS.loopStoped // wait until the loop is done
+	<-rS.loopStopped // wait until the loop is done
 	rS.stopBackup = make(chan struct{})
 	go rS.runBackup()
 }
@@ -414,14 +414,14 @@ func (rS *ResourceService) Shutdown() {
 func (rS *ResourceService) runBackup() {
 	storeInterval := rS.cgrcfg.ResourceSCfg().StoreInterval
 	if storeInterval <= 0 {
-		rS.loopStoped <- struct{}{}
+		rS.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		rS.storeResources()
 		select {
 		case <-rS.stopBackup:
-			rS.loopStoped <- struct{}{}
+			rS.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}
