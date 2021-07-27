@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -259,6 +260,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	msq.unlock()
 	if !reflect.DeepEqual(stqs[0].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(stqs[0].ID, msq[0].ID) {
@@ -271,6 +273,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	msq.unlock()
 	if !reflect.DeepEqual(stqs[1].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(stqs[1].ID, msq[0].ID) {
@@ -283,6 +286,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	msq.unlock()
 	if !reflect.DeepEqual(stqs[2].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[2].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(stqs[2].ID, msq[0].ID) {
@@ -741,6 +745,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	msq.unlock()
 	if !reflect.DeepEqual(stqs[0].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(stqs[0].ID, msq[0].ID) {
@@ -753,6 +758,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	msq.unlock()
 	if !reflect.DeepEqual(stqs[1].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(stqs[1].ID, msq[0].ID) {
@@ -765,6 +771,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	msq.unlock()
 	if !reflect.DeepEqual(stqs[2].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[2].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(stqs[2].ID, msq[0].ID) {
@@ -1223,4 +1230,327 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 	if _, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
+}
+
+func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	rS := NewStatService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	prfs := make([]*StatQueueProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &StatQueueProfile{
+			Tenant:       "cgrates.org",
+			ID:           fmt.Sprintf("STS%d", i),
+			Weight:       20.00,
+			ThresholdIDs: []string{utils.MetaNone},
+			QueueLength:  1,
+			Stored:       true,
+		}
+		dm.SetStatQueueProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	dm.RemoveStatQueue("cgrates.org", "STS1")
+	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	if err != utils.ErrNotFound {
+		t.Errorf("Error: %+v", err)
+	}
+	for _, rPrf := range prfs {
+		if rPrf.isLocked() {
+			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if rPrf.ID == "STS1" {
+			continue
+		}
+		if r, err := dm.GetStatQueue(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected StatQueue to not be locked %q", rPrf.ID)
+		}
+	}
+
+}
+
+func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	rS := NewStatService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	prfs := make([]*StatQueueProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &StatQueueProfile{
+			Tenant:       "cgrates.org",
+			ID:           fmt.Sprintf("STS%d", i),
+			QueueLength:  1,
+			Stored:       true,
+			Weight:       20.00,
+			ThresholdIDs: []string{utils.MetaNone},
+		}
+		dm.SetStatQueueProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	rPrf := &StatQueueProfile{
+		Tenant:       "cgrates.org",
+		ID:           "STS20",
+		FilterIDs:    []string{"FLTR_RES_201"},
+		QueueLength:  1,
+		Stored:       true,
+		Weight:       20.00,
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+	err = db.SetStatQueueProfileDrv(rPrf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	prfs = append(prfs, rPrf)
+	ids.Add(rPrf.ID)
+	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
+	if err == nil || err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
+	}
+	for _, rPrf := range prfs {
+		if rPrf.isLocked() {
+			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if rPrf.ID == "STS20" {
+			continue
+		}
+		if r, err := dm.GetStatQueue(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected StatQueue to not be locked %q", rPrf.ID)
+		}
+	}
+}
+
+func TestStatQueueMatchingStatQueuesForEventLocksBlocker(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	rS := NewStatService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	prfs := make([]*StatQueueProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &StatQueueProfile{
+			Tenant:       "cgrates.org",
+			ID:           fmt.Sprintf("STS%d", i),
+			QueueLength:  1,
+			Stored:       true,
+			Weight:       float64(10 - i),
+			Blocker:      i == 4,
+			ThresholdIDs: []string{utils.MetaNone},
+		}
+		dm.SetStatQueueProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mres.unlock()
+	if len(mres) != 5 {
+		t.Fatal("Expected 6 StatQueues")
+	}
+	for _, rPrf := range prfs[5:] {
+		if rPrf.isLocked() {
+			t.Errorf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetStatQueue(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected StatQueue to not be locked %q", rPrf.ID)
+		}
+	}
+	for _, rPrf := range prfs[:5] {
+		if !rPrf.isLocked() {
+			t.Errorf("Expected profile to be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetStatQueue(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if !r.isLocked() {
+			t.Fatalf("Expected StatQueue to be locked %q", rPrf.ID)
+		}
+	}
+}
+
+func TestStatQueueMatchingStatQueuesForEventLocksActivationInterval(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	rS := NewStatService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &StatQueueProfile{
+			Tenant:       "cgrates.org",
+			ID:           fmt.Sprintf("STS%d", i),
+			QueueLength:  1,
+			Stored:       true,
+			Weight:       20.00,
+			ThresholdIDs: []string{utils.MetaNone},
+		}
+		dm.SetStatQueueProfile(rPrf, true)
+		ids.Add(rPrf.ID)
+	}
+	rPrf := &StatQueueProfile{
+		Tenant:       "cgrates.org",
+		ID:           "STS21",
+		QueueLength:  1,
+		Stored:       true,
+		Weight:       20.00,
+		ThresholdIDs: []string{utils.MetaNone},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Now().Add(-5 * time.Second),
+		},
+	}
+	dm.SetStatQueueProfile(rPrf, true)
+	ids.Add(rPrf.ID)
+	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), utils.TimePointer(time.Now()), utils.MapStorage{})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mres.unlock()
+	if rPrf.isLocked() {
+		t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+	}
+	if r, err := dm.GetStatQueue(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+		t.Errorf("error %s for <%s>", err, rPrf.ID)
+	} else if r.isLocked() {
+		t.Fatalf("Expected StatQueue to not be locked %q", rPrf.ID)
+	}
+}
+
+func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	prfs := make([]*StatQueueProfile, 0)
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := &DataDBMock{
+		GetStatQueueProfileDrvF: func(tnt, id string) (*StatQueueProfile, error) {
+			if id == "STS1" {
+				return nil, utils.ErrNotImplemented
+			}
+			rPrf := &StatQueueProfile{
+				Tenant:       "cgrates.org",
+				ID:           id,
+				QueueLength:  1,
+				Stored:       true,
+				Weight:       20.00,
+				ThresholdIDs: []string{utils.MetaNone},
+			}
+			Cache.Set(utils.CacheStatQueues, rPrf.TenantID(), &StatQueue{
+				Tenant:    rPrf.Tenant,
+				ID:        rPrf.ID,
+				SQMetrics: make(map[string]StatMetric),
+			}, nil, true, utils.NonTransactional)
+			prfs = append(prfs, rPrf)
+			return rPrf, nil
+		},
+	}
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	rS := NewStatService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		ids.Add(fmt.Sprintf("STS%d", i))
+	}
+	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	if err != utils.ErrNotImplemented {
+		t.Fatalf("Error: %+v", err)
+	}
+	for _, rPrf := range prfs {
+		if rPrf.isLocked() {
+			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+		}
+	}
+
+}
+
+func TestStatQueueMatchingStatQueuesForEventLocks4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.StatSCfg().StoreInterval = 1
+	cfg.StatSCfg().StringIndexedFields = nil
+	cfg.StatSCfg().PrefixIndexedFields = nil
+	rS := NewStatService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg}, nil)
+
+	prfs := make([]*StatQueueProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &StatQueueProfile{
+			Tenant:       "cgrates.org",
+			ID:           fmt.Sprintf("STS%d", i),
+			Weight:       20.00,
+			ThresholdIDs: []string{utils.MetaNone},
+			QueueLength:  1,
+			Stored:       true,
+		}
+		dm.SetStatQueueProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	ids.Add("STS20")
+	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mres.unlock()
+	for _, rPrf := range prfs {
+		if !rPrf.isLocked() {
+			t.Errorf("Expected profile to be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetStatQueue(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if !r.isLocked() {
+			t.Fatalf("Expected StatQueue to be locked %q", rPrf.ID)
+		}
+	}
+
 }
