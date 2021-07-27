@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -47,6 +46,8 @@ type StatQueueProfile struct {
 	Blocker      bool // blocker flag to stop processing on filters matched
 	Weight       float64
 	ThresholdIDs []string // list of thresholds to be checked after changes
+
+	lkID string // holds the reference towards guardian lock key
 }
 
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -57,6 +58,36 @@ type StatQueueProfileWithAPIOpts struct {
 
 func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
+}
+
+// statQueueProfileLockKey returns the ID used to lock a StatQueueProfile with guardian
+func statQueueProfileLockKey(tnt, id string) string {
+	return utils.ConcatenatedKey(utils.CacheStatQueueProfiles, tnt, id)
+}
+
+// lock will lock the StatQueueProfile using guardian and store the lock within r.lkID
+// if lkID is passed as argument, the lock is considered as executed
+func (sqp *StatQueueProfile) lock(lkID string) {
+	if lkID == utils.EmptyString {
+		lkID = guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			statQueueProfileLockKey(sqp.Tenant, sqp.ID))
+	}
+	sqp.lkID = lkID
+}
+
+// unlock will unlock the StatQueueProfile and clear rp.lkID
+func (sqp *StatQueueProfile) unlock() {
+	if sqp.lkID == utils.EmptyString {
+		return
+	}
+	guardian.Guardian.UnguardIDs(sqp.lkID)
+	sqp.lkID = utils.EmptyString
+}
+
+// isLocked returns the locks status of this StatQueueProfile
+func (sqp *StatQueueProfile) isLocked() bool {
+	return sqp.lkID != utils.EmptyString
 }
 
 type MetricWithFilters struct {
@@ -158,27 +189,45 @@ func NewStatQueue(tnt, id string, metrics []*MetricWithFilters, minItems int) (s
 
 // StatQueue represents an individual stats instance
 type StatQueue struct {
-	lk        sync.RWMutex // protect the elements from within
 	Tenant    string
 	ID        string
 	SQItems   []SQItem
 	SQMetrics map[string]StatMetric
+	lkID      string // ID of the lock used when matching the stat
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
 	ttl       *time.Duration // timeToLeave, picked on each init
 }
 
-// RLock only to implement sync.RWMutex methods
-func (sq *StatQueue) RLock() { sq.lk.RLock() }
+// statQueueLockKey returns the ID used to lock a StatQueue with guardian
+func statQueueLockKey(tnt, id string) string {
+	return utils.ConcatenatedKey(utils.CacheStatQueues, tnt, id)
+}
 
-// RUnlock only to implement sync.RWMutex methods
-func (sq *StatQueue) RUnlock() { sq.lk.RUnlock() }
+// lock will lock the StatQueue using guardian and store the lock within r.lkID
+// if lkID is passed as argument, the lock is considered as executed
+func (sq *StatQueue) lock(lkID string) {
+	if lkID == utils.EmptyString {
+		lkID = guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			statQueueLockKey(sq.Tenant, sq.ID))
+	}
+	sq.lkID = lkID
+}
 
-// Lock only to implement sync.RWMutex methods
-func (sq *StatQueue) Lock() { sq.lk.Lock() }
+// unlock will unlock the StatQueue and clear r.lkID
+func (sq *StatQueue) unlock() {
+	if sq.lkID == utils.EmptyString {
+		return
+	}
+	guardian.Guardian.UnguardIDs(sq.lkID)
+	sq.lkID = utils.EmptyString
+}
 
-// Unlock only to implement sync.RWMutex methods
-func (sq *StatQueue) Unlock() { sq.lk.Unlock() }
+// isLocked returns the locks status of this StatQueue
+func (sq *StatQueue) isLocked() bool {
+	return sq.lkID != utils.EmptyString
+}
 
 // TenantID will compose the unique identifier for the StatQueue out of Tenant and ID
 func (sq *StatQueue) TenantID() string {
@@ -351,13 +400,28 @@ func (sq *StatQueue) MarshalJSON() (rply []byte, err error) {
 		return []byte("null"), nil
 	}
 	type tmp StatQueue
-	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ error) {
-		sq.RLock()
-		rply, err = json.Marshal(tmp(*sq))
-		sq.RUnlock()
-		return
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
+	sq.lock(utils.EmptyString)
+	rply, err = json.Marshal(tmp(*sq))
+	sq.unlock()
 	return
+}
+
+// unlock will unlock StatQueues part of this slice
+func (sis StatQueues) unlock() {
+	for _, s := range sis {
+		s.unlock()
+		if s.sqPrfl != nil {
+			s.sqPrfl.unlock()
+		}
+	}
+}
+
+func (sis StatQueues) IDs() []string {
+	ids := make([]string, len(sis))
+	for i, s := range sis {
+		ids[i] = s.ID
+	}
+	return ids
 }
 
 // UnmarshalJSON here only to fully support json for StatQueue
@@ -413,13 +477,10 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 func (sq *StatQueue) GobEncode() (rply []byte, err error) {
 	buf := bytes.NewBuffer(rply)
 	type tmp StatQueue
-	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ error) {
-		sq.RLock()
-		err = gob.NewEncoder(buf).Encode(tmp(*sq))
-		sq.RUnlock()
-		return
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
-	return buf.Bytes(), nil
+	sq.lock(utils.EmptyString)
+	err = gob.NewEncoder(buf).Encode(tmp(*sq))
+	sq.unlock()
+	return buf.Bytes(), err
 }
 
 func (sq *StatQueue) Clone() (cln *StatQueue) {
@@ -451,15 +512,12 @@ func (ssq *StatQueueWithAPIOpts) MarshalJSON() (rply []byte, err error) {
 		StatQueue
 		APIOpts map[string]interface{}
 	}
-	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ error) {
-		ssq.RLock()
-		rply, err = json.Marshal(tmp{
-			StatQueue: *ssq.StatQueue,
-			APIOpts:   ssq.APIOpts,
-		})
-		ssq.RUnlock()
-		return
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+ssq.TenantID())
+	ssq.lock(utils.EmptyString)
+	rply, err = json.Marshal(tmp{
+		StatQueue: *ssq.StatQueue,
+		APIOpts:   ssq.APIOpts,
+	})
+	ssq.unlock()
 	return
 }
 
@@ -469,16 +527,13 @@ func (ssq *StatQueueWithAPIOpts) GobEncode() (rply []byte, err error) {
 		StatQueue
 		APIOpts map[string]interface{}
 	}
-	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ error) {
-		ssq.RLock()
-		err = gob.NewEncoder(buf).Encode(tmp{
-			StatQueue: *ssq.StatQueue,
-			APIOpts:   ssq.APIOpts,
-		})
-		ssq.RUnlock()
-		return
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+ssq.TenantID())
-	return buf.Bytes(), nil
+	ssq.lock(utils.EmptyString)
+	err = gob.NewEncoder(buf).Encode(tmp{
+		StatQueue: *ssq.StatQueue,
+		APIOpts:   ssq.APIOpts,
+	})
+	ssq.unlock()
+	return buf.Bytes(), err
 }
 
 // UnmarshalJSON here only to fully support json for StatQueue
