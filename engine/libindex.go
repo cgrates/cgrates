@@ -30,10 +30,13 @@ import (
 var (
 	FilterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix})
 	// Element or values of a filter that starts with one of this should not be indexed
-	ToNotBeIndexed = []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+	ToNotBeIndexed = []string{
+		utils.DynamicDataPrefix + utils.MetaAccounts,
 		utils.DynamicDataPrefix + utils.MetaStats,
 		utils.DynamicDataPrefix + utils.MetaResources,
-		utils.DynamicDataPrefix + utils.MetaLibPhoneNumber}
+		utils.DynamicDataPrefix + utils.MetaLibPhoneNumber,
+		utils.DynamicDataPrefix + utils.MetaAsm,
+	}
 )
 
 // newFilterIndex will get the index from DataManager if is not found it will create it
