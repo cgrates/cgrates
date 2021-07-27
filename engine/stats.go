@@ -77,7 +77,7 @@ func (sS *StatService) Shutdown(ctx *context.Context) {
 	utils.Logger.Info("<StatS> service shutdown complete")
 }
 
-// runBackup will regularly store resources changed to dataDB
+// runBackup will regularly store statQueues changed to dataDB
 func (sS *StatService) runBackup(ctx *context.Context) {
 	storeInterval := sS.cgrcfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -95,7 +95,7 @@ func (sS *StatService) runBackup(ctx *context.Context) {
 	}
 }
 
-// storeResources represents one task of complete backup
+// storeStats represents one task of complete backup
 func (sS *StatService) storeStats(ctx *context.Context) {
 	var failedSqIDs []string
 	for { // don't stop untill we store all dirty statQueues
@@ -156,7 +156,7 @@ func (sS *StatService) StoreStatQueue(ctx *context.Context, sq *StatQueue) (err 
 	return
 }
 
-// matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
+// matchingStatQueuesForEvent returns ordered list of matching statQueues which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt string, statsIDs []string, evNm utils.MapStorage) (sqs StatQueues, err error) {
 	sqIDs := utils.NewStringSet(statsIDs)
 	if len(sqIDs) == 0 {
@@ -430,7 +430,7 @@ func (sS *StatService) V1GetStatQueue(ctx *context.Context, args *utils.TenantID
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	// make sure resource is locked at process level
+	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		statQueueLockKey(tnt, args.ID))
@@ -452,7 +452,7 @@ func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	// make sure resource is locked at process level
+	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		statQueueLockKey(tnt, args.ID))
@@ -481,7 +481,7 @@ func (sS *StatService) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	// make sure resource is locked at process level
+	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		statQueueLockKey(tnt, args.ID))
@@ -528,7 +528,7 @@ func (sS *StatService) V1ResetStatQueue(ctx *context.Context, tntID *utils.Tenan
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	// make sure resource is locked at process level
+	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		statQueueLockKey(tnt, tntID.ID))
