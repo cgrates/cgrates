@@ -38,7 +38,7 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 		filterS:          filterS,
 		cgrcfg:           cgrcfg,
 		storedStatQueues: make(utils.StringSet),
-		loopStoped:       make(chan struct{}),
+		loopStopped:      make(chan struct{}),
 		stopBackup:       make(chan struct{}),
 	}
 }
@@ -49,7 +49,7 @@ type StatService struct {
 	connMgr          *ConnManager
 	filterS          *FilterS
 	cgrcfg           *config.CGRConfig
-	loopStoped       chan struct{}
+	loopStopped      chan struct{}
 	stopBackup       chan struct{}
 	storedStatQueues utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
 	ssqMux           sync.RWMutex    // protects storedStatQueues
@@ -58,7 +58,7 @@ type StatService struct {
 // Reload stops the backupLoop and restarts it
 func (sS *StatService) Reload() {
 	close(sS.stopBackup)
-	<-sS.loopStoped // wait until the loop is done
+	<-sS.loopStopped // wait until the loop is done
 	sS.stopBackup = make(chan struct{})
 	go sS.runBackup()
 }
@@ -80,14 +80,14 @@ func (sS *StatService) Shutdown() {
 func (sS *StatService) runBackup() {
 	storeInterval := sS.cgrcfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
-		sS.loopStoped <- struct{}{}
+		sS.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		sS.storeStats()
 		select {
 		case <-sS.stopBackup:
-			sS.loopStoped <- struct{}{}
+			sS.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}

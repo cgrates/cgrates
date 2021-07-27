@@ -160,7 +160,7 @@ func (s *Scheduler) loadTasks() {
 						utils.SchedulerS, err.Error(), s.cfg.SchedulerCfg().Filters, task.ActionsID, task.AccountID))
 			}
 			// we do not push the task back as this may cause an infinite loop
-			// push it when the function is done and we stoped the for
+			// push it when the function is done and we stopped the for
 			// do not use defer here as the functions are exeucted
 			// from the last one to the first
 			unexecutedTasks = append(unexecutedTasks, task)

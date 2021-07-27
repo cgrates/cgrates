@@ -97,7 +97,7 @@ func TestKamailioAgentReload(t *testing.T) {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	// the engine should be stoped as we could not connect to kamailio
+	// the engine should be stopped as we could not connect to kamailio
 
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
