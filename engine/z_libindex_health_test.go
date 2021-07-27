@@ -498,3 +498,121 @@ func TestHealthIndexThreshold(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 }
+
+func TestHealthIndexCharger(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	// we will set this charger but without indexing
+	chPrf := &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Raw",
+		FilterIDs:    []string{
+			"*string:~*opts.*eventType:ChargerAccountUpdate",
+			"*string:~*req.*Account:1234",
+			"*string:~*asm.ID:1002",         // *asm will not be indexing
+			"*suffix:BrokenFilter:Invalid"},
+		RunID:        "raw",
+		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
+		Weight:       20,
+	}
+	if err := dm.SetChargerProfile(chPrf, false); err != nil {
+		t.Error(err)
+	}
+
+	args := &IndexHealthArgsWith3Ch{}
+	exp := &FilterIHReply{
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*string:*opts.*eventType:ChargerAccountUpdate": {"Raw"},
+			"cgrates.org:*string:*req.*Account:1234": {"Raw"},
+		},
+		BrokenIndexes:  map[string][]string{},
+		MissingFilters: map[string][]string{},
+	}
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheChargerFilterIndexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+	indexes := map[string]utils.StringSet{
+		"*prefix:req.Destination:+10": { // obj exist but the index don't
+			"Raw": {},
+		},
+		"*string:*req.Destination:123": { // index is valid but the obj does not exist
+			"InexistingCharger": {},
+		},
+	}
+
+	// we will set manually some indexes that points to an nil object or index is valid but the obj is missing
+	if err := dm.SetIndexes(utils.CacheChargerFilterIndexes, "cgrates.org",
+		indexes, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	exp = &FilterIHReply{
+		MissingObjects: []string{"cgrates.org:InexistingCharger"},
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*string:*opts.*eventType:ChargerAccountUpdate": {"Raw"},
+			"cgrates.org:*string:*req.*Account:1234": {"Raw"},
+		},
+		BrokenIndexes: map[string][]string{
+			"cgrates.org:*prefix:req.Destination:+10": {"Raw"},
+		},
+		MissingFilters: map[string][]string{},
+	}
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheChargerFilterIndexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+	//we will use an inexisting Filter(not inline) for the same ChargerProfile
+	chPrf = &ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Raw",
+		FilterIDs:    []string{
+			"*string:~*opts.*eventType:ChargerAccountUpdate",
+			"*string:~*req.*Account:1234",
+			"*string:~*asm.ID:1002",         // *asm will not be indexing
+			"*suffix:BrokenFilter:Invalid",
+		"FLTR_1_DOES_NOT_EXIST_CHRGR"},
+		RunID:        "raw",
+		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
+		Weight:       20,
+	}
+	if err := dm.SetChargerProfile(chPrf, false); err != nil {
+		t.Error(err)
+	}
+	exp = &FilterIHReply{
+		MissingObjects: []string{"cgrates.org:InexistingCharger"},
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*string:*opts.*eventType:ChargerAccountUpdate": {"Raw"},
+			"cgrates.org:*string:*req.*Account:1234": {"Raw"},
+		},
+		BrokenIndexes: map[string][]string{
+			"cgrates.org:*prefix:req.Destination:+10": {"Raw"},
+		},
+		MissingFilters: map[string][]string{
+			"cgrates.org:FLTR_1_DOES_NOT_EXIST_CHRGR": {"Raw"},
+		},
+	}
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheChargerFilterIndexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
