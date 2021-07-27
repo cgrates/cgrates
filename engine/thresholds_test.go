@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -29,6 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestThresholdsSort(t *testing.T) {
@@ -376,29 +378,36 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
 		}
 	}
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != nil {
+	thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0])
+	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
+	}
+	thMatched.unlock()
+	if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[0].ID, thMatched[0].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].ID, thMatched[0].ID)
 	} else if !reflect.DeepEqual(ths[0].Hits, thMatched[0].Hits) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Hits, thMatched[0].Hits)
 	}
-
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1]); err != nil {
+	thMatched, err = thServ.matchingThresholdsForEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1])
+	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Tenant) {
+	}
+	thMatched.unlock()
+	if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[1].ID, thMatched[0].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].ID, thMatched[0].ID)
 	} else if !reflect.DeepEqual(ths[1].Hits, thMatched[0].Hits) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Hits, thMatched[0].Hits)
 	}
-
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2]); err != nil {
+	thMatched, err = thServ.matchingThresholdsForEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2])
+	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Tenant) {
+	}
+	thMatched.unlock()
+	if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[2].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[2].ID, thMatched[0].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[2].ID, thMatched[0].ID)
@@ -798,9 +807,12 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 	} else if !reflect.DeepEqual(thIDs, thMatched) {
 		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
 	}
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != nil {
+	thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0])
+	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
+	}
+	thMatched.unlock()
+	if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[0].ID, thMatched[0].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].ID, thMatched[0].ID)
@@ -808,9 +820,12 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 		t.Errorf("Expecting: 1, received: %+v", thMatched[0].Hits)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1]); err != nil {
+	thMatched, err = thServ.matchingThresholdsForEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1])
+	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Tenant) {
+	}
+	thMatched.unlock()
+	if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[1].ID, thMatched[0].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].ID, thMatched[0].ID)
@@ -818,9 +833,12 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 		t.Errorf("Expecting: 1, received: %+v", thMatched[0].Hits)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2]); err != nil {
+	thMatched, err = thServ.matchingThresholdsForEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2])
+	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Tenant) {
+	}
+	thMatched.unlock()
+	if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[2].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[2].ID, thMatched[0].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[2].ID, thMatched[0].ID)
@@ -1058,18 +1076,18 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 	} else if !reflect.DeepEqual(thIDs, thMatched) && !reflect.DeepEqual(thIDsRev, thMatched) {
 		t.Errorf("Expecting: %+v, received: %+v", thIDs, thMatched)
 	}
-
-	if thMatched, err := thServ.matchingThresholdsForEvent(ev.Tenant, ev); err != nil {
-		t.Errorf("Error: %+v", err)
-	} else {
-		for _, thM := range thMatched {
-			if !reflect.DeepEqual(thPrf.Tenant, thM.Tenant) {
-				t.Errorf("Expecting: %+v, received: %+v", thPrf.Tenant, thM.Tenant)
-			} else if reflect.DeepEqual(thIDs[0], thM.ID) && thM.Hits != 1 {
-				t.Errorf("Expecting: 1 for %+v, received: %+v", thM.ID, thM.Hits)
-			} else if reflect.DeepEqual(thIDs[1], thM.ID) && thM.Hits != 1 {
-				t.Errorf("Expecting: 1 for %+v, received: %+v", thM.ID, thM.Hits)
-			}
+	thMatched, err := thServ.matchingThresholdsForEvent(ev.Tenant, ev)
+	if err != nil {
+		t.Fatalf("Error: %+v", err)
+	}
+	thMatched.unlock()
+	for _, thM := range thMatched {
+		if !reflect.DeepEqual(thPrf.Tenant, thM.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", thPrf.Tenant, thM.Tenant)
+		} else if reflect.DeepEqual(thIDs[0], thM.ID) && thM.Hits != 1 {
+			t.Errorf("Expecting: 1 for %+v, received: %+v", thM.ID, thM.Hits)
+		} else if reflect.DeepEqual(thIDs[1], thM.ID) && thM.Hits != 1 {
+			t.Errorf("Expecting: 1 for %+v, received: %+v", thM.ID, thM.Hits)
 		}
 	}
 }
@@ -1355,22 +1373,15 @@ func TestThresholdsStoreThresholdsOK(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	tS := NewThresholdService(dm, cfg, nil)
 
-	value := &Threshold{
-		dirty:  utils.BoolPointer(true),
-		Tenant: "cgrates.org",
-		ID:     "TH1",
-		Hits:   2,
-	}
-
-	Cache.SetWithoutReplicate(utils.CacheThresholds, "TH1", value, nil, true,
-		utils.NonTransactional)
-	tS.storedTdIDs.Add("TH1")
 	exp := &Threshold{
 		dirty:  utils.BoolPointer(false),
 		Tenant: "cgrates.org",
 		ID:     "TH1",
 		Hits:   2,
 	}
+	Cache.SetWithoutReplicate(utils.CacheThresholds, "cgrates.org:TH1", exp, nil, true,
+		utils.NonTransactional)
+	tS.storedTdIDs.Add("cgrates.org:TH1")
 	tS.storeThresholds()
 
 	if rcv, err := tS.dm.GetThreshold("cgrates.org", "TH1", true, false,
@@ -1381,7 +1392,7 @@ func TestThresholdsStoreThresholdsOK(t *testing.T) {
 			utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 
-	Cache.Remove(utils.CacheThresholds, "TH1", true, utils.NonTransactional)
+	Cache.Remove(utils.CacheThresholds, "cgrates.org:TH1", true, utils.NonTransactional)
 }
 
 func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
@@ -1614,13 +1625,10 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "TH2",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
-		MinHits: 2,
-		MaxHits: 5,
-		Weight:  10,
-		Blocker: true,
+		MinHits:   2,
+		MaxHits:   5,
+		Weight:    10,
+		Blocker:   true,
 	}
 
 	if err := dm.SetThresholdProfile(thPrf, true); err != nil {
@@ -1653,8 +1661,7 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 	} else {
 		rcv.tPrfl = nil
 		rcv.dirty = nil
-		var snooze time.Time
-		rcv.Snooze = snooze
+		rcv.Snooze = time.Time{}
 		if !reflect.DeepEqual(rcv, exp) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 		}
@@ -1668,16 +1675,28 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	tmp := config.CgrConfig()
+	tmpC := Cache
+	tmpCMgr := connMgr
 
 	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
+	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	dm := NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(nil, cfg, filterS)
+	Cache = NewCacheS(cfg, dm, nil)
 
+	defer func() {
+		connMgr = tmpCMgr
+		Cache = tmpC
+		config.SetCgrConfig(tmp)
+		log.SetOutput(os.Stderr)
+	}()
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH3",
@@ -1716,7 +1735,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	}
 
 	expLog1 := `[WARNING] <ThresholdService> failed removing from database non-recurrent threshold: cgrates.org:TH3, error: NO_DATABASE_CONNECTION`
-	expLog2 := `[WARNING] <ThresholdService> failed removing from cache non-recurrent threshold: cgrates.org:TH3, error: NO_DATABASE_CONNECTION`
+	expLog2 := `[WARNING] <ThresholdService> failed removing from cache non-recurrent threshold: cgrates.org:TH3, error: DISCONNECTED`
 
 	if _, err := tS.processEvent(args.Tenant, args); err == nil ||
 		err != utils.ErrPartiallyExecuted {
@@ -2080,4 +2099,390 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 	}, &rplyTh); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
+}
+
+func TestThresholdMatchingThresholdForEventLocks(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ThresholdSCfg().StoreInterval = 1
+	cfg.ThresholdSCfg().StringIndexedFields = nil
+	cfg.ThresholdSCfg().PrefixIndexedFields = nil
+	rS := NewThresholdService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg})
+
+	prfs := make([]*ThresholdProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ThresholdProfile{
+			Tenant:  "cgrates.org",
+			ID:      fmt.Sprintf("TH%d", i),
+			Weight:  20.00,
+			MaxHits: 5,
+		}
+		dm.SetThresholdProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	dm.RemoveThreshold("cgrates.org", "TH1")
+	mth, err := rS.matchingThresholdsForEvent("cgrates.org", &ThresholdsArgsProcessEvent{
+		ThresholdIDs: ids.AsSlice(),
+		CGREvent:     new(utils.CGREvent),
+	})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mth.unlock()
+	for _, rPrf := range prfs {
+		if rPrf.ID == "TH1" {
+			if rPrf.isLocked() {
+				t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+			}
+			continue
+		}
+		if !rPrf.isLocked() {
+			t.Fatalf("Expected profile to be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetThreshold(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if !r.isLocked() {
+			t.Fatalf("Expected Threshold to be locked %q", rPrf.ID)
+		}
+	}
+
+}
+
+func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ThresholdSCfg().StoreInterval = 1
+	cfg.ThresholdSCfg().StringIndexedFields = nil
+	cfg.ThresholdSCfg().PrefixIndexedFields = nil
+	rS := NewThresholdService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg})
+
+	prfs := make([]*ThresholdProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ThresholdProfile{
+			Tenant:  "cgrates.org",
+			ID:      fmt.Sprintf("TH%d", i),
+			Weight:  20.00,
+			MaxHits: 5,
+		}
+		dm.SetThresholdProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	rPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH20",
+		FilterIDs: []string{"FLTR_RES_201"},
+		Weight:    20.00,
+		MaxHits:   5,
+	}
+	err = db.SetThresholdProfileDrv(rPrf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	prfs = append(prfs, rPrf)
+	ids.Add(rPrf.ID)
+	_, err := rS.matchingThresholdsForEvent("cgrates.org", &ThresholdsArgsProcessEvent{
+		ThresholdIDs: ids.AsSlice(),
+		CGREvent:     new(utils.CGREvent),
+	})
+	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
+	if err == nil || err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
+	}
+	for _, rPrf := range prfs {
+		if rPrf.isLocked() {
+			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if rPrf.ID == "TH20" {
+			continue
+		}
+		if r, err := dm.GetThreshold(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected Threshold to not be locked %q", rPrf.ID)
+		}
+	}
+}
+
+func TestThresholdMatchingThresholdForEventLocksBlocker(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ThresholdSCfg().StoreInterval = 1
+	cfg.ThresholdSCfg().StringIndexedFields = nil
+	cfg.ThresholdSCfg().PrefixIndexedFields = nil
+	rS := NewThresholdService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg})
+
+	prfs := make([]*ThresholdProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ThresholdProfile{
+			Tenant:  "cgrates.org",
+			ID:      fmt.Sprintf("TH%d", i),
+			Weight:  float64(10 - i),
+			Blocker: i == 4,
+			MaxHits: 5,
+		}
+		dm.SetThresholdProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &ThresholdsArgsProcessEvent{
+		ThresholdIDs: ids.AsSlice(),
+		CGREvent:     new(utils.CGREvent),
+	})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mres.unlock()
+	if len(mres) != 5 {
+		t.Fatal("Expected 6 Thresholds")
+	}
+	for _, rPrf := range prfs[5:] {
+		if rPrf.isLocked() {
+			t.Errorf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetThreshold(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected Threshold to not be locked %q", rPrf.ID)
+		}
+	}
+	for _, rPrf := range prfs[:5] {
+		if !rPrf.isLocked() {
+			t.Errorf("Expected profile to be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetThreshold(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if !r.isLocked() {
+			t.Fatalf("Expected Threshold to be locked %q", rPrf.ID)
+		}
+	}
+}
+
+func TestThresholdMatchingThresholdForEventLocksActivationInterval(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ThresholdSCfg().StoreInterval = 1
+	cfg.ThresholdSCfg().StringIndexedFields = nil
+	cfg.ThresholdSCfg().PrefixIndexedFields = nil
+	rS := NewThresholdService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg})
+
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ThresholdProfile{
+			Tenant:  "cgrates.org",
+			ID:      fmt.Sprintf("TH%d", i),
+			MaxHits: 5,
+			Weight:  20.00,
+		}
+		dm.SetThresholdProfile(rPrf, true)
+		ids.Add(rPrf.ID)
+	}
+	rPrf := &ThresholdProfile{
+		Tenant:  "cgrates.org",
+		ID:      "TH21",
+		MaxHits: 5,
+		Weight:  20.00,
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Now().Add(-5 * time.Second),
+		},
+	}
+	dm.SetThresholdProfile(rPrf, true)
+	ids.Add(rPrf.ID)
+	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &ThresholdsArgsProcessEvent{
+		ThresholdIDs: ids.AsSlice(),
+		CGREvent:     &utils.CGREvent{Time: utils.TimePointer(time.Now())},
+	})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mres.unlock()
+	if rPrf.isLocked() {
+		t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+	}
+	if r, err := dm.GetThreshold(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+		t.Errorf("error %s for <%s>", err, rPrf.ID)
+	} else if r.isLocked() {
+		t.Fatalf("Expected Threshold to not be locked %q", rPrf.ID)
+	}
+}
+
+func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	prfs := make([]*ThresholdProfile, 0)
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := &DataDBMock{
+		GetThresholdProfileDrvF: func(tnt, id string) (*ThresholdProfile, error) {
+			if id == "TH1" {
+				return nil, utils.ErrNotImplemented
+			}
+			rPrf := &ThresholdProfile{
+				Tenant:  "cgrates.org",
+				ID:      id,
+				MaxHits: 5,
+				Weight:  20.00,
+			}
+			Cache.Set(utils.CacheThresholds, rPrf.TenantID(), &Threshold{
+				Tenant: rPrf.Tenant,
+				ID:     rPrf.ID,
+			}, nil, true, utils.NonTransactional)
+			prfs = append(prfs, rPrf)
+			return rPrf, nil
+		},
+	}
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ThresholdSCfg().StoreInterval = 1
+	cfg.ThresholdSCfg().StringIndexedFields = nil
+	cfg.ThresholdSCfg().PrefixIndexedFields = nil
+	rS := NewThresholdService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg})
+
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		ids.Add(fmt.Sprintf("TH%d", i))
+	}
+	_, err := rS.matchingThresholdsForEvent("cgrates.org", &ThresholdsArgsProcessEvent{
+		ThresholdIDs: ids.AsSlice(),
+		CGREvent:     new(utils.CGREvent),
+	})
+	if err != utils.ErrNotImplemented {
+		t.Fatalf("Error: %+v", err)
+	}
+	for _, rPrf := range prfs {
+		if rPrf.isLocked() {
+			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+		}
+	}
+
+}
+
+func TestThresholdMatchingThresholdForEventLocks4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	defer func() { Cache = tmp }()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	cfg.ThresholdSCfg().StoreInterval = 1
+	cfg.ThresholdSCfg().StringIndexedFields = nil
+	cfg.ThresholdSCfg().PrefixIndexedFields = nil
+	rS := NewThresholdService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg})
+
+	prfs := make([]*ThresholdProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ThresholdProfile{
+			Tenant:  "cgrates.org",
+			ID:      fmt.Sprintf("TH%d", i),
+			Weight:  20.00,
+			MaxHits: 5,
+		}
+		dm.SetThresholdProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	ids.Add("TH20")
+	mres, err := rS.matchingThresholdsForEvent("cgrates.org", &ThresholdsArgsProcessEvent{
+		ThresholdIDs: ids.AsSlice(),
+		CGREvent:     new(utils.CGREvent),
+	})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defer mres.unlock()
+	for _, rPrf := range prfs {
+		if !rPrf.isLocked() {
+			t.Errorf("Expected profile to be locked %q", rPrf.ID)
+		}
+		if r, err := dm.GetThreshold(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if !r.isLocked() {
+			t.Fatalf("Expected Threshold to be locked %q", rPrf.ID)
+		}
+	}
+
+}
+
+func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+	Cache = NewCacheS(cfg, nil, nil)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector)))
+	cfg.ThresholdSCfg().StoreInterval = 1
+	cfg.ThresholdSCfg().StringIndexedFields = nil
+	cfg.ThresholdSCfg().PrefixIndexedFields = nil
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.DataDbCfg().RmtConns = []string{"test"}
+	cfg.DataDbCfg().Items[utils.CacheThresholds].Remote = true
+	config.SetCgrConfig(cfg)
+	rS := NewThresholdService(dm, cfg,
+		&FilterS{dm: dm, cfg: cfg})
+
+	prfs := make([]*ThresholdProfile, 0)
+	ids := utils.StringSet{}
+	for i := 0; i < 10; i++ {
+		rPrf := &ThresholdProfile{
+			Tenant:  "cgrates.org",
+			ID:      fmt.Sprintf("TH%d", i),
+			Weight:  20.00,
+			MaxHits: 5,
+		}
+		dm.SetThresholdProfile(rPrf, true)
+		prfs = append(prfs, rPrf)
+		ids.Add(rPrf.ID)
+	}
+	dm.RemoveThreshold("cgrates.org", "TH1")
+	_, err := rS.matchingThresholdsForEvent("cgrates.org", &ThresholdsArgsProcessEvent{
+		ThresholdIDs: ids.AsSlice(),
+		CGREvent:     new(utils.CGREvent),
+	})
+	if err != utils.ErrDisconnected {
+		t.Errorf("Error: %+v", err)
+	}
+	for _, rPrf := range prfs {
+		if rPrf.isLocked() {
+			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
+		}
+		if rPrf.ID == "TH1" {
+			continue
+		}
+		if r, err := dm.GetThreshold(rPrf.Tenant, rPrf.ID, true, false, utils.NonTransactional); err != nil {
+			t.Errorf("error %s for <%s>", err, rPrf.ID)
+		} else if r.isLocked() {
+			t.Fatalf("Expected Threshold to not be locked %q", rPrf.ID)
+		}
+	}
+
 }
