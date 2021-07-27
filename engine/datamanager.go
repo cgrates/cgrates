@@ -165,10 +165,14 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
+			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, thresholdProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetThresholdProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			guardian.Guardian.UnguardIDs(lkID)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
+			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, thresholdLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetThreshold(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			guardian.Guardian.UnguardIDs(lkID)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetFilter(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)

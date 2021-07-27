@@ -389,6 +389,19 @@ type ResourceService struct {
 	connMgr         *ConnManager
 }
 
+// Reload stops the backupLoop and restarts it
+func (rS *ResourceService) Reload(ctx *context.Context) {
+	close(rS.stopBackup)
+	<-rS.loopStoped // wait until the loop is done
+	rS.stopBackup = make(chan struct{})
+	go rS.runBackup(ctx)
+}
+
+// StartLoop starts the gorutine with the backup loop
+func (rS *ResourceService) StartLoop(ctx *context.Context) {
+	go rS.runBackup(ctx)
+}
+
 // Shutdown is called to shutdown the service
 func (rS *ResourceService) Shutdown(ctx *context.Context) {
 	utils.Logger.Info("<ResourceS> service shutdown initialized")
@@ -939,17 +952,4 @@ func (rS *ResourceService) V1GetResourceWithConfig(ctx *context.Context, arg *ut
 	}
 
 	return
-}
-
-// Reload stops the backupLoop and restarts it
-func (rS *ResourceService) Reload(ctx *context.Context) {
-	close(rS.stopBackup)
-	<-rS.loopStoped // wait until the loop is done
-	rS.stopBackup = make(chan struct{})
-	go rS.runBackup(ctx)
-}
-
-// StartLoop starts the gorutine with the backup loop
-func (rS *ResourceService) StartLoop(ctx *context.Context) {
-	go rS.runBackup(ctx)
 }
