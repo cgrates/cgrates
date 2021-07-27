@@ -600,7 +600,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 					MetricID: "*sum#~*req.Val",
 				},
 			},
-			ThresholdIDs: []string{"Val1", "Val2"},
+			ThresholdIDs: []string{utils.MetaNone},
 			Blocker:      true,
 			Stored:       true,
 			Weight:       20,

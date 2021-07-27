@@ -371,18 +371,19 @@ func testConfigSSetConfigEEs(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	eporter := map[string]interface{}{
-		"attempts":          1.,
-		"attribute_context": "",
-		"attribute_ids":     []interface{}{},
-		"export_path":       "/var/spool/cgrates/ees",
-		"fields":            []interface{}{},
-		"filters":           []interface{}{},
-		"flags":             []interface{}{},
-		"id":                "*default",
-		"synchronous":       false,
-		"timezone":          "",
-		"type":              "*none",
-		"opts":              map[string]interface{}{},
+		"attempts":            1.,
+		"attribute_context":   "",
+		"attribute_ids":       []interface{}{},
+		"export_path":         "/var/spool/cgrates/ees",
+		"fields":              []interface{}{},
+		"filters":             []interface{}{},
+		"flags":               []interface{}{},
+		"id":                  "*default",
+		"synchronous":         false,
+		"timezone":            "",
+		"type":                "*none",
+		"opts":                map[string]interface{}{},
+		"concurrent_requests": 0.,
 	}
 	exp := map[string]interface{}{
 		"enabled":          true,

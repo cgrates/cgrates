@@ -1184,7 +1184,7 @@ func TestLibstatsaddStatEventNoPass(t *testing.T) {
 			utils.MetaTCD: sm,
 		},
 	}
-	sq.Lock()
+	sq.lock(utils.EmptyString)
 
 	tnt, evID := "cgrates.org", "eventID"
 	filters := &FilterS{
@@ -1215,7 +1215,7 @@ func TestLibstatsaddStatEventNoPass(t *testing.T) {
 		},
 	}
 	err = sq.addStatEvent(tnt, evID, filters, evNm)
-	sq.Unlock()
+	sq.unlock()
 
 	if err != nil {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)

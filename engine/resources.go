@@ -296,22 +296,6 @@ func (rs Resources) resIDsMp() (mp utils.StringSet) {
 	return mp
 }
 
-func (rs Resources) tenantIDs() []string {
-	ids := make([]string, len(rs))
-	for i, r := range rs {
-		ids[i] = r.TenantID()
-	}
-	return ids
-}
-
-func (rs Resources) IDs() []string {
-	ids := make([]string, len(rs))
-	for i, r := range rs {
-		ids[i] = r.ID
-	}
-	return ids
-}
-
 // recordUsage will record the usage in all the resource limits, failing back on errors
 func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
 	var nonReservedIdx int // index of first resource not reserved

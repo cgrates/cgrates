@@ -172,13 +172,14 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
+			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, statQueueProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueuePrefix:
 			tntID := utils.NewTenantID(dataID)
-			// guardian.Guardian.Guard(func() ( _ error) { // lock the get
+			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, statQueueLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-			// return
-			// }, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+dataID)
+			guardian.Guardian.UnguardIDs(lkID)
 		case utils.TimingsPrefix:
 			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:

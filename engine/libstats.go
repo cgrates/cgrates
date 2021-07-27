@@ -23,10 +23,10 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,6 +44,8 @@ type StatQueueProfile struct {
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Weight             float64
 	ThresholdIDs       []string // list of thresholds to be checked after changes
+
+	lkID string // holds the reference towards guardian lock key
 }
 
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -54,6 +56,36 @@ type StatQueueProfileWithAPIOpts struct {
 
 func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
+}
+
+// statQueueProfileLockKey returns the ID used to lock a StatQueueProfile with guardian
+func statQueueProfileLockKey(tnt, id string) string {
+	return utils.ConcatenatedKey(utils.CacheStatQueueProfiles, tnt, id)
+}
+
+// lock will lock the StatQueueProfile using guardian and store the lock within r.lkID
+// if lkID is passed as argument, the lock is considered as executed
+func (sqp *StatQueueProfile) lock(lkID string) {
+	if lkID == utils.EmptyString {
+		lkID = guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			statQueueProfileLockKey(sqp.Tenant, sqp.ID))
+	}
+	sqp.lkID = lkID
+}
+
+// unlock will unlock the StatQueueProfile and clear rp.lkID
+func (sqp *StatQueueProfile) unlock() {
+	if sqp.lkID == utils.EmptyString {
+		return
+	}
+	guardian.Guardian.UnguardIDs(sqp.lkID)
+	sqp.lkID = utils.EmptyString
+}
+
+// isLocked returns the locks status of this StatQueueProfile
+func (sqp *StatQueueProfile) isLocked() bool {
+	return sqp.lkID != utils.EmptyString
 }
 
 type MetricWithFilters struct {
@@ -155,27 +187,45 @@ func NewStatQueue(tnt, id string, metrics []*MetricWithFilters, minItems int) (s
 
 // StatQueue represents an individual stats instance
 type StatQueue struct {
-	lk        sync.RWMutex // protect the elements from within
 	Tenant    string
 	ID        string
 	SQItems   []SQItem
 	SQMetrics map[string]StatMetric
+	lkID      string // ID of the lock used when matching the stat
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
 	ttl       *time.Duration // timeToLeave, picked on each init
 }
 
-// RLock only to implement sync.RWMutex methods
-func (sq *StatQueue) RLock() { sq.lk.RLock() }
+// statQueueLockKey returns the ID used to lock a StatQueue with guardian
+func statQueueLockKey(tnt, id string) string {
+	return utils.ConcatenatedKey(utils.CacheStatQueues, tnt, id)
+}
 
-// RUnlock only to implement sync.RWMutex methods
-func (sq *StatQueue) RUnlock() { sq.lk.RUnlock() }
+// lock will lock the StatQueue using guardian and store the lock within r.lkID
+// if lkID is passed as argument, the lock is considered as executed
+func (sq *StatQueue) lock(lkID string) {
+	if lkID == utils.EmptyString {
+		lkID = guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout,
+			statQueueLockKey(sq.Tenant, sq.ID))
+	}
+	sq.lkID = lkID
+}
 
-// Lock only to implement sync.RWMutex methods
-func (sq *StatQueue) Lock() { sq.lk.Lock() }
+// unlock will unlock the StatQueue and clear r.lkID
+func (sq *StatQueue) unlock() {
+	if sq.lkID == utils.EmptyString {
+		return
+	}
+	guardian.Guardian.UnguardIDs(sq.lkID)
+	sq.lkID = utils.EmptyString
+}
 
-// Unlock only to implement sync.RWMutex methods
-func (sq *StatQueue) Unlock() { sq.lk.Unlock() }
+// isLocked returns the locks status of this StatQueue
+func (sq *StatQueue) isLocked() bool {
+	return sq.lkID != utils.EmptyString
+}
 
 // TenantID will compose the unique identifier for the StatQueue out of Tenant and ID
 func (sq *StatQueue) TenantID() string {
@@ -341,6 +391,24 @@ type StatQueues []*StatQueue
 // Sort is part of sort interface, sort based on Weight
 func (sis StatQueues) Sort() {
 	sort.Slice(sis, func(i, j int) bool { return sis[i].sqPrfl.Weight > sis[j].sqPrfl.Weight })
+}
+
+// unlock will unlock StatQueues part of this slice
+func (sis StatQueues) unlock() {
+	for _, s := range sis {
+		s.unlock()
+		if s.sqPrfl != nil {
+			s.sqPrfl.unlock()
+		}
+	}
+}
+
+func (sis StatQueues) IDs() []string {
+	ids := make([]string, len(sis))
+	for i, s := range sis {
+		ids[i] = s.ID
+	}
+	return ids
 }
 
 // UnmarshalJSON here only to fully support json for StatQueue
