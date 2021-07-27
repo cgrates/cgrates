@@ -302,15 +302,10 @@ func TestVersionCheckVersionsCompareNonNilMsg(t *testing.T) {
 		testcase: "Compare returns non-nil message",
 	}
 
-	experr1 := fmt.Sprintf("Migration needed: please backup cgr data and run : <%s>", "cgr-migrator -exec=*cost_details")
-	experr2 := fmt.Sprintf("Migration needed: please backup cgr data and run : <%s>", "cgr-migrator -exec=*sessions_costs")
+	experr := "Migration needed: please backup cgr data and run :"
 	err := CheckVersions(storage)
 
-	if err == nil || (err.Error() != experr1 && err.Error() != experr2) {
-		if err.Error() == experr1 {
-			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr1, err)
-		} else {
-			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr2, err)
-		}
+	if err == nil || !strings.Contains(err.Error(), experr) {
+		t.Errorf("expected error to be of type: <Migration needed: please backup cgr data and run : ..., \n received: <%+v>", err)
 	}
 }
