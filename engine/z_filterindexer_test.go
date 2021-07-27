@@ -15,11 +15,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"reflect"
-	"testing"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"reflect"
+	"testing"
 )
 
 func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
@@ -125,6 +124,80 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 	}
 	if fltrIDx, err := dm.GetIndexes(utils.CacheAttributeFilterIndexes,
 		"cgrates.org:*any", utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIDx, fltrIDx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))
+	}
+}
+
+func TestFilterIndexesCheckingDynamicPathToNotIndexAsm(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	// set 1 charger profile with different *asm filter to index
+	cghPfr := &ChargerProfile{
+		Tenant: "cgrates.org",
+		ID:     "CHARGER_1",
+		FilterIDs: []string{
+			"*prefix:~*req.DestinationNr:+10227",
+			"*string:~*accounts.RS_ALOC.Available:2",
+			"*string:~*asm.Cost:122.03",
+		},
+		RunID:        "CustomRunID",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+
+	if err := dm.SetChargerProfile(cghPfr, true); err != nil {
+		t.Error(err)
+	}
+
+	expIDx := map[string]utils.StringSet{
+		"*prefix:*req.DestinationNr:+10227": {
+			"CHARGER_1": {},
+		},
+	}
+	if fltrIDx, err := dm.GetIndexes(utils.CacheChargerFilterIndexes,
+		"cgrates.org", utils.EmptyString, true, true); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expIDx, fltrIDx) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))
+	}
+}
+
+func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	// set 1 charger profile with different *libphonenumber filter to index
+	cghPfr := &ChargerProfile{
+		Tenant: "cgrates.org",
+		ID:     "CHARGER_2",
+		FilterIDs: []string{
+			"*prefix:~*req.CGRID:TEST_ID",
+			"*string:~*opts.TotalCost:~*stats.STS_PRF1.*tcc",
+			"*string:~*libphonenumber.<~*req.Destination:1233",
+		},
+		RunID:        "RAW",
+		AttributeIDs: []string{"attr_1"},
+		Weight:       10,
+	}
+
+	if err := dm.SetChargerProfile(cghPfr, true); err != nil {
+		t.Error(err)
+	}
+
+	expIDx := map[string]utils.StringSet{
+		"*prefix:*req.CGRID:TEST_ID": {
+			"CHARGER_2": {},
+		},
+	}
+	if fltrIDx, err := dm.GetIndexes(utils.CacheChargerFilterIndexes,
+		"cgrates.org", utils.EmptyString, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIDx, fltrIDx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))

@@ -401,8 +401,8 @@ func TestHealthIndexThreshold(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestHealthIndexThreshold",
 			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
-				"*string:~*asm.ID:1002",
-				"*suffix:BrokenFilter:Invalid"},
+				"*string:~*asm.ID:1002",         // *asm will not be indexing
+				"*suffix:BrokenFilter:Invalid"}, // static value, won't index
 			MaxHits: 1,
 		},
 	}
@@ -413,7 +413,6 @@ func TestHealthIndexThreshold(t *testing.T) {
 	args := &IndexHealthArgsWith3Ch{}
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*asm.ID:1002":                   {"TestHealthIndexThreshold"},
 			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
 		},
 		BrokenIndexes:  map[string][]string{},
@@ -436,7 +435,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 		"*string:*req.Destination:123": { // index is valid but the obj does not exist
 			"InexistingThreshold": {},
 		},
-    }
+	}
 
 	// we will set manually some indexes that points to an nil object or index is valid but the obj is missing
 	if err := dm.SetIndexes(utils.CacheThresholdFilterIndexes, "cgrates.org",
@@ -446,10 +445,9 @@ func TestHealthIndexThreshold(t *testing.T) {
 	exp = &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:InexistingThreshold"},
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*asm.ID:1002":                   {"TestHealthIndexThreshold"},
 			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
 		},
-		BrokenIndexes:  map[string][]string{
+		BrokenIndexes: map[string][]string{
 			"cgrates.org:*prefix:req.InvalidIdx:10": {"TestHealthIndexThreshold"},
 		},
 		MissingFilters: map[string][]string{},
@@ -481,10 +479,9 @@ func TestHealthIndexThreshold(t *testing.T) {
 	exp = &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:InexistingThreshold"},
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*asm.ID:1002":                   {"TestHealthIndexThreshold"},
 			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
 		},
-		BrokenIndexes:  map[string][]string{
+		BrokenIndexes: map[string][]string{
 			"cgrates.org:*prefix:req.InvalidIdx:10": {"TestHealthIndexThreshold"},
 		},
 		MissingFilters: map[string][]string{
