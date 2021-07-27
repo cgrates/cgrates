@@ -78,7 +78,6 @@ func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps
 	}
-
 	// costIncrement
 	var costIcrm *utils.CostIncrement
 	if costIcrm, err = costIncrement(ctx, cB.blnCfg.CostIncrements,
