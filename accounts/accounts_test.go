@@ -437,8 +437,10 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
 	}
 
-/*
 	// get usage from *usage
+	//firstly reset the account
+	accntsPrf[0].Account.Balances["ConcreteBal1"].Units = &utils.Decimal{decimal.New(90, 0)}
+	accnts = NewAccountS(cfg, fltr, nil, dm)
 	cgrEvent = &utils.CGREvent{
 		ID:     "TEST_EVENT_get_usage",
 		Tenant: "cgrates.org",
@@ -452,11 +454,9 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
 		cgrEvent, false, false); err != nil {
 		t.Error(err)
-	} else if rcv.Equals(evChExp) {
+	} else if !rcv.Equals(evChExp) {
 		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
 	}
-
- */
 }
 
 func TestAccountsDebit(t *testing.T) {
