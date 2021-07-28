@@ -23,7 +23,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -354,5 +356,126 @@ func TestHttpJsonMapComposeHeader(t *testing.T) {
 	errExpect := "inline parse error for string: <*wrong-type>"
 	if _, err := httpEE.composeHeader(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
+	}
+}
+
+func TestHttpJsonMapSync(t *testing.T) {
+	//Create new exporter
+	cgrCfg := config.NewDefaultCGRConfig()
+	var cfgIdx int
+	cfgIdx = 0
+
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
+		cgrCfg.GeneralCfg().DefaultTimezone))
+	if err != nil {
+		t.Error(err)
+	}
+
+	//Create an event
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+	}
+	var wg1 sync.WaitGroup
+
+	wg1.Add(3)
+
+	test := make(chan struct{})
+	go func() {
+		wg1.Wait()
+		close(test)
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		// fmt.Println("2")
+		time.Sleep(3 * time.Second)
+		wg1.Done()
+	}))
+
+	defer ts.Close()
+
+	cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath = ts.URL
+
+	exp, err := NewHTTPjsonMapEE(cgrCfg, cfgIdx, new(engine.FilterS), dc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i := 0; i < 3; i++ {
+		go exp.ExportEvent(cgrEvent)
+	}
+	// exp.ExportEvent(cgrEvent)
+
+	select {
+	case <-test:
+		return
+	case <-time.After(4 * time.Second):
+		t.Error("Can't asynchronously export events")
+	}
+}
+
+func TestHttpJsonMapSyncLimit(t *testing.T) {
+	//Create new exporter
+	cgrCfg := config.NewDefaultCGRConfig()
+	var cfgIdx int
+	cfgIdx = 0
+
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
+		cgrCfg.GeneralCfg().DefaultTimezone))
+	if err != nil {
+		t.Error(err)
+	}
+
+	//Create an event
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+	}
+	var wg1 sync.WaitGroup
+
+	wg1.Add(3)
+
+	test := make(chan struct{})
+	go func() {
+		wg1.Wait()
+		close(test)
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		// fmt.Println("2")
+		time.Sleep(3 * time.Second)
+		wg1.Done()
+	}))
+
+	defer ts.Close()
+
+	cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath = ts.URL
+
+	exp, err := NewHTTPjsonMapEE(cgrCfg, cfgIdx, new(engine.FilterS), dc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i := 0; i < 3; i++ {
+		go exp.ExportEvent(cgrEvent)
+	}
+	// exp.ExportEvent(cgrEvent)
+
+	select {
+	case <-test:
+		t.Error("Should not have been possible to asynchronously export events")
+	case <-time.After(4 * time.Second):
+		return
 	}
 }
