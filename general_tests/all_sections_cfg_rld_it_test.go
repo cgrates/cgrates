@@ -1027,20 +1027,170 @@ func testSectConfigSReloadActions(t *testing.T) {
 	} else if replyRld != utils.OK {
 		t.Errorf("Expected OK received: %+v", replyRld)
 	}
-	// var reply string
-	// if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
-	// 	Tenant: "cgrates.org",
-	// 	Config: `{"actions":{"enabled":true,"keys":["testKey"]}}`,
-	// }, &reply); err != nil {
-	// 	t.Error(err)
-	// } else if reply != utils.OK {
-	// 	t.Errorf("Expected OK received: %s", reply)
-	// }
-	cfgStr := "{\"actions\":{\"enabled\":true,\"keys\":[\"testKey\"]}}"
+	var reply string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+		Tenant: "cgrates.org",
+		Config: `"actions": { 
+			"enabled": false, 
+			"cdrs_conns": [],
+			"ees_conns": [], 
+			"thresholds_conns": [], 
+			"stats_conns": [],
+			"accounts_conns": [], 
+			"tenants": [], 
+			"indexed_selects": true, 
+			//"string_indexed_fields": [],		
+			"prefix_indexed_fields": [], 
+			"suffix_indexed_fields": [], 
+			"nested_fields": false, 
+			"dynaprepaid_actionprofile": [],
+		},`,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	cfgStr := `"actions": { 
+		"enabled": false, 
+		"cdrs_conns": [],
+		"ees_conns": [], 
+		"thresholds_conns": [], 
+		"stats_conns": [],
+		"accounts_conns": [], 
+		"tenants": [], 
+		"indexed_selects": true, 
+		//"string_indexed_fields": [],		
+		"prefix_indexed_fields": [], 
+		"suffix_indexed_fields": [], 
+		"nested_fields": false, 
+		"dynaprepaid_actionprofile": [],
+	},`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
 		Sections: []string{config.APIBanJSON},
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if cfgStr != rpl {
+		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+}
+
+func testSectConfigSReloadAccounts(t *testing.T) {
+	var replyRld string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
+		Tenant:  "cgrates.org",
+		Section: config.AccountSJSON,
+	}, &replyRld); err != nil {
+		t.Error(err)
+	} else if replyRld != utils.OK {
+		t.Errorf("Expected OK received: %+v", replyRld)
+	}
+	var reply string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+		Tenant: "cgrates.org",
+		Config: `"accounts": { 
+			"enabled": false, 
+			"indexed_selects": true, 
+			"attributes_conns": [],
+			"rates_conns": [], 
+			"thresholds_conns": [], 
+			//"string_indexed_fields": [],			
+			"prefix_indexed_fields": [], 
+			"suffix_indexed_fields": [], 
+			"nested_fields": false, 
+			"max_iterations": 1000, 
+			"max_usage": "72h", 
+		},`,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	cfgStr := `"accounts": { 
+		"enabled": false, 
+		"indexed_selects": true, 
+		"attributes_conns": [],
+		"rates_conns": [], 
+		"thresholds_conns": [], 
+		//"string_indexed_fields": [],			
+		"prefix_indexed_fields": [], 
+		"suffix_indexed_fields": [], 
+		"nested_fields": false, 
+		"max_iterations": 1000, 
+		"max_usage": "72h", 
+	},`
+	var rpl string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+		Tenant:   "cgrates.org",
+		Sections: []string{config.AccountSJSON},
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if cfgStr != rpl {
+		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+}
+
+func testSectConfigSReloadConfigDB(t *testing.T) {
+	var replyRld string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
+		Tenant:  "cgrates.org",
+		Section: config.ConfigDBJSON,
+	}, &replyRld); err != nil {
+		t.Error(err)
+	} else if replyRld != utils.OK {
+		t.Errorf("Expected OK received: %+v", replyRld)
+	}
+	var reply string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+		Tenant: "cgrates.org",
+		Config: `"config_db": { 
+			"db_type": "*internal", 
+			"db_host": "", 
+			"db_port": 0,
+			"db_name": "", 
+			"db_user": "",
+			"db_password": "", 
+			"opts": {
+				"redisSentinel": "", 
+				"redisCluster": false, 
+				"redisClusterSync": "5s", 
+				"redisClusterOndownDelay": "0", 
+				"mongoQueryTimeout": "10s", 
+				"redisTLS": false, tion
+				"redisClientCertificate": "", 
+				"redisClientKey": "", 
+				"redisCACertificate": "", 
+			}
+		},`,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	cfgStr := `"config_db": { 
+		"db_type": "*internal", 
+		"db_host": "", 
+		"db_port": 0,
+		"db_name": "", 
+		"db_user": "",
+		"db_password": "", 
+		"opts": {
+			"redisSentinel": "", 
+			"redisCluster": false, 
+			"redisClusterSync": "5s", 
+			"redisClusterOndownDelay": "0", 
+			"mongoQueryTimeout": "10s", 
+			"redisTLS": false, tion
+			"redisClientCertificate": "", 
+			"redisClientKey": "", 
+			"redisCACertificate": "", 
+		}
+	},`
+	var rpl string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+		Tenant:   "cgrates.org",
+		Sections: []string{config.ConfigDBJSON},
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if cfgStr != rpl {
