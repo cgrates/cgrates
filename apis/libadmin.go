@@ -37,19 +37,25 @@ func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cach
 		return
 	case utils.MetaReload:
 		method = utils.CacheSv1ReloadCache
-		if args, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters, opts); err != nil {
+		var argCache map[string][]string
+		if argCache, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters); err != nil {
 			return
 		}
+		args = utils.NewAttrReloadCacheWithOptsFromMap(argCache, tnt, opts)
 	case utils.MetaLoad:
 		method = utils.CacheSv1LoadCache
-		if args, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters, opts); err != nil {
+		var argCache map[string][]string
+		if argCache, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters); err != nil {
 			return
 		}
+		args = utils.NewAttrReloadCacheWithOptsFromMap(argCache, tnt, opts)
 	case utils.MetaRemove:
 		method = utils.CacheSv1RemoveItems
-		if args, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters, opts); err != nil {
+		var argCache map[string][]string
+		if argCache, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters); err != nil {
 			return
 		}
+		args = utils.NewAttrReloadCacheWithOptsFromMap(argCache, tnt, opts)
 	case utils.MetaClear:
 		cacheIDs := make([]string, 1, 3)
 		cacheIDs[0] = cacheID
@@ -79,30 +85,24 @@ func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cach
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string, opts map[string]interface{}) (rpl *utils.AttrReloadCacheWithAPIOpts, err error) {
-	rpl = &utils.AttrReloadCacheWithAPIOpts{
-		Tenant: tnt,
-		ArgsCache: map[string][]string{
-			utils.CacheInstanceToArg[cacheID]: {itemID},
-		},
-		APIOpts: opts,
-	}
+func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string) (argCache map[string][]string, err error) {
+	argCache = map[string][]string{cacheID: {itemID}}
 	switch cacheID { // add the items to the cache reload
 	case utils.CacheThresholdProfiles:
-		rpl.ArgsCache[utils.ThresholdIDs] = []string{itemID}
+		argCache[utils.CacheThresholds] = []string{itemID}
 	case utils.CacheResourceProfiles:
-		rpl.ArgsCache[utils.ResourceIDs] = []string{itemID}
+		argCache[utils.CacheResources] = []string{itemID}
 	case utils.CacheStatQueueProfiles:
-		rpl.ArgsCache[utils.StatsQueueIDs] = []string{itemID}
+		argCache[utils.CacheStatQueues] = []string{itemID}
 	}
 	if filterIDs == nil { // in case we remove a profile we do not need to reload the indexes
 		return
 	}
 	// populate the indexes
-	idxCacheID := utils.CacheInstanceToArg[utils.CacheInstanceToCacheIndex[cacheID]]
+	idxCacheID := utils.CacheInstanceToCacheIndex[cacheID]
 	if len(*filterIDs) == 0 { // in case we do not have any filters reload the *none filter indexes
 		indxID := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
-		rpl.ArgsCache[idxCacheID] = []string{utils.ConcatenatedKey(tnt, indxID)}
+		argCache[idxCacheID] = []string{utils.ConcatenatedKey(tnt, indxID)}
 		return
 	}
 	indxIDs := make([]string, 0, len(*filterIDs))
@@ -131,9 +131,9 @@ func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, item
 			}
 		}
 	}
-	rpl.ArgsCache[idxCacheID] = make([]string, len(indxIDs))
+	argCache[idxCacheID] = make([]string, len(indxIDs))
 	for i, indxID := range indxIDs {
-		rpl.ArgsCache[idxCacheID][i] = utils.ConcatenatedKey(tnt, indxID)
+		argCache[idxCacheID][i] = utils.ConcatenatedKey(tnt, indxID)
 	}
 	return
 }
@@ -142,13 +142,7 @@ func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, item
 func (admS *AdminSv1) callCacheForRemoveIndexes(ctx *context.Context, cacheopt string, tnt, cacheID string,
 	itemIDs []string, opts map[string]interface{}) (err error) {
 	var reply, method string
-	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
-		Tenant: tnt,
-		ArgsCache: map[string][]string{
-			utils.CacheInstanceToArg[cacheID]: itemIDs,
-		},
-		APIOpts: opts,
-	}
+	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -173,11 +167,7 @@ func (admS *AdminSv1) callCacheForRemoveIndexes(ctx *context.Context, cacheopt s
 func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt, tnt string,
 	cacheItems map[string][]string, opts map[string]interface{}) (err error) {
 	var reply, method string
-	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
-		Tenant:    tnt,
-		ArgsCache: cacheItems,
-		APIOpts:   opts,
-	}
+	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(cacheItems, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
@@ -191,7 +181,7 @@ func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt,
 		method = utils.CacheSv1Clear
 		cacheIDs := make([]string, 0, len(cacheItems))
 		for idx := range cacheItems {
-			cacheIDs = append(cacheIDs, utils.ArgCacheToInstance[idx])
+			cacheIDs = append(cacheIDs, idx)
 		}
 		args = &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   tnt,
@@ -216,31 +206,13 @@ func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs
 		return
 	case utils.MetaReload:
 		method = utils.CacheSv1ReloadCache
-		args = &utils.AttrReloadCacheWithAPIOpts{
-			Tenant: tnt,
-			ArgsCache: map[string][]string{
-				utils.CacheInstanceToArg[cacheID]: itemIDs,
-			},
-			APIOpts: opts,
-		}
+		args = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
 	case utils.MetaLoad:
 		method = utils.CacheSv1LoadCache
-		args = &utils.AttrReloadCacheWithAPIOpts{
-			Tenant: tnt,
-			ArgsCache: map[string][]string{
-				utils.CacheInstanceToArg[cacheID]: itemIDs,
-			},
-			APIOpts: opts,
-		}
+		args = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
 	case utils.MetaRemove:
 		method = utils.CacheSv1RemoveItems
-		args = &utils.AttrReloadCacheWithAPIOpts{
-			Tenant: tnt,
-			ArgsCache: map[string][]string{
-				utils.CacheInstanceToArg[cacheID]: itemIDs,
-			},
-			APIOpts: opts,
-		}
+		args = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
 	case utils.MetaClear:
 		method = utils.CacheSv1Clear
 		args = &utils.AttrCacheIDsWithAPIOpts{
@@ -289,10 +261,8 @@ func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, flt
 	}
 
 	for k := range rcvIndx {
-		if cField, has := utils.CacheInstanceToArg[k]; has {
-			for _, indx := range indxIDs {
-				args[cField] = append(args[cField], utils.ConcatenatedKey(tnt, indx))
-			}
+		for _, indx := range indxIDs {
+			args[k] = append(args[k], utils.ConcatenatedKey(tnt, indx))
 		}
 	}
 	return args, nil
@@ -302,11 +272,7 @@ func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, flt
 func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, ctx *context.Context, cacheopt, dftCache, tnt string,
 	argC map[string][]string, opts map[string]interface{}) (err error) {
 	var reply, method string
-	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
-		Tenant:    tnt,
-		ArgsCache: argC,
-		APIOpts:   opts,
-	}
+	var args interface{} = utils.NewAttrReloadCacheWithOptsFromMap(argC, tnt, opts)
 	switch utils.FirstNonEmpty(cacheopt, dftCache) {
 	case utils.MetaNone:
 		return
@@ -319,7 +285,7 @@ func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, ctx *c
 	case utils.MetaClear:
 		cacheIDs := make([]string, 0, len(argC))
 		for k := range argC {
-			cacheIDs = append(cacheIDs, utils.ArgCacheToInstance[k])
+			cacheIDs = append(cacheIDs, k)
 		}
 		method = utils.CacheSv1Clear
 		args = &utils.AttrCacheIDsWithAPIOpts{

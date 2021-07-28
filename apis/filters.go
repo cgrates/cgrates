@@ -32,7 +32,7 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
 	}
 	tntID := arg.TenantID()
-	argC := map[string][]string{utils.FilterIDs: {tntID}}
+	argC := map[string][]string{utils.CacheFilters: {tntID}}
 	if fltr, err := adms.dm.GetFilter(ctx, arg.Filter.Tenant, arg.Filter.ID, true, false, utils.NonTransactional); err != nil {
 		if err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
@@ -121,7 +121,7 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 	if err := callCacheForFilter(adms.connMgr, adms.cfg.AdminSCfg().CachesConns, ctx,
 		utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]),
 		adms.cfg.GeneralCfg().DefaultCaching,
-		arg.Tenant, map[string][]string{utils.FilterIDs: {utils.ConcatenatedKey(tnt, arg.ID)}}, arg.APIOpts); err != nil {
+		arg.Tenant, map[string][]string{utils.CacheFilters: {utils.ConcatenatedKey(tnt, arg.ID)}}, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

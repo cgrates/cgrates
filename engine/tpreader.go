@@ -933,20 +933,20 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 
 	//compose Reload Cache argument
 	cacheArgs := map[string][]string{
-		utils.ResourceProfileIDs:   rspIDs,
-		utils.ResourceIDs:          rspIDs,
-		utils.StatsQueueIDs:        stqpIDs,
-		utils.StatsQueueProfileIDs: stqpIDs,
-		utils.ThresholdIDs:         trspfIDs,
-		utils.ThresholdProfileIDs:  trspfIDs,
-		utils.FilterIDs:            flrIDs,
-		utils.RouteProfileIDs:      routeIDs,
-		utils.AttributeProfileIDs:  apfIDs,
-		utils.ChargerProfileIDs:    chargerIDs,
-		utils.DispatcherProfileIDs: dppIDs,
-		utils.DispatcherHostIDs:    dphIDs,
-		utils.RateProfileIDs:       ratePrfIDs,
-		utils.ActionProfileIDs:     actionPrfIDs,
+		utils.CacheResourceProfiles:   rspIDs,
+		utils.CacheResources:          rspIDs,
+		utils.CacheStatQueues:         stqpIDs,
+		utils.CacheStatQueueProfiles:  stqpIDs,
+		utils.CacheThresholds:         trspfIDs,
+		utils.CacheThresholdProfiles:  trspfIDs,
+		utils.CacheFilters:            flrIDs,
+		utils.CacheRouteProfiles:      routeIDs,
+		utils.CacheAttributeProfiles:  apfIDs,
+		utils.CacheChargerProfiles:    chargerIDs,
+		utils.CacheDispatcherProfiles: dppIDs,
+		utils.CacheDispatcherHosts:    dphIDs,
+		utils.CacheRateProfiles:       ratePrfIDs,
+		utils.CacheActionProfiles:     actionPrfIDs,
 	}
 
 	// verify if we need to clear indexes
@@ -1006,17 +1006,8 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 
 // CallCache call the cache reload after data load
 func CallCache(connMgr *ConnManager, ctx *context.Context, cacheConns []string, caching string, args map[string][]string, cacheIDs []string, opts map[string]interface{}, verbose bool, tenant string) (err error) {
-	for k, v := range args {
-		if len(v) == 0 {
-			delete(args, k)
-		}
-	}
 	var method, reply string
-	var cacheArgs interface{} = &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:   opts,
-		ArgsCache: args,
-		Tenant:    tenant,
-	}
+	var cacheArgs interface{} = utils.NewAttrReloadCacheWithOptsFromMap(args, tenant, opts)
 	switch caching {
 	case utils.MetaNone:
 		return

@@ -289,11 +289,9 @@ func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 
 func (chS *CacheS) V1RemoveItems(args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) (err error) {
-	for key, ids := range args.ArgsCache {
-		if cacheID, has := utils.ArgCacheToInstance[key]; has {
-			for _, id := range ids {
-				chS.tCache.Remove(cacheID, id, true, utils.NonTransactional)
-			}
+	for cacheID, ids := range args.Map() {
+		for _, id := range ids {
+			chS.tCache.Remove(cacheID, id, true, utils.NonTransactional)
 		}
 	}
 	*reply = utils.OK
@@ -365,8 +363,9 @@ func (chS *CacheS) V1LoadCache(ctx *context.Context, attrs *utils.AttrReloadCach
 }
 
 func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs *utils.AttrReloadCacheWithAPIOpts, reply *string, mustBeCached bool) (err error) {
-	for key, ids := range attrs.ArgsCache {
-		if prfx, has := utils.ArgCacheToPrefix[key]; has {
+	argCache := attrs.Map()
+	for key, ids := range argCache {
+		if prfx, has := utils.CacheInstanceToPrefix[key]; has {
 			if err = chS.dm.CacheDataFromDB(ctx, prfx, ids, mustBeCached); err != nil {
 				return
 			}
@@ -381,7 +380,7 @@ func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs *utils.AttrReload
 		err = nil
 		loadIDs = make(map[string]int64)
 	}
-	for key, val := range populateCacheLoadIDs(loadIDs, attrs.ArgsCache) {
+	for key, val := range populateCacheLoadIDs(loadIDs, argCache) {
 		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
@@ -393,8 +392,8 @@ func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs *utils.AttrReload
 func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (cacheLoadIDs map[string]int64) {
 	cacheLoadIDs = make(map[string]int64)
 	//based on IDs of each type populate cacheLoadIDs and add into cache
-	for key, ids := range attrs {
-		if inst, has := utils.ArgCacheToInstance[key]; has && len(ids) != 0 {
+	for inst, ids := range attrs {
+		if len(ids) != 0 {
 			cacheLoadIDs[inst] = loadIDs[inst]
 		}
 	}

@@ -1197,13 +1197,9 @@ func TestLoadersLoad(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	loaderCfg := &config.LoaderSCfg{
-		ID:      "LoaderID",
-		Enabled: true,
-		Tenant: config.RSRParsers{
-			{
-				Rules: "cgrates.org",
-			},
-		},
+		ID:             "LoaderID",
+		Enabled:        true,
+		Tenant:         "cgrates.org",
 		RunDelay:       1 * time.Millisecond,
 		LockFileName:   "lockFileName",
 		FieldSeparator: ";",

@@ -372,9 +372,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 
 	//remove all items
 	argsRemove := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.AttributeProfileIDs: {"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
-		},
+		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
 	}
 	var replyRem string
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1RemoveItems,
@@ -393,9 +391,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 	//reload cache
 	var reply string
 	argsReload := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.AttributeProfileIDs: {"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
-		},
+		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
 	}
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1LoadCache,
 		argsReload, &reply); err != nil {
