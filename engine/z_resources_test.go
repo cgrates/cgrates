@@ -6091,3 +6091,347 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 	}
 
 }
+
+func TestResourcesLockUnlockResourceProfiles(t *testing.T) {
+	rp := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "rsPrf",
+		Limit:             10,
+		AllocationMessage: "Approved",
+		Weight:            10,
+		ThresholdIDs:      []string{utils.MetaNone},
+	}
+
+	//lock profile with empty lkID parameter
+	rp.lock(utils.EmptyString)
+
+	if !rp.isLocked() {
+		t.Fatal("expected profile to be locked")
+	} else if rp.lkID == utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be non-empty")
+	}
+
+	//unlock previously locked profile
+	rp.unlock()
+
+	if rp.isLocked() {
+		t.Fatal("expected profile to be unlocked")
+	} else if rp.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+
+	//unlock an already unlocked profile - nothing happens
+	rp.unlock()
+
+	if rp.isLocked() {
+		t.Fatal("expected profile to be unlocked")
+	} else if rp.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+}
+
+func TestResourcesLockUnlockResources(t *testing.T) {
+	rs := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "rsPrf",
+	}
+
+	//lock resource with empty lkID parameter
+	rs.lock(utils.EmptyString)
+
+	if !rs.isLocked() {
+		t.Fatal("expected resource to be locked")
+	} else if rs.lkID == utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be non-empty")
+	}
+
+	//unlock previously locked resource
+	rs.unlock()
+
+	if rs.isLocked() {
+		t.Fatal("expected resource to be unlocked")
+	} else if rs.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+
+	//unlock an already unlocked resource - nothing happens
+	rs.unlock()
+
+	if rs.isLocked() {
+		t.Fatal("expected resource to be unlocked")
+	} else if rs.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+}
+
+func TestResourcesRunBackupStoreIntervalLessThanZero(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = -1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	rS := &ResourceService{
+		dm:              dm,
+		storedResources: make(utils.StringSet),
+		cgrcfg:          cfg,
+		filterS:         filterS,
+		loopStopped:     make(chan struct{}, 1),
+		stopBackup:      make(chan struct{}),
+	}
+
+	rS.runBackup(context.Background())
+
+	if len(rS.loopStopped) != 1 {
+		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	}
+}
+
+func TestResourcesRunBackupStop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	rS := &ResourceService{
+		dm: dm,
+		storedResources: utils.StringSet{
+			"Res1": struct{}{},
+		},
+		cgrcfg:      cfg,
+		filterS:     filterS,
+		loopStopped: make(chan struct{}, 1),
+		stopBackup:  make(chan struct{}),
+	}
+
+	value := &Resource{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "Res1",
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheResources, "Res1", value, nil, true,
+		utils.NonTransactional)
+
+	exp := &Resource{
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "Res1",
+	}
+
+	go func() {
+		time.Sleep(9 * time.Millisecond)
+		close(rS.stopBackup)
+		// rS.stopBackup <- struct{}{}
+	}()
+	rS.runBackup(context.Background())
+
+	if rcv, err := rS.dm.GetResource(context.Background(), "cgrates.org", "Res1", true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	if len(rS.loopStopped) != 1 {
+		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	}
+}
+
+func TestResourcesReload(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	rS := &ResourceService{
+		dm:          dm,
+		filterS:     filterS,
+		stopBackup:  make(chan struct{}),
+		loopStopped: make(chan struct{}, 1),
+		cgrcfg:      cfg,
+	}
+	rS.loopStopped <- struct{}{}
+	rS.Reload(context.Background())
+	close(rS.stopBackup)
+}
+
+func TestResourcesStartLoop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = -1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	rS := &ResourceService{
+		dm:          dm,
+		filterS:     filterS,
+		stopBackup:  make(chan struct{}),
+		loopStopped: make(chan struct{}, 1),
+		cgrcfg:      cfg,
+	}
+
+	rS.StartLoop(context.Background())
+	time.Sleep(10 * time.Millisecond)
+
+	if len(rS.loopStopped) != 1 {
+		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(rS.loopStopped))
+	}
+}
+
+// func TestResourcesMatchingResourcesForEvent2(t *testing.T) {
+// 	tmp := Cache
+// 	tmpC := config.CgrConfig()
+// 	defer func() {
+// 		Cache = tmp
+// 		config.SetCgrConfig(tmpC)
+// 	}()
+
+// 	Cache.Clear(nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.CacheCfg().ReplicationConns = []string{"test"}
+// 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
+// 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+// 	config.SetCgrConfig(cfg)
+// 	data := NewInternalDB(nil, nil, true)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+// 	Cache = NewCacheS(cfg, dm, nil)
+
+// 	fltrs := NewFilterS(cfg, nil, dm)
+
+// 	rsPrf := &ResourceProfile{
+// 		Tenant:            "cgrates.org",
+// 		ID:                "RES1",
+// 		FilterIDs:         []string{"*string:~*req.Account:1001"},
+// 		ThresholdIDs:      []string{utils.MetaNone},
+// 		AllocationMessage: "Approved",
+// 		Weight:            10,
+// 		Limit:             10,
+// 		UsageTTL:          time.Minute,
+// 		Stored:            true,
+// 	}
+
+// 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+
+// 	rS := NewResourceService(dm, cfg, fltrs, connMgr)
+// 	ev := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TestMatchingResourcesForEvent",
+// 		Event: map[string]interface{}{
+// 			utils.AccountField: "1001",
+// 		},
+// 		APIOpts: map[string]interface{}{},
+// 	}
+
+// 	Cache.SetWithoutReplicate(utils.CacheEventResources, ev.ID, utils.StringSet{
+// 		"RES1": struct{}{},
+// 	}, nil, true, utils.NonTransactional)
+// 	_, err = rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID, utils.DurationPointer(10*time.Second))
+// 	fmt.Println(err)
+// }
+
+func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+
+	rS := NewResourceService(dm, cfg, fltrs, connMgr)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestMatchingResourcesForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	if rcv, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
+		utils.DurationPointer(10*time.Second)); err == nil || err.Error() != utils.ErrDisconnected.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
+	} else if rcv != nil {
+		t.Errorf("expected nil, received: <%+v>", rcv)
+	}
+}
+
+func TestResourcesMatchingResourcesForEventFinalFinalCacheSetErr(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+		Stored:            true,
+	}
+
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rS := NewResourceService(dm, cfg, fltrs, connMgr)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestMatchingResourcesForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	exp := &Resource{
+		Tenant: "cgrates.org",
+		rPrf:   rsPrf,
+		ID:     "RES1",
+		Usages: make(map[string]*ResourceUsage),
+		ttl:    utils.DurationPointer(10 * time.Second),
+		dirty:  utils.BoolPointer(false),
+	}
+
+	if rcv, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
+		utils.DurationPointer(10*time.Second)); err == nil || err.Error() != utils.ErrDisconnected.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
+	} else if !reflect.DeepEqual(rcv[0], exp) {
+		t.Errorf("expected: <%+v>, received: <%+v>", exp, rcv[0])
+	} else if rcv[0].isLocked() {
+		t.Error("expected resource to be unlocked")
+	} else if rcv[0].lkID != utils.EmptyString {
+		t.Error("expected struct field \"lkID\" to be empty")
+	}
+}
