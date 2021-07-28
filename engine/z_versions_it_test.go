@@ -21,6 +21,7 @@ package engine
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os/exec"
 	"path"
@@ -226,7 +227,7 @@ func testVersion(t *testing.T) {
 }
 
 func testVersionsWithEngine(t *testing.T) {
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -262,7 +263,7 @@ func testUpdateVersionsAccounts(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -282,7 +283,7 @@ func testUpdateVersionsActionPlans(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -302,7 +303,7 @@ func testUpdateVersionsActionTriggers(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -322,7 +323,7 @@ func testUpdateVersionsActions(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -342,7 +343,7 @@ func testUpdateVersionsChargers(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -362,7 +363,7 @@ func testUpdateVersionsDestinations(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -381,7 +382,7 @@ func testUpdateVersionsAttributes(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -401,7 +402,7 @@ func testUpdateVersionsDispatchers(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -421,7 +422,7 @@ func testUpdateVersionsLoadIDs(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -441,7 +442,7 @@ func testUpdateVersionsRQF(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -461,7 +462,7 @@ func testUpdateVersionsRatingPlan(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -481,7 +482,7 @@ func testUpdateVersionsRatingProfile(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -501,7 +502,7 @@ func testUpdateVersionsResource(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -521,7 +522,7 @@ func testUpdateVersionsReverseDestinations(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -541,7 +542,7 @@ func testUpdateVersionsRoutes(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -561,7 +562,7 @@ func testUpdateVersionsSharedGroups(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -581,7 +582,7 @@ func testUpdateVersionsStats(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -601,7 +602,7 @@ func testUpdateVersionsSubscribers(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -621,7 +622,7 @@ func testUpdateVersionsThresholds(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -641,7 +642,7 @@ func testUpdateVersionsTiming(t *testing.T) {
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -662,7 +663,7 @@ func testUpdateVersionsCostDetails(t *testing.T) {
 	if err := storageDb.SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -682,7 +683,7 @@ func testUpdateVersionsSessionSCosts(t *testing.T) {
 	if err := storageDb.SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -702,7 +703,7 @@ func testUpdateVersionsCDRs(t *testing.T) {
 	if err := storageDb.SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
