@@ -21,7 +21,9 @@ package ees
 import (
 	"encoding/json"
 	"reflect"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -355,4 +357,138 @@ func TestPosterJsonMapExportEvent3(t *testing.T) {
 		t.Errorf("Expected %q but received %q", dcExpect, pstrEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 	pstrEE.OnEvicted("test", "test")
+}
+
+type mockPoster struct {
+	wg *sync.WaitGroup
+}
+
+func (mp mockPoster) Post(body []byte, key string) error {
+	// resp, err := http.Get(mp.url)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer resp.Body.Close()
+	time.Sleep(3 * time.Second)
+	mp.wg.Done()
+	return nil
+}
+
+func (mockPoster) Close() {
+	return
+}
+
+func TestPosterJsonMapSync(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	var cfgIdx int
+	cfgIdx = 0
+
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
+		cgrCfg.GeneralCfg().DefaultTimezone))
+	if err != nil {
+		t.Error(err)
+	}
+
+	//Create an event
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+	}
+
+	var wg1 = &sync.WaitGroup{}
+
+	wg1.Add(3)
+
+	test := make(chan struct{})
+	go func() {
+		wg1.Wait()
+		close(test)
+	}()
+
+	mckPoster := mockPoster{
+		wg: wg1,
+	}
+	exp := &PosterJSONMapEE{
+		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg:  cgrCfg,
+		cfgIdx:  cfgIdx,
+		filterS: new(engine.FilterS),
+		poster:  mckPoster,
+		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+	}
+
+	for i := 0; i < 3; i++ {
+		go exp.ExportEvent(cgrEvent)
+	}
+
+	select {
+	case <-test:
+		return
+	case <-time.After(4 * time.Second):
+		t.Error("Can't asynchronously export events")
+	}
+}
+
+func TestPosterJsonMapSyncLimit(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	var cfgIdx int
+	cfgIdx = 0
+
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
+		cgrCfg.GeneralCfg().DefaultTimezone))
+	if err != nil {
+		t.Error(err)
+	}
+
+	//Create an event
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+	}
+
+	var wg1 = &sync.WaitGroup{}
+
+	wg1.Add(3)
+
+	test := make(chan struct{})
+	go func() {
+		wg1.Wait()
+		close(test)
+	}()
+
+	mckPoster := mockPoster{
+		wg: wg1,
+	}
+	exp := &PosterJSONMapEE{
+		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg:  cgrCfg,
+		cfgIdx:  cfgIdx,
+		filterS: new(engine.FilterS),
+		poster:  mckPoster,
+		dc:      dc,
+		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+	}
+
+	for i := 0; i < 3; i++ {
+		go exp.ExportEvent(cgrEvent)
+	}
+
+	select {
+	case <-test:
+		t.Error("Should not have been possible to asynchronously export events")
+	case <-time.After(4 * time.Second):
+		return
+	}
 }
