@@ -3227,11 +3227,9 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"AttributeProfileIDs": {"cgrates.org:attributesID"},
-		},
+		APIOpts:             nil,
+		Tenant:              "",
+		AttributeProfileIDs: []string{"cgrates.org:attributesID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3278,16 +3276,10 @@ func TestStoreLoadedDataResources(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"ResourceIDs": {
-				"cgrates.org:resourcesID",
-			},
-			"ResourceProfileIDs": {
-				"cgrates.org:resourcesID",
-			},
-		},
+		APIOpts:            nil,
+		Tenant:             "",
+		ResourceIDs:        []string{"cgrates.org:resourcesID"},
+		ResourceProfileIDs: []string{"cgrates.org:resourcesID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3334,11 +3326,9 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"FilterIDs": {"cgrates.org:filtersID"},
-		},
+		APIOpts:   nil,
+		Tenant:    "",
+		FilterIDs: []string{"cgrates.org:filtersID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3385,16 +3375,10 @@ func TestStoreLoadedDataStats(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"StatsQueueIDs": {
-				"cgrates.org:statsID",
-			},
-			"StatsQueueProfileIDs": {
-				"cgrates.org:statsID",
-			},
-		},
+		APIOpts:              nil,
+		Tenant:               "",
+		StatsQueueIDs:        []string{"cgrates.org:statsID"},
+		StatsQueueProfileIDs: []string{"cgrates.org:statsID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3441,16 +3425,10 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"ThresholdIDs": {
-				"cgrates.org:thresholdsID",
-			},
-			"ThresholdProfileIDs": {
-				"cgrates.org:thresholdsID",
-			},
-		},
+		APIOpts:             nil,
+		Tenant:              "",
+		ThresholdIDs:        []string{"cgrates.org:thresholdsID"},
+		ThresholdProfileIDs: []string{"cgrates.org:thresholdsID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3497,11 +3475,9 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"RouteProfileIDs": {"cgrates.org:routesID"},
-		},
+		APIOpts:         nil,
+		Tenant:          "",
+		RouteProfileIDs: []string{"cgrates.org:routesID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3548,11 +3524,9 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"ChargerProfileIDs": {"cgrates.org:chargersID"},
-		},
+		APIOpts:           nil,
+		Tenant:            "",
+		ChargerProfileIDs: []string{"cgrates.org:chargersID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3599,11 +3573,9 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"DispatcherProfileIDs": {"cgrates.org:dispatchersID"},
-		},
+		APIOpts:              nil,
+		Tenant:               "",
+		DispatcherProfileIDs: []string{"cgrates.org:dispatchersID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -3650,11 +3622,9 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: nil,
-		Tenant:  "",
-		ArgsCache: map[string][]string{
-			"DispatcherHostIDs": {"cgrates.org:dispatcherHostsID"},
-		},
+		APIOpts:           nil,
+		Tenant:            "",
+		DispatcherHostIDs: []string{"cgrates.org:dispatcherHostsID"},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{

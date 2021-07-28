@@ -430,7 +430,7 @@ func (apierSv1 *APIerSv1) RemoveActionTrigger(attr *AttrRemoveActionTrigger, rep
 	// CacheReload
 	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.ActionTriggerIDs: {attr.GroupID}},
+			ActionTriggerIDs: []string{attr.GroupID},
 		}, reply); err != nil {
 		return
 	}
@@ -480,7 +480,7 @@ func (apierSv1 *APIerSv1) SetActionTrigger(attr *AttrSetActionTrigger, reply *st
 	// CacheReload
 	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.ActionTriggerIDs: {attr.GroupID}},
+			ActionTriggerIDs: []string{attr.GroupID},
 		}, reply); err != nil {
 		return
 	}

@@ -1308,45 +1308,147 @@ type ArgsGetCacheItemWithAPIOpts struct {
 // NewAttrReloadCacheWithOpts returns the ArgCache populated with nil
 func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 	return &AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			DestinationIDs:           {MetaAny},
-			ReverseDestinationIDs:    {MetaAny},
-			RatingPlanIDs:            {MetaAny},
-			RatingProfileIDs:         {MetaAny},
-			ActionIDs:                {MetaAny},
-			ActionPlanIDs:            {MetaAny},
-			AccountActionPlanIDs:     {MetaAny},
-			ActionTriggerIDs:         {MetaAny},
-			SharedGroupIDs:           {MetaAny},
-			ResourceProfileIDs:       {MetaAny},
-			ResourceIDs:              {MetaAny},
-			StatsQueueIDs:            {MetaAny},
-			StatsQueueProfileIDs:     {MetaAny},
-			ThresholdIDs:             {MetaAny},
-			ThresholdProfileIDs:      {MetaAny},
-			FilterIDs:                {MetaAny},
-			RouteProfileIDs:          {MetaAny},
-			AttributeProfileIDs:      {MetaAny},
-			ChargerProfileIDs:        {MetaAny},
-			DispatcherProfileIDs:     {MetaAny},
-			DispatcherHostIDs:        {MetaAny},
-			TimingIDs:                {MetaAny},
-			AttributeFilterIndexIDs:  {MetaAny},
-			ResourceFilterIndexIDs:   {MetaAny},
-			StatFilterIndexIDs:       {MetaAny},
-			ThresholdFilterIndexIDs:  {MetaAny},
-			RouteFilterIndexIDs:      {MetaAny},
-			ChargerFilterIndexIDs:    {MetaAny},
-			DispatcherFilterIndexIDs: {MetaAny},
-			FilterIndexIDs:           {MetaAny},
-		},
+		DestinationIDs:           []string{MetaAny},
+		ReverseDestinationIDs:    []string{MetaAny},
+		RatingPlanIDs:            []string{MetaAny},
+		RatingProfileIDs:         []string{MetaAny},
+		ActionIDs:                []string{MetaAny},
+		ActionPlanIDs:            []string{MetaAny},
+		AccountActionPlanIDs:     []string{MetaAny},
+		ActionTriggerIDs:         []string{MetaAny},
+		SharedGroupIDs:           []string{MetaAny},
+		ResourceProfileIDs:       []string{MetaAny},
+		ResourceIDs:              []string{MetaAny},
+		StatsQueueIDs:            []string{MetaAny},
+		StatsQueueProfileIDs:     []string{MetaAny},
+		ThresholdIDs:             []string{MetaAny},
+		ThresholdProfileIDs:      []string{MetaAny},
+		FilterIDs:                []string{MetaAny},
+		RouteProfileIDs:          []string{MetaAny},
+		AttributeProfileIDs:      []string{MetaAny},
+		ChargerProfileIDs:        []string{MetaAny},
+		DispatcherProfileIDs:     []string{MetaAny},
+		DispatcherHostIDs:        []string{MetaAny},
+		TimingIDs:                []string{MetaAny},
+		AttributeFilterIndexIDs:  []string{MetaAny},
+		ResourceFilterIndexIDs:   []string{MetaAny},
+		StatFilterIndexIDs:       []string{MetaAny},
+		ThresholdFilterIndexIDs:  []string{MetaAny},
+		RouteFilterIndexIDs:      []string{MetaAny},
+		ChargerFilterIndexIDs:    []string{MetaAny},
+		DispatcherFilterIndexIDs: []string{MetaAny},
+		FilterIndexIDs:           []string{MetaAny},
+	}
+}
+
+func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts map[string]interface{}) *AttrReloadCacheWithAPIOpts {
+	return &AttrReloadCacheWithAPIOpts{
+		Tenant:  tnt,
+		APIOpts: opts,
+
+		DestinationIDs:        arg[CacheDestinations],
+		ReverseDestinationIDs: arg[CacheReverseDestinations],
+		RatingPlanIDs:         arg[CacheRatingPlans],
+		RatingProfileIDs:      arg[CacheRatingProfiles],
+		ActionIDs:             arg[CacheActions],
+		ActionPlanIDs:         arg[CacheActionPlans],
+		AccountActionPlanIDs:  arg[CacheAccountActionPlans],
+		ActionTriggerIDs:      arg[CacheActionTriggers],
+		SharedGroupIDs:        arg[CacheSharedGroups],
+		ResourceProfileIDs:    arg[CacheResourceProfiles],
+		ResourceIDs:           arg[CacheResources],
+		StatsQueueIDs:         arg[CacheStatQueues],
+		StatsQueueProfileIDs:  arg[CacheStatQueueProfiles],
+		ThresholdIDs:          arg[CacheThresholds],
+		ThresholdProfileIDs:   arg[CacheThresholdProfiles],
+		FilterIDs:             arg[CacheFilters],
+		RouteProfileIDs:       arg[CacheRouteProfiles],
+		AttributeProfileIDs:   arg[CacheAttributeProfiles],
+		ChargerProfileIDs:     arg[CacheChargerProfiles],
+		DispatcherProfileIDs:  arg[CacheDispatcherProfiles],
+		DispatcherHostIDs:     arg[CacheDispatcherHosts],
+
+		TimingIDs:                arg[CacheTimings],
+		AttributeFilterIndexIDs:  arg[CacheAttributeFilterIndexes],
+		ResourceFilterIndexIDs:   arg[CacheResourceFilterIndexes],
+		StatFilterIndexIDs:       arg[CacheStatFilterIndexes],
+		ThresholdFilterIndexIDs:  arg[CacheThresholdFilterIndexes],
+		RouteFilterIndexIDs:      arg[CacheRouteFilterIndexes],
+		ChargerFilterIndexIDs:    arg[CacheChargerFilterIndexes],
+		DispatcherFilterIndexIDs: arg[CacheDispatcherFilterIndexes],
+		FilterIndexIDs:           arg[CacheReverseFilterIndexes],
 	}
 }
 
 type AttrReloadCacheWithAPIOpts struct {
-	APIOpts   map[string]interface{}
-	Tenant    string
-	ArgsCache map[string][]string
+	APIOpts                  map[string]interface{} `json:",omitempty"`
+	Tenant                   string                 `json:",omitempty"`
+	DestinationIDs           []string               `json:",omitempty"`
+	ReverseDestinationIDs    []string               `json:",omitempty"`
+	RatingPlanIDs            []string               `json:",omitempty"`
+	RatingProfileIDs         []string               `json:",omitempty"`
+	ActionIDs                []string               `json:",omitempty"`
+	ActionPlanIDs            []string               `json:",omitempty"`
+	AccountActionPlanIDs     []string               `json:",omitempty"`
+	ActionTriggerIDs         []string               `json:",omitempty"`
+	SharedGroupIDs           []string               `json:",omitempty"`
+	ResourceProfileIDs       []string               `json:",omitempty"`
+	ResourceIDs              []string               `json:",omitempty"`
+	StatsQueueIDs            []string               `json:",omitempty"`
+	StatsQueueProfileIDs     []string               `json:",omitempty"`
+	ThresholdIDs             []string               `json:",omitempty"`
+	ThresholdProfileIDs      []string               `json:",omitempty"`
+	FilterIDs                []string               `json:",omitempty"`
+	RouteProfileIDs          []string               `json:",omitempty"`
+	AttributeProfileIDs      []string               `json:",omitempty"`
+	ChargerProfileIDs        []string               `json:",omitempty"`
+	DispatcherProfileIDs     []string               `json:",omitempty"`
+	DispatcherHostIDs        []string               `json:",omitempty"`
+	TimingIDs                []string               `json:",omitempty"`
+	AttributeFilterIndexIDs  []string               `json:",omitempty"`
+	ResourceFilterIndexIDs   []string               `json:",omitempty"`
+	StatFilterIndexIDs       []string               `json:",omitempty"`
+	ThresholdFilterIndexIDs  []string               `json:",omitempty"`
+	RouteFilterIndexIDs      []string               `json:",omitempty"`
+	ChargerFilterIndexIDs    []string               `json:",omitempty"`
+	DispatcherFilterIndexIDs []string               `json:",omitempty"`
+	FilterIndexIDs           []string               `json:",omitempty"`
+}
+
+func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
+	return map[string][]string{
+		CacheDestinations:        a.DestinationIDs,
+		CacheReverseDestinations: a.ReverseDestinationIDs,
+		CacheRatingPlans:         a.RatingPlanIDs,
+		CacheRatingProfiles:      a.RatingProfileIDs,
+		CacheActions:             a.ActionIDs,
+		CacheActionPlans:         a.ActionPlanIDs,
+		CacheAccountActionPlans:  a.AccountActionPlanIDs,
+		CacheActionTriggers:      a.ActionTriggerIDs,
+		CacheSharedGroups:        a.SharedGroupIDs,
+		CacheResourceProfiles:    a.ResourceProfileIDs,
+		CacheResources:           a.ResourceIDs,
+		CacheStatQueues:          a.StatsQueueIDs,
+		CacheStatQueueProfiles:   a.StatsQueueProfileIDs,
+		CacheThresholds:          a.ThresholdIDs,
+		CacheThresholdProfiles:   a.ThresholdProfileIDs,
+		CacheFilters:             a.FilterIDs,
+		CacheRouteProfiles:       a.RouteProfileIDs,
+		CacheAttributeProfiles:   a.AttributeProfileIDs,
+		CacheChargerProfiles:     a.ChargerProfileIDs,
+		CacheDispatcherProfiles:  a.DispatcherProfileIDs,
+		CacheDispatcherHosts:     a.DispatcherHostIDs,
+
+		CacheTimings:                 a.TimingIDs,
+		CacheAttributeFilterIndexes:  a.AttributeFilterIndexIDs,
+		CacheResourceFilterIndexes:   a.ResourceFilterIndexIDs,
+		CacheStatFilterIndexes:       a.StatFilterIndexIDs,
+		CacheThresholdFilterIndexes:  a.ThresholdFilterIndexIDs,
+		CacheRouteFilterIndexes:      a.RouteFilterIndexIDs,
+		CacheChargerFilterIndexes:    a.ChargerFilterIndexIDs,
+		CacheDispatcherFilterIndexes: a.DispatcherFilterIndexIDs,
+		CacheReverseFilterIndexes:    a.FilterIndexIDs,
+	}
 }
 
 type AttrCacheIDsWithAPIOpts struct {

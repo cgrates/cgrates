@@ -2026,9 +2026,7 @@ func testAttributeSCacheTestSetProfile(t *testing.T) {
 
 func testAttributeSCacheTestReload(t *testing.T) {
 	cache := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.AttributeProfileIDs: {"cgrates.org:ATTR_CACHE"},
-		},
+		AttributeProfileIDs: []string{"cgrates.org:ATTR_CACHE"},
 	}
 	var reply string
 	if err := attrSRPC.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {

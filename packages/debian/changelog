@@ -169,6 +169,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [ERs] Added *nats_json_map
   * [EEs] Added *nats_json_map
   * [RSRParsers] Added *slice dataconverter  
+  * [CacheS] Updated LoadCache and ReloadCache APIs
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

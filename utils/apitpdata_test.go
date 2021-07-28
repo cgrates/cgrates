@@ -1013,41 +1013,59 @@ func TestCDRsFilterPrepare(t *testing.T) {
 
 func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 	newAttrReloadCache := &AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			DestinationIDs:           {MetaAny},
-			ReverseDestinationIDs:    {MetaAny},
-			RatingPlanIDs:            {MetaAny},
-			RatingProfileIDs:         {MetaAny},
-			ActionIDs:                {MetaAny},
-			ActionPlanIDs:            {MetaAny},
-			AccountActionPlanIDs:     {MetaAny},
-			ActionTriggerIDs:         {MetaAny},
-			SharedGroupIDs:           {MetaAny},
-			ResourceProfileIDs:       {MetaAny},
-			ResourceIDs:              {MetaAny},
-			StatsQueueIDs:            {MetaAny},
-			StatsQueueProfileIDs:     {MetaAny},
-			ThresholdIDs:             {MetaAny},
-			ThresholdProfileIDs:      {MetaAny},
-			FilterIDs:                {MetaAny},
-			RouteProfileIDs:          {MetaAny},
-			AttributeProfileIDs:      {MetaAny},
-			ChargerProfileIDs:        {MetaAny},
-			DispatcherProfileIDs:     {MetaAny},
-			DispatcherHostIDs:        {MetaAny},
-			TimingIDs:                {MetaAny},
-			AttributeFilterIndexIDs:  {MetaAny},
-			ResourceFilterIndexIDs:   {MetaAny},
-			StatFilterIndexIDs:       {MetaAny},
-			ThresholdFilterIndexIDs:  {MetaAny},
-			RouteFilterIndexIDs:      {MetaAny},
-			ChargerFilterIndexIDs:    {MetaAny},
-			DispatcherFilterIndexIDs: {MetaAny},
-			FilterIndexIDs:           {MetaAny},
-		},
+		DestinationIDs:           []string{MetaAny},
+		ReverseDestinationIDs:    []string{MetaAny},
+		RatingPlanIDs:            []string{MetaAny},
+		RatingProfileIDs:         []string{MetaAny},
+		ActionIDs:                []string{MetaAny},
+		ActionPlanIDs:            []string{MetaAny},
+		AccountActionPlanIDs:     []string{MetaAny},
+		ActionTriggerIDs:         []string{MetaAny},
+		SharedGroupIDs:           []string{MetaAny},
+		ResourceProfileIDs:       []string{MetaAny},
+		ResourceIDs:              []string{MetaAny},
+		StatsQueueIDs:            []string{MetaAny},
+		StatsQueueProfileIDs:     []string{MetaAny},
+		ThresholdIDs:             []string{MetaAny},
+		ThresholdProfileIDs:      []string{MetaAny},
+		FilterIDs:                []string{MetaAny},
+		RouteProfileIDs:          []string{MetaAny},
+		AttributeProfileIDs:      []string{MetaAny},
+		ChargerProfileIDs:        []string{MetaAny},
+		DispatcherProfileIDs:     []string{MetaAny},
+		DispatcherHostIDs:        []string{MetaAny},
+		TimingIDs:                []string{MetaAny},
+		AttributeFilterIndexIDs:  []string{MetaAny},
+		ResourceFilterIndexIDs:   []string{MetaAny},
+		StatFilterIndexIDs:       []string{MetaAny},
+		ThresholdFilterIndexIDs:  []string{MetaAny},
+		RouteFilterIndexIDs:      []string{MetaAny},
+		ChargerFilterIndexIDs:    []string{MetaAny},
+		DispatcherFilterIndexIDs: []string{MetaAny},
+		FilterIndexIDs:           []string{MetaAny},
 	}
 	eMap := NewAttrReloadCacheWithOpts()
 	if !reflect.DeepEqual(eMap, newAttrReloadCache) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, newAttrReloadCache)
 	}
+}
+
+func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
+	excluded := NewStringSet([]string{MetaAPIBan, MetaAccounts, MetaLoadIDs})
+	mp := make(map[string][]string)
+	for k := range CacheInstanceToPrefix {
+		if !excluded.Has(k) {
+			mp[k] = []string{MetaAny}
+		}
+	}
+	exp := NewAttrReloadCacheWithOpts()
+	rply := NewAttrReloadCacheWithOptsFromMap(mp, "", nil)
+	if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(exp), ToJSON(rply))
+	}
+	rplyM := rply.Map()
+	if !reflect.DeepEqual(mp, rplyM) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(mp), ToJSON(rplyM))
+	}
+
 }

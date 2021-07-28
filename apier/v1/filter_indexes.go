@@ -228,7 +228,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	var indexes utils.StringSet
 	//ThresholdProfile Indexes
 	if args.ThresholdS {
-		cacheIDs[utils.ThresholdFilterIndexIDs] = []string{utils.MetaAny}
+		cacheIDs[utils.CacheThresholdFilterIndexes] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheThresholdFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				th, e := apierSv1.DataManager.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
@@ -247,7 +247,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	}
 	//StatQueueProfile Indexes
 	if args.StatS {
-		cacheIDs[utils.StatFilterIndexIDs] = []string{utils.MetaAny}
+		cacheIDs[utils.CacheStatFilterIndexes] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheStatFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				sq, e := apierSv1.DataManager.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional)
@@ -266,7 +266,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	}
 	//ResourceProfile Indexes
 	if args.ResourceS {
-		cacheIDs[utils.ResourceFilterIndexIDs] = []string{utils.MetaAny}
+		cacheIDs[utils.CacheResourceFilterIndexes] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheResourceFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				rp, e := apierSv1.DataManager.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
@@ -285,7 +285,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	}
 	//RouteSProfile Indexes
 	if args.RouteS {
-		cacheIDs[utils.RouteFilterIndexIDs] = []string{utils.MetaAny}
+		cacheIDs[utils.CacheRouteFilterIndexes] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheRouteFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				rp, e := apierSv1.DataManager.GetRouteProfile(tnt, id, true, false, utils.NonTransactional)
@@ -304,7 +304,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	}
 	//AttributeProfile Indexes
 	if args.AttributeS {
-		cacheIDs[utils.AttributeFilterIndexIDs] = []string{utils.MetaAny}
+		cacheIDs[utils.CacheAttributeFilterIndexes] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAttributeFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				ap, e := apierSv1.DataManager.GetAttributeProfile(tnt, id, true, false, utils.NonTransactional)
@@ -327,7 +327,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	}
 	//ChargerProfile  Indexes
 	if args.ChargerS {
-		cacheIDs[utils.ChargerFilterIndexIDs] = []string{utils.MetaAny}
+		cacheIDs[utils.CacheChargerFilterIndexes] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheChargerFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				ap, e := apierSv1.DataManager.GetChargerProfile(tnt, id, true, false, utils.NonTransactional)
@@ -346,7 +346,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	}
 	//DispatcherProfile Indexes
 	if args.DispatcherS {
-		cacheIDs[utils.DispatcherFilterIndexIDs] = []string{utils.MetaAny}
+		cacheIDs[utils.CacheDispatcherFilterIndexes] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheDispatcherFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				dsp, e := apierSv1.DataManager.GetDispatcherProfile(tnt, id, true, false, utils.NonTransactional)
@@ -419,7 +419,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	loadIDs := make(map[string]int64)
 	timeNow := time.Now().UnixNano()
 	for idx := range cacheIDs {
-		loadIDs[utils.ArgCacheToInstance[idx]] = timeNow
+		loadIDs[idx] = timeNow
 	}
 	if err := apierSv1.DataManager.SetLoadIDs(loadIDs); err != nil {
 		return utils.APIErrorHandler(err)
@@ -457,7 +457,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {
-		cacheIDs[utils.ThresholdFilterIndexIDs] = indexes.AsSlice()
+		cacheIDs[utils.CacheThresholdFilterIndexes] = indexes.AsSlice()
 	}
 	//StatQueueProfile Indexes
 	if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheStatFilterIndexes,
@@ -466,7 +466,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 			if e != nil {
 				return nil, e
 			}
-			cacheIDs[utils.StatFilterIndexIDs] = []string{sq.ID}
+			cacheIDs[utils.CacheStatFilterIndexes] = []string{sq.ID}
 			fltrIDs := make([]string, len(sq.FilterIDs))
 			for i, fltrID := range sq.FilterIDs {
 				fltrIDs[i] = fltrID
@@ -476,7 +476,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {
-		cacheIDs[utils.StatFilterIndexIDs] = indexes.AsSlice()
+		cacheIDs[utils.CacheStatFilterIndexes] = indexes.AsSlice()
 	}
 	//ResourceProfile Indexes
 	if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheResourceFilterIndexes,
@@ -485,7 +485,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 			if e != nil {
 				return nil, e
 			}
-			cacheIDs[utils.ResourceFilterIndexIDs] = []string{rp.ID}
+			cacheIDs[utils.CacheResourceFilterIndexes] = []string{rp.ID}
 			fltrIDs := make([]string, len(rp.FilterIDs))
 			for i, fltrID := range rp.FilterIDs {
 				fltrIDs[i] = fltrID
@@ -495,7 +495,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {
-		cacheIDs[utils.ResourceFilterIndexIDs] = indexes.AsSlice()
+		cacheIDs[utils.CacheResourceFilterIndexes] = indexes.AsSlice()
 	}
 	//RouteProfile Indexes
 	if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheRouteFilterIndexes,
@@ -504,7 +504,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 			if e != nil {
 				return nil, e
 			}
-			cacheIDs[utils.RouteFilterIndexIDs] = []string{rp.ID}
+			cacheIDs[utils.CacheRouteFilterIndexes] = []string{rp.ID}
 			fltrIDs := make([]string, len(rp.FilterIDs))
 			for i, fltrID := range rp.FilterIDs {
 				fltrIDs[i] = fltrID
@@ -514,7 +514,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {
-		cacheIDs[utils.RouteFilterIndexIDs] = indexes.AsSlice()
+		cacheIDs[utils.CacheRouteFilterIndexes] = indexes.AsSlice()
 	}
 	//AttributeProfile Indexes
 	if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAttributeFilterIndexes,
@@ -535,7 +535,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {
-		cacheIDs[utils.AttributeFilterIndexIDs] = indexes.AsSlice()
+		cacheIDs[utils.CacheAttributeFilterIndexes] = indexes.AsSlice()
 	}
 	//ChargerProfile  Indexes
 	if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheChargerFilterIndexes,
@@ -553,7 +553,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {
-		cacheIDs[utils.ChargerFilterIndexIDs] = indexes.AsSlice()
+		cacheIDs[utils.CacheChargerFilterIndexes] = indexes.AsSlice()
 	}
 	//DispatcherProfile Indexes
 	if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheDispatcherFilterIndexes,
@@ -574,13 +574,13 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {
-		cacheIDs[utils.DispatcherFilterIndexIDs] = indexes.AsSlice()
+		cacheIDs[utils.CacheDispatcherFilterIndexes] = indexes.AsSlice()
 	}
 
 	loadIDs := make(map[string]int64)
 	timeNow := time.Now().UnixNano()
 	for idx := range cacheIDs {
-		loadIDs[utils.ArgCacheToInstance[idx]] = timeNow
+		loadIDs[idx] = timeNow
 	}
 	if err := apierSv1.DataManager.SetLoadIDs(loadIDs); err != nil {
 		return utils.APIErrorHandler(err)

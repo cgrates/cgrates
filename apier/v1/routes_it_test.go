@@ -1695,9 +1695,7 @@ func testRouteSCacheTestSet(t *testing.T) {
 
 func testRouteSCacheReload(t *testing.T) {
 	cache := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.RouteProfileIDs: {"cgrates.org:ROUTE_CACHE"},
-		},
+		RouteProfileIDs: []string{"cgrates.org:ROUTE_CACHE"},
 	}
 	var reply string
 	if err := routeSv1Rpc.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {

@@ -702,9 +702,7 @@ func testChargerSCacheTestSet(t *testing.T) {
 
 func testChargerSCacheReload(t *testing.T) {
 	cache := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.ChargerProfileIDs: {"cgrates.org:CHARGERS_CACHE"},
-		},
+		ChargerProfileIDs: []string{"cgrates.org:CHARGERS_CACHE"},
 	}
 	var reply string
 	if err := chargerRPC.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {

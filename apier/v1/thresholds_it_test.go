@@ -1085,9 +1085,7 @@ func testThresholdSCacheSet(t *testing.T) {
 
 func testThresholdSCacheReload(t *testing.T) {
 	cache := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.ThresholdProfileIDs: {"cgrates.org:THRESHOLD_CACHE"},
-		},
+		ThresholdProfileIDs: []string{"cgrates.org:THRESHOLD_CACHE"},
 	}
 	var reply string
 	if err := tSv1Rpc.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {

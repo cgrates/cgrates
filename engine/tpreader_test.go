@@ -43,29 +43,20 @@ func TestCallCacheNoCaching(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	Cache = NewCacheS(defaultCfg, nil, nil)
 	cM := NewConnManager(defaultCfg, nil)
-	cacheConns := []string{}
-	caching := utils.MetaNone
 	args := map[string][]string{
-		utils.FilterIDs:   {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
-		utils.ResourceIDs: {},
+		utils.CacheFilters:   {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+		utils.CacheResources: {},
 	}
-	cacheIDs := []string{}
 	opts := map[string]interface{}{
 		utils.Subsys: utils.MetaChargers,
 	}
 
-	expArgs := map[string][]string{
-		utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
-	}
-	err := CallCache(cM, cacheConns, caching, args, cacheIDs, opts, true, "cgrates.org")
+	err := CallCache(cM, []string{}, utils.MetaNone, args, []string{}, opts, true, "cgrates.org")
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 
-	if !reflect.DeepEqual(args, expArgs) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expArgs, args)
-	}
 }
 
 func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
@@ -86,16 +77,14 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 					APIOpts: map[string]interface{}{
 						utils.Subsys: utils.MetaChargers,
 					},
-					ArgsCache: map[string][]string{
-						utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
-					},
-					Tenant: "cgrates.org",
+					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+					Tenant:    "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf(
 						"\nWrong value of args: \nexpected: <%+v>, \nreceived: <%+v>",
-						expArgs, args,
+						utils.ToJSON(expArgs), utils.ToJSON(args),
 					)
 				}
 				return utils.ErrUnsupporteServiceMethod
@@ -109,7 +98,7 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	})
 	caching := utils.MetaReload
 	args := map[string][]string{
-		utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{}
 	opts := map[string]interface{}{
@@ -178,7 +167,7 @@ func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	})
 	caching := utils.MetaReload
 	args := map[string][]string{
-		utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{"cacheID"}
 	opts := map[string]interface{}{
@@ -235,10 +224,8 @@ func TestCallCacheLoadCache(t *testing.T) {
 					APIOpts: map[string]interface{}{
 						utils.Subsys: utils.MetaChargers,
 					},
-					ArgsCache: map[string][]string{
-						utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
-					},
-					Tenant: "cgrates.org",
+					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+					Tenant:    "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -275,7 +262,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 	})
 	caching := utils.MetaLoad
 	args := map[string][]string{
-		utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{"cacheID"}
 	opts := map[string]interface{}{
@@ -307,10 +294,8 @@ func TestCallCacheRemoveItems(t *testing.T) {
 					APIOpts: map[string]interface{}{
 						utils.Subsys: utils.MetaChargers,
 					},
-					ArgsCache: map[string][]string{
-						utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
-					},
-					Tenant: "cgrates.org",
+					FilterIDs: []string{"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+					Tenant:    "cgrates.org",
 				}
 
 				if !reflect.DeepEqual(args, expArgs) {
@@ -347,7 +332,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 	})
 	caching := utils.MetaRemove
 	args := map[string][]string{
-		utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{"cacheID"}
 	opts := map[string]interface{}{
@@ -399,7 +384,7 @@ func TestCallCacheClear(t *testing.T) {
 	})
 	caching := utils.MetaClear
 	args := map[string][]string{
-		utils.FilterIDs: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
+		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 	}
 	cacheIDs := []string{}
 	opts := map[string]interface{}{
@@ -947,31 +932,30 @@ func TestReloadCache(t *testing.T) {
 	data := NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: map[string]interface{}{},
-		Tenant:  "cgrates.org",
-		ArgsCache: map[string][]string{
-			"ActionIDs":            {"ActionsID"},
-			"ActionPlanIDs":        {"ActionPlansID"},
-			"ActionTriggerIDs":     {"ActionTriggersID"},
-			"DestinationIDs":       {"DestinationsID"},
-			"TimingIDs":            {"TimingsID"},
-			"RatingPlanIDs":        {"RatingPlansID"},
-			"RatingProfileIDs":     {"RatingProfilesID"},
-			"SharedGroupIDs":       {"SharedGroupsID"},
-			"ResourceProfileIDs":   {"cgrates.org:resourceProfilesID"},
-			"StatsQueueProfileIDs": {"cgrates.org:statProfilesID"},
-			"ThresholdProfileIDs":  {"cgrates.org:thresholdProfilesID"},
-			"FilterIDs":            {"cgrates.org:filtersID"},
-			"RouteProfileIDs":      {"cgrates.org:routeProfilesID"},
-			"AttributeProfileIDs":  {"cgrates.org:attributeProfilesID"},
-			"ChargerProfileIDs":    {"cgrates.org:chargerProfilesID"},
-			"DispatcherProfileIDs": {"cgrates.org:dispatcherProfilesID"},
-			"DispatcherHostIDs":    {"cgrates.org:dispatcherHostsID"},
-			"ResourceIDs":          {"cgrates.org:resourceProfilesID"},
-			"StatsQueueIDs":        {"cgrates.org:statProfilesID"},
-			"ThresholdIDs":         {"cgrates.org:thresholdProfilesID"},
-			"AccountActionPlanIDs": {"AccountActionPlansID"},
-		},
+		APIOpts:               map[string]interface{}{},
+		Tenant:                "cgrates.org",
+		ActionIDs:             []string{"ActionsID"},
+		ActionPlanIDs:         []string{"ActionPlansID"},
+		ActionTriggerIDs:      []string{"ActionTriggersID"},
+		DestinationIDs:        []string{"DestinationsID"},
+		TimingIDs:             []string{"TimingsID"},
+		RatingPlanIDs:         []string{"RatingPlansID"},
+		RatingProfileIDs:      []string{"RatingProfilesID"},
+		SharedGroupIDs:        []string{"SharedGroupsID"},
+		ResourceProfileIDs:    []string{"cgrates.org:resourceProfilesID"},
+		StatsQueueProfileIDs:  []string{"cgrates.org:statProfilesID"},
+		ThresholdProfileIDs:   []string{"cgrates.org:thresholdProfilesID"},
+		FilterIDs:             []string{"cgrates.org:filtersID"},
+		RouteProfileIDs:       []string{"cgrates.org:routeProfilesID"},
+		AttributeProfileIDs:   []string{"cgrates.org:attributeProfilesID"},
+		ChargerProfileIDs:     []string{"cgrates.org:chargerProfilesID"},
+		DispatcherProfileIDs:  []string{"cgrates.org:dispatcherProfilesID"},
+		DispatcherHostIDs:     []string{"cgrates.org:dispatcherHostsID"},
+		ResourceIDs:           []string{"cgrates.org:resourceProfilesID"},
+		StatsQueueIDs:         []string{"cgrates.org:statProfilesID"},
+		ThresholdIDs:          []string{"cgrates.org:thresholdProfilesID"},
+		AccountActionPlanIDs:  []string{"AccountActionPlansID"},
+		ReverseDestinationIDs: []string{},
 	}
 	cM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
