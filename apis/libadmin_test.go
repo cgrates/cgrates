@@ -65,11 +65,11 @@ func TestCallCacheForFilter(t *testing.T) {
 	}
 
 	exp := map[string][]string{
-		utils.FilterIDs:                {"cgrates.org:FLTR1"},
-		utils.DispatcherFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001"},
-		utils.ThresholdFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001"},
+		utils.CacheFilters:                 {"cgrates.org:FLTR1"},
+		utils.CacheDispatcherFilterIndexes: {"cgrates.org:*string:*req.Account:1001"},
+		utils.CacheThresholdFilterIndexes:  {"cgrates.org:*string:*req.Account:1001"},
 	}
-	rpl, err := composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), map[string][]string{utils.FilterIDs: {"cgrates.org:FLTR1"}})
+	rpl, err := composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), map[string][]string{utils.CacheFilters: {"cgrates.org:FLTR1"}})
 	if err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rpl, exp) {
@@ -91,9 +91,9 @@ func TestCallCacheForFilter(t *testing.T) {
 		t.Fatal(err)
 	}
 	exp = map[string][]string{
-		utils.FilterIDs:                {"cgrates.org:FLTR1"},
-		utils.DispatcherFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-		utils.ThresholdFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		utils.CacheFilters:                 {"cgrates.org:FLTR1"},
+		utils.CacheDispatcherFilterIndexes: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		utils.CacheThresholdFilterIndexes:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
 	}
 	rpl, err = composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), rpl)
 	if err != nil {

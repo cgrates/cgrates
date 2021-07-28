@@ -134,10 +134,8 @@ func TestCacheSetAndRemoveItems(t *testing.T) {
 	cache := NewCacheSv1(ch)
 
 	argsRemItm := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.AttributeProfileIDs: {"cgrates.org:TestCacheSetAndRemoveItems1",
-				"cgrates.org:TestCacheSetAndRemoveItems2", "cgrates.org:TestCacheSetAndRemoveItems3"},
-		},
+		AttributeProfileIDs: []string{"cgrates.org:TestCacheSetAndRemoveItems1",
+			"cgrates.org:TestCacheSetAndRemoveItems2", "cgrates.org:TestCacheSetAndRemoveItems3"},
 	}
 	var reply string
 	if err := cache.RemoveItems(nil, argsRemItm, &reply); err != nil {
