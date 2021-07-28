@@ -30,73 +30,63 @@ import (
 
 func TestComposeArgsReload(t *testing.T) {
 	apv1 := &APIerSv1{}
-	expArgs := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: make(map[string]interface{}),
-		Tenant:  "cgrates.org",
-		ArgsCache: map[string][]string{
-			utils.AttributeProfileIDs: {"cgrates.org:ATTR1"},
-		},
-	}
+	expArgs := map[string][]string{utils.CacheAttributeProfiles: {"cgrates.org:ATTR1"}}
 
 	if rply, err := apv1.composeArgsReload("cgrates.org", utils.CacheAttributeProfiles,
-		"cgrates.org:ATTR1", nil, nil, make(map[string]interface{})); err != nil {
+		"cgrates.org:ATTR1", nil, nil); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expArgs, rply) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(expArgs), utils.ToJSON(rply))
 	}
 
-	expArgs.ArgsCache[utils.AttributeFilterIndexIDs] = []string{"cgrates.org:*cdrs:*none:*any:*any"}
+	expArgs[utils.CacheAttributeFilterIndexes] = []string{"cgrates.org:*cdrs:*none:*any:*any"}
 
 	if rply, err := apv1.composeArgsReload("cgrates.org", utils.CacheAttributeProfiles,
-		"cgrates.org:ATTR1", &[]string{}, []string{utils.MetaCDRs}, make(map[string]interface{})); err != nil {
+		"cgrates.org:ATTR1", &[]string{}, []string{utils.MetaCDRs}); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expArgs, rply) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(expArgs), utils.ToJSON(rply))
 	}
 
-	expArgs.ArgsCache[utils.AttributeFilterIndexIDs] = []string{
+	expArgs[utils.CacheAttributeFilterIndexes] = []string{
 		"cgrates.org:*cdrs:*string:*req.Account:1001",
 		"cgrates.org:*cdrs:*prefix:*req.Destination:1001",
 	}
 
 	if rply, err := apv1.composeArgsReload("cgrates.org", utils.CacheAttributeProfiles,
-		"cgrates.org:ATTR1", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination", "*gt:~req.Usage:0"}, []string{utils.MetaCDRs}, make(map[string]interface{})); err != nil {
+		"cgrates.org:ATTR1", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination", "*gt:~req.Usage:0"}, []string{utils.MetaCDRs}); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expArgs, rply) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(expArgs), utils.ToJSON(rply))
 	}
 
-	expArgs = &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: make(map[string]interface{}),
-		Tenant:  "cgrates.org",
-		ArgsCache: map[string][]string{
-			utils.StatsQueueProfileIDs: {"cgrates.org:Stat2"},
-			utils.StatsQueueIDs:        {"cgrates.org:Stat2"},
-			utils.StatFilterIndexIDs: {
-				"cgrates.org:*string:*req.Account:1001",
-				"cgrates.org:*prefix:*req.Destination:1001",
-			},
+	expArgs = map[string][]string{
+		utils.CacheStatQueueProfiles: {"cgrates.org:Stat2"},
+		utils.CacheStatQueues:        {"cgrates.org:Stat2"},
+		utils.CacheStatFilterIndexes: {
+			"cgrates.org:*string:*req.Account:1001",
+			"cgrates.org:*prefix:*req.Destination:1001",
 		},
 	}
 
 	if rply, err := apv1.composeArgsReload("cgrates.org", utils.CacheStatQueueProfiles,
-		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"}, nil, make(map[string]interface{})); err != nil {
+		"cgrates.org:Stat2", &[]string{"*string:~*req.Account:1001|~req.Subject", "*prefix:1001:~*req.Destination"}, nil); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expArgs, rply) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(expArgs), utils.ToJSON(rply))
 	}
 
-	expArgs.ArgsCache[utils.StatFilterIndexIDs] = []string{"cgrates.org:*none:*any:*any"}
+	expArgs[utils.CacheStatFilterIndexes] = []string{"cgrates.org:*none:*any:*any"}
 
 	if rply, err := apv1.composeArgsReload("cgrates.org", utils.CacheStatQueueProfiles,
-		"cgrates.org:Stat2", &[]string{}, []string{utils.MetaCDRs}, make(map[string]interface{})); err != nil {
+		"cgrates.org:Stat2", &[]string{}, []string{utils.MetaCDRs}); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expArgs, rply) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(expArgs), utils.ToJSON(rply))
 	}
 
 	if _, err := apv1.composeArgsReload("cgrates.org", utils.CacheStatQueueProfiles,
-		"cgrates.org:Stat2", &[]string{"FLTR1"}, []string{utils.MetaCDRs}, make(map[string]interface{})); err != utils.ErrNoDatabaseConn {
+		"cgrates.org:Stat2", &[]string{"FLTR1"}, []string{utils.MetaCDRs}); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 }
@@ -151,15 +141,13 @@ func TestCallCache(t *testing.T) {
 	exp = &rpcRequest{
 		Method: utils.CacheSv1ReloadCache,
 		Params: &utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: make(map[string]interface{}),
-			Tenant:  "cgrates.org",
-			ArgsCache: map[string][]string{
-				utils.StatsQueueProfileIDs: {"cgrates.org:Stat2"},
-				utils.StatsQueueIDs:        {"cgrates.org:Stat2"},
-				utils.StatFilterIndexIDs: {
-					"cgrates.org:*string:*req.Account:1001",
-					"cgrates.org:*prefix:*req.Destination:1001",
-				},
+			APIOpts:              make(map[string]interface{}),
+			Tenant:               "cgrates.org",
+			StatsQueueProfileIDs: []string{"cgrates.org:Stat2"},
+			StatsQueueIDs:        []string{"cgrates.org:Stat2"},
+			StatFilterIndexIDs: []string{
+				"cgrates.org:*string:*req.Account:1001",
+				"cgrates.org:*prefix:*req.Destination:1001",
 			},
 		},
 	}
@@ -255,11 +243,11 @@ func TestCallCacheForFilter(t *testing.T) {
 	}
 
 	exp := map[string][]string{
-		utils.FilterIDs:               {"cgrates.org:FLTR1"},
-		utils.AttributeFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001"},
-		utils.ThresholdFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001"},
+		utils.CacheFilters:                {"cgrates.org:FLTR1"},
+		utils.CacheAttributeFilterIndexes: {"cgrates.org:*any:*string:*req.Account:1001"},
+		utils.CacheThresholdFilterIndexes: {"cgrates.org:*string:*req.Account:1001"},
 	}
-	rpl, err := composeCacheArgsForFilter(dm, flt, tnt, flt.TenantID(), map[string][]string{utils.FilterIDs: {"cgrates.org:FLTR1"}})
+	rpl, err := composeCacheArgsForFilter(dm, flt, tnt, flt.TenantID(), map[string][]string{utils.CacheFilters: {"cgrates.org:FLTR1"}})
 	if err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rpl, exp) {
@@ -281,9 +269,9 @@ func TestCallCacheForFilter(t *testing.T) {
 		t.Fatal(err)
 	}
 	exp = map[string][]string{
-		utils.FilterIDs:               {"cgrates.org:FLTR1"},
-		utils.AttributeFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
-		utils.ThresholdFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		utils.CacheFilters:                {"cgrates.org:FLTR1"},
+		utils.CacheAttributeFilterIndexes: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+		utils.CacheThresholdFilterIndexes: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
 	}
 	rpl, err = composeCacheArgsForFilter(dm, flt, tnt, flt.TenantID(), rpl)
 	if err != nil {

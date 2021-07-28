@@ -34,7 +34,7 @@ func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string
 		arg.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	tntID := arg.TenantID()
-	argC := map[string][]string{utils.FilterIDs: {tntID}}
+	argC := map[string][]string{utils.CacheFilters: {tntID}}
 	if fltr, err := apierSv1.DataManager.GetFilter(arg.Filter.Tenant, arg.Filter.ID, true, false, utils.NonTransactional); err != nil {
 		if err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
@@ -123,7 +123,7 @@ func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithAPIOpts, reply *st
 	if err := callCacheForFilter(apierSv1.ConnMgr, apierSv1.Config.ApierCfg().CachesConns,
 		utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]),
 		apierSv1.Config.GeneralCfg().DefaultCaching,
-		arg.Tenant, map[string][]string{utils.FilterIDs: {utils.ConcatenatedKey(tnt, arg.ID)}}, arg.APIOpts); err != nil {
+		arg.Tenant, map[string][]string{utils.CacheFilters: {utils.ConcatenatedKey(tnt, arg.ID)}}, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

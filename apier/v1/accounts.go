@@ -144,7 +144,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-				ArgsCache: map[string][]string{utils.ActionPlanIDs: {attrs.ActionPlanId}},
+				ActionPlanIDs: []string{attrs.ActionPlanId},
 			}, reply); err != nil {
 			return err
 		}
@@ -156,7 +156,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 		if len(remAcntAPids) != 0 {
 			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: remAcntAPids},
+					AccountActionPlanIDs: remAcntAPids,
 				}, reply); err != nil {
 				return err
 			}
@@ -257,7 +257,8 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 				}
 				return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 					utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-						ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}, utils.ActionPlanIDs: apIDs},
+						AccountActionPlanIDs: []string{accID},
+						ActionPlanIDs:        apIDs,
 					}, reply)
 			}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
 				return err
@@ -344,7 +345,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 	}
 	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}},
+			AccountActionPlanIDs: []string{accID},
 		}, reply); err != nil {
 		return
 	}

@@ -52,10 +52,8 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
-		Tenant: "cgrates.org",
-		ArgsCache: map[string][]string{
-			utils.FilterIDs: {"cgrates.org:FLTR_ID"},
-		},
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"cgrates.org:FLTR_ID"},
 	}
 	ccM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -216,16 +214,14 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
-		Tenant: "cgrates.org",
-		ArgsCache: map[string][]string{
-			utils.FilterIDs:                {"cgrates.org:FLTR_ID"},
-			utils.AttributeFilterIndexIDs:  {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
-			utils.ChargerFilterIndexIDs:    {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-			utils.DispatcherFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
-			utils.ResourceFilterIndexIDs:   {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-			utils.StatFilterIndexIDs:       {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-			utils.ThresholdFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-		},
+		Tenant:                   "cgrates.org",
+		FilterIDs:                []string{"cgrates.org:FLTR_ID"},
+		AttributeFilterIndexIDs:  []string{"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+		ChargerFilterIndexIDs:    []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		DispatcherFilterIndexIDs: []string{"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+		ResourceFilterIndexIDs:   []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		StatFilterIndexIDs:       []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		ThresholdFilterIndexIDs:  []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
 	}
 
 	if err := apierSv1.SetFilter(arg, &reply); err != nil {

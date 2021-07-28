@@ -124,7 +124,6 @@ var (
 		CacheChargerProfiles:    CacheChargerFilterIndexes,
 		CacheDispatcherProfiles: CacheDispatcherFilterIndexes,
 		CacheFilters:            CacheReverseFilterIndexes,
-		// CacheRates:              CacheRateFilterIndexes,
 	}
 
 	// NonMonetaryBalances are types of balances which are not handled as monetary
@@ -159,74 +158,8 @@ var (
 	}
 
 	// ProtectedSFlds are the fields that sessions should not alter
-	ProtectedSFlds   = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
-	ArgCacheToPrefix = map[string]string{
-		DestinationIDs:        DestinationPrefix,
-		ReverseDestinationIDs: ReverseDestinationPrefix,
-		RatingPlanIDs:         RatingPlanPrefix,
-		RatingProfileIDs:      RatingProfilePrefix,
-		ActionIDs:             ActionPrefix,
-		ActionPlanIDs:         ActionPlanPrefix,
-		AccountActionPlanIDs:  AccountActionPlansPrefix,
-		ActionTriggerIDs:      ActionTriggerPrefix,
-		SharedGroupIDs:        SharedGroupPrefix,
-		ResourceProfileIDs:    ResourceProfilesPrefix,
-		ResourceIDs:           ResourcesPrefix,
-		StatsQueueIDs:         StatQueuePrefix,
-		StatsQueueProfileIDs:  StatQueueProfilePrefix,
-		ThresholdIDs:          ThresholdPrefix,
-		ThresholdProfileIDs:   ThresholdProfilePrefix,
-		FilterIDs:             FilterPrefix,
-		RouteProfileIDs:       RouteProfilePrefix,
-		AttributeProfileIDs:   AttributeProfilePrefix,
-		ChargerProfileIDs:     ChargerProfilePrefix,
-		DispatcherProfileIDs:  DispatcherProfilePrefix,
-		DispatcherHostIDs:     DispatcherHostPrefix,
+	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 
-		TimingIDs:                TimingsPrefix,
-		AttributeFilterIndexIDs:  AttributeFilterIndexes,
-		ResourceFilterIndexIDs:   ResourceFilterIndexes,
-		StatFilterIndexIDs:       StatFilterIndexes,
-		ThresholdFilterIndexIDs:  ThresholdFilterIndexes,
-		RouteFilterIndexIDs:      RouteFilterIndexes,
-		ChargerFilterIndexIDs:    ChargerFilterIndexes,
-		DispatcherFilterIndexIDs: DispatcherFilterIndexes,
-		FilterIndexIDs:           FilterIndexPrfx,
-	}
-	CacheInstanceToArg map[string]string
-	ArgCacheToInstance = map[string]string{
-		DestinationIDs:        CacheDestinations,
-		ReverseDestinationIDs: CacheReverseDestinations,
-		RatingPlanIDs:         CacheRatingPlans,
-		RatingProfileIDs:      CacheRatingProfiles,
-		ActionIDs:             CacheActions,
-		ActionPlanIDs:         CacheActionPlans,
-		AccountActionPlanIDs:  CacheAccountActionPlans,
-		ActionTriggerIDs:      CacheActionTriggers,
-		SharedGroupIDs:        CacheSharedGroups,
-		ResourceProfileIDs:    CacheResourceProfiles,
-		ResourceIDs:           CacheResources,
-		StatsQueueIDs:         CacheStatQueues,
-		StatsQueueProfileIDs:  CacheStatQueueProfiles,
-		ThresholdIDs:          CacheThresholds,
-		ThresholdProfileIDs:   CacheThresholdProfiles,
-		FilterIDs:             CacheFilters,
-		RouteProfileIDs:       CacheRouteProfiles,
-		AttributeProfileIDs:   CacheAttributeProfiles,
-		ChargerProfileIDs:     CacheChargerProfiles,
-		DispatcherProfileIDs:  CacheDispatcherProfiles,
-		DispatcherHostIDs:     CacheDispatcherHosts,
-
-		TimingIDs:                CacheTimings,
-		AttributeFilterIndexIDs:  CacheAttributeFilterIndexes,
-		ResourceFilterIndexIDs:   CacheResourceFilterIndexes,
-		StatFilterIndexIDs:       CacheStatFilterIndexes,
-		ThresholdFilterIndexIDs:  CacheThresholdFilterIndexes,
-		RouteFilterIndexIDs:      CacheRouteFilterIndexes,
-		ChargerFilterIndexIDs:    CacheChargerFilterIndexes,
-		DispatcherFilterIndexIDs: CacheDispatcherFilterIndexes,
-		FilterIndexIDs:           CacheReverseFilterIndexes,
-	}
 	ConcurrentReqsLimit    int
 	ConcurrentReqsStrategy string
 )
@@ -2506,37 +2439,12 @@ const (
 
 // ArgCache constats
 const (
-	DestinationIDs           = "DestinationIDs"
-	ReverseDestinationIDs    = "ReverseDestinationIDs"
-	RatingPlanIDs            = "RatingPlanIDs"
-	RatingProfileIDs         = "RatingProfileIDs"
-	ActionIDs                = "ActionIDs"
-	ActionPlanIDs            = "ActionPlanIDs"
-	AccountActionPlanIDs     = "AccountActionPlanIDs"
-	ActionTriggerIDs         = "ActionTriggerIDs"
-	SharedGroupIDs           = "SharedGroupIDs"
-	ResourceProfileIDs       = "ResourceProfileIDs"
-	ResourceIDs              = "ResourceIDs"
-	StatsQueueIDs            = "StatsQueueIDs"
-	StatsQueueProfileIDs     = "StatsQueueProfileIDs"
-	ThresholdIDs             = "ThresholdIDs"
-	ThresholdProfileIDs      = "ThresholdProfileIDs"
-	FilterIDs                = "FilterIDs"
-	RouteProfileIDs          = "RouteProfileIDs"
-	AttributeProfileIDs      = "AttributeProfileIDs"
-	ChargerProfileIDs        = "ChargerProfileIDs"
-	DispatcherProfileIDs     = "DispatcherProfileIDs"
-	DispatcherHostIDs        = "DispatcherHostIDs"
-	DispatcherRoutesIDs      = "DispatcherRoutesIDs"
-	TimingIDs                = "TimingIDs"
-	AttributeFilterIndexIDs  = "AttributeFilterIndexIDs"
-	ResourceFilterIndexIDs   = "ResourceFilterIndexIDs"
-	StatFilterIndexIDs       = "StatFilterIndexIDs"
-	ThresholdFilterIndexIDs  = "ThresholdFilterIndexIDs"
-	RouteFilterIndexIDs      = "RouteFilterIndexIDs"
-	ChargerFilterIndexIDs    = "ChargerFilterIndexIDs"
-	DispatcherFilterIndexIDs = "DispatcherFilterIndexIDs"
-	FilterIndexIDs           = "FilterIndexIDs"
+	DestinationIDs = "DestinationIDs"
+	RatingPlanIDs  = "RatingPlanIDs"
+	ActionIDs      = "ActionIDs"
+	ThresholdIDs   = "ThresholdIDs"
+	FilterIDs      = "FilterIDs"
+	TimingIDs      = "TimingIDs"
 )
 
 // Poster and Event reader constants
@@ -2746,10 +2654,6 @@ func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {
 		CachePrefixToInstance[v] = k
-	}
-	CacheInstanceToArg = make(map[string]string)
-	for k, v := range ArgCacheToInstance {
-		CacheInstanceToArg[v] = k
 	}
 }
 

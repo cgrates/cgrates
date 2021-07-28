@@ -564,9 +564,7 @@ func testDispatcherSCacheTestSet(t *testing.T) {
 
 func testDispatcherSCacheReload(t *testing.T) {
 	cache := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.DispatcherProfileIDs: {"cgrates.org:DISPATCHER_CACHE"},
-		},
+		DispatcherProfileIDs: []string{"cgrates.org:DISPATCHER_CACHE"},
 	}
 	var reply string
 	if err := dispatcherRPC.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {

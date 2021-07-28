@@ -301,7 +301,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 			}
-			cacheArgs[utils.AttributeProfileIDs] = ids
+			cacheArgs[utils.CacheAttributeProfiles] = ids
 		}
 	case utils.MetaResources:
 		cacheIDs = []string{utils.CacheResourceFilterIndexes}
@@ -330,8 +330,8 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetResourceProfile(res, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.ResourceProfileIDs] = ids
-				cacheArgs[utils.ResourceIDs] = ids
+				cacheArgs[utils.CacheResourceProfiles] = ids
+				cacheArgs[utils.CacheResources] = ids
 			}
 		}
 	case utils.MetaFilters:
@@ -360,7 +360,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetFilter(fltrPrf, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.FilterIDs] = ids
+				cacheArgs[utils.CacheFilters] = ids
 			}
 		}
 	case utils.MetaStats:
@@ -389,8 +389,8 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetStatQueueProfile(stsPrf, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.StatsQueueProfileIDs] = ids
-				cacheArgs[utils.StatsQueueIDs] = ids
+				cacheArgs[utils.CacheStatQueueProfiles] = ids
+				cacheArgs[utils.CacheStatQueues] = ids
 			}
 		}
 	case utils.MetaThresholds:
@@ -419,8 +419,8 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetThresholdProfile(thPrf, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.ThresholdProfileIDs] = ids
-				cacheArgs[utils.ThresholdIDs] = ids
+				cacheArgs[utils.CacheThresholdProfiles] = ids
+				cacheArgs[utils.CacheThresholds] = ids
 			}
 		}
 	case utils.MetaRoutes:
@@ -450,7 +450,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetRouteProfile(spPrf, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.RouteProfileIDs] = ids
+				cacheArgs[utils.CacheRouteProfiles] = ids
 			}
 		}
 	case utils.MetaChargers:
@@ -480,7 +480,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetChargerProfile(cpp, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.ChargerProfileIDs] = ids
+				cacheArgs[utils.CacheChargerProfiles] = ids
 			}
 		}
 	case utils.MetaDispatchers:
@@ -509,7 +509,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetDispatcherProfile(dsp, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.DispatcherProfileIDs] = ids
+				cacheArgs[utils.CacheDispatcherProfiles] = ids
 			}
 		}
 	case utils.MetaDispatcherHosts:
@@ -538,7 +538,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetDispatcherHost(dsp); err != nil {
 					return err
 				}
-				cacheArgs[utils.DispatcherHostIDs] = ids
+				cacheArgs[utils.CacheDispatcherHosts] = ids
 			}
 		}
 	}
@@ -638,7 +638,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					true); err != nil {
 					return err
 				}
-				cacheArgs[utils.AttributeProfileIDs] = ids
+				cacheArgs[utils.CacheAttributeProfiles] = ids
 			}
 		}
 
@@ -658,8 +658,8 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.ResourceProfileIDs] = ids
-				cacheArgs[utils.ResourceIDs] = ids
+				cacheArgs[utils.CacheResourceProfiles] = ids
+				cacheArgs[utils.CacheResources] = ids
 			}
 		}
 	case utils.MetaFilters:
@@ -676,7 +676,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					true); err != nil {
 					return err
 				}
-				cacheArgs[utils.FilterIDs] = ids
+				cacheArgs[utils.CacheFilters] = ids
 			}
 		}
 	case utils.MetaStats:
@@ -694,8 +694,8 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.StatsQueueProfileIDs] = ids
-				cacheArgs[utils.StatsQueueIDs] = ids
+				cacheArgs[utils.CacheStatQueueProfiles] = ids
+				cacheArgs[utils.CacheStatQueues] = ids
 			}
 		}
 	case utils.MetaThresholds:
@@ -713,8 +713,8 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.ThresholdProfileIDs] = ids
-				cacheArgs[utils.ThresholdIDs] = ids
+				cacheArgs[utils.CacheThresholdProfiles] = ids
+				cacheArgs[utils.CacheThresholds] = ids
 			}
 		}
 	case utils.MetaRoutes:
@@ -732,7 +732,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.RouteProfileIDs] = ids
+				cacheArgs[utils.CacheRouteProfiles] = ids
 			}
 		}
 	case utils.MetaChargers:
@@ -750,7 +750,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.ChargerProfileIDs] = ids
+				cacheArgs[utils.CacheChargerProfiles] = ids
 			}
 		}
 	case utils.MetaDispatchers:
@@ -768,7 +768,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID, true); err != nil {
 					return err
 				}
-				cacheArgs[utils.DispatcherProfileIDs] = ids
+				cacheArgs[utils.CacheDispatcherProfiles] = ids
 			}
 		}
 	case utils.MetaDispatcherHosts:
@@ -785,7 +785,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					tntIDStruct.ID); err != nil {
 					return err
 				}
-				cacheArgs[utils.DispatcherHostIDs] = ids
+				cacheArgs[utils.CacheDispatcherHosts] = ids
 			}
 		}
 	}

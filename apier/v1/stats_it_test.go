@@ -1750,9 +1750,7 @@ func testStatSCacheSet(t *testing.T) {
 
 func testStatSCacheReload(t *testing.T) {
 	cache := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.StatsQueueProfileIDs: {"cgrates.org:STAT_CACHE"},
-		},
+		StatsQueueProfileIDs: []string{"cgrates.org:STAT_CACHE"},
 	}
 	var reply string
 	if err := stsV1Rpc.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {

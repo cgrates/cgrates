@@ -356,7 +356,7 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 	//CacheReload
 	if err := apiv2.ConnMgr.Call(apiv2.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.ActionIDs: {attrs.ActionsId}},
+			ActionIDs: []string{attrs.ActionsId},
 		}, reply); err != nil {
 		return err
 	}

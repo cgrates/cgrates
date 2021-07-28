@@ -1168,9 +1168,7 @@ func testResourceSCacheTestSet(t *testing.T) {
 
 func testResourceSCacheReload(t *testing.T) {
 	cache := &utils.AttrReloadCacheWithAPIOpts{
-		ArgsCache: map[string][]string{
-			utils.ResourceProfileIDs: {"cgrates.org:RESOURCE_CACHE"},
-		},
+		ResourceProfileIDs: []string{"cgrates.org:RESOURCE_CACHE"},
 	}
 	var reply string
 	if err := rlsV1Rpc.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {

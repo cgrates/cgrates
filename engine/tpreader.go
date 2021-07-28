@@ -785,10 +785,8 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-					ArgsCache: map[string][]string{
-						utils.AccountActionPlanIDs: {id},
-						utils.ActionPlanIDs:        {accountAction.ActionPlanId},
-					},
+					AccountActionPlanIDs: []string{id},
+					ActionPlanIDs:        []string{accountAction.ActionPlanId},
 				}, &reply); err != nil {
 				return err
 			}
@@ -894,9 +892,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-					ArgsCache: map[string][]string{
-						utils.ActionTriggerIDs: {accountAction.ActionTriggersId},
-					},
+					ActionTriggerIDs: []string{accountAction.ActionTriggersId},
 				}, &reply); err != nil {
 				return err
 			}
@@ -1012,9 +1008,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-					ArgsCache: map[string][]string{
-						utils.ActionIDs: {k},
-					},
+					ActionIDs: []string{k},
 				}, &reply); err != nil {
 				return err
 			}
@@ -2254,28 +2248,28 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 
 	//compose Reload Cache argument
 	cacheArgs := map[string][]string{
-		utils.DestinationIDs:        dstIds,
-		utils.ReverseDestinationIDs: revDstIDs,
-		utils.TimingIDs:             tmgIds,
-		utils.RatingPlanIDs:         rplIds,
-		utils.RatingProfileIDs:      rpfIds,
-		utils.ActionIDs:             actIds,
-		utils.ActionPlanIDs:         aps,
-		utils.AccountActionPlanIDs:  aapIDs,
-		utils.SharedGroupIDs:        shgIds,
-		utils.ResourceProfileIDs:    rspIDs,
-		utils.ResourceIDs:           rspIDs,
-		utils.ActionTriggerIDs:      aatIDs,
-		utils.StatsQueueIDs:         stqpIDs,
-		utils.StatsQueueProfileIDs:  stqpIDs,
-		utils.ThresholdIDs:          trspfIDs,
-		utils.ThresholdProfileIDs:   trspfIDs,
-		utils.FilterIDs:             flrIDs,
-		utils.RouteProfileIDs:       routeIDs,
-		utils.AttributeProfileIDs:   apfIDs,
-		utils.ChargerProfileIDs:     chargerIDs,
-		utils.DispatcherProfileIDs:  dppIDs,
-		utils.DispatcherHostIDs:     dphIDs,
+		utils.CacheDestinations:        dstIds,
+		utils.CacheReverseDestinations: revDstIDs,
+		utils.CacheTimings:             tmgIds,
+		utils.CacheRatingPlans:         rplIds,
+		utils.CacheRatingProfiles:      rpfIds,
+		utils.CacheActions:             actIds,
+		utils.CacheActionPlans:         aps,
+		utils.CacheAccountActionPlans:  aapIDs,
+		utils.CacheSharedGroups:        shgIds,
+		utils.CacheResourceProfiles:    rspIDs,
+		utils.CacheResources:           rspIDs,
+		utils.CacheActionTriggers:      aatIDs,
+		utils.CacheStatQueues:          stqpIDs,
+		utils.CacheStatQueueProfiles:   stqpIDs,
+		utils.CacheThresholds:          trspfIDs,
+		utils.CacheThresholdProfiles:   trspfIDs,
+		utils.CacheFilters:             flrIDs,
+		utils.CacheRouteProfiles:       routeIDs,
+		utils.CacheAttributeProfiles:   apfIDs,
+		utils.CacheChargerProfiles:     chargerIDs,
+		utils.CacheDispatcherProfiles:  dppIDs,
+		utils.CacheDispatcherHosts:     dphIDs,
 	}
 
 	// verify if we need to clear indexes
@@ -2325,17 +2319,8 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 
 // CallCache call the cache reload after data load
 func CallCache(connMgr *ConnManager, cacheConns []string, caching string, args map[string][]string, cacheIDs []string, opts map[string]interface{}, verbose bool, tenant string) (err error) {
-	for k, v := range args {
-		if len(v) == 0 {
-			delete(args, k)
-		}
-	}
 	var method, reply string
-	var cacheArgs interface{} = &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:   opts,
-		ArgsCache: args,
-		Tenant:    tenant,
-	}
+	var cacheArgs interface{} = utils.NewAttrReloadCacheWithOptsFromMap(args, tenant, opts)
 	switch caching {
 	case utils.MetaNone:
 		return
