@@ -357,9 +357,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	if dryRun {
 		return
 	}
-	if err = rs.recordUsage(ru); err != nil {
-		return utils.EmptyString, err
-	}
+	rs.recordUsage(ru) // recordUsage returns error only when ru.ID already exists in the Usages map
 	return
 }
 
