@@ -207,7 +207,7 @@ func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *Fil
 		filterS:     filterS,
 		connMgr:     connMgr,
 		stopBackup:  make(chan struct{}),
-		loopStoped:  make(chan struct{}),
+		loopStopped: make(chan struct{}),
 		storedTdIDs: make(utils.StringSet),
 	}
 }
@@ -219,7 +219,7 @@ type ThresholdService struct {
 	filterS     *FilterS
 	connMgr     *ConnManager
 	stopBackup  chan struct{}
-	loopStoped  chan struct{}
+	loopStopped chan struct{}
 	storedTdIDs utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
 	stMux       sync.RWMutex    // protects storedTdIDs
 }
@@ -227,7 +227,7 @@ type ThresholdService struct {
 // Reload stops the backupLoop and restarts it
 func (tS *ThresholdService) Reload(ctx *context.Context) {
 	close(tS.stopBackup)
-	<-tS.loopStoped // wait until the loop is done
+	<-tS.loopStopped // wait until the loop is done
 	tS.stopBackup = make(chan struct{})
 	go tS.runBackup(ctx)
 }
@@ -249,14 +249,14 @@ func (tS *ThresholdService) Shutdown(ctx *context.Context) {
 func (tS *ThresholdService) runBackup(ctx *context.Context) {
 	storeInterval := tS.cgrcfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
-		tS.loopStoped <- struct{}{}
+		tS.loopStopped <- struct{}{}
 		return
 	}
 	for {
 		tS.storeThresholds(ctx)
 		select {
 		case <-tS.stopBackup:
-			tS.loopStoped <- struct{}{}
+			tS.loopStopped <- struct{}{}
 			return
 		case <-time.After(storeInterval):
 		}
