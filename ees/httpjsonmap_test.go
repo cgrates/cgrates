@@ -365,7 +365,7 @@ func TestHttpJsonMapSync(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPjsonMap
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone))
@@ -425,7 +425,7 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPjsonMap
 	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
