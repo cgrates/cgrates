@@ -6529,9 +6529,11 @@ func TestResourcesStartLoop(t *testing.T) {
 func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
+	tmpCM := connMgr
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
 	}()
 
 	Cache.Clear(nil)
@@ -6564,12 +6566,14 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	}
 }
 
-func TestResourcesMatchingResourcesForEventFinalFinalCacheSetErr(t *testing.T) {
+func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
+	tmpCM := connMgr
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
 	}()
 
 	Cache.Clear(nil)
