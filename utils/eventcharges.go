@@ -285,15 +285,15 @@ func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
 
 // Equals returns the equality between two EventCharges
 func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
-    if eC == nil && evCh == nil {
-    	return true
+	if eC == nil && evCh == nil {
+		return true
 	}
 	if (eC == nil && evCh != nil ||
 		eC != nil && evCh == nil) ||
 		(eC.Abstracts == nil && evCh.Abstracts != nil ||
-		eC.Abstracts != nil && evCh.Abstracts == nil ||
-		(eC.Abstracts != nil && evCh.Abstracts != nil &&
-			eC.Abstracts.Compare(evCh.Abstracts) != 0)) ||
+			eC.Abstracts != nil && evCh.Abstracts == nil ||
+			(eC.Abstracts != nil && evCh.Abstracts != nil &&
+				eC.Abstracts.Compare(evCh.Abstracts) != 0)) ||
 		(eC.Concretes == nil && evCh.Concretes != nil ||
 			eC.Concretes != nil && evCh.Concretes == nil ||
 			(eC.Concretes != nil && evCh.Concretes != nil &&
