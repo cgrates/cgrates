@@ -550,6 +550,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 	if indexKeys, err = dm.dataDB.GetKeysForPrefix(idxPrfx); err != nil {
 		return
 	}
+	missingObj := utils.StringSet{}
 	for _, dataID := range indexKeys { // get all the indexes
 		dataID = strings.TrimPrefix(dataID, idxPrfx)
 
@@ -577,7 +578,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 				if err != utils.ErrNotFound {
 					return
 				}
-				rply.MissingObjects = append(rply.MissingObjects, utils.ConcatenatedKey(tnt, itmID))
+				missingObj.Add(utils.ConcatenatedKey(tnt, itmID))
 				err = nil
 				continue
 			}
@@ -618,7 +619,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 			}
 		}
 	}
-
+	rply.MissingObjects = missingObj.AsSlice()
 	return
 }
 
