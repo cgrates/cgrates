@@ -53,7 +53,7 @@
 
 - name:  Start registry
   become: yes
-  shell: docker run -d --name {{ registry_name }} --restart=always -v "$(pwd)":/var/lib/{{ registry_name }} -p {{ registry_port }}:5000 registry:2
+  shell: docker run -d --name {{ registry_name }} --restart=always -v "$(pwd)":/var/lib/registry -p {{ registry_port }}:5000 registry:2
   args:
     chdir: /var/docker/{{ registry_name }}
   when: continerList.stdout_lines|length == 0
