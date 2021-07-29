@@ -282,10 +282,11 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 					err.Error(),
 					fmt.Sprintf("error <%s> querying DataManager for category: <%s>, dataID: <%s>", err.Error(), prfx, dataID))
 			}
-			if err = Cache.Remove(ctx, utils.CachePrefixToInstance[prfx], dataID,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
-				return
-			}
+			err = nil
+			// if err = Cache.Remove(ctx, utils.CachePrefixToInstance[prfx], dataID,
+			// cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
+			// return
+			// }
 		}
 	}
 	return

@@ -170,7 +170,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*opts.ID:1002":                   {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:*opts.ID:1002":                  {"TestHealthIndexThreshold"},
 			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
 		},
 		BrokenIndexes:  map[string][]string{},
@@ -203,7 +203,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 	exp = &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:InexistingThreshold"},
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*opts.ID:1002":                   {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:*opts.ID:1002":                  {"TestHealthIndexThreshold"},
 			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
 		},
 		BrokenIndexes: map[string][]string{
@@ -238,7 +238,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 	exp = &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:InexistingThreshold"},
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*opts.ID:1002":                   {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:*opts.ID:1002":                  {"TestHealthIndexThreshold"},
 			"cgrates.org:*string:*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
 		},
 		BrokenIndexes: map[string][]string{

@@ -22,17 +22,22 @@ package main
 
 import (
 	"bytes"
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"os/exec"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -143,7 +148,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
 		&replyAttr); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
 
 	//filtersPrf
@@ -151,7 +156,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetFilter,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}},
 		&replyFltr); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
 
 	//ratesPrf
@@ -167,13 +172,13 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyResPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
 	var replyRes *engine.Resource
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.ResourceSv1GetResource,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
 
 	// routesPrf
@@ -181,7 +186,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&replyRts); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
 
 	// statsPrf
@@ -189,7 +194,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replySts); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
 
 	// statQueue
@@ -197,7 +202,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetStatQueue,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replyStQue); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
 
 	// thresholdPrf
@@ -205,7 +210,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1"}},
 		&replyThdPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
 
 	// threshold
@@ -213,8 +218,17 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1"}},
 		&rplyThd); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
+		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
+
+	//chargers
+	var replyChrgr *engine.ChargerProfile
+	if err := cgrLdrBIRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Raw"},
+		&replyChrgr); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %v", utils.ErrNotFound.Error(), err)
+	}
+
 }
 
 func testCgrLdrLoadData(t *testing.T) {
