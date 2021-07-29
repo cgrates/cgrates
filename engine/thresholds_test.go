@@ -2602,8 +2602,10 @@ func TestThresholdsStartLoop(t *testing.T) {
 
 func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 	tmp := Cache
+	tmpC := config.CgrConfig()
 	defer func() {
 		Cache = tmp
+		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2654,8 +2656,10 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 
 func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	tmp := Cache
+	tmpC := config.CgrConfig()
 	defer func() {
 		Cache = tmp
+		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2723,8 +2727,10 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 
 func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 	tmp := Cache
+	tmpC := config.CgrConfig()
 	defer func() {
 		Cache = tmp
+		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2773,8 +2779,10 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 
 func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 	tmp := Cache
+	tmpC := config.CgrConfig()
 	defer func() {
 		Cache = tmp
+		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2793,8 +2801,10 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 
 func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 	tmp := Cache
+	tmpC := config.CgrConfig()
 	defer func() {
 		Cache = tmp
+		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2840,4 +2850,303 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 	} else if !reflect.DeepEqual(tS.storedTdIDs, expStored) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expStored, tS.storedTdIDs)
 	}
+}
+
+func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS)
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weight:    10,
+		Blocker:   true,
+	}
+
+	th := &Threshold{
+		tPrfl:  thPrf,
+		Tenant: "cgrates.org",
+		ID:     "TH2",
+		Hits:   2,
+		dirty:  utils.BoolPointer(false),
+	}
+	if err := dm.SetThreshold(th); err != nil {
+		t.Error(err)
+	}
+
+	var reply string
+	if err := tS.V1ResetThreshold(&utils.TenantID{
+		ID: "TH1",
+	}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().StoreInterval = -1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS)
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weight:    10,
+		Blocker:   true,
+	}
+
+	th := &Threshold{
+		tPrfl:  thPrf,
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+		dirty:  utils.BoolPointer(false),
+	}
+	if err := dm.SetThreshold(th); err != nil {
+		t.Error(err)
+	}
+
+	var reply string
+	if err := tS.V1ResetThreshold(&utils.TenantID{
+		ID: "TH1",
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned: <%q>", reply)
+	} else if th.Hits != 0 {
+		t.Errorf("expected nr. of hits to be 0, received: <%+v>", th.Hits)
+	}
+}
+
+func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().StoreInterval = -1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(nil, cfg, filterS)
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weight:    10,
+		Blocker:   true,
+	}
+
+	th := &Threshold{
+		tPrfl:  thPrf,
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+		dirty:  utils.BoolPointer(false),
+	}
+	if err := dm.SetThreshold(th); err != nil {
+		t.Error(err)
+	}
+
+	var reply string
+	if err := tS.V1ResetThreshold(&utils.TenantID{
+		ID: "TH1",
+	}, &reply); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNoDatabaseConn, err)
+	}
+}
+
+func TestThresholdsLockUnlockThresholdProfiles(t *testing.T) {
+	thPrf := &ThresholdProfile{
+		Tenant:  "cgrates.org",
+		ID:      "thPrf",
+		Weight:  10,
+		MaxHits: 5,
+		MinHits: 2,
+	}
+
+	//lock profile with empty lkID parameter
+	thPrf.lock(utils.EmptyString)
+
+	if !thPrf.isLocked() {
+		t.Fatal("expected profile to be locked")
+	} else if thPrf.lkID == utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be non-empty")
+	}
+
+	//unlock previously locked profile
+	thPrf.unlock()
+
+	if thPrf.isLocked() {
+		t.Fatal("expected profile to be unlocked")
+	} else if thPrf.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+
+	//unlock an already unlocked profile - nothing happens
+	thPrf.unlock()
+
+	if thPrf.isLocked() {
+		t.Fatal("expected profile to be unlocked")
+	} else if thPrf.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+}
+
+func TestThresholdsLockUnlockThresholds(t *testing.T) {
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "thPrf",
+	}
+
+	//lock resource with empty lkID parameter
+	th.lock(utils.EmptyString)
+
+	if !th.isLocked() {
+		t.Fatal("expected resource to be locked")
+	} else if th.lkID == utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be non-empty")
+	}
+
+	//unlock previously locked resource
+	th.unlock()
+
+	if th.isLocked() {
+		t.Fatal("expected resource to be unlocked")
+	} else if th.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+
+	//unlock an already unlocked resource - nothing happens
+	th.unlock()
+
+	if th.isLocked() {
+		t.Fatal("expected resource to be unlocked")
+	} else if th.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+}
+
+func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS)
+
+	thPrf1 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weight:    10,
+		Blocker:   true,
+	}
+	if err := dm.SetThresholdProfile(thPrf1, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestEvent",
+			Event:  map[string]interface{}{},
+		},
+	}
+
+	if _, err := tS.matchingThresholdsForEvent("cgrates.org", args); err == nil ||
+		err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS)
+
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		dirty:  utils.BoolPointer(true),
+	}
+
+	expLog := `[WARNING] <ThresholdService> failed caching Threshold with ID: cgrates.org:TH1, error: DISCONNECTED`
+	if err := tS.StoreThreshold(th); err == nil ||
+		err.Error() != utils.ErrDisconnected.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
+	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
+		t.Errorf("expected log <%+v> to be included in <%+v>", expLog, rcv)
+	}
+
+	utils.Logger.SetLogLevel(0)
 }
