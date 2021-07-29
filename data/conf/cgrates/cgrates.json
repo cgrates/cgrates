@@ -39,7 +39,7 @@
 // 	"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
 // 	"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
 // 	"caps_stats_interval": "0",			// the interval we sample for caps stats ( 0 to disabled )
-// 	"shutdown_timeout": "1s"			// the duration to wait until all services are stoped
+// 	"shutdown_timeout": "1s"			// the duration to wait until all services are stopped
 // },
 
 

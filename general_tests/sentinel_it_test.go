@@ -67,7 +67,7 @@ var (
 // Node2 will be slave of node1 and start at port 16380
 // Sentinel1 will be started at port 16381 and will watch Node1
 // Sentinel2 will be started at port 16382 and will watch Node1
-// Also make sure that redis process is stoped
+// Also make sure that redis process is stopped
 func TestRedisSentinel(t *testing.T) {
 	if !*redisSentinel {
 		return
