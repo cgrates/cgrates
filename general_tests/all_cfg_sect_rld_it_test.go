@@ -137,29 +137,6 @@ func testSectRPCConn(t *testing.T) {
 	}
 }
 
-func testSectConfigSReloadGeneral(t *testing.T) {
-
-	var reply string
-	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
-		Tenant: "cgrates.org",
-		Config: "{\"general\":{\"connect_attempts\":5,\"connect_timeout\":\"1s\",\"dbdata_encoding\":\"*msgpack\",\"default_caching\":\"*reload\",\"default_category\":\"call\",\"default_request_type\":\"*rated\",\"default_tenant\":\"cgrates.org\",\"default_timezone\":\"Local\",\"digest_equal\":\":\",\"digest_separator\":\",\",\"failed_posts_dir\":\"/var/spool/cgrates/failed_posts\",\"failed_posts_ttl\":\"5s\",\"locking_timeout\":\"0\",\"log_level\":7,\"logger\":\"*syslog\",\"max_parallel_conns\":100,\"node_id\":\"98ead14\",\"poster_attempts\":3,\"reconnects\":-1,\"reply_timeout\":\"50s\",\"rounding_decimals\":5,\"rsr_separator\":\";\",\"tpexport_dir\":\"/var/spool/cgrates/tpe\"}}",
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected OK received: %+v", reply)
-	}
-	cfgStr := "{\"general\":{\"connect_attempts\":5,\"connect_timeout\":\"1s\",\"dbdata_encoding\":\"*msgpack\",\"default_caching\":\"*reload\",\"default_category\":\"call\",\"default_request_type\":\"*rated\",\"default_tenant\":\"cgrates.org\",\"default_timezone\":\"Local\",\"digest_equal\":\":\",\"digest_separator\":\",\",\"failed_posts_dir\":\"/var/spool/cgrates/failed_posts\",\"failed_posts_ttl\":\"5s\",\"locking_timeout\":\"0\",\"log_level\":7,\"logger\":\"*syslog\",\"max_parallel_conns\":100,\"node_id\":\"98ead14\",\"poster_attempts\":3,\"reconnects\":-1,\"reply_timeout\":\"50s\",\"rounding_decimals\":5,\"rsr_separator\":\";\",\"tpexport_dir\":\"/var/spool/cgrates/tpe\"}}"
-	var rpl string
-	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
-		Tenant:  "cgrates.org",
-		Section: config.GENERAL_JSN,
-	}, &rpl); err != nil {
-		t.Error(err)
-	} else if cfgStr != rpl {
-		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
-	}
-}
-
 func testSectConfigSReloadCores(t *testing.T) {
 
 	var reply string
