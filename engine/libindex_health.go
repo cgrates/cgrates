@@ -469,7 +469,7 @@ func getFilterAsIndexSet(dm *DataManager, fltrIdxCache *ltcache.Cache, idxItmTyp
 }
 
 // updateFilterIHMisingIndx updates the reply with the missing indexes for a specific object( obj->filter->index relation)
-func updateFilterIHMisingIndx(dm *DataManager, fltrCache, fltrIdxCache *ltcache.Cache, filterIDs []string, indxType, tnt, tntCtx, itmID string, rply *FilterIHReply) (_ *FilterIHReply, err error) {
+func updateFilterIHMisingIndx(dm *DataManager, fltrCache, fltrIdxCache *ltcache.Cache, filterIDs []string, indxType, tnt, tntCtx, itmID string, missingFltrs utils.StringSet, rply *FilterIHReply) (_ *FilterIHReply, err error) {
 	if len(filterIDs) == 0 { // no filter so check the *none:*any:*any index
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
 		var rcvIndx utils.StringSet
@@ -493,7 +493,10 @@ func updateFilterIHMisingIndx(dm *DataManager, fltrCache, fltrIdxCache *ltcache.
 				return
 			}
 			fltrID = utils.ConcatenatedKey(tnt, fltrID)
-			rply.MissingFilters[fltrID] = append(rply.MissingFilters[fltrID], itmID)
+			if tntIdxFltr := utils.ConcatenatedKey(fltrID, itmID); !missingFltrs.Has(tntIdxFltr) { // tntIdxFltr = tnt:idx:id verification to not set the same ID
+				missingFltrs.Add(tntIdxFltr)
+				rply.MissingFilters[fltrID] = append(rply.MissingFilters[fltrID], itmID)
+			}
 			continue
 		}
 		var indexes map[string]utils.StringSet
@@ -507,6 +510,7 @@ func updateFilterIHMisingIndx(dm *DataManager, fltrCache, fltrIdxCache *ltcache.
 			}
 		}
 	}
+
 	return rply, nil
 }
 
@@ -523,6 +527,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 	if ids, err = dm.dataDB.GetKeysForPrefix(objPrfx); err != nil {
 		return
 	}
+	missingFltrs := utils.StringSet{} // for checking multiple filters that are missing(to not append the same ID in case)
 	for _, id := range ids { // get all the objects from DB
 		id = strings.TrimPrefix(id, objPrfx)
 		tntID := utils.NewTenantID(id)
@@ -530,14 +535,15 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 		if obj, err = getIHObjFromCache(dm, objCache, indxType, tntID.Tenant, tntID.ID); err != nil {
 			return
 		}
-
 		if obj.contexts == nil { // update the reply
-			if rply, err = updateFilterIHMisingIndx(dm, fltrCache, fltrIdxCache, obj.filterIDs, indxType, tntID.Tenant, tntID.Tenant, tntID.ID, rply); err != nil {
+			if rply, err = updateFilterIHMisingIndx(dm, fltrCache, fltrIdxCache, obj.filterIDs,
+				indxType, tntID.Tenant, tntID.Tenant, tntID.ID, missingFltrs, rply); err != nil {
 				return
 			}
 		} else {
 			for _, ctx := range *obj.contexts {
-				if rply, err = updateFilterIHMisingIndx(dm, fltrCache, fltrIdxCache, obj.filterIDs, indxType, tntID.Tenant, utils.ConcatenatedKey(tntID.Tenant, ctx), tntID.ID, rply); err != nil {
+				if rply, err = updateFilterIHMisingIndx(dm, fltrCache, fltrIdxCache,
+					obj.filterIDs, indxType, tntID.Tenant, utils.ConcatenatedKey(tntID.Tenant, ctx), tntID.ID, missingFltrs, rply); err != nil {
 					return
 				}
 			}
