@@ -19,6 +19,7 @@ package utils
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -96,8 +97,11 @@ func TestSafeMapStorageGetKeys(t *testing.T) {
 	}
 
 	expected := []string{"*req.field1", "*req.field2"}
-	if reply := ms.GetKeys(false, 0, MetaReq); !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %v \n but received \n %v", expected, reply)
+	reply := ms.GetKeys(false, 0, MetaReq)
+	sort.Strings(reply)
+
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, reply)
 	}
 }
 
