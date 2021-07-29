@@ -349,6 +349,7 @@ type mockCsv struct {
 
 func (mc *mockCsv) Close() error { return nil }
 func (mc *mockCsv) Write(s []byte) (n int, err error) {
+	// fmt.Println(string(s))
 	time.Sleep(3 * time.Second)
 	mc.wg.Done()
 	return 0, nil
@@ -360,7 +361,7 @@ func TestFileCSVSync(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*file_csv"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaFileCSV
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone))
@@ -415,3 +416,66 @@ func TestFileCSVSync(t *testing.T) {
 		t.Error("Can't asynchronously export events")
 	}
 }
+
+// func TestFileCSVSyncLimit(t *testing.T) {
+// 	//Create new exporter
+// 	cgrCfg := config.NewDefaultCGRConfig()
+// 	var cfgIdx int
+// 	cfgIdx = 0
+
+// 	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*file_csv"
+// 	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
+// 	dc, err := newEEMetrics(utils.FirstNonEmpty(
+// 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
+// 		cgrCfg.GeneralCfg().DefaultTimezone))
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	//Create an event
+// 	cgrEvent := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		Event: map[string]interface{}{
+// 			"Account":     "1001",
+// 			"Destination": "1002",
+// 		},
+// 	}
+
+// 	var wg1 = &sync.WaitGroup{}
+
+// 	wg1.Add(3)
+
+// 	test := make(chan struct{})
+// 	go func() {
+// 		wg1.Wait()
+// 		close(test)
+// 	}()
+// 	mckCsv := &mockCsv{
+// 		wg: wg1,
+// 	}
+// 	exp := &FileCSVee{
+// 		id:        cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+// 		cgrCfg:    cgrCfg,
+// 		cfgIdx:    cfgIdx,
+// 		filterS:   new(engine.FilterS),
+// 		file:      mckCsv,
+// 		csvWriter: csv.NewWriter(mckCsv),
+// 		dc:        dc,
+// 		reqs:      newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+// 	}
+
+// 	for i := 0; i < 3; i++ {
+// 		go func() {
+// 			exp.ExportEvent(cgrEvent)
+// 			exp.csvWriter.Flush()
+// 		}()
+// 	}
+// 	// exp.ExportEvent(cgrEvent)
+
+// 	select {
+// 	case <-test:
+// 		t.Error("Should not have been possible to asynchronously export events")
+// 	case <-time.After(4 * time.Second):
+// 		return
+// 	}
+// }
