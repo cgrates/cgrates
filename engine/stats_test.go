@@ -27,10 +27,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestNewStatService(t *testing.T) {
@@ -1482,7 +1482,7 @@ func TestStatQueueReload(t *testing.T) {
 		cgrcfg:      cfg,
 	}
 	sS.loopStopped <- struct{}{}
-	sS.Reload()
+	sS.Reload(context.Background())
 	close(sS.stopBackup)
 }
 
@@ -1500,7 +1500,7 @@ func TestStatQueueStartLoop(t *testing.T) {
 		cgrcfg:      cfg,
 	}
 
-	sS.StartLoop()
+	sS.StartLoop(context.Background())
 	time.Sleep(10 * time.Millisecond)
 
 	if len(sS.loopStopped) != 1 {
@@ -1525,7 +1525,7 @@ func TestStatQueueShutdown(t *testing.T) {
 
 	expLog1 := `[INFO] <StatS> service shutdown initialized`
 	expLog2 := `[INFO] <StatS> service shutdown complete`
-	sS.Shutdown()
+	sS.Shutdown(context.Background())
 
 	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog1) ||
 		!strings.Contains(rcvLog, expLog2) {
@@ -1554,9 +1554,9 @@ func TestStatQueueStoreStatsOK(t *testing.T) {
 	Cache.SetWithoutReplicate(utils.CacheStatQueues, "cgrates.org:SQ1", exp, nil, true,
 		utils.NonTransactional)
 	sS.storedStatQueues.Add("cgrates.org:SQ1")
-	sS.storeStats()
+	sS.storeStats(context.Background())
 
-	if rcv, err := sS.dm.GetStatQueue("cgrates.org", "SQ1", true, false,
+	if rcv, err := sS.dm.GetStatQueue(context.Background(), "cgrates.org", "SQ1", true, false,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
@@ -1564,7 +1564,7 @@ func TestStatQueueStoreStatsOK(t *testing.T) {
 			utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 
-	Cache.Remove(utils.CacheStatQueues, "cgrates.org:SQ1", true, utils.NonTransactional)
+	Cache.Remove(context.Background(), utils.CacheStatQueues, "cgrates.org:SQ1", true, utils.NonTransactional)
 }
 
 func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
@@ -1598,7 +1598,7 @@ func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
 		"SQ1": struct{}{},
 	}
 	expLog := `[WARNING] <StatS> failed saving StatQueue with ID: cgrates.org:SQ1, error: NO_DATABASE_CONNECTION`
-	sS.storeStats()
+	sS.storeStats(context.Background())
 
 	if !reflect.DeepEqual(sS.storedStatQueues, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, sS.storedStatQueues)
@@ -1608,7 +1608,7 @@ func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
 	}
 
 	utils.Logger.SetLogLevel(0)
-	Cache.Remove(utils.CacheStatQueues, "SQ1", true, utils.NonTransactional)
+	Cache.Remove(context.Background(), utils.CacheStatQueues, "SQ1", true, utils.NonTransactional)
 }
 
 func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
@@ -1641,14 +1641,14 @@ func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 		utils.NonTransactional)
 	sS.storedStatQueues.Add("SQ1")
 	expLog := `[WARNING] <StatS> failed retrieving from cache stat queue with ID: SQ1`
-	sS.storeStats()
+	sS.storeStats(context.Background())
 
 	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected <%+v> \nto be included in: <%+v>", expLog, rcvLog)
 	}
 
 	utils.Logger.SetLogLevel(0)
-	Cache.Remove(utils.CacheStatQueues, "SQ2", true, utils.NonTransactional)
+	Cache.Remove(context.Background(), utils.CacheStatQueues, "SQ2", true, utils.NonTransactional)
 }
 
 func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
@@ -1677,7 +1677,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, connMgr)
@@ -1689,7 +1689,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	}
 
 	expLog := `[WARNING] <StatS> failed caching StatQueue with ID: cgrates.org:SQ1, error: DISCONNECTED`
-	if err := sS.StoreStatQueue(sq); err == nil ||
+	if err := sS.StoreStatQueue(context.Background(), sq); err == nil ||
 		err.Error() != utils.ErrDisconnected.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
 	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
@@ -1710,7 +1710,7 @@ func TestStatQueueStoreThresholdNilDirtyField(t *testing.T) {
 		ID:     "SQ1",
 	}
 
-	if err := sS.StoreStatQueue(sq); err != nil {
+	if err := sS.StoreStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 }
