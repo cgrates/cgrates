@@ -696,7 +696,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 	}
 }
 
-func TestLibstatsSqID(t *testing.T) {
+func TestStatQueueSqID(t *testing.T) {
 	ssq := &StoredStatQueue{
 		ID:     "testID",
 		Tenant: "testTenant",
@@ -773,7 +773,7 @@ func (sMM *statMetricMock) GetCompressFactor(events map[string]int) map[string]i
 	return nil
 }
 
-func TestLibstatsNewStoredStatQueue(t *testing.T) {
+func TestStatQueueNewStoredStatQueue(t *testing.T) {
 	sq := &StatQueue{
 		SQMetrics: map[string]StatMetric{
 			"key": &statMetricMock{},
@@ -793,7 +793,7 @@ func TestLibstatsNewStoredStatQueue(t *testing.T) {
 	}
 }
 
-func TestLibstatsAsStatQueueNilStoredSq(t *testing.T) {
+func TestStatQueueAsStatQueueNilStoredSq(t *testing.T) {
 	var ssq *StoredStatQueue
 	var ms Marshaler
 
@@ -808,7 +808,7 @@ func TestLibstatsAsStatQueueNilStoredSq(t *testing.T) {
 	}
 }
 
-func TestLibstatsAsStatQueueSuccess(t *testing.T) {
+func TestStatQueueAsStatQueueSuccess(t *testing.T) {
 	ssq := &StoredStatQueue{
 		SQItems: []SQItem{
 			{
@@ -837,7 +837,7 @@ func TestLibstatsAsStatQueueSuccess(t *testing.T) {
 	}
 }
 
-func TestLibstatsAsStatQueueUnsupportedMetric(t *testing.T) {
+func TestStatQueueAsStatQueueUnsupportedMetric(t *testing.T) {
 	ssq := &StoredStatQueue{
 		SQItems: []SQItem{
 			{
@@ -862,7 +862,7 @@ func TestLibstatsAsStatQueueUnsupportedMetric(t *testing.T) {
 	}
 }
 
-func TestLibstatsAsStatQueueErrLoadMarshaled(t *testing.T) {
+func TestStatQueueAsStatQueueErrLoadMarshaled(t *testing.T) {
 	ssq := &StoredStatQueue{
 		SQItems: []SQItem{
 			{
@@ -891,7 +891,7 @@ func TestLibstatsAsStatQueueErrLoadMarshaled(t *testing.T) {
 	}
 }
 
-func TestLibstatsAsStatQueueOK(t *testing.T) {
+func TestStatQueueAsStatQueueOK(t *testing.T) {
 	ms, err := NewMarshaler(utils.JSON)
 	if err != nil {
 		t.Fatal(err)
@@ -935,7 +935,7 @@ func TestLibstatsAsStatQueueOK(t *testing.T) {
 	}
 }
 
-func TestLibstatsNewStatQueue(t *testing.T) {
+func TestStatQueueNewStatQueue(t *testing.T) {
 	tnt := "tenant"
 	id := "id"
 	metrics := []*MetricWithFilters{
@@ -964,7 +964,7 @@ func TestLibstatsNewStatQueue(t *testing.T) {
 	}
 }
 
-func TestLibstatsProcessEventremExpiredErr(t *testing.T) {
+func TestStatQueueProcessEventremExpiredErr(t *testing.T) {
 	tnt, evID := "tenant", "eventID"
 	filters := &FilterS{}
 	expiry := time.Date(2021, 1, 1, 23, 59, 59, 10, time.UTC)
@@ -997,7 +997,7 @@ func TestLibstatsProcessEventremExpiredErr(t *testing.T) {
 	}
 }
 
-func TestLibstatsProcessEventremOnQueueLengthErr(t *testing.T) {
+func TestStatQueueProcessEventremOnQueueLengthErr(t *testing.T) {
 	tnt, evID := "tenant", "eventID"
 	filters := &FilterS{}
 	evNm := utils.MapStorage{
@@ -1028,7 +1028,7 @@ func TestLibstatsProcessEventremOnQueueLengthErr(t *testing.T) {
 	}
 }
 
-func TestLibstatsProcessEventaddStatEvent(t *testing.T) {
+func TestStatQueueProcessEventaddStatEvent(t *testing.T) {
 	tnt, evID := "tenant", "eventID"
 	filters := &FilterS{}
 	evNm := utils.MapStorage{
@@ -1057,7 +1057,7 @@ func TestLibstatsProcessEventaddStatEvent(t *testing.T) {
 	}
 }
 
-func TestLibstatsCompress(t *testing.T) {
+func TestStatQueueCompress(t *testing.T) {
 	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
 	if err != nil {
 		t.Fatal(err)
@@ -1139,7 +1139,7 @@ func TestLibstatsCompress(t *testing.T) {
 	// }
 }
 
-func TestLibstatsaddStatEventPassErr(t *testing.T) {
+func TestStatQueueaddStatEventPassErr(t *testing.T) {
 	sq := &StatQueue{
 		SQMetrics: map[string]StatMetric{
 			utils.MetaTCD: &statMetricMock{
@@ -1173,7 +1173,7 @@ func TestLibstatsaddStatEventPassErr(t *testing.T) {
 	}
 }
 
-func TestLibstatsaddStatEventNoPass(t *testing.T) {
+func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
 	if err != nil {
 		t.Fatal(err)
@@ -1262,4 +1262,74 @@ func TestStatQueueWithAPIOptsJSONMarshall(t *testing.T) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp2), utils.ToJSON(rply))
 	}
 
+}
+
+func TestStatQueueLockUnlockStatQueueProfiles(t *testing.T) {
+	sqPrf := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "SQ1",
+		Weight:      10,
+		QueueLength: 10,
+	}
+
+	//lock profile with empty lkID parameter
+	sqPrf.lock(utils.EmptyString)
+
+	if !sqPrf.isLocked() {
+		t.Fatal("expected profile to be locked")
+	} else if sqPrf.lkID == utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be non-empty")
+	}
+
+	//unlock previously locked profile
+	sqPrf.unlock()
+
+	if sqPrf.isLocked() {
+		t.Fatal("expected profile to be unlocked")
+	} else if sqPrf.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+
+	//unlock an already unlocked profile - nothing happens
+	sqPrf.unlock()
+
+	if sqPrf.isLocked() {
+		t.Fatal("expected profile to be unlocked")
+	} else if sqPrf.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+}
+
+func TestStatQueueLockUnlockStatQueues(t *testing.T) {
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+	}
+
+	//lock resource with empty lkID parameter
+	sq.lock(utils.EmptyString)
+
+	if !sq.isLocked() {
+		t.Fatal("expected resource to be locked")
+	} else if sq.lkID == utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be non-empty")
+	}
+
+	//unlock previously locked resource
+	sq.unlock()
+
+	if sq.isLocked() {
+		t.Fatal("expected resource to be unlocked")
+	} else if sq.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
+
+	//unlock an already unlocked resource - nothing happens
+	sq.unlock()
+
+	if sq.isLocked() {
+		t.Fatal("expected resource to be unlocked")
+	} else if sq.lkID != utils.EmptyString {
+		t.Fatal("expected struct field \"lkID\" to be empty")
+	}
 }

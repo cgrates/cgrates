@@ -6345,7 +6345,7 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 func TestResourcesLockUnlockResourceProfiles(t *testing.T) {
 	rp := &ResourceProfile{
 		Tenant:            "cgrates.org",
-		ID:                "rsPrf",
+		ID:                "RES1",
 		Limit:             10,
 		AllocationMessage: "Approved",
 		Weight:            10,
@@ -6383,7 +6383,7 @@ func TestResourcesLockUnlockResourceProfiles(t *testing.T) {
 func TestResourcesLockUnlockResources(t *testing.T) {
 	rs := &Resource{
 		Tenant: "cgrates.org",
-		ID:     "rsPrf",
+		ID:     "RES1",
 	}
 
 	//lock resource with empty lkID parameter
