@@ -2979,7 +2979,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS, nil)
+	tS := NewThresholdService(dm, cfg, filterS, connMgr)
 
 	th := &Threshold{
 		Tenant: "cgrates.org",
@@ -2996,4 +2996,49 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	}
 
 	utils.Logger.SetLogLevel(0)
+}
+
+func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
+
+	thPrf1 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weight:    10,
+		Blocker:   true,
+	}
+	if err := dm.SetThresholdProfile(context.Background(), thPrf1, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH1"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+			},
+		},
+	}
+	if _, err := tS.matchingThresholdsForEvent(context.Background(), "cgrates.org",
+		args); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
+	}
 }
