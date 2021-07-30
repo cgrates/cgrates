@@ -248,6 +248,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	// all indexes are set and points to their objects correctly
 	args := &engine.IndexHealthArgsWith3Ch{}
 	expRPly := &engine.FilterIHReply{
+		MissingObjects: []string{},
 		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -293,6 +294,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	}
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
 	expRPly = &engine.FilterIHReply{
+		MissingObjects: []string{},
 		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -355,6 +357,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
+		MissingObjects: []string{},
 		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -449,6 +452,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
+		MissingObjects: []string{},
 		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -532,6 +536,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
+		MissingObjects: []string{},
 		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -610,6 +615,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
+		MissingObjects: []string{},
 		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -727,6 +733,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 
 	//as we removed the object, the index specified is removed too, so the health of the indexes is fine
 	expRPly := &engine.FilterIHReply{
+		MissingObjects: []string{},
 		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -779,6 +786,7 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 
 	// all indexes are set and points to their objects correctly
 	expRPly := &engine.FilterIHReply{
+		MissingObjects: []string{},
 		MissingIndexes: map[string][]string{},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
