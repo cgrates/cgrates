@@ -360,7 +360,7 @@ func TestFileCSVSync(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*file_csv"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaFileCSV
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone))
@@ -406,7 +406,6 @@ func TestFileCSVSync(t *testing.T) {
 			exp.csvWriter.Flush()
 		}()
 	}
-	// exp.ExportEvent(cgrEvent)
 
 	select {
 	case <-test:

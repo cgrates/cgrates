@@ -310,7 +310,7 @@ func TestHttpPostSync(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_post"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPPost
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone))
@@ -337,7 +337,6 @@ func TestHttpPostSync(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		// fmt.Println("2")
 		time.Sleep(3 * time.Second)
 		wg1.Done()
 	}))
@@ -354,7 +353,6 @@ func TestHttpPostSync(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		go exp.ExportEvent(cgrEvent)
 	}
-	// exp.ExportEvent(cgrEvent)
 
 	select {
 	case <-test:
@@ -370,7 +368,7 @@ func TestHttpPostSyncLimit(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_post"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPPost
 
 	// We set the limit of events to be exported lower than the amount of events we asynchronously want to export
 	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
@@ -400,7 +398,6 @@ func TestHttpPostSyncLimit(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		// fmt.Println("2")
 		time.Sleep(3 * time.Second)
 		wg1.Done()
 	}))
@@ -417,7 +414,6 @@ func TestHttpPostSyncLimit(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		go exp.ExportEvent(cgrEvent)
 	}
-	// exp.ExportEvent(cgrEvent)
 
 	select {
 	case <-test:

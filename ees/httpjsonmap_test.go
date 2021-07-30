@@ -356,7 +356,7 @@ func TestHttpJsonMapSync(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPjsonMap
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone))
@@ -383,7 +383,6 @@ func TestHttpJsonMapSync(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		// fmt.Println("2")
 		time.Sleep(3 * time.Second)
 		wg1.Done()
 	}))
@@ -400,7 +399,6 @@ func TestHttpJsonMapSync(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		go exp.ExportEvent(cgrEvent)
 	}
-	// exp.ExportEvent(cgrEvent)
 
 	select {
 	case <-test:
@@ -416,7 +414,7 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPjsonMap
 	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
@@ -444,7 +442,6 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		// fmt.Println("2")
 		time.Sleep(3 * time.Second)
 		wg1.Done()
 	}))
@@ -461,7 +458,6 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		go exp.ExportEvent(cgrEvent)
 	}
-	// exp.ExportEvent(cgrEvent)
 
 	select {
 	case <-test:
