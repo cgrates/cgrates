@@ -364,11 +364,6 @@ type mockPoster struct {
 }
 
 func (mp mockPoster) Post(body []byte, key string) error {
-	// resp, err := http.Get(mp.url)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer resp.Body.Close()
 	time.Sleep(3 * time.Second)
 	mp.wg.Done()
 	return nil
@@ -383,7 +378,7 @@ func TestPosterJsonMapSync(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPjsonMap
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone))
@@ -440,7 +435,7 @@ func TestPosterJsonMapSyncLimit(t *testing.T) {
 	var cfgIdx int
 	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = "*http_json_map"
+	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPjsonMap
 	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
