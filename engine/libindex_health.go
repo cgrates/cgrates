@@ -719,6 +719,7 @@ func getRevFltrIdxHealthFromReverse(dm *DataManager, fltrCache, revFltrIdxCache 
 	if revIndexKeys, err = dm.dataDB.GetKeysForPrefix(utils.FilterIndexPrfx); err != nil {
 		return
 	}
+	missingObj := utils.StringSet{}
 	for _, revIdxKey := range revIndexKeys { // parse all the reverse indexes
 		// compose the needed information from key
 		revIdxKey = strings.TrimPrefix(revIdxKey, utils.FilterIndexPrfx)
@@ -751,7 +752,9 @@ func getRevFltrIdxHealthFromReverse(dm *DataManager, fltrCache, revFltrIdxCache 
 			var obj *objFIH
 			if obj, err = getIHObjFromCache(dm, objCache, indxType, tnt, id); err != nil { // get the object
 				if err == utils.ErrNotFound {
-					rply[indxType].MissingObjects = append(rply[indxType].MissingObjects, utils.ConcatenatedKey(tnt, id))
+					missingObj.Add(utils.ConcatenatedKey(tnt, id))
+					rply[indxType].MissingObjects = missingObj.AsSlice()
+					//rply[indxType].MissingObjects = append(rply[indxType].MissingObjects, utils.ConcatenatedKey(tnt, id))
 					err = nil
 					continue
 				}
@@ -764,7 +767,6 @@ func getRevFltrIdxHealthFromReverse(dm *DataManager, fltrCache, revFltrIdxCache 
 				key := utils.ConcatenatedKey(tnt, itemIDCtx)
 				rply[indxType].BrokenReverseIndexes[key] = append(rply[indxType].BrokenReverseIndexes[key], fltrID)
 			}
-
 		}
 	}
 	return rply, nil

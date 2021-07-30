@@ -363,7 +363,7 @@ func TestHealthReverseFilter(t *testing.T) {
 	exp := map[string]*ReverseFilterIHReply{
 		utils.CacheAttributeFilterIndexes: {
 			MissingReverseIndexes: map[string][]string{
-				// "cgrates.org:ATTR1": {"Fltr1:*any"},
+				// "cgrates.org:ATTR1": {"Fltr1:*any"}, ??
 			},
 			MissingFilters: map[string][]string{"cgrates.org:Fltr1": {"ATTR1"}},
 			BrokenReverseIndexes: map[string][]string{
@@ -1430,8 +1430,8 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 	indexes = map[string]utils.StringSet{
 		utils.CacheChargerFilterIndexes: {
 			"Raw": {},
-			//"Default": {},
-			//"Call_Attr1": {},
+			"Default": {},
+			"Call_Attr1": {},
 		},
 	}
 	if err := dm.SetIndexes(utils.CacheReverseFilterIndexes, "cgrates.org:FLTR_NOT_IN_PROFILE",
@@ -1450,7 +1450,7 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 				"cgrates.org:Raw": {"FLTR_NOT_IN_PROFILE"},
 			},
 			MissingReverseIndexes: map[string][]string{},
-			MissingObjects: []string{"cgrates.org:Default","cgrates.org:Call_Attr1" },
+			MissingObjects: []string{"cgrates.org:Default","cgrates.org:Call_Attr1"},
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(dm,
@@ -1466,3 +1466,149 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 		}
 	}
 }
+
+func TestIndexHealthMissingReverseIndexes(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	filter1 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_1",
+		Rules: []*FilterRule{
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	filter2 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules: []*FilterRule{
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+				Type:    utils.MetaString,
+				Values:  []string{"1003"},
+			},
+		},
+	}
+	filter3 := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_3",
+		Rules: []*FilterRule{
+			{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+				Type:    utils.MetaString,
+				Values:  []string{"1004"},
+			},
+		},
+	}
+	if err := dm.SetFilter(filter1, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(filter2, false); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(filter3, false); err != nil {
+		t.Error(err)
+	}
+
+	// we will set this multiple chargers but without indexing(same and different indexes)
+	chPrf1 := &ChargerProfile{
+		Tenant: "cgrates.org",
+		ID:     "Raw",
+		FilterIDs: []string{
+			"*string:~*req.Account:1234",
+			"FLTR_1",
+			"FLTR_3",
+		},
+		RunID:        "raw",
+		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
+		Weight:       20,
+	}
+	if err := dm.SetChargerProfile(chPrf1, false); err != nil {
+		t.Error(err)
+	}
+	// get cachePrefix for every subsystem
+	objCaches := make(map[string]*ltcache.Cache)
+	for indxType := range utils.CacheIndexesToPrefix {
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+	}
+
+	exp := map[string]*ReverseFilterIHReply{
+		utils.CacheChargerFilterIndexes: {
+			MissingFilters: map[string][]string{},
+			BrokenReverseIndexes: map[string][]string{},
+			MissingReverseIndexes: map[string][]string{
+				"cgrates.org:Raw": {"FLTR_1", "FLTR_3"},
+			},
+		},
+	}
+	if rply, err := GetRevFltrIdxHealth(dm,
+		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, nil),
+		objCaches); err != nil {
+		t.Fatal(err)
+	} else {
+		if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+		}
+	}
+	/*
+	if err := dm.SetFilter(filter1, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(filter2, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetFilter(filter3, true); err != nil {
+		t.Error(err)
+	}
+
+	 */
+    //Cache.Clear(nil)
+	// we will set this multiple chargers but without indexing(same and different indexes)
+	chPrf1 = &ChargerProfile{
+		Tenant: "cgrates.org",
+		ID:     "Raw",
+		FilterIDs: []string{
+			"*string:~*req.Account:1234",
+			"FLTR_1",
+			"FLTR_2",
+			"FLTR_3",
+		},
+		RunID:        "raw",
+		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
+		Weight:       20,
+	}
+	// now we set the charger with indexing and check the reverse indexes health
+	if err := dm.SetChargerProfile(chPrf1, false); err != nil {
+		t.Error(err)
+	}
+	exp = map[string]*ReverseFilterIHReply{
+		utils.CacheChargerFilterIndexes: {
+			MissingFilters: map[string][]string{},
+			BrokenReverseIndexes: map[string][]string{},
+			MissingReverseIndexes: map[string][]string{
+				"cgrates.org:Raw": {"FLTR_1", "FLTR_3"}, // check for FLTR_2
+			},
+		},
+	}
+	if rply, err := GetRevFltrIdxHealth(dm,
+		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, nil),
+		objCaches); err != nil {
+		t.Fatal(err)
+	} else {
+		sort.Strings(exp[utils.CacheChargerFilterIndexes].MissingReverseIndexes["cgrates.org:Raw"])
+		sort.Strings(rply[utils.CacheChargerFilterIndexes].MissingReverseIndexes["cgrates.org:Raw"])
+		if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+		}
+	}
+}
+
+
