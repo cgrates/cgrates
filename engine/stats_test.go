@@ -18,14 +18,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"fmt"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestNewStatService(t *testing.T) {
@@ -1461,4 +1466,308 @@ func TestStatQueueMatchingStatQueuesForEventLocks4(t *testing.T) {
 		}
 	}
 
+}
+
+func TestStatQueueReload(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := &StatService{
+		dm:          dm,
+		filterS:     filterS,
+		stopBackup:  make(chan struct{}),
+		loopStopped: make(chan struct{}, 1),
+		cgrcfg:      cfg,
+	}
+	sS.loopStopped <- struct{}{}
+	sS.Reload()
+	close(sS.stopBackup)
+}
+
+func TestStatQueueStartLoop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = -1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := &StatService{
+		dm:          dm,
+		filterS:     filterS,
+		stopBackup:  make(chan struct{}),
+		loopStopped: make(chan struct{}, 1),
+		cgrcfg:      cfg,
+	}
+
+	sS.StartLoop()
+	time.Sleep(10 * time.Millisecond)
+
+	if len(sS.loopStopped) != 1 {
+		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(sS.loopStopped))
+	}
+}
+
+func TestStatQueueShutdown(t *testing.T) {
+	utils.Logger.SetLogLevel(6)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	sS := NewStatService(dm, cfg, nil, nil)
+
+	expLog1 := `[INFO] <StatS> service shutdown initialized`
+	expLog2 := `[INFO] <StatS> service shutdown complete`
+	sS.Shutdown()
+
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog1) ||
+		!strings.Contains(rcvLog, expLog2) {
+		t.Errorf("expected logs <%+v> and <%+v> \n to be included in <%+v>",
+			expLog1, expLog2, rcvLog)
+	}
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestStatQueueStoreStatsOK(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	sS := NewStatService(dm, cfg, nil, nil)
+
+	exp := &StatQueue{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+	}
+	Cache.SetWithoutReplicate(utils.CacheStatQueues, "cgrates.org:SQ1", exp, nil, true,
+		utils.NonTransactional)
+	sS.storedStatQueues.Add("cgrates.org:SQ1")
+	sS.storeStats()
+
+	if rcv, err := sS.dm.GetStatQueue("cgrates.org", "SQ1", true, false,
+		utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	Cache.Remove(utils.CacheStatQueues, "cgrates.org:SQ1", true, utils.NonTransactional)
+}
+
+func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	sS := NewStatService(nil, cfg, nil, nil)
+
+	value := &StatQueue{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheStatQueues, "SQ1", value, nil, true,
+		utils.NonTransactional)
+	sS.storedStatQueues.Add("SQ1")
+	exp := utils.StringSet{
+		"SQ1": struct{}{},
+	}
+	expLog := `[WARNING] <StatS> failed saving StatQueue with ID: cgrates.org:SQ1, error: NO_DATABASE_CONNECTION`
+	sS.storeStats()
+
+	if !reflect.DeepEqual(sS.storedStatQueues, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, sS.storedStatQueues)
+	}
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected log <%+v>\n to be in included in: <%+v>", expLog, rcvLog)
+	}
+
+	utils.Logger.SetLogLevel(0)
+	Cache.Remove(utils.CacheStatQueues, "SQ1", true, utils.NonTransactional)
+}
+
+func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	sS := NewStatService(dm, cfg, nil, nil)
+
+	value := &StatQueue{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheStatQueues, "SQ2", value, nil, true,
+		utils.NonTransactional)
+	sS.storedStatQueues.Add("SQ1")
+	expLog := `[WARNING] <StatS> failed retrieving from cache stat queue with ID: SQ1`
+	sS.storeStats()
+
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected <%+v> \nto be included in: <%+v>", expLog, rcvLog)
+	}
+
+	utils.Logger.SetLogLevel(0)
+	Cache.Remove(utils.CacheStatQueues, "SQ2", true, utils.NonTransactional)
+}
+
+func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, connMgr)
+
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		dirty:  utils.BoolPointer(true),
+	}
+
+	expLog := `[WARNING] <StatS> failed caching StatQueue with ID: cgrates.org:SQ1, error: DISCONNECTED`
+	if err := sS.StoreStatQueue(sq); err == nil ||
+		err.Error() != utils.ErrDisconnected.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDisconnected, err)
+	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
+		t.Errorf("expected log <%+v> to be included in <%+v>", expLog, rcv)
+	}
+
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestStatQueueStoreThresholdNilDirtyField(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	sS := NewStatService(dm, cfg, nil, nil)
+
+	sq := &StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+	}
+
+	if err := sS.StoreStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStatQueueSetCloneable(t *testing.T) {
+	args := &StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventTest",
+			Event:  map[string]interface{}{},
+		},
+		clnb: false,
+	}
+
+	exp := &StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventTest",
+			Event:  map[string]interface{}{},
+		},
+		clnb: true,
+	}
+	args.SetCloneable(true)
+
+	if !reflect.DeepEqual(args, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, args)
+	}
+}
+
+func TestStatQueueRPCClone(t *testing.T) {
+	args := &StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "EventTest",
+			Event:   make(map[string]interface{}),
+			APIOpts: make(map[string]interface{}),
+		},
+		clnb: true,
+	}
+
+	exp := &StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "EventTest",
+			Event:   make(map[string]interface{}),
+			APIOpts: make(map[string]interface{}),
+		},
+	}
+
+	if out, err := args.RPCClone(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out.(*StatsArgsProcessEvent), exp) {
+		t.Errorf("expected: <%T>, \nreceived: <%T>",
+			args, exp)
+	}
 }

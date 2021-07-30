@@ -2840,7 +2840,7 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 func TestThresholdsLockUnlockThresholdProfiles(t *testing.T) {
 	thPrf := &ThresholdProfile{
 		Tenant:  "cgrates.org",
-		ID:      "thPrf",
+		ID:      "TH1",
 		Weight:  10,
 		MaxHits: 5,
 		MinHits: 2,
@@ -2877,7 +2877,7 @@ func TestThresholdsLockUnlockThresholdProfiles(t *testing.T) {
 func TestThresholdsLockUnlockThresholds(t *testing.T) {
 	th := &Threshold{
 		Tenant: "cgrates.org",
-		ID:     "thPrf",
+		ID:     "TH1",
 	}
 
 	//lock resource with empty lkID parameter
