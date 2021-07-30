@@ -89,11 +89,11 @@ var (
 func TestSectChange(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		testSectCfgDir = "tutinternal"
+		testSectCfgDir = "reload_sect_internal"
 	case utils.MetaMySQL:
-		testSectCfgDir = "tutmysql"
+		testSectCfgDir = "reload_sect_mysql"
 	case utils.MetaMongo:
-		testSectCfgDir = "tutmongo"
+		testSectCfgDir = "reload_sect_mongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -715,6 +715,12 @@ func testSectConfigSReloadStats(t *testing.T) {
 
 func testSectConfigSReloadThresholds(t *testing.T) {
 
+	var replyPingBf string
+	if err := testSectRPC.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -733,6 +739,13 @@ func testSectConfigSReloadThresholds(t *testing.T) {
 		t.Error(err)
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 }
 
