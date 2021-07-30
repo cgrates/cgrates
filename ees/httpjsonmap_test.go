@@ -392,7 +392,7 @@ func TestHttpJsonMapSync(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		// fmt.Println("2")
+
 		time.Sleep(3 * time.Second)
 		wg1.Done()
 	}))
@@ -409,7 +409,6 @@ func TestHttpJsonMapSync(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		go exp.ExportEvent(cgrEvent)
 	}
-	// exp.ExportEvent(cgrEvent)
 
 	select {
 	case <-test:
@@ -453,7 +452,6 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		// fmt.Println("2")
 		time.Sleep(3 * time.Second)
 		wg1.Done()
 	}))
@@ -470,7 +468,6 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		go exp.ExportEvent(cgrEvent)
 	}
-	// exp.ExportEvent(cgrEvent)
 
 	select {
 	case <-test:
