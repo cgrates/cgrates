@@ -91,12 +91,8 @@ var (
 func TestITCoreIt(t *testing.T) {
 	argPath = "/tmp"
 	switch *dbType {
-	case utils.MetaInternal:
-		coreSConfDIR = "tutinternal"
-	case utils.MetaMySQL:
-		coreSConfDIR = "tutmysql"
-	case utils.MetaMongo:
-		coreSConfDIR = "tutmongo"
+	case utils.MetaInternal, utils.MetaMySQL, utils.MetaMongo:
+		coreSConfDIR = "core_config"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	}
@@ -351,7 +347,7 @@ func testCoreItStatus(t *testing.T) {
 	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1Status,
 		args, &reply); err != nil {
 		t.Fatal(err)
-	} else if reply[utils.NodeID] != "ALL2" {
+	} else if reply[utils.NodeID] != "Cores_apis_test" {
 		t.Errorf("Expected ALL2 but received %v", reply[utils.NodeID])
 	}
 }

@@ -451,6 +451,16 @@ func testAccMaxAbstracts(t *testing.T) {
 					Weights: ";20",
 					Type:    utils.MetaConcrete,
 					Units:   213,
+					/*
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(0),
+						},
+					},
+
+					 */
 				},
 			},
 		},
@@ -470,9 +480,10 @@ func testAccMaxAbstracts(t *testing.T) {
 			ID:     "testIDEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1004",
-				utils.Usage:        "27s",
 			},
-			APIOpts: nil,
+			APIOpts: map[string]interface{}{
+				utils.MetaUsage: "27s",
+			},
 		},
 		AccountIDs: []string{"TEST_ACC_IT_TEST4"},
 	}
@@ -539,7 +550,6 @@ func testAccMaxAbstracts(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Weights: utils.DynamicWeights{
 					{
-						FilterIDs: nil,
 						Weight:    0,
 					},
 				},
@@ -548,14 +558,12 @@ func testAccMaxAbstracts(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								FilterIDs: nil,
 								Weight:    25,
 							},
 						},
 						Type: "*abstract",
 						CostIncrements: []*utils.ExtCostIncrement{
 							{
-								FilterIDs:    nil,
 								Increment:    utils.Float64Pointer(1000000000),
 								FixedFee:     utils.Float64Pointer(0),
 								RecurrentFee: utils.Float64Pointer(0),
@@ -568,20 +576,13 @@ func testAccMaxAbstracts(t *testing.T) {
 						FilterIDs: nil,
 						Weights: utils.DynamicWeights{
 							{
-								FilterIDs: nil,
 								Weight:    20,
 							},
 						},
 						Type:           "*concrete",
 						Units:          utils.Float64Pointer(213),
-						UnitFactors:    nil,
-						Opts:           nil,
-						CostIncrements: nil,
-						AttributeIDs:   nil,
-						RateProfileIDs: nil,
 					},
 				},
-				Opts: nil,
 			},
 		},
 	}
@@ -636,9 +637,10 @@ func testAccDebitAbstracts(t *testing.T) {
 			ID:     "testIDEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1004",
-				utils.Usage:        "27s",
 			},
-			APIOpts: nil,
+			APIOpts: map[string]interface{}{
+				utils.MetaUsage: "27s",
+			},
 		},
 		AccountIDs: []string{"TEST_ACC_IT_TEST5"},
 	}
@@ -705,7 +707,6 @@ func testAccDebitAbstracts(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Weights: utils.DynamicWeights{
 					{
-						FilterIDs: nil,
 						Weight:    0,
 					},
 				},
@@ -714,14 +715,12 @@ func testAccDebitAbstracts(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								FilterIDs: nil,
 								Weight:    25,
 							},
 						},
 						Type: "*abstract",
 						CostIncrements: []*utils.ExtCostIncrement{
 							{
-								FilterIDs:    nil,
 								Increment:    utils.Float64Pointer(1000000000),
 								FixedFee:     utils.Float64Pointer(0),
 								RecurrentFee: utils.Float64Pointer(0),
@@ -734,20 +733,13 @@ func testAccDebitAbstracts(t *testing.T) {
 						FilterIDs: nil,
 						Weights: utils.DynamicWeights{
 							{
-								FilterIDs: nil,
 								Weight:    20,
 							},
 						},
 						Type:           "*concrete",
 						Units:          utils.Float64Pointer(213),
-						UnitFactors:    nil,
-						Opts:           nil,
-						CostIncrements: nil,
-						AttributeIDs:   nil,
-						RateProfileIDs: nil,
 					},
 				},
-				Opts: nil,
 			},
 		},
 	}
@@ -802,9 +794,10 @@ func testAccMaxConcretes(t *testing.T) {
 			ID:     "testIDEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1004",
-				utils.Usage:        "27s",
 			},
-			APIOpts: nil,
+			APIOpts: map[string]interface{}{
+				utils.OptsRatesIntervalStart: "27s",
+			},
 		},
 		AccountIDs: []string{"TEST_ACC_IT_TEST6"},
 	}
@@ -827,11 +820,9 @@ func testAccMaxConcretes(t *testing.T) {
 		IntervalStart: nil,
 		Increments: []*utils.ExtRateSIncrement{
 			{
-				IncrementStart:    nil,
 				IntervalRateIndex: 0,
-				RateID:            "",
+				RateID:            utils.EmptyString,
 				CompressFactor:    0,
-				Usage:             nil,
 			},
 		},
 		CompressFactor: 1,
@@ -858,7 +849,6 @@ func testAccMaxConcretes(t *testing.T) {
 				BalanceLimit:    utils.Float64Pointer(0),
 				UnitFactorID:    "",
 				RatingID:        rtID,
-				JoinedChargeIDs: nil,
 			},
 		},
 		UnitFactors: map[string]*utils.ExtUnitFactor{},
@@ -871,7 +861,6 @@ func testAccMaxConcretes(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Weights: utils.DynamicWeights{
 					{
-						FilterIDs: nil,
 						Weight:    0,
 					},
 				},
@@ -880,14 +869,12 @@ func testAccMaxConcretes(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								FilterIDs: nil,
 								Weight:    25,
 							},
 						},
 						Type: "*abstract",
 						CostIncrements: []*utils.ExtCostIncrement{
 							{
-								FilterIDs:    nil,
 								Increment:    utils.Float64Pointer(1000000000),
 								FixedFee:     utils.Float64Pointer(0),
 								RecurrentFee: utils.Float64Pointer(0),
@@ -897,23 +884,15 @@ func testAccMaxConcretes(t *testing.T) {
 					},
 					"ConcreteBalance2": {
 						ID:        "ConcreteBalance2",
-						FilterIDs: nil,
 						Weights: utils.DynamicWeights{
 							{
-								FilterIDs: nil,
 								Weight:    20,
 							},
 						},
 						Type:           "*concrete",
 						Units:          utils.Float64Pointer(0),
-						UnitFactors:    nil,
-						Opts:           nil,
-						CostIncrements: nil,
-						AttributeIDs:   nil,
-						RateProfileIDs: nil,
 					},
 				},
-				Opts: nil,
 			},
 		},
 	}
@@ -968,9 +947,10 @@ func testAccDebitConcretes(t *testing.T) {
 			ID:     "testIDEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1004",
-				utils.Usage:        "27s",
 			},
-			APIOpts: nil,
+			APIOpts: map[string]interface{}{
+				utils.OptsRatesUsage: "27s",
+			},
 		},
 		AccountIDs: []string{"TEST_ACC_IT_TEST7"},
 	}
@@ -993,11 +973,9 @@ func testAccDebitConcretes(t *testing.T) {
 		IntervalStart: nil,
 		Increments: []*utils.ExtRateSIncrement{
 			{
-				IncrementStart:    nil,
 				IntervalRateIndex: 0,
-				RateID:            "",
+				RateID:            utils.EmptyString,
 				CompressFactor:    0,
-				Usage:             nil,
 			},
 		},
 		CompressFactor: 1,
@@ -1024,7 +1002,6 @@ func testAccDebitConcretes(t *testing.T) {
 				BalanceLimit:    utils.Float64Pointer(0),
 				UnitFactorID:    "",
 				RatingID:        rtID,
-				JoinedChargeIDs: nil,
 			},
 		},
 		UnitFactors: map[string]*utils.ExtUnitFactor{},
@@ -1037,7 +1014,6 @@ func testAccDebitConcretes(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Weights: utils.DynamicWeights{
 					{
-						FilterIDs: nil,
 						Weight:    0,
 					},
 				},
@@ -1046,14 +1022,12 @@ func testAccDebitConcretes(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								FilterIDs: nil,
 								Weight:    25,
 							},
 						},
 						Type: "*abstract",
 						CostIncrements: []*utils.ExtCostIncrement{
 							{
-								FilterIDs:    nil,
 								Increment:    utils.Float64Pointer(1000000000),
 								FixedFee:     utils.Float64Pointer(0),
 								RecurrentFee: utils.Float64Pointer(0),
@@ -1063,23 +1037,15 @@ func testAccDebitConcretes(t *testing.T) {
 					},
 					"ConcreteBalance2": {
 						ID:        "ConcreteBalance2",
-						FilterIDs: nil,
 						Weights: utils.DynamicWeights{
 							{
-								FilterIDs: nil,
 								Weight:    20,
 							},
 						},
 						Type:           "*concrete",
 						Units:          utils.Float64Pointer(0),
-						UnitFactors:    nil,
-						Opts:           nil,
-						CostIncrements: nil,
-						AttributeIDs:   nil,
-						RateProfileIDs: nil,
 					},
 				},
-				Opts: nil,
 			},
 		},
 	}
@@ -1128,7 +1094,6 @@ func testAccActionSetRmvBalance(t *testing.T) {
 				Value: "10",
 			},
 		},
-		Reset: false,
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionSetBalance,
 		args2, &reply3); err != nil {
@@ -1155,25 +1120,19 @@ func testAccActionSetRmvBalance(t *testing.T) {
 					{
 						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
 						Increment:    utils.NewDecimal(1000000000, 0),
-						FixedFee:     nil,
 						RecurrentFee: utils.NewDecimal(0, 0),
 					},
 					{
 						FilterIDs:    []string{"*string:~*req.ToR:*data"},
 						Increment:    utils.NewDecimal(1048576, 0),
-						FixedFee:     nil,
 						RecurrentFee: utils.NewDecimal(0, 0),
 					},
 					{
 						FilterIDs:    []string{"*string:~*req.ToR:*sms"},
 						Increment:    utils.NewDecimal(1, 0),
-						FixedFee:     nil,
 						RecurrentFee: utils.NewDecimal(0, 0),
 					},
 				},
-
-				AttributeIDs:   nil,
-				RateProfileIDs: nil,
 			},
 
 			"VoiceBalance": {
@@ -1181,7 +1140,6 @@ func testAccActionSetRmvBalance(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Weights: utils.DynamicWeights{
 					{
-						FilterIDs: nil,
 						Weight:    12,
 					},
 				},
@@ -1194,7 +1152,6 @@ func testAccActionSetRmvBalance(t *testing.T) {
 		},
 		Weights: utils.DynamicWeights{
 			{
-				FilterIDs: nil,
 				Weight:    10,
 			},
 		},
@@ -1217,7 +1174,6 @@ func testAccActionSetRmvBalance(t *testing.T) {
 		Tenant:     "",
 		AccountID:  "TEST_ACC_IT_TEST8",
 		BalanceIDs: []string{"AbstractBalance3"},
-		APIOpts:    nil,
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionRemoveBalance,
 		args3, &reply4); err != nil {

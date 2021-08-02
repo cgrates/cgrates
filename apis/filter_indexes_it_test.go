@@ -1038,12 +1038,13 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 		t.Error("Unexpected reply returned")
 	}
 
-	expIdx := []string{"*string:*opts.*context:*sessions:ACCOUNT_FILTER_INDEXES",
+	expIdx := []string{
 		"*prefix:*req.AnswerTime:12:ACCOUNT_FILTER_INDEXES2",
 		"*prefix:*req.AnswerTime:33:ACCOUNT_FILTER_INDEXES2",
 		"*prefix:*req.AnswerTime:12:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.AnswerTime:33:ACCOUNT_FILTER_INDEXES",
 		"*string:*req.Usage:123s:ACCOUNT_FILTER_INDEXES2",
+		"*string:*opts.*context:*sessions:ACCOUNT_FILTER_INDEXES",
 		"*string:*req.Usage:123s:ACCOUNT_FILTER_INDEXES",
 		"*string:*req.Subject:1004:ACCOUNT_FILTER_INDEXES",
 		"*string:*req.Subject:6774:ACCOUNT_FILTER_INDEXES",
@@ -1059,7 +1060,7 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 		sort.Strings(expIdx)
 		sort.Strings(replyIdx)
 		if !reflect.DeepEqual(expIdx, replyIdx) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+			t.Errorf("Expected %+v \n , received %+v", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
 		}
 	}
 
