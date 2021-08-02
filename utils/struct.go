@@ -26,18 +26,41 @@ import (
 	"strings"
 )
 
+func fieldByIndexIsEmpty(v reflect.Value, index []int) bool {
+	if len(index) == 1 {
+		return valueIsEmpty(v.Field(index[0]))
+	}
+	for i, x := range index {
+		if i > 0 {
+			if v.Kind() == reflect.Ptr && v.Type().Elem().Kind() == reflect.Struct {
+				if v.IsNil() {
+					return true
+				}
+				v = v.Elem()
+			}
+		}
+		v = v.Field(x)
+	}
+	return valueIsEmpty(v)
+}
+
+func valueIsEmpty(fld reflect.Value) bool {
+	if fld.Kind() == reflect.String && fld.CanSet() {
+		fld.SetString(strings.TrimSpace(fld.String()))
+	}
+	return (fld.Kind() == reflect.String && fld.String() == EmptyString) ||
+		((fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0) ||
+		(fld.Kind() == reflect.Int && fld.Int() == 0)
+}
+
 // Detects missing field values based on mandatory field names, s should be a pointer to a struct
 func MissingStructFields(s interface{}, mandatories []string) []string {
 	missing := []string{}
+	sValue := reflect.ValueOf(s).Elem()
+	sType := sValue.Type()
 	for _, fieldName := range mandatories {
-		fld := reflect.ValueOf(s).Elem().FieldByName(fieldName)
-		// sanitize the string fields before checking
-		if fld.Kind() == reflect.String && fld.CanSet() {
-			fld.SetString(strings.TrimSpace(fld.String()))
-		}
-		if (fld.Kind() == reflect.String && fld.String() == "") ||
-			((fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0) ||
-			(fld.Kind() == reflect.Int && fld.Int() == 0) {
+		fldStr, ok := sType.FieldByName(fieldName)
+		if !ok || fieldByIndexIsEmpty(sValue, fldStr.Index){
 			missing = append(missing, fieldName)
 		}
 	}

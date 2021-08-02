@@ -36,161 +36,34 @@ func TestMissingStructFieldsCorrect(t *testing.T) {
 	}
 }
 
-func TestStructMapStruct(t *testing.T) {
-	type TestStruct struct {
-		Name    string
-		Surname string
-		Address string
-		Other   string
-	}
-	ts := &TestStruct{
-		Name:    "1",
-		Surname: "2",
-		Address: "3",
-		Other:   "",
-	}
-	nts := &TestStruct{
-		Name:    "1",
-		Surname: "2",
-		Address: "3",
-		Other:   "",
-	}
-	m := ToMapStringString(ts)
-
-	FromMapStringString(m, ts)
-	if !reflect.DeepEqual(ts, nts) {
-		t.Log(m)
-		t.Errorf("Expected: %+v got: %+v", ts, nts)
-	}
-}
-
-func TestMapStructAddStructs(t *testing.T) {
-	type TestStruct struct {
-		Name    string
-		Surname string
-		Address string
-		Other   string
-	}
-	ts := &TestStruct{
-		Name:    "1",
-		Surname: "2",
-		Address: "3",
-		Other:   "",
-	}
-	nts := &TestStruct{
-		Name:    "1",
-		Surname: "2",
-		Address: "3",
-		Other:   "",
-	}
-	m := ToMapStringString(ts)
-	m["Test"] = "4"
-	FromMapStringString(m, ts)
-
-	if !reflect.DeepEqual(ts, nts) {
-		t.Log(m)
-		t.Errorf("Expected: %+v got: %+v", ts, nts)
-	}
-}
-
-func TestStructExtraFields(t *testing.T) {
-	ts := struct {
-		Name        string
-		Surname     string
-		Address     string
-		ExtraFields map[string]string
-	}{
-		Name:    "1",
-		Surname: "2",
-		Address: "3",
-		ExtraFields: map[string]string{
-			"k1": "v1",
-			"k2": "v2",
-			"k3": "v3",
+func TestMissingStructFieldsNilCorporate(t *testing.T) {
+	tst := &TenantIDWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			OptsAPIKey: "attr1234",
 		},
 	}
-	efMap := GetMapExtraFields(ts, "ExtraFields")
-
-	if !reflect.DeepEqual(efMap, ts.ExtraFields) {
-		t.Errorf("expected: %v got: %v", ts.ExtraFields, efMap)
+	if missing := MissingStructFields(tst,
+		[]string{Tenant}); len(missing) != 1 {
+		t.Errorf("TenantIDWithAPIOpts is missing from my struct: %v", missing)
 	}
 }
 
-func TestSetStructExtraFields(t *testing.T) {
-	ts := struct {
-		Name        string
-		Surname     string
-		Address     string
-		ExtraFields map[string]string
+func TestMissingStructFieldsNilCorporateTwoStructs(t *testing.T) {
+	tst := &struct {
+		APIOpts map[string]interface{}
+		*TenantID
+		*TenantWithAPIOpts
 	}{
-		Name:        "1",
-		Surname:     "2",
-		Address:     "3",
-		ExtraFields: make(map[string]string),
-	}
-	s := "ExtraFields"
-	m := map[string]string{
-		"k1": "v1",
-		"k2": "v2",
-		"k3": "v3",
-	}
-	SetMapExtraFields(ts, m, s)
-	efMap := GetMapExtraFields(ts, "ExtraFields")
-	if !reflect.DeepEqual(efMap, ts.ExtraFields) {
-		t.Errorf("expected: %v got: %v", ts.ExtraFields, efMap)
-	}
-}
-
-func TestStructFromMapStringInterface(t *testing.T) {
-	ts := &struct {
-		Name     string
-		Class    *string
-		List     []string
-		Elements struct {
-			Type  string
-			Value float64
-		}
-	}{}
-	s := "test2"
-	m := map[string]interface{}{
-		"Name":  "test1",
-		"Class": &s,
-		"List":  []string{"test3", "test4"},
-		"Elements": struct {
-			Type  string
-			Value float64
-		}{
-			Type:  "test5",
-			Value: 9.8,
+		APIOpts: map[string]interface{}{
+			OptsAPIKey: "attr1234",
+		},
+		TenantID: &TenantID{
+			Tenant: "cgrates.org",
 		},
 	}
-	if err := FromMapStringInterface(m, ts); err != nil {
-		t.Logf("ts: %+v", ToJSON(ts))
-		t.Error("Error converting map to struct: ", err)
-	}
-}
-
-func TestStructFromMapStringInterfaceValue(t *testing.T) {
-	type T struct {
-		Name     string
-		Disabled *bool
-		Members  []string
-	}
-	ts := &T{}
-	vts := reflect.ValueOf(ts)
-	x, err := FromMapStringInterfaceValue(map[string]interface{}{
-		"Name":     "test",
-		"Disabled": true,
-		"Members":  []string{"1", "2", "3"},
-	}, vts)
-	rt := x.(T)
-	if err != nil {
-		t.Fatalf("error converting structure value: %v", err)
-	}
-	if rt.Name != "test" ||
-		*rt.Disabled != true ||
-		!reflect.DeepEqual(rt.Members, []string{"1", "2", "3"}) {
-		t.Errorf("error converting structure value: %s", ToIJSON(rt))
+	if missing := MissingStructFields(tst,
+		[]string{Tenant}); len(missing) != 1 {
+		t.Errorf("TenantIDWithAPIOpts is missing from my struct: %v", missing)
 	}
 }
 
