@@ -35,6 +35,37 @@ func TestMissingStructFieldsCorrect(t *testing.T) {
 	}
 }
 
+func TestMissingStructFieldsNilCorporate(t *testing.T) {
+	tst := &TenantIDWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			OptsAPIKey: "attr1234",
+		},
+	}
+	if missing := MissingStructFields(tst,
+		[]string{Tenant}); len(missing) != 1 {
+		t.Errorf("TenantIDWithAPIOpts is missing from my struct: %v", missing)
+	}
+}
+
+func TestMissingStructFieldsNilCorporateTwoStructs(t *testing.T) {
+	tst := &struct {
+		APIOpts map[string]interface{}
+		*TenantID
+		*TenantWithAPIOpts
+	}{
+		APIOpts: map[string]interface{}{
+			OptsAPIKey: "attr1234",
+		},
+		TenantID: &TenantID{
+			Tenant: "cgrates.org",
+		},
+	}
+	if missing := MissingStructFields(tst,
+		[]string{Tenant}); len(missing) != 1 {
+		t.Errorf("TenantIDWithAPIOpts is missing from my struct: %v", missing)
+	}
+}
+
 func TestUpdateStructWithIfaceMap(t *testing.T) {
 	type myStruct struct {
 		String string
