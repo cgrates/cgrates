@@ -1742,7 +1742,7 @@ func TestStatQueueSetCloneable(t *testing.T) {
 	}
 }
 
-func TestStatQueueRPCClone(t *testing.T) {
+func TestStatQueueRPCCloneOK(t *testing.T) {
 	args := &StatsArgsProcessEvent{
 		StatIDs: []string{"SQ_ID"},
 		CGREvent: &utils.CGREvent{
@@ -1769,5 +1769,155 @@ func TestStatQueueRPCClone(t *testing.T) {
 	} else if !reflect.DeepEqual(out.(*StatsArgsProcessEvent), exp) {
 		t.Errorf("expected: <%T>, \nreceived: <%T>",
 			args, exp)
+	}
+}
+
+func TestStatQueueRPCCloneNotCloneable(t *testing.T) {
+	args := &StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "EventTest",
+			Event:   make(map[string]interface{}),
+			APIOpts: make(map[string]interface{}),
+		},
+		clnb: false,
+	}
+
+	exp := &StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "EventTest",
+			Event:   make(map[string]interface{}),
+			APIOpts: make(map[string]interface{}),
+		},
+	}
+
+	if out, err := args.RPCClone(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out.(*StatsArgsProcessEvent), exp) {
+		t.Errorf("expected: <%T>, \nreceived: <%T>",
+			args, exp)
+	}
+}
+
+func TestStatQueueProcessEventOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaASR,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+
+	args := &StatsArgsProcessEvent{
+		StatIDs: []string{"SQ1"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SqProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+
+	expIDs := []string{"SQ1"}
+	if rcvIDs, err := sS.processEvent(args.Tenant, args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDs, expIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rcvIDs)
+	}
+}
+
+func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: make(map[string]StatMetric),
+	}
+
+	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+
+	args := &StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "SqProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+			},
+		},
+	}
+
+	if _, err := sS.processEvent(args.Tenant, args); err == nil ||
+		err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
