@@ -349,7 +349,7 @@ type mockCsv struct {
 
 func (mc *mockCsv) Close() error { return nil }
 func (mc *mockCsv) Write(s []byte) (n int, err error) {
-	time.Sleep(3 * time.Second)
+	time.Sleep(25 * time.Millisecond)
 	mc.wg.Done()
 	return 0, nil
 }
@@ -410,7 +410,7 @@ func TestFileCSVSync(t *testing.T) {
 	select {
 	case <-test:
 		return
-	case <-time.After(4 * time.Second):
+	case <-time.After(50 * time.Millisecond):
 		t.Error("Can't asynchronously export events")
 	}
 }

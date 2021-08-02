@@ -337,7 +337,7 @@ func TestHttpPostSync(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		time.Sleep(3 * time.Second)
+		time.Sleep(25 * time.Millisecond)
 		wg1.Done()
 	}))
 
@@ -357,7 +357,7 @@ func TestHttpPostSync(t *testing.T) {
 	select {
 	case <-test:
 		return
-	case <-time.After(4 * time.Second):
+	case <-time.After(50 * time.Millisecond):
 		t.Error("Can't asynchronously export events")
 	}
 }
@@ -398,7 +398,7 @@ func TestHttpPostSyncLimit(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		time.Sleep(3 * time.Second)
+		time.Sleep(25 * time.Millisecond)
 		wg1.Done()
 	}))
 
@@ -418,7 +418,7 @@ func TestHttpPostSyncLimit(t *testing.T) {
 	select {
 	case <-test:
 		t.Error("Should not have been possible to asynchronously export events")
-	case <-time.After(4 * time.Second):
+	case <-time.After(50 * time.Millisecond):
 		return
 	}
 }
