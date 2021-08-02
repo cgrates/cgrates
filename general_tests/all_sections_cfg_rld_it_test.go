@@ -68,7 +68,8 @@ var (
 		testSectConfigSReloadStats,
 		testSectConfigSReloadThresholds,
 		testSectConfigSReloadRoutes,
-		testSectConfigSReloadLoaders, testSectConfigSReloadSuretax,
+		testSectConfigSReloadLoaders,
+		testSectConfigSReloadSuretax,
 		testSectConfigSReloadLoader,
 		testSectConfigSReloadMigrator,
 		testSectConfigSReloadDispatchers,
@@ -159,6 +160,13 @@ func testSectConfigSReloadGeneral(t *testing.T) {
 
 func testSectConfigSReloadCores(t *testing.T) {
 
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.CoreSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
+
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -177,6 +185,13 @@ func testSectConfigSReloadCores(t *testing.T) {
 		t.Error(err)
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.CoreSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
 	}
 }
 
@@ -321,6 +336,13 @@ func testSectConfigSReloadHTTP(t *testing.T) {
 
 func testSectConfigSReloadCaches(t *testing.T) {
 
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.CacheSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
+
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -339,6 +361,13 @@ func testSectConfigSReloadCaches(t *testing.T) {
 		t.Error(err)
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.CacheSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
 	}
 }
 
@@ -367,6 +396,13 @@ func testSectConfigSReloadFilters(t *testing.T) {
 
 func testSectConfigSReloadCDRS(t *testing.T) {
 
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.CDRsV1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
+
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -385,6 +421,13 @@ func testSectConfigSReloadCDRS(t *testing.T) {
 		t.Error(err)
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.CDRsV1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
 	}
 }
 
@@ -436,6 +479,13 @@ func testSectConfigSReloadEES(t *testing.T) {
 
 func testSectConfigSReloadSessions(t *testing.T) {
 
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.SessionSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
+
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -454,6 +504,13 @@ func testSectConfigSReloadSessions(t *testing.T) {
 		t.Error(err)
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.SessionSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
 	}
 }
 
@@ -597,6 +654,13 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 
 func testSectConfigSReloadAttributes(t *testing.T) {
 
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
+
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -616,9 +680,23 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
+	}
 }
 
 func testSectConfigSReloadChargers(t *testing.T) {
+
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.ChargerSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
 
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
@@ -639,9 +717,23 @@ func testSectConfigSReloadChargers(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.ChargerSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
+	}
 }
 
 func testSectConfigSReloadResources(t *testing.T) {
+
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.ResourceSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
 
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
@@ -662,9 +754,23 @@ func testSectConfigSReloadResources(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.ResourceSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
+	}
 }
 
 func testSectConfigSReloadStats(t *testing.T) {
+
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.StatSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
 
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
@@ -685,9 +791,23 @@ func testSectConfigSReloadStats(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.StatSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
+	}
 }
 
 func testSectConfigSReloadThresholds(t *testing.T) {
+
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.ThresholdSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
 
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
@@ -708,9 +828,23 @@ func testSectConfigSReloadThresholds(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.ThresholdSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
+	}
 }
 
 func testSectConfigSReloadRoutes(t *testing.T) {
+
+	var replyPingBf string
+	if err := testSectRPC.Call(context.Background(), utils.RouteSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
 
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
@@ -730,6 +864,13 @@ func testSectConfigSReloadRoutes(t *testing.T) {
 		t.Error(err)
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(context.Background(), utils.RouteSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
 	}
 }
 
