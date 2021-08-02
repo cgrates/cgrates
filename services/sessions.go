@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/apis"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -59,8 +60,8 @@ type SessionService struct {
 	stopChan chan struct{}
 
 	sm *sessions.SessionS
-	// rpc      *v1.SMGenericV1
-	// rpcv1    *v1.SessionSv1
+	//rpc      *apis.SMGenericV1
+	rpcv1    *apis.SessionSv1
 	connChan chan birpc.ClientConnector
 
 	// in order to stop the bircp server if necesary
@@ -70,7 +71,7 @@ type SessionService struct {
 	srvDep       map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (smg *SessionService) Start() (err error) {
 	if smg.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -86,26 +87,27 @@ func (smg *SessionService) Start() (err error) {
 	defer smg.Unlock()
 
 	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
-	//start sync session in a separate gorutine
+	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)
 	// Pass internal connection via BiRPCClient
-	// smg.connChan <- smg.anz.GetInternalCodec(smg.sm, utils.SessionS)
-	// Register RPC handler
-	// smg.rpc = v1.NewSMGenericV1(smg.sm, smg.caps)
 
-	// smg.rpcv1 = v1.NewSessionSv1(smg.sm, smg.caps) // methods with multiple options
-	// if !smg.cfg.DispatcherSCfg().Enabled {
-	// 	smg.server.RpcRegister(smg.rpc)
-	// 	smg.server.RpcRegister(smg.rpcv1)
-	// }
+	// Register RPC handler
+	smg.rpcv1 = apis.NewSessionSv1(smg.sm) // methods with multiple options
+	srv, _ := birpc.NewService(smg.rpcv1, utils.EmptyString, false)
+	//smg.rpc = v1.NewSMGenericV1(smg.sm, smg.caps)
+	smg.rpcv1 = apis.NewSessionSv1(smg.sm) // methods with multiple options
+	if !smg.cfg.DispatcherSCfg().Enabled {
+		smg.server.RpcRegister(srv)
+	}
+	smg.connChan <- smg.anz.GetInternalCodec(srv, utils.SessionS)
 	// Register BiRpc handlers
-	if smg.cfg.SessionSCfg().ListenBijson != "" {
+	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
 		smg.bircpEnabled = true
 		// smg.server.BiRPCRegisterName("SMGenericV1", smg.rpc)
-		// smg.server.BiRPCRegisterName(utils.SessionSv1, smg.rpcv1)
+		smg.server.BiRPCRegisterName(utils.SessionSv1, smg.rpcv1)
 		// run this in it's own goroutine
-		// go smg.start()
+		go smg.start()
 	}
 	return
 }
@@ -141,8 +143,8 @@ func (smg *SessionService) Shutdown() (err error) {
 	}
 	smg.sm = nil
 	// smg.rpc = nil
-	// smg.rpcv1 = nil
-	// <-smg.connChan
+	smg.rpcv1 = nil
+	<-smg.connChan
 	return
 }
 
