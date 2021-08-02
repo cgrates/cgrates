@@ -393,7 +393,7 @@ func TestHttpJsonMapSync(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 
-		time.Sleep(3 * time.Second)
+		time.Sleep(25 * time.Millisecond)
 		wg1.Done()
 	}))
 
@@ -413,7 +413,7 @@ func TestHttpJsonMapSync(t *testing.T) {
 	select {
 	case <-test:
 		return
-	case <-time.After(4 * time.Second):
+	case <-time.After(50 * time.Millisecond):
 		t.Error("Can't asynchronously export events")
 	}
 }
@@ -452,7 +452,7 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		time.Sleep(3 * time.Second)
+		time.Sleep(25 * time.Millisecond)
 		wg1.Done()
 	}))
 
@@ -472,7 +472,7 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 	select {
 	case <-test:
 		t.Error("Should not have been possible to asynchronously export events")
-	case <-time.After(4 * time.Second):
+	case <-time.After(50 * time.Millisecond):
 		return
 	}
 }
