@@ -37,9 +37,9 @@ func TestMissingStructFieldsCorrect(t *testing.T) {
 }
 
 func TestMissingStructFieldsNilCorporate(t *testing.T) {
-	tst := &TenantIDWithAPIOpts{
-		APIOpts: map[string]interface{}{
-			OptsAPIKey: "attr1234",
+	tst := &TenantArgWithPaginator{
+		Paginator: Paginator{
+			Limit: IntPointer(1),
 		},
 	}
 	if missing := MissingStructFields(tst,
@@ -52,14 +52,12 @@ func TestMissingStructFieldsNilCorporateTwoStructs(t *testing.T) {
 	tst := &struct {
 		APIOpts map[string]interface{}
 		*TenantID
-		*TenantWithAPIOpts
+		*TenantArg
 	}{
-		APIOpts: map[string]interface{}{
-			OptsAPIKey: "attr1234",
-		},
 		TenantID: &TenantID{
 			Tenant: "cgrates.org",
 		},
+		TenantArg: &TenantArg{},
 	}
 	if missing := MissingStructFields(tst,
 		[]string{Tenant}); len(missing) != 1 {
