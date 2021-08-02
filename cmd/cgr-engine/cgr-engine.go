@@ -144,7 +144,7 @@ func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 func startRPC(server *cores.Server, internalAdminSChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalRouteSChan,
-	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
+	internalSessionSChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalCacheSChan,
 	internalEEsChan, internalRateSChan, internalActionSChan,
 	internalAccountSChan chan birpc.ClientConnector,
@@ -153,8 +153,8 @@ func startRPC(server *cores.Server, internalAdminSChan,
 		select { // Any of the rpc methods will unlock listening to rpc requests
 		// case cdrs := <-internalCdrSChan:
 		// 	internalCdrSChan <- cdrs
-		// case smg := <-internalSMGChan:
-		// 	internalSMGChan <- smg
+		case smg := <-internalSessionSChan:
+			internalSessionSChan <- smg
 		case rls := <-internalRsChan:
 			internalRsChan <- rls
 		case statS := <-internalStatSChan:
