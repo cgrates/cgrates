@@ -1810,12 +1810,9 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -1838,10 +1835,10 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -1857,7 +1854,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 	}
 
 	expIDs := []string{"SQ1"}
-	if rcvIDs, err := sS.processEvent(args.Tenant, args); err != nil {
+	if rcvIDs, err := sS.processEvent(context.Background(), args.Tenant, args); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDs, expIDs) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rcvIDs)
@@ -1872,12 +1869,9 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -1896,10 +1890,10 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 		SQMetrics: make(map[string]StatMetric),
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -1913,7 +1907,7 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 		},
 	}
 
-	if _, err := sS.processEvent(args.Tenant, args); err == nil ||
+	if _, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -1936,12 +1930,9 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -1967,10 +1958,10 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -1987,7 +1978,7 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 
 	expLog := `[WARNING] <StatS> Queue: cgrates.org:SQ1, ignoring event: cgrates.org:SqProcessEvent, error: NOT_FOUND:Usage`
 	expIDs := []string{"SQ1"}
-	if rcvIDs, err := sS.processEvent(args.Tenant, args); err == nil ||
+	if rcvIDs, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil ||
 		err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	} else if !reflect.DeepEqual(rcvIDs, expIDs) {
@@ -2016,12 +2007,9 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2047,10 +2035,10 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -2065,7 +2053,7 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 	}
 
 	var reply []string
-	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
@@ -2087,12 +2075,9 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2118,10 +2103,10 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -2132,7 +2117,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 
 	var reply []string
 	experr := `MANDATORY_IE_MISSING: [CGREvent]`
-	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2148,7 +2133,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2163,7 +2148,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
