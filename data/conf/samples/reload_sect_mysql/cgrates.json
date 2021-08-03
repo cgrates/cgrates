@@ -118,5 +118,13 @@
 	"apiers_conns": ["*internal"],
 },
 
+"apiban": {
+	"enabled": false,
+	"keys": [],
+},
+
+"dispatchers":{	
+	"enabled": false,
+}
 
 }
