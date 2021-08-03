@@ -705,6 +705,13 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 
 func testSectConfigSReloadAttributes(t *testing.T) {
 
+	var replyPingBf string
+	if err := testSectRPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+		t.Error(err)
+	} else if replyPingBf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingBf)
+	}
+
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -724,6 +731,14 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+
+	var replyPingAf string
+	if err := testSectRPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
+		t.Error(err)
+	} else if replyPingAf != utils.Pong {
+		t.Errorf("Expected OK received: %s", replyPingAf)
+	}
+
 }
 
 func testSectConfigSReloadChargers(t *testing.T) {
@@ -1028,10 +1043,9 @@ func testSectConfigSReloadMigrator(t *testing.T) {
 func testSectConfigSReloadDispatchers(t *testing.T) {
 
 	var replyPingBf string
-	if err := testSectRPC.Call(utils.DispatcherSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+	err := testSectRPC.Call(utils.DispatcherSv1Ping, &utils.CGREvent{}, &replyPingBf)
+	if err == nil || err.Error() != "rpc: can't find service DispatcherSv1.Ping" {
 		t.Error(err)
-	} else if replyPingBf != utils.Pong {
-		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
@@ -1221,6 +1235,7 @@ func testSectConfigSReloadAPIBan(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+
 }
 
 func testSectStopCgrEngine(t *testing.T) {
