@@ -1,0 +1,36 @@
+#Install NFS Server
+- hosts: nfs-server
+  become: true
+  vars:
+    export_path: ~/shared_resources
+    mount_folder: /var/mount_folder
+  tasks:
+    - name: Install NFS Server
+      become: 'yes'
+      apt:
+        name: nfs-kernel-server
+        state: latest
+
+    - name: Create export directory
+      shell: 'mkdir {{ export_path }}'
+      
+    - name: Give permisions
+      become: 'yes'
+      shell: 'sudo chown nobody: {{ export_path }} && sudo chmod 777 {{ export_path }}'
+
+#Install NFS Client
+- hosts: localhost
+  become: true
+  tasks:
+    - name: Install NFS Client
+      become: 'yes'
+      apt:
+        name: nfs-common
+        state: latest
+    - name: Create mounting folder
+      become: 'yes'
+      shell: 'sudo mkdir {{ mount_folder }}'
+
+    - name: Mount exported folder 
+      become: 'yes'
+      shell: 'sudo mount -t nfs 192.168.60.1:{{ export_path }} {{ mount_folder }}'
