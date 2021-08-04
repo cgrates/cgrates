@@ -23,6 +23,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -2257,6 +2258,266 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	experr = `MANDATORY_IE_MISSING: [Event]`
 	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
 		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq1 := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
+		},
+	}
+
+	sq2 := &StatQueue{
+		sqPrfl: nil,
+		Tenant: "testTenant",
+		ID:     "SQ2",
+	}
+	sq3 := &StatQueue{
+		sqPrfl: nil,
+		Tenant: "cgrates.org",
+		ID:     "SQ3",
+	}
+
+	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(sq1); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(sq2); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(sq3); err != nil {
+		t.Error(err)
+	}
+
+	expIDs := []string{"SQ1", "SQ3"}
+	var qIDs []string
+	if err := sS.V1GetQueueIDs(utils.EmptyString, &qIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(qIDs)
+		if !reflect.DeepEqual(qIDs, expIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, qIDs)
+		}
+	}
+}
+
+func TestStatQueueV1GetQueueIDsGetKeysForPrefixErr(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := &DataDBMock{}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	var qIDs []string
+	if err := sS.V1GetQueueIDs(utils.EmptyString, &qIDs); err == nil ||
+		err.Error() != utils.ErrNotImplemented.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestStatQueueV1GetStatQueueOK(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+
+	var reply StatQueue
+	if err := sS.V1GetStatQueue(&utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "SQ1",
+		},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, *sq) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(*sq), utils.ToJSON(reply))
+	}
+}
+
+func TestStatQueueV1GetStatQueueNotFound(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	var reply StatQueue
+	if err := sS.V1GetStatQueue(&utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "SQ1",
+		},
+	}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+
+	experr := `MANDATORY_IE_MISSING: [ID]`
+	var reply StatQueue
+	if err := sS.V1GetStatQueue(&utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{},
+	}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
