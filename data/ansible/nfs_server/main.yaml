@@ -1,9 +1,9 @@
-#Install NFS Server
+#Installing NFS Server 
 - hosts: nfs-server
-  become: true
+  become: 'yes'
   vars:
-    export_path: ~/shared_resources
-    mount_folder: /var/mount_folder
+    export_path: /home/nick/shared_resources
+
   tasks:
     - name: Install NFS Server
       become: 'yes'
@@ -11,26 +11,58 @@
         name: nfs-kernel-server
         state: latest
 
+    - name: Install portmap
+      become: 'yes'
+      apt:
+        name: portmap
+        state: latest
+
+    - name: Allow connection
+      shell: 'echo "portmap: 192.168.58.1" >> /etc/hosts.allow'
+
+    - name: Restart portmap
+      become: 'yes'
+      shell: 'sudo systemctl restart portmap'
+
     - name: Create export directory
       shell: 'mkdir {{ export_path }}'
-      
+
     - name: Give permisions
       become: 'yes'
       shell: 'sudo chown nobody: {{ export_path }} && sudo chmod 777 {{ export_path }}'
 
-#Install NFS Client
+    - name: Create content in export directory
+      shell: 'cd {{ export_path }} && touch test1.txt test2.txt test3.txt'
+
+    - name: Add the export directories
+      become: 'yes'
+      shell: 'echo "{{ export_path }} 192.168.58.1(rw,sync,no_subtree_check,no_root_squash,no_all_squash)" >> /etc/exports'
+
+    - name: Run the export command
+      become: yes
+      shell: 'sudo exportfs -a'
+
+    - name: Reload the NFS Server
+      become: yes
+      shell: '/etc/init.d/nfs-kernel-server reload'
+
+#Installing NFS Client
 - hosts: localhost
   become: true
+  vars:
+    mount_folder: /var/mount_folder
+
   tasks:
     - name: Install NFS Client
       become: 'yes'
       apt:
         name: nfs-common
         state: latest
+        
     - name: Create mounting folder
       become: 'yes'
       shell: 'sudo mkdir {{ mount_folder }}'
 
-    - name: Mount exported folder 
+    - name: Mounting from exports
       become: 'yes'
-      shell: 'sudo mount -t nfs 192.168.60.1:{{ export_path }} {{ mount_folder }}'
+      shell: 'sudo mount -t nfs -vvvv -o v3 192.168.60.1:/home/nick/shared_resources {{ mount_folder }}'
