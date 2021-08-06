@@ -47,23 +47,30 @@ var (
 		//testSectConfigSReloadDataDB,
 		//testSectConfigSReloadStorDB,
 		testSectConfigSReloadListen,
+		testSectConfigSReloadRALS,
+		testSectConfigSReloadAttributes,
+		testSectConfigSReloadSessions,
+		testSectConfigSReloadApiers,
+
+		testSectConfigSReloadRegistrarC,
+
 		testSectConfigSReloadTLS,
 		testSectConfigSReloadHTTP,
 		testSectConfigSReloadSchedulers,
 		testSectConfigSReloadCaches,
 		testSectConfigSReloadFilters,
-		testSectConfigSReloadRALS,
+
 		testSectConfigSReloadCDRS,
 		testSectConfigSReloadERS,
 		testSectConfigSReloadEES,
-		testSectConfigSReloadSessions,
+
 		testSectConfigSReloadAsteriskAgent,
 		testSectConfigSReloadFreeswitchAgent,
 		testSectConfigSReloadKamailioAgent,
 		testSectConfigSReloadDiameterAgent,
 		testSectConfigSReloadHTTPAgent,
 		testSectConfigSReloadDNSAgent,
-		testSectConfigSReloadAttributes,
+
 		testSectConfigSReloadChargers,
 		testSectConfigSReloadResources,
 		testSectConfigSReloadStats,
@@ -75,13 +82,12 @@ var (
 		testSectConfigSReloadLoader,
 		testSectConfigSReloadMigrator,
 		testSectConfigSReloadDispatchers,
-		testSectConfigSReloadRegistrarC,
 		testSectConfigSReloadAnalyzer,
-		testSectConfigSReloadApiers,
-		testSectConfigSReloadSIPAgent,
-		testSectConfigSReloadTemplates,
+
 		testSectConfigSReloadConfigs,
 		testSectConfigSReloadAPIBan,
+		testSectConfigSReloadTemplates,
+		testSectConfigSReloadSIPAgent,
 		testSectStopCgrEngine,
 	}
 )
@@ -529,10 +535,8 @@ func testSectConfigSReloadEES(t *testing.T) {
 func testSectConfigSReloadSessions(t *testing.T) {
 
 	var replyPingBf string
-	if err := testSectRPC.Call(utils.SessionSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+	if err := testSectRPC.Call(utils.SessionSv1Ping, &utils.CGREvent{}, &replyPingBf); err == nil || err.Error() != "rpc: can't find service SessionSv1.Ping" {
 		t.Error(err)
-	} else if replyPingBf != utils.Pong {
-		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 
 	var reply string
@@ -704,10 +708,8 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 func testSectConfigSReloadAttributes(t *testing.T) {
 
 	var replyPingBf string
-	if err := testSectRPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+	if err := testSectRPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &replyPingBf); err == nil || err.Error() != "rpc: can't find service AttributeSv1.Ping" {
 		t.Error(err)
-	} else if replyPingBf != utils.Pong {
-		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 
 	var reply string
@@ -1046,13 +1048,13 @@ func testSectConfigSReloadDispatchers(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"dispatchers\":{\"any_subsystem\":true,\"attributes_conns\":[],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"suffix_indexed_fields\":[]}}",
+		Config: "{\"dispatchers\":{\"any_subsystem\":true,\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"*internal\"],\"suffix_indexed_fields\":[\"*internal\"]}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"dispatchers\":{\"any_subsystem\":true,\"attributes_conns\":[],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"suffix_indexed_fields\":[]}}"
+	cfgStr := "{\"dispatchers\":{\"any_subsystem\":true,\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"*internal\"],\"string_indexed_fields\":[],\"suffix_indexed_fields\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1076,13 +1078,13 @@ func testSectConfigSReloadRegistrarC(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"registrarc\":{\"dispatchers\":{\"enabled\":true,\"hosts\":[],\"refresh_interval\":\"5m0s\",\"registrars_conns\":[]},\"rpc\":{\"enabled\":true,\"hosts\":[],\"refresh_interval\":\"5m0s\",\"registrars_conns\":[]}}}",
+		Config: "{\"registrarc\":{\"dispatchers\":{\"enabled\":true,\"hosts\":[{\"Tenant\":\"*default\"}],\"refresh_interval\":\"5m0s\",\"registrars_conns\":[]},\"rpc\":{\"enabled\":true,\"hosts\":[{\"Tenant\":\"*default\"}],\"refresh_interval\":\"5m0s\",\"registrars_conns\":[]}}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"registrarc\":{\"dispatchers\":{\"hosts\":[],\"refresh_interval\":\"5m0s\",\"registrars_conns\":[]},\"rpc\":{\"hosts\":[],\"refresh_interval\":\"5m0s\",\"registrars_conns\":[]}}}"
+	cfgStr := "{\"registrarc\":{\"dispatchers\":{\"hosts\":[{\"Tenant\":\"*default\",\"transport\":\"\"}],\"refresh_interval\":\"5m0s\",\"registrars_conns\":[]},\"rpc\":{\"hosts\":[{\"Tenant\":\"*default\",\"transport\":\"\"}],\"refresh_interval\":\"5m0s\",\"registrars_conns\":[]}}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1122,13 +1124,13 @@ func testSectConfigSReloadApiers(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"apiers\":{\"attributes_conns\":[],\"caches_conns\":[\"*internal\"],\"ees_conns\":[],\"enabled\":true,\"scheduler_conns\":[\"*internal\"]}}",
+		Config: "{\"apiers\":{\"attributes_conns\":[\"*internal\"],\"caches_conns\":[\"*internal\"],\"ees_conns\":[\"*internal\"],\"enabled\":true,\"scheduler_conns\":[\"*internal\"]}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"apiers\":{\"attributes_conns\":[],\"caches_conns\":[\"*internal\"],\"ees_conns\":[],\"enabled\":true,\"scheduler_conns\":[\"*internal\"]}}"
+	cfgStr := "{\"apiers\":{\"attributes_conns\":[\"*internal\"],\"caches_conns\":[\"*internal\"],\"ees_conns\":[\"*internal\"],\"enabled\":true,\"scheduler_conns\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1159,7 +1161,7 @@ func testSectConfigSReloadSIPAgent(t *testing.T) {
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if cfgStr != rpl {
-		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl)
+		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToJSON(cfgStr), utils.ToJSON(rpl))
 	}
 }
 
