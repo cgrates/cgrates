@@ -45,24 +45,3 @@
     - name: Reload the NFS Server
       become: yes
       shell: '/etc/init.d/nfs-kernel-server reload'
-
-#Installing NFS Client
-- hosts: localhost
-  become: true
-  vars:
-    mount_folder: /var/mount_folder
-
-  tasks:
-    - name: Install NFS Client
-      become: 'yes'
-      apt:
-        name: nfs-common
-        state: latest
-        
-    - name: Create mounting folder
-      become: 'yes'
-      shell: 'sudo mkdir {{ mount_folder }}'
-
-    - name: Mounting from exports
-      become: 'yes'
-      shell: 'sudo mount -t nfs -vvvv -o v3 192.168.60.1:/home/nick/shared_resources {{ mount_folder }}'
