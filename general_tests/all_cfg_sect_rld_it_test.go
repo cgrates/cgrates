@@ -80,7 +80,6 @@ var (
 		testSectConfigSReloadMailer,
 		testSectConfigSReloadSuretax,
 		testSectConfigSReloadLoader,
-		testSectConfigSReloadMigrator,
 		testSectConfigSReloadDispatchers,
 		testSectConfigSReloadAnalyzer,
 
@@ -88,6 +87,7 @@ var (
 		testSectConfigSReloadAPIBan,
 		testSectConfigSReloadTemplates,
 		testSectConfigSReloadSIPAgent,
+		testSectConfigSReloadMigrator,
 		testSectStopCgrEngine,
 	}
 )
@@ -974,7 +974,31 @@ func testSectConfigSReloadSuretax(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"suretax\":{\"bill_to_number\":\"\",\"business_unit\":\"\",\"client_number\":\"\",\"client_tracking\":\"~*req.CGRID\",\"customer_number\":\"~*req.Subject\",\"include_local_cost\":false,\"orig_number\":\"~*req.Subject\",\"p2pplus4\":\"\",\"p2pzipcode\":\"\",\"plus4\":\"\",\"regulatory_code\":\"03\",\"response_group\":\"03\",\"response_type\":\"D4\",\"return_file_code\":\"0\",\"sales_type_code\":\"R\",\"tax_exemption_code_list\":\"\",\"tax_included\":\"0\",\"tax_situs_rule\":\"04\",\"term_number\":\"~*req.Destination\",\"timezone\":\"Local\",\"trans_type_code\":\"010101\",\"unit_type\":\"00\",\"units\":\"1\",\"url\":\"\",\"validation_key\":\"\",\"zipcode\":\"\"}}",
+		Config: `{"suretax": {
+			"timezone":                "UTC",
+			"include_local_cost":      true,
+			"return_file_code":        "0",
+			"response_group":          "04",
+			"response_type":           "A4",
+			"regulatory_code":         "04",
+			"client_tracking":         "~*req.Destination",
+			"customer_number":         "~*req.Destination",
+			"orig_number":             "~*req.Destination",
+			"bill_to_number": "randomNumber",					
+			"zipcode": "randomCode",							
+			"plus4": "randomValue",							
+			"p2pzipcode": "randomCode",						
+			"p2pplus4": "randomValue",
+			"term_number":             "~*req.CGRID",
+			"units":                   "7",
+			"unit_type":               "02",
+			"tax_included":            "1",
+			"tax_situs_rule":          "03",
+			"trans_type_code":         "01010101",
+			"sales_type_code":         "B",
+			"tax_exemption_code_list": "randomCode"
+		},
+	}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -997,13 +1021,13 @@ func testSectConfigSReloadLoader(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"loader\":{\"caches_conns\":[\"*localhost\"],\"data_path\":\"./\",\"disable_reverse\":false,\"field_separator\":\",\",\"gapi_credentials\":\".gapi/credentials.json\",\"gapi_token\":\".gapi/token.json\",\"scheduler_conns\":[\"*localhost\"],\"tpid\":\"\"}}",
+		Config: "{\"loader\":{\"caches_conns\":[\"*internal\"],\"data_path\":\".path\",\"disable_reverse\":true,\"field_separator\":\";\",\"gapi_credentials\":\".testCredentials\",\"gapi_token\":\".testToken\",\"scheduler_conns\":[\"*internal\"],\"tpid\":\"testID\"}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"loader\":{\"caches_conns\":[\"*localhost\"],\"data_path\":\"./\",\"disable_reverse\":false,\"field_separator\":\",\",\"gapi_credentials\":\".gapi/credentials.json\",\"gapi_token\":\".gapi/token.json\",\"scheduler_conns\":[\"*localhost\"],\"tpid\":\"\"}}"
+	cfgStr := "{\"loader\":{\"caches_conns\":[\"*internal\"],\"data_path\":\".path\",\"disable_reverse\":true,\"field_separator\":\";\",\"gapi_credentials\":\".testCredentials\",\"gapi_token\":\".testToken\",\"scheduler_conns\":[\"*internal\"],\"tpid\":\"testID\"}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1020,13 +1044,13 @@ func testSectConfigSReloadMigrator(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"migrator\":{\"out_datadb_encoding\":\"msgpack\",\"out_datadb_host\":\"127.0.0.1\",\"out_datadb_name\":\"10\",\"out_datadb_opts\":{\"redisCACertificate\":\"\",\"redisClientCertificate\":\"\",\"redisClientKey\":\"\",\"redisCluster\":false,\"redisClusterOndownDelay\":\"0\",\"redisClusterSync\":\"5s\",\"redisSentinel\":\"\",\"redisTLS\":false},\"out_datadb_password\":\"\",\"out_datadb_port\":\"6379\",\"out_datadb_type\":\"redis\",\"out_datadb_user\":\"cgrates\",\"out_stordb_host\":\"127.0.0.1\",\"out_stordb_name\":\"cgrates\",\"out_stordb_opts\":{},\"out_stordb_password\":\"CGRateS.org\",\"out_stordb_port\":\"3306\",\"out_stordb_type\":\"mysql\",\"out_stordb_user\":\"cgrates\",\"users_filters\":[\"Account\"]}}",
+		Config: "{\"migrator\":{\"out_datadb_encoding\":\"testDatadbEncoding\",\"out_datadb_host\":\"127.1.1.1\",\"out_datadb_name\":\"10\",\"out_datadb_opts\":{\"redisCACertificate\":\"testRedisCACertificate\",\"redisClientCertificate\":\"testRedisClientCertificate\",\"redisClientKey\":\"testRedisClientKey\",\"redisCluster\":true,\"redisClusterOndownDelay\":\"4\",\"redisClusterSync\":\"10s\",\"redisSentinel\":\"redisTest\",\"redisTLS\":true},\"out_datadb_password\":\"dataDBPass\",\"out_datadb_port\":\"5555\",\"out_datadb_type\":\"redisTest\",\"out_datadb_user\":\"cgratesTest\",\"out_stordb_host\":\"125.1.1.1\",\"out_stordb_name\":\"cgratesStorDBName\",\"out_stordb_opts\":{},\"out_stordb_password\":\"StorDBPass\",\"out_stordb_port\":\"3333\",\"out_stordb_type\":\"mongo\",\"out_stordb_user\":\"cgratesTest\",\"users_filters\":[\"Stats\"]}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"migrator\":{\"out_datadb_encoding\":\"msgpack\",\"out_datadb_host\":\"127.0.0.1\",\"out_datadb_name\":\"10\",\"out_datadb_opts\":{\"redisCACertificate\":\"\",\"redisClientCertificate\":\"\",\"redisClientKey\":\"\",\"redisCluster\":false,\"redisClusterOndownDelay\":\"0\",\"redisClusterSync\":\"5s\",\"redisSentinel\":\"\",\"redisTLS\":false},\"out_datadb_password\":\"\",\"out_datadb_port\":\"6379\",\"out_datadb_type\":\"redis\",\"out_datadb_user\":\"cgrates\",\"out_stordb_host\":\"127.0.0.1\",\"out_stordb_name\":\"cgrates\",\"out_stordb_opts\":{},\"out_stordb_password\":\"CGRateS.org\",\"out_stordb_port\":\"3306\",\"out_stordb_type\":\"mysql\",\"out_stordb_user\":\"cgrates\",\"users_filters\":[\"Account\"]}}"
+	cfgStr := "{\"migrator\":{\"out_datadb_encoding\":\"testDatadbEncoding\",\"out_datadb_host\":\"127.1.1.1\",\"out_datadb_name\":\"10\",\"out_datadb_opts\":{\"redisCACertificate\":\"testRedisCACertificate\",\"redisClientCertificate\":\"testRedisClientCertificate\",\"redisClientKey\":\"testRedisClientKey\",\"redisCluster\":true,\"redisClusterOndownDelay\":\"4\",\"redisClusterSync\":\"10s\",\"redisSentinel\":\"redisTest\",\"redisTLS\":true},\"out_datadb_password\":\"dataDBPass\",\"out_datadb_port\":\"5555\",\"out_datadb_type\":\"redisTest\",\"out_datadb_user\":\"cgratesTest\",\"out_stordb_host\":\"125.1.1.1\",\"out_stordb_name\":\"cgratesStorDBName\",\"out_stordb_opts\":{},\"out_stordb_password\":\"StorDBPass\",\"out_stordb_port\":\"3333\",\"out_stordb_type\":\"mongo\",\"out_stordb_user\":\"cgratesTest\",\"users_filters\":[\"Stats\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1048,13 +1072,14 @@ func testSectConfigSReloadDispatchers(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"dispatchers\":{\"any_subsystem\":true,\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"*internal\"],\"suffix_indexed_fields\":[\"*internal\"]}}",
+		Config: "{\"dispatchers\":{\"any_subsystem\":true,\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"*internal\"],\"string_indexed_fields\":[\"*internal\"],\"suffix_indexed_fields\":[\"*internal\"]}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"dispatchers\":{\"any_subsystem\":true,\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"*internal\"],\"string_indexed_fields\":[],\"suffix_indexed_fields\":[\"*internal\"]}}"
+	cfgStr :=
+		"{\"dispatchers\":{\"any_subsystem\":true,\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"*internal\"],\"string_indexed_fields\":[\"*internal\"],\"suffix_indexed_fields\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
