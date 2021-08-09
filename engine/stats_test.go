@@ -2422,12 +2422,9 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf1 := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2440,16 +2437,13 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf1, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf1, true); err != nil {
 		t.Error(err)
 	}
 
 	sqPrf2 := &StatQueueProfile{
-		Tenant: "cgrates.org",
-		ID:     "SQ2",
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ2",
 		Weight:       20,
 		Blocker:      false,
 		QueueLength:  10,
@@ -2462,7 +2456,7 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf2, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2477,7 +2471,7 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 
 	exp := []string{"SQ1", "SQ2"}
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err != nil {
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply)
@@ -2503,12 +2497,9 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2521,7 +2512,7 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2535,7 +2526,7 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 	}
 
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
@@ -2557,12 +2548,9 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2575,7 +2563,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2585,7 +2573,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [CGREvent]`
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2601,7 +2589,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2615,7 +2603,7 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2638,12 +2626,9 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2673,7 +2658,7 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -2694,7 +2679,7 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 	}
 	var reply string
 
-	if err := sS.V1ResetStatQueue(&utils.TenantID{
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{
 		ID: "SQ1",
 	}, &reply); err != nil {
 		t.Error(err)
@@ -2724,12 +2709,9 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2759,12 +2741,12 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
 	var reply string
-	if err := sS.V1ResetStatQueue(&utils.TenantID{
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{
 		ID: "SQ2",
 	}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -2788,12 +2770,9 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2823,13 +2802,13 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	var reply string
-	if err := sS.V1ResetStatQueue(&utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2852,12 +2831,9 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2887,14 +2863,14 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
 	experr := `unsupported metric type <testMetricType>`
 	var reply string
 
-	if err := sS.V1ResetStatQueue(&utils.TenantID{
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{
 		ID: "SQ1",
 	}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
