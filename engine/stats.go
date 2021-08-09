@@ -534,7 +534,7 @@ func (sS *StatService) V1ResetStatQueue(ctx *context.Context, tntID *utils.Tenan
 		statQueueLockKey(tnt, tntID.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 	var sq *StatQueue
-	if sq, err = sS.dm.GetStatQueue(ctx, tntID.Tenant, tntID.ID,
+	if sq, err = sS.dm.GetStatQueue(ctx, tnt, tntID.ID,
 		true, true, utils.NonTransactional); err != nil {
 		return
 	}
