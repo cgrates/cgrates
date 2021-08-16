@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -28,54 +29,49 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type EventExporter interface {
-	ID() string                                    // return the exporter identificator
-	ExportEvent(cgrEv *utils.CGREvent) (err error) // called on each event to be exported
-	OnEvicted(itmID string, value interface{})     // called when the exporter needs to terminate
-	GetMetrics() *utils.SafeMapStorage             // called to get metrics
-}
-
-type exportedEvent interface {
-	Parse(func(path []string, val interface{}))
-	AsStringSlice() []string
-	AsMapStringSlice() map[string]interface{}
-}
-
 type EventExporter2 interface {
-	Cfg() *config.EventExporterCfg                  // return the config
-	Connect() error                                 // called before exporting an event to make sure it is connected
-	ExportEvent(exportedEvent) (interface{}, error) // called on each event to be exported
-	Close() error                                   // called when the exporter needs to terminate
-	GetMetrics() *utils.SafeMapStorage              // called to get metrics
+	Cfg() *config.EventExporterCfg         // return the config
+	Connect() error                        // called before exporting an event to make sure it is connected
+	ExportEvent(interface{}, string) error // called on each event to be exported
+	Close() error                          // called when the exporter needs to terminate
+	GetMetrics() *utils.SafeMapStorage     // called to get metrics
+	PrepareMap(map[string]interface{}) (interface{}, error)
+	PrepareOrderMap(*utils.OrderedNavigableMap) (interface{}, error)
 }
 
 // NewEventExporter produces exporters
-func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (ee EventExporter, err error) {
+func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (ee EventExporter2, err error) {
 	var dc *utils.SafeMapStorage
 	if dc, err = newEEMetrics(utils.FirstNonEmpty(
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone)); err != nil {
 		return
 	}
+	cfg := cgrCfg.EEsCfg().Exporters[cfgIdx]
 	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
 	case utils.MetaFileCSV:
-		return NewFileCSVee(cgrCfg, cfgIdx, filterS, dc)
+		return NewFileCSVee(cfg, cgrCfg, filterS, dc)
 	case utils.MetaFileFWV:
-		return NewFileFWVee(cgrCfg, cfgIdx, filterS, dc)
+		return NewFileFWVee(cfg, cgrCfg, filterS, dc)
 	case utils.MetaHTTPPost:
-		return NewHTTPPostEe(cgrCfg, cfgIdx, filterS, dc)
+		return NewHTTPPostEE(cfg, cgrCfg, filterS, dc)
 	case utils.MetaHTTPjsonMap:
-		return NewHTTPjsonMapEE(cgrCfg, cfgIdx, filterS, dc)
-	case utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap,
+		return NewHTTPjsonMapEE(cfg, cgrCfg, filterS, dc)
+	case utils.MetaNatsjsonMap:
+		return NewNatsEE(cfg, cgrCfg.GeneralCfg().NodeID,
+			cgrCfg.GeneralCfg().ConnectTimeout, dc)
+	case utils.MetaAMQPjsonMap:
+		return NewAMQPee(cfg, dc), nil
+	case utils.MetaAMQPV1jsonMap,
 		utils.MetaSQSjsonMap, utils.MetaKafkajsonMap,
-		utils.MetaS3jsonMap, utils.MetaNatsjsonMap:
+		utils.MetaS3jsonMap:
 		return NewPosterJSONMapEE(cgrCfg, cfgIdx, filterS, dc)
 	case utils.MetaVirt:
-		return NewVirtualExporter(cgrCfg, cfgIdx, filterS, dc)
+		return NewVirtualEE(cfg, dc)
 	case utils.MetaElastic:
-		return NewElasticExporter(cgrCfg, cfgIdx, filterS, dc)
+		return NewElasticEE(cfg, dc)
 	case utils.MetaSQL:
-		return NewSQLEe(cgrCfg, cfgIdx, filterS, dc)
+		return NewSQLEe(cfg, dc)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
 	}
@@ -224,44 +220,31 @@ func updateEEMetrics(dc *utils.SafeMapStorage, cgrID string, ev engine.MapEvent,
 	}
 }
 
-type expOrderedNavigableMap utils.OrderedNavigableMap
+type bytePreparing struct{}
 
-func (v *expOrderedNavigableMap) Parse(f func(path []string, val interface{})) {
-	nm := (*utils.OrderedNavigableMap)(v)
-	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
-		nmIt, _ := nm.Field(el.Value)
-		f(el.Value, nmIt.Data)
-	}
+func (eEe *bytePreparing) PrepareMap(mp map[string]interface{}) (interface{}, error) {
+	return json.Marshal(mp)
 }
-
-func (v *expOrderedNavigableMap) AsStringSlice() []string {
-	return (*utils.OrderedNavigableMap)(v).OrderedFieldsAsStrings()
-}
-func (v *expOrderedNavigableMap) AsMapStringSlice() (m map[string]interface{}) {
-	m = map[string]interface{}{}
-	nm := (*utils.OrderedNavigableMap)(v)
-	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
+func (eEe *bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
+	valMp := make(map[string]interface{})
+	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
-		nmIt, _ := nm.Field(path)
+		nmIt, _ := mp.Field(path)
 		path = path[:len(path)-1] // remove the last index
-		m[strings.Join(path, utils.NestingSep)] = nmIt.String()
+		valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
 	}
-	return
+	return json.Marshal(valMp)
 }
 
-type expMapStorage utils.MapStorage
+type slicePreparing struct{}
 
-func (v expMapStorage) Parse(f func(path []string, val interface{})) {
-	for k, val := range utils.MapStorage(v) {
-		f([]string{k}, val)
+func (eEe *slicePreparing) PrepareMap(mp map[string]interface{}) (interface{}, error) {
+	csvRecord := make([]string, 0, len(mp))
+	for _, val := range mp {
+		csvRecord = append(csvRecord, utils.IfaceAsString(val))
 	}
+	return csvRecord, nil
 }
-
-func (v expMapStorage) AsStringSlice() (s []string) {
-	s = make([]string, 0, len(v))
-	for _, val := range utils.MapStorage(v) {
-		s = append(s, utils.IfaceAsString(val))
-	}
-	return
+func (eEe *slicePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
+	return mp.OrderedFieldsAsStrings(), nil
 }
-func (v expMapStorage) AsMapStringSlice() map[string]interface{} { return v }

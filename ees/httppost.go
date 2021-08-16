@@ -28,124 +28,92 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewHTTPPostEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc *utils.SafeMapStorage) (httpPost *HTTPPost, err error) {
-	httpPost = &HTTPPost{
-		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg:  cgrCfg,
-		cfgIdx:  cfgIdx,
-		filterS: filterS,
-		dc:      dc,
-		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
+func NewHTTPPostEE(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS,
+	dc *utils.SafeMapStorage) (httpPost *HTTPPostEE, err error) {
+	httpPost = &HTTPPostEE{
+		cfg:    cfg,
+		dc:     dc,
+		client: &http.Client{Transport: engine.GetHTTPPstrTransport(), Timeout: cgrCfg.GeneralCfg().ReplyTimeout},
+		reqs:   newConcReq(cfg.ConcurrentRequests),
 	}
-	httpPost.httpPoster = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
-		cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-		utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type],
-		cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)
+	httpPost.hdr, err = httpPost.composeHeader(cgrCfg, filterS)
 	return
 }
 
 // FileCSVee implements EventExporter interface for .csv files
-type HTTPPost struct {
-	id         string
-	cgrCfg     *config.CGRConfig
-	cfgIdx     int // index of config instance within ERsCfg.Readers
-	filterS    *engine.FilterS
-	httpPoster *engine.HTTPPoster
-	dc         *utils.SafeMapStorage
-	reqs       *concReq
+type HTTPPostEE struct {
+	cfg    *config.EventExporterCfg
+	dc     *utils.SafeMapStorage
+	client *http.Client
+	reqs   *concReq
+
+	hdr http.Header
 }
-
-// ID returns the identificator of this exporter
-func (httpPost *HTTPPost) ID() string {
-	return httpPost.id
-}
-
-// OnEvicted implements EventExporter, doing the cleanup before exit
-func (httpPost *HTTPPost) OnEvicted(_ string, _ interface{}) {
-}
-
-// ExportEvent implements EventExporter
-func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	httpPost.reqs.get()
-	defer func() {
-		updateEEMetrics(httpPost.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
-			httpPost.cgrCfg.GeneralCfg().DefaultTimezone))
-		httpPost.reqs.done()
-	}()
-	httpPost.dc.Lock()
-	httpPost.dc.MapStorage[utils.NumberOfEvents] = httpPost.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
-	httpPost.dc.Unlock()
-
-	urlVals := url.Values{}
-	hdr := http.Header{}
-	if len(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()) == 0 {
-		for k, v := range cgrEv.Event {
-			urlVals.Set(k, utils.IfaceAsString(v))
-		}
-	} else {
-		oNm := map[string]*utils.OrderedNavigableMap{
-			utils.MetaExp: utils.NewOrderedNavigableMap(),
-		}
-		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
-			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
-			utils.MetaDC:   httpPost.dc,
-			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
-			utils.MetaCfg:  httpPost.cgrCfg.GetDataProvider(),
-		}, utils.FirstNonEmpty(cgrEv.Tenant, httpPost.cgrCfg.GeneralCfg().DefaultTenant),
-			httpPost.filterS, oNm)
-		if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()); err != nil {
-			return
-		}
-		for el := eeReq.ExpData[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-			path := el.Value
-			nmIt, _ := eeReq.ExpData[utils.MetaExp].Field(path)
-			path = path[:len(path)-1] // remove the last index
-			urlVals.Set(strings.Join(path, utils.NestingSep), nmIt.String())
-		}
-		if hdr, err = httpPost.composeHeader(); err != nil {
-			return
-		}
-	}
-
-	if err = httpPost.httpPoster.PostValues(urlVals, hdr); err != nil &&
-		httpPost.cgrCfg.GeneralCfg().FailedPostsDir != utils.MetaNone {
-		engine.AddFailedPost(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ExportPath,
-			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Type, utils.EventExporterS,
-			&engine.HTTPPosterRequest{
-				Header: hdr,
-				Body:   urlVals,
-			}, httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Opts)
-	}
-	return
-}
-
-func (httpPost *HTTPPost) GetMetrics() *utils.SafeMapStorage {
-	return httpPost.dc.Clone()
+type httpPosterRequest struct {
+	Header http.Header
+	Body   interface{}
 }
 
 // Compose and cache the header
-func (httpPost *HTTPPost) composeHeader() (hdr http.Header, err error) {
+func (httpPost *HTTPPostEE) composeHeader(cgrCfg *config.CGRConfig, filterS *engine.FilterS) (hdr http.Header, err error) {
 	hdr = make(http.Header)
-	if len(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].HeaderFields()) == 0 {
+	if len(httpPost.Cfg().HeaderFields()) == 0 {
 		return
 	}
-	oNm := map[string]*utils.OrderedNavigableMap{
-		utils.MetaHdr: utils.NewOrderedNavigableMap(),
-	}
-	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
-		utils.MetaDC:  httpPost.dc,
-		utils.MetaCfg: httpPost.cgrCfg.GetDataProvider(),
-	}, httpPost.cgrCfg.GeneralCfg().DefaultTenant,
-		httpPost.filterS, oNm)
-	if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].HeaderFields()); err != nil {
+	var exp *utils.OrderedNavigableMap
+	if exp, err = composeHeaderTrailer(utils.MetaHdr, httpPost.Cfg().HeaderFields(), httpPost.dc, cgrCfg, filterS); err != nil {
 		return
 	}
-	for el := eeReq.ExpData[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
+	for el := exp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
-		nmIt, _ := eeReq.ExpData[utils.MetaHdr].Field(path)
-		path = path[:len(path)-1] // remove the last index
+		nmIt, _ := exp.Field(path) //Safe to ignore error, since the path always exists
+		path = path[:len(path)-1]  // remove the last index
 		hdr.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 	}
 	return
+}
+
+func (httpPost *HTTPPostEE) Cfg() *config.EventExporterCfg { return httpPost.cfg }
+
+func (httpPost *HTTPPostEE) Connect() (_ error) { return }
+
+func (httpPost *HTTPPostEE) ExportEvent(content interface{}, _ string) (err error) {
+	httpPost.reqs.get()
+	defer httpPost.reqs.done()
+	pReq := content.(*httpPosterRequest)
+	var req *http.Request
+	if req, err = prepareRequest(httpPost.Cfg().ExportPath, utils.ContentForm, pReq.Body, pReq.Header); err != nil {
+		return
+	}
+	_, err = sendHTTPReq(httpPost.client, req)
+	return
+}
+
+func (httpPost *HTTPPostEE) Close() (_ error) { return }
+
+func (httpPost *HTTPPostEE) GetMetrics() *utils.SafeMapStorage { return httpPost.dc }
+
+func (httpPost *HTTPPostEE) PrepareMap(mp map[string]interface{}) (interface{}, error) {
+	urlVals := url.Values{}
+	for k, v := range mp {
+		urlVals.Set(k, utils.IfaceAsString(v))
+	}
+	return &httpPosterRequest{
+		Header: httpPost.hdr,
+		Body:   urlVals,
+	}, nil
+}
+
+func (httpPost *HTTPPostEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
+	urlVals := url.Values{}
+	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
+		path := el.Value
+		nmIt, _ := mp.Field(path)
+		path = path[:len(path)-1] // remove the last index
+		urlVals.Set(strings.Join(path, utils.NestingSep), nmIt.String())
+	}
+	return &httpPosterRequest{
+		Header: httpPost.hdr,
+		Body:   urlVals,
+	}, nil
 }

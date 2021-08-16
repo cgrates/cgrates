@@ -147,6 +147,7 @@ type EventExporterCfg struct {
 	AttributeSCtx      string   // context to use when querying AttributeS
 	Synchronous        bool
 	Attempts           int
+	FailedPostsDir     string
 	ConcurrentRequests int
 	Fields             []*FCTemplate
 	headerFields       []*FCTemplate
@@ -208,6 +209,9 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 			eeC.Opts[k] = v
 		}
 	}
+	if jsnEec.Failed_posts_dir != nil {
+		eeC.FailedPostsDir = *jsnEec.Failed_posts_dir
+	}
 	return
 }
 
@@ -261,6 +265,7 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		contentFields:      make([]*FCTemplate, len(eeC.contentFields)),
 		trailerFields:      make([]*FCTemplate, len(eeC.trailerFields)),
 		Opts:               make(map[string]interface{}),
+		FailedPostsDir:     eeC.FailedPostsDir,
 	}
 
 	if eeC.Filters != nil {
@@ -306,6 +311,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		utils.SynchronousCfg:        eeC.Synchronous,
 		utils.AttemptsCfg:           eeC.Attempts,
 		utils.ConcurrentRequestsCfg: eeC.ConcurrentRequests,
+		utils.FailedPostsDirCfg:     eeC.FailedPostsDir,
 	}
 	opts := make(map[string]interface{})
 	for k, v := range eeC.Opts {
@@ -337,6 +343,7 @@ type EventExporterJsonCfg struct {
 	Synchronous         *bool
 	Attempts            *int
 	Concurrent_requests *int
+	Failed_posts_dir    *string
 	Fields              *[]*FcTemplateJsonCfg
 }
 
@@ -387,6 +394,9 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields, separator)
 	if flds != nil {
 		d.Fields = &flds
+	}
+	if v1.FailedPostsDir != v2.FailedPostsDir {
+		d.Failed_posts_dir = utils.StringPointer(v2.FailedPostsDir)
 	}
 	return d
 }

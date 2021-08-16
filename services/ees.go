@@ -68,7 +68,7 @@ type EventExporterService struct {
 
 // ServiceName returns the service name
 func (es *EventExporterService) ServiceName() string {
-	return utils.EventExporterS
+	return utils.EEs
 }
 
 // ShouldRun returns if the service should be running
@@ -109,7 +109,7 @@ func (es *EventExporterService) Start() (err error) {
 	fltrS := <-es.filterSChan
 	es.filterSChan <- fltrS
 
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EventExporterS))
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EEs))
 
 	es.Lock()
 	defer es.Unlock()

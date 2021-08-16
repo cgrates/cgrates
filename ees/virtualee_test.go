@@ -28,7 +28,7 @@ import (
 )
 
 func TestVirtualEeID(t *testing.T) {
-	vEe := &VirtualEe{
+	vEe := &VirtualEE{
 		id: "3",
 	}
 	if rcv := vEe.ID(); !reflect.DeepEqual(rcv, "3") {
@@ -44,7 +44,7 @@ func TestVirtualEeGetMetrics(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	vEe := &VirtualEe{
+	vEe := &VirtualEE{
 		dc: dc,
 	}
 
@@ -65,7 +65,7 @@ func TestVirtualEeExportEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	vEe := &VirtualEe{
+	vEe := &VirtualEE{
 		id:      "string",
 		cgrCfg:  cgrCfg,
 		cfgIdx:  0,

@@ -116,11 +116,11 @@ func TestNewEventExporterCase3(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eeExpect, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	eeExpect, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
-	newEE := ee.(*HTTPPost)
+	newEE := ee.(*HTTPPostEE)
 	newEE.dc.MapStorage[utils.TimeNow] = nil
 	eeExpect.dc.MapStorage[utils.TimeNow] = nil
 	if !reflect.DeepEqual(eeExpect, newEE) {
@@ -200,11 +200,11 @@ func TestNewEventExporterCase6(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eeExpect, err := NewVirtualExporter(cgrCfg, 0, filterS, dc)
+	eeExpect, err := NewVirtualEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
-	newEE := ee.(*VirtualEe)
+	newEE := ee.(*VirtualEE)
 	newEE.dc.MapStorage[utils.TimeNow] = nil
 	eeExpect.dc.MapStorage[utils.TimeNow] = nil
 	if !reflect.DeepEqual(eeExpect, newEE) {
@@ -242,11 +242,11 @@ func TestNewEventExporterCase7(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eeExpect, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	eeExpect, err := NewElasticEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
-	newEE := ee.(*ElasticEe)
+	newEE := ee.(*ElasticEE)
 	newEE.dc.MapStorage[utils.TimeNow] = nil
 	eeExpect.dc.MapStorage[utils.TimeNow] = nil
 	eeExpect.eClnt = newEE.eClnt
