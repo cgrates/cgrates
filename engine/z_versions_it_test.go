@@ -79,7 +79,7 @@ func TestVersionsIT(t *testing.T) {
 	case utils.MetaMongo:
 		versionsConfigDIR = "tutmongo"
 	case utils.MetaPostgres:
-		versionsConfigDIR = "storage/postgres"
+		versionsConfigDIR = "tutpostgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}
