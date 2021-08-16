@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
@@ -79,7 +80,7 @@ type NatsER struct {
 	opts         []nats.Option
 	jsOpts       []nats.JSOpt
 
-	poster *engine.NatsPoster
+	poster *ees.NatsEE
 }
 
 // Config returns the curent configuration
@@ -134,7 +135,7 @@ func (rdr *NatsER) Serve() (err error) {
 							utils.ERs, string(msg.Data), err.Error()))
 				}
 				if rdr.poster != nil { // post it
-					if err := rdr.poster.Post(msg.Data, utils.EmptyString); err != nil {
+					if err := ees.ExportWithAttempts(rdr.poster, msg.Data, utils.EmptyString); err != nil {
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> writing message %s error: %s",
 								utils.ERs, string(msg.Data), err.Error()))
@@ -186,11 +187,13 @@ func (rdr *NatsER) createPoster() (err error) {
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	rdr.poster, err = engine.NewNatsPoster(utils.FirstNonEmpty(
-		rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().PosterAttempts,
-		processedOpt, rdr.cgrCfg.GeneralCfg().NodeID,
-		rdr.cgrCfg.GeneralCfg().ConnectTimeout)
+	rdr.poster, err = ees.NewNatsEE(&config.EventExporterCfg{
+		ExportPath: utils.FirstNonEmpty(
+			rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		Opts:     processedOpt,
+		Attempts: rdr.cgrCfg.GeneralCfg().PosterAttempts,
+	}, rdr.cgrCfg.GeneralCfg().NodeID,
+		rdr.cgrCfg.GeneralCfg().ConnectTimeout, nil)
 	return
 }
 
@@ -214,7 +217,7 @@ func (rdr *NatsER) processOpts() (err error) {
 			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(maxWait)}
 		}
 	}
-	rdr.opts, err = engine.GetNatsOpts(rdr.Config().Opts,
+	rdr.opts, err = ees.GetNatsOpts(rdr.Config().Opts,
 		rdr.cgrCfg.GeneralCfg().NodeID,
 		rdr.cgrCfg.GeneralCfg().ConnectTimeout)
 	return

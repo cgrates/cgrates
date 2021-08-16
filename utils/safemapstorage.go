@@ -75,3 +75,9 @@ func (ms *SafeMapStorage) Clone() (msClone *SafeMapStorage) {
 	defer ms.RUnlock()
 	return &SafeMapStorage{MapStorage: ms.MapStorage.Clone()}
 }
+
+func (ms *SafeMapStorage) ClonedMapStorage() (msClone MapStorage) {
+	ms.RLock()
+	defer ms.RUnlock()
+	return ms.MapStorage.Clone()
+}

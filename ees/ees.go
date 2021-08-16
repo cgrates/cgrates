@@ -61,7 +61,7 @@ type EventExporterS struct {
 // ListenAndServe keeps the service alive
 func (eeS *EventExporterS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
-		utils.CoreS, utils.EventExporterS))
+		utils.CoreS, utils.EEs))
 	for {
 		select {
 		case <-stopChan: // global exit
@@ -69,7 +69,7 @@ func (eeS *EventExporterS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 		case rld := <-cfgRld: // configuration was reloaded, destroy the cache
 			cfgRld <- rld
 			utils.Logger.Info(fmt.Sprintf("<%s> reloading configuration internals.",
-				utils.EventExporterS))
+				utils.EEs))
 			eeS.setupCache(eeS.cfg.EEsCfg().Cache)
 		}
 	}
@@ -77,7 +77,7 @@ func (eeS *EventExporterS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 
 // Shutdown is called to shutdown the service
 func (eeS *EventExporterS) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EventExporterS))
+	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EEs))
 	eeS.setupCache(nil) // cleanup exporters
 }
 
@@ -176,11 +176,11 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		eeCache, hasCache := eeS.eesChs[eeCfg.Type]
 		eeS.eesMux.RUnlock()
 		var isCached bool
-		var ee EventExporter
+		var ee EventExporter2
 		if hasCache {
 			var x interface{}
 			if x, isCached = eeCache.Get(eeCfg.ID); isCached {
-				ee = x.(EventExporter)
+				ee = x.(EventExporter2)
 			}
 		}
 		if !isCached {
@@ -191,6 +191,11 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 				eeCache.Set(eeCfg.ID, ee, nil)
 			}
 		}
+
+		metricMapLock.Lock()
+		metricsMap[ee.Cfg().ID] = utils.MapStorage{} // will return the ID for all processed exporters
+		metricMapLock.Unlock()
+
 		if eeCfg.Synchronous {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
@@ -201,22 +206,17 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		if hasVerbose && !eeCfg.Synchronous {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> with id <%s>, running verbosed exporter with syncronous false",
-					utils.EventExporterS, ee.ID()))
+					utils.EEs, ee.Cfg().ID))
 		}
-		go func(evict, sync bool, ee EventExporter) {
-			if err := ee.ExportEvent(cgrEv.CGREvent); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> with id <%s>, error: <%s>",
-						utils.EventExporterS, ee.ID(), err.Error()))
+		go func(evict, sync bool, ee EventExporter2) {
+			if err := eeS.exportEventWithExporter(ee, cgrEv.CGREvent, evict); err != nil {
+
 				withErr = true
-			}
-			if evict {
-				ee.OnEvicted("", nil) // so we can close ie the file
 			}
 			if sync {
 				if hasVerbose {
 					metricMapLock.Lock()
-					metricsMap[ee.ID()] = ee.GetMetrics().MapStorage
+					metricsMap[ee.Cfg().ID] = ee.GetMetrics().ClonedMapStorage()
 					metricMapLock.Unlock()
 				}
 				wg.Done()
@@ -255,13 +255,18 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 }
 
 func (eeS *EventExporterS) exportEventWithExporter(exp EventExporter2, ev *utils.CGREvent, oneTime bool) (err error) {
-	var eEv exportedEvent
+	if oneTime {
+		defer exp.Close()
+	}
+	var eEv interface{}
 
 	exp.GetMetrics().Lock()
 	exp.GetMetrics().MapStorage[utils.NumberOfEvents] = exp.GetMetrics().MapStorage[utils.NumberOfEvents].(int64) + 1
 	exp.GetMetrics().Unlock()
 	if len(exp.Cfg().ContentFields()) == 0 {
-		eEv = expMapStorage(ev.Event)
+		if eEv, err = exp.PrepareMap(ev.Event); err != nil {
+			return
+		}
 	} else {
 		expNM := utils.NewOrderedNavigableMap()
 		err = engine.NewExportRequest(map[string]utils.DataStorage{
@@ -272,21 +277,25 @@ func (eeS *EventExporterS) exportEventWithExporter(exp EventExporter2, ev *utils
 		}, utils.FirstNonEmpty(ev.Tenant, eeS.cfg.GeneralCfg().DefaultTenant),
 			eeS.filterS,
 			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(exp.Cfg().ContentFields())
-		eEv = (*expOrderedNavigableMap)(expNM)
+		if eEv, err = exp.PrepareOrderMap(expNM); err != nil {
+			return
+		}
 	}
+	key := utils.ConcatenatedKey(utils.FirstNonEmpty(engine.MapEvent(ev.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID()),
+		utils.FirstNonEmpty(engine.MapEvent(ev.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault))
 
-	exp = utils.NewOrderedNavigableMap()
-	err = engine.NewExportRequest(map[string]utils.DataStorage{
-		utils.MetaReq:  utils.MapStorage(cgrEv.Event),
-		utils.MetaDC:   dc,
-		utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
-		utils.MetaCfg:  cfg.GetDataProvider(),
-	}, utils.FirstNonEmpty(cgrEv.Tenant, cfg.GeneralCfg().DefaultTenant),
-		fltS,
-		map[string]*utils.OrderedNavigableMap{utils.MetaExp: r}).SetFields(fields)
-	return
-	if oneTime {
-		defer exp.Close()
+	return ExportWithAttempts(exp, eEv, key)
+}
+
+func ExportWithAttempts(exp EventExporter2, eEv interface{}, key string) (err error) {
+	if exp.Cfg().FailedPostsDir != utils.MetaNone {
+		defer func() {
+			if err != nil {
+				engine.AddFailedPost(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
+					exp.Cfg().Type, utils.EEs,
+					eEv, exp.Cfg().Opts)
+			}
+		}()
 	}
 	fib := utils.Fib()
 
@@ -299,11 +308,13 @@ func (eeS *EventExporterS) exportEventWithExporter(exp EventExporter2, ev *utils
 		}
 	}
 	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter <%s> could not connect because err: %s", utils.EEs, exp.Cfg().ID, err.Error()))
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> Exporter <%s> could not connect because err: <%s>",
+				utils.EEs, exp.Cfg().ID, err.Error()))
 		return
 	}
 	for i := 0; i < exp.Cfg().Attempts; i++ {
-		if err = exp.ExportEvent(ev); err == nil {
+		if err = exp.ExportEvent(eEv, key); err == nil {
 			break
 		}
 		if i+1 < exp.Cfg().Attempts {
@@ -311,7 +322,9 @@ func (eeS *EventExporterS) exportEventWithExporter(exp EventExporter2, ev *utils
 		}
 	}
 	if err != nil {
-		return
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> Exporter <%s> could not export because err: <%s>",
+				utils.EEs, exp.Cfg().ID, err.Error()))
 	}
 	return
 }

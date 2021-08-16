@@ -59,6 +59,11 @@ func SetHTTPPstrTransport(pstrTransport *http.Transport) {
 	httpPstrTransport = pstrTransport
 }
 
+// GetHTTPPstrTransport gets the http transport to be used by the HTTP Poster
+func GetHTTPPstrTransport() *http.Transport {
+	return httpPstrTransport
+}
+
 // NewHTTPTransport will create a new transport for HTTP client
 func NewHTTPTransport(opts map[string]interface{}) (trsp *http.Transport, err error) {
 	trsp = &http.Transport{

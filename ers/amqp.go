@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/streadway/amqp"
@@ -79,7 +80,7 @@ type AMQPER struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
 
-	poster engine.Poster
+	poster *ees.AMQPee
 }
 
 // Config returns the curent configuration
@@ -166,7 +167,7 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 							utils.ERs, msg.MessageId, err.Error()))
 				}
 				if rdr.poster != nil { // post it
-					if err := rdr.poster.Post(msg.Body, utils.EmptyString); err != nil {
+					if err := ees.ExportWithAttempts(rdr.poster, msg.Body, utils.EmptyString); err != nil {
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> writing message %s error: %s",
 								utils.ERs, msg.MessageId, err.Error()))
@@ -254,6 +255,9 @@ func (rdr *AMQPER) createPoster() {
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	rdr.poster = engine.NewAMQPPoster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
+	rdr.poster = ees.NewAMQPee(&config.EventExporterCfg{
+		ExportPath: utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		Attempts:   rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Opts:       processedOpt,
+	}, nil)
 }

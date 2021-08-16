@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
@@ -78,7 +79,7 @@ func testCheckNatsJetStream(t *testing.T, cfg *config.CGRConfig) {
 		t.Fatal(err)
 	}
 
-	nop, err := engine.GetNatsOpts(rdr.Config().Opts, "testExp", time.Second)
+	nop, err := ees.GetNatsOpts(rdr.Config().Opts, "testExp", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +166,7 @@ func testCheckNatsNormal(t *testing.T, cfg *config.CGRConfig) {
 		t.Fatal(err)
 	}
 
-	nop, err := engine.GetNatsOpts(rdr.Config().Opts, "testExp", time.Second)
+	nop, err := ees.GetNatsOpts(rdr.Config().Opts, "testExp", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}

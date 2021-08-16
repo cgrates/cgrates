@@ -50,15 +50,15 @@ func writeFailedPosts(itmID string, value interface{}) {
 	if !canConvert {
 		return
 	}
-	filePath := path.Join(config.CgrConfig().GeneralCfg().FailedPostsDir, expEv.FileName())
+	filePath := expEv.FilePath()
 	if err := expEv.WriteToFile(filePath); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write file <%s> because <%s>",
 			utils.CDRs, filePath, err))
 	}
 }
 
-func AddFailedPost(expPath, format, module string, ev interface{}, opts map[string]interface{}) {
-	key := utils.ConcatenatedKey(expPath, format, module)
+func AddFailedPost(failedPostsDir, expPath, format, module string, ev interface{}, opts map[string]interface{}) {
+	key := utils.ConcatenatedKey(failedPostsDir, expPath, format, module)
 	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
 	if qID := utils.FirstNonEmpty(
 		utils.IfaceAsString(opts[utils.AMQPQueueID]),
@@ -75,10 +75,11 @@ func AddFailedPost(expPath, format, module string, ev interface{}, opts map[stri
 	}
 	if failedPost == nil {
 		failedPost = &ExportEvents{
-			Path:   expPath,
-			Format: format,
-			Opts:   opts,
-			module: module,
+			Path:           expPath,
+			Format:         format,
+			Opts:           opts,
+			module:         module,
+			failedPostsDir: failedPostsDir,
 		}
 	}
 	failedPost.AddEvent(ev)
@@ -107,17 +108,18 @@ func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
 
 // ExportEvents used to save the failed post to file
 type ExportEvents struct {
-	lk     sync.RWMutex
-	Path   string
-	Opts   map[string]interface{}
-	Format string
-	Events []interface{}
-	module string
+	lk             sync.RWMutex
+	Path           string
+	Opts           map[string]interface{}
+	Format         string
+	Events         []interface{}
+	failedPostsDir string
+	module         string
 }
 
-// FileName returns the file name it should use for saving the failed events
-func (expEv *ExportEvents) FileName() string {
-	return expEv.module + utils.PipeSep + utils.UUIDSha1Prefix() + utils.GOBSuffix
+// FilePath returns the file path it should use for saving the failed events
+func (expEv *ExportEvents) FilePath() string {
+	return path.Join(expEv.failedPostsDir, expEv.module+utils.PipeSep+utils.UUIDSha1Prefix()+utils.GOBSuffix)
 }
 
 // SetModule sets the module for this event

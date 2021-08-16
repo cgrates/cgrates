@@ -33,7 +33,7 @@ import (
 )
 
 func TestHttpPostID(t *testing.T) {
-	httpPost := &HTTPPost{
+	httpPost := &HTTPPostEE{
 		id: "3",
 	}
 	if rcv := httpPost.ID(); !reflect.DeepEqual(rcv, "3") {
@@ -49,7 +49,7 @@ func TestHttpPostGetMetrics(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpPost := &HTTPPost{
+	httpPost := &HTTPPostEE{
 		dc: dc,
 	}
 
@@ -72,7 +72,7 @@ func TestHttpPostExportEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -117,7 +117,7 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	}))
 	defer srv.Close()
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = srv.URL + "/"
-	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -161,7 +161,7 @@ func TestHttpPostExportEvent3(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -208,7 +208,7 @@ func TestHttpPostExportEvent4(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -258,7 +258,7 @@ func TestHttpPostComposeHeader(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	httpPost, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
+	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -345,7 +345,7 @@ func TestHttpPostSync(t *testing.T) {
 
 	cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath = ts.URL
 
-	exp, err := NewHTTPPostEe(cgrCfg, cfgIdx, new(engine.FilterS), dc)
+	exp, err := NewHTTPPostEE(cgrCfg, cfgIdx, new(engine.FilterS), dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -404,7 +404,7 @@ func TestHttpPostSyncLimit(t *testing.T) {
 
 	cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath = ts.URL
 
-	exp, err := NewHTTPPostEe(cgrCfg, cfgIdx, new(engine.FilterS), dc)
+	exp, err := NewHTTPPostEE(cgrCfg, cfgIdx, new(engine.FilterS), dc)
 	if err != nil {
 		t.Error(err)
 	}

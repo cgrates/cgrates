@@ -35,24 +35,6 @@ type HTTPPosterRequest struct {
 	Body   interface{}
 }
 
-// HTTPPostJSON posts without automatic failover
-func HTTPPostJSON(url string, content []byte) (respBody []byte, err error) {
-	client := &http.Client{Transport: httpPstrTransport}
-	var resp *http.Response
-	if resp, err = client.Post(url, "application/json", bytes.NewBuffer(content)); err != nil {
-		return
-	}
-	respBody, err = io.ReadAll(resp.Body)
-	resp.Body.Close()
-	if err != nil {
-		return
-	}
-	if resp.StatusCode > 299 {
-		err = fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
-	}
-	return
-}
-
 // NewHTTPPoster return a new HTTP poster
 func NewHTTPPoster(replyTimeout time.Duration, addr, contentType string,
 	attempts int) (httposter *HTTPPoster) {
