@@ -1912,7 +1912,7 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EeSv1ProcessEvent,
 			argCdr, &rplyCdr); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: <%s> processing event: <%s> with <%s>",
-				utils.ApierS, err.Error(), utils.ToJSON(cdr.AsCGREvent()), utils.EventExporterS))
+				utils.ApierS, err.Error(), utils.ToJSON(cdr.AsCGREvent()), utils.EEs))
 			withErros = true
 		}
 	}

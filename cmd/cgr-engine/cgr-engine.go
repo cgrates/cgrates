@@ -501,7 +501,7 @@ func main() {
 		utils.RegistrarC:      new(sync.WaitGroup),
 		utils.DispatcherS:     new(sync.WaitGroup),
 		utils.DNSAgent:        new(sync.WaitGroup),
-		utils.EventExporterS:  new(sync.WaitGroup),
+		utils.EEs:             new(sync.WaitGroup),
 		utils.ERs:             new(sync.WaitGroup),
 		utils.FreeSWITCHAgent: new(sync.WaitGroup),
 		utils.GlobalVarS:      new(sync.WaitGroup),

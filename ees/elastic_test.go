@@ -30,7 +30,7 @@ import (
 )
 
 func TestID(t *testing.T) {
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		id: "3",
 	}
 	if rcv := ee.ID(); !reflect.DeepEqual(rcv, "3") {
@@ -46,7 +46,7 @@ func TestGetMetrics(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		dc: dc,
 	}
 
@@ -57,7 +57,7 @@ func TestGetMetrics(t *testing.T) {
 
 func TestInitClient(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	ee.cgrCfg.EEsCfg().Exporters[0].ExportPath = "/\x00"
@@ -69,7 +69,7 @@ func TestInitClient(t *testing.T) {
 func TestInitCase1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIndex] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -84,7 +84,7 @@ func TestInitCase1(t *testing.T) {
 func TestInitCase2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIfPrimaryTerm] = 20
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -99,7 +99,7 @@ func TestInitCase2(t *testing.T) {
 func TestInitCase2Err(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIfPrimaryTerm] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
@@ -111,7 +111,7 @@ func TestInitCase2Err(t *testing.T) {
 func TestInitCase3(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIfSeqNo] = 20
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -126,7 +126,7 @@ func TestInitCase3(t *testing.T) {
 func TestInitCase3Err(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIfSeqNo] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
@@ -138,7 +138,7 @@ func TestInitCase3Err(t *testing.T) {
 func TestInitCase4(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsOpType] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -153,7 +153,7 @@ func TestInitCase4(t *testing.T) {
 func TestInitCase5(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsPipeline] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -168,7 +168,7 @@ func TestInitCase5(t *testing.T) {
 func TestInitCase6(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsRouting] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -183,7 +183,7 @@ func TestInitCase6(t *testing.T) {
 func TestInitCase7(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsTimeout] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	errExpect := "time: invalid duration \"test\""
@@ -195,7 +195,7 @@ func TestInitCase7(t *testing.T) {
 func TestInitCase8(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsVersionLow] = 20
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -210,7 +210,7 @@ func TestInitCase8(t *testing.T) {
 func TestInitCase8Err(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsVersionLow] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
@@ -222,7 +222,7 @@ func TestInitCase8Err(t *testing.T) {
 func TestInitCase9(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsVersionType] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -237,7 +237,7 @@ func TestInitCase9(t *testing.T) {
 func TestInitCase10(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsWaitForActiveShards] = "test"
-	ee := &ElasticEe{
+	ee := &ElasticEE{
 		cgrCfg: cgrCfg,
 	}
 	if err := ee.init(); err != nil {
@@ -273,7 +273,7 @@ func TestElasticExportEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -324,7 +324,7 @@ func TestElasticExportEvent2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -375,7 +375,7 @@ func TestElasticExportEvent3(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -416,7 +416,7 @@ func TestElasticExportEvent4(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -456,7 +456,7 @@ func TestElasticExportEvent5(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
 	}

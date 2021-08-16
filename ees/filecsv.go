@@ -24,6 +24,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"sync"
 
 	"github.com/cgrates/cgrates/engine"
 
@@ -31,15 +32,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
+func NewFileCSVee(cfg *config.EventExporterCfg,
+	cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	dc *utils.SafeMapStorage) (fCsv *FileCSVee, err error) {
 	fCsv = &FileCSVee{
-		id:      cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cfg: cfg,
+		dc:  dc,
+
 		cgrCfg:  cgrCfg,
-		cfgIdx:  cfgIdx,
 		filterS: filterS,
-		dc:      dc,
-		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
 	}
 	err = fCsv.init()
 	return
@@ -47,21 +48,23 @@ func NewFileCSVee(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 
 // FileCSVee implements EventExporter interface for .csv files
 type FileCSVee struct {
-	id        string
-	cgrCfg    *config.CGRConfig
-	cfgIdx    int // index of config instance within ERsCfg.Readers
-	filterS   *engine.FilterS
+	cfg       *config.EventExporterCfg
+	dc        *utils.SafeMapStorage
 	file      io.WriteCloser
 	csvWriter *csv.Writer
-	dc        *utils.SafeMapStorage
-	reqs      *concReq
+	sync.Mutex
+	slicePreparing
+	// for header and trailer composing
+	cgrCfg  *config.CGRConfig
+	filterS *engine.FilterS
 }
 
-// init will create all the necessary dependencies, including opening the file
 func (fCsv *FileCSVee) init() (err error) {
+	fCsv.Lock()
+	defer fCsv.Unlock()
 	// create the file
-	filePath := path.Join(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ExportPath,
-		fCsv.id+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)
+	filePath := path.Join(fCsv.Cfg().ExportPath,
+		fCsv.Cfg().ID+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)
 	fCsv.dc.Lock()
 	fCsv.dc.MapStorage[utils.ExportPath] = filePath
 	fCsv.dc.Unlock()
@@ -70,109 +73,60 @@ func (fCsv *FileCSVee) init() (err error) {
 	}
 	fCsv.csvWriter = csv.NewWriter(fCsv.file)
 	fCsv.csvWriter.Comma = utils.CSVSep
-	if fieldSep, has := fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Opts[utils.CSVFieldSepOpt]; has {
+	if fieldSep, has := fCsv.Cfg().Opts[utils.CSVFieldSepOpt]; has {
 		fCsv.csvWriter.Comma = rune(utils.IfaceAsString(fieldSep)[0])
 	}
 	return fCsv.composeHeader()
 }
 
-// ID returns the identificator of this exporter
-func (fCsv *FileCSVee) ID() string {
-	return fCsv.id
-}
-
-// OnEvicted implements EventExporter, doing the cleanup before exit
-func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
-	// verify if we need to add the trailer
-	if err := fCsv.composeTrailer(); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when composed trailer",
-			utils.EventExporterS, fCsv.id, err.Error()))
-	}
-	fCsv.csvWriter.Flush()
-	if err := fCsv.file.Close(); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when closing the file",
-			utils.EventExporterS, fCsv.id, err.Error()))
-	}
-}
-
-// ExportEvent implements EventExporter
-func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
-	fCsv.reqs.get()
-	defer func() {
-		updateEEMetrics(fCsv.dc, cgrEv.ID, cgrEv.Event, err != nil, utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,
-			fCsv.cgrCfg.GeneralCfg().DefaultTimezone))
-		fCsv.reqs.done()
-	}()
-	fCsv.dc.Lock()
-	fCsv.dc.MapStorage[utils.NumberOfEvents] = fCsv.dc.MapStorage[utils.NumberOfEvents].(int64) + 1
-	fCsv.dc.Unlock()
-
-	var csvRecord []string
-	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()) == 0 {
-		csvRecord = make([]string, 0, len(cgrEv.Event))
-		for _, val := range cgrEv.Event {
-			csvRecord = append(csvRecord, utils.IfaceAsString(val))
-		}
-	} else {
-		oNm := map[string]*utils.OrderedNavigableMap{
-			utils.MetaExp: utils.NewOrderedNavigableMap(),
-		}
-		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
-			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
-			utils.MetaDC:   fCsv.dc,
-			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
-			utils.MetaCfg:  fCsv.cgrCfg.GetDataProvider(),
-		}, utils.FirstNonEmpty(cgrEv.Tenant, fCsv.cgrCfg.GeneralCfg().DefaultTenant),
-			fCsv.filterS, oNm)
-
-		if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].ContentFields()); err != nil {
-			return
-		}
-		csvRecord = eeReq.ExpData[utils.MetaExp].OrderedFieldsAsStrings()
-	}
-
-	return fCsv.csvWriter.Write(csvRecord)
-}
-
 // Compose and cache the header
 func (fCsv *FileCSVee) composeHeader() (err error) {
-	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields()) == 0 {
-		return
+	if len(fCsv.Cfg().HeaderFields()) != 0 {
+		var exp *utils.OrderedNavigableMap
+		if exp, err = composeHeaderTrailer(utils.MetaHdr, fCsv.Cfg().HeaderFields(), fCsv.dc, fCsv.cgrCfg, fCsv.filterS); err != nil {
+			return
+		}
+		return fCsv.csvWriter.Write(exp.OrderedFieldsAsStrings())
 	}
-	oNm := map[string]*utils.OrderedNavigableMap{
-		utils.MetaHdr: utils.NewOrderedNavigableMap(),
-	}
-	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
-		utils.MetaDC:  fCsv.dc,
-		utils.MetaCfg: fCsv.cgrCfg.GetDataProvider(),
-	}, fCsv.cgrCfg.GeneralCfg().DefaultTenant,
-		fCsv.filterS, oNm)
-	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].HeaderFields()); err != nil {
-		return
-	}
-	return fCsv.csvWriter.Write(eeReq.ExpData[utils.MetaHdr].OrderedFieldsAsStrings())
+	return
 }
 
 // Compose and cache the trailer
 func (fCsv *FileCSVee) composeTrailer() (err error) {
-	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields()) == 0 {
-		return
+	if len(fCsv.Cfg().TrailerFields()) != 0 {
+		var exp *utils.OrderedNavigableMap
+		if exp, err = composeHeaderTrailer(utils.MetaTrl, fCsv.Cfg().TrailerFields(), fCsv.dc, fCsv.cgrCfg, fCsv.filterS); err != nil {
+			return
+		}
+		return fCsv.csvWriter.Write(exp.OrderedFieldsAsStrings())
 	}
-	oNm := map[string]*utils.OrderedNavigableMap{
-		utils.MetaTrl: utils.NewOrderedNavigableMap(),
-	}
-	eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
-		utils.MetaDC:  fCsv.dc,
-		utils.MetaCfg: fCsv.cgrCfg.GetDataProvider(),
-	}, fCsv.cgrCfg.GeneralCfg().DefaultTenant,
-		fCsv.filterS, oNm)
-	if err = eeReq.SetFields(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].TrailerFields()); err != nil {
-		return
-	}
-
-	return fCsv.csvWriter.Write(eeReq.ExpData[utils.MetaTrl].OrderedFieldsAsStrings())
+	return
 }
 
-func (fCsv *FileCSVee) GetMetrics() *utils.SafeMapStorage {
-	return fCsv.dc.Clone()
+func (fCsv *FileCSVee) Cfg() *config.EventExporterCfg { return fCsv.cfg }
+
+func (fCsv *FileCSVee) Connect() (_ error) { return }
+
+func (fCsv *FileCSVee) ExportEvent(ev interface{}, _ string) error {
+	fCsv.Lock() // make sure that only one event is writen in file at once
+	defer fCsv.Unlock()
+	return fCsv.csvWriter.Write(ev.([]string))
 }
+
+func (fCsv *FileCSVee) Close() (err error) {
+	fCsv.Lock()
+	defer fCsv.Unlock()
+	// verify if we need to add the trailer
+	if err = fCsv.composeTrailer(); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when composed trailer",
+			utils.EEs, fCsv.Cfg().ID, err.Error()))
+	}
+	fCsv.csvWriter.Flush()
+	if err = fCsv.file.Close(); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when closing the file",
+			utils.EEs, fCsv.Cfg().ID, err.Error()))
+	}
+	return
+}
+
+func (fCsv *FileCSVee) GetMetrics() *utils.SafeMapStorage { return fCsv.dc }

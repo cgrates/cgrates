@@ -38,9 +38,6 @@ func NewPosterJSONMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Fi
 		reqs:    newConcReq(cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests),
 	}
 	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
-	case utils.MetaAMQPjsonMap:
-		pstrJSON.poster = engine.NewAMQPPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
 	case utils.MetaAMQPV1jsonMap:
 		pstrJSON.poster = engine.NewAMQPv1Poster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
 			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
@@ -53,10 +50,6 @@ func NewPosterJSONMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Fi
 	case utils.MetaS3jsonMap:
 		pstrJSON.poster = engine.NewS3Poster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
 			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts)
-	case utils.MetaNatsjsonMap:
-		pstrJSON.poster, err = engine.NewNatsPoster(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
-			cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts, cgrCfg.EEsCfg().Exporters[cfgIdx].Opts,
-			cgrCfg.GeneralCfg().NodeID, cgrCfg.GeneralCfg().ConnectTimeout)
 	}
 	return
 }

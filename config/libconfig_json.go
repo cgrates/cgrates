@@ -200,6 +200,7 @@ type EventExporterJsonCfg struct {
 	Attribute_context   *string
 	Synchronous         *bool
 	Attempts            *int
+	Failed_posts_dir    *string
 	Concurrent_requests *int
 	Fields              *[]*FcTemplateJsonCfg
 }
