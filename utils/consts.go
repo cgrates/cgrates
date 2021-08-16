@@ -802,7 +802,6 @@ const (
 	Count                   = "Count"
 	ProfileID               = "ProfileID"
 	SortedRoutes            = "SortedRoutes"
-	EventExporterS          = "EventExporterS"
 	MetaMonthly             = "*monthly"
 	MetaYearly              = "*yearly"
 	MetaDaily               = "*daily"

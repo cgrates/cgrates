@@ -37,7 +37,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 
 func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(5 * time.Second)
-	AddFailedPost("path1", "format1", "module1", "1", make(map[string]interface{}))
+	AddFailedPost("", "path1", "format1", "module1", "1", make(map[string]interface{}))
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -60,8 +60,8 @@ func TestAddFldPost(t *testing.T) {
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	AddFailedPost("path1", "format1", "module1", "2", make(map[string]interface{}))
-	AddFailedPost("path2", "format2", "module2", "3", map[string]interface{}{utils.SQSQueueID: "qID"})
+	AddFailedPost("", "path1", "format1", "module1", "2", make(map[string]interface{}))
+	AddFailedPost("", "path2", "format2", "module2", "3", map[string]interface{}{utils.SQSQueueID: "qID"})
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -106,9 +106,9 @@ func TestAddFldPost(t *testing.T) {
 	}
 }
 
-func TestFileName(t *testing.T) {
+func TestFilePath(t *testing.T) {
 	exportEvent := &ExportEvents{}
-	rcv := exportEvent.FileName()
+	rcv := exportEvent.FilePath()
 	if rcv[0] != '|' {
 		t.Errorf("Expecting: '|', received: %+v", rcv[0])
 	} else if rcv[8:] != ".gob" {
@@ -117,7 +117,7 @@ func TestFileName(t *testing.T) {
 	exportEvent = &ExportEvents{
 		module: "module",
 	}
-	rcv = exportEvent.FileName()
+	rcv = exportEvent.FilePath()
 	if rcv[:7] != "module|" {
 		t.Errorf("Expecting: 'module|', received: %+v", rcv[:7])
 	} else if rcv[14:] != ".gob" {

@@ -1,5 +1,5 @@
 /*
-Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Real-time Online/Offline Charging System (OerS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+
+package ees
 
 import (
 	"crypto/tls"
@@ -25,82 +26,41 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
 )
 
-// NewNatsPoster creates a kafka poster
-func NewNatsPoster(dialURL string, attempts int, opts map[string]interface{}, nodeID string, connTimeout time.Duration) (natsPstr *NatsPoster, err error) {
-	natsPstr = &NatsPoster{
-		dialURL:  dialURL,
-		subject:  utils.DefaultQueueID,
-		attempts: attempts,
+// NewNatsEE creates a kafka poster
+func NewNatsEE(cfg *config.EventExporterCfg, nodeID string, connTimeout time.Duration, dc *utils.SafeMapStorage) (natsPstr *NatsEE, err error) {
+	natsPstr = &NatsEE{
+		cfg:     cfg,
+		dc:      dc,
+		subject: utils.DefaultQueueID,
+		reqs:    newConcReq(cfg.ConcurrentRequests),
 	}
-	err = natsPstr.parseOpt(opts, nodeID, connTimeout)
+	err = natsPstr.parseOpt(cfg.Opts, nodeID, connTimeout)
 	return
 }
 
-// NatsPoster is a kafka poster
-type NatsPoster struct {
-	dialURL    string
-	subject    string // identifier of the CDR queue where we publish
-	attempts   int
-	jetStream  bool
-	opts       []nats.Option
-	jsOpts     []nats.JSOpt
-	sync.Mutex // protect writer
+// NatsEE is a kafka poster
+type NatsEE struct {
+	subject   string // identifier of the CDR queue where we publish
+	jetStream bool
+	opts      []nats.Option
+	jsOpts    []nats.JSOpt
 
 	poster   *nats.Conn
 	posterJS nats.JetStreamContext
+
+	cfg          *config.EventExporterCfg
+	dc           *utils.SafeMapStorage
+	reqs         *concReq
+	sync.RWMutex // protect writer
+	bytePreparing
 }
 
-// Post is the method being called when we need to post anything in the queue
-// the optional chn will permits channel caching
-func (pstr *NatsPoster) Post(content []byte, _ string) (err error) {
-	fib := utils.Fib()
-	for i := 0; i < pstr.attempts; i++ {
-		if err = pstr.newPostWriter(); err == nil {
-			break
-		}
-		if i+1 < pstr.attempts {
-			time.Sleep(time.Duration(fib()) * time.Second)
-		}
-	}
-	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<NatsPoster> connecting to nats server, err: %s", err.Error()))
-		return
-	}
-	for i := 0; i < pstr.attempts; i++ {
-		pstr.Lock()
-
-		if pstr.jetStream {
-			_, err = pstr.posterJS.Publish(pstr.subject, content)
-		} else {
-			err = pstr.poster.Publish(pstr.subject, content)
-		}
-		pstr.Unlock()
-
-		if err == nil {
-			break
-		}
-		if i+1 < pstr.attempts {
-			time.Sleep(time.Duration(fib()) * time.Second)
-		}
-	}
-	return
-}
-
-// Close closes the kafka writer
-func (pstr *NatsPoster) Close() {
-	pstr.Lock()
-	if pstr.poster != nil {
-		pstr.poster.Drain()
-	}
-	pstr.poster = nil
-	pstr.Unlock()
-}
-
-func (pstr *NatsPoster) parseOpt(opts map[string]interface{}, nodeID string, connTimeout time.Duration) (err error) {
+func (pstr *NatsEE) parseOpt(opts map[string]interface{}, nodeID string, connTimeout time.Duration) (err error) {
 	if useJetStreamVal, has := opts[utils.NatsJetStream]; has {
 		if pstr.jetStream, err = utils.IfaceAsBool(useJetStreamVal); err != nil {
 			return
@@ -123,11 +83,13 @@ func (pstr *NatsPoster) parseOpt(opts map[string]interface{}, nodeID string, con
 	return
 }
 
-func (pstr *NatsPoster) newPostWriter() (err error) {
+func (pstr *NatsEE) Cfg() *config.EventExporterCfg { return pstr.cfg }
+
+func (pstr *NatsEE) Connect() (err error) {
 	pstr.Lock()
 	defer pstr.Unlock()
 	if pstr.poster == nil {
-		if pstr.poster, err = nats.Connect(pstr.dialURL, pstr.opts...); err != nil {
+		if pstr.poster, err = nats.Connect(pstr.Cfg().ExportPath, pstr.opts...); err != nil {
 			return
 		}
 		if pstr.jetStream {
@@ -136,6 +98,31 @@ func (pstr *NatsPoster) newPostWriter() (err error) {
 	}
 	return
 }
+
+func (pstr *NatsEE) ExportEvent(content interface{}, _ string) (err error) {
+	pstr.reqs.get()
+	pstr.RLock()
+	if pstr.jetStream {
+		_, err = pstr.posterJS.Publish(pstr.subject, content.([]byte))
+	} else {
+		err = pstr.poster.Publish(pstr.subject, content.([]byte))
+	}
+	pstr.RUnlock()
+	pstr.reqs.done()
+	return
+}
+
+func (pstr *NatsEE) Close() (err error) {
+	pstr.Lock()
+	if pstr.poster != nil {
+		err = pstr.poster.Drain()
+		pstr.poster = nil
+	}
+	pstr.Unlock()
+	return
+}
+
+func (pstr *NatsEE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
 
 func GetNatsOpts(opts map[string]interface{}, nodeID string, connTimeout time.Duration) (nop []nats.Option, err error) {
 	nop = make([]nats.Option, 0, 7)

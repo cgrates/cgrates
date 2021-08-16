@@ -62,8 +62,8 @@ func TestEventExporterSCoverage(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	serviceName := srv2.ServiceName()
-	if serviceName != utils.EventExporterS {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.EventExporterS, serviceName)
+	if serviceName != utils.EEs {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.EEs, serviceName)
 	}
 	shouldRun := srv2.ShouldRun()
 	if shouldRun != false {
