@@ -31,9 +31,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -223,7 +220,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	//chargers
 	var replyChrgr *engine.ChargerProfile
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.APIerSv1GetChargerProfile,
+	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Raw"},
 		&replyChrgr); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %v", utils.ErrNotFound.Error(), err)

@@ -24,6 +24,14 @@ import (
 	"bytes"
 	"errors"
 	"flag"
+	"fmt"
+	"net"
+	"os/exec"
+	"path"
+	"reflect"
+	"sort"
+	"testing"
+
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
@@ -31,11 +39,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-	"os/exec"
-	"path"
-	"reflect"
-	"sort"
-	"testing"
 )
 
 var (
@@ -226,6 +229,9 @@ var (
 		testLoadItResetDataDB,
 		testLoadItResetStorDb,
 		testLoadItStartLoader,
+		testLoadItCheckTenantFlag,
+		testLoadItStartLoaderWithTenant,
+
 		testLoadItConnectToDB,
 		testLoadItCheckAttributes,
 		testLoadItStartLoaderRemove,
@@ -379,6 +385,62 @@ func testLoadItStartLoaderFromStorDB(t *testing.T) {
 		t.Log(outerr.String())
 		t.Fatal(err)
 	}
+}
+
+func testLoadItStartLoaderWithTenant(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), fmt.Sprintf("-caches_address=%s", address), "-scheduler_address=", `-tenant="tenant.com"`, "-verbose")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	listener.Close()
+	if resp != "\"tenant.com\"" {
+		t.Errorf("Expected \"tenant.com\" \n but received \n %q", resp)
+	}
+}
+
+type mockCache int
+
+func (c *mockCache) ReloadCache(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+	resp = args.Tenant
+	*reply = "OK"
+	return nil
+}
+
+func (c *mockCache) Clear(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
+	reply *string) error {
+	*reply = args.Tenant
+	return nil
+}
+
+var address string
+var listener net.Listener
+var resp string
+
+func testLoadItCheckTenantFlag(t *testing.T) {
+	err := birpc.RegisterName("CacheSv1", new(mockCache))
+	if err != nil {
+		t.Error(err)
+	}
+
+	listener, err = net.Listen("tcp", ":0")
+	if err != nil {
+		t.Error(err)
+	}
+	address = listener.Addr().String()
+
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			go birpc.ServeCodec(jsonrpc.NewServerCodec(conn))
+		}
+	}()
 }
 
 func testLoadItStartLoaderFlushStorDB(t *testing.T) {
