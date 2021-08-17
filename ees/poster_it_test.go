@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package ees
 
 import (
 	"context"
@@ -65,17 +65,20 @@ type TestContent struct {
 
 func TestHttpJsonPoster(t *testing.T) {
 	SetFailedPostCacheTTL(time.Millisecond)
-	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
-	pstr, err := NewHTTPPoster(2*time.Second, "http://localhost:8080/invalid", utils.ContentJSON, 3)
+	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
+		ExportPath:     "http://localhost:8080/invalid",
+		Attempts:       3,
+		FailedPostsDir: "/tmp",
+	}, config.CgrConfig(), nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	if err = pstr.PostValues(jsn, make(http.Header)); err == nil {
+	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("http://localhost:8080/invalid", utils.ContentJSON, "test1", jsn, make(map[string]interface{}))
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, "test1", jsn, make(map[string]interface{}))
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test1*")
 	if err != nil {
@@ -97,18 +100,21 @@ func TestHttpJsonPoster(t *testing.T) {
 
 func TestHttpBytesPoster(t *testing.T) {
 	SetFailedPostCacheTTL(time.Millisecond)
-	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := []byte(`Test
 		Test2
 		`)
-	pstr, err := NewHTTPPoster(2*time.Second, "http://localhost:8080/invalid", utils.ContentText, 3)
+	pstr, err := NewHTTPjsonMapEE(&config.EventExporterCfg{
+		ExportPath:     "http://localhost:8080/invalid",
+		Attempts:       3,
+		FailedPostsDir: "/tmp",
+	}, config.CgrConfig(), nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	if err = pstr.PostValues(content, make(http.Header)); err == nil {
+	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("http://localhost:8080/invalid", utils.ContentJSON, "test2", content, make(map[string]interface{}))
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, "test2", content, make(map[string]interface{}))
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test2*")
 	if err != nil {
@@ -154,15 +160,19 @@ func TestSQSPoster(t *testing.T) {
 
 	body := "testString"
 
-	pstr := NewSQSPoster(endpoint, 5, opts)
-	if err := pstr.Post([]byte(body), ""); err != nil {
+	pstr := NewSQSee(&config.EventExporterCfg{
+		ExportPath: endpoint,
+		Attempts:   5,
+		Opts:       opts,
+	}, nil)
+	if err := ExportWithAttempts(pstr, []byte(body), ""); err != nil {
 		t.Fatal(err)
 	}
 
 	var sess *session.Session
 	cfg := aws.Config{Endpoint: aws.String(endpoint)}
 	cfg.Region = aws.String(region)
-
+	var err error
 	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
 	sess, err = session.NewSessionWithOptions(
 		session.Options{
@@ -233,8 +243,12 @@ func TestS3Poster(t *testing.T) {
 
 	body := "testString"
 	key := "key1234"
-	pstr := NewS3Poster(endpoint, 5, opts)
-	if err := pstr.Post([]byte(body), key); err != nil {
+	pstr := NewS3EE(&config.EventExporterCfg{
+		ExportPath: endpoint,
+		Attempts:   5,
+		Opts:       opts,
+	}, nil)
+	if err := ExportWithAttempts(pstr, []byte(body), key); err != nil {
 		t.Fatal(err)
 	}
 	key += ".json"
@@ -243,6 +257,7 @@ func TestS3Poster(t *testing.T) {
 	cfg.Region = aws.String(region)
 
 	cfg.Credentials = credentials.NewStaticCredentials(awsKey, awsSecret, "")
+	var err error
 	sess, err = session.NewSessionWithOptions(
 		session.Options{
 			Config: cfg,
@@ -287,8 +302,12 @@ func TestAMQPv1Poster(t *testing.T) {
 
 	body := "testString"
 
-	pstr := NewAMQPv1Poster(endpoint, 5, opts)
-	if err := pstr.Post([]byte(body), ""); err != nil {
+	pstr := NewAMQPv1EE(&config.EventExporterCfg{
+		ExportPath: endpoint,
+		Attempts:   5,
+		Opts:       opts,
+	}, nil)
+	if err := ExportWithAttempts(pstr, []byte(body), ""); err != nil {
 		t.Fatal(err)
 	}
 	// Create client

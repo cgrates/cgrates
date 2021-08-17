@@ -1887,6 +1887,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Fields:              &[]*FcTemplateJsonCfg{},
 				Opts:                make(map[string]interface{}),
 				Concurrent_requests: utils.IntPointer(0),
+				Failed_posts_dir:    utils.StringPointer("/var/spool/cgrates/failed_posts"),
 			},
 		},
 	}

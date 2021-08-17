@@ -80,8 +80,6 @@ func init() {
 	gob.Register(new(StatAverage))
 	gob.Register(new(StatDistinct))
 
-	gob.Register(new(HTTPPosterRequest))
-
 	gob.Register([]interface{}{})
 	gob.Register([]map[string]interface{}{})
 	gob.Register(map[string]interface{}{})

@@ -80,7 +80,7 @@ func (httpEE *HTTPjsonMapEE) Connect() (_ error) { return }
 func (httpEE *HTTPjsonMapEE) ExportEvent(content interface{}, _ string) (err error) {
 	httpEE.reqs.get()
 	defer httpEE.reqs.done()
-	pReq := content.(httpPosterRequest)
+	pReq := content.(*HTTPPosterRequest)
 	var req *http.Request
 	if req, err = prepareRequest(httpEE.Cfg().ExportPath, utils.ContentJSON, pReq.Body, pReq.Header); err != nil {
 		return
@@ -95,7 +95,7 @@ func (httpEE *HTTPjsonMapEE) GetMetrics() *utils.SafeMapStorage { return httpEE.
 
 func (httpEE *HTTPjsonMapEE) PrepareMap(mp map[string]interface{}) (interface{}, error) {
 	body, err := json.Marshal(mp)
-	return &httpPosterRequest{
+	return &HTTPPosterRequest{
 		Header: httpEE.hdr,
 		Body:   body,
 	}, err
@@ -110,7 +110,7 @@ func (httpEE *HTTPjsonMapEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (int
 		valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
 	}
 	body, err := json.Marshal(valMp)
-	return &httpPosterRequest{
+	return &HTTPPosterRequest{
 		Header: httpEE.hdr,
 		Body:   body,
 	}, err

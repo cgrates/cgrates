@@ -53,7 +53,6 @@ type SQLEe struct {
 
 	dialect   gorm.Dialector
 	tableName string
-	colNames  []string
 }
 
 type sqlPosterRequest struct {

@@ -187,10 +187,12 @@ func (rdr *NatsER) createPoster() (err error) {
 		return
 	}
 	rdr.poster, err = ees.NewNatsEE(&config.EventExporterCfg{
+		ID: rdr.Config().ID,
 		ExportPath: utils.FirstNonEmpty(
 			rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		Opts:     processedOpt,
-		Attempts: rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Opts:           processedOpt,
+		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
 	}, rdr.cgrCfg.GeneralCfg().NodeID,
 		rdr.cgrCfg.GeneralCfg().ConnectTimeout, nil)
 	return

@@ -27,6 +27,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -575,7 +576,11 @@ func TestS3ERReadMsgError5(t *testing.T) {
 		awsToken:  "",
 		bucket:    "cgrates_cdrs",
 		session:   nil,
-		poster:    engine.NewSQSPoster("url", 1, make(map[string]interface{})),
+		poster: ees.NewS3EE(&config.EventExporterCfg{
+			ExportPath: "url",
+			Attempts:   1,
+			Opts:       map[string]interface{}{},
+		}, nil),
 	}
 	rdr.Config().SourcePath = rdr.awsRegion
 	rdr.Config().ConcurrentReqs = -1

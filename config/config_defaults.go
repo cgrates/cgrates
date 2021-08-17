@@ -577,6 +577,7 @@ const CGRATES_CFG_JSON = `
 			"synchronous": false,								// block processing until export has a result
 			"attempts": 1,										// export attempts
 			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
 		},
 	],
 },

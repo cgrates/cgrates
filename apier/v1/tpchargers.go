@@ -63,7 +63,7 @@ type AttrGetTPChargerIds struct {
 
 // GetTPChargerIDs queries Charger identities on specific tariff plan.
 func (apierSv1 *APIerSv1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(attrs, []string{utils.ID}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPChargers, utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg},

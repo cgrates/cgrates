@@ -38,17 +38,12 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/net/websocket"
-
-	sessions2 "github.com/cgrates/cgrates/sessions"
-
 	"github.com/cenkalti/rpc2"
-
 	"github.com/cgrates/cgrates/config"
-
 	"github.com/cgrates/cgrates/engine"
-
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"golang.org/x/net/websocket"
 )
 
 var (
@@ -333,10 +328,10 @@ func testServeBiJSON(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
 
-	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfgDflt, dm, nil)
 
 	go func() {
-		if err := server.ServeBiRPC(":3434", "", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err != nil {
+		if err := server.ServeBiRPC(":3434", "", ss.OnBiJSONConnect, ss.OnBiJSONDisconnect); err != nil {
 			t.Error(err)
 		}
 	}()
@@ -352,11 +347,11 @@ func testServeBiJSONEmptyBiRPCServer(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
 
-	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfgDflt, dm, nil)
 
 	expectedErr := "BiRPCServer should not be nil"
 	go func() {
-		if err := server.ServeBiRPC(":3430", "", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
+		if err := server.ServeBiRPC(":3430", "", ss.OnBiJSONConnect, ss.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
 			t.Errorf("Expected %+v, received %+v", expectedErr, err)
 		}
 	}()
@@ -374,11 +369,11 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
 
-	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfgDflt, dm, nil)
 
 	expectedErr := "listen tcp: address invalid_port_format: missing port in address"
-	if err := server.ServeBiRPC("invalid_port_format", "", sessions.OnBiJSONConnect,
-		sessions.OnBiJSONDisconnect); err == nil || err.Error() != expectedErr {
+	if err := server.ServeBiRPC("invalid_port_format", "", ss.OnBiJSONConnect,
+		ss.OnBiJSONDisconnect); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
@@ -395,11 +390,11 @@ func testServeBiGoB(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
 
-	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfgDflt, dm, nil)
 
 	go func() {
-		if err := server.ServeBiRPC("", ":9343", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err != nil {
-			t.Error(err)
+		if err := server.ServeBiRPC("", ":9343", ss.OnBiJSONConnect, ss.OnBiJSONDisconnect); err != nil {
+			t.Log(err)
 		}
 	}()
 	runtime.Gosched()
@@ -414,11 +409,11 @@ func testServeBiGoBEmptyBiRPCServer(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
 
-	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfgDflt, dm, nil)
 
 	expectedErr := "BiRPCServer should not be nil"
 	go func() {
-		if err := server.ServeBiRPC("", ":93430", sessions.OnBiJSONConnect, sessions.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
+		if err := server.ServeBiRPC("", ":93430", ss.OnBiJSONConnect, ss.OnBiJSONDisconnect); err == nil || err.Error() != "BiRPCServer should not be nil" {
 			t.Errorf("Expected %+v, received %+v", expectedErr, err)
 		}
 	}()
@@ -436,11 +431,11 @@ func testServeBiGoBInvalidPort(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
 
-	sessions := sessions2.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfgDflt, dm, nil)
 
 	expectedErr := "listen tcp: address invalid_port_format: missing port in address"
-	if err := server.ServeBiRPC("", "invalid_port_format", sessions.OnBiJSONConnect,
-		sessions.OnBiJSONDisconnect); err == nil || err.Error() != expectedErr {
+	if err := server.ServeBiRPC("", "invalid_port_format", ss.OnBiJSONConnect,
+		ss.OnBiJSONDisconnect); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 

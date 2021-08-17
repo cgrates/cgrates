@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -192,7 +193,7 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 		fileName := file.Name()
 		filePath := path.Join(cdrsPostFailCfg.GeneralCfg().FailedPostsDir, fileName)
 
-		ev, err := engine.NewExportEventsFromFile(filePath)
+		ev, err := ees.NewExportEventsFromFile(filePath)
 		if err != nil {
 			t.Errorf("<%s> for file <%s>", err, fileName)
 			continue

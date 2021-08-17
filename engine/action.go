@@ -69,46 +69,50 @@ func (a *Action) Clone() (cln *Action) {
 
 type actionTypeFunc func(*Account, *Action, Actions, interface{}) error
 
-func getActionFunc(typ string) (actionTypeFunc, bool) {
-	actionFuncMap := map[string]actionTypeFunc{
-		utils.MetaLog:                     logAction,
-		utils.MetaResetTriggers:           resetTriggersAction,
-		utils.CDRLog:                      cdrLogAction,
-		utils.MetaSetRecurrent:            setRecurrentAction,
-		utils.MetaUnsetRecurrent:          unsetRecurrentAction,
-		utils.MetaAllowNegative:           allowNegativeAction,
-		utils.MetaDenyNegative:            denyNegativeAction,
-		utils.MetaResetAccount:            resetAccountAction,
-		utils.MetaTopUpReset:              topupResetAction,
-		utils.MetaTopUp:                   topupAction,
-		utils.MetaDebitReset:              debitResetAction,
-		utils.MetaDebit:                   debitAction,
-		utils.MetaResetCounters:           resetCountersAction,
-		utils.MetaEnableAccount:           enableAccountAction,
-		utils.MetaDisableAccount:          disableAccountAction,
-		utils.MetaHTTPPost:                callURL,
-		utils.HttpPostAsync:               callURLAsync,
-		utils.MetaMailAsync:               mailAsync,
-		utils.MetaSetDDestinations:        setddestinations,
-		utils.MetaRemoveAccount:           removeAccountAction,
-		utils.MetaRemoveBalance:           removeBalanceAction,
-		utils.MetaSetBalance:              setBalanceAction,
-		utils.MetaTransferMonetaryDefault: transferMonetaryDefaultAction,
-		utils.MetaCgrRpc:                  cgrRPCAction,
-		utils.TopUpZeroNegative:           topupZeroNegativeAction,
-		utils.SetExpiry:                   setExpiryAction,
-		utils.MetaPublishAccount:          publishAccount,
-		utils.MetaRemoveSessionCosts:      removeSessionCosts,
-		utils.MetaRemoveExpired:           removeExpired,
-		utils.MetaPostEvent:               postEvent,
-		utils.MetaCDRAccount:              resetAccountCDR,
-		utils.MetaExport:                  export,
-		utils.MetaResetThreshold:          resetThreshold,
-		utils.MetaResetStatQueue:          resetStatQueue,
-		utils.MetaRemoteSetAccount:        remoteSetAccount,
-	}
-	f, exists := actionFuncMap[typ]
-	return f, exists
+var actionFuncMap = make(map[string]actionTypeFunc)
+
+func init() {
+	actionFuncMap[utils.MetaLog] = logAction
+	actionFuncMap[utils.MetaResetTriggers] = resetTriggersAction
+	actionFuncMap[utils.CDRLog] = cdrLogAction
+	actionFuncMap[utils.MetaSetRecurrent] = setRecurrentAction
+	actionFuncMap[utils.MetaUnsetRecurrent] = unsetRecurrentAction
+	actionFuncMap[utils.MetaAllowNegative] = allowNegativeAction
+	actionFuncMap[utils.MetaDenyNegative] = denyNegativeAction
+	actionFuncMap[utils.MetaResetAccount] = resetAccountAction
+	actionFuncMap[utils.MetaTopUpReset] = topupResetAction
+	actionFuncMap[utils.MetaTopUp] = topupAction
+	actionFuncMap[utils.MetaDebitReset] = debitResetAction
+	actionFuncMap[utils.MetaDebit] = debitAction
+	actionFuncMap[utils.MetaResetCounters] = resetCountersAction
+	actionFuncMap[utils.MetaEnableAccount] = enableAccountAction
+	actionFuncMap[utils.MetaDisableAccount] = disableAccountAction
+	actionFuncMap[utils.MetaMailAsync] = mailAsync
+	actionFuncMap[utils.MetaSetDDestinations] = setddestinations
+	actionFuncMap[utils.MetaRemoveAccount] = removeAccountAction
+	actionFuncMap[utils.MetaRemoveBalance] = removeBalanceAction
+	actionFuncMap[utils.MetaSetBalance] = setBalanceAction
+	actionFuncMap[utils.MetaTransferMonetaryDefault] = transferMonetaryDefaultAction
+	actionFuncMap[utils.MetaCgrRpc] = cgrRPCAction
+	actionFuncMap[utils.TopUpZeroNegative] = topupZeroNegativeAction
+	actionFuncMap[utils.SetExpiry] = setExpiryAction
+	actionFuncMap[utils.MetaPublishAccount] = publishAccount
+	actionFuncMap[utils.MetaRemoveSessionCosts] = removeSessionCosts
+	actionFuncMap[utils.MetaRemoveExpired] = removeExpired
+	actionFuncMap[utils.MetaCDRAccount] = resetAccountCDR
+	actionFuncMap[utils.MetaExport] = export
+	actionFuncMap[utils.MetaResetThreshold] = resetThreshold
+	actionFuncMap[utils.MetaResetStatQueue] = resetStatQueue
+	actionFuncMap[utils.MetaRemoteSetAccount] = remoteSetAccount
+}
+
+func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
+	f, exists = actionFuncMap[typ]
+	return
+}
+
+func RegisterActionFunc(action string, f actionTypeFunc) {
+	actionFuncMap[action] = f
 }
 
 func logAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
@@ -368,54 +372,6 @@ func genericReset(ub *Account) error {
 	}
 	ub.InitCounters()
 	ub.ResetActionTriggers(nil)
-	return nil
-}
-
-func getOneData(ub *Account, extraData interface{}) ([]byte, error) {
-	switch {
-	case ub != nil:
-		return json.Marshal(ub)
-	case extraData != nil:
-		return json.Marshal(extraData)
-	}
-	return nil, nil
-}
-
-func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	body, err := getOneData(ub, extraData)
-	if err != nil {
-		return err
-	}
-	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
-		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts)
-	if err != nil {
-		return err
-	}
-	err = pstr.PostValues(body, make(http.Header))
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
-		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+a.ActionType, body, make(map[string]interface{}))
-		err = nil
-	}
-	return err
-}
-
-// Does not block for posts, no error reports
-func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	body, err := getOneData(ub, extraData)
-	if err != nil {
-		return err
-	}
-	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
-		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts)
-	if err != nil {
-		return err
-	}
-	go func() {
-		err := pstr.PostValues(body, make(http.Header))
-		if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
-			AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+a.ActionType, body, make(map[string]interface{}))
-		}
-	}()
 	return nil
 }
 
@@ -939,24 +895,6 @@ func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{
 		return utils.ErrNotFound
 	}
 	return nil
-}
-
-func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	body, err := json.Marshal(extraData)
-	if err != nil {
-		return err
-	}
-	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
-		utils.ContentJSON, config.CgrConfig().GeneralCfg().PosterAttempts)
-	if err != nil {
-		return err
-	}
-	err = pstr.PostValues(body, make(http.Header))
-	if err != nil && config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
-		AddFailedPost(a.ExtraParameters, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+a.ActionType, body, make(map[string]interface{}))
-		err = nil
-	}
-	return err
 }
 
 // resetAccountCDR resets the account out of values from CDR

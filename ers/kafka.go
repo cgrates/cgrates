@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
@@ -79,7 +80,7 @@ type KafkaER struct {
 	rdrErr        chan error
 	cap           chan struct{}
 
-	poster engine.Poster
+	poster *ees.KafkaEE
 }
 
 // Config returns the curent configuration
@@ -137,7 +138,7 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 						utils.ERs, string(msg.Key), err.Error()))
 			}
 			if rdr.poster != nil { // post it
-				if err := rdr.poster.Post(msg.Value, string(msg.Key)); err != nil {
+				if err := ees.ExportWithAttempts(rdr.poster, msg.Value, string(msg.Key)); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> writing message %s error: %s",
 							utils.ERs, string(msg.Key), err.Error()))
@@ -206,6 +207,11 @@ func (rdr *KafkaER) createPoster() {
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	rdr.poster = engine.NewKafkaPoster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
+	rdr.poster = ees.NewKafkaEE(&config.EventExporterCfg{
+		ID:             rdr.Config().ID,
+		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Opts:           processedOpt,
+		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
+	}, nil)
 }
