@@ -286,6 +286,13 @@ func TestMultiplyConverterConvert(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv, 0.0) {
 		t.Errorf("Expected %+v received: %+v", 0, rcv)
 	}
+
+	m.Value = 2
+	if rcv, err := m.Convert(3); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, 6.0) {
+		t.Errorf("Expected %+v received: %+v", 0, rcv)
+	}
 }
 
 func TestNewDivideConverter(t *testing.T) {

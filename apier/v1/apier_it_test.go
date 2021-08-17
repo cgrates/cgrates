@@ -2077,13 +2077,12 @@ func testApierStopEngine(t *testing.T) {
 
 func TestAttrRemoveRatingProfileGetID(t *testing.T) {
 	attr := &AttrRemoveRatingProfile{
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 		Category: "sms",
-		Subject: "*any",
+		Subject:  "*any",
 	}
 	expRes := "*out:cgrates.org:sms:*any"
 	if rply := attr.GetId(); rply != expRes {
 		t.Errorf("Expected %+v, received %v", expRes, rply)
 	}
 }
-
