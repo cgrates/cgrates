@@ -1686,15 +1686,25 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		var lastErr error
 		for key, itmMp := range indexes {
 			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-				var action bson.M
+			//	var action bson.M
 				if len(itmMp) == 0 {
-					action = bson.M{"$unset": bson.M{"value": 1}}
+					_, err = ms.getCol(ColRFI).DeleteOne(sctx,
+						bson.M{"key": utils.ConcatenatedKey(dbKey, key)})
+					//action = bson.M{"$unset": bson.M{"value": 1}}
 				} else {
+					_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, key)},
+						bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(dbKey, key), "value": itmMp.Slice()}},
+						options.Update().SetUpsert(true),
+					)
+				}
+					/*
 					action = bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(dbKey, key), "value": itmMp.Slice()}}
 				}
 				_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, key)},
 					action, options.Update().SetUpsert(true),
 				)
+
+					 */
 				return err
 			}); err != nil {
 				lastErr = err
