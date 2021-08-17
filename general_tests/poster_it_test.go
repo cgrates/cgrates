@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -111,7 +112,7 @@ func testPosterITRpcConn(t *testing.T) {
 	}
 }
 
-func testPosterReadFolder(format string) (expEv *engine.ExportEvents, err error) {
+func testPosterReadFolder(format string) (expEv *ees.ExportEvents, err error) {
 	filesInDir, _ := os.ReadDir(pstrCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		err = fmt.Errorf("No files in directory: %s", pstrCfg.GeneralCfg().FailedPostsDir)
@@ -121,7 +122,7 @@ func testPosterReadFolder(format string) (expEv *engine.ExportEvents, err error)
 		fileName := file.Name()
 		filePath := path.Join(pstrCfg.GeneralCfg().FailedPostsDir, fileName)
 
-		expEv, err = engine.NewExportEventsFromFile(filePath)
+		expEv, err = ees.NewExportEventsFromFile(filePath)
 		if err != nil {
 			return
 		}

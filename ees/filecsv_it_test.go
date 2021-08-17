@@ -481,6 +481,7 @@ func TestCsvInitFileCSV(t *testing.T) {
 	}
 	fCsv := &FileCSVee{
 		cgrCfg: cgrCfg,
+		cfg:    cgrCfg.EEsCfg().Exporters[0],
 		dc:     dc,
 	}
 	if err := fCsv.init(); err != nil {

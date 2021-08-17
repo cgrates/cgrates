@@ -119,7 +119,7 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 	case utils.CDRLog:
 		return &actCDRLog{cfg, fltrS, connMgr, aCfg}, nil
 	case utils.MetaHTTPPost:
-		return &actHTTPPost{cfg, aCfg}, nil
+		return newActHTTPPost(cfg, aCfg), nil
 	case utils.MetaExport:
 		return &actExport{tnt, cfg, connMgr, aCfg}, nil
 	case utils.MetaResetStatQueue:

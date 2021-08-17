@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type EventExporter2 interface {
+type EventExporter interface {
 	Cfg() *config.EventExporterCfg         // return the config
 	Connect() error                        // called before exporting an event to make sure it is connected
 	ExportEvent(interface{}, string) error // called on each event to be exported
@@ -40,15 +40,14 @@ type EventExporter2 interface {
 }
 
 // NewEventExporter produces exporters
-func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS) (ee EventExporter2, err error) {
+func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS) (ee EventExporter, err error) {
 	var dc *utils.SafeMapStorage
 	if dc, err = newEEMetrics(utils.FirstNonEmpty(
-		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
+		cfg.Timezone,
 		cgrCfg.GeneralCfg().DefaultTimezone)); err != nil {
 		return
 	}
-	cfg := cgrCfg.EEsCfg().Exporters[cfgIdx]
-	switch cgrCfg.EEsCfg().Exporters[cfgIdx].Type {
+	switch cfg.Type {
 	case utils.MetaFileCSV:
 		return NewFileCSVee(cfg, cgrCfg, filterS, dc)
 	case utils.MetaFileFWV:
@@ -62,10 +61,14 @@ func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 			cgrCfg.GeneralCfg().ConnectTimeout, dc)
 	case utils.MetaAMQPjsonMap:
 		return NewAMQPee(cfg, dc), nil
-	case utils.MetaAMQPV1jsonMap,
-		utils.MetaSQSjsonMap, utils.MetaKafkajsonMap,
-		utils.MetaS3jsonMap:
-		return NewPosterJSONMapEE(cgrCfg, cfgIdx, filterS, dc)
+	case utils.MetaAMQPV1jsonMap:
+		return NewAMQPv1EE(cfg, dc), nil
+	case utils.MetaS3jsonMap:
+		return NewS3EE(cfg, dc), nil
+	case utils.MetaSQSjsonMap:
+		return NewSQSee(cfg, dc), nil
+	case utils.MetaKafkajsonMap:
+		return NewKafkaEE(cfg, dc), nil
 	case utils.MetaVirt:
 		return NewVirtualEE(cfg, dc)
 	case utils.MetaElastic:
@@ -73,7 +76,7 @@ func NewEventExporter(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 	case utils.MetaSQL:
 		return NewSQLEe(cfg, dc)
 	default:
-		return nil, fmt.Errorf("unsupported exporter type: <%s>", cgrCfg.EEsCfg().Exporters[cfgIdx].Type)
+		return nil, fmt.Errorf("unsupported exporter type: <%s>", cfg.Type)
 	}
 }
 
@@ -222,10 +225,10 @@ func updateEEMetrics(dc *utils.SafeMapStorage, cgrID string, ev engine.MapEvent,
 
 type bytePreparing struct{}
 
-func (eEe *bytePreparing) PrepareMap(mp map[string]interface{}) (interface{}, error) {
+func (bytePreparing) PrepareMap(mp map[string]interface{}) (interface{}, error) {
 	return json.Marshal(mp)
 }
-func (eEe *bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
+func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
 	valMp := make(map[string]interface{})
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
@@ -238,13 +241,13 @@ func (eEe *bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interf
 
 type slicePreparing struct{}
 
-func (eEe *slicePreparing) PrepareMap(mp map[string]interface{}) (interface{}, error) {
+func (slicePreparing) PrepareMap(mp map[string]interface{}) (interface{}, error) {
 	csvRecord := make([]string, 0, len(mp))
 	for _, val := range mp {
 		csvRecord = append(csvRecord, utils.IfaceAsString(val))
 	}
 	return csvRecord, nil
 }
-func (eEe *slicePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
+func (slicePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
 	return mp.OrderedFieldsAsStrings(), nil
 }

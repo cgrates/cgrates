@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -32,27 +31,14 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func TestSqlID(t *testing.T) {
-	sqlEe := &SQLEe{
-		id: "3",
-	}
-	if rcv := sqlEe.ID(); !reflect.DeepEqual(rcv, "3") {
-		t.Errorf("Expected %+v but got %+v", "3", rcv)
-	}
-}
-
 func TestSqlGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
 	}
 	sqlEe := &SQLEe{
 		dc: dc,
 	}
-
 	if rcv := sqlEe.GetMetrics(); !reflect.DeepEqual(rcv, sqlEe.dc) {
 		t.Errorf("Expected %+v but got %+v", utils.ToJSON(rcv), utils.ToJSON(sqlEe.dc))
 	}
@@ -63,21 +49,12 @@ func TestNewSQLeUrl(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "postgres"
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SSLModeCfg] = "test"
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
+	sqlEe := &SQLEe{
+		cfg:  cgrCfg.EEsCfg().Exporters[0],
+		reqs: newConcReq(0),
 	}
-	sqlEe := &SQLEe{id: cgrCfg.EEsCfg().Exporters[0].ID,
-		cgrCfg: cgrCfg, cfgIdx: 0, filterS: filterS, dc: dc}
-	_, err = sqlEe.NewSQLEeURL(cgrCfg)
 	errExpect := "db type <> not supported"
-	if err == nil || err.Error() != errExpect {
+	if err := sqlEe.initDialector(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -87,24 +64,16 @@ func TestNewSQLeUrlSQL(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "mysql"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
+	sqlEe := &SQLEe{
+		cfg:  cgrCfg.EEsCfg().Exporters[0],
+		reqs: newConcReq(0),
 	}
-	sqlEe := &SQLEe{id: cgrCfg.EEsCfg().Exporters[0].ID,
-		cgrCfg: cgrCfg, cfgIdx: 0, filterS: filterS, dc: dc}
 	dialectExpect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "mysql"))
-	if dialect, err := sqlEe.NewSQLEeURL(cgrCfg); err != nil {
+	if err := sqlEe.initDialector(); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(dialect, dialectExpect) {
-		t.Errorf("Expected %v but received %v", utils.ToJSON(dialectExpect), utils.ToJSON(dialect))
+	} else if !reflect.DeepEqual(sqlEe.dialect, dialectExpect) {
+		t.Errorf("Expected %v but received %v", utils.ToJSON(dialectExpect), utils.ToJSON(sqlEe.dialect))
 	}
 }
 
@@ -113,24 +82,16 @@ func TestNewSQLeUrlPostgres(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "postgres"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `postgres://cgrates:CGRateS.org@127.0.0.1:3306`
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
+	sqlEe := &SQLEe{
+		cfg:  cgrCfg.EEsCfg().Exporters[0],
+		reqs: newConcReq(0),
 	}
-	sqlEe := &SQLEe{id: cgrCfg.EEsCfg().Exporters[0].ID,
-		cgrCfg: cgrCfg, cfgIdx: 0, filterS: filterS, dc: dc}
 	dialectExpect := postgres.Open(fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
 		"127.0.0.1", "3306", "postgres", "cgrates", "CGRateS.org", utils.SQLDefaultSSLMode))
-	if dialect, err := sqlEe.NewSQLEeURL(cgrCfg); err != nil {
+	if err := sqlEe.initDialector(); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(dialect, dialectExpect) {
-		t.Errorf("Expected %v but received %v", utils.ToJSON(dialectExpect), utils.ToJSON(dialect))
+	} else if !reflect.DeepEqual(sqlEe.dialect, dialectExpect) {
+		t.Errorf("Expected %v but received %v", utils.ToJSON(dialectExpect), utils.ToJSON(sqlEe.dialect))
 	}
 }
 
@@ -139,20 +100,12 @@ func TestNewSQLeExportPathError(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "postgres"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ":foo"
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
+	sqlEe := &SQLEe{
+		cfg:  cgrCfg.EEsCfg().Exporters[0],
+		reqs: newConcReq(0),
 	}
-	sqlEe := &SQLEe{id: cgrCfg.EEsCfg().Exporters[0].ID,
-		cgrCfg: cgrCfg, cfgIdx: 0, filterS: filterS, dc: dc}
 	errExpect := `parse ":foo": missing protocol scheme`
-	if _, err := sqlEe.NewSQLEeURL(cgrCfg); err == nil || err.Error() != errExpect {
+	if err := sqlEe.initDialector(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -166,9 +119,8 @@ func (mockDialect2) Initialize(db *gorm.DB) error { return nil }
 func TestOpenDBError2(t *testing.T) {
 	tmp := logger.Default
 	logger.Default = logger.Default.LogMode(logger.Silent)
-	cgrCfg := config.NewDefaultCGRConfig()
 	mckDialect := new(mockDialect2)
-	_, _, err := openDB(cgrCfg, 0, mckDialect)
+	_, _, err := openDB(mckDialect, make(map[string]interface{}))
 	errExpect := "invalid db"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -187,9 +139,8 @@ func (mockDialectErr) Initialize(db *gorm.DB) error {
 func TestOpenDBError3(t *testing.T) {
 	tmp := logger.Default
 	logger.Default = logger.Default.LogMode(logger.Silent)
-	cgrCfg := config.NewDefaultCGRConfig()
 	mckDialect := new(mockDialectErr)
-	_, _, err := openDB(cgrCfg, 0, mckDialect)
+	_, _, err := openDB(mckDialect, make(map[string]interface{}))
 	errExpect := "NOT_FOUND"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)

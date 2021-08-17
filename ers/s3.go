@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -79,7 +80,7 @@ type S3ER struct {
 	bucket    string
 	session   *session.Session
 
-	poster engine.Poster
+	poster *ees.S3EE
 }
 
 // Config returns the curent configuration
@@ -193,8 +194,13 @@ func (rdr *S3ER) createPoster() {
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	rdr.poster = engine.NewS3Poster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
+	rdr.poster = ees.NewS3EE(&config.EventExporterCfg{
+		ID:             rdr.Config().ID,
+		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Opts:           processedOpt,
+		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
+	}, nil)
 }
 
 func (rdr *S3ER) isClosed() bool {
@@ -240,7 +246,7 @@ func (rdr *S3ER) readMsg(scv *s3.S3, key string) (err error) {
 	}
 
 	if rdr.poster != nil { // post it
-		if err = rdr.poster.Post(msg, key); err != nil {
+		if err = ees.ExportWithAttempts(rdr.poster, msg, key); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> writing message %s error: %s",
 					utils.ERs, key, err.Error()))

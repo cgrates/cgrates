@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package ees
 
 import (
 	"bytes"
@@ -156,52 +156,28 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 		Opts:   expEv.Opts,
 		Format: expEv.Format,
 	}
-	var pstr Poster
-	keyFunc := func() string { return utils.EmptyString }
-	switch expEv.Format {
-	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.MetaHTTPPost:
-		pstr := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, expEv.Path,
-			utils.PosterTransportContentTypes[expEv.Format],
-			config.CgrConfig().GeneralCfg().PosterAttempts)
 
-		for _, ev := range expEv.Events {
-			req := ev.(*HTTPPosterRequest)
-			err = pstr.PostValues(req.Body, req.Header)
-			if err != nil {
-				failedEvents.AddEvent(req)
-			}
-		}
-		if len(failedEvents.Events) > 0 {
-			err = utils.ErrPartiallyExecuted
-		} else {
-			failedEvents = nil
-		}
+	var ee EventExporter
+	if ee, err = NewEventExporter(&config.EventExporterCfg{
+		ID:             "ReplayFailedPosts",
+		Type:           expEv.Format,
+		ExportPath:     expEv.Path,
+		Opts:           expEv.Opts,
+		Attempts:       attempts,
+		FailedPostsDir: utils.MetaNone,
+	}, config.CgrConfig(), nil); err != nil {
 		return
-	case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-		pstr = NewAMQPPoster(expEv.Path, attempts, expEv.Opts)
-	case utils.MetaAMQPV1jsonMap:
-		pstr = NewAMQPv1Poster(expEv.Path, attempts, expEv.Opts)
-	case utils.MetaSQSjsonMap:
-		pstr = NewSQSPoster(expEv.Path, attempts, expEv.Opts)
-	case utils.MetaKafkajsonMap:
-		pstr = NewKafkaPoster(expEv.Path, attempts, expEv.Opts)
+	}
+	keyFunc := func() string { return utils.EmptyString }
+	if expEv.Format == utils.MetaKafkajsonMap || expEv.Format == utils.MetaS3jsonMap {
 		keyFunc = utils.UUIDSha1Prefix
-	case utils.MetaS3jsonMap:
-		pstr = NewS3Poster(expEv.Path, attempts, expEv.Opts)
-		keyFunc = utils.UUIDSha1Prefix
-	case utils.MetaNatsjsonMap:
-		if pstr, err = NewNatsPoster(expEv.Path, attempts, expEv.Opts,
-			config.CgrConfig().GeneralCfg().NodeID,
-			config.CgrConfig().GeneralCfg().ConnectTimeout); err != nil {
-			return expEv, err
-		}
 	}
 	for _, ev := range expEv.Events {
-		if err = pstr.Post(ev.([]byte), keyFunc()); err != nil {
+		if err = ExportWithAttempts(ee, ev, keyFunc()); err != nil {
 			failedEvents.AddEvent(ev)
 		}
 	}
-	pstr.Close()
+	ee.Close()
 	if len(failedEvents.Events) > 0 {
 		err = utils.ErrPartiallyExecuted
 	} else {

@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -579,7 +580,7 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 		if strings.HasPrefix(fileName, "EventExporterS|") {
 			foundFile = true
 			filePath := path.Join(pecdrsCfg.GeneralCfg().FailedPostsDir, fileName)
-			ev, err := engine.NewExportEventsFromFile(filePath)
+			ev, err := ees.NewExportEventsFromFile(filePath)
 			if err != nil {
 				t.Fatal(err)
 			} else if len(ev.Events) == 0 {

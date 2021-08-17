@@ -28,24 +28,11 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestHttpJsonMapID(t *testing.T) {
-	httpEE := &HTTPjsonMapEE{
-		id: "3",
-	}
-	if rcv := httpEE.ID(); !reflect.DeepEqual(rcv, "3") {
-		t.Errorf("Expected %+v but got %+v", "3", rcv)
-	}
-}
-
 func TestHttpJsonMapGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
 	}
@@ -61,49 +48,21 @@ func TestHttpJsonMapGetMetrics(t *testing.T) {
 func TestHttpJsonMapExportEvent1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
 
-	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
+	httpEE, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
 	}
 	errExpect := `Post "/var/spool/cgrates/ees": unsupported protocol scheme ""`
-	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+	if err := httpEE.ExportEvent(&HTTPPosterRequest{Body: []byte{}, Header: make(http.Header)}, ""); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
 func TestHttpJsonMapExportEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
+
 	bodyExpect := map[string]interface{}{
 		"2": "*req.field2",
 	}
@@ -120,267 +79,21 @@ func TestHttpJsonMapExportEvent2(t *testing.T) {
 	}))
 	defer srv.Close()
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = srv.URL + "/"
-	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
+	httpEE, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := httpEE.ExportEvent(cgrEv); err != nil {
-		t.Error(err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
-	}
-}
 
-func TestHttpJsonMapExportEvent3(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
+	if err := httpEE.ExportEvent(&HTTPPosterRequest{Body: []byte(`{"2": "*req.field2"}`), Header: make(http.Header)}, ""); err != nil {
 		t.Error(err)
-	}
-	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "inline parse error for string: <*wrong-type>"
-	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
-	}
-}
-func TestHttpJsonMapExportEvent4(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
-		},
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "inline parse error for string: <*wrong-type>"
-	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
-	}
-}
-
-func TestHttpJsonMapExportEvent5(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQSjsonMap
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	cgrEv.Event = map[string]interface{}{
-		"test": make(chan int),
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{{}}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "json: unsupported type: chan int"
-	if err := httpEE.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpEE.dc.MapStorage[utils.NumberOfEvents])
-	}
-	httpEE.OnEvicted("test", "test")
-}
-
-func TestHttpJsonMapComposeHeader(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjson
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
-		},
-		{
-			Path: "*hdr.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	if _, err := httpEE.composeHeader(); err != nil {
-		t.Error(err)
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if _, err := httpEE.composeHeader(); err != nil {
-		t.Error(err)
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "inline parse error for string: <*wrong-type>"
-	if _, err := httpEE.composeHeader(); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 }
 
 func TestHttpJsonMapSync(t *testing.T) {
 	//Create new exporter
 	cgrCfg := config.NewDefaultCGRConfig()
-	var cfgIdx int
-	cfgIdx = 0
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjsonMap
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPjsonMap
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
-		cgrCfg.GeneralCfg().DefaultTimezone))
-	if err != nil {
-		t.Error(err)
-	}
-
-	//Create an event
-	cgrEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
-			"Account":     "1001",
-			"Destination": "1002",
-		},
-	}
 	var wg1 sync.WaitGroup
 
 	wg1.Add(3)
@@ -392,22 +105,21 @@ func TestHttpJsonMapSync(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-
 		time.Sleep(25 * time.Millisecond)
 		wg1.Done()
 	}))
 
 	defer ts.Close()
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath = ts.URL
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = ts.URL
 
-	exp, err := NewHTTPjsonMapEE(cgrCfg, cfgIdx, new(engine.FilterS), dc)
+	exp, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
 
 	for i := 0; i < 3; i++ {
-		go exp.ExportEvent(cgrEvent)
+		go exp.ExportEvent(&HTTPPosterRequest{Body: []byte(`{"2": "*req.field2"}`), Header: make(http.Header)}, "")
 	}
 
 	select {
@@ -421,28 +133,10 @@ func TestHttpJsonMapSync(t *testing.T) {
 func TestHttpJsonMapSyncLimit(t *testing.T) {
 	//Create new exporter
 	cgrCfg := config.NewDefaultCGRConfig()
-	var cfgIdx int
-	cfgIdx = 0
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjsonMap
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 1
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPjsonMap
-	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
-		cgrCfg.GeneralCfg().DefaultTimezone))
-	if err != nil {
-		t.Error(err)
-	}
-
-	//Create an event
-	cgrEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
-			"Account":     "1001",
-			"Destination": "1002",
-		},
-	}
 	var wg1 sync.WaitGroup
-
 	wg1.Add(3)
 
 	test := make(chan struct{})
@@ -458,15 +152,15 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 
 	defer ts.Close()
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath = ts.URL
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = ts.URL
 
-	exp, err := NewHTTPjsonMapEE(cgrCfg, cfgIdx, new(engine.FilterS), dc)
+	exp, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
 
 	for i := 0; i < 3; i++ {
-		go exp.ExportEvent(cgrEvent)
+		go exp.ExportEvent(&HTTPPosterRequest{Body: []byte(`{"2": "*req.field2"}`), Header: make(http.Header)}, "")
 	}
 
 	select {

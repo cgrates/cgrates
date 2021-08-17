@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package ees
 
 import (
 	"reflect"
@@ -38,7 +38,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(5 * time.Second)
 	AddFailedPost("", "path1", "format1", "module1", "1", make(map[string]interface{}))
-	x, ok := failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
+	x, ok := failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
 	}
@@ -62,7 +62,7 @@ func TestAddFldPost(t *testing.T) {
 	}
 	AddFailedPost("", "path1", "format1", "module1", "2", make(map[string]interface{}))
 	AddFailedPost("", "path2", "format2", "module2", "3", map[string]interface{}{utils.SQSQueueID: "qID"})
-	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
+	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
 	}
@@ -83,7 +83,7 @@ func TestAddFldPost(t *testing.T) {
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path2", "format2", "module2", "qID"))
+	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path2", "format2", "module2", "qID"))
 	if !ok {
 		t.Error("Error reading from cache")
 	}

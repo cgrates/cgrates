@@ -68,7 +68,7 @@ func TestListenAndServe(t *testing.T) {
 	logBuf := new(bytes.Buffer)
 	log.SetOutput(logBuf)
 	eeS.ListenAndServe(stopChan, cfgRld)
-	logExpect := "[INFO] <CoreS> starting <EventExporterS>"
+	logExpect := "[INFO] <CoreS> starting <EEs>"
 	if rcv := logBuf.String(); !strings.Contains(rcv, logExpect) {
 		t.Errorf("Expected %q but received %q", logExpect, rcv)
 	}
@@ -275,7 +275,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 		utils.MetaHTTPPost: ltcache.NewCache(1,
 			time.Second, false, onCacheEvicted),
 	}
-	newEeS, err := NewEventExporter(cgrCfg, 0, filterS)
+	newEeS, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
 	if err != nil {
 		t.Error(err)
 	}
@@ -300,23 +300,34 @@ func TestV1ProcessEvent4(t *testing.T) {
 	}
 }
 
-type mockEventExporter struct{}
-
-func (mockEventExporter) ID() string                              { return utils.EmptyString }
-func (mockEventExporter) ExportEvent(cgrEv *utils.CGREvent) error { return nil }
-func (mockEventExporter) OnEvicted(itdmID string, value interface{}) {
-	utils.Logger.Warning("NOT IMPLEMENTED")
+func newMockEventExporter() *mockEventExporter {
+	return &mockEventExporter{dc: &utils.SafeMapStorage{
+		MapStorage: utils.MapStorage{
+			utils.NumberOfEvents:  int64(0),
+			utils.PositiveExports: utils.StringSet{},
+			utils.NegativeExports: 5,
+		}}}
 }
-func (mockEventExporter) GetMetrics() *utils.SafeMapStorage {
-	return &utils.SafeMapStorage{MapStorage: utils.MapStorage{
-		utils.NumberOfEvents:  int64(0),
-		utils.PositiveExports: utils.StringSet{},
-		utils.NegativeExports: 5,
-	}}
+
+type mockEventExporter struct {
+	dc *utils.SafeMapStorage
+	bytePreparing
+}
+
+func (m mockEventExporter) GetMetrics() *utils.SafeMapStorage {
+	return m.dc
+}
+
+func (mockEventExporter) Cfg() *config.EventExporterCfg         { return new(config.EventExporterCfg) }
+func (mockEventExporter) Connect() error                        { return nil }
+func (mockEventExporter) ExportEvent(interface{}, string) error { return nil }
+func (mockEventExporter) Close() error {
+	utils.Logger.Warning("NOT IMPLEMENTED")
+	return nil
 }
 
 func TestV1ProcessEventMockMetrics(t *testing.T) {
-	mEe := mockEventExporter{}
+	mEe := newMockEventExporter()
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
@@ -414,7 +425,7 @@ func TestOnCacheEvicted(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	bufLog := new(bytes.Buffer)
 	log.SetOutput(bufLog)
-	ee := mockEventExporter{}
+	ee := newMockEventExporter()
 	onCacheEvicted(utils.EmptyString, ee)
 	rcvExpect := "CGRateS <> [WARNING] NOT IMPLEMENTED"
 	if rcv := bufLog.String(); !strings.Contains(rcv, rcvExpect) {
@@ -431,7 +442,7 @@ func TestShutdown(t *testing.T) {
 	logBuf := new(bytes.Buffer)
 	log.SetOutput(logBuf)
 	eeS.Shutdown()
-	logExpect := "[INFO] <CoreS> shutdown <EventExporterS>"
+	logExpect := "[INFO] <CoreS> shutdown <EEs>"
 	if rcv := logBuf.String(); !strings.Contains(rcv, logExpect) {
 		t.Errorf("Expected %q but received %q", logExpect, rcv)
 	}

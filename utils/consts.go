@@ -28,20 +28,7 @@ var (
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
 	PostPaidRatedSlice = []string{MetaPostpaid, MetaRated}
 
-	GitLastLog                  string // If set, it will be processed as part of versioning
-	PosterTransportContentTypes = map[string]string{
-		MetaHTTPjsonCDR:   ContentJSON,
-		MetaHTTPjsonMap:   ContentJSON,
-		MetaHTTPjson:      ContentJSON,
-		MetaHTTPPost:      ContentForm,
-		MetaAMQPjsonCDR:   ContentJSON,
-		MetaAMQPjsonMap:   ContentJSON,
-		MetaAMQPV1jsonMap: ContentJSON,
-		MetaSQSjsonMap:    ContentJSON,
-		MetaKafkajsonMap:  ContentJSON,
-		MetaS3jsonMap:     ContentJSON,
-		MetaNatsjsonMap:   ContentJSON,
-	}
+	GitLastLog string // If set, it will be processed as part of versioning
 
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
@@ -293,7 +280,6 @@ const (
 	MetaConstant              = "*constant"
 	MetaFiller                = "*filler"
 	MetaHTTPPost              = "*httpPost"
-	MetaHTTPjson              = "*http_json"
 	MetaHTTPjsonCDR           = "*http_json_cdr"
 	MetaHTTPjsonMap           = "*httpJSONMap"
 	MetaAMQPjsonCDR           = "*amqp_json_cdr"
@@ -399,7 +385,6 @@ const (
 	FWVSuffix                = ".fwv"
 	ContentJSON              = "json"
 	ContentForm              = "form"
-	ContentText              = "text"
 	FileLockPrefix           = "file_"
 	ActionsPoster            = "act"
 	MetaFileCSV              = "*fileCSV"

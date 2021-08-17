@@ -20,19 +20,37 @@ package actions
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
+func newActHTTPPost(cfg *config.CGRConfig, aCfg *engine.APAction) (aL *actHTTPPost) {
+	aL = &actHTTPPost{
+		config: cfg,
+		aCfg:   aCfg,
+		pstrs:  make([]*ees.HTTPjsonMapEE, len(aCfg.Diktats)),
+	}
+	for i, actD := range aL.cfg().Diktats {
+		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(&config.EventExporterCfg{
+			ID:         aL.id(),
+			ExportPath: actD.Path,
+			Attempts:   aL.config.GeneralCfg().PosterAttempts,
+		}, cfg, nil, nil)
+	}
+	return
+}
+
 type actHTTPPost struct {
 	config *config.CGRConfig
 	aCfg   *engine.APAction
+
+	pstrs []*ees.HTTPjsonMapEE
 }
 
 func (aL *actHTTPPost) id() string {
@@ -50,28 +68,15 @@ func (aL *actHTTPPost) execute(_ *context.Context, data utils.MapStorage, _ stri
 		return
 	}
 	var partExec bool
-	for _, actD := range aL.cfg().Diktats {
-		pstr := engine.NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, actD.Path,
-			utils.ContentJSON, aL.config.GeneralCfg().PosterAttempts)
+	for _, pstr := range aL.pstrs {
 		if async, has := aL.cfg().Opts[utils.MetaAsync]; has && utils.IfaceAsString(async) == utils.TrueStr {
-			go aL.post(pstr, body, actD.Path)
-		} else if err = aL.post(pstr, body, actD.Path); err != nil {
+			go ees.ExportWithAttempts(pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString)
+		} else if err = ees.ExportWithAttempts(pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString); err != nil {
 			partExec = true
 		}
 	}
 	if partExec {
 		err = utils.ErrPartiallyExecuted
-	}
-	return
-}
-
-func (aL *actHTTPPost) post(pstr *engine.HTTPPoster, body []byte, path string) (err error) {
-	if err = pstr.PostValues(body, make(http.Header)); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Failed posting event to: <%s> because: %s", utils.ActionS, path, err.Error()))
-		if aL.config.GeneralCfg().FailedPostsDir != utils.MetaNone {
-			engine.AddFailedPost(path, utils.MetaHTTPjson, utils.ActionsPoster+utils.HierarchySep+aL.cfg().Type, body, make(map[string]interface{}))
-			err = nil
-		}
 	}
 	return
 }

@@ -256,8 +256,10 @@ func (rdr *AMQPER) createPoster() {
 		return
 	}
 	rdr.poster = ees.NewAMQPee(&config.EventExporterCfg{
-		ExportPath: utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		Attempts:   rdr.cgrCfg.GeneralCfg().PosterAttempts,
-		Opts:       processedOpt,
+		ID:             rdr.Config().ID,
+		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Opts:           processedOpt,
+		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
 	}, nil)
 }
