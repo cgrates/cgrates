@@ -25,24 +25,11 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestID(t *testing.T) {
-	ee := &ElasticEE{
-		id: "3",
-	}
-	if rcv := ee.ID(); !reflect.DeepEqual(rcv, "3") {
-		t.Errorf("Expected %+v \n but got %+v", "3", rcv)
-	}
-}
-
 func TestGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
 	}
@@ -56,23 +43,23 @@ func TestGetMetrics(t *testing.T) {
 }
 
 func TestInitClient(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			ExportPath: "/\x00",
+		},
 	}
-	ee.cgrCfg.EEsCfg().Exporters[0].ExportPath = "/\x00"
 	errExpect := `cannot create client: parse "/\x00": net/url: invalid control character in URL`
-	if err := ee.init(); err == nil || err.Error() != errExpect {
+	if err := ee.Connect(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
 }
 func TestInitCase1(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIndex] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsIndex: "test"},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := "test"
@@ -82,12 +69,12 @@ func TestInitCase1(t *testing.T) {
 }
 
 func TestInitCase2(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIfPrimaryTerm] = 20
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsIfPrimaryTerm: 20},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := utils.IntPointer(20)
@@ -97,24 +84,24 @@ func TestInitCase2(t *testing.T) {
 }
 
 func TestInitCase2Err(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIfPrimaryTerm] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsIfPrimaryTerm: "test"},
+		},
 	}
 	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
-	if err := ee.init(); err == nil || err.Error() != errExpect {
+	if err := ee.prepareOpts(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
 }
 
 func TestInitCase3(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIfSeqNo] = 20
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsIfSeqNo: 20},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := utils.IntPointer(20)
@@ -124,24 +111,24 @@ func TestInitCase3(t *testing.T) {
 }
 
 func TestInitCase3Err(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsIfSeqNo] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsIfSeqNo: "test"},
+		},
 	}
 	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
-	if err := ee.init(); err == nil || err.Error() != errExpect {
+	if err := ee.prepareOpts(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
 }
 
 func TestInitCase4(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsOpType] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsOpType: "test"},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := "test"
@@ -151,12 +138,12 @@ func TestInitCase4(t *testing.T) {
 }
 
 func TestInitCase5(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsPipeline] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsPipeline: "test"},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := "test"
@@ -166,12 +153,12 @@ func TestInitCase5(t *testing.T) {
 }
 
 func TestInitCase6(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsRouting] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsRouting: "test"},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := "test"
@@ -181,24 +168,24 @@ func TestInitCase6(t *testing.T) {
 }
 
 func TestInitCase7(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsTimeout] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsTimeout: "test"},
+		},
 	}
 	errExpect := "time: invalid duration \"test\""
-	if err := ee.init(); err == nil || err.Error() != errExpect {
+	if err := ee.prepareOpts(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
 }
 
 func TestInitCase8(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsVersionLow] = 20
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsVersionLow: 20},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := utils.IntPointer(20)
@@ -208,24 +195,24 @@ func TestInitCase8(t *testing.T) {
 }
 
 func TestInitCase8Err(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsVersionLow] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsVersionLow: "test"},
+		},
 	}
 	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
-	if err := ee.init(); err == nil || err.Error() != errExpect {
+	if err := ee.prepareOpts(); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
 }
 
 func TestInitCase9(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsVersionType] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsVersionType: "test"},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := "test"
@@ -235,12 +222,12 @@ func TestInitCase9(t *testing.T) {
 }
 
 func TestInitCase10(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.ElsWaitForActiveShards] = "test"
 	ee := &ElasticEE{
-		cgrCfg: cgrCfg,
+		cfg: &config.EventExporterCfg{
+			Opts: map[string]interface{}{utils.ElsWaitForActiveShards: "test"},
+		},
 	}
-	if err := ee.init(); err != nil {
+	if err := ee.prepareOpts(); err != nil {
 		t.Error(err)
 	}
 	eeExpect := "test"
@@ -262,40 +249,19 @@ func (mockClientErr) Perform(req *http.Request) (res *http.Response, err error) 
 
 func TestElasticExportEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], dc)
 	if err != nil {
+		t.Error(err)
+	}
+	if err = eEe.Connect(); err != nil {
 		t.Error(err)
 	}
 	eEe.eClnt.Transport = new(mockClientErr)
-	cgrEv.Event = map[string]interface{}{
-		"test1": "value",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := eEe.ExportEvent(cgrEv); err != nil {
+	if err := eEe.ExportEvent([]byte{}, ""); err != nil {
 		t.Error(err)
 	}
 }
@@ -313,41 +279,21 @@ func (mockClientErr2) Perform(req *http.Request) (res *http.Response, err error)
 
 func TestElasticExportEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], dc)
 	if err != nil {
+		t.Error(err)
+	}
+	if err = eEe.Connect(); err != nil {
 		t.Error(err)
 	}
 	eEe.eClnt.Transport = new(mockClientErr2)
-	cgrEv.Event = map[string]interface{}{
-		"test1": "value",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+
 	errExpect := io.EOF
-	if err := eEe.ExportEvent(cgrEv); err == nil || err != errExpect {
+	if err := eEe.ExportEvent([]byte{}, ""); err == nil || err != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -364,125 +310,40 @@ func (mockClient) Perform(req *http.Request) (res *http.Response, err error) {
 }
 func TestElasticExportEvent3(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], dc)
 	if err != nil {
+		t.Error(err)
+	}
+	if err = eEe.Connect(); err != nil {
 		t.Error(err)
 	}
 	eEe.eClnt.Transport = new(mockClient)
-	cgrEv.Event = map[string]interface{}{
-		"test1": "value",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
 	// errExpect := `unsupported protocol scheme ""`
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := eEe.ExportEvent(cgrEv); err != nil {
+	if err := eEe.ExportEvent([]byte{}, ""); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestElasticExportEvent4(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
 	}
-	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
+	eEe, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], dc)
 	if err != nil {
 		t.Error(err)
 	}
-	// eEe.eClnt.Transport = new(mockClient)
-	cgrEv.Event = map[string]interface{}{
-		"test1": "value",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
+	if err = eEe.Connect(); err != nil {
+		t.Error(err)
 	}
 	errExpect := `unsupported protocol scheme ""`
-	if err := eEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+	if err := eEe.ExportEvent([]byte{}, ""); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but got %q", errExpect, err)
 	}
-}
-
-func TestElasticExportEvent5(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	eEe, err := NewElasticEE(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	// eEe.eClnt.Transport = new(mockClient)
-	cgrEv.Event = map[string]interface{}{
-		"test1": "value",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "inline parse error for string: <*wrong-type>"
-	if err := eEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	eEe.OnEvicted("test", "test")
 }

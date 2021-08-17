@@ -138,7 +138,7 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.StorDBJSON):
 			go srvMngr.reloadService(utils.StorDB)
 		case <-srvMngr.GetConfig().GetReloadChan(config.EEsJSON):
-			go srvMngr.reloadService(utils.EventExporterS)
+			go srvMngr.reloadService(utils.EEs)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJSON):
 			go srvMngr.reloadService(utils.RateS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJSON):

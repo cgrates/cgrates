@@ -32,7 +32,7 @@ import (
 
 // onCacheEvicted is called by ltcache when evicting an item
 func onCacheEvicted(_ string, value interface{}) {
-	value.(EventExporter2).Close()
+	value.(EventExporter).Close()
 }
 
 // NewEventExporterS instantiates the EventExporterS
@@ -176,15 +176,15 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		eeCache, hasCache := eeS.eesChs[eeCfg.Type]
 		eeS.eesMux.RUnlock()
 		var isCached bool
-		var ee EventExporter2
+		var ee EventExporter
 		if hasCache {
 			var x interface{}
 			if x, isCached = eeCache.Get(eeCfg.ID); isCached {
-				ee = x.(EventExporter2)
+				ee = x.(EventExporter)
 			}
 		}
 		if !isCached {
-			if ee, err = NewEventExporter(eeS.cfg, cfgIdx, eeS.filterS); err != nil {
+			if ee, err = NewEventExporter(eeS.cfg.EEsCfg().Exporters[cfgIdx], eeS.cfg, eeS.filterS); err != nil {
 				return
 			}
 			if hasCache {
@@ -199,18 +199,14 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		if eeCfg.Synchronous {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
-		metricMapLock.Lock()
-		metricsMap[ee.ID()] = utils.MapStorage{}
-		metricMapLock.Unlock()
 		// log the message before starting the gorutine, but still execute the exporter
 		if hasVerbose && !eeCfg.Synchronous {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> with id <%s>, running verbosed exporter with syncronous false",
 					utils.EEs, ee.Cfg().ID))
 		}
-		go func(evict, sync bool, ee EventExporter2) {
-			if err := eeS.exportEventWithExporter(ee, cgrEv.CGREvent, evict); err != nil {
-
+		go func(evict, sync bool, ee EventExporter) {
+			if err := exportEventWithExporter(ee, cgrEv.CGREvent, evict, eeS.cfg, eeS.filterS); err != nil {
 				withErr = true
 			}
 			if sync {
@@ -254,7 +250,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 	return
 }
 
-func (eeS *EventExporterS) exportEventWithExporter(exp EventExporter2, ev *utils.CGREvent, oneTime bool) (err error) {
+func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS) (err error) {
 	if oneTime {
 		defer exp.Close()
 	}
@@ -273,9 +269,9 @@ func (eeS *EventExporterS) exportEventWithExporter(exp EventExporter2, ev *utils
 			utils.MetaReq:  utils.MapStorage(ev.Event),
 			utils.MetaDC:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
-			utils.MetaCfg:  eeS.cfg.GetDataProvider(),
-		}, utils.FirstNonEmpty(ev.Tenant, eeS.cfg.GeneralCfg().DefaultTenant),
-			eeS.filterS,
+			utils.MetaCfg:  cfg.GetDataProvider(),
+		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
+			filterS,
 			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(exp.Cfg().ContentFields())
 		if eEv, err = exp.PrepareOrderMap(expNM); err != nil {
 			return
@@ -287,11 +283,11 @@ func (eeS *EventExporterS) exportEventWithExporter(exp EventExporter2, ev *utils
 	return ExportWithAttempts(exp, eEv, key)
 }
 
-func ExportWithAttempts(exp EventExporter2, eEv interface{}, key string) (err error) {
+func ExportWithAttempts(exp EventExporter, eEv interface{}, key string) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
 			if err != nil {
-				engine.AddFailedPost(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
+				AddFailedPost(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
 					exp.Cfg().Type, utils.EEs,
 					eEv, exp.Cfg().Opts)
 			}

@@ -37,6 +37,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	kafka "github.com/segmentio/kafka-go"
@@ -328,7 +329,7 @@ func testCDRsExpKafka(t *testing.T) {
 	cancel()
 }
 
-func checkContent(ev *engine.ExportEvents, content []interface{}) error {
+func checkContent(ev *ees.ExportEvents, content []interface{}) error {
 	match := false
 	for _, bev := range ev.Events {
 		for _, con := range content {
@@ -366,7 +367,7 @@ func testCDRsExpFileFailover(t *testing.T) {
 		fileName := file.Name()
 		filePath := path.Join(cdrsExpCfg.GeneralCfg().FailedPostsDir, fileName)
 
-		ev, err := engine.NewExportEventsFromFile(filePath)
+		ev, err := ees.NewExportEventsFromFile(filePath)
 		if err != nil {
 			t.Errorf("<%s> for file <%s>", err, fileName)
 			continue

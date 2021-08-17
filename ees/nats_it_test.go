@@ -41,23 +41,22 @@ func TestNatsEE(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 	defer cmd.Process.Kill()
-	cfgPath := path.Join(*dataDir, "conf", "samples", "ees")
-	cfg, err := config.NewCGRConfigFromPath(cfgPath)
+	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	var idx int
-	for idx = range cfg.EEsCfg().Exporters {
-		if cfg.EEsCfg().Exporters[idx].ID == "NatsJsonMapExporter" {
+	var cfg *config.EventExporterCfg
+	for _, cfg = range cgrCfg.EEsCfg().Exporters {
+		if cfg.ID == "NatsJsonMapExporter" {
 			break
 		}
 	}
-	evExp, err := NewEventExporter(cfg, idx, new(engine.FilterS))
+	evExp, err := NewEventExporter(cfg, cgrCfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	nop, err := engine.GetNatsOpts(cfg.EEsCfg().Exporters[5].Opts, "natsTest", time.Second)
+	nop, err := GetNatsOpts(cfg.Opts, "natsTest", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,9 +104,84 @@ func TestNatsEE(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := evExp.ExportEvent(cgrEv); err != nil {
+	if err := exportEventWithExporter(evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)
-	// fmt.Println(string((<-ch).Data))
+	expected := `{"Account":"1001","Destination":"1002"}`
+	// fmt.Println((<-ch).Data)
+	select {
+	case data := <-ch:
+		if expected != string(data.Data) {
+			t.Fatalf("Expected %v \n but received \n %v", expected, string(data.Data))
+		}
+	case <-time.After(50 * time.Millisecond):
+		t.Fatal("Time limit exceeded")
+	}
+}
+
+func TestNatsEE2(t *testing.T) {
+	testCreateDirectory(t)
+	exec.Command("pkill", "nats-server")
+
+	cmd := exec.Command("nats-server")
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(50 * time.Millisecond)
+	defer cmd.Process.Kill()
+
+	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cfg *config.EventExporterCfg
+	for _, cfg = range cgrCfg.EEsCfg().Exporters {
+		if cfg.ID == "NatsJsonMapExporter2" {
+			break
+		}
+	}
+	evExp, err := NewEventExporter(cfg, cgrCfg, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nop, err := GetNatsOpts(cfg.Opts, "natsTest", time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	nc, err := nats.Connect("nats://localhost:4222", nop...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ch := make(chan *nats.Msg, 3)
+	_, err = nc.ChanQueueSubscribe("processed_cdrs", "test3", ch)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer nc.Drain()
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+	}
+	if err := exportEventWithExporter(evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
+		t.Fatal(err)
+	}
+	testCleanDirectory(t)
+	expected := `{"Account":"1001","Destination":"1002"}`
+	// fmt.Println((<-ch).Data)
+	select {
+	case data := <-ch:
+		if expected != string(data.Data) {
+			t.Fatalf("Expected %v \n but received \n %v", expected, string(data.Data))
+		}
+	case <-time.After(50 * time.Millisecond):
+		t.Fatal("Time limit exceeded")
+	}
 }

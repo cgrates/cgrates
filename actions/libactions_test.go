@@ -60,7 +60,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 
 	expectedActs := []actioner{
 		&actCDRLog{cfg, fltr, nil, &engine.APAction{Type: utils.CDRLog}},
-		&actHTTPPost{cfg, &engine.APAction{Type: utils.MetaHTTPPost}},
+		newActHTTPPost(cfg, &engine.APAction{Type: utils.MetaHTTPPost}),
 		&actExport{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaExport}},
 		&actResetStat{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaResetStatQueue}},
 		&actResetThreshold{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaResetThreshold}},

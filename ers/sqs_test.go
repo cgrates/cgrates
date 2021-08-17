@@ -27,6 +27,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -523,7 +524,11 @@ func TestSQSERReadMsgError3(t *testing.T) {
 		awsToken:  "",
 		queueID:   "cgrates_cdrs",
 		session:   nil,
-		poster:    engine.NewSQSPoster("url", 1, make(map[string]interface{})),
+		poster: ees.NewSQSee(&config.EventExporterCfg{
+			ExportPath: "url",
+			Attempts:   1,
+			Opts:       make(map[string]interface{}),
+		}, nil),
 	}
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
 	rdr.session, _ = session.NewSessionWithOptions(

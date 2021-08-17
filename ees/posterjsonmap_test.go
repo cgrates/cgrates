@@ -18,18 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package ees
 
-import (
-	"encoding/json"
-	"reflect"
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func TestPosterJsonMapID(t *testing.T) {
 	pstrEE := &PosterJSONMapEE{
 		id: "3",
@@ -492,3 +481,4 @@ func TestPosterJsonMapSyncLimit(t *testing.T) {
 		return
 	}
 }
+*/

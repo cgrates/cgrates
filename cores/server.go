@@ -38,7 +38,6 @@ import (
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-
 	"golang.org/x/net/websocket"
 )
 

@@ -32,6 +32,7 @@ import (
 
 func TestACHTTPPostExecute(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().PosterAttempts = 1
 	apAction := &engine.APAction{
 		ID:   "TEST_ACTION_HTTPPOST",
 		Type: utils.CDRLog,
@@ -97,6 +98,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 
 func TestACHTTPPostValues(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().PosterAttempts = 1
 	cfg.GeneralCfg().FailedPostsDir = utils.MetaNone
 	apAction := &engine.APAction{
 		ID:   "TEST_ACTION_HTTPPostValues",

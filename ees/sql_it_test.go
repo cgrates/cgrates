@@ -228,22 +228,18 @@ func testSqlEeVerifyExportedEvent2(t *testing.T) {
 }
 
 func TestOpenDB1(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxIdleConnsCfg] = 2
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
-	_, _, err := openDB(cgrCfg, 0, dialect)
+	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLMaxIdleConnsCfg: 2})
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestOpenDB1Err(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxIdleConnsCfg] = "test"
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
-	_, _, err := openDB(cgrCfg, 0, dialect)
+	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLMaxIdleConnsCfg: "test"})
 	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -251,22 +247,18 @@ func TestOpenDB1Err(t *testing.T) {
 }
 
 func TestOpenDB2(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxOpenConns] = 2
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
-	_, _, err := openDB(cgrCfg, 0, dialect)
+	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLMaxOpenConns: 2})
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestOpenDB2Err(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxOpenConns] = "test"
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
-	_, _, err := openDB(cgrCfg, 0, dialect)
+	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLMaxOpenConns: "test"})
 	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -274,22 +266,18 @@ func TestOpenDB2Err(t *testing.T) {
 }
 
 func TestOpenDB3(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxConnLifetime] = 2
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
-	_, _, err := openDB(cgrCfg, 0, dialect)
+	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLMaxConnLifetime: 2})
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestOpenDB3Err(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxConnLifetime] = "test"
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
-	_, _, err := openDB(cgrCfg, 0, dialect)
+	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLMaxConnLifetime: "test"})
 	errExpect := "time: invalid duration \"test\""
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -301,171 +289,15 @@ func TestSQLExportEvent1(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "cgrates"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	sqlEe, err := NewSQLEe(cgrCfg.EEsCfg().Exporters[0], nil)
 	if err != nil {
 		t.Error(err)
 	}
-	sqlEe, err := NewSQLEe(cgrCfg, 0, filterS, dc)
-	if err != nil {
+	if err := sqlEe.Connect(); err != nil {
+		t.Fatal(err)
+	}
+	if err := sqlEe.ExportEvent(&sqlPosterRequest{Querry: "INSERT INTO expTable VALUES (); ", Values: []interface{}{}}, ""); err != nil {
 		t.Error(err)
 	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := sqlEe.ExportEvent(cgrEv); err != nil {
-		t.Error(err)
-	}
-	sqlEe.OnEvicted("test", "test")
-}
-
-func TestSQLExportEvent2(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "cgrates"
-	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	sqlEe, err := NewSQLEe(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.*row", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile(utils.MetaRow, utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := sqlEe.ExportEvent(cgrEv); err != nil {
-		t.Error(err)
-	}
-	sqlEe.OnEvicted("test", "test")
-}
-
-func TestSQLExportEvent3(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "cgrates"
-	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	sqlEe, err := NewSQLEe(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := sqlEe.ExportEvent(cgrEv); err != nil {
-		t.Error(err)
-	}
-	sqlEe.OnEvicted("test", "test")
-}
-
-func TestSQLExportEvent4(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "cgrates"
-	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	sqlEe, err := NewSQLEe(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "inline parse error for string: <*wrong-type>"
-	if err := sqlEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
-	}
+	sqlEe.Close()
 }

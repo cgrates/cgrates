@@ -34,6 +34,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -452,8 +453,8 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 	v2 := url.Values{}
 	v1.Set("OriginID", "httpjsonrpc1")
 	v2.Set("OriginID", "amqpreconnect")
-	httpContent := []interface{}{&engine.HTTPPosterRequest{Body: v1, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}},
-		&engine.HTTPPosterRequest{Body: v2, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}}}
+	httpContent := []interface{}{&ees.HTTPPosterRequest{Body: v1, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}},
+		&ees.HTTPPosterRequest{Body: v2, Header: http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}}}}
 	filesInDir, _ := os.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -462,7 +463,7 @@ func testCDRsOnExpFileFailover(t *testing.T) {
 		fileName := file.Name()
 		filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
 
-		ev, err := engine.NewExportEventsFromFile(filePath)
+		ev, err := ees.NewExportEventsFromFile(filePath)
 		if err != nil {
 			t.Errorf("<%s> for file <%s>", err, fileName)
 			continue
