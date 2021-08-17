@@ -23,6 +23,10 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
+	"net"
+	"net/rpc"
+	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"reflect"
@@ -212,6 +216,8 @@ var (
 		testLoadItResetStorDb,
 		testLoadItStartLoader,
 		// testLoadItStartLoaderFlushStorDB,
+		testLoadItCheckTenantFlag,
+		// testLoadItRpcClient,
 		testLoadItStartLoaderWithTenant,
 		testLoadItConnectToDB,
 		testLoadItCheckAttributes,
@@ -365,7 +371,7 @@ func testLoadItStartLoaderFromStorDB(t *testing.T) {
 }
 
 func testLoadItStartLoaderWithTenant(t *testing.T) {
-	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), "-caches_address=", "-scheduler_address=", `-tenant="tenant.com"`)
+	cmd := exec.Command("cgr-loader", "-config_path="+ldrItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"), fmt.Sprintf("-caches_address=%s", address), "-scheduler_address=", `-tenant="tenant.com"`, "-verbose")
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	if err := cmd.Run(); err != nil {
@@ -373,6 +379,51 @@ func testLoadItStartLoaderWithTenant(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
+	listener.Close()
+	if resp != "\"tenant.com\"" {
+		t.Errorf("Expected \"tenant.com\" \n but received \n %q", resp)
+	}
+}
+
+type mockCache int
+
+func (c *mockCache) ReloadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+	resp = args.Tenant
+	*reply = "OK"
+	return nil
+}
+
+func (c *mockCache) Clear(args *utils.AttrCacheIDsWithAPIOpts,
+	reply *string) error {
+	*reply = args.Tenant
+	return nil
+}
+
+var address string
+var listener net.Listener
+var resp string
+
+func testLoadItCheckTenantFlag(t *testing.T) {
+	err := rpc.RegisterName("CacheSv1", new(mockCache))
+	if err != nil {
+		t.Error(err)
+	}
+
+	listener, err = net.Listen("tcp", ":0")
+	if err != nil {
+		t.Error(err)
+	}
+	address = listener.Addr().String()
+
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			go rpc.ServeCodec(jsonrpc.NewServerCodec(conn))
+		}
+	}()
 }
 
 func testLoadItStartLoaderFlushStorDB(t *testing.T) {
