@@ -309,22 +309,13 @@ func TestHealthReverseDestination4(t *testing.T) {
 	}
 }
 
-func TestHealthFilter(t *testing.T) {
+func TestHealthFilterAttributes(t *testing.T) {
 	Cache.Clear(nil)
 	cfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	// db, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
-	// cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-	// cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-	// cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-	// "", cfg.DataDbCfg().Items)
-	// if err != nil {
-	// t.Fatal(err)
-	// }
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAttributeProfile(&AttributeProfile{
@@ -344,11 +335,12 @@ func TestHealthFilter(t *testing.T) {
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*any:*string:~*req.Account:1001": {"ATTR1"},
-			"cgrates.org:*any:*string:~*req.Account:1002": {"ATTR1"},
 		},
-		BrokenIndexes: make(map[string][]string),
+		BrokenIndexes: map[string][]string{
+			"cgrates.org:*string:~*req.Account:1002": {"ATTR1"},
+		},
 		MissingFilters: map[string][]string{
-			"cgrates.org:Fltr1": {"ATTR1"},
+			"Fltr1": {"ATTR1"},
 		},
 		MissingObjects: []string{"cgrates.org:ATTR2"},
 	}
