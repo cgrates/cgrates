@@ -127,7 +127,7 @@ func (self *APIerSv1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, rep
 
 // Removes specific AccountActions on Tariff plan
 func (self *APIerSv1) RemoveTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	aa := engine.TpAccountAction{Tpid: attrs.TPid}
