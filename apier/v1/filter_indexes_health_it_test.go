@@ -40,27 +40,20 @@ var (
 		testV1FIdxHLoadConfig,
 		testV1FIdxHdxInitDataDb,
 		testV1FIdxHResetStorDb,
-		// testV1FIdxHStartEngine,
+		testV1FIdxHStartEngine,
 		testV1FIdxHRpcConn,
 
 		testV1FIdxHLoadFromFolderTutorial2,
-		/*
 		testV1FIdxHAccountActionPlansHealth,
 		testV1FIdxHReverseDestinationHealth,
 		testV1FIdxHdxInitDataDb,
 		testV1FIdxHResetStorDb,
-		testV1FIdxCacheClear,
 
-
-		 */
 		testV1FIdxHLoadFromFolderTutorial,
-		/*
 		testV1FIdxGetThresholdsIndexesHealth,
 		testV1FIdxGetResourcesIndexesHealth,
 		testV1FIdxGetStatsIndexesHealth,
 		testV1FIdxGetRoutesIndexesHealth,
-
-		 */
 
 		testV1FIdxGetChargersIndexesHealth,
 		testV1FIdxGetAttributesIndexesHealth,
@@ -71,7 +64,7 @@ var (
 		testV1FIdxHLoadFromFolderDispatchers,
 		testV1FIdxHGetDispatchersIndexesHealth,
 
-		// testV1FIdxHStopEngine,
+		testV1FIdxHStopEngine,
 	}
 )
 
@@ -180,17 +173,12 @@ func testV1FIdxHReverseDestinationHealth(t *testing.T) {
 }
 
 func testV1FIdxCacheClear(t *testing.T) {
-	var result string
+	var reply string
 	if err := tFIdxHRpc.Call(utils.CacheSv1Clear,
-		&utils.AttrCacheIDsWithArgDispatcher{
-		  CacheIDs: nil,
-		  TenantArg: utils.TenantArg{
-			  Tenant: "cgrates.org",
-		  },
-		}, &result); err != nil {
+		&utils.AttrCacheIDsWithArgDispatcher{}, &reply); err != nil {
 		t.Error(err)
-	} else if result != utils.OK {
-		t.Errorf("Unexpected result returned")
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }
 
@@ -246,7 +234,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	var result []string
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -293,7 +281,7 @@ func testV1FIdxGetThresholdsIndexesHealth(t *testing.T) {
 	}
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -356,7 +344,7 @@ func testV1FIdxGetResourcesIndexesHealth(t *testing.T) {
 	var result []string
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -450,7 +438,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 	var result []string
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -533,7 +521,7 @@ func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 	var result []string
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaSuppliers,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -600,6 +588,29 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
+	// those 2 charger object (*none:*any:*any index) are from tutorial2 tariffplan, so on imternal we must delete them by api
+	if tSv1Cfg.DataDbCfg().DataDbType == utils.INTERNAL {
+		var result string
+		if err := tFIdxHRpc.Call(utils.APIerSv1RemoveChargerProfile,
+			&utils.TenantIDWithCache{
+				Tenant: "cgrates.org",
+				ID:     "CRG_RESELLER1",
+			}, &result); err != nil {
+			t.Error(err)
+		} else if result != utils.OK {
+			t.Errorf("Unexpected reply returned")
+		}
+		if err := tFIdxHRpc.Call(utils.APIerSv1RemoveChargerProfile,
+			&utils.TenantIDWithCache{
+				Tenant: "cgrates.org",
+				ID:     "CGR_DEFAULT",
+			}, &result); err != nil {
+			t.Error(err)
+		} else if result != utils.OK {
+			t.Errorf("Unexpected reply returned")
+		}
+	}
+
 	// check all the indexes for chargers
 	expIdx := []string{
 		"*string:~*req.Destination:+1442:Default",
@@ -611,7 +622,7 @@ func testV1FIdxGetChargersIndexesHealth(t *testing.T) {
 	var result []string
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaChargers,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -671,7 +682,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Context:  "simpleauth",
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -682,7 +693,21 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 		}
 	}
 
-	//*sessions context
+	// this attr object (*none:*any:*any index) must be deleted with api
+	if tSv1Cfg.DataDbCfg().DataDbType == utils.INTERNAL {
+		var result string
+		if err := tFIdxHRpc.Call(utils.APIerSv1RemoveAttributeProfile,
+			&utils.TenantIDWithCache{
+				Tenant: "cgrates.org",
+				ID:     "ATTR_CRG_SUPPLIER1",
+			}, &result); err != nil {
+			t.Error(err)
+		} else if result != utils.OK {
+			t.Errorf("Unexpected reply returned")
+		}
+	}
+
+	// *sessions context
 	expIdx = []string{
 		"*string:~*req.Account:1001:ATTR_1001_SESSIONAUTH",
 		"*string:~*req.Account:1002:ATTR_1002_SESSIONAUTH",
@@ -691,7 +716,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Context:  utils.MetaSessionS,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -709,7 +734,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Context:  utils.META_ANY,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
@@ -783,7 +808,7 @@ func testV1FIdxHGetDispatchersIndexesHealth(t *testing.T) {
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaDispatchers,
 		Context:  utils.META_ANY,
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
 	}, &result); err != nil {
 		t.Error(err)
 	} else {
