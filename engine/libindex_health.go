@@ -528,7 +528,7 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 		return
 	}
 	missingFltrs := utils.StringSet{} // for checking multiple filters that are missing(to not append the same ID in case)
-	for _, id := range ids { // get all the objects from DB
+	for _, id := range ids {          // get all the objects from DB
 		id = strings.TrimPrefix(id, objPrfx)
 		tntID := utils.NewTenantID(id)
 		var obj *objFIH

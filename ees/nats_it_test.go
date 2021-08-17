@@ -38,23 +38,22 @@ func TestNatsEEJetStream(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 	defer cmd.Process.Kill()
-	cfgPath := path.Join(*dataDir, "conf", "samples", "ees")
-	cfg, err := config.NewCGRConfigFromPath(cfgPath)
+	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	var idx int
-	for idx = range cfg.EEsCfg().Exporters {
-		if cfg.EEsCfg().Exporters[idx].ID == "NatsJsonMapExporter" {
+	var cfg *config.EventExporterCfg
+	for _, cfg = range cgrCfg.EEsCfg().Exporters {
+		if cfg.ID == "NatsJsonMapExporter" {
 			break
 		}
 	}
-	evExp, err := NewEventExporter(cfg, idx, new(engine.FilterS))
+	evExp, err := NewEventExporter(cfg, cgrCfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	nop, err := engine.GetNatsOpts(cfg.EEsCfg().Exporters[idx].Opts, "natsTest", time.Second)
+	nop, err := GetNatsOpts(cfg.Opts, "natsTest", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +101,7 @@ func TestNatsEEJetStream(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := evExp.ExportEvent(cgrEv); err != nil {
+	if err := exportEventWithExporter(evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)
@@ -129,23 +128,22 @@ func TestNatsEE(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	defer cmd.Process.Kill()
 
-	cfgPath := path.Join(*dataDir, "conf", "samples", "ees")
-	cfg, err := config.NewCGRConfigFromPath(cfgPath)
+	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	var idx int
-	for idx = range cfg.EEsCfg().Exporters {
-		if cfg.EEsCfg().Exporters[idx].ID == "NatsJsonMapExporter2" {
+	var cfg *config.EventExporterCfg
+	for _, cfg = range cgrCfg.EEsCfg().Exporters {
+		if cfg.ID == "NatsJsonMapExporter2" {
 			break
 		}
 	}
-	evExp, err := NewEventExporter(cfg, idx, new(engine.FilterS))
+	evExp, err := NewEventExporter(cfg, cgrCfg, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	nop, err := engine.GetNatsOpts(cfg.EEsCfg().Exporters[idx].Opts, "natsTest", time.Second)
+	nop, err := GetNatsOpts(cfg.Opts, "natsTest", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +167,7 @@ func TestNatsEE(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := evExp.ExportEvent(cgrEv); err != nil {
+	if err := exportEventWithExporter(evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)

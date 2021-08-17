@@ -58,7 +58,7 @@ func MissingStructFields(s interface{}, mandatories []string) []string {
 	sType := sValue.Type()
 	for _, fieldName := range mandatories {
 		fldStr, ok := sType.FieldByName(fieldName)
-		if !ok || fieldByIndexIsEmpty(sValue, fldStr.Index){
+		if !ok || fieldByIndexIsEmpty(sValue, fldStr.Index) {
 			missing = append(missing, fieldName)
 		}
 	}

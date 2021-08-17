@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/scheduler"
@@ -453,11 +454,11 @@ func (apierSv1 *APIerSv1) ImportTariffPlanFromFolder(attrs *utils.AttrImportTPFr
 
 // SetRatingProfile sets a specific rating profile working with data directly in the DataDB without involving storDb
 func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attrs, []string{"ToR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attrs, []string{"Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, rpa := range attrs.RatingPlanActivations {
-		if missing := utils.MissingStructFields(rpa, []string{"ActivationTimes", "RatingPlanId"}); len(missing) != 0 {
+		if missing := utils.MissingStructFields(rpa, []string{"ActivationTime", "RatingPlanId"}); len(missing) != 0 {
 			return fmt.Errorf("%s:RatingPlanActivation:%v", utils.ErrMandatoryIeMissing.Error(), missing)
 		}
 	}
@@ -1404,7 +1405,7 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(args *ArgsReplyFailedPosts, reply *s
 			}
 		}
 		filePath := path.Join(failedReqsInDir, file.Name())
-		expEv, err := engine.NewExportEventsFromFile(filePath)
+		expEv, err := ees.NewExportEventsFromFile(filePath)
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}

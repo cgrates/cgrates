@@ -24,7 +24,7 @@ import (
 
 // Creates a new destination within a tariff plan
 func (self *APIerSv2) SetTPDestination(attrs *utils.TPDestination, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tag", "Prefixes"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "ID", "Prefixes"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.SetTPDestinations([]*utils.TPDestination{attrs}); err != nil {

@@ -30,6 +30,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -80,7 +81,7 @@ type SQSER struct {
 	queueID   string
 	session   *session.Session
 
-	poster engine.Poster
+	poster *ees.SQSee
 }
 
 type sqsClient interface {
@@ -220,8 +221,13 @@ func (rdr *SQSER) createPoster() {
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	rdr.poster = engine.NewSQSPoster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
+	rdr.poster = ees.NewSQSee(&config.EventExporterCfg{
+		ID:             rdr.Config().ID,
+		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Opts:           processedOpt,
+		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
+	}, nil)
 }
 
 func (rdr *SQSER) isClosed() bool {
@@ -254,7 +260,7 @@ func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 	}
 
 	if rdr.poster != nil { // post it
-		if err = rdr.poster.Post(body, key); err != nil {
+		if err = ees.ExportWithAttempts(rdr.poster, body, key); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> writing message %s error: %s",
 					utils.ERs, key, err.Error()))

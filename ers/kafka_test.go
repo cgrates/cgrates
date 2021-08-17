@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -133,7 +134,11 @@ func TestKafkaERServe2(t *testing.T) {
 		topic:     "testTopic",
 		maxWait:   time.Duration(1),
 		cap:       make(chan struct{}, 1),
-		poster:    engine.NewKafkaPoster("url", 1, make(map[string]interface{})),
+		poster: ees.NewKafkaEE(&config.EventExporterCfg{
+			ExportPath: "url",
+			Attempts:   1,
+			Opts:       make(map[string]interface{}),
+		}, nil),
 	}
 	rdr.rdrExit <- struct{}{}
 	rdr.Config().RunDelay = 1 * time.Millisecond

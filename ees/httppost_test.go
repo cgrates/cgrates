@@ -22,24 +22,15 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
-
-func TestHttpPostID(t *testing.T) {
-	httpPost := &HTTPPostEE{
-		id: "3",
-	}
-	if rcv := httpPost.ID(); !reflect.DeepEqual(rcv, "3") {
-		t.Errorf("Expected %+v but got %+v", "3", rcv)
-	}
-}
 
 func TestHttpPostGetMetrics(t *testing.T) {
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
@@ -62,17 +53,7 @@ func TestHttpPostExportEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
+	httpPost, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -80,29 +61,14 @@ func TestHttpPostExportEvent(t *testing.T) {
 		"Test1": 3,
 	}
 	errExpect := `Post "/var/spool/cgrates/ees": unsupported protocol scheme ""`
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
+	if err := httpPost.ExportEvent(&HTTPPosterRequest{Body: url.Values{}, Header: make(http.Header)}, ""); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents])
 	}
 }
 
 func TestHttpPostExportEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
 	bodyExpect := "2=%2Areq.field2"
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -117,215 +83,25 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	}))
 	defer srv.Close()
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = srv.URL + "/"
-	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
+	httpPost, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	cgrEv.Event = map[string]interface{}{
-		"test": "string",
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := httpPost.ExportEvent(cgrEv); err != nil {
-		t.Error(err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents])
-	}
-}
-
-func TestHttpPostExportEvent3(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	vals, err := httpPost.PrepareMap(map[string]interface{}{"2": "*req.field2"})
 	if err != nil {
+		t.Fatal(err)
+	}
+	if err := httpPost.ExportEvent(vals, ""); err != nil {
 		t.Error(err)
-	}
-	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"Test1": 3,
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "inline parse error for string: <*wrong-type>"
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents])
-	}
-}
-
-func TestHttpPostExportEvent4(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
-	cgrEv := new(utils.CGREvent)
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrEv.Event = map[string]interface{}{
-		"Test1": 3,
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*exp.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
-		},
-		{
-			Path: "*exp.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
-		},
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("~*req.field2", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "inline parse error for string: <*wrong-type>"
-	if err := httpPost.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-	dcExpect := int64(1)
-	if !reflect.DeepEqual(dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents]) {
-		t.Errorf("Expected %q but received %q", dcExpect, httpPost.dc.MapStorage[utils.NumberOfEvents])
-	}
-	httpPost.OnEvicted("test", "test")
-}
-
-func TestHttpPostComposeHeader(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
-	httpPost, err := NewHTTPPostEE(cgrCfg, 0, filterS, dc)
-	if err != nil {
-		t.Error(err)
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
-		},
-		{
-			Path: "*hdr.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	if _, err := httpPost.composeHeader(); err != nil {
-		t.Error(err)
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if _, err := httpPost.composeHeader(); err != nil {
-		t.Error(err)
-	}
-	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-		{
-			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
-			Filters: []string{"*wrong-type"},
-		},
-	}
-	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
-		field.ComputePath()
-	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect := "inline parse error for string: <*wrong-type>"
-	if _, err := httpPost.composeHeader(); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 }
 
 func TestHttpPostSync(t *testing.T) {
 	//Create new exporter
 	cgrCfg := config.NewDefaultCGRConfig()
-	var cfgIdx int
-	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPPost
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
-		cgrCfg.GeneralCfg().DefaultTimezone))
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 
-	//Create an event
-	cgrEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
-			"Account":     "1001",
-			"Destination": "1002",
-		},
-	}
 	var wg1 sync.WaitGroup
 
 	wg1.Add(3)
@@ -343,15 +119,23 @@ func TestHttpPostSync(t *testing.T) {
 
 	defer ts.Close()
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath = ts.URL
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = ts.URL
 
-	exp, err := NewHTTPPostEE(cgrCfg, cfgIdx, new(engine.FilterS), dc)
+	exp, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
 
+	vals, err := exp.PrepareMap(map[string]interface{}{
+		"Account":     "1001",
+		"Destination": "1002",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	for i := 0; i < 3; i++ {
-		go exp.ExportEvent(cgrEvent)
+		go exp.ExportEvent(vals, "")
 	}
 
 	select {
@@ -365,28 +149,12 @@ func TestHttpPostSync(t *testing.T) {
 func TestHttpPostSyncLimit(t *testing.T) {
 	//Create new exporter
 	cgrCfg := config.NewDefaultCGRConfig()
-	var cfgIdx int
-	cfgIdx = 0
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].Type = utils.MetaHTTPPost
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 
 	// We set the limit of events to be exported lower than the amount of events we asynchronously want to export
-	cgrCfg.EEsCfg().Exporters[cfgIdx].ConcurrentRequests = 1
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		cgrCfg.EEsCfg().Exporters[cfgIdx].Timezone,
-		cgrCfg.GeneralCfg().DefaultTimezone))
-	if err != nil {
-		t.Error(err)
-	}
+	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 1
 
-	//Create an event
-	cgrEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
-			"Account":     "1001",
-			"Destination": "1002",
-		},
-	}
 	var wg1 sync.WaitGroup
 
 	wg1.Add(3)
@@ -404,17 +172,24 @@ func TestHttpPostSyncLimit(t *testing.T) {
 
 	defer ts.Close()
 
-	cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath = ts.URL
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = ts.URL
 
-	exp, err := NewHTTPPostEE(cgrCfg, cfgIdx, new(engine.FilterS), dc)
+	exp, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
 
-	for i := 0; i < 3; i++ {
-		go exp.ExportEvent(cgrEvent)
+	vals, err := exp.PrepareMap(map[string]interface{}{
+		"Account":     "1001",
+		"Destination": "1002",
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 
+	for i := 0; i < 3; i++ {
+		go exp.ExportEvent(vals, "")
+	}
 	select {
 	case <-test:
 		t.Error("Should not have been possible to asynchronously export events")

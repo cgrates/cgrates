@@ -384,6 +384,7 @@ func testConfigSSetConfigEEs(t *testing.T) {
 		"type":                "*none",
 		"opts":                map[string]interface{}{},
 		"concurrent_requests": 0.,
+		"failed_posts_dir":    "/var/spool/cgrates/failed_posts",
 	}
 	exp := map[string]interface{}{
 		"enabled":          true,

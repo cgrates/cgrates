@@ -49,7 +49,7 @@ type HTTPPostEE struct {
 
 	hdr http.Header
 }
-type httpPosterRequest struct {
+type HTTPPosterRequest struct {
 	Header http.Header
 	Body   interface{}
 }
@@ -80,7 +80,7 @@ func (httpPost *HTTPPostEE) Connect() (_ error) { return }
 func (httpPost *HTTPPostEE) ExportEvent(content interface{}, _ string) (err error) {
 	httpPost.reqs.get()
 	defer httpPost.reqs.done()
-	pReq := content.(*httpPosterRequest)
+	pReq := content.(*HTTPPosterRequest)
 	var req *http.Request
 	if req, err = prepareRequest(httpPost.Cfg().ExportPath, utils.ContentForm, pReq.Body, pReq.Header); err != nil {
 		return
@@ -98,7 +98,7 @@ func (httpPost *HTTPPostEE) PrepareMap(mp map[string]interface{}) (interface{}, 
 	for k, v := range mp {
 		urlVals.Set(k, utils.IfaceAsString(v))
 	}
-	return &httpPosterRequest{
+	return &HTTPPosterRequest{
 		Header: httpPost.hdr,
 		Body:   urlVals,
 	}, nil
@@ -112,7 +112,7 @@ func (httpPost *HTTPPostEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (inte
 		path = path[:len(path)-1] // remove the last index
 		urlVals.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 	}
-	return &httpPosterRequest{
+	return &HTTPPosterRequest{
 		Header: httpPost.hdr,
 		Body:   urlVals,
 	}, nil

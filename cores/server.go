@@ -35,11 +35,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-
-	"github.com/cenkalti/rpc2"
 	"golang.org/x/net/websocket"
 )
 

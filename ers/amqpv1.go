@@ -27,6 +27,7 @@ import (
 	amqpv1 "github.com/Azure/go-amqp"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -75,7 +76,7 @@ type AMQPv1ER struct {
 	conn *amqpv1.Client
 	ses  *amqpv1.Session
 
-	poster engine.Poster
+	poster *ees.AMQPv1EE
 }
 
 // Config returns the curent configuration
@@ -142,7 +143,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 						utils.ERs, err.Error()))
 			}
 			if rdr.poster != nil { // post it
-				if err := rdr.poster.Post(body, utils.EmptyString); err != nil {
+				if err := ees.ExportWithAttempts(rdr.poster, body, utils.EmptyString); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> writing message error: %s",
 							utils.ERs, err.Error()))
@@ -205,6 +206,11 @@ func (rdr *AMQPv1ER) createPoster() {
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	rdr.poster = engine.NewAMQPv1Poster(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
-		rdr.cgrCfg.GeneralCfg().PosterAttempts, processedOpt)
+	rdr.poster = ees.NewAMQPv1EE(&config.EventExporterCfg{
+		ID:             rdr.Config().ID,
+		ExportPath:     utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		Attempts:       rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		Opts:           processedOpt,
+		FailedPostsDir: rdr.cgrCfg.GeneralCfg().FailedPostsDir,
+	}, nil)
 }

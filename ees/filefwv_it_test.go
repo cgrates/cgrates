@@ -170,6 +170,7 @@ func TestFileFwvInit(t *testing.T) {
 	}
 	fFwv := &FileFWVee{
 		cgrCfg: cgrCfg,
+		cfg:    cgrCfg.EEsCfg().Exporters[0],
 		dc:     dc,
 	}
 	if err := fFwv.init(); err != nil {
