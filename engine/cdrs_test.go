@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-
 package engine
 
 import (
@@ -55,8 +54,8 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		*rply = AttrSProcessEventReply{
 			AlteredFields: []string{utils.Account},
 			CGREvent: &utils.CGREvent{
-				ID:     "TestBiRPCv1AuthorizeEventNoTenant",
-				Time:   utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
+				ID:   "TestBiRPCv1AuthorizeEventNoTenant",
+				Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 				Event: map[string]interface{}{
 					"Account":     "1002",
 					"Category":    "call",
@@ -78,10 +77,10 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
-		cgrCfg: cfg,
+		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb: NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
-		dm: dm,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
 	}
 	cdr := &CDRWithArgDispatcher{ // no tenant, take the default
 		CDR: &CDR{
@@ -137,10 +136,10 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
-		cgrCfg: cfg,
+		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb: NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
-		dm: dm,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
 	}
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
@@ -194,10 +193,10 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
-		cgrCfg: cfg,
+		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb: NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
-		dm: dm,
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dm:      dm,
 	}
 
 	args := &ExternalCDRWithArgDispatcher{
@@ -224,4 +223,3 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 		t.Error(err)
 	}
 }
-

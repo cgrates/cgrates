@@ -981,7 +981,7 @@ func (iDB *InternalDB) SetFilterIndexesDrv(cacheID, tntCtx string,
 			dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 		}
 		if len(indx) == 0 {
-			iDB.db.Set(cacheID, dbKey, nil, []string{tntCtx},
+			iDB.db.Remove(cacheID, dbKey,
 				true, utils.NonTransactional)
 			continue
 		}
