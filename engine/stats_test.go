@@ -2897,12 +2897,9 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -2932,7 +2929,7 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -2940,7 +2937,7 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 		sq,
 	}
 
-	if err := sS.processThresholds(sQs, nil); err != nil {
+	if err := sS.processThresholds(context.Background(), sQs, nil); err != nil {
 		t.Error(err)
 	}
 }
@@ -2962,8 +2959,8 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				exp := &ThresholdsArgsProcessEvent{
 					ThresholdIDs: []string{"TH1"},
 					CGREvent: &utils.CGREvent{
@@ -2987,9 +2984,9 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
 	})
 
@@ -2997,12 +2994,9 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, connMgr)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3032,7 +3026,7 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -3040,7 +3034,7 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 		sq,
 	}
 
-	if err := sS.processThresholds(sQs, nil); err != nil {
+	if err := sS.processThresholds(context.Background(), sQs, nil); err != nil {
 		t.Error(err)
 	}
 }
@@ -3074,15 +3068,15 @@ func TestStatQueueProcessThresholds2(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 
 	ccM := &ccMock{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				return utils.ErrExists
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr = NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
 	})
 
@@ -3090,12 +3084,9 @@ func TestStatQueueProcessThresholds2(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, connMgr)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3125,7 +3116,7 @@ func TestStatQueueProcessThresholds2(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -3134,7 +3125,7 @@ func TestStatQueueProcessThresholds2(t *testing.T) {
 	}
 
 	expLog := `[WARNING] <StatS> error: EXISTS`
-	if err := sS.processThresholds(sQs, nil); err == nil ||
+	if err := sS.processThresholds(context.Background(), sQs, nil); err == nil ||
 		err != utils.ErrPartiallyExecuted {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
