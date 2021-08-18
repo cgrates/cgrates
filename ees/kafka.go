@@ -32,6 +32,7 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE
 		cfg:   cfg,
 		dc:    dc,
 		topic: utils.DefaultQueueID,
+		reqs:  newConcReq(cfg.ConcurrentRequests),
 	}
 	if vals, has := cfg.Opts[utils.KafkaTopic]; has {
 		kfkPstr.topic = utils.IfaceAsString(vals)
@@ -56,11 +57,16 @@ func (pstr *KafkaEE) Cfg() *config.EventExporterCfg { return pstr.cfg }
 func (pstr *KafkaEE) Connect() (_ error) {
 	pstr.Lock()
 	if pstr.writer == nil {
-		pstr.writer = kafka.NewWriter(kafka.WriterConfig{
-			Brokers:     []string{pstr.Cfg().ExportPath},
-			MaxAttempts: pstr.Cfg().Attempts,
+		pstr.writer = &kafka.Writer{
+			Addr:        kafka.TCP(pstr.Cfg().ExportPath),
 			Topic:       pstr.topic,
-		})
+			MaxAttempts: pstr.Cfg().Attempts,
+		}
+		// pstr.writer = kafka.NewWriter(kafka.WriterConfig{
+		// Brokers:     []string{pstr.Cfg().ExportPath},
+		// MaxAttempts: pstr.Cfg().Attempts,
+		// Topic:       pstr.topic,
+		// })
 	}
 	pstr.Unlock()
 	return
@@ -69,6 +75,11 @@ func (pstr *KafkaEE) Connect() (_ error) {
 func (pstr *KafkaEE) ExportEvent(content interface{}, key string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
+	if pstr.writer == nil {
+		pstr.RUnlock()
+		pstr.reqs.done()
+		return utils.ErrDisconnected
+	}
 	err = pstr.writer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(key),
 		Value: content.([]byte),

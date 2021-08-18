@@ -61,7 +61,11 @@ func callURL(ub *engine.Account, a *engine.Action, _ engine.Actions, extraData i
 	if err != nil {
 		return err
 	}
-	return ExportWithAttempts(pstr, &HTTPPosterRequest{Body: body, Header: make(http.Header)}, "")
+	err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: body, Header: make(http.Header)}, "")
+	if config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
+		err = nil
+	}
+	return err
 }
 
 // Does not block for posts, no error reports
@@ -97,5 +101,9 @@ func postEvent(_ *engine.Account, a *engine.Action, _ engine.Actions, extraData 
 	if err != nil {
 		return err
 	}
-	return ExportWithAttempts(pstr, &HTTPPosterRequest{Body: body, Header: make(http.Header)}, "")
+	err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: body, Header: make(http.Header)}, "")
+	if config.CgrConfig().GeneralCfg().FailedPostsDir != utils.MetaNone {
+		err = nil
+	}
+	return err
 }
