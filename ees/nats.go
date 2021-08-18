@@ -102,6 +102,11 @@ func (pstr *NatsEE) Connect() (err error) {
 func (pstr *NatsEE) ExportEvent(content interface{}, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
+	if pstr.poster == nil {
+		pstr.RUnlock()
+		pstr.reqs.done()
+		return utils.ErrDisconnected
+	}
 	if pstr.jetStream {
 		_, err = pstr.posterJS.Publish(pstr.subject, content.([]byte))
 	} else {

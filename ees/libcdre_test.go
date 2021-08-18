@@ -104,6 +104,9 @@ func TestAddFldPost(t *testing.T) {
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
+	for _, id := range failedPostCache.GetItemIDs("") {
+		failedPostCache.Set(id, nil, nil)
+	}
 }
 
 func TestFilePath(t *testing.T) {

@@ -452,15 +452,15 @@ func testAccMaxAbstracts(t *testing.T) {
 					Type:    utils.MetaConcrete,
 					Units:   213,
 					/*
-					CostIncrements: []*utils.APICostIncrement{
-						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
-							FixedFee:     utils.Float64Pointer(0),
-							RecurrentFee: utils.Float64Pointer(0),
+						CostIncrements: []*utils.APICostIncrement{
+							{
+								Increment:    utils.Float64Pointer(float64(time.Second)),
+								FixedFee:     utils.Float64Pointer(0),
+								RecurrentFee: utils.Float64Pointer(0),
+							},
 						},
-					},
 
-					 */
+					*/
 				},
 			},
 		},
@@ -550,7 +550,7 @@ func testAccMaxAbstracts(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Weights: utils.DynamicWeights{
 					{
-						Weight:    0,
+						Weight: 0,
 					},
 				},
 				Balances: map[string]*utils.ExtBalance{
@@ -558,7 +558,7 @@ func testAccMaxAbstracts(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								Weight:    25,
+								Weight: 25,
 							},
 						},
 						Type: "*abstract",
@@ -576,11 +576,11 @@ func testAccMaxAbstracts(t *testing.T) {
 						FilterIDs: nil,
 						Weights: utils.DynamicWeights{
 							{
-								Weight:    20,
+								Weight: 20,
 							},
 						},
-						Type:           "*concrete",
-						Units:          utils.Float64Pointer(213),
+						Type:  "*concrete",
+						Units: utils.Float64Pointer(213),
 					},
 				},
 			},
@@ -707,7 +707,7 @@ func testAccDebitAbstracts(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Weights: utils.DynamicWeights{
 					{
-						Weight:    0,
+						Weight: 0,
 					},
 				},
 				Balances: map[string]*utils.ExtBalance{
@@ -715,7 +715,7 @@ func testAccDebitAbstracts(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								Weight:    25,
+								Weight: 25,
 							},
 						},
 						Type: "*abstract",
@@ -733,11 +733,11 @@ func testAccDebitAbstracts(t *testing.T) {
 						FilterIDs: nil,
 						Weights: utils.DynamicWeights{
 							{
-								Weight:    20,
+								Weight: 20,
 							},
 						},
-						Type:           "*concrete",
-						Units:          utils.Float64Pointer(213),
+						Type:  "*concrete",
+						Units: utils.Float64Pointer(213),
 					},
 				},
 			},
@@ -843,12 +843,12 @@ func testAccMaxConcretes(t *testing.T) {
 		},
 		Accounting: map[string]*utils.ExtAccountCharge{
 			accKEy: &utils.ExtAccountCharge{
-				AccountID:       "TEST_ACC_IT_TEST6",
-				BalanceID:       "ConcreteBalance2",
-				Units:           utils.Float64Pointer(213),
-				BalanceLimit:    utils.Float64Pointer(0),
-				UnitFactorID:    "",
-				RatingID:        rtID,
+				AccountID:    "TEST_ACC_IT_TEST6",
+				BalanceID:    "ConcreteBalance2",
+				Units:        utils.Float64Pointer(213),
+				BalanceLimit: utils.Float64Pointer(0),
+				UnitFactorID: "",
+				RatingID:     rtID,
 			},
 		},
 		UnitFactors: map[string]*utils.ExtUnitFactor{},
@@ -861,7 +861,7 @@ func testAccMaxConcretes(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Weights: utils.DynamicWeights{
 					{
-						Weight:    0,
+						Weight: 0,
 					},
 				},
 				Balances: map[string]*utils.ExtBalance{
@@ -869,7 +869,7 @@ func testAccMaxConcretes(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								Weight:    25,
+								Weight: 25,
 							},
 						},
 						Type: "*abstract",
@@ -883,14 +883,14 @@ func testAccMaxConcretes(t *testing.T) {
 						Units: utils.Float64Pointer(40000000000),
 					},
 					"ConcreteBalance2": {
-						ID:        "ConcreteBalance2",
+						ID: "ConcreteBalance2",
 						Weights: utils.DynamicWeights{
 							{
-								Weight:    20,
+								Weight: 20,
 							},
 						},
-						Type:           "*concrete",
-						Units:          utils.Float64Pointer(0),
+						Type:  "*concrete",
+						Units: utils.Float64Pointer(0),
 					},
 				},
 			},
@@ -996,12 +996,12 @@ func testAccDebitConcretes(t *testing.T) {
 		},
 		Accounting: map[string]*utils.ExtAccountCharge{
 			accKEy: &utils.ExtAccountCharge{
-				AccountID:       "TEST_ACC_IT_TEST7",
-				BalanceID:       "ConcreteBalance2",
-				Units:           utils.Float64Pointer(213),
-				BalanceLimit:    utils.Float64Pointer(0),
-				UnitFactorID:    "",
-				RatingID:        rtID,
+				AccountID:    "TEST_ACC_IT_TEST7",
+				BalanceID:    "ConcreteBalance2",
+				Units:        utils.Float64Pointer(213),
+				BalanceLimit: utils.Float64Pointer(0),
+				UnitFactorID: "",
+				RatingID:     rtID,
 			},
 		},
 		UnitFactors: map[string]*utils.ExtUnitFactor{},
@@ -1014,7 +1014,7 @@ func testAccDebitConcretes(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Weights: utils.DynamicWeights{
 					{
-						Weight:    0,
+						Weight: 0,
 					},
 				},
 				Balances: map[string]*utils.ExtBalance{
@@ -1022,7 +1022,7 @@ func testAccDebitConcretes(t *testing.T) {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
-								Weight:    25,
+								Weight: 25,
 							},
 						},
 						Type: "*abstract",
@@ -1036,14 +1036,14 @@ func testAccDebitConcretes(t *testing.T) {
 						Units: utils.Float64Pointer(40000000000),
 					},
 					"ConcreteBalance2": {
-						ID:        "ConcreteBalance2",
+						ID: "ConcreteBalance2",
 						Weights: utils.DynamicWeights{
 							{
-								Weight:    20,
+								Weight: 20,
 							},
 						},
-						Type:           "*concrete",
-						Units:          utils.Float64Pointer(0),
+						Type:  "*concrete",
+						Units: utils.Float64Pointer(0),
 					},
 				},
 			},
@@ -1140,7 +1140,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Weights: utils.DynamicWeights{
 					{
-						Weight:    12,
+						Weight: 12,
 					},
 				},
 				Type: "*abstract",
@@ -1152,7 +1152,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 		},
 		Weights: utils.DynamicWeights{
 			{
-				Weight:    10,
+				Weight: 10,
 			},
 		},
 	}

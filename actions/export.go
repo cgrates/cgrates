@@ -38,9 +38,10 @@ func newActHTTPPost(cfg *config.CGRConfig, aCfg *engine.APAction) (aL *actHTTPPo
 	}
 	for i, actD := range aL.cfg().Diktats {
 		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(&config.EventExporterCfg{
-			ID:         aL.id(),
-			ExportPath: actD.Path,
-			Attempts:   aL.config.GeneralCfg().PosterAttempts,
+			ID:             aL.id(),
+			ExportPath:     actD.Path,
+			Attempts:       aL.config.GeneralCfg().PosterAttempts,
+			FailedPostsDir: cfg.GeneralCfg().FailedPostsDir,
 		}, cfg, nil, nil)
 	}
 	return
@@ -72,7 +73,11 @@ func (aL *actHTTPPost) execute(_ *context.Context, data utils.MapStorage, _ stri
 		if async, has := aL.cfg().Opts[utils.MetaAsync]; has && utils.IfaceAsString(async) == utils.TrueStr {
 			go ees.ExportWithAttempts(pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString)
 		} else if err = ees.ExportWithAttempts(pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString); err != nil {
-			partExec = true
+			if pstr.Cfg().FailedPostsDir != utils.MetaNone {
+				err = nil
+			} else {
+				partExec = true
+			}
 		}
 	}
 	if partExec {

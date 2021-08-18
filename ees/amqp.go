@@ -139,6 +139,11 @@ func (pstr *AMQPee) Connect() (err error) {
 func (pstr *AMQPee) ExportEvent(content interface{}, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
+	if pstr.postChan == nil {
+		pstr.RUnlock()
+		pstr.reqs.done()
+		return utils.ErrDisconnected
+	}
 	err = pstr.postChan.Publish(
 		pstr.exchange,   // exchange
 		pstr.routingKey, // routing key
