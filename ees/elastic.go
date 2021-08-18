@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/elastic/go-elasticsearch/esapi"
 
@@ -49,6 +50,7 @@ type ElasticEE struct {
 	dc    *utils.SafeMapStorage
 	opts  esapi.IndexRequest // this variable is used only for storing the options from OptsMap
 	reqs  *concReq
+	sync.RWMutex
 	bytePreparing
 }
 
@@ -106,19 +108,28 @@ func (eEe *ElasticEE) prepareOpts() (err error) {
 func (eEe *ElasticEE) Cfg() *config.EventExporterCfg { return eEe.cfg }
 
 func (eEe *ElasticEE) Connect() (err error) {
+	eEe.Lock()
 	// create the client
 	if eEe.eClnt == nil {
 		eEe.eClnt, err = elasticsearch.NewClient(
 			elasticsearch.Config{Addresses: strings.Split(eEe.Cfg().ExportPath, utils.InfieldSep)},
 		)
 	}
+	eEe.Unlock()
 	return
 }
 
 // ExportEvent implements EventExporter
 func (eEe *ElasticEE) ExportEvent(ev interface{}, key string) (err error) {
 	eEe.reqs.get()
-	defer eEe.reqs.done()
+	eEe.RLock()
+	defer func() {
+		eEe.RUnlock()
+		eEe.reqs.done()
+	}()
+	if eEe.eClnt == nil {
+		return utils.ErrDisconnected
+	}
 	eReq := esapi.IndexRequest{
 		Index:               eEe.opts.Index,
 		DocumentID:          key,
@@ -153,7 +164,9 @@ func (eEe *ElasticEE) ExportEvent(ev interface{}, key string) (err error) {
 }
 
 func (eEe *ElasticEE) Close() (_ error) {
+	eEe.Lock()
 	eEe.eClnt = nil
+	eEe.Unlock()
 	return
 }
 

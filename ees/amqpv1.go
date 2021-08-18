@@ -85,6 +85,9 @@ func (pstr *AMQPv1EE) ExportEvent(content interface{}, _ string) (err error) {
 		pstr.RUnlock()
 		pstr.reqs.done()
 	}()
+	if pstr.session == nil {
+		return utils.ErrDisconnected
+	}
 	sender, err := pstr.session.NewSender(
 		amqpv1.LinkTargetAddress(pstr.queueID),
 	)

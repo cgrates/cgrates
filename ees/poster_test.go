@@ -58,6 +58,7 @@ func TestKafkaParseURL(t *testing.T) {
 	exp := &KafkaEE{
 		cfg:   cfg,
 		topic: "cdr_billing",
+		reqs:  newConcReq(0),
 	}
 	if kfk := NewKafkaEE(cfg, nil); !reflect.DeepEqual(exp, kfk) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(kfk))

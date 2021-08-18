@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -53,6 +54,7 @@ type SQLEe struct {
 
 	dialect   gorm.Dialector
 	tableName string
+	sync.RWMutex
 }
 
 type sqlPosterRequest struct {
@@ -132,20 +134,36 @@ func openDB(dialect gorm.Dialector, opts map[string]interface{}) (db *gorm.DB, s
 func (sqlEe *SQLEe) Cfg() *config.EventExporterCfg { return sqlEe.cfg }
 
 func (sqlEe *SQLEe) Connect() (err error) {
+	sqlEe.Lock()
 	if sqlEe.db == nil || sqlEe.sqldb == nil {
 		sqlEe.db, sqlEe.sqldb, err = openDB(sqlEe.dialect, sqlEe.Cfg().Opts)
 	}
+	sqlEe.Unlock()
 	return
 }
 
 func (sqlEe *SQLEe) ExportEvent(req interface{}, _ string) error {
 	sqlEe.reqs.get()
-	defer sqlEe.reqs.done()
+	sqlEe.RLock()
+	defer func() {
+		sqlEe.RUnlock()
+		sqlEe.reqs.done()
+	}()
+	if sqlEe.db == nil {
+		return utils.ErrDisconnected
+	}
 	sReq := req.(*sqlPosterRequest)
 	return sqlEe.db.Table(sqlEe.tableName).Exec(sReq.Querry, sReq.Values...).Error
 }
 
-func (sqlEe *SQLEe) Close() error { return sqlEe.sqldb.Close() }
+func (sqlEe *SQLEe) Close() (err error) {
+	sqlEe.Lock()
+	err = sqlEe.sqldb.Close()
+	sqlEe.db = nil
+	sqlEe.sqldb = nil
+	sqlEe.Unlock()
+	return
+}
 
 func (sqlEe *SQLEe) GetMetrics() *utils.SafeMapStorage { return sqlEe.dc }
 

@@ -260,9 +260,13 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 }
 
 func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS) (err error) {
-	if oneTime {
-		defer exp.Close()
-	}
+	defer func() {
+		updateEEMetrics(exp.GetMetrics(), ev.ID, ev.Event, err != nil, utils.FirstNonEmpty(exp.Cfg().Timezone,
+			cfg.GeneralCfg().DefaultTimezone))
+		if oneTime {
+			exp.Close()
+		}
+	}()
 	var eEv interface{}
 
 	exp.GetMetrics().Lock()
@@ -319,7 +323,8 @@ func ExportWithAttempts(exp EventExporter, eEv interface{}, key string) (err err
 		return
 	}
 	for i := 0; i < exp.Cfg().Attempts; i++ {
-		if err = exp.ExportEvent(eEv, key); err == nil {
+		if err = exp.ExportEvent(eEv, key); err == nil ||
+			err == utils.ErrDisconnected { // special error in case the exporter was closed
 			break
 		}
 		if i+1 < exp.Cfg().Attempts {
