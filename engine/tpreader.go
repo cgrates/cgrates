@@ -2404,7 +2404,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	//compose Reload Cache argument
 	cacheArgs := utils.AttrReloadCacheWithArgDispatcher{
 		TenantArg: utils.TenantArg{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: tenant,
 		},
 		ArgDispatcher: argDispatcher,
 		AttrReloadCache: utils.AttrReloadCache{
