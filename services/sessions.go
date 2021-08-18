@@ -96,7 +96,6 @@ func (smg *SessionService) Start() (err error) {
 	smg.rpcv1 = apis.NewSessionSv1(smg.sm) // methods with multiple options
 	srv, _ := birpc.NewService(smg.rpcv1, utils.EmptyString, false)
 	//smg.rpc = v1.NewSMGenericV1(smg.sm, smg.caps)
-	smg.rpcv1 = apis.NewSessionSv1(smg.sm) // methods with multiple options
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(srv)
 	}
