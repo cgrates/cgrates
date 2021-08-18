@@ -284,7 +284,7 @@ func TestSureTaxCfgloadFromJsonCfgCase18(t *testing.T) {
 
 func TestSureTaxCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-	"suretax": {
+	"suretax": {	
 		"timezone":                "UTC",
 		"include_local_cost":      true,
 		"return_file_code":        "0",
