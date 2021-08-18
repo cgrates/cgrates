@@ -43,10 +43,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 			},
 		},
 	}
-	http := &actHTTPPost{
-		config: cfg,
-		aCfg:   apAction,
-	}
+	http := newActHTTPPost(cfg, apAction)
 
 	dataStorage := utils.MapStorage{
 		utils.MetaReq: map[string]interface{}{
@@ -67,7 +64,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 	buff := new(bytes.Buffer)
 	log.SetOutput(buff)
 
-	expected := "[WARNING] <HTTPPoster> Posting to : <~*balance.TestBalance.Value>, error: <Post \"~*balance.TestBalance.Value\": unsupported protocol scheme \"\">"
+	expected := `<EEs> Exporter <TEST_ACTION_HTTPPOST> could not export because err: <Post "~*balance.TestBalance.Value": unsupported protocol scheme "">`
 	if err := http.execute(nil, dataStorage, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if rcv := buff.String(); !strings.Contains(rcv, expected) {
@@ -110,10 +107,7 @@ func TestACHTTPPostValues(t *testing.T) {
 			},
 		},
 	}
-	http := &actHTTPPost{
-		config: cfg,
-		aCfg:   apAction,
-	}
+	http := newActHTTPPost(cfg, apAction)
 	dataStorage := utils.MapStorage{
 		utils.MetaReq: map[string]interface{}{
 			utils.AccountField: 1003,

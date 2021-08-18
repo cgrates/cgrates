@@ -118,6 +118,7 @@ func TestKafkaERServe(t *testing.T) {
 	rdr.Config().Opts = map[string]interface{}{}
 	rdr.Config().ProcessedPath = ""
 	rdr.(*KafkaER).createPoster()
+	close(rdrExit)
 }
 
 func TestKafkaERServe2(t *testing.T) {

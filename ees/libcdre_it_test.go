@@ -37,7 +37,8 @@ func TestWriteFldPosts(t *testing.T) {
 	// can convert & write
 	dir := "/tmp/engine/libcdre_test/"
 	exportEvent := &ExportEvents{
-		module: "module",
+		failedPostsDir: dir,
+		module:         "module",
 	}
 	if err := os.RemoveAll(dir); err != nil {
 		t.Fatal("Error removing folder: ", dir, err)
