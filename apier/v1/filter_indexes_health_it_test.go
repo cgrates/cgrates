@@ -53,8 +53,7 @@ var (
 		testV1FIdxGetThresholdsIndexesHealth,
 		testV1FIdxGetResourcesIndexesHealth,
 		testV1FIdxGetStatsIndexesHealth,
-		testV1FIdxGetRoutesIndexesHealth,
-
+		testV1FIdxGetSupplierIndexesHealth,
 		testV1FIdxGetChargersIndexesHealth,
 		testV1FIdxGetAttributesIndexesHealth,
 		testV1FIdxCacheClear,
@@ -485,7 +484,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 	}
 }
 
-func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
+func testV1FIdxGetSupplierIndexesHealth(t *testing.T) {
 	// set another routes profile different than the one from tariffplan
 	rPrf := &SupplierWithCache{
 		SupplierProfile: &engine.SupplierProfile{

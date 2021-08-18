@@ -59,12 +59,12 @@ type SessionService struct {
 	rpcv1    *v1.SessionSv1
 	connChan chan rpcclient.ClientConnector
 
-	// in order to stop the bircp server if necesary
+	// in order to stop the birpc server if necessary
 	bircpEnabled bool
 	connMgr      *engine.ConnManager
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (smg *SessionService) Start() (err error) {
 	if smg.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -79,7 +79,7 @@ func (smg *SessionService) Start() (err error) {
 	defer smg.Unlock()
 
 	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
-	//start sync session in a separate gorutine
+	// start sync session in a separate goroutine
 	go func(sm *sessions.SessionS) {
 		if err = sm.ListenAndServe(smg.exitChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
@@ -104,7 +104,7 @@ func (smg *SessionService) Start() (err error) {
 		for method, handler := range smg.rpcv1.Handlers() {
 			smg.server.BiRPCRegisterName(method, handler)
 		}
-		// run this in it's own gorutine
+		// run this in it's own goroutine
 		go func() {
 			if err := smg.server.ServeBiJSON(smg.cfg.SessionSCfg().ListenBijson, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
