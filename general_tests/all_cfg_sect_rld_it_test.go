@@ -22,6 +22,7 @@ package general_tests
 import (
 	"net/rpc"
 	"path"
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -48,8 +49,11 @@ var (
 		//testSectConfigSReloadStorDB,
 		testSectConfigSReloadListen,
 		testSectConfigSReloadRALS,
+
 		testSectConfigSReloadAttributes,
+		testSectConfigSReloadRoutes,
 		testSectConfigSReloadSessions,
+
 		testSectConfigSReloadApiers,
 
 		testSectConfigSReloadRegistrarC,
@@ -75,10 +79,9 @@ var (
 		testSectConfigSReloadResources,
 		testSectConfigSReloadStats,
 		testSectConfigSReloadThresholds,
-		testSectConfigSReloadRoutes,
 		testSectConfigSReloadLoaders,
 		testSectConfigSReloadMailer,
-		testSectConfigSReloadSuretax,
+
 		testSectConfigSReloadLoader,
 		testSectConfigSReloadDispatchers,
 		testSectConfigSReloadAnalyzer,
@@ -88,6 +91,8 @@ var (
 		testSectConfigSReloadTemplates,
 		testSectConfigSReloadSIPAgent,
 		testSectConfigSReloadMigrator,
+		testSectConfigSReloadSuretax,
+
 		testSectStopCgrEngine,
 	}
 )
@@ -889,21 +894,32 @@ func testSectConfigSReloadThresholds(t *testing.T) {
 func testSectConfigSReloadRoutes(t *testing.T) {
 
 	var replyPingBf string
-	if err := testSectRPC.Call(utils.RouteSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+	if err := testSectRPC.Call(utils.RouteSv1Ping, &utils.CGREvent{}, &replyPingBf); err == nil || err.Error() != "rpc: can't find service RouteSv1.Ping" {
 		t.Error(err)
-	} else if replyPingBf != utils.Pong {
-		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"routes\":{\"attributes_conns\":[],\"default_ratio\":1,\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[\"*req.Destination\"],\"rals_conns\":[\"*internal\"],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*internal\"],\"suffix_indexed_fields\":[]}}",
+		Config: `{"routes": {									
+					"enabled": true,						
+					"indexed_selects": true,				
+					"string_indexed_fields": ["string_indexed_fields"],			
+					"prefix_indexed_fields": ["prefix_indexed_fields"],			
+					"suffix_indexed_fields": ["suffix_indexed_fields"],			
+					"nested_fields": true,					
+					"attributes_conns": ["*localhost"],					
+					"resources_conns": ["*localhost"],					
+					"stats_conns": ["*localhost"],						
+					"rals_conns": ["*localhost"],						
+					"default_ratio":1						
+		},
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"routes\":{\"attributes_conns\":[],\"default_ratio\":1,\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[\"*req.Destination\"],\"rals_conns\":[\"*internal\"],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*internal\"],\"suffix_indexed_fields\":[]}}"
+	cfgStr := "{\"routes\":{\"attributes_conns\":[\"*localhost\"],\"default_ratio\":1,\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"rals_conns\":[\"*localhost\"],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -941,7 +957,7 @@ func testSectConfigSReloadLoaders(t *testing.T) {
 		Section: config.LoaderJson,
 	}, &rpl); err != nil {
 		t.Error(err)
-	} else if cfgStr != rpl {
+	} else if !reflect.DeepEqual(rpl, cfgStr) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
 }
@@ -951,13 +967,13 @@ func testSectConfigSReloadMailer(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"mailer\":{\"auth_password\":\"CGRateS.org\",\"auth_user\":\"cgrates\",\"from_address\":\"cgr-mailer@localhost.localdomain\",\"server\":\"localhost\"}}",
+		Config: "{\"mailer\":{\"auth_password\":\"CGRateS.com\",\"auth_user\":\"cgrates2\",\"from_address\":\"cgr-mailer@internal.localdomain\",\"server\":\"internal\"}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"mailer\":{\"auth_password\":\"CGRateS.org\",\"auth_user\":\"cgrates\",\"from_address\":\"cgr-mailer@localhost.localdomain\",\"server\":\"localhost\"}}"
+	cfgStr := "{\"mailer\":{\"auth_password\":\"CGRateS.com\",\"auth_user\":\"cgrates2\",\"from_address\":\"cgr-mailer@internal.localdomain\",\"server\":\"internal\"}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -975,28 +991,32 @@ func testSectConfigSReloadSuretax(t *testing.T) {
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
 		Config: `{"suretax": {
-			"timezone":                "UTC",
-			"include_local_cost":      true,
-			"return_file_code":        "0",
-			"response_group":          "04",
-			"response_type":           "A4",
-			"regulatory_code":         "04",
-			"client_tracking":         "~*req.Destination",
-			"customer_number":         "~*req.Destination",
-			"orig_number":             "~*req.Destination",
-			"bill_to_number": "randomNumber",					
-			"zipcode": "randomCode",							
-			"plus4": "randomValue",							
-			"p2pzipcode": "randomCode",						
-			"p2pplus4": "randomValue",
-			"term_number":             "~*req.CGRID",
-			"units":                   "7",
-			"unit_type":               "02",
-			"tax_included":            "1",
-			"tax_situs_rule":          "03",
-			"trans_type_code":         "01010101",
-			"sales_type_code":         "B",
-			"tax_exemption_code_list": "randomCode"
+			"url": "google.ro",								
+			"client_number": "4",					
+			"validation_key": "5",					
+			"business_unit": "6",					
+			"timezone": "UTC",				
+			"include_local_cost": true,			
+			"return_file_code": "01",				
+			"response_group": "04",					
+			"response_type": "D5",					
+			"regulatory_code": "04",				
+			"client_tracking": "~*req.CGRID",		
+			"customer_number": "~*req.Subject",		
+			"orig_number":  "~*req.Subject", 		
+			"term_number": "~*req.Destination",		
+			"bill_to_number": "3",					
+			"zipcode": "3",							
+			"plus4": "3",							
+			"p2pzipcode": "3",						
+			"p2pplus4": "3",							
+			"units": "2",							
+			"unit_type": "01",						
+			"tax_included": "02",					
+			"tax_situs_rule": "05",					
+			"trans_type_code": "101010",			
+			"sales_type_code": "RC",					
+			"tax_exemption_code_list": "3",	
 		},
 	}}`,
 	}, &reply); err != nil {
@@ -1004,14 +1024,14 @@ func testSectConfigSReloadSuretax(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"suretax\":{\"bill_to_number\":\"\",\"business_unit\":\"\",\"client_number\":\"\",\"client_tracking\":\"~*req.CGRID\",\"customer_number\":\"~*req.Subject\",\"include_local_cost\":false,\"orig_number\":\"~*req.Subject\",\"p2pplus4\":\"\",\"p2pzipcode\":\"\",\"plus4\":\"\",\"regulatory_code\":\"03\",\"response_group\":\"03\",\"response_type\":\"D4\",\"return_file_code\":\"0\",\"sales_type_code\":\"R\",\"tax_exemption_code_list\":\"\",\"tax_included\":\"0\",\"tax_situs_rule\":\"04\",\"term_number\":\"~*req.Destination\",\"timezone\":\"Local\",\"trans_type_code\":\"010101\",\"unit_type\":\"00\",\"units\":\"1\",\"url\":\"\",\"validation_key\":\"\",\"zipcode\":\"\"}}"
+	cfgStr := "{\"suretax\":{\"bill_to_number\":\"3\",\"business_unit\":\"6\",\"client_number\":\"4\",\"client_tracking\":\"~*req.CGRID\",\"customer_number\":\"~*req.Subject\",\"include_local_cost\":true,\"orig_number\":\"~*req.Subject\",\"p2pplus4\":\"3\",\"p2pzipcode\":\"3\",\"plus4\":\"3\",\"regulatory_code\":\"04\",\"response_group\":\"04\",\"response_type\":\"D5\",\"return_file_code\":\"01\",\"sales_type_code\":\"RC\",\"tax_exemption_code_list\":\"3\",\"tax_included\":\"02\",\"tax_situs_rule\":\"05\",\"term_number\":\"~*req.Destination\",\"timezone\":\"UTC\",\"trans_type_code\":\"101010\",\"unit_type\":\"01\",\"units\":\"2\",\"url\":\"google.ro\",\"validation_key\":\"5\",\"zipcode\":\"3\"}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.SURETAX_JSON,
 	}, &rpl); err != nil {
 		t.Error(err)
-	} else if cfgStr != rpl {
+	} else if !reflect.DeepEqual(rpl, cfgStr) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
 }
@@ -1218,13 +1238,13 @@ func testSectConfigSReloadConfigs(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"configs":{"enabled":true,"root_dir":"testRootDir","url":"/testUrl/"}}`,
+		Config: `{"configs":{"enabled":true,"root_dir":"root_dir","url":"/configs/"}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"configs":{"enabled":true,"root_dir":"testRootDir","url":"/testUrl/"}}`
+	cfgStr := `{"configs":{"enabled":true,"root_dir":"root_dir","url":"/configs/"}}`
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1242,13 +1262,13 @@ func testSectConfigSReloadAPIBan(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"apiban":{"enabled":true,"keys":["testKey"]}}`,
+		Config: `{"apiban":{"enabled":true,"keys":["keys"]}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	cfgStr := "{\"apiban\":{\"enabled\":true,\"keys\":[\"testKey\"]}}"
+	cfgStr := "{\"apiban\":{\"enabled\":true,\"keys\":[\"keys\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",

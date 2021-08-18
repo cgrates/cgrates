@@ -609,9 +609,9 @@
 },
 
 "routes": {									
-	"enabled": true,						
-	"indexed_selects": true,				
-	//"string_indexed_fields": [],			
+	"enabled": false,						
+	"indexed_selects": false,				
+	"string_indexed_fields": [],			
 	"prefix_indexed_fields": [],			
 	"suffix_indexed_fields": [],			
 	"nested_fields": false,					
@@ -619,7 +619,7 @@
 	"resources_conns": [],					
 	"stats_conns": [],						
 	"rals_conns": [],						
-	"default_ratio":1						
+	"default_ratio":0						
 },
 
 "loaders": [											
@@ -801,20 +801,20 @@
 },
 
 "suretax": {
-	"url": "",								
-	"client_number": "",					
-	"validation_key": "",					
-	"business_unit": "",					
-	"timezone": "Local",					
+	"url": "google.com",	
+	"client_number": "1",
+	"validation_key": "2",					
+	"business_unit": "3",				
+	"timezone": "Local",				
 	"include_local_cost": false,			
 	"return_file_code": "0",				
 	"response_group": "03",					
 	"response_type": "D4",					
 	"regulatory_code": "03",				
-	"client_tracking": "~*req.CGRID",		
-	"customer_number": "~*req.Subject",		
-	"orig_number":  "~*req.Subject", 		
-	"term_number": "~*req.Destination",		
+	"client_tracking": "",		
+	"customer_number": "",		
+	"orig_number":  "", 		
+	"term_number": "",		
 	"bill_to_number": "",					
 	"zipcode": "",							
 	"plus4": "",							
@@ -826,7 +826,7 @@
 	"tax_situs_rule": "04",					
 	"trans_type_code": "010101",			
 	"sales_type_code": "R",					
-	"tax_exemption_code_list": "",			
+	"tax_exemption_code_list": "",		
 },
 
 "loader": {											
