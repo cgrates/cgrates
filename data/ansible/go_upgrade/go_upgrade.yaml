@@ -1,0 +1,99 @@
+---
+- hosts: all
+  vars:
+    ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
+    ###############################################################
+    ##################### Golang Vars #############################
+    ###############################################################
+    # Go language SDK version number
+    golang_version: '1.17'
+    go_version_target: "go version go{{ golang_version }} linux/amd64"
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ user }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+    ###############################################################
+    # CGRateS location
+    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+
+    rootUser : root
+    customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+  remote_user: '{{ user }}'
+  tasks:
+    # Install Golang
+    - name: install unarchive dependencies (zypper)
+      become: yes
+      zypper:
+        name:
+          - gzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == 'zypper'
+
+    - name: create download directory
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        dest: '{{ golang_download_dir }}'
+
+    - name: Register the current Go version (if any)
+      command: /usr/local/go/bin/go version
+      ignore_errors: yes
+      register: go_version
+      changed_when: false
+    
+    - name : Clear go cache
+      command: /usr/local/go/bin/go clean -cache -modcache 
+      ignore_errors: yes
+      when: go_version is succeeded or go_version.stdout != go_version_target
+
+    - name: Remove old installation of Go
+      become: yes
+      file:
+        path: /usr/local/go
+        state: absent
+
+    - name: download Go language SDK
+      get_url:
+          url: '{{ golang_mirror }}/{{ golang_redis_filename }}'
+          dest: '{{ golang_download_dir }}/{{ golang_redis_filename }}'
+          mode: 'u=rw,go=r'
+
+    - name: create Go language SDK installation directory
+      become: yes
+      file:
+        state: directory
+        owner: root
+        group: root
+        mode: 'u=rwx,go=rx'
+        dest: '{{ golang_install_dir }}'
+
+
+    - name: install Go language SDK
+      become: yes
+      unarchive:
+        src: '{{ golang_download_dir }}/{{ golang_redis_filename }}'
+        remote_src: yes
+        extra_opts: '--strip-components=1'
+        dest: '{{ golang_install_dir }}'
+        owner: root
+        group: root
+        creates: '{{ golang_install_dir }}/bin'
+    
+
+    - name: build cgrates
+      shell: "sh {{ cgrates_dir }}/build.sh"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      args:
+        chdir: '{{ cgrates_dir }}'
+
+
+
