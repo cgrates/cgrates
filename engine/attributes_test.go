@@ -867,7 +867,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.SetFilter(fltr, true); err != nil {
+	if err := dm.SetFilter(context.Background(), fltr, true); err != nil {
 		t.Error(err)
 	}
 
