@@ -31,3 +31,13 @@
 
 - include: gpg-gen-key.yaml
   when: gpgkeys.stdout_lines|length < 1
+
+- name: get user armored public key
+  become: true
+  shell: "sudo gpg --armor --output {{ gpg_pubkeyfileexport }} --export {{ gpg_useremail }}"
+  when: gpgkeys.stdout_lines|length < 1 or (gpgkeys.stdout_lines|length > 0 and gpgExpKeys.stdout_lines|length > 0)
+
+- name: After export move the key to /var/packages
+  become: true
+  shell: "sudo mv {{ gpg_pubkeyfileexport }} /var/packages"
+  when: gpgkeys.stdout_lines|length < 1 or (gpgkeys.stdout_lines|length > 0 and gpgExpKeys.stdout_lines|length > 0)
