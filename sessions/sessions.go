@@ -1496,13 +1496,6 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 	return
 }
 
-// ArgsReplicateSessions used to specify wich Session to replicate over the given connections
-type ArgsReplicateSessions struct {
-	CGRID   string
-	Passive bool
-	ConnIDs []string
-}
-
 // BiRPCv1ReplicateSessions will replicate active sessions to either args.Connections or the internal configured ones
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
 func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
@@ -1510,156 +1503,6 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
 	sS.replicateSessions(ctx, args.CGRID, args.Passive, args.ConnIDs)
 	*reply = utils.OK
 	return
-}
-
-// NewV1AuthorizeArgs is a constructor for V1AuthorizeArgs
-func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
-	thrslds bool, thresholdIDs []string, statQueues bool, statIDs []string,
-	res, maxUsage, routes, routesIgnoreErrs, routesEventCost bool,
-	cgrEv *utils.CGREvent, routePaginator utils.Paginator,
-	forceDuration bool, routesMaxCost string) (args *V1AuthorizeArgs) {
-	args = &V1AuthorizeArgs{
-		GetAttributes:      attrs,
-		AuthorizeResources: res,
-		GetMaxUsage:        maxUsage,
-		ProcessThresholds:  thrslds,
-		ProcessStats:       statQueues,
-		RoutesIgnoreErrors: routesIgnoreErrs,
-		GetRoutes:          routes,
-		CGREvent:           cgrEv,
-		ForceDuration:      forceDuration,
-	}
-	if routesEventCost {
-		args.RoutesMaxCost = utils.MetaEventCost
-	} else {
-		args.RoutesMaxCost = routesMaxCost
-	}
-	args.Paginator = routePaginator
-	if len(attributeIDs) != 0 {
-		args.AttributeIDs = attributeIDs
-	}
-	if len(thresholdIDs) != 0 {
-		args.ThresholdIDs = thresholdIDs
-	}
-	if len(statIDs) != 0 {
-		args.StatIDs = statIDs
-	}
-
-	return
-}
-
-// V1AuthorizeArgs are options available in auth request
-type V1AuthorizeArgs struct {
-	GetAttributes      bool
-	AuthorizeResources bool
-	GetMaxUsage        bool
-	ForceDuration      bool
-	ProcessThresholds  bool
-	ProcessStats       bool
-	GetRoutes          bool
-	RoutesMaxCost      string
-	RoutesIgnoreErrors bool
-	AttributeIDs       []string
-	ThresholdIDs       []string
-	StatIDs            []string
-	*utils.CGREvent
-	utils.Paginator
-}
-
-// ParseFlags will populate the V1AuthorizeArgs flags
-func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
-	for _, subsystem := range strings.Split(flags, sep) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.GetMaxUsage = true
-		case subsystem == utils.MetaResources:
-			args.AuthorizeResources = true
-		case subsystem == utils.MetaRoutes:
-			args.GetRoutes = true
-		case subsystem == utils.MetaRoutesIgnoreErrors:
-			args.RoutesIgnoreErrors = true
-		case subsystem == utils.MetaRoutesEventCost:
-			args.RoutesMaxCost = utils.MetaEventCost
-		case strings.HasPrefix(subsystem, utils.MetaRoutesMaxCost):
-			args.RoutesMaxCost = strings.TrimPrefix(subsystem, utils.MetaRoutesMaxCost+utils.InInFieldSep)
-		case strings.HasPrefix(subsystem, utils.MetaAttributes):
-			args.GetAttributes = true
-			args.AttributeIDs = getFlagIDs(subsystem)
-		case strings.HasPrefix(subsystem, utils.MetaThresholds):
-			args.ProcessThresholds = true
-			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.HasPrefix(subsystem, utils.MetaStats):
-			args.ProcessStats = true
-			args.StatIDs = getFlagIDs(subsystem)
-		case subsystem == utils.MetaFD:
-			args.ForceDuration = true
-		}
-	}
-	args.Paginator, _ = utils.GetRoutePaginatorFromOpts(args.APIOpts)
-}
-
-// V1AuthorizeReply are options available in auth reply
-type V1AuthorizeReply struct {
-	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
-	ResourceAllocation *string                        `json:",omitempty"`
-	MaxUsage           *time.Duration                 `json:",omitempty"`
-	RouteProfiles      engine.SortedRoutesList        `json:",omitempty"`
-	ThresholdIDs       *[]string                      `json:",omitempty"`
-	StatQueueIDs       *[]string                      `json:",omitempty"`
-
-	needsMaxUsage bool // for gob encoding only
-}
-
-// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
-// only used for gob encoding
-func (v1AuthReply *V1AuthorizeReply) SetMaxUsageNeeded(getMaxUsage bool) {
-	if v1AuthReply == nil {
-		return
-	}
-	v1AuthReply.needsMaxUsage = getMaxUsage
-}
-
-// AsNavigableMap is part of engine.NavigableMapper interface
-func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() map[string]*utils.DataNode {
-	cgrReply := make(map[string]*utils.DataNode)
-	if v1AuthReply.Attributes != nil {
-		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, fldName := range v1AuthReply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
-				attrs.Map[fldName] = utils.NewLeafNode(v1AuthReply.Attributes.CGREvent.Event[fldName])
-			}
-		}
-		cgrReply[utils.CapAttributes] = attrs
-	}
-	if v1AuthReply.ResourceAllocation != nil {
-		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*v1AuthReply.ResourceAllocation)
-	}
-	if v1AuthReply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(*v1AuthReply.MaxUsage)
-	} else if v1AuthReply.needsMaxUsage {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(0)
-	}
-
-	if v1AuthReply.RouteProfiles != nil {
-		nm := v1AuthReply.RouteProfiles.AsNavigableMap()
-		cgrReply[utils.CapRouteProfiles] = nm
-	}
-	if v1AuthReply.ThresholdIDs != nil {
-		thIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1AuthReply.ThresholdIDs))}
-		for i, v := range *v1AuthReply.ThresholdIDs {
-			thIDs.Slice[i] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.CapThresholds] = thIDs
-	}
-	if v1AuthReply.StatQueueIDs != nil {
-		stIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1AuthReply.StatQueueIDs))}
-		for i, v := range *v1AuthReply.StatQueueIDs {
-			stIDs.Slice[i] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.CapStatQueues] = stIDs
-	}
-	return cgrReply
 }
 
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific components
@@ -1698,7 +1541,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 
 	if !args.GetAttributes && !args.AuthorizeResources &&
 		!args.GetMaxUsage && !args.GetRoutes {
-		return utils.NewErrMandatoryIeMissing("subsystems")
+		return // Nothing to do
 	}
 	if args.GetAttributes {
 		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent, args.AttributeIDs, false)
@@ -1782,16 +1625,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	return
 }
 
-// V1AuthorizeReplyWithDigest contains return options for auth with digest
-type V1AuthorizeReplyWithDigest struct {
-	AttributesDigest   *string
-	ResourceAllocation *string
-	MaxUsage           float64 // special treat returning time.Duration.Seconds()
-	RoutesDigest       *string
-	Thresholds         *string
-	StatQueues         *string
-}
-
 // BiRPCv1AuthorizeEventWithDigest performs authorization for CGREvent based on specific components
 // returning one level fields instead of multiple ones returned by BiRPCv1AuthorizeEvent
 func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
@@ -1821,127 +1654,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 			strings.Join(*initAuthRply.StatQueueIDs, utils.FieldsSep))
 	}
 	return
-}
-
-// NewV1InitSessionArgs is a constructor for V1InitSessionArgs
-func NewV1InitSessionArgs(attrs bool, attributeIDs []string,
-	thrslds bool, thresholdIDs []string, stats bool, statIDs []string,
-	resrc, acnt bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1InitSessionArgs) {
-	args = &V1InitSessionArgs{
-		GetAttributes:     attrs,
-		AllocateResources: resrc,
-		InitSession:       acnt,
-		ProcessThresholds: thrslds,
-		ProcessStats:      stats,
-		CGREvent:          cgrEv,
-		ForceDuration:     forceDuration,
-	}
-	if len(attributeIDs) != 0 {
-		args.AttributeIDs = attributeIDs
-	}
-	if len(thresholdIDs) != 0 {
-		args.ThresholdIDs = thresholdIDs
-	}
-	if len(statIDs) != 0 {
-		args.StatIDs = statIDs
-	}
-	return
-}
-
-// V1InitSessionArgs are options for session initialization request
-type V1InitSessionArgs struct {
-	GetAttributes     bool
-	AllocateResources bool
-	InitSession       bool
-	ForceDuration     bool
-	ProcessThresholds bool
-	ProcessStats      bool
-	AttributeIDs      []string
-	ThresholdIDs      []string
-	StatIDs           []string
-	*utils.CGREvent
-}
-
-// ParseFlags will populate the V1InitSessionArgs flags
-func (args *V1InitSessionArgs) ParseFlags(flags, sep string) {
-	for _, subsystem := range strings.Split(flags, sep) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.InitSession = true
-		case subsystem == utils.MetaResources:
-			args.AllocateResources = true
-		case strings.HasPrefix(subsystem, utils.MetaAttributes):
-			args.GetAttributes = true
-			args.AttributeIDs = getFlagIDs(subsystem)
-		case strings.HasPrefix(subsystem, utils.MetaThresholds):
-			args.ProcessThresholds = true
-			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.HasPrefix(subsystem, utils.MetaStats):
-			args.ProcessStats = true
-			args.StatIDs = getFlagIDs(subsystem)
-		case subsystem == utils.MetaFD:
-			args.ForceDuration = true
-		}
-	}
-}
-
-// V1InitSessionReply are options for initialization reply
-type V1InitSessionReply struct {
-	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
-	ResourceAllocation *string                        `json:",omitempty"`
-	MaxUsage           *time.Duration                 `json:",omitempty"`
-	ThresholdIDs       *[]string                      `json:",omitempty"`
-	StatQueueIDs       *[]string                      `json:",omitempty"`
-
-	needsMaxUsage bool // for gob encoding only
-}
-
-// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
-// only used for gob encoding
-func (v1Rply *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
-	if v1Rply == nil {
-		return
-	}
-	v1Rply.needsMaxUsage = getMaxUsage
-}
-
-// AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1InitSessionReply) AsNavigableMap() map[string]*utils.DataNode {
-	cgrReply := make(map[string]*utils.DataNode)
-	if v1Rply.Attributes != nil {
-		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
-			}
-		}
-		cgrReply[utils.CapAttributes] = attrs
-	}
-	if v1Rply.ResourceAllocation != nil {
-		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*v1Rply.ResourceAllocation)
-	}
-	if v1Rply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(*v1Rply.MaxUsage)
-	} else if v1Rply.needsMaxUsage {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(0)
-	}
-
-	if v1Rply.ThresholdIDs != nil {
-		thIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1Rply.ThresholdIDs))}
-		for i, v := range *v1Rply.ThresholdIDs {
-			thIDs.Slice[i] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.CapThresholds] = thIDs
-	}
-	if v1Rply.StatQueueIDs != nil {
-		stIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1Rply.StatQueueIDs))}
-		for i, v := range *v1Rply.StatQueueIDs {
-			stIDs.Slice[i] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.CapStatQueues] = stIDs
-	}
-	return cgrReply
 }
 
 // BiRPCv1InitiateSession initiates a new session
@@ -1979,7 +1691,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	// end of RPC caching
 
 	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
-		return utils.NewErrMandatoryIeMissing("subsystems")
+		return // nothing to do
 	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
 	if args.GetAttributes {
@@ -2073,15 +1785,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	return
 }
 
-// V1InitReplyWithDigest is the formated reply
-type V1InitReplyWithDigest struct {
-	AttributesDigest   *string
-	ResourceAllocation *string
-	MaxUsage           float64
-	Thresholds         *string
-	StatQueues         *string
-}
-
 // BiRPCv1InitiateSessionWithDigest returns the formated result of InitiateSession
 func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(ctx *context.Context,
 	args *V1InitSessionArgs, initReply *V1InitReplyWithDigest) (err error) {
@@ -2112,68 +1815,6 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(ctx *context.Context,
 			strings.Join(*initSessionRply.StatQueueIDs, utils.FieldsSep))
 	}
 	return
-}
-
-// NewV1UpdateSessionArgs is a constructor for update session arguments
-func NewV1UpdateSessionArgs(attrs bool, attributeIDs []string,
-	acnts bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1UpdateSessionArgs) {
-	args = &V1UpdateSessionArgs{
-		GetAttributes: attrs,
-		UpdateSession: acnts,
-		CGREvent:      cgrEv,
-		ForceDuration: forceDuration,
-	}
-	if len(attributeIDs) != 0 {
-		args.AttributeIDs = attributeIDs
-	}
-	return
-}
-
-// V1UpdateSessionArgs contains options for session update
-type V1UpdateSessionArgs struct {
-	GetAttributes bool
-	UpdateSession bool
-	ForceDuration bool
-	AttributeIDs  []string
-	*utils.CGREvent
-}
-
-// V1UpdateSessionReply contains options for session update reply
-type V1UpdateSessionReply struct {
-	Attributes *engine.AttrSProcessEventReply `json:",omitempty"`
-	MaxUsage   *time.Duration                 `json:",omitempty"`
-
-	needsMaxUsage bool // for gob encoding only
-}
-
-// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
-// only used for gob encoding
-func (v1Rply *V1UpdateSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
-	if v1Rply == nil {
-		return
-	}
-	v1Rply.needsMaxUsage = getMaxUsage
-}
-
-// AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1UpdateSessionReply) AsNavigableMap() map[string]*utils.DataNode {
-	cgrReply := make(map[string]*utils.DataNode)
-	if v1Rply.Attributes != nil {
-		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
-			}
-		}
-		cgrReply[utils.CapAttributes] = attrs
-	}
-	if v1Rply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(*v1Rply.MaxUsage)
-	} else if v1Rply.needsMaxUsage {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(0)
-	}
-	return cgrReply
 }
 
 // BiRPCv1UpdateSession updates an existing session, returning the duration which the session can still last
@@ -2210,7 +1851,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 	// end of RPC caching
 
 	if !args.GetAttributes && !args.UpdateSession {
-		return utils.NewErrMandatoryIeMissing("subsystems")
+		return // nothing to do
 	}
 
 	if args.GetAttributes {
@@ -2259,59 +1900,6 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 	return
 }
 
-// NewV1TerminateSessionArgs creates a new V1TerminateSessionArgs using the given arguments
-func NewV1TerminateSessionArgs(acnts, resrc,
-	thrds bool, thresholdIDs []string, stats bool,
-	statIDs []string, cgrEv *utils.CGREvent, forceDuration bool) (args *V1TerminateSessionArgs) {
-	args = &V1TerminateSessionArgs{
-		TerminateSession:  acnts,
-		ReleaseResources:  resrc,
-		ProcessThresholds: thrds,
-		ProcessStats:      stats,
-		CGREvent:          cgrEv,
-		ForceDuration:     forceDuration,
-	}
-	if len(thresholdIDs) != 0 {
-		args.ThresholdIDs = thresholdIDs
-	}
-	if len(statIDs) != 0 {
-		args.StatIDs = statIDs
-	}
-	return
-}
-
-// V1TerminateSessionArgs is used as argumen for TerminateSession
-type V1TerminateSessionArgs struct {
-	TerminateSession  bool
-	ForceDuration     bool
-	ReleaseResources  bool
-	ProcessThresholds bool
-	ProcessStats      bool
-	ThresholdIDs      []string
-	StatIDs           []string
-	*utils.CGREvent
-}
-
-// ParseFlags will populate the V1TerminateSessionArgs flags
-func (args *V1TerminateSessionArgs) ParseFlags(flags, sep string) {
-	for _, subsystem := range strings.Split(flags, sep) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.TerminateSession = true
-		case subsystem == utils.MetaResources:
-			args.ReleaseResources = true
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
-			args.ProcessThresholds = true
-			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaStats) != -1:
-			args.ProcessStats = true
-			args.StatIDs = getFlagIDs(subsystem)
-		case subsystem == utils.MetaFD:
-			args.ForceDuration = true
-		}
-	}
-}
-
 // BiRPCv1TerminateSession will stop debit loops as well as release any used resources
 func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	args *V1TerminateSessionArgs, rply *string) (err error) {
@@ -2345,7 +1933,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	}
 	// end of RPC caching
 	if !args.TerminateSession && !args.ReleaseResources {
-		return utils.NewErrMandatoryIeMissing("subsystems")
+		return // nothing to do
 	}
 
 	ev := engine.MapEvent(args.CGREvent.Event)
@@ -2482,152 +2070,6 @@ func (sS *SessionS) BiRPCv1ProcessCDR(ctx *context.Context,
 	return sS.processCDR(ctx, cgrEv, []string{ /*utils.MetaRALs*/ }, rply, false)
 }
 
-// NewV1ProcessMessageArgs is a constructor for MessageArgs used by ProcessMessage
-func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
-	thds bool, thresholdIDs []string, stats bool, statIDs []string, resrc, acnts,
-	routes, routesIgnoreErrs, routesEventCost bool, cgrEv *utils.CGREvent,
-	routePaginator utils.Paginator, forceDuration bool, routesMaxCost string) (args *V1ProcessMessageArgs) {
-	args = &V1ProcessMessageArgs{
-		AllocateResources:  resrc,
-		Debit:              acnts,
-		GetAttributes:      attrs,
-		ProcessThresholds:  thds,
-		ProcessStats:       stats,
-		RoutesIgnoreErrors: routesIgnoreErrs,
-		GetRoutes:          routes,
-		CGREvent:           cgrEv,
-		ForceDuration:      forceDuration,
-	}
-	if routesEventCost {
-		args.RoutesMaxCost = utils.MetaEventCost
-	} else {
-		args.RoutesMaxCost = routesMaxCost
-	}
-	args.Paginator = routePaginator
-	if len(attributeIDs) != 0 {
-		args.AttributeIDs = attributeIDs
-	}
-	if len(thresholdIDs) != 0 {
-		args.ThresholdIDs = thresholdIDs
-	}
-	if len(statIDs) != 0 {
-		args.StatIDs = statIDs
-	}
-	return
-}
-
-// V1ProcessMessageArgs are the options passed to ProcessMessage API
-type V1ProcessMessageArgs struct {
-	GetAttributes      bool
-	AllocateResources  bool
-	Debit              bool
-	ForceDuration      bool
-	ProcessThresholds  bool
-	ProcessStats       bool
-	GetRoutes          bool
-	RoutesMaxCost      string
-	RoutesIgnoreErrors bool
-	AttributeIDs       []string
-	ThresholdIDs       []string
-	StatIDs            []string
-	*utils.CGREvent
-	utils.Paginator
-}
-
-// ParseFlags will populate the V1ProcessMessageArgs flags
-func (args *V1ProcessMessageArgs) ParseFlags(flags, sep string) {
-	for _, subsystem := range strings.Split(flags, sep) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.Debit = true
-		case subsystem == utils.MetaResources:
-			args.AllocateResources = true
-		case subsystem == utils.MetaRoutes:
-			args.GetRoutes = true
-		case subsystem == utils.MetaRoutesIgnoreErrors:
-			args.RoutesIgnoreErrors = true
-		case subsystem == utils.MetaRoutesEventCost:
-			args.RoutesMaxCost = utils.MetaEventCost
-		case strings.HasPrefix(subsystem, utils.MetaRoutesMaxCost):
-			args.RoutesMaxCost = strings.TrimPrefix(subsystem, utils.MetaRoutesMaxCost+utils.InInFieldSep)
-		case strings.Index(subsystem, utils.MetaAttributes) != -1:
-			args.GetAttributes = true
-			args.AttributeIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
-			args.ProcessThresholds = true
-			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaStats) != -1:
-			args.ProcessStats = true
-			args.StatIDs = getFlagIDs(subsystem)
-		case subsystem == utils.MetaFD:
-			args.ForceDuration = true
-		}
-	}
-	args.Paginator, _ = utils.GetRoutePaginatorFromOpts(args.APIOpts)
-}
-
-// V1ProcessMessageReply is the reply for the ProcessMessage API
-type V1ProcessMessageReply struct {
-	MaxUsage           *time.Duration                 `json:",omitempty"`
-	ResourceAllocation *string                        `json:",omitempty"`
-	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
-	RouteProfiles      engine.SortedRoutesList        `json:",omitempty"`
-	ThresholdIDs       *[]string                      `json:",omitempty"`
-	StatQueueIDs       *[]string                      `json:",omitempty"`
-
-	needsMaxUsage bool // for gob encoding only
-}
-
-// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
-// only used for gob encoding
-func (v1Rply *V1ProcessMessageReply) SetMaxUsageNeeded(getMaxUsage bool) {
-	if v1Rply == nil {
-		return
-	}
-	v1Rply.needsMaxUsage = getMaxUsage
-}
-
-// AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessMessageReply) AsNavigableMap() map[string]*utils.DataNode {
-	cgrReply := make(map[string]*utils.DataNode)
-	if v1Rply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(*v1Rply.MaxUsage)
-	} else if v1Rply.needsMaxUsage {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(0)
-	}
-	if v1Rply.ResourceAllocation != nil {
-		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*v1Rply.ResourceAllocation)
-	}
-	if v1Rply.Attributes != nil {
-		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
-			}
-		}
-		cgrReply[utils.CapAttributes] = attrs
-	}
-	if v1Rply.RouteProfiles != nil {
-		cgrReply[utils.CapRouteProfiles] = v1Rply.RouteProfiles.AsNavigableMap()
-	}
-	if v1Rply.ThresholdIDs != nil {
-		thIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1Rply.ThresholdIDs))}
-		for i, v := range *v1Rply.ThresholdIDs {
-			thIDs.Slice[i] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.CapThresholds] = thIDs
-	}
-	if v1Rply.StatQueueIDs != nil {
-		stIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1Rply.StatQueueIDs))}
-		for i, v := range *v1Rply.StatQueueIDs {
-			stIDs.Slice[i] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.CapStatQueues] = stIDs
-	}
-	return cgrReply
-}
-
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
@@ -2736,101 +2178,6 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	}
 
 	return
-}
-
-// V1ProcessEventArgs are the options passed to ProcessEvent API
-type V1ProcessEventArgs struct {
-	Flags []string
-	*utils.CGREvent
-	utils.Paginator
-}
-
-// V1ProcessEventReply is the reply for the ProcessEvent API
-type V1ProcessEventReply struct {
-	MaxUsage           map[string]time.Duration                  `json:",omitempty"`
-	Cost               map[string]float64                        `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
-	ResourceAllocation map[string]string                         `json:",omitempty"`
-	Attributes         map[string]*engine.AttrSProcessEventReply `json:",omitempty"`
-	RouteProfiles      map[string]engine.SortedRoutesList        `json:",omitempty"`
-	ThresholdIDs       map[string][]string                       `json:",omitempty"`
-	StatQueueIDs       map[string][]string                       `json:",omitempty"`
-	STIRIdentity       map[string]string                         `json:",omitempty"`
-}
-
-// AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
-	cgrReply := make(map[string]*utils.DataNode)
-	if v1Rply.MaxUsage != nil {
-		usage := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, v := range v1Rply.MaxUsage {
-			usage.Map[k] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.CapMaxUsage] = usage
-	}
-	if v1Rply.ResourceAllocation != nil {
-		res := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, v := range v1Rply.ResourceAllocation {
-			res.Map[k] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.CapResourceAllocation] = res
-	}
-	if v1Rply.Attributes != nil {
-		atts := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, att := range v1Rply.Attributes {
-			attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-			for _, fldName := range att.AlteredFields {
-				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-				if att.CGREvent.HasField(fldName) {
-					attrs.Map[fldName] = utils.NewLeafNode(att.CGREvent.Event[fldName])
-				}
-			}
-			atts.Map[k] = attrs
-		}
-		cgrReply[utils.CapAttributes] = atts
-	}
-	if v1Rply.RouteProfiles != nil {
-		routes := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, route := range v1Rply.RouteProfiles {
-			routes.Map[k] = route.AsNavigableMap()
-		}
-		cgrReply[utils.CapRouteProfiles] = routes
-	}
-	if v1Rply.ThresholdIDs != nil {
-		th := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, thr := range v1Rply.ThresholdIDs {
-			thIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(thr))}
-			for i, v := range thr {
-				thIDs.Slice[i] = utils.NewLeafNode(v)
-			}
-			th.Map[k] = thIDs
-		}
-		cgrReply[utils.CapThresholds] = th
-	}
-	if v1Rply.StatQueueIDs != nil {
-		st := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, sts := range v1Rply.StatQueueIDs {
-			stIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(sts))}
-			for i, v := range sts {
-				stIDs.Slice[i] = utils.NewLeafNode(v)
-			}
-			st.Map[k] = stIDs
-		}
-		cgrReply[utils.CapStatQueues] = st
-	}
-	if v1Rply.Cost != nil {
-		costs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, cost := range v1Rply.Cost {
-			costs.Map[k] = utils.NewLeafNode(cost)
-		}
-	}
-	if v1Rply.STIRIdentity != nil {
-		stir := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for k, v := range v1Rply.STIRIdentity {
-			stir.Map[k] = utils.NewLeafNode(v)
-		}
-		cgrReply[utils.OptsStirIdentity] = stir
-	}
-	return cgrReply
 }
 
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
@@ -3496,117 +2843,6 @@ func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREven
 	return
 }
 
-/*
-// BiRPCV1GetMaxUsage returns the maximum usage as seconds, compatible with OpenSIPS 2.3
-// DEPRECATED, it will be removed in future versions
-func (sS *SessionS) BiRPCV1GetMaxUsage(clnt birpc.ClientConnector,
-	ev engine.MapEvent, maxUsage *float64) (err error) {
-	var rply *V1AuthorizeReply
-	if err = sS.BiRPCv1AuthorizeEvent(
-		context.TODO(),
-		&V1AuthorizeArgs{
-			GetMaxUsage: true,
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(
-					ev.GetStringIgnoreErrors(utils.Tenant),
-					sS.cgrCfg.GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Event: ev,
-			},
-		},
-		rply); err != nil {
-		return
-	}
-	*maxUsage = rply.MaxUsage.Seconds()
-	return nil
-}
-
-// BiRPCV1InitiateSession is called on session start, returns the maximum number of seconds the session can last
-// DEPRECATED, it will be removed in future versions
-// Kept for compatibility with OpenSIPS 2.3
-func (sS *SessionS) BiRPCV1InitiateSession(clnt birpc.ClientConnector,
-	ev engine.MapEvent, maxUsage *float64) (err error) {
-	var rply *V1InitSessionReply
-	if err = sS.BiRPCv1InitiateSession(
-		context.TODO(),
-		&V1InitSessionArgs{
-			InitSession: true,
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(
-					ev.GetStringIgnoreErrors(utils.Tenant),
-					sS.cgrCfg.GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Event: ev,
-			},
-		},
-		rply); err != nil {
-		return
-	}
-	*maxUsage = rply.MaxUsage.Seconds()
-	return
-}
-
-// BiRPCV1UpdateSession processes interim updates, returns remaining duration from the RALs
-// DEPRECATED, it will be removed in future versions
-// Kept for compatibility with OpenSIPS 2.3
-func (sS *SessionS) BiRPCV1UpdateSession(clnt birpc.ClientConnector,
-	ev engine.MapEvent, maxUsage *float64) (err error) {
-	var rply *V1UpdateSessionReply
-	if err = sS.BiRPCv1UpdateSession(
-		context.TODO(),
-		&V1UpdateSessionArgs{
-			UpdateSession: true,
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(
-					ev.GetStringIgnoreErrors(utils.Tenant),
-					sS.cgrCfg.GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Event: ev,
-			},
-		},
-		rply); err != nil {
-		return
-	}
-	*maxUsage = rply.MaxUsage.Seconds()
-	return
-}
-
-// BiRPCV1TerminateSession is called on session end, should stop debit loop
-// DEPRECATED, it will be removed in future versions
-// Kept for compatibility with OpenSIPS 2.3
-func (sS *SessionS) BiRPCV1TerminateSession(clnt birpc.ClientConnector,
-	ev engine.MapEvent, rply *string) (err error) {
-	return sS.BiRPCv1TerminateSession(
-		context.TODO(),
-		&V1TerminateSessionArgs{
-			TerminateSession: true,
-			CGREvent: &utils.CGREvent{
-				Tenant: utils.FirstNonEmpty(
-					ev.GetStringIgnoreErrors(utils.Tenant),
-					sS.cgrCfg.GeneralCfg().DefaultTenant),
-				ID:    utils.UUIDSha1Prefix(),
-				Event: ev,
-			},
-		},
-		rply)
-}
-
-// BiRPCV1ProcessCDR should send the CDR to CDRS
-// DEPRECATED, it will be removed in future versions
-// Kept for compatibility with OpenSIPS 2.3
-func (sS *SessionS) BiRPCV1ProcessCDR(clnt birpc.ClientConnector,
-	ev engine.MapEvent, rply *string) (err error) {
-	return sS.BiRPCv1ProcessCDR(
-		context.TODO(),
-		&utils.CGREvent{
-			Tenant: utils.FirstNonEmpty(
-				ev.GetStringIgnoreErrors(utils.Tenant),
-				sS.cgrCfg.GeneralCfg().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Event: ev},
-		rply)
-}
-*/
 func (sS *SessionS) sendRar(ctx *context.Context, s *Session) (err error) {
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
