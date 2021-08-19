@@ -1512,7 +1512,6 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	// we will set this multiple chargers but without indexing(same and different indexes)
 	chPrf1 := &ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Raw",
@@ -1554,6 +1553,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		}
 	}
 
+	Cache.Clear(nil)
 	if err := dm.SetFilter(filter1, true); err != nil {
 		t.Error(err)
 	}
@@ -1563,10 +1563,11 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	if err := dm.SetFilter(filter3, true); err != nil {
 		t.Error(err)
 	}
-
-	/*
-    // Cache.Clear(nil)
-	// we will set this multiple chargers but without indexing(same and different indexes)
+	// initialized cachePrefix for every subsystem again for a new case
+	objCaches = make(map[string]*ltcache.Cache)
+	for indxType := range utils.CacheIndexesToPrefix {
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+	}
 	chPrf1 = &ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Raw",
@@ -1589,7 +1590,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 			MissingFilters: map[string][]string{},
 			BrokenReverseIndexes: map[string][]string{},
 			MissingReverseIndexes: map[string][]string{
-				"cgrates.org:Raw": {"FLTR_1", "FLTR_3"}, // check for FLTR_2
+				"cgrates.org:Raw": {"FLTR_1", "FLTR_2", "FLTR_3"},
 			},
 		},
 	}
@@ -1606,7 +1607,40 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		}
 	}
 
-	 */
+	// delete the filters and check again the reverse index health
+	if err := dm.RemoveFilter("cgrates.org", "FLTR_1", true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveFilter("cgrates.org", "FLTR_2", true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.RemoveFilter("cgrates.org", "FLTR_3", true); err != nil {
+		t.Error(err)
+	}
+	// Nnow the exepcted should be on missing filters as those were removed lately
+	exp = map[string]*ReverseFilterIHReply{
+		utils.CacheChargerFilterIndexes: {
+			MissingFilters: map[string][]string{
+				"cgrates.org:FLTR_1": {"Raw"},
+				"cgrates.org:FLTR_2": {"Raw"},
+				"cgrates.org:FLTR_3": {"Raw"},
+			},
+			BrokenReverseIndexes: map[string][]string{},
+			MissingReverseIndexes: map[string][]string{},
+		},
+	}
+	if rply, err := GetRevFltrIdxHealth(dm,
+		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, nil),
+		objCaches); err != nil {
+		t.Fatal(err)
+	} else {
+		sort.Strings(exp[utils.CacheChargerFilterIndexes].MissingReverseIndexes["cgrates.org:Raw"])
+		sort.Strings(rply[utils.CacheChargerFilterIndexes].MissingReverseIndexes["cgrates.org:Raw"])
+		if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+		}
+	}
 }
 
 
