@@ -837,8 +837,8 @@ func TestHealthIndexDispatchers(t *testing.T) {
 
 	// we will set this dispatcherProfile but without indexing
 	dspPrf := &DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "Dsp1",
+		Tenant: "cgrates.org",
+		ID:     "Dsp1",
 		FilterIDs: []string{
 			"*string:~*opts.*apikey:dps1234|dsp9876",
 			"*string:~*req.AnswerTime:2013-11-07T08:42:26Z",
@@ -859,25 +859,24 @@ func TestHealthIndexDispatchers(t *testing.T) {
 
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*opts.*apikey:dps1234":                     {"Dsp1"},
-			"cgrates.org:*string:*opts.*apikey:dsp9876":                     {"Dsp1"},
-			"cgrates.org:*string:*req.AnswerTime:2013-11-07T08:42:26Z":      {"Dsp1"},
+			"cgrates.org:*string:*opts.*apikey:dps1234":                {"Dsp1"},
+			"cgrates.org:*string:*opts.*apikey:dsp9876":                {"Dsp1"},
+			"cgrates.org:*string:*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
 		},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
 		MissingObjects: []string{},
 	}
 
-		if rply, err := GetFltrIdxHealth(context.Background(), dm,
-			ltcache.NewCache(0, 0, false, nil),
-			ltcache.NewCache(0, 0, false, nil),
-			ltcache.NewCache(0, 0, false, nil),
-			utils.CacheDispatcherFilterIndexes); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(exp, rply) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
-		}
-
+	if rply, err := GetFltrIdxHealth(context.Background(), dm,
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
+		utils.CacheDispatcherFilterIndexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
 
 	// we will set manually some indexes that points to an nil object or index is valid but the obj is missing
 	indexes := map[string]utils.StringSet{
@@ -902,9 +901,9 @@ func TestHealthIndexDispatchers(t *testing.T) {
 	//get the newIdxHealth for dispatchersProfile
 	exp = &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*opts.*apikey:dps1234":                     {"Dsp1"},
-			"cgrates.org:*string:*opts.*apikey:dsp9876":                     {"Dsp1"},
-			"cgrates.org:*string:*req.AnswerTime:2013-11-07T08:42:26Z":      {"Dsp1"},
+			"cgrates.org:*string:*opts.*apikey:dps1234":                {"Dsp1"},
+			"cgrates.org:*string:*opts.*apikey:dsp9876":                {"Dsp1"},
+			"cgrates.org:*string:*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
 		},
 		BrokenIndexes: map[string][]string{
 			"cgrates.org:*suffix:*opts.Destination:+100":  {"Dsp1"},
@@ -918,25 +917,24 @@ func TestHealthIndexDispatchers(t *testing.T) {
 		},
 	}
 
-		if rply, err := GetFltrIdxHealth(context.Background(), dm,
-			ltcache.NewCache(0, 0, false, nil),
-			ltcache.NewCache(0, 0, false, nil),
-			ltcache.NewCache(0, 0, false, nil),
-			utils.CacheDispatcherFilterIndexes); err != nil {
-			t.Error(err)
-		} else {
-			sort.Strings(rply.MissingObjects)
-			sort.Strings(exp.MissingObjects)
-			if !reflect.DeepEqual(exp, rply) {
-				t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
-			}
+	if rply, err := GetFltrIdxHealth(context.Background(), dm,
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
+		ltcache.NewCache(0, 0, false, nil),
+		utils.CacheDispatcherFilterIndexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(rply.MissingObjects)
+		sort.Strings(exp.MissingObjects)
+		if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 		}
-
+	}
 
 	//we will use an inexisting Filter(not inline) for the same DispatcherProfile
 	dspPrf = &DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "Dsp1",
+		Tenant: "cgrates.org",
+		ID:     "Dsp1",
 		FilterIDs: []string{
 			"*string:~*opts.*apikey:dps1234|dsp9876",
 			"*string:~*req.AnswerTime:2013-11-07T08:42:26Z",
@@ -959,9 +957,9 @@ func TestHealthIndexDispatchers(t *testing.T) {
 	//get the newIdxHealth for dispatchersProfile
 	exp = &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:*opts.*apikey:dps1234":                     {"Dsp1"},
-			"cgrates.org:*string:*opts.*apikey:dsp9876":                     {"Dsp1"},
-			"cgrates.org:*string:*req.AnswerTime:2013-11-07T08:42:26Z":      {"Dsp1"},
+			"cgrates.org:*string:*opts.*apikey:dps1234":                {"Dsp1"},
+			"cgrates.org:*string:*opts.*apikey:dsp9876":                {"Dsp1"},
+			"cgrates.org:*string:*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
 		},
 		BrokenIndexes: map[string][]string{
 			"cgrates.org:*suffix:*opts.Destination:+100":  {"Dsp1"},
@@ -1332,7 +1330,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	}
 	exp = map[string]*ReverseFilterIHReply{
 		utils.CacheChargerFilterIndexes: {
-			MissingFilters: map[string][]string{},
+			MissingFilters:       map[string][]string{},
 			BrokenReverseIndexes: map[string][]string{},
 			MissingReverseIndexes: map[string][]string{
 				"cgrates.org:Raw": {"FLTR_1", "FLTR_2", "FLTR_3"},
@@ -1370,7 +1368,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 				"cgrates.org:FLTR_2": {"Raw"},
 				"cgrates.org:FLTR_3": {"Raw"},
 			},
-			BrokenReverseIndexes: map[string][]string{},
+			BrokenReverseIndexes:  map[string][]string{},
 			MissingReverseIndexes: map[string][]string{},
 		},
 	}
@@ -1387,4 +1385,3 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		}
 	}
 }
-
