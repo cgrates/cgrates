@@ -48,6 +48,7 @@ var (
 		//testSectConfigSReloadDataDB,
 		//testSectConfigSReloadStorDB,
 		testSectConfigSReloadListen,
+		testSectConfigSReloadThresholds,
 		testSectConfigSReloadRALS,
 
 		testSectConfigSReloadAttributes,
@@ -78,7 +79,7 @@ var (
 		testSectConfigSReloadChargers,
 		testSectConfigSReloadResources,
 		testSectConfigSReloadStats,
-		testSectConfigSReloadThresholds,
+
 		testSectConfigSReloadLoaders,
 		testSectConfigSReloadMailer,
 
@@ -858,21 +859,27 @@ func testSectConfigSReloadStats(t *testing.T) {
 func testSectConfigSReloadThresholds(t *testing.T) {
 
 	var replyPingBf string
-	if err := testSectRPC.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+	if err := testSectRPC.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &replyPingBf); err == nil || err.Error() != "rpc: can't find service ThresholdSv1.Ping" {
 		t.Error(err)
-	} else if replyPingBf != utils.Pong {
-		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"thresholds\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"store_interval\":\"-1ns\",\"suffix_indexed_fields\":[]}}",
+		Config: `{"thresholds": {								
+			"enabled": true,						
+			"store_interval": "0ns",					
+			"indexed_selects": true,				
+			"string_indexed_fields": ["string_indexed_fields"],			
+			"prefix_indexed_fields": ["prefix_indexed_fields"],			
+			"suffix_indexed_fields": ["suffix_indexed_fields"],			
+			"nested_fields": true,					
+		},}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"thresholds\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"store_interval\":\"-1ns\",\"suffix_indexed_fields\":[]}}"
+	cfgStr := "{\"thresholds\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"\",\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
