@@ -35,10 +35,3 @@
   become: true
   shell: "sudo gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ rootUser }}"
 
-- name: get user armored public key
-  become: true
-  shell: "sudo gpg --armor --output {{ gpg_pubkeyfileexport }} --export {{ gpg_useremail }}"
-
-- name: After export move the key to /var/packages
-  become: true
-  shell: "sudo mv {{ gpg_pubkeyfileexport }} /var/packages"
