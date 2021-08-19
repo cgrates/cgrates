@@ -499,15 +499,12 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 	if err := apierSv1.DataManager.SetRatingProfile(rpfl); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	//CacheReload
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-			RatingProfileIDs: []string{rpfl.Id},
-		}, reply); err != nil {
-		return err
-	}
+
 	//generate a loadID for CacheRatingProfiles and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if err := apierSv1.CallCache(utils.IfaceAsString(attrs.APIOpts[utils.CacheOpt]), attrs.Tenant, utils.CacheRatingProfiles, keyID, nil, nil, attrs.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -1224,6 +1221,7 @@ type AttrRemoveRatingProfile struct {
 	Tenant   string
 	Category string
 	Subject  string
+	APIOpts  map[string]interface{}
 }
 
 func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
@@ -1253,21 +1251,19 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, rep
 		(attr.Category != utils.EmptyString && attr.Tenant == utils.EmptyString) {
 		return utils.ErrMandatoryIeMissing
 	}
+	keyID := attr.GetId()
 	err := guardian.Guardian.Guard(func() error {
-		return apierSv1.DataManager.RemoveRatingProfile(attr.GetId())
+		return apierSv1.DataManager.RemoveRatingProfile(keyID)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
 	}
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
-			RatingProfileIDs: []string{attr.GetId()},
-		}, reply); err != nil {
-		return err
-	}
 	//generate a loadID for CacheActionPlans and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if err := apierSv1.CallCache(utils.IfaceAsString(attr.APIOpts[utils.CacheOpt]), attr.Tenant, utils.CacheRatingProfiles, keyID, nil, nil, attr.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

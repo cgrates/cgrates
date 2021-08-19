@@ -2227,9 +2227,6 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan) (err error) {
 	if err = dm.DataDB().SetRatingPlanDrv(rp); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.RatingPlanPrefix, []string{rp.Id}, true); err != nil {
-		return
-	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
@@ -2250,10 +2247,6 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 	}
 	if err = dm.DataDB().RemoveRatingPlanDrv(key); err != nil {
 		return
-	}
-	if errCh := Cache.Remove(utils.CacheRatingPlans, key,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return errCh
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {
 		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
