@@ -1700,9 +1700,6 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 	if err = dm.DataDB().SetRatingProfileDrv(rpf); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, true); err != nil {
-		return
-	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
@@ -1718,8 +1715,6 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 	if err = dm.DataDB().RemoveRatingProfileDrv(key); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheRatingProfiles, key,
-		cacheCommit(transactionID), transactionID)
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
 		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
@@ -2105,7 +2100,7 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL{
+			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.INTERNAL {
 				Cache.Set(utils.CacheChargerProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
 

@@ -292,7 +292,9 @@ func (apiv1 *APIerSv1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *str
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
+	if ids, err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
+		return utils.NewErrServerError(err)
+	} else if err = apiv1.DataManager.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, ids, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -454,6 +456,13 @@ func (apiv1 *APIerSv1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply 
 	}
 	//generate a loadID for CacheRatingProfiles and store it in database
 	if err := apiv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	args := utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRatingProfiles,
+		ItemID:  keyID,
+	}
+	if err := apiv1.CallCache(attrs.Tenant, GetCacheOpt(attrs.Cache), args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -1054,6 +1063,7 @@ type AttrRemoveRatingProfile struct {
 	Tenant   string
 	Category string
 	Subject  string
+	Cache    *string
 }
 
 func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
@@ -1080,8 +1090,9 @@ func (apiv1 *APIerSv1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *
 		(attr.Category != utils.EmptyString && attr.Tenant == utils.EmptyString) {
 		return utils.ErrMandatoryIeMissing
 	}
+	keyID := attr.GetId()
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, apiv1.DataManager.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
+		return 0, apiv1.DataManager.RemoveRatingProfile(keyID, utils.NonTransactional)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
@@ -1089,6 +1100,13 @@ func (apiv1 *APIerSv1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *
 	}
 	//generate a loadID for CacheActionPlans and store it in database
 	if err := apiv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	args := utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRatingProfiles,
+		ItemID:  keyID,
+	}
+	if err := apiv1.CallCache(attr.Tenant, GetCacheOpt(attr.Cache), args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -251,6 +251,7 @@ type AttrSetRatingProfile struct {
 	Subject               string                // Rating subject, usually the same as account
 	Overwrite             bool                  // Overwrite if exists
 	RatingPlanActivations []*TPRatingActivation // Activate rating plans at specific time
+	Cache                 *string
 }
 
 type AttrGetRatingProfile struct {

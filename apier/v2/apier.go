@@ -60,7 +60,9 @@ func (apiv2 *APIerSv2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *str
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := dbReader.LoadRatingProfilesFiltered(&utils.TPRatingProfile{TPid: attrs.TPid}); err != nil {
+	if ids, err := dbReader.LoadRatingProfilesFiltered(&utils.TPRatingProfile{TPid: attrs.TPid}); err != nil {
+		return utils.NewErrServerError(err)
+	} else if err = apiv2.DataManager.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, ids, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
