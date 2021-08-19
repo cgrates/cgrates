@@ -1,4 +1,4 @@
-%global version 0.11.0~dev
+%global version 1.0~dev
 %global git_commit %(echo $gitLastCommit)
 %global releaseTag %(echo $rpmTag)
 
