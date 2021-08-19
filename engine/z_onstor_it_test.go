@@ -489,7 +489,6 @@ func testOnStorITRatingPlan(t *testing.T) {
 	if err := onStor.SetRatingPlan(rp); err != nil {
 		t.Error(err)
 	}
-
 	//get from cache
 	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -542,6 +541,13 @@ func testOnStorITRatingProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(rpf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
 	}
+	//get from cache
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
+		utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rpf, rcv) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
+	}
 
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		//get from cache
@@ -570,8 +576,8 @@ func testOnStorITRatingProfile(t *testing.T) {
 	if err := onStor.SetRatingProfile(rpf); err != nil {
 		t.Error(err)
 	}
-	//get from database
-	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
+	//get from cache
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpf, rcv) {
@@ -1260,7 +1266,6 @@ func testOnStorITResourceProfile(t *testing.T) {
 	if err := onStor.SetResourceProfile(rL, false); err != nil {
 		t.Error(err)
 	}
-
 	//get from database
 	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		false, false, utils.NonTransactional); err != nil {
@@ -1317,7 +1322,6 @@ func testOnStorITResource(t *testing.T) {
 	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
-
 	//get from database
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
 		false, false, utils.NonTransactional); err != nil {
@@ -1378,7 +1382,6 @@ func testOnStorITTiming(t *testing.T) {
 	if err := onStor.SetTiming(tmg); err != nil {
 		t.Error(err)
 	}
-
 	//get from cache
 	if rcv, err := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1525,7 +1528,6 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
 		t.Error(err)
 	}
-
 	//get from database
 	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
@@ -1601,7 +1603,6 @@ func testOnStorITStatQueue(t *testing.T) {
 	if err := onStor.SetStatQueue(sq); err != nil {
 		t.Error(err)
 	}
-
 	//get from database
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
@@ -1674,7 +1675,6 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
-
 	//get from database
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
@@ -1725,7 +1725,6 @@ func testOnStorITThreshold(t *testing.T) {
 	if err := onStor.SetThreshold(th); err != nil {
 		t.Error(err)
 	}
-
 	//get from database
 	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
 		false, false, utils.NonTransactional); err != nil {
@@ -1808,7 +1807,6 @@ func testOnStorITFilter(t *testing.T) {
 	if err := onStor.SetFilter(fp, true); err != nil {
 		t.Error(err)
 	}
-
 	//get from cache
 	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); err != nil {
@@ -1915,7 +1913,6 @@ func testOnStorITRouteProfile(t *testing.T) {
 	if err := onStor.SetRouteProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
-
 	//get from cache
 	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); err != nil {
@@ -1995,7 +1992,6 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
-
 	//get from cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); err != nil {
@@ -2128,7 +2124,6 @@ func testOnStorITChargerProfile(t *testing.T) {
 	if err := onStor.SetChargerProfile(cpp, false); err != nil {
 		t.Error(err)
 	}
-
 	//get from database
 	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); err != nil {
@@ -2184,7 +2179,6 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	if err := onStor.SetDispatcherProfile(dpp, false); err != nil {
 		t.Error(err)
 	}
-
 	//get from database
 	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); err != nil {
