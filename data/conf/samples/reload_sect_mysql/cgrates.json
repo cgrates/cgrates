@@ -599,10 +599,10 @@
 },
 
 "thresholds": {								
-	"enabled": true,						
+	"enabled": false,						
 	"store_interval": "",					
-	"indexed_selects": true,				
-	//"string_indexed_fields": [],			
+	"indexed_selects": false,				
+	"string_indexed_fields": [],			
 	"prefix_indexed_fields": [],			
 	"suffix_indexed_fields": [],			
 	"nested_fields": false,					
