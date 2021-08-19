@@ -858,20 +858,12 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	fltrS := NewFilterS(cfg, nil, dm)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
-		ID: "Process_Runs_Fltr",
+		ID:     "Process_Runs_Fltr",
 		Rules: []*FilterRule{
-			/*
-				{
-					Type: utils.MetaString,
-					Element: "~*req.Account",
-					Values: []string{"pc_test"},
-				},
-
-			*/
 			{
-				Type: utils.MetaGreaterThan,
+				Type:    utils.MetaGreaterThan,
 				Element: "~*vars.*processRuns",
-				Values: []string{"1"},
+				Values:  []string{"1"},
 			},
 		},
 	}
@@ -880,14 +872,13 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	}
 
 	attrPfr := &AttributeProfile{
-		Tenant: "cgrates.org",
-		ID: "ATTR_ProcessRuns",
-		Contexts: []string{"*any"},
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ProcessRuns",
 		FilterIDs: []string{"Process_Runs_Fltr"},
 		Attributes: []*Attribute{
 			{
-				Path: "*req.CompanyName",
-				Type: utils.MetaVariable,
+				Path:  "*req.CompanyName",
+				Type:  utils.MetaVariable,
 				Value: config.NewRSRParsersMustCompile("ITSYS COMMUNICATIONS SRL", utils.InfieldSep),
 			},
 		},
@@ -896,12 +887,11 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	// this I'll match first, no fltr and processRuns will be 1
 	attrPfr2 := &AttributeProfile{
 		Tenant: "cgrates.org",
-		ID: "ATTR_MatchSecond",
-		Contexts: []string{"*any"},
+		ID:     "ATTR_MatchSecond",
 		Attributes: []*Attribute{
 			{
-				Path: "*req.Password",
-				Type: utils.MetaVariable,
+				Path:  "*req.Password",
+				Type:  utils.MetaVariable,
 				Value: config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
@@ -911,22 +901,20 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	attrPfr.Compile()
 	fltr.Compile()
 	attrPfr2.Compile()
-	if err := dm.SetAttributeProfile(attrPfr, true); err != nil {
+	if err := dm.SetAttributeProfile(context.Background(), attrPfr, true); err != nil {
 		t.Error(err)
 	}
-	if err := dm.SetAttributeProfile(attrPfr2, true); err != nil {
+	if err := dm.SetAttributeProfile(context.Background(), attrPfr2, true); err != nil {
 		t.Error(err)
 	}
-
 
 	attr := NewAttributeService(dm, fltrS, cfg)
 
 	args := &AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(2),
-		Context: utils.StringPointer(utils.MetaAny),
 		CGREvent: &utils.CGREvent{
 			Event: map[string]interface{}{
-				"Account": "pc_test",
+				"Account":     "pc_test",
 				"CompanyName": "MY_company_will_be_changed",
 			},
 		},
@@ -934,22 +922,20 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	reply := &AttrSProcessEventReply{}
 	expReply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:ATTR_MatchSecond", "cgrates.org:ATTR_ProcessRuns"},
-		AlteredFields: []string{"*req.Password", "*req.CompanyName"},
+		AlteredFields:   []string{"*req.Password", "*req.CompanyName"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account": "pc_test",
+				"Account":     "pc_test",
 				"CompanyName": "ITSYS COMMUNICATIONS SRL",
-				"Password": "CGRateS.org",
+				"Password":    "CGRateS.org",
 			},
 			APIOpts: map[string]interface{}{},
 		},
 	}
-	if err := attr.V1ProcessEvent(args, reply); err != nil {
+	if err := attr.V1ProcessEvent(context.Background(), args, reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expReply, reply){
+	} else if !reflect.DeepEqual(expReply, reply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expReply), utils.ToJSON(reply))
 	}
 }
-
-
