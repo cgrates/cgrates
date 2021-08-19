@@ -3281,3 +3281,269 @@ func TestStatQueueProcessThresholds2(t *testing.T) {
 		t.Errorf("expected log <%+v> to be included in <%+v>", expLog, rcvLog)
 	}
 }
+
+func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
+				Sum: time.Minute,
+				val: utils.DurationPointer(time.Hour),
+			},
+		},
+	}
+
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+
+	expected := map[string]float64{
+		utils.MetaTCD: 3600000000000,
+	}
+	reply := map[string]float64{}
+	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
+		ID: "SQ1",
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, reply)
+	}
+}
+
+func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
+				Sum: time.Minute,
+				val: utils.DurationPointer(time.Hour),
+			},
+		},
+	}
+
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+
+	reply := map[string]float64{}
+	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
+		ID: "SQ2",
+	}, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().StoreInterval = 1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
+				Sum: time.Minute,
+				val: utils.DurationPointer(time.Hour),
+			},
+		},
+	}
+
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+
+	experr := `MANDATORY_IE_MISSING: [ID]`
+	reply := map[string]float64{}
+	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{}, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+// func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
+// 	tmp := Cache
+// 	tmpC := config.CgrConfig()
+// 	defer func() {
+// 		Cache = tmp
+// 		config.SetCgrConfig(tmpC)
+// 	}()
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.StatSCfg().StoreInterval = 1
+// 	data := DataDBMock{}
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	Cache = NewCacheS(cfg, dm, nil)
+// 	filterS := NewFilterS(cfg, nil, dm)
+// 	sS := NewStatService(dm, cfg, filterS, nil)
+
+// 	sqPrf := &StatQueueProfile{
+// 		Tenant:    "cgrates.org",
+// 		ID:        "SQ1",
+// 		FilterIDs: []string{"*string:~*req.Account:1001"},
+// 		ActivationInterval: &utils.ActivationInterval{
+// 			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+// 		},
+// 		Weight:       10,
+// 		Blocker:      true,
+// 		QueueLength:  10,
+// 		ThresholdIDs: []string{"*none"},
+// 		MinItems:     5,
+// 		Metrics: []*MetricWithFilters{
+// 			{
+// 				MetricID: utils.MetaTCD,
+// 			},
+// 		},
+// 	}
+// 	sq := &StatQueue{
+// 		sqPrfl: sqPrf,
+// 		dirty:  utils.BoolPointer(false),
+// 		Tenant: "cgrates.org",
+// 		ID:     "SQ1",
+// 		SQItems: []SQItem{
+// 			{
+// 				EventID: "SqProcessEvent",
+// 			},
+// 		},
+// 		SQMetrics: map[string]StatMetric{
+// 			utils.MetaTCD: &StatTCD{
+// 				Sum: time.Minute,
+// 				val: utils.DurationPointer(time.Hour),
+// 			},
+// 		},
+// 	}
+
+// 	if err := dm.SetStatQueue(sq); err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	expected := map[string]float64{
+// 		utils.MetaTCD: 3600000000000,
+// 	}
+// 	reply := map[string]float64{}
+// 	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
+// 		ID: "SQ1",
+// 	}, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(reply, expected) {
+// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, reply)
+// 	}
+// }
