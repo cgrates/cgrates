@@ -239,7 +239,7 @@ func updateFilterIHMisingIndx(ctx *context.Context, dm *DataManager, fltrCache, 
 	if len(filterIDs) == 0 { // no filter so check the *none:*any:*any index
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
 		var rcvIndx utils.StringSet
-		if rcvIndx, err = getIHFltrIdxFromCache(ctx, dm, nil, indxType, tntGrp, idxKey); err != nil {
+		if rcvIndx, err = getIHFltrIdxFromCache(ctx, dm, fltrIdxCache, indxType, tntGrp, idxKey); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -308,6 +308,7 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 	if indexKeys, err = dm.dataDB.GetKeysForPrefix(ctx, idxPrfx); err != nil {
 		return
 	}
+	missingObj := utils.StringSet{}
 	for _, dataID := range indexKeys { // get all the indexes
 		dataID = strings.TrimPrefix(dataID, idxPrfx)
 
@@ -330,7 +331,7 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 				if err != utils.ErrNotFound {
 					return
 				}
-				rply.MissingObjects = append(rply.MissingObjects, utils.ConcatenatedKey(tnt, itmID))
+				missingObj.Add(utils.ConcatenatedKey(tnt, itmID))
 				err = nil
 				continue
 			}
@@ -365,7 +366,7 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 			}
 		}
 	}
-
+	rply.MissingObjects = missingObj.AsSlice()
 	return
 }
 
@@ -426,6 +427,7 @@ func getRevFltrIdxHealthFromReverse(ctx *context.Context, dm *DataManager, fltrC
 	if revIndexKeys, err = dm.dataDB.GetKeysForPrefix(ctx, utils.FilterIndexPrfx); err != nil {
 		return
 	}
+	missingObj := utils.StringSet{}
 	for _, revIdxKey := range revIndexKeys { // parse all the reverse indexes
 		// compose the needed information from key
 		revIdxKey = strings.TrimPrefix(revIdxKey, utils.FilterIndexPrfx)
@@ -457,20 +459,22 @@ func getRevFltrIdxHealthFromReverse(ctx *context.Context, dm *DataManager, fltrC
 					if err != utils.ErrNotFound {
 						return
 					}
-					rply[indxType].MissingObjects = append(rply[indxType].MissingObjects, utils.ConcatenatedKey(tnt, id))
+					missingObj.Add(utils.ConcatenatedKey(tnt, id))
+					rply[indxType].MissingObjects = missingObj.AsSlice()
 					err = nil
 					continue
 				}
 				if rate, has := rates[rateID]; !has {
-					rply[indxType].MissingObjects = append(rply[indxType].MissingObjects, utils.ConcatenatedKey(tnt, id))
+					missingObj.Add(utils.ConcatenatedKey(tnt, id))
+					rply[indxType].MissingObjects = missingObj.AsSlice()
 					continue
 				} else {
 					filterIDs = rate.FilterIDs
 				}
-
 			} else if filterIDs, err = getIHObjFromCache(ctx, dm, objCache, indxType, tnt, id); err != nil {
 				if err == utils.ErrNotFound {
-					rply[indxType].MissingObjects = append(rply[indxType].MissingObjects, utils.ConcatenatedKey(tnt, id))
+					missingObj.Add(utils.ConcatenatedKey(tnt, id))
+					rply[indxType].MissingObjects = missingObj.AsSlice()
 					err = nil
 					continue
 				}
@@ -480,7 +484,6 @@ func getRevFltrIdxHealthFromReverse(ctx *context.Context, dm *DataManager, fltrC
 				key := utils.ConcatenatedKey(tnt, id)
 				rply[indxType].BrokenReverseIndexes[key] = append(rply[indxType].BrokenReverseIndexes[key], fltrID)
 			}
-
 		}
 	}
 	return rply, nil
