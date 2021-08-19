@@ -95,7 +95,6 @@ func (smg *SessionService) Start() (err error) {
 	// Register RPC handler
 	smg.rpcv1 = apis.NewSessionSv1(smg.sm) // methods with multiple options
 	srv, _ := birpc.NewService(smg.rpcv1, utils.EmptyString, false)
-	//smg.rpc = v1.NewSMGenericV1(smg.sm, smg.caps)
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(srv)
 	}
@@ -103,7 +102,6 @@ func (smg *SessionService) Start() (err error) {
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
 		smg.bircpEnabled = true
-		// smg.server.BiRPCRegisterName("SMGenericV1", smg.rpc)
 		smg.server.BiRPCRegisterName(utils.SessionSv1, smg.rpcv1)
 		// run this in it's own goroutine
 		go smg.start()
