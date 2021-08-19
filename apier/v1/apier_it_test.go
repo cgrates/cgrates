@@ -139,6 +139,26 @@ var (
 		testApierGetStorDBVesions,
 		testApierBackwardsCompatible,
 		testApierStopEngine,
+
+		//start test for cache options
+		testApierLoadConfig,
+		testApierCreateDirs,
+		testApierInitDataDb,
+		testApierInitStorDb,
+		testApierStartEngine,
+		testApierRpcConn,
+		testApierTPTiming,
+		testApierTPDestination,
+		testApierTPRate,
+		testApierTPDestinationRate,
+		testApierTPRatingPlan,
+		testApierLoadRatingPlan,
+		testRatingProfileCachingMetaNone,
+		testRatingProfileCachingMetaLoad,
+		testRatingProfileCachingMetaReload1,
+		testRatingProfileCachingMetaReload2,
+		testRatingProfileCachingMetaRemove,
+		testApierStopEngine,
 	}
 )
 
@@ -783,7 +803,10 @@ func testApierTPAccountActions(t *testing.T) {
 // Test here LoadRatingPlan
 func testApierLoadRatingPlan(t *testing.T) {
 	var reply string
-	if err := rater.Call(utils.APIerSv1LoadRatingPlan, AttrLoadRatingPlan{TPid: utils.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1LoadRatingPlan, AttrLoadRatingPlan{
+		TPid:         utils.TEST_SQL,
+		RatingPlanId: "RETAIL1",
+	}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingPlan: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv1.LoadRatingPlan got reply: ", reply)
@@ -794,8 +817,12 @@ func testApierLoadRatingPlan(t *testing.T) {
 func testApierLoadRatingProfile(t *testing.T) {
 	var reply string
 	rpf := &utils.TPRatingProfile{
-		TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
-		Tenant: "cgrates.org", Category: "call", Subject: "*any"}
+		TPid:     utils.TEST_SQL,
+		LoadId:   utils.TEST_SQL,
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "*any",
+	}
 	if err := rater.Call(utils.APIerSv1LoadRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on APIerSv1.LoadRatingProfile: ", err.Error())
 	} else if reply != utils.OK {
@@ -2085,4 +2112,340 @@ func TestAttrRemoveRatingProfileGetID(t *testing.T) {
 	if rply := attr.GetId(); rply != expRes {
 		t.Errorf("Expected %+v, received %v", expRes, rply)
 	}
+}
+
+//Start tests for caching
+func testRatingProfileCachingMetaNone(t *testing.T) {
+	//*none option should not add profile in cache only in Datamanager
+	rpf := &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "dan",
+		RatingPlanActivations: []*utils.TPRatingActivation{{
+			ActivationTime:   "2012-01-01T00:00:00Z",
+			RatingPlanId:     "RETAIL1",
+			FallbackSubjects: "dan2",
+		}},
+		Overwrite: true,
+		Cache:     utils.StringPointer(utils.META_NONE),
+	}
+	// set the profile
+	var result string
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply bool
+	argsCache := utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRatingProfiles,
+		ItemID:  "*out:cgrates.org:call:dan",
+	}
+	if err := rater.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: false, received:%v", reply)
+	}
+
+	var rcvKeys []string
+	argsCache2 := utils.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheRatingProfiles,
+	}
+	if err := rater.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err.Error(), rcvKeys)
+	}
+
+	//check in dataManager
+	expected := []string{"call:dan"}
+	var rcvIDs []string
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcvIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
+	}
+}
+
+func testRatingProfileCachingMetaLoad(t *testing.T) {
+	//*load option should add profile in cache and in Datamanager
+	rpf := &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "dan",
+		RatingPlanActivations: []*utils.TPRatingActivation{{
+			ActivationTime:   "2012-01-01T00:00:00Z",
+			RatingPlanId:     "RETAIL1",
+			FallbackSubjects: "dan2",
+		}},
+		Cache: utils.StringPointer(utils.MetaLoad),
+	}
+	// set the profile
+	var result string
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply bool
+	argsCache := utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRatingProfiles,
+		ItemID:  "*out:cgrates.org:call:dan",
+	}
+	if err := rater.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if !reply {
+		t.Errorf("Expected: true, received:%v", reply)
+	}
+
+	var rcvKeys []string
+	expectedIDs := []string{"*out:cgrates.org:call:dan"}
+	argsCache2 := utils.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheRatingProfiles,
+	}
+	if err := rater.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rcvKeys, expectedIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expectedIDs, rcvKeys)
+	}
+
+	//check in dataManager
+	expected := []string{"call:dan"}
+	var rcvIDs []string
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcvIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
+	}
+	//remove from cache and DataManager the profile
+	var resp string
+	if err := rater.Call(utils.APIerSv1RemoveRatingProfile,
+		AttrRemoveRatingProfile{
+			Tenant:   rpf.Tenant,
+			Category: rpf.Category,
+			Subject:  rpf.Subject,
+			Cache:    utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+
+	argsCache = utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRatingProfiles,
+		ItemID:  "*out:cgrates.org:call:dan",
+	}
+	if err := rater.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: false, received:%v", reply)
+	}
+
+	if err := rater.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err, rcvKeys)
+	}
+
+	//check in dataManager
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err, rcvIDs)
+	}
+}
+
+func testRatingProfileCachingMetaReload1(t *testing.T) {
+	//*reload add the profile in cache if was there before
+	rpf := &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "dan",
+		RatingPlanActivations: []*utils.TPRatingActivation{{
+			ActivationTime:   "2012-01-01T00:00:00Z",
+			RatingPlanId:     "RETAIL1",
+			FallbackSubjects: "dan2",
+		}},
+		Overwrite: true,
+		Cache:     utils.StringPointer(utils.MetaReload),
+	}
+	// set the profile
+	var result string
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply bool
+	argsCache := utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRatingProfiles,
+		ItemID:  "*out:cgrates.org:call:dan",
+	}
+	if err := rater.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: false, received:%v", reply)
+	}
+
+	var rcvKeys []string
+	argsCache2 := utils.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheRatingProfiles,
+	}
+	if err := rater.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err, rcvKeys)
+	}
+
+	//check in dataManager
+	expected := []string{"call:dan"}
+	var rcvIDs []string
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcvIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
+	}
+}
+
+func testRatingProfileCachingMetaReload2(t *testing.T) {
+	//add cache with *load option
+	rpf := &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "dan",
+		RatingPlanActivations: []*utils.TPRatingActivation{{
+			ActivationTime:   "2012-01-01T00:00:00Z",
+			RatingPlanId:     "RETAIL1",
+			FallbackSubjects: "dan2",
+		}},
+		Overwrite: true,
+		Cache:     utils.StringPointer(utils.MetaLoad),
+	}
+	expected := &engine.RatingProfile{
+		Id: "*out:cgrates.org:call:dan",
+		RatingPlanActivations: engine.RatingPlanActivations{{
+			ActivationTime: time.Date(2012, 01, 01, 0, 0, 0, 0, time.UTC),
+			RatingPlanId:   "RETAIL1",
+			FallbackKeys:   []string{"*out:cgrates.org:call:dan2"},
+		}},
+	}
+	// set the profile
+	var result string
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	var reply *engine.RatingProfile
+	if err := rater.Call(utils.APIerSv1GetRatingProfile, &utils.AttrGetRatingProfile{
+		Tenant: "cgrates.org", Category: "call", Subject: "dan"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+
+	//add cache with *reload option
+	// should overwrite the first
+	rpf.RatingPlanActivations[0].FallbackSubjects = "dan3"
+	expected.RatingPlanActivations[0].FallbackKeys[0] = "*out:cgrates.org:call:dan3"
+	// set the profile
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	if err := rater.Call(utils.APIerSv1GetRatingProfile, &utils.AttrGetRatingProfile{
+		Tenant: "cgrates.org", Category: "call", Subject: "dan"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func testRatingProfileCachingMetaRemove(t *testing.T) {
+	//add cache with *load option
+	rpf := &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "dan",
+		RatingPlanActivations: []*utils.TPRatingActivation{{
+			ActivationTime:   "2012-01-01T00:00:00Z",
+			RatingPlanId:     "RETAIL1",
+			FallbackSubjects: "dan2",
+		}},
+		Cache: utils.StringPointer(utils.MetaLoad),
+	}
+	// set the profile
+	var result string
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply bool
+	argsCache := utils.ArgsGetCacheItem{
+		CacheID: utils.CacheRatingProfiles,
+		ItemID:  "*out:cgrates.org:call:dan",
+	}
+	if err := rater.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if !reply {
+		t.Errorf("Expected: true, received:%v", reply)
+	}
+
+	var rcvKeys []string
+	expectedIDs := []string{"*out:cgrates.org:call:dan"}
+	argsCache2 := utils.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheRatingProfiles,
+	}
+	if err := rater.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rcvKeys, expectedIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expectedIDs, rcvKeys)
+	}
+
+	// add with *remove cache option
+	// should delete it from cache
+	rpf = &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "dan",
+		RatingPlanActivations: []*utils.TPRatingActivation{{
+			ActivationTime:   "2012-01-01T00:00:00Z",
+			RatingPlanId:     "RETAIL1",
+			FallbackSubjects: "dan2",
+		}},
+		Cache: utils.StringPointer(utils.MetaRemove),
+	}
+	// set the profile
+	if err := rater.Call(utils.APIerSv1SetRatingProfile, rpf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	if err := rater.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: false, received:%v", reply)
+	}
+
+	if err := rater.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err.Error(), rcvKeys)
+	}
+
+	//check in dataManager
+	expected := []string{"call:dan"}
+	var rcvIDs []string
+	if err := rater.Call(utils.APIerSv1GetRatingProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &rcvIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcvIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
+	}
+
 }

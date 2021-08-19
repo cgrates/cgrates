@@ -571,7 +571,7 @@ func testLoaderITLoadIndividualProfiles(t *testing.T) {
 		t.Fatal("Could not retrieve rating profiles")
 	} else {
 		for _, r := range rprs {
-			if err := loader.LoadRatingProfilesFiltered(r); err != nil {
+			if _, err := loader.LoadRatingProfilesFiltered(r); err != nil {
 				t.Fatalf("Could not load ratingProfile with id: %s, error: %s", r.KeyId(), err.Error())
 			}
 		}

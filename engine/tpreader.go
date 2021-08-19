@@ -365,32 +365,34 @@ func (tpr *TpReader) LoadRatingPlans() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile) error {
+func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile) ([]string, error) {
 	var resultRatingProfile *RatingProfile
 	mpTpRpfs, err := tpr.lr.GetTPRatingProfiles(qriedRpf)
 	if err != nil {
-		return fmt.Errorf("no RateProfile for filter %v, error: %v", qriedRpf, err)
+		return nil, fmt.Errorf("no RateProfile for filter %v, error: %v", qriedRpf, err)
 	}
 
 	rpfs, err := MapTPRatingProfiles(mpTpRpfs)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	ids := make([]string, 0, len(rpfs))
 	for _, tpRpf := range rpfs {
+		ids = append(ids, tpRpf.KeyId())
 		resultRatingProfile = &RatingProfile{Id: tpRpf.KeyId()}
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseTimeDetectLayout(tpRa.ActivationTime, tpr.timezone)
 			if err != nil {
-				return fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
+				return nil, fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.dm.dataDB != nil {
 				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId, ""); err != nil {
-					return err
+					return nil, err
 				}
 			}
 			if !exists {
-				return fmt.Errorf("could not load rating plans for tag: %q", tpRa.RatingPlanId)
+				return nil, fmt.Errorf("could not load rating plans for tag: %q", tpRa.RatingPlanId)
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,
 				&RatingPlanActivation{
@@ -401,10 +403,10 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 				})
 		}
 		if err := tpr.dm.SetRatingProfile(resultRatingProfile, utils.NonTransactional); err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return ids, nil
 }
 
 func (tpr *TpReader) LoadRatingProfiles() (err error) {

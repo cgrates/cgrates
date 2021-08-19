@@ -385,8 +385,8 @@ func TestHealthIndexThreshold(t *testing.T) {
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:~*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
-			"cgrates.org:*string:~*asm.ID:1002": {"TestHealthIndexThreshold"},
-			"cgrates.org:*prefix:StaticValue:AlwaysTrue": {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:~*asm.ID:1002":                   {"TestHealthIndexThreshold"},
+			"cgrates.org:*prefix:StaticValue:AlwaysTrue":          {"TestHealthIndexThreshold"},
 		},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -420,8 +420,8 @@ func TestHealthIndexThreshold(t *testing.T) {
 		MissingObjects: []string{"cgrates.org:InexistingThreshold"},
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:~*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
-			"cgrates.org:*string:~*asm.ID:1002": {"TestHealthIndexThreshold"},
-			"cgrates.org:*prefix:StaticValue:AlwaysTrue": {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:~*asm.ID:1002":                   {"TestHealthIndexThreshold"},
+			"cgrates.org:*prefix:StaticValue:AlwaysTrue":          {"TestHealthIndexThreshold"},
 		},
 		BrokenIndexes: map[string][]string{
 			"cgrates.org:*prefix:req.InvalidIdx:10": {"TestHealthIndexThreshold"},
@@ -439,7 +439,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 	}
 
 	//we will use an inexisting Filter(not inline) for the same ThresholdProfile
-	thPrf =  &ThresholdProfile{
+	thPrf = &ThresholdProfile{
 		Tenant: "cgrates.org",
 		ID:     "TestHealthIndexThreshold",
 		FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
@@ -455,7 +455,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 		MissingObjects: []string{"cgrates.org:InexistingThreshold"},
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:~*opts.*eventType:AccountUpdate": {"TestHealthIndexThreshold"},
-			"cgrates.org:*string:~*asm.ID:1002": {"TestHealthIndexThreshold"},
+			"cgrates.org:*string:~*asm.ID:1002":                   {"TestHealthIndexThreshold"},
 		},
 		BrokenIndexes: map[string][]string{
 			"cgrates.org:*prefix:req.InvalidIdx:10": {"TestHealthIndexThreshold"},
@@ -506,7 +506,7 @@ func TestHealthIndexCharger(t *testing.T) {
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:~*opts.*eventType:ChargerAccountUpdate": {"Raw"},
 			"cgrates.org:*string:~*req.*Account:1234":                    {"Raw"},
-			"cgrates.org:*string:~*asm.ID:1002":  {"Raw"},
+			"cgrates.org:*string:~*asm.ID:1002":                          {"Raw"},
 		},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -541,7 +541,7 @@ func TestHealthIndexCharger(t *testing.T) {
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:~*opts.*eventType:ChargerAccountUpdate": {"Raw"},
 			"cgrates.org:*string:~*req.*Account:1234":                    {"Raw"},
-			"cgrates.org:*string:~*asm.ID:1002":  {"Raw"},
+			"cgrates.org:*string:~*asm.ID:1002":                          {"Raw"},
 		},
 		BrokenIndexes: map[string][]string{
 			"cgrates.org:*prefix:req.Destination:+10": {"Raw"},
@@ -581,7 +581,7 @@ func TestHealthIndexCharger(t *testing.T) {
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:~*opts.*eventType:ChargerAccountUpdate": {"Raw"},
 			"cgrates.org:*string:~*req.*Account:1234":                    {"Raw"},
-			"cgrates.org:*string:~*asm.ID:1002":  {"Raw"},
+			"cgrates.org:*string:~*asm.ID:1002":                          {"Raw"},
 		},
 		BrokenIndexes: map[string][]string{
 			"cgrates.org:*prefix:req.Destination:+10": {"Raw"},
@@ -714,7 +714,7 @@ func TestHealthIndexResources(t *testing.T) {
 		MissingIndexes: map[string][]string{
 			"tenant.custom:*string:~*opts.*eventType:ResourceAccountUpdate": {"RES_GRP1"},
 			"tenant.custom:*string:~*req.RequestType:*rated":                {"RES_GRP1"},
-			"tenant.custom:*prefix:~*accounts.RES_GRP1.Available:10":       {"RES_GRP1"},
+			"tenant.custom:*prefix:~*accounts.RES_GRP1.Available:10":        {"RES_GRP1"},
 		},
 		BrokenIndexes: map[string][]string{
 			"tenant.custom:*suffix:*req.Destination:+10": {"RES_GRP1"},
@@ -778,9 +778,9 @@ func TestHealthIndexStats(t *testing.T) {
 	args := &IndexHealthArgsWith3Ch{}
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:~*opts.*apikey:sts1234":                 {"Stat_1"},
-			"cgrates.org:*string:~*req.RequestType:*postpaid":            {"Stat_1"},
-			"cgrates.org:*prefix:~*resources.RES_GRP1.Available:10":      {"Stat_1"},
+			"cgrates.org:*string:~*opts.*apikey:sts1234":            {"Stat_1"},
+			"cgrates.org:*string:~*req.RequestType:*postpaid":       {"Stat_1"},
+			"cgrates.org:*prefix:~*resources.RES_GRP1.Available:10": {"Stat_1"},
 		},
 		BrokenIndexes:  map[string][]string{},
 		MissingFilters: map[string][]string{},
@@ -813,9 +813,9 @@ func TestHealthIndexStats(t *testing.T) {
 	exp = &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:InexistingStats"},
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:~*opts.*apikey:sts1234":      {"Stat_1"},
-			"cgrates.org:*string:~*req.RequestType:*postpaid": {"Stat_1"},
-			"cgrates.org:*prefix:~*resources.RES_GRP1.Available:10":      {"Stat_1"},
+			"cgrates.org:*string:~*opts.*apikey:sts1234":            {"Stat_1"},
+			"cgrates.org:*string:~*req.RequestType:*postpaid":       {"Stat_1"},
+			"cgrates.org:*prefix:~*resources.RES_GRP1.Available:10": {"Stat_1"},
 		},
 		BrokenIndexes: map[string][]string{
 			"cgrates.org:*suffix:*req.Destination:+60": {"Stat_1"},
@@ -867,9 +867,9 @@ func TestHealthIndexStats(t *testing.T) {
 	exp = &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:InexistingStats"},
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:~*opts.*apikey:sts1234":      {"Stat_1"},
-			"cgrates.org:*string:~*req.RequestType:*postpaid": {"Stat_1"},
-			"cgrates.org:*prefix:~*resources.RES_GRP1.Available:10":      {"Stat_1"},
+			"cgrates.org:*string:~*opts.*apikey:sts1234":            {"Stat_1"},
+			"cgrates.org:*string:~*req.RequestType:*postpaid":       {"Stat_1"},
+			"cgrates.org:*prefix:~*resources.RES_GRP1.Available:10": {"Stat_1"},
 		},
 		BrokenIndexes: map[string][]string{
 			"cgrates.org:*suffix:*req.Destination:+60": {"Stat_1"},
@@ -912,9 +912,9 @@ func TestHealthIndexSupplier(t *testing.T) {
 		SortingParameters: []string{},
 		Suppliers: []*Supplier{
 			{
-				ID:              "route1",
-				Weight:          10,
-				Blocker:         false,
+				ID:      "route1",
+				Weight:  10,
+				Blocker: false,
 			},
 			{
 				ID:            "route2",
@@ -932,9 +932,9 @@ func TestHealthIndexSupplier(t *testing.T) {
 	args := &IndexHealthArgsWith3Ch{}
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"routes.com:*string:~*opts.*apikey:rts1234": {"ROUTE_ACNT_1001"},
-			"routes.com:*string:~*req.Usage:160s":       {"ROUTE_ACNT_1001"},
-			"routes.com:*string:~*nothing.Denied:true":  {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*opts.*apikey:rts1234":         {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*req.Usage:160s":               {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*nothing.Denied:true":          {"ROUTE_ACNT_1001"},
 			"routes.com:*string:~*stats.STATS_VENDOR_2.*acd:1m": {"ROUTE_ACNT_1001"},
 		},
 		BrokenIndexes:  map[string][]string{},
@@ -979,9 +979,9 @@ func TestHealthIndexSupplier(t *testing.T) {
 			"routes.com:ROUTE_ACNT_1002",
 		},
 		MissingIndexes: map[string][]string{
-			"routes.com:*string:~*opts.*apikey:rts1234": {"ROUTE_ACNT_1001"},
-			"routes.com:*string:~*req.Usage:160s":       {"ROUTE_ACNT_1001"},
-			"routes.com:*string:~*nothing.Denied:true":  {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*opts.*apikey:rts1234":         {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*req.Usage:160s":               {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*nothing.Denied:true":          {"ROUTE_ACNT_1001"},
 			"routes.com:*string:~*stats.STATS_VENDOR_2.*acd:1m": {"ROUTE_ACNT_1001"},
 		},
 		BrokenIndexes: map[string][]string{
@@ -1020,9 +1020,9 @@ func TestHealthIndexSupplier(t *testing.T) {
 		SortingParameters: []string{},
 		Suppliers: []*Supplier{
 			{
-				ID:              "route1",
-				Weight:          10,
-				Blocker:         false,
+				ID:      "route1",
+				Weight:  10,
+				Blocker: false,
 			},
 			{
 				ID:            "route2",
@@ -1042,9 +1042,9 @@ func TestHealthIndexSupplier(t *testing.T) {
 			"routes.com:ROUTE_ACNT_1002",
 		},
 		MissingIndexes: map[string][]string{
-			"routes.com:*string:~*opts.*apikey:rts1234": {"ROUTE_ACNT_1001"},
-			"routes.com:*string:~*req.Usage:160s":       {"ROUTE_ACNT_1001"},
-			"routes.com:*string:~*nothing.Denied:true":  {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*opts.*apikey:rts1234":         {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*req.Usage:160s":               {"ROUTE_ACNT_1001"},
+			"routes.com:*string:~*nothing.Denied:true":          {"ROUTE_ACNT_1001"},
 			"routes.com:*string:~*stats.STATS_VENDOR_2.*acd:1m": {"ROUTE_ACNT_1001"},
 		},
 		BrokenIndexes: map[string][]string{
@@ -1082,8 +1082,8 @@ func TestHealthIndexDispatchers(t *testing.T) {
 
 	// we will set this dispatcherProfile but without indexing
 	dspPrf := &DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Dsp1",
+		Tenant:     "cgrates.org",
+		ID:         "Dsp1",
 		Subsystems: []string{utils.META_ANY, utils.MetaSessionS},
 		FilterIDs: []string{
 			"*string:~*opts.*apikey:dps1234;dsp9876",
@@ -1095,7 +1095,7 @@ func TestHealthIndexDispatchers(t *testing.T) {
 		Weight:   20,
 		Hosts: DispatcherHostProfiles{
 			{
-				ID:        "ALL",
+				ID: "ALL",
 			},
 		},
 	}
@@ -1106,13 +1106,13 @@ func TestHealthIndexDispatchers(t *testing.T) {
 	args := &IndexHealthArgsWith3Ch{}
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*any:*string:~*opts.*apikey:dps1234": {"Dsp1"},
-			"cgrates.org:*any:*string:~*opts.*apikey:dsp9876": {"Dsp1"},
-			"cgrates.org:*any:*string:~*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
-			"cgrates.org:*any:*string:~*libphonenumber.<~*req.Destination>:+443234566": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*opts.*apikey:dps1234": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*opts.*apikey:dsp9876": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
+			"cgrates.org:*any:*string:~*opts.*apikey:dps1234":                               {"Dsp1"},
+			"cgrates.org:*any:*string:~*opts.*apikey:dsp9876":                               {"Dsp1"},
+			"cgrates.org:*any:*string:~*req.AnswerTime:2013-11-07T08:42:26Z":                {"Dsp1"},
+			"cgrates.org:*any:*string:~*libphonenumber.<~*req.Destination>:+443234566":      {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*opts.*apikey:dps1234":                          {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*opts.*apikey:dsp9876":                          {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*req.AnswerTime:2013-11-07T08:42:26Z":           {"Dsp1"},
 			"cgrates.org:*sessions:*string:~*libphonenumber.<~*req.Destination>:+443234566": {"Dsp1"},
 		},
 		BrokenIndexes:  map[string][]string{},
@@ -1120,16 +1120,15 @@ func TestHealthIndexDispatchers(t *testing.T) {
 		MissingObjects: []string{},
 	}
 
-		if rply, err := GetFltrIdxHealth(dm,
-			ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-			ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-			ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
-			utils.CacheDispatcherFilterIndexes); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(exp, rply) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
-		}
-
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheDispatcherFilterIndexes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
 
 	// we will set manually some indexes that points to an nil object or index is valid but the obj is missing
 	indexes := map[string]utils.StringMap{
@@ -1142,7 +1141,7 @@ func TestHealthIndexDispatchers(t *testing.T) {
 			"Dsp2": true,
 		},
 		"*string:*req.ExtraField:Usage": { // index is valid but the obj does not exist
-			"InexistingDispatcher": true,
+			"InexistingDispatcher":  true,
 			"InexistingDispatcher2": true,
 		},
 	}
@@ -1154,17 +1153,17 @@ func TestHealthIndexDispatchers(t *testing.T) {
 	//get the newIdxHealth for dispatchersProfile
 	exp = &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*any:*string:~*opts.*apikey:dps1234": {"Dsp1"},
-			"cgrates.org:*any:*string:~*opts.*apikey:dsp9876": {"Dsp1"},
-			"cgrates.org:*any:*string:~*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
-			"cgrates.org:*any:*string:~*libphonenumber.<~*req.Destination>:+443234566": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*opts.*apikey:dps1234": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*opts.*apikey:dsp9876": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
+			"cgrates.org:*any:*string:~*opts.*apikey:dps1234":                               {"Dsp1"},
+			"cgrates.org:*any:*string:~*opts.*apikey:dsp9876":                               {"Dsp1"},
+			"cgrates.org:*any:*string:~*req.AnswerTime:2013-11-07T08:42:26Z":                {"Dsp1"},
+			"cgrates.org:*any:*string:~*libphonenumber.<~*req.Destination>:+443234566":      {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*opts.*apikey:dps1234":                          {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*opts.*apikey:dsp9876":                          {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*req.AnswerTime:2013-11-07T08:42:26Z":           {"Dsp1"},
 			"cgrates.org:*sessions:*string:~*libphonenumber.<~*req.Destination>:+443234566": {"Dsp1"},
 		},
-		BrokenIndexes:  map[string][]string{
-			"cgrates.org:*suffix:*opts.Destination:+100": {"Dsp1"},
+		BrokenIndexes: map[string][]string{
+			"cgrates.org:*suffix:*opts.Destination:+100":  {"Dsp1"},
 			"cgrates.org:*string:*req.RequestType:*rated": {"Dsp1"},
 		},
 		MissingFilters: map[string][]string{},
@@ -1175,24 +1174,24 @@ func TestHealthIndexDispatchers(t *testing.T) {
 		},
 	}
 
-		if rply, err := GetFltrIdxHealth(dm,
-			ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-			ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-			ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
-			utils.CacheDispatcherFilterIndexes); err != nil {
-			t.Error(err)
-		} else {
-			sort.Strings(rply.MissingObjects)
-			sort.Strings(exp.MissingObjects)
-			if !reflect.DeepEqual(exp, rply) {
-				t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
-			}
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheDispatcherFilterIndexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(rply.MissingObjects)
+		sort.Strings(exp.MissingObjects)
+		if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 		}
+	}
 
 	//we will use an inexisting Filter(not inline) for the same DispatcherProfile
 	dspPrf = &DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Dsp1",
+		Tenant:     "cgrates.org",
+		ID:         "Dsp1",
 		Subsystems: []string{utils.META_ANY, utils.MetaSessionS},
 		FilterIDs: []string{
 			"*string:~*opts.*apikey:dps1234;dsp9876",
@@ -1205,7 +1204,7 @@ func TestHealthIndexDispatchers(t *testing.T) {
 		Weight:   20,
 		Hosts: DispatcherHostProfiles{
 			{
-				ID:        "ALL",
+				ID: "ALL",
 			},
 		},
 	}
@@ -1216,17 +1215,17 @@ func TestHealthIndexDispatchers(t *testing.T) {
 	//get the newIdxHealth for dispatchersProfile
 	exp = &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*any:*string:~*opts.*apikey:dps1234": {"Dsp1"},
-			"cgrates.org:*any:*string:~*opts.*apikey:dsp9876": {"Dsp1"},
-			"cgrates.org:*any:*string:~*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
-			"cgrates.org:*any:*string:~*libphonenumber.<~*req.Destination>:+443234566": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*opts.*apikey:dps1234": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*opts.*apikey:dsp9876": {"Dsp1"},
-			"cgrates.org:*sessions:*string:~*req.AnswerTime:2013-11-07T08:42:26Z": {"Dsp1"},
+			"cgrates.org:*any:*string:~*opts.*apikey:dps1234":                               {"Dsp1"},
+			"cgrates.org:*any:*string:~*opts.*apikey:dsp9876":                               {"Dsp1"},
+			"cgrates.org:*any:*string:~*req.AnswerTime:2013-11-07T08:42:26Z":                {"Dsp1"},
+			"cgrates.org:*any:*string:~*libphonenumber.<~*req.Destination>:+443234566":      {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*opts.*apikey:dps1234":                          {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*opts.*apikey:dsp9876":                          {"Dsp1"},
+			"cgrates.org:*sessions:*string:~*req.AnswerTime:2013-11-07T08:42:26Z":           {"Dsp1"},
 			"cgrates.org:*sessions:*string:~*libphonenumber.<~*req.Destination>:+443234566": {"Dsp1"},
 		},
-		BrokenIndexes:  map[string][]string{
-			"cgrates.org:*suffix:*opts.Destination:+100": {"Dsp1"},
+		BrokenIndexes: map[string][]string{
+			"cgrates.org:*suffix:*opts.Destination:+100":  {"Dsp1"},
 			"cgrates.org:*string:*req.RequestType:*rated": {"Dsp1"},
 		},
 		MissingFilters: map[string][]string{
@@ -1285,8 +1284,8 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 			"*string:~*req.Account:1234",
 			"FLTR_1_NOT_EXIST2",
 		},
-		RunID:        "*default",
-		Weight:       10,
+		RunID:  "*default",
+		Weight: 10,
 	}
 	chPrf3 := &ChargerProfile{
 		Tenant: "cgrates.org",
@@ -1315,18 +1314,18 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 	args := &IndexHealthArgsWith3Ch{}
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*string:~*asm.ID:1002": {"Raw"},
+			"cgrates.org:*string:~*asm.ID:1002":                          {"Raw"},
 			"cgrates.org:*string:~*opts.*eventType:ChargerAccountUpdate": {"Raw", "Default"},
-			"cgrates.org:*string:~*req.Account:1234": {"Raw", "Default", "Call_Attr1"},
-			"cgrates.org:*prefix:~*req.Destination:+2234": {"Default"},
-			"cgrates.org:*prefix:~*req.Destination:~*req.CGRID": {"Default"},
-			"cgrates.org:*prefix:~*req.Usage:10":{"Default"},
-			"cgrates.org:*string:*broken:index": {"Call_Attr1"},
+			"cgrates.org:*string:~*req.Account:1234":                     {"Raw", "Default", "Call_Attr1"},
+			"cgrates.org:*prefix:~*req.Destination:+2234":                {"Default"},
+			"cgrates.org:*prefix:~*req.Destination:~*req.CGRID":          {"Default"},
+			"cgrates.org:*prefix:~*req.Usage:10":                         {"Default"},
+			"cgrates.org:*string:*broken:index":                          {"Call_Attr1"},
 		},
-		BrokenIndexes:  map[string][]string{},
+		BrokenIndexes: map[string][]string{},
 		MissingFilters: map[string][]string{
 			"FLTR_1_NOT_EXIST2": {"Default", "Call_Attr1"},
-			"FLTR_1_NOT_EXIST": {"Call_Attr1"},
+			"FLTR_1_NOT_EXIST":  {"Call_Attr1"},
 		},
 		MissingObjects: []string{},
 	}
