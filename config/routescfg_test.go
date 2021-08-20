@@ -48,6 +48,10 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
+		DefaultOpts: map[string]interface{}{
+			utils.OptsContext:             utils.MetaRoutes,
+			utils.OptsRoutesProfilesCount: float64(1),
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -71,6 +75,10 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.ResourceSConnsCfg:      []string{},
 		utils.StatSConnsCfg:          []string{},
 		utils.DefaultRatioCfg:        1,
+		utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsContext:             utils.MetaRoutes,
+			utils.OptsRoutesProfilesCount: float64(1),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -106,6 +114,10 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.ResourceSConnsCfg:      []string{utils.MetaInternal, "conn1"},
 		utils.StatSConnsCfg:          []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
+		utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsContext:             utils.MetaRoutes,
+			utils.OptsRoutesProfilesCount: float64(1),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -191,6 +203,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Resources_conns:       &[]string{"*birpc"},
 		Stats_conns:           &[]string{"*birpc"},
 		Default_ratio:         utils.IntPointer(3),
+		Default_opts:          make(map[string]interface{}),
 	}
 
 	rcv := diffRouteSJsonCfg(d, v1, v2)
@@ -199,7 +212,9 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	expected = &RouteSJsonCfg{}
+	expected = &RouteSJsonCfg{
+		Default_opts: make(map[string]interface{}),
+	}
 	rcv = diffRouteSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))

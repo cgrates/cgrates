@@ -34,6 +34,7 @@ type RouteSCfg struct {
 	ResourceSConns      []string
 	StatSConns          []string
 	DefaultRatio        int
+	DefaultOpts         map[string]interface{}
 }
 
 func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
@@ -67,6 +68,9 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
 	}
+	if jsnCfg.Default_opts != nil {
+		rts.DefaultOpts = jsnCfg.Default_opts
+	}
 	if jsnCfg.Nested_fields != nil {
 		rts.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -80,6 +84,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: rts.IndexedSelects,
 		utils.DefaultRatioCfg:   rts.DefaultRatio,
 		utils.NestedFieldsCfg:   rts.NestedFields,
+		utils.DefaultOptsCfg:    rts.DefaultOpts,
 	}
 	if rts.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rts.StringIndexedFields)
@@ -109,6 +114,7 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		IndexedSelects: rts.IndexedSelects,
 		DefaultRatio:   rts.DefaultRatio,
 		NestedFields:   rts.NestedFields,
+		DefaultOpts:    rts.DefaultOpts,
 	}
 	if rts.AttributeSConns != nil {
 		cln.AttributeSConns = utils.CloneStringSlice(rts.AttributeSConns)
@@ -143,6 +149,7 @@ type RouteSJsonCfg struct {
 	Resources_conns       *[]string
 	Stats_conns           *[]string
 	Default_ratio         *int
+	Default_opts          map[string]interface{}
 }
 
 func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
@@ -173,5 +180,6 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	if v1.DefaultRatio != v2.DefaultRatio {
 		d.Default_ratio = utils.IntPointer(v2.DefaultRatio)
 	}
+	d.Default_opts = diffMap(d.Default_opts, v1.DefaultOpts, v2.DefaultOpts)
 	return d
 }

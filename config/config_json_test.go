@@ -881,6 +881,10 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Stats_conns:           &[]string{},
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
+		Default_opts: map[string]interface{}{
+			utils.OptsContext:             utils.MetaRoutes,
+			utils.OptsRoutesProfilesCount: float64(1),
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

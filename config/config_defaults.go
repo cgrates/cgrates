@@ -727,7 +727,12 @@ const CGRATES_CFG_JSON = `
 	"attributes_conns": [],					// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"default_ratio":1						// default ratio used in case of *load strategy
+	"default_ratio":1,						// default ratio used in case of *load strategy
+	"default_opts":{
+		"*context": "*routes",
+		// "*processRuns": 1,
+		"*routesProfilesCount": 1,
+	},
 },
 
 
