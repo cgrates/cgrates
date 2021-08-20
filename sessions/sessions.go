@@ -1237,6 +1237,12 @@ func (sS *SessionS) getRelocateSession(cgrID string, initOriginID,
 // syncSessions synchronizes the active sessions with the one in the clients
 // it will force-disconnect the one found in SessionS but not in clients
 func (sS *SessionS) syncSessions() {
+	sS.aSsMux.RLock()
+	asCount := len(sS.aSessions)
+	sS.aSsMux.RUnlock()
+	if asCount == 0 { // no need to sync the sessions if none is active
+		return
+	}
 	queriedCGRIDs := engine.NewSafEvent(nil) // need this to be
 	var err error
 	for _, clnt := range sS.biJClients() {
