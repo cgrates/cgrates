@@ -582,9 +582,14 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *ArgsGetRoutes, 
 			if v, err := utils.IfaceAsTInt64(val); err == nil {
 				processRuns = utils.IntPointer(int(v))
 			}
+		} else if val, has = rpS.cgrcfg.RouteSCfg().DefaultOpts[utils.OptsAttributesProcessRuns]; has {
+			if v, err := utils.IfaceAsTInt64(val); err == nil {
+				processRuns = utils.IntPointer(int(v))
+			}
 		}
 		args.CGREvent.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 			utils.IfaceAsString(args.CGREvent.APIOpts[utils.OptsContext]),
+			utils.IfaceAsString(rpS.cgrcfg.RouteSCfg().DefaultOpts[utils.OptsContext]),
 			utils.MetaRoutes)
 		attrArgs := &AttrArgsProcessEvent{
 			CGREvent:    args.CGREvent,
@@ -692,12 +697,17 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
-	if prfCountOpt, err := args.OptAsInt64(utils.OptsRoutesProfilesCount); err != nil {
-		if err != utils.ErrNotFound { // is an conversion error
+	prfCountOptInf, has := args.APIOpts[utils.OptsRoutesProfilesCount]
+	if !has {
+		prfCountOptInf, has = rpS.cgrcfg.RouteSCfg().DefaultOpts[utils.OptsRoutesProfilesCount]
+	}
+	if has {
+		prfCountOpt, err := utils.IfaceAsTInt64(prfCountOptInf)
+		if err != nil {
 			return nil, err
+		} else if prfCount > int(prfCountOpt) { // it has the option and is smaller that the current number of profiles
+			prfCount = int(prfCountOpt)
 		}
-	} else if prfCount > int(prfCountOpt) { // it has the option and is smaller that the current number of profiles
-		prfCount = int(prfCountOpt)
 	}
 	var extraOpts *optsGetRoutes
 	if extraOpts, err = args.asOptsGetRoutes(); err != nil { // convert routes arguments into internal options used to limit data

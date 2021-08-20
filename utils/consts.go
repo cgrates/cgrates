@@ -1900,6 +1900,7 @@ const (
 	TpOutDirCfg     = "tp_out_dir"
 	DataCfg         = "data"
 
+	DefaultOptsCfg    = "default_opts"
 	DefaultRatioCfg   = "default_ratio"
 	ReadersCfg        = "readers"
 	ExportersCfg      = "exporters"
