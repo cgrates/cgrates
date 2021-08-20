@@ -94,11 +94,14 @@ func (cIl *ChargingInterval) EndTime(cIlST time.Time) (et time.Time) {
 }
 
 // Cost computes the total cost on this ChargingInterval
-func (cIl *ChargingInterval) Cost() float64 {
+func (cIl *ChargingInterval) Cost(ac Accounting) float64 {
 	if cIl.cost == nil {
 		var cost float64
 		for _, incr := range cIl.Increments {
-			cost += incr.Cost * float64(incr.CompressFactor)
+			if ac[incr.AccountingID] == nil || // ignore the rounding increment
+				ac[incr.AccountingID].RatingID != utils.MetaRounding { // only used to justify the diference between the debited price and the final CDR cost
+				cost += incr.Cost * float64(incr.CompressFactor)
+			}
 		}
 		cost = utils.Round(cost, globalRoundingDecimals, utils.MetaRoundingMiddle)
 		cIl.cost = &cost
@@ -107,8 +110,8 @@ func (cIl *ChargingInterval) Cost() float64 {
 }
 
 // TotalCost returns the cost of charges
-func (cIl *ChargingInterval) TotalCost() float64 {
-	return utils.Round((cIl.Cost() * float64(cIl.CompressFactor)),
+func (cIl *ChargingInterval) TotalCost(ac Accounting) float64 {
+	return utils.Round((cIl.Cost(ac) * float64(cIl.CompressFactor)),
 		globalRoundingDecimals, utils.MetaRoundingMiddle)
 }
 
