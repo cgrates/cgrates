@@ -51,8 +51,8 @@ var (
 		testSectConfigSReloadThresholds,
 		testSectConfigSReloadRALS,
 
-		testSectConfigSReloadAttributes,
 		testSectConfigSReloadRoutes,
+		testSectConfigSReloadAttributes,
 		testSectConfigSReloadResources,
 		testSectConfigSReloadChargers,
 		testSectConfigSReloadSessions,
