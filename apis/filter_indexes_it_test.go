@@ -53,6 +53,7 @@ var (
 		testV1FIdxAttributeComputeIndexes,
 		testV1FIdxAttributeMoreProfilesForFilters,
 		testV1FIdxAttributeSRemoveComputedIndexesIDs,
+		// testV1FIdxAttributeRemoveIndexesComputeIndexesAllProfiles,
 		testV1FIdxAttributesRemoveProfilesNoIndexes,
 		testV1IndexClearCache,
 
@@ -462,8 +463,6 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 	}
 
 	var replyIdx []string
-
-	//matching for our context
 	expectedIDx := []string{"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
@@ -653,6 +652,60 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 		sort.Strings(replyIdx)
 		if !reflect.DeepEqual(expIdx, replyIdx) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxAttributeRemoveIndexesComputeIndexesAllProfiles(t *testing.T) {
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{
+		Tenant: utils.CGRateSorg,
+		ItemType: utils.MetaAttributes,
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaClear,
+		},
+		},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+	// compute our indexes
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, AttributeS: true}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+
+	expectedIDx := []string{"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
+	}
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
 		}
 	}
 }
@@ -1015,7 +1068,12 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 	//indexes will ne removed again
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts},
+		&AttrRemFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaAccounts,
+			APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1479,7 +1537,13 @@ func testV1FIdxActionSRemoveComputedIndexesIDs(t *testing.T) {
 	//indexes will be removed again
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&AttrRemFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaActions,
+			APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			},
+		},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1890,7 +1954,13 @@ func testV1FIdxChargerSRemoveComputedIndexesIDs(t *testing.T) {
 	// indexes will be removed again
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&AttrRemFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaChargers,
+			APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			},
+		},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -2343,7 +2413,13 @@ func testV1FIdxRateSRemoveComputedIndexesIDs(t *testing.T) {
 	// indexes will be removed again
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfiles},
+		&AttrRemFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaRateProfiles,
+			APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			},
+		},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -2875,8 +2951,14 @@ func testV1FIdxRateProfileRatesRemoveComputedIndexesIDs(t *testing.T) {
 	// indexes will be removed for both context, both RateProfile
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
-			Context: "RATE_1"},
+		&AttrRemFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaRateProfileRates,
+			Context:  "RATE_1",
+			APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			},
+		},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -3355,7 +3437,13 @@ func testV1FIdxResourceSRemoveComputedIndexesIDs(t *testing.T) {
 	// indexes will be removed again
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaResources},
+		&AttrRemFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaResources,
+			APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			},
+		},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -3798,7 +3886,13 @@ func testV1FIdxRouteSRemoveComputedIndexesIDs(t *testing.T) {
 	// indexes will be removed again
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&AttrRemFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaRoutes,
+			APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			},
+		},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -4239,7 +4333,13 @@ func testV1FIdxStatSRemoveComputedIndexesIDs(t *testing.T) {
 	// indexes will be removed again
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&AttrRemFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaStats,
+			APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			},
+		},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
