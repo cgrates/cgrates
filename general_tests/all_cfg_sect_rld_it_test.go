@@ -53,8 +53,12 @@ var (
 
 		testSectConfigSReloadAttributes,
 		testSectConfigSReloadRoutes,
+		testSectConfigSReloadResources,
+		testSectConfigSReloadChargers,
 		testSectConfigSReloadSessions,
 
+		testSectConfigSReloadDNSAgent,
+		testSectConfigSReloadHTTPAgent,
 		testSectConfigSReloadApiers,
 
 		testSectConfigSReloadRegistrarC,
@@ -74,10 +78,7 @@ var (
 		testSectConfigSReloadKamailioAgent,
 		testSectConfigSReloadDiameterAgent,
 		testSectConfigSReloadHTTPAgent,
-		testSectConfigSReloadDNSAgent,
 
-		testSectConfigSReloadChargers,
-		testSectConfigSReloadResources,
 		testSectConfigSReloadStats,
 
 		testSectConfigSReloadLoaders,
@@ -670,13 +671,23 @@ func testSectConfigSReloadHTTPAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"http_agent\":[]}",
+		Config: `{"http_agent": [
+			{
+				"id": "conecto1",
+				"url": "/conecto",					// relative URL for requests coming in
+				"sessions_conns": ["*internal"],
+				"request_payload":	"*url",			// source of input data <*url>
+				"reply_payload":	"*xml",			// type of output data <*xml>
+				"request_processors": [],
+			}
+		],
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"http_agent\":[]}"
+	cfgStr := "{\"http_agent\":[{\"id\":\"conecto1\",\"reply_payload\":\"*xml\",\"request_payload\":\"*url\",\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"url\":\"/conecto\"}]}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -693,13 +704,25 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"dns_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:2053\",\"listen_net\":\"udp\",\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}",
+		Config: `{"dns_agent": {
+			"enabled": true,											
+			"listen": "127.0.0.1:2053",									
+			"listen_net": "udp",										
+			"sessions_conns": ["*internal"],
+			"timezone": "local",									
+			"request_processors": [	
+				{
+					"id": "random",
+				},									
+			],
+		},
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"dns_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:2053\",\"listen_net\":\"udp\",\"request_processors\":[],\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}"
+	cfgStr := "{\"dns_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:2053\",\"listen_net\":\"udp\",\"request_processors\":[{\"filters\":null,\"flags\":null,\"id\":\"random\",\"timezone\":\"\"}],\"sessions_conns\":[\"*internal\"],\"timezone\":\"local\"}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -721,13 +744,26 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"attributes\":{\"any_context\":true,\"apiers_conns\":[\"*localhost\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":1,\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}",
+		Config: `{"attributes": {								
+			"enabled": true,						
+			"stats_conns": ["*internal"],						
+			"resources_conns": ["*internal"],					
+			"apiers_conns": ["*internal"],						
+			"indexed_selects": true,				
+			"string_indexed_fields": ["string_indexed_fields"],			
+			"prefix_indexed_fields": ["prefix_indexed_fields"],			
+			"suffix_indexed_fields": ["suffix_indexed_fields"],			
+			"nested_fields": true,				
+			"process_runs": 1,						
+			"any_context": true					
+		},}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"attributes\":{\"any_context\":true,\"apiers_conns\":[\"*localhost\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":1,\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+	cfgStr := "{\"attributes\":{\"any_context\":true,\"apiers_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"process_runs\":1,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*internal\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
+
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -750,22 +786,28 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 func testSectConfigSReloadChargers(t *testing.T) {
 
 	var replyPingBf string
-	if err := testSectRPC.Call(utils.ChargerSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+	if err := testSectRPC.Call(utils.ChargerSv1Ping, &utils.CGREvent{}, &replyPingBf); err == nil || err.Error() != "rpc: can't find service ChargerSv1.Ping" {
 		t.Error(err)
-	} else if replyPingBf != utils.Pong {
-		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"chargers\":{\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"suffix_indexed_fields\":[]}}",
+		Config: `{"chargers": {								
+			"enabled": true,						
+			"attributes_conns": ["*internal"],					
+			"indexed_selects": true,				
+			"string_indexed_fields": ["string_indexed_fields"],			
+			"prefix_indexed_fields": ["prefix_indexed_fields"],			
+			"suffix_indexed_fields": ["suffix_indexed_fields"],			
+			"nested_fields": true,					
+		},}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"chargers\":{\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"suffix_indexed_fields\":[]}}"
+	cfgStr := "{\"chargers\":{\"attributes_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -787,22 +829,29 @@ func testSectConfigSReloadChargers(t *testing.T) {
 func testSectConfigSReloadResources(t *testing.T) {
 
 	var replyPingBf string
-	if err := testSectRPC.Call(utils.ResourceSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
+	if err := testSectRPC.Call(utils.ResourceSv1Ping, &utils.CGREvent{}, &replyPingBf); err == nil || err.Error() != "rpc: can't find service ResourceSv1.Ping" {
 		t.Error(err)
-	} else if replyPingBf != utils.Pong {
-		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"resources\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"store_interval\":\"-1ns\",\"suffix_indexed_fields\":[],\"thresholds_conns\":[\"*internal\"]}}",
+		Config: `{"resources": {								
+			"enabled": true,						
+			"store_interval": "1",					
+			"thresholds_conns": ["*internal"],					
+			"indexed_selects": true,				
+			"string_indexed_fields": ["string_indexed_fields"],			
+			"prefix_indexed_fields": ["prefix_indexed_fields"],			
+			"suffix_indexed_fields": ["suffix_indexed_fields"],			
+			"nested_fields": true,					
+		},}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"resources\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"store_interval\":\"-1ns\",\"suffix_indexed_fields\":[],\"thresholds_conns\":[\"*internal\"]}}"
+	cfgStr := "{\"resources\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"1ns\",\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"],\"thresholds_conns\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -831,13 +880,24 @@ func testSectConfigSReloadStats(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"stats\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"store_interval\":\"-1ns\",\"store_uncompressed_limit\":0,\"suffix_indexed_fields\":[],\"thresholds_conns\":[\"*internal\"]}}",
+		Config: `{"stats": {									
+			"enabled": true,						
+			"store_interval": "1",					
+			"store_uncompressed_limit": 1,			
+			"thresholds_conns": ["*internal"],					
+			"indexed_selects": true,				
+			"string_indexed_fields": ["string_indexed_fields"],			
+			"prefix_indexed_fields": ["prefix_indexed_fields"],			
+			"suffix_indexed_fields": ["suffix_indexed_fields"],			
+			"nested_fields": true,					
+		},
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"stats\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"store_interval\":\"-1ns\",\"store_uncompressed_limit\":0,\"suffix_indexed_fields\":[],\"thresholds_conns\":[\"*internal\"]}}"
+	cfgStr := "{\"stats\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"1ns\",\"store_uncompressed_limit\":1,\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"],\"thresholds_conns\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
