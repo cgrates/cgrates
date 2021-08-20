@@ -3654,5 +3654,3 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, sS.storedStatQueues)
 	}
 }
-
-func TestStatQueueMatchingStatQueuesForEvent
