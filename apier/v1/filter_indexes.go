@@ -434,7 +434,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 
 // ComputeFilterIndexIDs computes specific filter indexes
 func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
-	transactionID := utils.NonTransactional
+	transactionID := utils.GenUUID()
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -577,6 +577,55 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		cacheIDs[utils.CacheDispatcherFilterIndexes] = indexes.AsSlice()
 	}
 
+	tntCtx := args.Tenant
+	if args.Context != utils.EmptyString {
+		tntCtx = utils.ConcatenatedKey(tnt, args.Context)
+	}
+	//Now we move from tmpKey to the right key for each type
+	//ThresholdProfile Indexes
+	if len(args.ThresholdIDs) != 0 {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheThresholdFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//StatQueueProfile Indexes
+	if len(args.StatIDs) != 0 {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheStatFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//ResourceProfile Indexes
+	if len(args.ResourceIDs) != 0 {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheResourceFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//RouteProfile Indexes
+	if len(args.RouteIDs) != 0 {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheRouteFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//AttributeProfile Indexes
+	if len(args.AttributeIDs) != 0 {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//ChargerProfile Indexes
+	if len(args.ChargerIDs) != 0 {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheChargerFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//DispatcherProfile Indexes
+	if len(args.DispatcherIDs) != 0 {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheDispatcherFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//generate a load
+	//ID for CacheFilterIndexes and store it in database
 	loadIDs := make(map[string]int64)
 	timeNow := time.Now().UnixNano()
 	for idx := range cacheIDs {
