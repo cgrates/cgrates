@@ -451,10 +451,8 @@ func testOnStorITRatingPlan(t *testing.T) {
 	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
 		//get from cache
-		if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
+		if _, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != utils.ErrNotFound {
 			t.Error(err)
-		} else if !reflect.DeepEqual(rp, rcv) {
-			t.Errorf("Expecting: %v, received: %v", rp, rcv)
 		}
 	}
 	//get from database
@@ -462,6 +460,14 @@ func testOnStorITRatingPlan(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
+	}
+	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+		//get from cache
+		if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(rp, rcv) {
+			t.Errorf("Expecting: %v, received: %v", rp, rcv)
+		}
 	}
 	expectedRP := []string{"rpl_HasData", "rpl_CRUDRatingPlan"}
 	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix); err != nil {
@@ -489,14 +495,14 @@ func testOnStorITRatingPlan(t *testing.T) {
 	if err := onStor.SetRatingPlan(rp); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
+	//get from database
+	if rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
 	}
-	//get from database
-	if rcv, err := onStor.GetRatingPlan(rp.Id, true, utils.NonTransactional); err != nil {
+	//get from cache
+	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rp, rcv) {
 		t.Errorf("Expecting: %v, received: %v", rp, rcv)
@@ -504,13 +510,13 @@ func testOnStorITRatingPlan(t *testing.T) {
 	if err = onStor.RemoveRatingPlan(rp.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetRatingPlan(rp.Id, false,
+	//check database if removed
+	if _, rcvErr := onStor.GetRatingPlan(rp.Id, true,
 		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	//check database if removed
-	if _, rcvErr := onStor.GetRatingPlan(rp.Id, true,
+	//check cache if removed
+	if _, rcvErr := onStor.GetRatingPlan(rp.Id, false,
 		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -576,8 +582,8 @@ func testOnStorITRatingProfile(t *testing.T) {
 	if err := onStor.SetRatingProfile(rpf); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
+	//get from databse
+	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpf, rcv) {
