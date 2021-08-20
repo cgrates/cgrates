@@ -1253,7 +1253,6 @@ func TestHealthIndexDispatchers(t *testing.T) {
 }
 
 func TestIndexHealthMultipleProfiles(t *testing.T) {
-	Cache.Clear(nil)
 	cfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
@@ -1315,8 +1314,8 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
 			"cgrates.org:*string:~*asm.ID:1002":                          {"Raw"},
-			"cgrates.org:*string:~*opts.*eventType:ChargerAccountUpdate": {"Raw", "Default"},
-			"cgrates.org:*string:~*req.Account:1234":                     {"Raw", "Default", "Call_Attr1"},
+			"cgrates.org:*string:~*opts.*eventType:ChargerAccountUpdate": {"Default", "Raw"},
+			"cgrates.org:*string:~*req.Account:1234":                     {"Call_Attr1", "Default","Raw"},
 			"cgrates.org:*prefix:~*req.Destination:+2234":                {"Default"},
 			"cgrates.org:*prefix:~*req.Destination:~*req.CGRID":          {"Default"},
 			"cgrates.org:*prefix:~*req.Usage:10":                         {"Default"},
@@ -1324,7 +1323,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		},
 		BrokenIndexes: map[string][]string{},
 		MissingFilters: map[string][]string{
-			"FLTR_1_NOT_EXIST2": {"Default", "Call_Attr1"},
+			"FLTR_1_NOT_EXIST2": {"Call_Attr1", "Default"},
 			"FLTR_1_NOT_EXIST":  {"Call_Attr1"},
 		},
 		MissingObjects: []string{},
@@ -1336,14 +1335,11 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
-		sort.Strings(exp.MissingIndexes["cgrates.org:*string:*opts.*eventType:ChargerAccountUpdate"])
-		sort.Strings(exp.MissingIndexes["cgrates.org:*string:*req.Account:1234"])
-		sort.Strings(exp.MissingFilters["cgrates.org:FLTR_1_NOT_EXIST2"])
-		sort.Strings(rply.MissingIndexes["cgrates.org:*string:*opts.*eventType:ChargerAccountUpdate"])
-		sort.Strings(rply.MissingIndexes["cgrates.org:*string:*req.Account:1234"])
-		sort.Strings(rply.MissingFilters["cgrates.org:FLTR_1_NOT_EXIST2"])
+		for _, slice := range rply.MissingIndexes{sort.Strings(slice)}
+		for _, slice := range rply.MissingFilters{sort.Strings(slice)}
+		for _, slice := range rply.BrokenIndexes{sort.Strings(slice)}
 		if !reflect.DeepEqual(exp, rply) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 		}
 	}
 }
