@@ -272,7 +272,7 @@ func (ec *EventCost) GetCost() float64 {
 	if ec.Cost == nil {
 		var cost float64
 		for _, ci := range ec.Charges {
-			cost += ci.TotalCost()
+			cost += ci.TotalCost(ec.Accounting)
 		}
 		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 		ec.Cost = &cost
@@ -372,7 +372,7 @@ func (ec *EventCost) AsCallCost(tor string) *CallCost {
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {
 		ts := &TimeSpan{
-			Cost:           cIl.Cost(),
+			Cost:           cIl.Cost(ec.Accounting),
 			DurationIndex:  *cIl.Usage(),
 			CompressFactor: cIl.CompressFactor,
 		}
