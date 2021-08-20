@@ -322,7 +322,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		Account:     "dan",
 		Destination: "+4986517174963",
 		ToR:         utils.VOICE,
-		Cost:        0.75,
+		Cost:        0.85,
 		RatedUsage:  120.0,
 		Timespans: TimeSpans{
 			&TimeSpan{
@@ -516,9 +516,9 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 					},
 				},
 				CompressFactor: 1,
-				usage:          utils.DurationPointer(time.Duration(60 * time.Second)),
-				cost:           utils.Float64Pointer(0.15),
-				ecUsageIdx:     utils.DurationPointer(time.Duration(0)),
+				usage:          utils.DurationPointer(60 * time.Second),
+				cost:           utils.Float64Pointer(0.25),
+				ecUsageIdx:     utils.DurationPointer(0),
 			},
 			&ChargingInterval{
 				RatingID: "f2518464-68b8-42f4-acec-aef23d714314",
@@ -662,9 +662,9 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v",
 				eEC.Charges[i].Usage(), ec.Charges[i].Usage())
 		}
-		if !reflect.DeepEqual(eEC.Charges[i].Cost(), ec.Charges[i].Cost()) {
+		if !reflect.DeepEqual(eEC.Charges[i].Cost(eEC.Accounting), ec.Charges[i].Cost(ec.Accounting)) {
 			t.Errorf("Expecting: %f, received: %f",
-				eEC.Charges[i].Cost(), ec.Charges[i].Cost())
+				eEC.Charges[i].Cost(eEC.Accounting), ec.Charges[i].Cost(ec.Accounting))
 		}
 		if !reflect.DeepEqual(eEC.Charges[i].ecUsageIdx, ec.Charges[i].ecUsageIdx) {
 			t.Errorf("Expecting: %v, received: %v",
@@ -1741,7 +1741,7 @@ func TestECMergeGT(t *testing.T) {
 	}
 	if len(ecGT.Charges) != len(ecExpct.Charges) ||
 		!reflect.DeepEqual(ecGT.Charges[0].TotalUsage(), ecExpct.Charges[0].TotalUsage()) ||
-		!reflect.DeepEqual(ecGT.Charges[0].TotalCost(), ecExpct.Charges[0].TotalCost()) {
+		!reflect.DeepEqual(ecGT.Charges[0].TotalCost(ecGT.Accounting), ecExpct.Charges[0].TotalCost(ecExpct.Accounting)) {
 		t.Errorf("expecting: %s\n\n, received: %s",
 			utils.ToJSON(ecExpct), utils.ToJSON(ecGT))
 	}
