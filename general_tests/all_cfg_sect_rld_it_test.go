@@ -72,10 +72,8 @@ var (
 		testSectConfigSReloadCDRS,
 		testSectConfigSReloadERS,
 		testSectConfigSReloadEES,
+		testSectConfigSReloadRadiusAgent,
 
-		testSectConfigSReloadAsteriskAgent,
-		testSectConfigSReloadFreeswitchAgent,
-		testSectConfigSReloadKamailioAgent,
 		testSectConfigSReloadDiameterAgent,
 		testSectConfigSReloadHTTPAgent,
 
@@ -94,7 +92,9 @@ var (
 		testSectConfigSReloadSIPAgent,
 		testSectConfigSReloadMigrator,
 		testSectConfigSReloadSuretax,
-
+		testSectConfigSReloadAsteriskAgent,
+		//testSectConfigSReloadKamailioAgent,
+		//testSectConfigSReloadFreeswitchAgent,
 		testSectStopCgrEngine,
 	}
 )
@@ -579,13 +579,21 @@ func testSectConfigSReloadAsteriskAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"asterisk_agent\":{\"asterisk_conns\":[{\"address\":\"127.0.0.1:8088\",\"alias\":\"\",\"connect_attempts\":3,\"password\":\"CGRateS.org\",\"reconnects\":5,\"user\":\"cgrates\"}],\"create_cdr\":false,\"enabled\":false,\"sessions_conns\":[\"*birpc_internal\"]}}",
+		Config: `{"asterisk_agent": {
+			"enabled": true,						
+			"sessions_conns": ["*birpc_internal"],
+			"create_cdr": true,					
+			"asterisk_conns":[						
+				{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+			],
+		},
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"asterisk_agent\":{\"asterisk_conns\":[{\"address\":\"127.0.0.1:8088\",\"alias\":\"\",\"connect_attempts\":3,\"password\":\"CGRateS.org\",\"reconnects\":5,\"user\":\"cgrates\"}],\"create_cdr\":false,\"enabled\":false,\"sessions_conns\":[\"*birpc_internal\"]}}"
+	cfgStr := "{\"asterisk_agent\":{\"asterisk_conns\":[{\"address\":\"127.0.0.1:8088\",\"alias\":\"\",\"connect_attempts\":3,\"password\":\"CGRateS.org\",\"reconnects\":5,\"user\":\"cgrates\"}],\"create_cdr\":true,\"enabled\":true,\"sessions_conns\":[\"*birpc_internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -602,13 +610,27 @@ func testSectConfigSReloadFreeswitchAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"freeswitch_agent\":{\"create_cdr\":false,\"empty_balance_ann_file\":\"\",\"empty_balance_context\":\"\",\"enabled\":false,\"event_socket_conns\":[{\"address\":\"127.0.0.1:8021\",\"alias\":\"127.0.0.1:8021\",\"password\":\"ClueCon\",\"reconnects\":5}],\"extra_fields\":[],\"low_balance_ann_file\":\"\",\"max_wait_connection\":\"2s\",\"sessions_conns\":[\"*birpc_internal\"],\"subscribe_park\":true}}",
+		Config: `{"freeswitch_agent": {
+			"enabled": true,						
+			"sessions_conns": ["*birpc_internal"],
+			"subscribe_park": true,					
+			"create_cdr": true,					
+			"extra_fields": ["extra_fields"],						
+			"low_balance_ann_file": "low_balance_ann_file",				
+			"empty_balance_context": "empty_balance_context",			
+			"empty_balance_ann_file": "empty_balance_ann_file",			
+			"max_wait_connection": "2s",			
+			"event_socket_conns":[					
+				{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":"alias"}
+			],
+		},
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"freeswitch_agent\":{\"create_cdr\":false,\"empty_balance_ann_file\":\"\",\"empty_balance_context\":\"\",\"enabled\":false,\"event_socket_conns\":[{\"address\":\"127.0.0.1:8021\",\"alias\":\"127.0.0.1:8021\",\"password\":\"ClueCon\",\"reconnects\":5}],\"extra_fields\":\"\",\"low_balance_ann_file\":\"\",\"max_wait_connection\":\"2s\",\"sessions_conns\":[\"*birpc_internal\"],\"subscribe_park\":true}}"
+	cfgStr := "{\"freeswitch_agent\":{\"create_cdr\":true,\"empty_balance_ann_file\":\"empty_balance_ann_file\",\"empty_balance_context\":\"empty_balance_context\",\"enabled\":true,\"event_socket_conns\":[{\"address\":\"127.0.0.1:8021\",\"alias\":\"alias\",\"password\":\"ClueCon\",\"reconnects\":5}],\"extra_fields\":\"extra_fields\",\"low_balance_ann_file\":\"low_balance_ann_file\",\"max_wait_connection\":\"2s\",\"sessions_conns\":[\"*birpc_internal\"],\"subscribe_park\":true}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -618,6 +640,30 @@ func testSectConfigSReloadFreeswitchAgent(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+
+	var reply2 string
+	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+		Tenant: "cgrates.org",
+		Config: `{"freeswitch_agent": {
+			"enabled": false,						
+			"sessions_conns": [],
+			"subscribe_park": false,					
+			"create_cdr": false,					
+			"extra_fields": [],						
+			"low_balance_ann_file": "",				
+			"empty_balance_context": "",			
+			"empty_balance_ann_file": "",			
+			"max_wait_connection": "",			
+			"event_socket_conns":[					
+				{"address": "", "password": "", "reconnects": 0,"alias":""}
+			],
+		},
+		}}`,
+	}, &reply2); err != nil {
+		t.Error(err)
+	} else if reply2 != utils.OK {
+		t.Errorf("Expected OK received: %+v", reply2)
+	}
 }
 
 func testSectConfigSReloadKamailioAgent(t *testing.T) {
@@ -625,13 +671,22 @@ func testSectConfigSReloadKamailioAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"kamailio_agent\":{\"create_cdr\":false,\"enabled\":false,\"evapi_conns\":[{\"address\":\"127.0.0.1:8448\",\"alias\":\"\",\"reconnects\":5}],\"sessions_conns\":[\"*birpc_internal\"],\"timezone\":\"\"}}",
+		Config: `{"kamailio_agent": {
+			"enabled": true,						
+			"sessions_conns": ["*birpc_internal"],
+			"create_cdr": true,					
+			"timezone": "local",							
+			"evapi_conns":[						
+				{"address": "127.0.0.1:8448", "reconnects": 5}
+			],
+		},
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"kamailio_agent\":{\"create_cdr\":false,\"enabled\":false,\"evapi_conns\":[{\"address\":\"127.0.0.1:8448\",\"alias\":\"\",\"reconnects\":5}],\"sessions_conns\":[\"*birpc_internal\"],\"timezone\":\"\"}}"
+	cfgStr := "{\"kamailio_agent\":{\"create_cdr\":true,\"enabled\":true,\"evapi_conns\":[{\"address\":\"127.0.0.1:8448\",\"alias\":\"\",\"reconnects\":5}],\"sessions_conns\":[\"*birpc_internal\"],\"timezone\":\"local\"}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -641,6 +696,24 @@ func testSectConfigSReloadKamailioAgent(t *testing.T) {
 	} else if cfgStr != rpl {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
+	var reply2 string
+	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+		Tenant: "cgrates.org",
+		Config: `{"kamailio_agent": {
+			"enabled": false,						
+			"sessions_conns": [],
+			"create_cdr": false,					
+			"timezone": "",							
+			"evapi_conns":[						
+				{"address": "", "reconnects": 0}
+			],
+		},
+		}}`,
+	}, &reply2); err != nil {
+		t.Error(err)
+	} else if reply2 != utils.OK {
+		t.Errorf("Expected OK received: %+v", reply2)
+	}
 }
 
 func testSectConfigSReloadDiameterAgent(t *testing.T) {
@@ -648,17 +721,97 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"diameter_agent\":{\"asr_template\":\"\",\"concurrent_requests\":-1,\"dictionaries_path\":\"/usr/share/cgrates/diameter/dict/\",\"enabled\":true,\"forced_disconnect\":\"*none\",\"listen\":\"127.0.0.1:3868\",\"listen_net\":\"tcp\",\"origin_host\":\"CGR-DA\",\"origin_realm\":\"cgrates.org\",\"product_name\":\"CGRateS\",\"rar_template\":\"\",\"request_processors\":[],\"sessions_conns\":[\"*birpc_internal\"],\"synced_conn_requests\":false,\"vendor_id\":0}}",
+		Config: `{"diameter_agent": {
+			"enabled": true,											
+			"listen": "127.0.0.1:3868",									
+			"listen_net": "tcp",										
+			"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	
+			"sessions_conns": ["*birpc_internal"],
+			"origin_host": "CGR-DA",									
+			"origin_realm": "cgrates.org",								
+			"vendor_id": 1,												
+			"product_name": "CGRateS",									
+			"concurrent_requests": -1,									
+			"synced_conn_requests": false,								
+			"asr_template": "asr_template",								
+			"rar_template": "rar_template",								
+			"forced_disconnect": "*none",								
+			"request_processors": [
+				{
+					"id": "cgrates", 
+					"tenant": "1",
+					"filters": [],
+					 "flags": ["1"],
+					"request_fields": [
+					   {"path": "randomPath"},
+					  ],
+					"reply_fields": [
+						 {"path": "randomPath"},
+					 ],
+				   }
+			],
+		},
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"diameter_agent\":{\"asr_template\":\"\",\"concurrent_requests\":-1,\"dictionaries_path\":\"/usr/share/cgrates/diameter/dict/\",\"enabled\":true,\"forced_disconnect\":\"*none\",\"listen\":\"127.0.0.1:3868\",\"listen_net\":\"tcp\",\"origin_host\":\"CGR-DA\",\"origin_realm\":\"cgrates.org\",\"product_name\":\"CGRateS\",\"rar_template\":\"\",\"request_processors\":[],\"sessions_conns\":[\"*birpc_internal\"],\"synced_conn_requests\":false,\"vendor_id\":0}}"
+	cfgStr := "{\"diameter_agent\":{\"asr_template\":\"asr_template\",\"concurrent_requests\":-1,\"dictionaries_path\":\"/usr/share/cgrates/diameter/dict/\",\"enabled\":true,\"forced_disconnect\":\"*none\",\"listen\":\"127.0.0.1:3868\",\"listen_net\":\"tcp\",\"origin_host\":\"CGR-DA\",\"origin_realm\":\"cgrates.org\",\"product_name\":\"CGRateS\",\"rar_template\":\"rar_template\",\"request_processors\":[{\"filters\":[],\"flags\":[\"1\"],\"id\":\"cgrates\",\"reply_fields\":[{\"path\":\"randomPath\",\"tag\":\"randomPath\"}],\"request_fields\":[{\"path\":\"randomPath\",\"tag\":\"randomPath\"}],\"tenant\":\"1\",\"timezone\":\"\"}],\"sessions_conns\":[\"*birpc_internal\"],\"synced_conn_requests\":false,\"vendor_id\":1}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: "diameter_agent",
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if cfgStr != rpl {
+		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
+}
+
+func testSectConfigSReloadRadiusAgent(t *testing.T) {
+
+	var reply string
+	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+		Tenant: "cgrates.org",
+		Config: `{"radius_agent": {
+			"enabled": true,											 
+			"listen_net": "udp",										 
+			"listen_auth": "127.0.0.1:1812",							 
+			"listen_acct": "127.0.0.1:1813",							 
+			"client_secrets": {											
+				"*default": "CGRateS.org"
+			},
+			"client_dictionaries": {									
+				"*default": "/usr/share/cgrates/radius/dict/",			
+			},
+			"sessions_conns": ["*internal"],
+			"request_processors": [	
+				{
+					"id": "cgrates", 
+					"tenant": "1",
+					"filters": [],
+					 "flags": ["1"],
+					"request_fields": [
+					   {"path": "randomPath"},
+					  ],
+					"reply_fields": [
+						 {"path": "randomPath"},
+					 ],
+				   }								
+			],
+		},
+		}}`,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %+v", reply)
+	}
+	cfgStr := "{\"radius_agent\":{\"client_dictionaries\":{\"*default\":\"/usr/share/cgrates/radius/dict/\"},\"client_secrets\":{\"*default\":\"CGRateS.org\"},\"enabled\":true,\"listen_acct\":\"127.0.0.1:1813\",\"listen_auth\":\"127.0.0.1:1812\",\"listen_net\":\"udp\",\"request_processors\":[{\"filters\":[],\"flags\":[\"1\"],\"id\":\"cgrates\",\"reply_fields\":[{\"path\":\"randomPath\",\"tag\":\"randomPath\"}],\"request_fields\":[{\"path\":\"randomPath\",\"tag\":\"randomPath\"}],\"tenant\":\"1\",\"timezone\":\"\"}],\"sessions_conns\":[\"*internal\"]}}"
+	var rpl string
+	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+		Tenant:  "cgrates.org",
+		Section: "radius_agent",
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if cfgStr != rpl {
@@ -674,10 +827,10 @@ func testSectConfigSReloadHTTPAgent(t *testing.T) {
 		Config: `{"http_agent": [
 			{
 				"id": "conecto1",
-				"url": "/conecto",					// relative URL for requests coming in
+				"url": "/conecto",					
 				"sessions_conns": ["*internal"],
-				"request_payload":	"*url",			// source of input data <*url>
-				"reply_payload":	"*xml",			// type of output data <*xml>
+				"request_payload":	"*url",			
+				"reply_payload":	"*xml",			
 				"request_processors": [],
 			}
 		],
@@ -1259,13 +1412,44 @@ func testSectConfigSReloadSIPAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"sip_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:5060\",\"listen_net\":\"udp\",\"request_processors\":[],\"retransmission_timer\":\"1000000000\",\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}",
+		Config: `{"sip_agent": {							
+			"enabled": true,					
+			"listen": "127.0.0.1:5060",			
+			"listen_net": "udp",				
+			"sessions_conns": ["*internal"],
+			"timezone": "local",						
+			"retransmission_timer": "100s",		
+			"request_processors": [	
+				{
+					"id": "OutboundAUTHDryRun",
+					"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
+					"tenant": "cgrates.org",
+					"flags": ["*dryrun"],
+					"timezone":       "",
+					"request_fields":[
+					],
+					"reply_fields":[
+						{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant",
+							"value": "1", "mandatory": true},
+						{"tag": "Concatenated1", "path": "*rep.response.Concatenated", "type": "*composed",
+							"value": "~*req.MCC;/", "mandatory": true},
+						{"tag": "Concatenated2", "path": "*rep.response.Concatenated", "type": "*composed",
+							"value": "Val1"},
+						{"tag": "MaxDuration", "path": "*rep.response.MaxDuration", "type": "*constant",
+							"value": "1200", "blocker": true},
+						{"tag": "Unused", "path": "*rep.response.Unused", "type": "*constant",
+							"value": "0"},
+						],
+					},	
+			],
+		},
+		}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"sip_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:5060\",\"listen_net\":\"udp\",\"request_processors\":[],\"retransmission_timer\":1000000000,\"sessions_conns\":[\"*internal\"],\"timezone\":\"\"}}"
+	cfgStr := "{\"sip_agent\":{\"enabled\":true,\"listen\":\"127.0.0.1:5060\",\"listen_net\":\"udp\",\"request_processors\":[{\"filters\":[\"*string:~*req.request_type:OutboundAUTH\",\"*string:~*req.Msisdn:497700056231\"],\"flags\":[\"*dryrun\"],\"id\":\"OutboundAUTHDryRun\",\"reply_fields\":[{\"mandatory\":true,\"path\":\"*rep.response.Allow\",\"tag\":\"Allow\",\"type\":\"*constant\",\"value\":\"1\"},{\"mandatory\":true,\"path\":\"*rep.response.Concatenated\",\"tag\":\"Concatenated1\",\"type\":\"*composed\",\"value\":\"~*req.MCC;/\"},{\"path\":\"*rep.response.Concatenated\",\"tag\":\"Concatenated2\",\"type\":\"*composed\",\"value\":\"Val1\"},{\"blocker\":true,\"path\":\"*rep.response.MaxDuration\",\"tag\":\"MaxDuration\",\"type\":\"*constant\",\"value\":\"1200\"},{\"path\":\"*rep.response.Unused\",\"tag\":\"Unused\",\"type\":\"*constant\",\"value\":\"0\"}],\"request_fields\":[],\"tenant\":\"cgrates.org\",\"timezone\":\"\"}],\"retransmission_timer\":100000000000,\"sessions_conns\":[\"*internal\"],\"timezone\":\"local\"}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
