@@ -542,11 +542,11 @@
 
 "dns_agent": {
 	"enabled": false,											
-	"listen": "127.0.0.1:2053",									
-	"listen_net": "udp",										
-	"sessions_conns": ["*internal"],
+	"listen": "",									
+	"listen_net": "",										
+	"sessions_conns": [],
 	"timezone": "",												
-	"request_processors": [										
+	"request_processors": [											
 	],
 },
 
@@ -555,32 +555,32 @@
 	"stats_conns": [],						
 	"resources_conns": [],					
 	"apiers_conns": [],						
-	"indexed_selects": true,				
-	//"string_indexed_fields": [],			
+	"indexed_selects": false,				
+	"string_indexed_fields": [],			
 	"prefix_indexed_fields": [],			
 	"suffix_indexed_fields": [],			
 	"nested_fields": false,					
-	"process_runs": 1,						
-	"any_context": true,					
+	"process_runs": 0,						
+	"any_context": false					
 },
 
 
 "chargers": {								
-	"enabled": true,						
+	"enabled": false,						
 	"attributes_conns": [],					
-	"indexed_selects": true,				
-	//"string_indexed_fields": [],			
+	"indexed_selects": false,				
+	"string_indexed_fields": [],			
 	"prefix_indexed_fields": [],			
 	"suffix_indexed_fields": [],			
 	"nested_fields": false,					
 },
 
 "resources": {								
-	"enabled": true,						
+	"enabled": false,						
 	"store_interval": "",					
 	"thresholds_conns": [],					
-	"indexed_selects": true,				
-	//"string_indexed_fields": [],			
+	"indexed_selects": false,				
+	"string_indexed_fields": [],			
 	"prefix_indexed_fields": [],			
 	"suffix_indexed_fields": [],			
 	"nested_fields": false,					
@@ -591,8 +591,8 @@
 	"store_interval": "",					
 	"store_uncompressed_limit": 0,			
 	"thresholds_conns": [],					
-	"indexed_selects": true,				
-	//"string_indexed_fields": [],			
+	"indexed_selects": false,				
+	"string_indexed_fields": [],			
 	"prefix_indexed_fields": [],			
 	"suffix_indexed_fields": [],			
 	"nested_fields": false,					
