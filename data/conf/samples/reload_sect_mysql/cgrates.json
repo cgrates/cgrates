@@ -472,68 +472,68 @@
 },
 "asterisk_agent": {
 	"enabled": false,						
-	"sessions_conns": ["*birpc_internal"],
+	"sessions_conns": [],
 	"create_cdr": false,					
 	"asterisk_conns":[						
-		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+		{"address": "", "user": "", "password": "", "connect_attempts": 0,"reconnects": 0}
 	],
 },
 
 "freeswitch_agent": {
 	"enabled": false,						
-	"sessions_conns": ["*birpc_internal"],
-	"subscribe_park": true,					
+	"sessions_conns": [],
+	"subscribe_park": false,					
 	"create_cdr": false,					
 	"extra_fields": [],						
 	"low_balance_ann_file": "",				
 	"empty_balance_context": "",			
 	"empty_balance_ann_file": "",			
-	"max_wait_connection": "2s",			
+	"max_wait_connection": "",			
 	"event_socket_conns":[					
-		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
+		{"address": "", "password": "", "reconnects": 0,"alias":""}
 	],
 },
 
 "kamailio_agent": {
 	"enabled": false,						
-	"sessions_conns": ["*birpc_internal"],
+	"sessions_conns": [],
 	"create_cdr": false,					
 	"timezone": "",							
 	"evapi_conns":[						
-		{"address": "127.0.0.1:8448", "reconnects": 5}
+		{"address": "", "reconnects": 0}
 	],
 },
 
 "diameter_agent": {
 	"enabled": false,											
-	"listen": "127.0.0.1:3868",									
-	"listen_net": "tcp",										
-	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	
-	"sessions_conns": ["*birpc_internal"],
-	"origin_host": "CGR-DA",									
-	"origin_realm": "cgrates.org",								
+	"listen": "",									
+	"listen_net": "",										
+	"dictionaries_path": "",	
+	"sessions_conns": [],
+	"origin_host": "",									
+	"origin_realm": "",								
 	"vendor_id": 0,												
-	"product_name": "CGRateS",									
+	"product_name": "",									
 	"concurrent_requests": -1,									
 	"synced_conn_requests": false,								
 	"asr_template": "",											
 	"rar_template": "",											
-	"forced_disconnect": "*none",								
+	"forced_disconnect": "",								
 	"request_processors": [],
 },
 
 "radius_agent": {
 	"enabled": false,											
-	"listen_net": "udp",										
-	"listen_auth": "127.0.0.1:1812",							
-	"listen_acct": "127.0.0.1:1813",							
+	"listen_net": "",										
+	"listen_auth": "",							
+	"listen_acct": "",							
 	"client_secrets": {											
-		"*default": "CGRateS.org"
+		"*default": ""
 	},
 	"client_dictionaries": {									
-		"*default": "/usr/share/cgrates/radius/dict/",			
+		"*default": "",			
 	},
-	"sessions_conns": ["*internal"],
+	"sessions_conns": [],
 	"request_processors": [										
 	],
 },
@@ -913,11 +913,11 @@
 
 "sip_agent": {							
 	"enabled": false,					
-	"listen": "testListen",			
-	"listen_net": "testNet",				
-	"sessions_conns": ["*localhost"],
-	"timezone": "time",						
-	"retransmission_timer": "100s",		
+	"listen": "",			
+	"listen_net": "",				
+	"sessions_conns": [""],
+	"timezone": "",						
+	"retransmission_timer": "",		
 	"request_processors": [		
 	],
 },
