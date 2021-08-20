@@ -2112,6 +2112,6 @@ func TestAttributesProcessEventSIPCIDInvalidArgs(t *testing.T) {
 	experr := `SERVER_ERROR: invalid number of arguments <[]> to *sipcid`
 	if err := attrService.V1ProcessEvent(attrArgs, &reply); err == nil ||
 		err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, \n received: <%+v>", experr, err)
 	}
 }
