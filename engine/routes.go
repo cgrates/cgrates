@@ -744,11 +744,16 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 		if sr, err = rpS.sortedRoutesForProfile(ctx, tnt, rPrfl, args.CGREvent, prfPag, extraOpts); err != nil {
 			return
 		}
-		noSrtRoutes += len(sr.Routes)
-		sortedRoutes = append(sortedRoutes, sr)
-		if len(sortedRoutes) == prfCount { // the profile count was reached
-			break
+		if len(sr.Routes) != 0 {
+			noSrtRoutes += len(sr.Routes)
+			sortedRoutes = append(sortedRoutes, sr)
+			if len(sortedRoutes) == prfCount { // the profile count was reached
+				break
+			}
 		}
+	}
+	if len(sortedRoutes) == 0 {
+		err = utils.ErrNotFound
 	}
 	return
 }

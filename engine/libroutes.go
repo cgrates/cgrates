@@ -245,13 +245,7 @@ func (ssd RouteSortDispatcher) SortRoutes(ctx *context.Context, prflID, strategy
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	if sortedRoutes, err = sd.SortRoutes(ctx, prflID, suppls, suplEv, extraOpts); err != nil {
-		return
-	}
-	if len(sortedRoutes.Routes) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	return
+	return sd.SortRoutes(ctx, prflID, suppls, suplEv, extraOpts)
 }
 
 // SortedRoutesList represents the list of matched routes grouped based of profile
