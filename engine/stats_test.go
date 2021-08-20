@@ -3150,12 +3150,9 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3185,7 +3182,7 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -3193,7 +3190,7 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 		utils.MetaTCD: 3600000000000,
 	}
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{
 		ID: "SQ1",
 	}, &reply); err != nil {
 		t.Error(err)
@@ -3219,12 +3216,9 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3254,12 +3248,12 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{
 		ID: "SQ2",
 	}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -3283,12 +3277,9 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3318,13 +3309,13 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3346,7 +3337,7 @@ func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(&utils.TenantID{
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{
 		ID: "SQ1",
 	}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -3370,12 +3361,9 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3405,7 +3393,7 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
@@ -3413,7 +3401,7 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 		utils.MetaTCD: "1h0m0s",
 	}
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(&utils.TenantID{
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{
 		ID: "SQ1",
 	}, &reply); err != nil {
 		t.Error(err)
@@ -3439,12 +3427,9 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3474,12 +3459,12 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(&utils.TenantID{
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{
 		ID: "SQ2",
 	}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -3503,12 +3488,9 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3538,13 +3520,13 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(&utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3566,7 +3548,7 @@ func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(&utils.TenantID{
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{
 		ID: "SQ1",
 	}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -3588,7 +3570,7 @@ func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, connMgr)
@@ -3599,7 +3581,7 @@ func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 		dirty:  utils.BoolPointer(true),
 	}
 
-	sS.storeStatQueue(sq)
+	sS.storeStatQueue(context.Background(), sq)
 
 	if *sq.dirty != false {
 		t.Error("expected dirty to be false")
@@ -3623,12 +3605,9 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		Weight:       10,
 		Blocker:      true,
 		QueueLength:  10,
@@ -3659,14 +3638,14 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Error(err)
 	}
 
 	expected := utils.StringSet{
 		utils.ConcatenatedKey(sq.Tenant, sq.ID): struct{}{},
 	}
-	if rcv, err := sS.getStatQueue("cgrates.org", "SQ1"); err != nil {
+	if rcv, err := sS.getStatQueue(context.Background(), "cgrates.org", "SQ1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, sq) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3676,73 +3655,4 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 	}
 }
 
-func TestStatQueueCall(t *testing.T) {
-	tmp := Cache
-	tmpC := config.CgrConfig()
-	defer func() {
-		Cache = tmp
-		config.SetCgrConfig(tmpC)
-	}()
-
-	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
-	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, nil)
-
-	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
-		},
-		Weight:       10,
-		Blocker:      true,
-		QueueLength:  10,
-		ThresholdIDs: []string{"*none"},
-		MinItems:     5,
-		Metrics: []*MetricWithFilters{
-			{
-				MetricID: utils.MetaTCD,
-			},
-		},
-	}
-	sq := &StatQueue{
-		sqPrfl: sqPrf,
-		dirty:  utils.BoolPointer(false),
-		Tenant: "cgrates.org",
-		ID:     "SQ1",
-		SQItems: []SQItem{
-			{
-				EventID:    "SqProcessEvent",
-				ExpiryTime: utils.TimePointer(time.Now()),
-			},
-		},
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &StatTCD{
-				Sum: time.Minute,
-				val: utils.DurationPointer(time.Hour),
-			},
-		},
-	}
-
-	if err := dm.SetStatQueue(sq); err != nil {
-		t.Error(err)
-	}
-
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "SQ1",
-		},
-	}
-	var reply StatQueue
-	if err := sS.Call(utils.StatSv1GetStatQueue, args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, *sq) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(*sq), utils.ToJSON(reply))
-	}
-}
+func TestStatQueueMatchingStatQueuesForEvent
