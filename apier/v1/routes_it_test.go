@@ -509,7 +509,7 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 }
 
 func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
+	ev := &engine.ArgsGetRoutes{ // it gives error to leastCost but try next because of ignoreErrors flag
 		IgnoreErrors: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -522,10 +522,25 @@ func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
 			},
 		},
 	}
+	eSpls := engine.SortedRoutesList{{
+		ProfileID: "ROUTE_WEIGHT_2",
+		Sorting:   utils.MetaWeight,
+		Routes: []*engine.SortedRoute{
+			{
+				RouteID: "route1",
+				SortingData: map[string]interface{}{
+					utils.Weight: 10.0,
+				},
+			},
+		},
+	}}
 	var suplsReply engine.SortedRoutesList
 	if err := routeSv1Rpc.Call(utils.RouteSv1GetRoutes,
-		ev, &suplsReply); err.Error() != utils.ErrNotFound.Error() {
+		ev, &suplsReply); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
 	}
 }
 
