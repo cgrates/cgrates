@@ -459,7 +459,7 @@ func TestAttributeIndexer(t *testing.T) {
 		t.Error(err)
 	}
 	if rcvIdx, err := dmAtr.GetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes,
-		attrPrf.Tenant, "",utils.NonTransactional, false, false); err != nil {
+		attrPrf.Tenant, "", utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -477,7 +477,7 @@ func TestAttributeIndexer(t *testing.T) {
 	}
 	//verify if old index was deleted ( context *any)
 	if rcv, err := dmAtr.GetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes,
-		attrPrf.Tenant, "",utils.NonTransactional, false, false); err != nil {
+		attrPrf.Tenant, "", utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expected, rcv)
@@ -3002,4 +3002,3 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expReply), utils.ToJSON(reply))
 	}
 }
-
