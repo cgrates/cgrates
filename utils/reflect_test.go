@@ -842,10 +842,10 @@ func TestIfaceAsBoolInt64(t *testing.T) {
 }
 
 func TestIfaceAsBoolDefault(t *testing.T) {
-	var test uint64 = 2147483647
+	var test struct{}
 	_, err := IfaceAsBool(test)
-	if err == nil || err.Error() != "cannot convert field: 2147483647 to bool" {
-		t.Errorf("Expecting <cannot convert field: 2147483647 to bool> ,received: <%+v>", err)
+	if err == nil || err.Error() != "cannot convert field: {} to bool" {
+		t.Errorf("Expecting <cannot convert field: {} to bool> ,received: <%+v>", err)
 	}
 }
 

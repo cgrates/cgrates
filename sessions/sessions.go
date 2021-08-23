@@ -943,7 +943,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent, resI
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 	}
-	s.chargeable = s.OptsStart.GetBoolOrDefault(utils.OptsChargeable, true)
+	s.chargeable = s.OptsStart.GetBoolOrDefault(utils.OptsSessionsChargeable, true)
 	if !isMsg && sS.isIndexed(s, false) { // check if already exists
 		return nil, utils.ErrExists
 	}
@@ -1107,38 +1107,41 @@ func (sS *SessionS) syncSessions(ctx *context.Context) {
 	if asCount == 0 { // no need to sync the sessions if none is active
 		return
 	}
-	queriedCGRIDs := engine.NewSafEvent(nil) // need this to be
-	var err error
-	for _, clnt := range sS.biJClients() {
-		errChan := make(chan error)
+	type qReply struct {
+		reply []*SessionID
+		err   error
+	}
+	biClnts := sS.biJClients()
+	replys := make(chan *qReply, len(biClnts))
+
+	for _, clnt := range biClnts {
 		ctx, cancel := context.WithTimeout(ctx, sS.cgrCfg.GeneralCfg().ReplyTimeout)
-		go func() {
-			var queriedSessionIDs []*SessionID
-			if err := clnt.conn.Call(ctx, utils.SessionSv1GetActiveSessionIDs,
-				utils.EmptyString, &queriedSessionIDs); err != nil {
-				errChan <- err
-			}
-			for _, sessionID := range queriedSessionIDs {
-				queriedCGRIDs.Set(sessionID.CGRID(), struct{}{})
-			}
-			errChan <- nil
-		}()
-		select {
-		case err = <-errChan:
-			if err != nil && err.Error() != utils.ErrNoActiveSession.Error() {
+		defer cancel()
+		go func(clnt *biJClient) {
+			var reply qReply
+			reply.err = clnt.conn.Call(ctx, utils.SessionSv1GetActiveSessionIDs,
+				utils.EmptyString, &reply.reply)
+			replys <- &reply
+		}(clnt)
+	}
+	queriedCGRIDs := utils.StringSet{}
+	for range biClnts {
+		reply := <-replys
+		if reply.err != nil {
+			if reply.err.Error() != utils.ErrNoActiveSession.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error <%s> quering session ids", utils.SessionS, err.Error()))
+					fmt.Sprintf("<%s> error <%s> quering session ids", utils.SessionS, reply.err.Error()))
 			}
-		case <-time.After(sS.cgrCfg.GeneralCfg().ReplyTimeout):
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> timeout quering session ids ", utils.SessionS))
+			continue
 		}
-		cancel()
+		for _, sessionID := range reply.reply {
+			queriedCGRIDs.Add(sessionID.CGRID())
+		}
 	}
 	var toBeRemoved []string
 	sS.aSsMux.RLock()
 	for cgrid := range sS.aSessions {
-		if !queriedCGRIDs.HasField(cgrid) {
+		if !queriedCGRIDs.Has(cgrid) {
 			toBeRemoved = append(toBeRemoved, cgrid)
 		}
 	}
@@ -1253,7 +1256,7 @@ func (sS *SessionS) updateSession(ctx *context.Context, s *Session, updtEv, opts
 		s.updateSRuns(updtEv, sS.cgrCfg.SessionSCfg().AlterableFields)
 		sS.setSTerminator(s, opts) // reset the terminator
 	}
-	s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+	s.chargeable = opts.GetBoolOrDefault(utils.OptsSessionsChargeable, true)
 	//init has no updtEv
 	if updtEv == nil {
 		updtEv = engine.MapEvent(s.EventStart.Clone())
@@ -1732,8 +1735,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		var err error
 		opts := engine.MapEvent(args.APIOpts)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
+		if opts.HasField(utils.OptsSessionsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = opts.GetDuration(utils.OptsSessionsDebitInterval); err != nil {
 				return err //utils.NewErrRALs(err)
 			}
 		}
@@ -1873,8 +1876,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 		ev := engine.MapEvent(args.CGREvent.Event)
 		opts := engine.MapEvent(args.APIOpts)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
+		if opts.HasField(utils.OptsSessionsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = opts.GetDuration(utils.OptsSessionsDebitInterval); err != nil {
 				return err //utils.NewErrRALs(err)
 			}
 		}
@@ -1951,8 +1954,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
+		if opts.HasField(utils.OptsSessionsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = opts.GetDuration(utils.OptsSessionsDebitInterval); err != nil {
 				return err //utils.NewErrRALs(err)
 			}
 		}
@@ -1984,7 +1987,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
 		}
 		s.Lock()
-		s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+		s.chargeable = opts.GetBoolOrDefault(utils.OptsSessionsChargeable, true)
 		s.Unlock()
 		if err = sS.terminateSession(ctx, s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),

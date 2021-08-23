@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 /*
@@ -136,8 +137,8 @@ func testSesPauseItInitSession(t *testing.T, cgrID string, chargeable bool, usag
 				utils.Usage:        usage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsDebitInterval: "0s",
-				utils.OptsChargeable:    chargeable,
+				utils.OptsSessionsDebitInterval: "0s",
+				utils.OptsSessionsChargeable:    chargeable,
 			},
 		},
 	}
@@ -170,7 +171,7 @@ func testSesPauseItUpdateSession(t *testing.T, cgrID string, chargeable bool, us
 				utils.Usage:        usage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsChargeable: chargeable,
+				utils.OptsSessionsChargeable: chargeable,
 			},
 		},
 	}
@@ -203,7 +204,7 @@ func testSesPauseItTerminateSession(t *testing.T, cgrID string, chargeable bool,
 				utils.Usage:        usage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsChargeable: chargeable,
+				utils.OptsSessionsChargeable: chargeable,
 			},
 		},
 	}
