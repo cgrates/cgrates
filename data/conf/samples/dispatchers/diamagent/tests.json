@@ -29,7 +29,7 @@
 					"value": "~*req.Event-Timestamp", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable",
 					"value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true},
-				{"tag": "DebitInterval", "path": "*opts.*sessionsDebitInterval",
+				{"tag": "DebitInterval", "path": "*opts.*ssDebitInterval",
 					"type": "*constant", "value": "1s"},
 			],
 			"reply_fields":[

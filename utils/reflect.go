@@ -742,3 +742,32 @@ func IfaceAsStringSlice(fld interface{}) (ss []string, err error) {
 	}
 	return
 }
+
+func OptAsBool(opts map[string]interface{}, name string) (b bool) {
+	val, has := opts[name]
+	if !has {
+		return
+	}
+	b, _ = IfaceAsBool(val)
+	return
+}
+
+func OptAsBoolOrDef(opts map[string]interface{}, name string, def bool) (b bool) {
+	val, has := opts[name]
+	if !has {
+		return def
+	}
+	b, _ = IfaceAsBool(val)
+	return
+}
+
+func OptAsStringSlice(opts map[string]interface{}, name string) (b []string, err error) {
+	val, has := opts[name]
+	if !has {
+		return
+	}
+	if b, err = IfaceAsStringSlice(val); err != nil {
+		err = fmt.Errorf("error for option <%s>: %s", name, err)
+	}
+	return
+}

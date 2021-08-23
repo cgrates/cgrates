@@ -74,7 +74,10 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 	// split the data into Request and Opts to send as parameters to AgentRequest
 	reqNm := utils.MapStorage(data[utils.MetaReq].(map[string]interface{})).Clone()
 	optsMS := utils.MapStorage(data[utils.MetaOpts].(map[string]interface{})).Clone()
-
+	if optsMS == nil {
+		optsMS = utils.MapStorage{}
+	}
+	optsMS[utils.OptsCDRsChargerS] = false // do not try to get the chargers for cdrlog
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaCDR: utils.NewOrderedNavigableMap(),
 	}
@@ -93,7 +96,6 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().CDRsConns,
 		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
-			Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog
 			CGREvent: *utils.NMAsCGREvent(cdrLogReq.ExpData[utils.MetaCDR], aL.config.GeneralCfg().DefaultTenant,
 				utils.NestingSep, optsMS),
 		}, &rply)

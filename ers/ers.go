@@ -291,7 +291,6 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		}
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
-			Flags:     rdrCfg.Flags.SliceFlags(),
 			CGREvent:  cgrEv,
 			Paginator: cgrArgs,
 		}

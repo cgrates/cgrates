@@ -238,7 +238,6 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		agReq.setCGRReply(nil, err)
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
-			Flags:     reqProcessor.Flags.SliceFlags(),
 			CGREvent:  cgrEv,
 			Paginator: cgrArgs,
 		}

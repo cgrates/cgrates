@@ -310,7 +310,6 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
-			Flags:     reqProcessor.Flags.SliceFlags(),
 			CGREvent:  cgrEv,
 			Paginator: cgrArgs,
 		}

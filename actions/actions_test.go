@@ -578,8 +578,8 @@ func TestCDRLogActionExecute(t *testing.T) {
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
-				if !reflect.DeepEqual(argConv.Flags, []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}) {
-					return fmt.Errorf("Expected %+v, received %+v", []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, argConv.Flags)
+				if argConv.APIOpts[utils.OptsCDRsChargerS].(bool) {
+					return fmt.Errorf("Expected false, received %+v", argConv.APIOpts[utils.OptsCDRsChargerS])
 				}
 				if val, has := argConv.CGREvent.Event[utils.Subject]; !has {
 					return fmt.Errorf("missing Subject")
@@ -650,8 +650,8 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
-				if !reflect.DeepEqual(argConv.Flags, []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}) {
-					return fmt.Errorf("Expected %+v, received %+v", []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, argConv.Flags)
+				if argConv.APIOpts[utils.OptsCDRsChargerS].(bool) {
+					return fmt.Errorf("Expected false, received %+v", argConv.APIOpts[utils.OptsCDRsChargerS])
 				}
 				if val, has := argConv.CGREvent.Event[utils.Tenant]; !has {
 					return fmt.Errorf("missing Tenant")

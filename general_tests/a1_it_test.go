@@ -203,9 +203,9 @@ func testA1itDataSession1(t *testing.T) {
 				utils.Usage:        "10240",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSessionsTTL:         "28800s",
-				utils.OptsSessionsTTLLastUsed: "0s",
-				utils.OptsSessionsTTLUsage:    "0s",
+				utils.OptsSSTTL:         "28800s",
+				utils.OptsSSTTLLastUsed: "0s",
+				utils.OptsSSTTLUsage:    "0s",
 			},
 		},
 	}
@@ -242,9 +242,9 @@ func testA1itDataSession1(t *testing.T) {
 				utils.Usage:           "2097152",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSessionsTTL:         "28800s",
-				utils.OptsSessionsTTLLastUsed: "2097152s",
-				utils.OptsSessionsTTLUsage:    "0s",
+				utils.OptsSSTTL:         "28800s",
+				utils.OptsSSTTLLastUsed: "2097152s",
+				utils.OptsSSTTLUsage:    "0s",
 			},
 		},
 	}
