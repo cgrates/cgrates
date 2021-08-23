@@ -148,7 +148,7 @@ func TestSetSTerminatorError(t *testing.T) {
 		utils.OptsSessionsTTLMaxDelay: "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected = "cannot extract <*sessionsTTLMaxDelay> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected = "cannot extract <*ssTTLMaxDelay> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -162,7 +162,7 @@ func TestSetSTerminatorError(t *testing.T) {
 		utils.OptsSessionsTTLLastUsed: "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected = "cannot extract <*sessionsTTLLastUsed> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected = "cannot extract <*ssTTLLastUsed> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -177,7 +177,7 @@ func TestSetSTerminatorError(t *testing.T) {
 		utils.OptsSessionsTTLLastUsage: "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected = "cannot extract <*sessionsTTLLastUsage> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected = "cannot extract <*ssTTLLastUsage> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -193,7 +193,7 @@ func TestSetSTerminatorError(t *testing.T) {
 		utils.OptsSessionsTTLUsage:     "invalid_time_format",
 	}
 	sessions.setSTerminator(ss, opts)
-	expected = "cannot extract <*sessionsTTLUsage> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
+	expected = "cannot extract <*ssTTLUsage> for session:<>, from it's options: <{}>, err: <time: invalid duration \"invalid_time_format\">"
 	if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}

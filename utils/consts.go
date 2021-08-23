@@ -361,7 +361,6 @@ const (
 	MetaCore                 = "*core"
 	MetaServiceManager       = "*servicemanager"
 	MetaChargers             = "*chargers"
-	MetaBlockerError         = "*blocker_error"
 	MetaConfig               = "*config"
 	MetaDispatchers          = "*dispatchers"
 	MetaDispatcherHosts      = "*dispatcher_hosts"
@@ -2082,24 +2081,56 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSessionsTTL,
-	OptsSessionsTTLMaxDelay, OptsSessionsTTLLastUsed, OptsSessionsTTLLastUsage, OptsSessionsTTLUsage,
-	OptsSessionsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
+var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSSTTL,
+	OptsSSTTLMaxDelay, OptsSSTTLLastUsed, OptsSSTTLLastUsage, OptsSSTTLUsage,
+	OptsSSDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
-	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSessionsChargeable,
+	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSSChargeable,
 	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount})
 
 // Event Opts
 const (
 	// SessionS
-	OptsSessionsTTL           = "*sessionsTTL"
-	OptsSessionsChargeable    = "*sessionsChargeable"
-	OptsSessionsDebitInterval = "*sessionsDebitInterval"
-	OptsSessionsTTLLastUsage  = "*sessionsTTLLastUsage"
-	OptsSessionsTTLLastUsed   = "*sessionsTTLLastUsed"
-	OptsSessionsTTLMaxDelay   = "*sessionsTTLMaxDelay"
-	OptsSessionsTTLUsage      = "*sessionsTTLUsage"
+	OptsSSTTL           = "*ssTTL"
+	OptsSSChargeable    = "*ssChargeable"
+	OptsSSDebitInterval = "*ssDebitInterval"
+	OptsSSTTLLastUsage  = "*ssTTLLastUsage"
+	OptsSSTTLLastUsed   = "*ssTTLLastUsed"
+	OptsSSTTLMaxDelay   = "*ssTTLMaxDelay"
+	OptsSSTTLUsage      = "*ssTTLUsage"
+
+	OptsSSAttributeS             = "*ssAttributeS"
+	OptsSSAttributeIDs           = "*ssAttributeIDs"
+	OptsSSAttributeSDerivedReply = "*ssAttributeSDerivedReply"
+	OptsSSBlockerError           = "*ssBlockerError"
+	OptsSSCDRs                   = "*ssCDRs"
+	OptsSSCDRsDerivedReply       = "*ssCDRsDerivedReply"
+	OptsSSChargerS               = "*ssChargerS"
+	OptsSSResourceS              = "*ssResourceS"
+	OptsSSResourceSDerivedReply  = "*ssResourceSDerivedReply"
+	OptsSSRouteS                 = "*ssRouteS"
+	OptsSSRouteSDerivedReply     = "*ssRouteSDerivedReply"
+	OptsSSRouteSIgnoreErrors     = "*ssRouteSIgnoreErrors"
+	OptsSSRouteSMaxCost          = "*ssRouteSMaxCost"
+	OptsSSStatS                  = "*ssStatS"
+	OptsSSStatSDerivedReply      = "*ssStatSDerivedReply"
+	OptsSSStatIDs                = "*ssStatIDs"
+	OptsSSSTIRAuthenticate       = "*ssSTIRAuthenticate"
+	OptsSSSTIRDerivedReply       = "*ssSTIRDerivedReply"
+	OptsSSSTIRInitiate           = "*ssSTIRInitiate"
+	OptsSSThresholdS             = "*ssThresholdS"
+	OptsSSThresholdSDerivedReply = "*ssThresholdSDerivedReply"
+	OptsSSThresholdIDs           = "*ssThresholdIDs"
+
+	OptsCDRsAttributeS = "*cdrsAttributeS"
+	OptsCDRsChargerS   = "*cdrsChargerS"
+	OptsCDRsExport     = "*cdrsExport"
+	OptsCDRsRefund     = "*cdrsRefund"
+	OptsCDRsRerate     = "*cdrsRerate"
+	OptsCDRsStatS      = "*cdrsStatS"
+	OptsCDRsStore      = "*cdrsStore"
+	OptsCDRsThresholdS = "*cdrsThresholdS"
 
 	OptsRoutesProfilesCount = "*routesProfilesCount"
 	OptsRoutesLimit         = "*routes_limit"

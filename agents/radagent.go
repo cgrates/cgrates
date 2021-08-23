@@ -295,7 +295,6 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
-			Flags:     reqProcessor.Flags.SliceFlags(),
 			CGREvent:  cgrEv,
 			Paginator: cgrArgs,
 		}

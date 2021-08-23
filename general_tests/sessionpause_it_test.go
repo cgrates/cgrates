@@ -137,8 +137,8 @@ func testSesPauseItInitSession(t *testing.T, cgrID string, chargeable bool, usag
 				utils.Usage:        usage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSessionsDebitInterval: "0s",
-				utils.OptsSessionsChargeable:    chargeable,
+				utils.OptsSSDebitInterval: "0s",
+				utils.OptsSSChargeable:    chargeable,
 			},
 		},
 	}
@@ -171,7 +171,7 @@ func testSesPauseItUpdateSession(t *testing.T, cgrID string, chargeable bool, us
 				utils.Usage:        usage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSessionsChargeable: chargeable,
+				utils.OptsSSChargeable: chargeable,
 			},
 		},
 	}
@@ -204,7 +204,7 @@ func testSesPauseItTerminateSession(t *testing.T, cgrID string, chargeable bool,
 				utils.Usage:        usage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSessionsChargeable: chargeable,
+				utils.OptsSSChargeable: chargeable,
 			},
 		},
 	}

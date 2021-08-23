@@ -276,9 +276,8 @@ func getDerivedEvents(events map[string]*utils.CGREvent, derivedReply bool) map[
 
 // V1ProcessEventArgs are the options passed to ProcessEvent API
 type V1ProcessEventArgs struct {
-	Flags []string
 	*utils.CGREvent
-	utils.Paginator
+	utils.Paginator // for routes
 }
 
 // V1ProcessEventReply is the reply for the ProcessEvent API

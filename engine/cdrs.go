@@ -406,7 +406,6 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithAPIOpts, reply *string) (err err
 
 // ArgV1ProcessEvent is the CGREvent with proccesing Flags
 type ArgV1ProcessEvent struct {
-	Flags []string
 	utils.CGREvent
 	clnb bool //rpcclonable
 }
@@ -426,15 +425,7 @@ func (attr *ArgV1ProcessEvent) RPCClone() (interface{}, error) {
 
 // Clone creates a clone of the object
 func (attr *ArgV1ProcessEvent) Clone() *ArgV1ProcessEvent {
-	var flags []string
-	if attr.Flags != nil {
-		flags = make([]string, len(attr.Flags))
-		for i, id := range attr.Flags {
-			flags[i] = id
-		}
-	}
 	return &ArgV1ProcessEvent{
-		Flags:    flags,
 		CGREvent: *attr.CGREvent.Clone(),
 	}
 }
@@ -468,45 +459,17 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	// end of RPC caching
 
 	// processing options
-	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
-	attrS := len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0
-	if flgs.Has(utils.MetaAttributes) {
-		attrS = flgs.GetBool(utils.MetaAttributes)
-	}
-	store := cdrS.cgrCfg.CdrsCfg().StoreCdrs
-	if flgs.Has(utils.MetaStore) {
-		store = flgs.GetBool(utils.MetaStore)
-	}
-	export := len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 || len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0
-	if flgs.Has(utils.MetaExport) {
-		export = flgs.GetBool(utils.MetaExport)
-	}
-	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
-	if flgs.Has(utils.MetaThresholds) {
-		thdS = flgs.GetBool(utils.MetaThresholds)
-	}
-	stS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
-	if flgs.Has(utils.MetaStats) {
-		stS = flgs.GetBool(utils.MetaStats)
-	}
-	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 // activate charging for the Event
-	if flgs.Has(utils.MetaChargers) {
-		chrgS = flgs.GetBool(utils.MetaChargers)
-	}
+	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsAttributeS, len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0)
+	store := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStore, cdrS.cgrCfg.CdrsCfg().StoreCdrs)
+	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 ||
+		len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0)
+	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsThresholdS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
+	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
+	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
+	reRate := utils.OptAsBool(arg.APIOpts, utils.OptsCDRsRerate)
+	refund := utils.OptAsBool(arg.APIOpts, utils.OptsCDRsRefund)
+
 	var ralS bool // activate single rating for the CDR
-	// if flgs.Has(utils.MetaRALs) {
-	// 	ralS = flgs.GetBool(utils.MetaRALs)
-	// }
-	var reRate bool
-	// if flgs.Has(utils.MetaRerate) {
-	// 	if reRate = flgs.GetBool(utils.MetaRerate); reRate {
-	// 		ralS = true
-	// 	}
-	// }
-	var refund bool
-	if flgs.Has(utils.MetaRefund) {
-		refund = flgs.GetBool(utils.MetaRefund)
-	}
 	// end of processing options
 
 	if _, err = cdrS.processEvent(&arg.CGREvent, chrgS, attrS, refund,
@@ -543,46 +506,16 @@ func (cdrS *CDRServer) V2ProcessEvent(arg *ArgV1ProcessEvent, evs *[]*utils.Even
 	// end of RPC caching
 
 	// processing options
-	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
-	attrS := len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0
-	if flgs.Has(utils.MetaAttributes) {
-		attrS = flgs.GetBool(utils.MetaAttributes)
-	}
-	store := cdrS.cgrCfg.CdrsCfg().StoreCdrs
-	if flgs.Has(utils.MetaStore) {
-		store = flgs.GetBool(utils.MetaStore)
-	}
-	export := len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 || len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0
-	if flgs.Has(utils.MetaExport) {
-		export = flgs.GetBool(utils.MetaExport)
-	}
-	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
-	if flgs.Has(utils.MetaThresholds) {
-		thdS = flgs.GetBool(utils.MetaThresholds)
-	}
-	stS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
-	if flgs.Has(utils.MetaStats) {
-		stS = flgs.GetBool(utils.MetaStats)
-	}
-	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 // activate charging for the Event
-	if flgs.Has(utils.MetaChargers) {
-		chrgS = flgs.GetBool(utils.MetaChargers)
-	}
+	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsAttributeS, len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0)
+	store := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStore, cdrS.cgrCfg.CdrsCfg().StoreCdrs)
+	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 ||
+		len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0)
+	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsThresholdS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
+	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
+	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
+	reRate := utils.OptAsBool(arg.APIOpts, utils.OptsCDRsRerate)
+	refund := utils.OptAsBool(arg.APIOpts, utils.OptsCDRsRefund)
 	var ralS bool // activate single rating for the CDR
-	// if flgs.Has(utils.MetaRALs) {
-	// 	ralS = flgs.GetBool(utils.MetaRALs)
-	// }
-	var reRate bool
-	// if flgs.Has(utils.MetaRerate) {
-	// reRate = flgs.GetBool(utils.MetaRerate)
-	// if reRate {
-	// ralS = true
-	// }
-	// }
-	var refund bool
-	if flgs.Has(utils.MetaRefund) {
-		refund = flgs.GetBool(utils.MetaRefund)
-	}
 	// end of processing options
 
 	var procEvs []*utils.EventWithFlags
