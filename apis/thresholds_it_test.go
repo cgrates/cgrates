@@ -527,7 +527,7 @@ func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
 		&engine.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_1",
-			Hits:   1,
+			Hits:   0,
 		},
 	}
 
@@ -561,12 +561,12 @@ func testThresholdsGetThresholdsAfterSecondEvent(t *testing.T) {
 		&engine.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
-			Hits:   0,
+			Hits:   1,
 		},
 		&engine.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_1",
-			Hits:   2,
+			Hits:   1,
 		},
 	}
 

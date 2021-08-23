@@ -40,8 +40,10 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	arg := &utils.TenantID{
-		ID: "thdID",
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "thdID",
+		},
 	}
 	var result engine.ThresholdProfile
 	var reply string
@@ -88,11 +90,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(thPrfIDs), rplyCount)
 	}
 
-	argRem := &utils.TenantIDWithAPIOpts{
-		TenantID: arg,
-	}
-
-	if err := adms.RemoveThresholdProfile(context.Background(), argRem, &reply); err != nil {
+	if err := adms.RemoveThresholdProfile(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -116,7 +114,7 @@ func TestThresholdsGetThresholdProfileCheckErrors(t *testing.T) {
 	var rcv engine.ThresholdProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
-	if err := adms.GetThresholdProfile(context.Background(), &utils.TenantID{}, &rcv); err == nil ||
+	if err := adms.GetThresholdProfile(context.Background(), &utils.TenantIDWithAPIOpts{}, &rcv); err == nil ||
 		err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -124,9 +122,13 @@ func TestThresholdsGetThresholdProfileCheckErrors(t *testing.T) {
 	adms.dm = nil
 	experr = "SERVER_ERROR: NO_DATABASE_CONNECTION"
 
-	if err := adms.GetThresholdProfile(context.Background(), &utils.TenantID{
-		ID: "TestThresholdsGetThresholdProfileCheckErrors",
-	}, &rcv); err == nil || err.Error() != experr {
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TestThresholdsGetThresholdProfileCheckErrors",
+		},
+	}
+
+	if err := adms.GetThresholdProfile(context.Background(), arg, &rcv); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
@@ -250,9 +252,13 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	var rcv engine.ThresholdProfile
 
-	if err := adms.GetThresholdProfile(context.Background(), &utils.TenantID{
-		ID: "TestThresholdsRemoveThresholdProfileCheckErrors",
-	}, &rcv); err == nil || err != utils.ErrNotFound {
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TestThresholdsRemoveThresholdProfileCheckErrors",
+		},
+	}
+
+	if err := adms.GetThresholdProfile(context.Background(), arg, &rcv); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 

@@ -41,8 +41,10 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	arg := &utils.TenantID{
-		ID: "sqID",
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "sqID",
+		},
 	}
 	var result engine.StatQueueProfile
 	var reply string
@@ -87,11 +89,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(sqPrfIDs), rplyCount)
 	}
 
-	argRem := &utils.TenantIDWithAPIOpts{
-		TenantID: arg,
-	}
-
-	if err := adms.RemoveStatQueueProfile(context.Background(), argRem, &reply); err != nil {
+	if err := adms.RemoveStatQueueProfile(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -115,7 +113,7 @@ func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
 	var rcv engine.StatQueueProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
-	if err := adms.GetStatQueueProfile(context.Background(), &utils.TenantID{}, &rcv); err == nil ||
+	if err := adms.GetStatQueueProfile(context.Background(), &utils.TenantIDWithAPIOpts{}, &rcv); err == nil ||
 		err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -123,9 +121,13 @@ func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
 	adms.dm = nil
 	experr = "SERVER_ERROR: NO_DATABASE_CONNECTION"
 
-	if err := adms.GetStatQueueProfile(context.Background(), &utils.TenantID{
-		ID: "TestStatsGetStatQueueProfileCheckErrors",
-	}, &rcv); err == nil || err.Error() != experr {
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "sqID",
+		},
+	}
+
+	if err := adms.GetStatQueueProfile(context.Background(), arg, &rcv); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
@@ -248,9 +250,13 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	var rcv engine.StatQueueProfile
 
-	if err := adms.GetStatQueueProfile(context.Background(), &utils.TenantID{
-		ID: "TestStatsRemoveStatQueueProfileCheckErrors",
-	}, &rcv); err == nil || err != utils.ErrNotFound {
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "sqID",
+		},
+	}
+
+	if err := adms.GetStatQueueProfile(context.Background(), arg, &rcv); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 

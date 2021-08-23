@@ -29,6 +29,7 @@ import (
 )
 
 type IndexHealthArgs struct {
+	Tenant              string
 	IndexCacheLimit     int
 	IndexCacheTTL       time.Duration
 	IndexCacheStaticTTL bool
@@ -40,6 +41,7 @@ type IndexHealthArgs struct {
 	FilterCacheLimit     int
 	FilterCacheTTL       time.Duration
 	FilterCacheStaticTTL bool
+	APIOpts              map[string]interface{} // Only for dispatcher.
 }
 
 type FilterIHReply struct {
