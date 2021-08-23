@@ -72,7 +72,6 @@ var (
 		testV1FIdxSetSecondRouteProfileIndexes,
 		testV1FIdxSecondComputeRouteProfileIndexes,
 		testV1FIdxRemoveRouteProfile,
-
 		testV1FIdxdxInitDataDb,
 
 		testV1FIdxSetAttributeProfileIndexes,
