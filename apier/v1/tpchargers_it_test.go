@@ -1,3 +1,4 @@
+//go:build offline
 // +build offline
 
 /*
