@@ -2084,45 +2084,29 @@ var (
 // CGROptionsSet the possible cgr options
 var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSessionsTTL,
 	OptsSessionsTTLMaxDelay, OptsSessionsTTLLastUsed, OptsSessionsTTLLastUsage, OptsSessionsTTLUsage,
-	OptsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
+	OptsSessionsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
-	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
+	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSessionsChargeable,
 	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount})
-
-// EventExporter metrics
-const (
-	NumberOfEvents    = "NumberOfEvents"
-	TotalCost         = "TotalCost"
-	PositiveExports   = "PositiveExports"
-	NegativeExports   = "NegativeExports"
-	FirstExpOrderID   = "FirstExpOrderID"
-	LastExpOrderID    = "LastExpOrderID"
-	FirstEventATime   = "FirstEventATime"
-	LastEventATime    = "LastEventATime"
-	TotalDuration     = "TotalDuration"
-	TotalDataUsage    = "TotalDataUsage"
-	TotalSMSUsage     = "TotalSMSUsage"
-	TotalMMSUsage     = "TotalMMSUsage"
-	TotalGenericUsage = "TotalGenericUsage"
-	FilePath          = "FilePath"
-)
 
 // Event Opts
 const (
-	OptsRoutesProfilesCount  = "*routesProfilesCount"
-	OptsRoutesLimit          = "*routes_limit"
-	OptsRoutesOffset         = "*routes_offset"
-	OptsRatesStartTime       = "*ratesStartTime"
-	OptsRatesUsage           = "*ratesUsage"
-	OptsRatesIntervalStart   = "*ratesIntervalStart"
-	OptsSessionsTTL          = "*sessionsTTL"
-	OptsSessionsTTLMaxDelay  = "*sessionsTTLMaxDelay"
-	OptsSessionsTTLLastUsed  = "*sessionsTTLLastUsed"
-	OptsSessionsTTLLastUsage = "*sessionsTTLLastUsage"
-	OptsSessionsTTLUsage     = "*sessionsTTLUsage"
-	OptsDebitInterval        = "*sessionsDebitInterval"
-	OptsChargeable           = "*sessionsChargeable"
+	// SessionS
+	OptsSessionsTTL           = "*sessionsTTL"
+	OptsSessionsChargeable    = "*sessionsChargeable"
+	OptsSessionsDebitInterval = "*sessionsDebitInterval"
+	OptsSessionsTTLLastUsage  = "*sessionsTTLLastUsage"
+	OptsSessionsTTLLastUsed   = "*sessionsTTLLastUsed"
+	OptsSessionsTTLMaxDelay   = "*sessionsTTLMaxDelay"
+	OptsSessionsTTLUsage      = "*sessionsTTLUsage"
+
+	OptsRoutesProfilesCount = "*routesProfilesCount"
+	OptsRoutesLimit         = "*routes_limit"
+	OptsRoutesOffset        = "*routes_offset"
+	OptsRatesStartTime      = "*ratesStartTime"
+	OptsRatesUsage          = "*ratesUsage"
+	OptsRatesIntervalStart  = "*ratesIntervalStart"
 	// STIR
 	OptsStirATest              = "*stirATest"
 	OptsStirPayloadMaxDuration = "*stirPayloadMaxDuration"
@@ -2164,35 +2148,28 @@ const (
 
 // ArgCache constats
 const (
-	// ResourceProfileIDs           = "ResourceProfileIDs"
-	// ResourceIDs                  = "ResourceIDs"
-	// StatsQueueIDs                = "StatsQueueIDs"
-	// StatsQueueProfileIDs         = "StatsQueueProfileIDs"
-	ThresholdIDs = "ThresholdIDs"
-	// ThresholdProfileIDs          = "ThresholdProfileIDs"
-	FilterIDs = "FilterIDs"
-
-	// RouteProfileIDs              = "RouteProfileIDs"
-	// AttributeProfileIDs          = "AttributeProfileIDs"
-	// ChargerProfileIDs            = "ChargerProfileIDs"
-	// DispatcherProfileIDs         = "DispatcherProfileIDs"
-	// DispatcherHostIDs            = "DispatcherHostIDs"
-	// DispatcherRoutesIDs          = "DispatcherRoutesIDs"
+	ThresholdIDs     = "ThresholdIDs"
+	FilterIDs        = "FilterIDs"
 	RateProfileIDs   = "RateProfileIDs"
 	ActionProfileIDs = "ActionProfileIDs"
+)
 
-// AttributeFilterIndexIDs      = "AttributeFilterIndexIDs"
-// ResourceFilterIndexIDs       = "ResourceFilterIndexIDs"
-// StatFilterIndexIDs           = "StatFilterIndexIDs"
-// ThresholdFilterIndexIDs      = "ThresholdFilterIndexIDs"
-// RouteFilterIndexIDs          = "RouteFilterIndexIDs"
-// ChargerFilterIndexIDs        = "ChargerFilterIndexIDs"
-// DispatcherFilterIndexIDs     = "DispatcherFilterIndexIDs"
-// RateProfilesFilterIndexIDs   = "RateProfilesFilterIndexIDs"
-// RateFilterIndexIDs           = "RateFilterIndexIDs"
-// ActionProfilesFilterIndexIDs = "ActionProfilesFilterIndexIDs"
-// AccountsFilterIndexIDs       = "AccountsFilterIndexIDs"
-// FilterIndexIDs               = "FilterIndexIDs"
+// EventExporter metrics
+const (
+	NumberOfEvents    = "NumberOfEvents"
+	TotalCost         = "TotalCost"
+	PositiveExports   = "PositiveExports"
+	NegativeExports   = "NegativeExports"
+	FirstExpOrderID   = "FirstExpOrderID"
+	LastExpOrderID    = "LastExpOrderID"
+	FirstEventATime   = "FirstEventATime"
+	LastEventATime    = "LastEventATime"
+	TotalDuration     = "TotalDuration"
+	TotalDataUsage    = "TotalDataUsage"
+	TotalSMSUsage     = "TotalSMSUsage"
+	TotalMMSUsage     = "TotalMMSUsage"
+	TotalGenericUsage = "TotalGenericUsage"
+	FilePath          = "FilePath"
 )
 
 // Poster and Event reader constants
@@ -2366,15 +2343,12 @@ const (
 	ExecCgr     = "exec"
 )
 
-var (
-	// AnzIndexType are the analyzers possible index types
-	AnzIndexType = StringSet{
-		MetaScorch:  {},
-		MetaBoltdb:  {},
-		MetaLeveldb: {},
-		MetaMoss:    {},
-	}
-)
+var AnzIndexType = StringSet{ // AnzIndexType are the analyzers possible index types
+	MetaScorch:  {},
+	MetaBoltdb:  {},
+	MetaLeveldb: {},
+	MetaMoss:    {},
+}
 
 // ActionSv1
 const (

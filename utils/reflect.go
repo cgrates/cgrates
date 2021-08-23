@@ -234,7 +234,13 @@ func IfaceAsBool(itm interface{}) (b bool, err error) {
 		return strconv.ParseBool(v)
 	case int:
 		return v > 0, nil
+	case int32:
+		return v > 0, nil
 	case int64:
+		return v > 0, nil
+	case uint32:
+		return v > 0, nil
+	case uint64:
 		return v > 0, nil
 	case float64:
 		return v > 0, nil
@@ -679,4 +685,60 @@ func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interfa
 		}
 	}
 	return field.Interface(), nil
+}
+
+func IfaceAsStringSlice(fld interface{}) (ss []string, err error) {
+	switch value := fld.(type) {
+	case nil:
+	case []string:
+		ss = value
+	case []int:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = strconv.Itoa(v)
+		}
+	case []int32:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = strconv.FormatInt(int64(v), 10)
+		}
+	case []int64:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = strconv.FormatInt(v, 10)
+		}
+	case []uint32:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = strconv.FormatUint(uint64(v), 10)
+		}
+	case []uint64:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = strconv.FormatUint(v, 10)
+		}
+	case []bool:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = strconv.FormatBool(v)
+		}
+	case []float32:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = strconv.FormatFloat(float64(v), 'f', -1, 64)
+		}
+	case []float64:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = strconv.FormatFloat(v, 'f', -1, 64)
+		}
+	case []interface{}:
+		ss = make([]string, len(value))
+		for i, v := range value {
+			ss[i] = IfaceAsString(v)
+		}
+	default: // Maybe we are lucky and the value converts to string
+		err = fmt.Errorf("cannot convert field: %+v to []string", value)
+	}
+	return
 }

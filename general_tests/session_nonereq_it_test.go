@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 /*
@@ -141,7 +142,7 @@ func testSesNoneReqTypeItInit(t *testing.T) {
 				utils.Usage:        10 * time.Second,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsDebitInterval: "0s",
+				utils.OptsSessionsDebitInterval: "0s",
 			},
 		},
 	}
