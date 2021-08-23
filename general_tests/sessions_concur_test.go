@@ -1,3 +1,4 @@
+//go:build performance
 // +build performance
 
 /*
