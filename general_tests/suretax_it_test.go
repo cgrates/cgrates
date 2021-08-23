@@ -1,3 +1,4 @@
+//go:build suretax
 // +build suretax
 
 /*
