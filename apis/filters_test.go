@@ -57,9 +57,11 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	}
 
 	var replyGet engine.Filter
-	argsGet := &utils.TenantID{
-		Tenant: utils.CGRateSorg,
-		ID:     "fltr_for_attr",
+	argsGet := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr",
+		},
 	}
 
 	err = admS.GetFilter(context.Background(), argsGet, &replyGet)
@@ -247,9 +249,11 @@ func TestFiltersSetFiltersTenantEmpty(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `"OK"`, utils.ToJSON(&reply))
 	}
 	var replyGet engine.Filter
-	argsGet := &utils.TenantID{
-		Tenant: utils.CGRateSorg,
-		ID:     "fltr_for_attr",
+	argsGet := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr",
+		},
 	}
 
 	err = admS.GetFilter(context.Background(), argsGet, &replyGet)
@@ -630,8 +634,11 @@ func TestFiltersGetFilterNoTenant(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `"OK"`, utils.ToJSON(&reply))
 	}
 	var replyGet engine.Filter
-	argsGet := &utils.TenantID{
-		ID: "fltr_for_attr",
+	argsGet := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr",
+		},
 	}
 
 	err = admS.GetFilter(context.Background(), argsGet, &replyGet)
@@ -669,7 +676,11 @@ func TestFiltersGetFilterMissingField(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `"OK"`, utils.ToJSON(&reply))
 	}
 	var replyGet engine.Filter
-	argsGet := &utils.TenantID{}
+	argsGet := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: utils.CGRateSorg,
+		},
+	}
 
 	err = admS.GetFilter(context.Background(), argsGet, &replyGet)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
@@ -694,8 +705,10 @@ func TestFiltersGetFilterGetFilterError(t *testing.T) {
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	var replyGet engine.Filter
-	argsGet := &utils.TenantID{
-		ID: "fltr_for_attr",
+	argsGet := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "fltr_for_attr",
+		},
 	}
 
 	err := admS.GetFilter(context.Background(), argsGet, &replyGet)

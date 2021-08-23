@@ -38,8 +38,10 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	arg := &utils.TenantID{
-		ID: "RES_1",
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RES_1",
+		},
 	}
 	var result engine.ResourceProfile
 	var reply string
@@ -86,7 +88,9 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 	}
 
 	argRem := &utils.TenantIDWithAPIOpts{
-		TenantID: arg,
+		TenantID: &utils.TenantID{
+			ID: "RES_1",
+		},
 	}
 
 	if err := adms.RemoveResourceProfile(context.Background(), argRem, &reply); err != nil {
@@ -113,7 +117,7 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 	var rcv engine.ResourceProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
-	if err := adms.GetResourceProfile(context.Background(), &utils.TenantID{}, &rcv); err == nil ||
+	if err := adms.GetResourceProfile(context.Background(), &utils.TenantIDWithAPIOpts{}, &rcv); err == nil ||
 		err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -121,9 +125,13 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 	adms.dm = nil
 	experr = "SERVER_ERROR: NO_DATABASE_CONNECTION"
 
-	if err := adms.GetResourceProfile(context.Background(), &utils.TenantID{
-		ID: "TestResourcesGetResourceProfileCheckErrors",
-	}, &rcv); err == nil || err.Error() != experr {
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RES_1",
+		},
+	}
+
+	if err := adms.GetResourceProfile(context.Background(), arg, &rcv); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
@@ -248,9 +256,13 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	var rcv engine.ResourceProfile
 
-	if err := adms.GetResourceProfile(context.Background(), &utils.TenantID{
-		ID: "TestResourcesRemoveResourceProfileCheckErrors",
-	}, &rcv); err == nil || err != utils.ErrNotFound {
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RES_1",
+		},
+	}
+
+	if err := adms.GetResourceProfile(context.Background(), arg, &rcv); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 

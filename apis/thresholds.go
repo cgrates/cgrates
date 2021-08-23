@@ -24,7 +24,7 @@ import (
 )
 
 // GetThresholdProfile returns a Threshold Profile
-func (adms *AdminSv1) GetThresholdProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.ThresholdProfile) (err error) {
+func (adms *AdminSv1) GetThresholdProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -32,6 +32,7 @@ type AttrGetFilterIndexes struct {
 	FilterType  string
 	FilterField string
 	FilterValue string
+	APIOpts     map[string]interface{}
 	utils.Paginator
 }
 

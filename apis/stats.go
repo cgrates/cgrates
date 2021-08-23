@@ -24,7 +24,7 @@ import (
 )
 
 // GetStatQueueProfile returns a StatQueue profile
-func (adms *AdminSv1) GetStatQueueProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.StatQueueProfile) (err error) {
+func (adms *AdminSv1) GetStatQueueProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

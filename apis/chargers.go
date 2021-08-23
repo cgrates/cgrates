@@ -25,7 +25,7 @@ import (
 )
 
 // GetChargerProfile returns a Charger Profile
-func (adms *AdminSv1) GetChargerProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.ChargerProfile) error {
+func (adms *AdminSv1) GetChargerProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

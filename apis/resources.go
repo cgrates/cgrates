@@ -24,7 +24,7 @@ import (
 )
 
 // GetResourceProfile returns a resource configuration
-func (adms *AdminSv1) GetResourceProfile(ctx *context.Context, arg *utils.TenantID, reply *engine.ResourceProfile) error {
+func (adms *AdminSv1) GetResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
