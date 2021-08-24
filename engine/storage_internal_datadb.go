@@ -504,7 +504,7 @@ func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (iDB *InternalDB) GetIndexesDrv(_ *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (iDB *InternalDB) GetIndexesDrv(_ *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
 	if idxKey == utils.EmptyString { // return all
 		indexes = make(map[string]utils.StringSet)
 		for _, dbKey := range Cache.tCache.GetGroupItemIDs(idxItmType, tntCtx) {
