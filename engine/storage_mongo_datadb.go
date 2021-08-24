@@ -1292,12 +1292,16 @@ func (ms *MongoStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id 
 // GetIndexesDrv retrieves Indexes from dataDB
 // the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
 // id is used as a concatenated key in case of filterIndexes the id will be filterType:fieldName:fieldVal
-func (ms *MongoStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (ms *MongoStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
 	type result struct {
 		Key   string
 		Value []string
 	}
-	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	if transactionID != utils.NonTransactional {
+		originKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+	}
+	dbKey := originKey
 	var q bson.M
 	if len(idxKey) != 0 {
 		q = bson.M{"key": utils.ConcatenatedKey(dbKey, idxKey)}
@@ -1322,7 +1326,7 @@ func (ms *MongoStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, 
 			if len(elem.Value) == 0 {
 				continue
 			}
-			indexKey := strings.TrimPrefix(elem.Key, utils.CacheInstanceToPrefix[idxItmType]+tntCtx+utils.ConcatenatedKeySep)
+			indexKey := strings.TrimPrefix(elem.Key, originKey+utils.ConcatenatedKeySep)
 			indexes[indexKey] = utils.NewStringSet(elem.Value)
 		}
 		return cur.Close(sctx)

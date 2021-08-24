@@ -202,74 +202,74 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheAttributeFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheAttributeFilterIndexes, tntCtx, idxKey,  utils.NonTransactional, false, true)
 		case utils.ResourceFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheResourceFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheResourceFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.StatFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheStatFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheStatFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.ThresholdFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheThresholdFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheThresholdFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.RouteFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheRouteFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheRouteFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.ChargerFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheChargerFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheChargerFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.DispatcherFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheDispatcherFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheDispatcherFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.RateProfilesFilterIndexPrfx:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheRateProfilesFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheRateProfilesFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.RateFilterIndexPrfx:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheRateFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheRateFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.ActionProfilesFilterIndexPrfx:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheActionProfilesFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheActionProfilesFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.AccountFilterIndexPrfx:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheAccountsFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheAccountsFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.FilterIndexPrfx:
 			idx := strings.LastIndexByte(dataID, utils.InInFieldSep[0])
 			if idx < 0 {
 				err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", dataID)
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], utils.NonTransactional, false, true)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(ctx, utils.EmptyString, true)
 		case utils.MetaAPIBan:
@@ -393,7 +393,7 @@ func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id string, wit
 		tntCtx = utils.ConcatenatedKey(tenant, id)
 		var rcvIndx map[string]utils.StringSet
 		if rcvIndx, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntCtx,
-			utils.EmptyString, true, true); err != nil {
+			utils.EmptyString, utils.NonTransactional, true, true); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -2288,7 +2288,7 @@ func (dm *DataManager) Reconnect(d DataDB) {
 	dm.dataDB = d
 }
 
-func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, idxKey string,
+func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string,
 	cacheRead, cacheWrite bool) (indexes map[string]utils.StringSet, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
@@ -2305,7 +2305,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, idxK
 			}, nil
 		}
 	}
-	if indexes, err = dm.DataDB().GetIndexesDrv(ctx, idxItmType, tntCtx, idxKey); err != nil {
+	if indexes, err = dm.DataDB().GetIndexesDrv(ctx, idxItmType, tntCtx, idxKey, transactionID); err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetIndexes,
@@ -2333,7 +2333,6 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, idxK
 			return nil, err
 		}
 	}
-
 	if cacheWrite {
 		for k, v := range indexes {
 			if err = Cache.Set(ctx, idxItmType, utils.ConcatenatedKey(tntCtx, k), v, []string{tntCtx},

@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -136,7 +137,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 	}
 	if indexes, err = adms.dm.GetIndexes(ctx,
-		arg.ItemType, tntCtx, utils.EmptyString, true, true); err != nil {
+		arg.ItemType, tntCtx, utils.EmptyString, utils.EmptyString, true, true); err != nil {
 		return
 	}
 	if arg.FilterType != utils.EmptyString {
@@ -353,6 +354,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 		}
 		args.ActionS = indexes.Size() != 0
 	}
+	// RateFilter Indexes
 	var ratePrf []string
 	if args.RateS {
 		cacheIDs[utils.CacheRateProfilesFilterIndexes] = []string{utils.MetaAny}
@@ -484,7 +486,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 
 // ComputeFilterIndexIDs computes specific filter indexes
 func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
-	transactionID := utils.NonTransactional
+	transactionID := utils.GenUUID()
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -607,12 +609,14 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 		cacheIDs[utils.CacheActionProfilesFilterIndexes] = indexes.AsSlice()
 	}
 	//RateProfile Indexes
+	var ratePrf []string
 	if _, err = engine.ComputeIndexes(ctx, adms.dm, tnt, utils.EmptyString, utils.CacheRateProfilesFilterIndexes,
 		&args.RateProfileIDs, transactionID, func(tnt, id, grp string) (*[]string, error) {
 			rpr, e := adms.dm.GetRateProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
+			ratePrf = append(ratePrf, utils.ConcatenatedKey(tnt, id))
 			rtIds := make([]string, 0, len(rpr.Rates))
 			for key := range rpr.Rates {
 				rtIds = append(rtIds, key)
@@ -648,6 +652,75 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 	if indexes.Size() != 0 {
 		cacheIDs[utils.CacheDispatcherFilterIndexes] = indexes.AsSlice()
 	}
+	//Now we move from tmpKey to the right key for each type
+	//ThresholdProfile Indexes
+	if len(args.ThresholdIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheThresholdFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//AccountProfile Indexes
+	if len(args.AccountIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheAccountsFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//ActionProfile Indexes
+	if len(args.ActionProfileIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheActionProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//RateProfile Indexes
+	if len(args.RateProfileIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheRateProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return err
+		}
+		for _, tntId := range ratePrf {
+			if err = adms.dm.SetIndexes(ctx, utils.CacheRateFilterIndexes, tntId, nil, true, transactionID); err != nil {
+				return err
+			}
+
+		}
+	}
+	//StatQueueProfile Indexes
+	if len(args.StatIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheStatFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//ResourceProfile Indexes
+	if len(args.ResourceIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheResourceFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//RouteProfile Indexes
+	if len(args.RouteIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheRouteFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//AttributeProfile Indexes
+	if len(args.AttributeIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheAttributeFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//ChargerProfile Indexes
+	if len(args.ChargerIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheChargerFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//DispatcherProfile Indexes
+	if len(args.DispatcherIDs) != 0 {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheDispatcherFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
+	//generate a load
+	//ID for CacheFilterIndexes and store it in database
 
 	loadIDs := make(map[string]int64)
 	timeNow := time.Now().UnixNano()

@@ -28,7 +28,7 @@ type DataDBMock struct {
 	SetRateProfileDrvF         func(*context.Context, *utils.RateProfile) error
 	GetRateProfileDrvF         func(*context.Context, string, string) (*utils.RateProfile, error)
 	GetKeysForPrefixF          func(*context.Context, string) ([]string, error)
-	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
 	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*AttributeProfile, error)
 	SetAttributeProfileDrvF    func(ctx *context.Context, attr *AttributeProfile) error
@@ -151,9 +151,9 @@ func (dbM *DataDBMock) AddLoadHistory(*utils.LoadInstance, int, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (dbM *DataDBMock) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
 	if dbM.GetIndexesDrvF != nil {
-		return dbM.GetIndexesDrvF(ctx, idxItmType, tntCtx, idxKey)
+		return dbM.GetIndexesDrvF(ctx, idxItmType, tntCtx, idxKey, transactionID)
 	}
 	return nil, utils.ErrNotImplemented
 }
