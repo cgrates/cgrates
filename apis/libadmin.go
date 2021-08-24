@@ -253,7 +253,7 @@ func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, flt
 
 	var rcvIndx map[string]utils.StringSet
 	if rcvIndx, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntID,
-		utils.EmptyString, true, true); err != nil && err != utils.ErrNotFound { // error when geting the revers
+		utils.EmptyString, utils.EmptyString, true, true); err != nil && err != utils.ErrNotFound { // error when geting the revers
 		return
 	}
 	if err == utils.ErrNotFound || len(rcvIndx) == 0 { // no reverse index for this filter
