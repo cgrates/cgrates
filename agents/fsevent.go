@@ -409,23 +409,6 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	return
 }
 
-// V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
-func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	args = &sessions.V1TerminateSessionArgs{ // defaults
-		CGREvent: cgrEv,
-	}
-	subsystems, has := fsev[VarCGRFlags]
-	if !has {
-		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
-			utils.FreeSWITCHAgent))
-		args.TerminateSession = true
-		return
-	}
-	args.ParseFlags(subsystems, utils.InfieldSep)
-	return
-}
-
 // SliceAsFsArray Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now
 func SliceAsFsArray(slc []string) (arry string) {
 	if len(slc) == 0 {

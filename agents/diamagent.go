@@ -391,17 +391,9 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, rply)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
-		terminateArgs := sessions.NewV1TerminateSessionArgs(
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.GetBool(utils.MetaResources),
-			reqProcessor.Flags.GetBool(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		var rply string
 		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
-			terminateArgs, &rply)
+			cgrEv, &rply)
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
 		msgArgs := sessions.NewV1ProcessMessageArgs(

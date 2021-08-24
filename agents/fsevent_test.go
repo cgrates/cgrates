@@ -1040,26 +1040,3 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.RoutesIgnoreErrors, rcv.RoutesIgnoreErrors)
 	}
 }
-
-func TestFsEvV1TerminateSessionArgs(t *testing.T) {
-	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
-	ev := NewFSEvent(hangupEv)
-	expected := &sessions.V1TerminateSessionArgs{
-		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: ev.GetTenant(utils.MetaDefault),
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  ev.AsMapStringInterface(timezone),
-		},
-	}
-	rcv := ev.V1TerminateSessionArgs()
-	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.TerminateSession, rcv.TerminateSession) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.TerminateSession, rcv.TerminateSession)
-	}
-}

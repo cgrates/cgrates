@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
-	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -390,39 +389,6 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", exp2.ProcessThresholds, rcv.ProcessThresholds)
 	} else if !reflect.DeepEqual(exp2.ProcessStats, rcv.ProcessStats) {
 		t.Errorf("Expecting: %+v, received: %+v", exp2.ProcessStats, rcv.ProcessStats)
-	}
-}
-
-func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "AsteriskEvent",
-		Event: map[string]interface{}{
-			"MissingCGRSubsustems": "",
-		},
-	}
-	exp := &sessions.V1TerminateSessionArgs{
-		TerminateSession: true,
-		CGREvent:         cgrEv,
-	}
-	var ev map[string]interface{}
-	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
-		t.Error(err)
-	}
-	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1", "")
-	if rcv := smaEv.V1TerminateSessionArgs(*cgrEv); !reflect.DeepEqual(exp, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
-	}
-
-	exp2 := &sessions.V1TerminateSessionArgs{
-		TerminateSession: true,
-		ReleaseResources: true,
-		ProcessStats:     true,
-		CGREvent:         cgrEv,
-	}
-	cgrEv.Event[utils.CGRFlags] = "*resources+*accounts+*stats"
-	if rcv := smaEv.V1TerminateSessionArgs(*cgrEv); !reflect.DeepEqual(exp2, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp2), utils.ToJSON(rcv))
 	}
 }
 
