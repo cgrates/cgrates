@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSessionsProcessEvent{
 		name:      "session_process_message",
 		rpcMethod: utils.SessionSv1ProcessMessage,
-		rpcParams: &sessions.V1ProcessMessageArgs{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdSessionsProcessEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *sessions.V1ProcessMessageArgs
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,9 +50,7 @@ func (self *CmdSessionsProcessEvent) RpcMethod() string {
 
 func (self *CmdSessionsProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &sessions.V1ProcessMessageArgs{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }

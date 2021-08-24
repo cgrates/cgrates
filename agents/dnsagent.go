@@ -192,16 +192,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	var cgrArgs utils.Paginator
-	if reqType == utils.MetaAuthorize ||
-		reqType == utils.MetaMessage ||
-		reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
-				utils.DNSAgent, err.Error()))
-			err = nil // reset the error and continue the processing
-		}
-	}
+
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: <%s>, message: %s",
@@ -228,7 +219,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
 			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
@@ -258,11 +249,10 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, &rply)
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
-		evArgs := sessions.NewV1ProcessMessageArgs(cgrEv, cgrArgs)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1ProcessMessage,
-			evArgs, rply)
+			cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else
@@ -273,14 +263,10 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply.SetMaxUsageNeeded(messageS)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
-		evArgs := &sessions.V1ProcessEventArgs{
-			CGREvent:  cgrEv,
-			Paginator: cgrArgs,
-		}
 		rply := new(sessions.V1ProcessEventReply)
 		err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1ProcessEvent,
-			evArgs, rply)
+			cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else

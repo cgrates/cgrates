@@ -1616,7 +1616,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	if args.GetRoutes ||
 		utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS) {
-		routesReply, err := sS.getRoutes(ctx, args.CGREvent.Clone(), args.Paginator,
+		cgrArgs, _ := utils.GetRoutePaginatorFromOpts(args.APIOpts)
+		routesReply, err := sS.getRoutes(ctx, args.CGREvent.Clone(), cgrArgs,
 			args.RoutesIgnoreErrors || utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSIgnoreErrors),
 			utils.FirstNonEmpty(args.RoutesMaxCost, utils.IfaceAsString(args.APIOpts[utils.OptsSesRouteSMaxCost])),
 			false)
@@ -2150,21 +2151,21 @@ func (sS *SessionS) BiRPCv1ProcessCDR(ctx *context.Context,
 
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
-	args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
-	if args.CGREvent == nil {
+	args *utils.CGREvent, rply *V1ProcessMessageReply) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == utils.EmptyString {
-		args.CGREvent.ID = utils.GenUUID()
+	if args.ID == utils.EmptyString {
+		args.ID = utils.GenUUID()
 	}
-	if args.CGREvent.Tenant == utils.EmptyString {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessMessage, args.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessMessage, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -2182,7 +2183,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	}
 	// end of RPC caching
 
-	me := engine.MapEvent(args.CGREvent.Event)
+	me := engine.MapEvent(args.Event)
 	originID := me.GetStringIgnoreErrors(utils.OriginID)
 
 	if utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS) {
@@ -2190,9 +2191,9 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
 			return
 		}
-		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent, atrsIDs, false)
+		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs, false)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent
+			args = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2206,7 +2207,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := &utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
+			CGREvent: args,
 			UsageID:  originID,
 			Units:    1,
 		}
@@ -2218,7 +2219,8 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		rply.ResourceAllocation = &allocMessage
 	}
 	if utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS) {
-		routesReply, err := sS.getRoutes(ctx, args.CGREvent.Clone(), args.Paginator,
+		cgrArgs, _ := utils.GetRoutePaginatorFromOpts(args.APIOpts)
+		routesReply, err := sS.getRoutes(ctx, args.Clone(), cgrArgs,
 			utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSIgnoreErrors),
 			utils.IfaceAsString(args.APIOpts[utils.OptsSesRouteSMaxCost]), false)
 		if err != nil {
@@ -2230,7 +2232,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	}
 	if utils.OptAsBool(args.APIOpts, utils.OptsSesMessage) {
 		var maxUsage time.Duration
-		if maxUsage, err = sS.chargeEvent(ctx, args.CGREvent, utils.OptAsBool(args.APIOpts, utils.OptsSesForceDuration)); err != nil {
+		if maxUsage, err = sS.chargeEvent(ctx, args, utils.OptAsBool(args.APIOpts, utils.OptsSesForceDuration)); err != nil {
 			return err
 		}
 		rply.MaxUsage = &maxUsage
@@ -2240,11 +2242,11 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
 			return
 		}
-		tIDs, err := sS.processThreshold(ctx, args.CGREvent, thIDs, true)
+		tIDs, err := sS.processThreshold(ctx, args, thIDs, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), args))
 			withErrors = true
 		}
 		rply.ThresholdIDs = &tIDs
@@ -2254,12 +2256,12 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		if stIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
 			return
 		}
-		sIDs, err := sS.processStats(ctx, args.CGREvent, stIDs, false)
+		sIDs, err := sS.processStats(ctx, args, stIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), args))
 			withErrors = true
 		}
 		rply.StatQueueIDs = &sIDs
@@ -2273,21 +2275,21 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
-	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
-	if args.CGREvent == nil {
+	args *utils.CGREvent, rply *V1ProcessEventReply) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
-		args.CGREvent.ID = utils.GenUUID()
+	if args.ID == "" {
+		args.ID = utils.GenUUID()
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	if args.Tenant == "" {
+		args.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessEvent, args.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessEvent, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -2307,12 +2309,12 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 
 	blockError := utils.OptAsBool(args.APIOpts, utils.OptsSesBlockerError)
 	events := map[string]*utils.CGREvent{
-		utils.MetaRaw: args.CGREvent,
+		utils.MetaRaw: args,
 	}
 
 	if utils.OptAsBool(args.APIOpts, utils.OptsSesChargerS) {
 		var chrgrs []*engine.ChrgSProcessEventReply
-		if chrgrs, err = sS.processChargerS(ctx, args.CGREvent); err != nil {
+		if chrgrs, err = sS.processChargerS(ctx, args); err != nil {
 			return
 		}
 		for _, chrgr := range chrgrs {
@@ -2339,17 +2341,18 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				rply.Attributes[runID] = &rplyAttr
 			}
 		}
-		args.CGREvent = events[utils.MetaRaw]
+		args = events[utils.MetaRaw]
 	}
 
 	// get routes if required
 	if utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS) {
 		rply.RouteProfiles = make(map[string]engine.SortedRoutesList)
 		// check in case we have options for suppliers
-		ignoreErrors := utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSIgnoreErrors)
-		maxCost := utils.IfaceAsString(args.APIOpts[utils.OptsSesRouteSMaxCost])
 		for runID, cgrEv := range getDerivedEvents(events, utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSDerivedReply)) {
-			routesReply, err := sS.getRoutes(ctx, cgrEv.Clone(), args.Paginator, ignoreErrors, maxCost, false)
+			cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
+			routesReply, err := sS.getRoutes(ctx, cgrEv.Clone(), cgrArgs,
+				utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesRouteSIgnoreErrors),
+				utils.IfaceAsString(cgrEv.APIOpts[utils.OptsSesRouteSMaxCost]), false)
 			if err != nil {
 				return err
 			}
