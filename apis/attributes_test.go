@@ -309,7 +309,7 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				"testIndex": {},
 			}, nil
