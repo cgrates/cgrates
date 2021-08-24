@@ -462,10 +462,10 @@ func testV1DataInitSession(t *testing.T) {
 				utils.Usage:        initUsage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSSTTL:         "300s",
-				utils.OptsSSTTLLastUsed: "0s",
-				utils.OptsSSTTLMaxDelay: "1800s",
-				utils.OptsSSTTLUsage:    "0s",
+				utils.OptsSesTTL:         "300s",
+				utils.OptsSesTTLLastUsed: "0s",
+				utils.OptsSesTTLMaxDelay: "1800s",
+				utils.OptsSesTTLUsage:    "0s",
 			},
 		},
 	}
@@ -509,10 +509,10 @@ func testV1DataUpdateWith1Mo(t *testing.T) {
 				utils.Usage:        reqUsage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSSTTL:         "28807s",
-				utils.OptsSSTTLLastUsed: "0s",
-				utils.OptsSSTTLMaxDelay: "1800s",
-				utils.OptsSSTTLUsage:    "0s"},
+				utils.OptsSesTTL:         "28807s",
+				utils.OptsSesTTLLastUsed: "0s",
+				utils.OptsSesTTLMaxDelay: "1800s",
+				utils.OptsSesTTLUsage:    "0s"},
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -553,10 +553,10 @@ func testV1DataUpdateWith1Go(t *testing.T) {
 				utils.Usage:        reqUsage,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSSTTL:         "28807s",
-				utils.OptsSSTTLLastUsed: "0s",
-				utils.OptsSSTTLMaxDelay: "1800s",
-				utils.OptsSSTTLUsage:    "0s"},
+				utils.OptsSesTTL:         "28807s",
+				utils.OptsSesTTLLastUsed: "0s",
+				utils.OptsSesTTLMaxDelay: "1800s",
+				utils.OptsSesTTLUsage:    "0s"},
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
