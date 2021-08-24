@@ -1031,44 +1031,6 @@ func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 	}
 }
 
-func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "Event",
-		Event: map[string]interface{}{
-			utils.AccountField: "1001",
-			utils.Destination:  "1002",
-		},
-	}
-	expected := &V1UpdateSessionArgs{
-		GetAttributes: true,
-		UpdateSession: true,
-		CGREvent:      cgrEv,
-		ForceDuration: true,
-	}
-	rply := NewV1UpdateSessionArgs(true, nil, true, cgrEv, true)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-	expected = &V1UpdateSessionArgs{
-		GetAttributes: false,
-		UpdateSession: true,
-		CGREvent:      cgrEv,
-		ForceDuration: true,
-	}
-	rply = NewV1UpdateSessionArgs(false, nil, true, cgrEv, true)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-	//test with len(AttributeIDs) != 0
-	attributeIDs := []string{"ATTR1", "ATTR2"}
-	rply = NewV1UpdateSessionArgs(false, attributeIDs, true, cgrEv, true)
-	expected.AttributeIDs = []string{"ATTR1", "ATTR2"}
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-}
-
 func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",

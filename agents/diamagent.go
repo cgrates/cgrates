@@ -382,18 +382,13 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1InitSessionReply)
 		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInit))
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInitiate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
-		updateArgs := sessions.NewV1UpdateSessionArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
-		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesUpdate))
 		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
-			updateArgs, rply)
+			cgrEv, rply)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(

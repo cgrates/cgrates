@@ -83,16 +83,16 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *utils.CGR
 	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1InitiateSessionWithDigest, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSessionArgs,
+func (dS *DispatcherService) SessionSv1UpdateSession(args *utils.CGREvent,
 	reply *sessions.V1UpdateSessionReply) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1UpdateSession, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.SessionSv1UpdateSession, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1UpdateSession, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1UpdateSession, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithAPIOpts,

@@ -2126,7 +2126,8 @@ const (
 	OptsSesThresholdIDs           = "*sesThresholdIDs"
 	OptsSesMaxUsage               = "*sesMaxUsage"
 	OptsSesForceDuration          = "*sesForceDuration"
-	OptsSesInit                   = "*sesInit"
+	OptsSesInitiate               = "*sesInitiate"
+	OptsSesUpdate                 = "*sesUpdate"
 
 	OptsCDRsAttributeS = "*cdrsAttributeS"
 	OptsCDRsChargerS   = "*cdrsChargerS"

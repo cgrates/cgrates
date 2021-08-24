@@ -742,30 +742,6 @@ type V1InitReplyWithDigest struct {
 	StatQueues         *string
 }
 
-// NewV1UpdateSessionArgs is a constructor for update session arguments
-func NewV1UpdateSessionArgs(attrs bool, attributeIDs []string,
-	acnts bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1UpdateSessionArgs) {
-	args = &V1UpdateSessionArgs{
-		GetAttributes: attrs,
-		UpdateSession: acnts,
-		CGREvent:      cgrEv,
-		ForceDuration: forceDuration,
-	}
-	if len(attributeIDs) != 0 {
-		args.AttributeIDs = attributeIDs
-	}
-	return
-}
-
-// V1UpdateSessionArgs contains options for session update
-type V1UpdateSessionArgs struct {
-	GetAttributes bool
-	UpdateSession bool
-	ForceDuration bool
-	AttributeIDs  []string
-	*utils.CGREvent
-}
-
 // V1UpdateSessionReply contains options for session update reply
 type V1UpdateSessionReply struct {
 	Attributes *engine.AttrSProcessEventReply `json:",omitempty"`
