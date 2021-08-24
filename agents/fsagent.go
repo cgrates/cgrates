@@ -268,10 +268,13 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 	var reply string
 	fsev[VarCGROriginHost] = utils.FirstNonEmpty(fsev[VarCGROriginHost], fsa.cfg.EventSocketConns[connIdx].Alias) // rewrite the OriginHost variable if it is empty
 	if fsev[VarAnswerEpoch] != "0" {                                                                              // call was answered
-		terminateSessionArgs := fsev.V1TerminateSessionArgs()
-		terminateSessionArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
+		cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+		if cgrEv.APIOpts == nil {
+			cgrEv.APIOpts = map[string]interface{}{utils.OptsSesTerminate: true}
+		}
+		cgrEv.Event[FsConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
 		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1TerminateSession,
-			terminateSessionArgs, &reply); err != nil {
+			cgrEv, &reply); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
 					utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))

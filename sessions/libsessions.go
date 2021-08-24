@@ -780,59 +780,6 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap() map[string]*utils.DataNode 
 	return cgrReply
 }
 
-// NewV1TerminateSessionArgs creates a new V1TerminateSessionArgs using the given arguments
-func NewV1TerminateSessionArgs(acnts, resrc,
-	thrds bool, thresholdIDs []string, stats bool,
-	statIDs []string, cgrEv *utils.CGREvent, forceDuration bool) (args *V1TerminateSessionArgs) {
-	args = &V1TerminateSessionArgs{
-		TerminateSession:  acnts,
-		ReleaseResources:  resrc,
-		ProcessThresholds: thrds,
-		ProcessStats:      stats,
-		CGREvent:          cgrEv,
-		ForceDuration:     forceDuration,
-	}
-	if len(thresholdIDs) != 0 {
-		args.ThresholdIDs = thresholdIDs
-	}
-	if len(statIDs) != 0 {
-		args.StatIDs = statIDs
-	}
-	return
-}
-
-// V1TerminateSessionArgs is used as argumen for TerminateSession
-type V1TerminateSessionArgs struct {
-	TerminateSession  bool
-	ForceDuration     bool
-	ReleaseResources  bool
-	ProcessThresholds bool
-	ProcessStats      bool
-	ThresholdIDs      []string
-	StatIDs           []string
-	*utils.CGREvent
-}
-
-// ParseFlags will populate the V1TerminateSessionArgs flags
-func (args *V1TerminateSessionArgs) ParseFlags(flags, sep string) {
-	for _, subsystem := range strings.Split(flags, sep) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.TerminateSession = true
-		case subsystem == utils.MetaResources:
-			args.ReleaseResources = true
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
-			args.ProcessThresholds = true
-			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaStats) != -1:
-			args.ProcessStats = true
-			args.StatIDs = getFlagIDs(subsystem)
-		case subsystem == utils.MetaFD:
-			args.ForceDuration = true
-		}
-	}
-}
-
 // ArgsReplicateSessions used to specify wich Session to replicate over the given connections
 type ArgsReplicateSessions struct {
 	CGRID   string

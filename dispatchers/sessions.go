@@ -113,16 +113,16 @@ func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithAPIOpt
 	}, utils.MetaSessionS, utils.SessionSv1SyncSessions, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1TerminateSessionArgs,
+func (dS *DispatcherService) SessionSv1TerminateSession(args *utils.CGREvent,
 	reply *string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1TerminateSession, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.SessionSv1TerminateSession, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1TerminateSession, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1TerminateSession, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREvent,

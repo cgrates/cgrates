@@ -67,7 +67,7 @@ func (ssv1 *SessionSv1) SyncSessions(ctx *context.Context, args *utils.TenantWit
 	return ssv1.sS.BiRPCv1SyncSessions(ctx, &utils.TenantWithAPIOpts{}, rply)
 }
 
-func (ssv1 *SessionSv1) TerminateSession(ctx *context.Context, args *sessions.V1TerminateSessionArgs,
+func (ssv1 *SessionSv1) TerminateSession(ctx *context.Context, args *utils.CGREvent,
 	rply *string) error {
 	return ssv1.sS.BiRPCv1TerminateSession(ctx, args, rply)
 }

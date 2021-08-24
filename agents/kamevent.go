@@ -310,23 +310,6 @@ func (kev KamEvent) AsKamProcessMessageEmptyReply() (kar *KamReply) {
 	return
 }
 
-// V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
-func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	cgrEv := kev.AsCGREvent(utils.FirstNonEmpty(
-		config.CgrConfig().KamAgentCfg().Timezone,
-		config.CgrConfig().GeneralCfg().DefaultTimezone))
-	args = &sessions.V1TerminateSessionArgs{ // defaults
-		TerminateSession: true,
-		CGREvent:         cgrEv,
-	}
-	subsystems, has := kev[utils.CGRFlags]
-	if !has {
-		return
-	}
-	args.ParseFlags(subsystems, utils.InfieldSep)
-	return
-}
-
 //KamReply will be used to send back to kamailio from
 //Authrization,ProcessEvent and ProcessEvent empty (pingPong)
 type KamReply struct {

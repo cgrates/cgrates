@@ -1031,49 +1031,6 @@ func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 	}
 }
 
-func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "Event",
-		Event: map[string]interface{}{
-			utils.AccountField: "1001",
-			utils.Destination:  "1002",
-		},
-	}
-	expected := &V1TerminateSessionArgs{
-		TerminateSession:  true,
-		ProcessThresholds: true,
-		CGREvent:          cgrEv,
-		ForceDuration:     true,
-	}
-	rply := NewV1TerminateSessionArgs(true, false, true, nil, false, nil, cgrEv, true)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-	expected = &V1TerminateSessionArgs{
-		CGREvent:      cgrEv,
-		ForceDuration: true,
-	}
-	rply = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEv, true)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-	//test with len(thresholdIDs) != 0 && len(StatIDs) != 0
-	thresholdIDs := []string{"ID1", "ID2"}
-	statIDs := []string{"test1", "test2"}
-	expected = &V1TerminateSessionArgs{
-		CGREvent:      cgrEv,
-		ThresholdIDs:  []string{"ID1", "ID2"},
-		StatIDs:       []string{"test1", "test2"},
-		ForceDuration: true,
-	}
-	rply = NewV1TerminateSessionArgs(false, false, false, thresholdIDs, false, statIDs, cgrEv, true)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-
-}
-
 func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1860,50 +1817,6 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 
 }
 */
-
-func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
-	v1TerminateSsArgs := new(V1TerminateSessionArgs)
-	eOut := new(V1TerminateSessionArgs)
-	//empty check
-	strArg := ""
-	v1TerminateSsArgs.ParseFlags(strArg, utils.InfieldSep)
-	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1TerminateSsArgs)
-	}
-	//normal check -> without *dispatchers
-	eOut = &V1TerminateSessionArgs{
-		TerminateSession:  true,
-		ReleaseResources:  true,
-		ProcessThresholds: true,
-		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
-		ProcessStats:      true,
-		StatIDs:           []string{"st1", "st2", "st3"},
-		ForceDuration:     true,
-	}
-
-	strArg = "*accounts;*resources;*routes;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
-	v1TerminateSsArgs.ParseFlags(strArg, utils.InfieldSep)
-	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
-	}
-	// //normal check -> with *dispatchers
-	eOut = &V1TerminateSessionArgs{
-		TerminateSession:  true,
-		ReleaseResources:  true,
-		ProcessThresholds: true,
-		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
-		ProcessStats:      true,
-		StatIDs:           []string{"st1", "st2", "st3"},
-		ForceDuration:     true,
-	}
-
-	strArg = "*accounts;*resources;;*dispatchers;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
-	v1TerminateSsArgs.ParseFlags(strArg, utils.InfieldSep)
-	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
-	}
-
-}
 
 func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	v1ProcessMsgArgs := new(V1ProcessMessageArgs)

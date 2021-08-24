@@ -300,17 +300,14 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 		return
 	}
 	// populate terminate session args
-	tsArgs := ev.V1TerminateSessionArgs(*cgrEvDisp)
-	if tsArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
-			utils.AsteriskAgent, chID))
-		return
+	if cgrEvDisp.APIOpts == nil {
+		cgrEvDisp.APIOpts = map[string]interface{}{utils.OptsSesTerminate: true}
 	}
 
 	var reply string
 	if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns,
 		utils.SessionSv1TerminateSession,
-		tsArgs, &reply); err != nil {
+		cgrEvDisp, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to terminate session for channelID: %s",
 			utils.AsteriskAgent, err.Error(), chID))
 	}

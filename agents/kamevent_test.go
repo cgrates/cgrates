@@ -286,36 +286,6 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	}
 }
 
-func TestKamEvV1TerminateSessionArgs(t *testing.T) {
-	kamEv := KamEvent{"event": "CGR_CALL_END",
-		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
-		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
-		"cgr_destination": "1002", "cgr_answertime": "1419839310",
-		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGRRoute:           "supplier2",
-		utils.CGRDisconnectCause: "200"}
-	expected := &sessions.V1TerminateSessionArgs{
-		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-				config.CgrConfig().GeneralCfg().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Event: kamEv.AsMapStringInterface(),
-		},
-	}
-	rcv := kamEv.V1TerminateSessionArgs()
-	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.TerminateSession, rcv.TerminateSession) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.TerminateSession, rcv.TerminateSession)
-	}
-}
-
 func TestKamEvV1ProcessMessageArgs(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_PROCESS_MESSAGE",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",

@@ -1553,7 +1553,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 
 	if !(args.GetAttributes || utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS) ||
 		args.GetMaxUsage || utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) ||
-		args.AuthorizeResources || utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuth) ||
+		args.AuthorizeResources || utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) ||
 		args.GetRoutes || utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS)) {
 		return // Nothing to do
 	}
@@ -1594,7 +1594,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		authReply.MaxUsage = &maxUsage
 	}
 	if args.AuthorizeResources ||
-		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuth) {
+		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
 		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
@@ -1683,7 +1683,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 		authReply.AttributesDigest = utils.StringPointer(initAuthRply.Attributes.Digest())
 	}
 	if args.AuthorizeResources ||
-		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuth) {
+		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
 	if args.GetMaxUsage ||
@@ -1743,7 +1743,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 
 	attrS := utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS)
 	initS := utils.OptAsBool(args.APIOpts, utils.OptsSesInitiate)
-	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAloc)
+	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAlocate)
 	if !(attrS || initS || resS) {
 		return // nothing to do
 	}
@@ -1970,20 +1970,20 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 
 // BiRPCv1TerminateSession will stop debit loops as well as release any used resources
 func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
-	args *V1TerminateSessionArgs, rply *string) (err error) {
-	if args.CGREvent == nil {
+	args *utils.CGREvent, rply *string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
-		args.CGREvent.ID = utils.GenUUID()
+	if args.ID == "" {
+		args.ID = utils.GenUUID()
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	if args.Tenant == "" {
+		args.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1TerminateSession, args.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1TerminateSession, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -2000,15 +2000,17 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-	if !args.TerminateSession && !args.ReleaseResources {
+	attrS := utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS)
+	termS := utils.OptAsBool(args.APIOpts, utils.OptsSesTerminate)
+	if !(attrS || termS) {
 		return // nothing to do
 	}
 
-	ev := engine.MapEvent(args.CGREvent.Event)
+	ev := engine.MapEvent(args.Event)
 	opts := engine.MapEvent(args.APIOpts)
 	cgrID := GetSetCGRID(ev)
 	originID := ev.GetStringIgnoreErrors(utils.OriginID)
-	if args.TerminateSession {
+	if termS {
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
@@ -2033,8 +2035,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 				continue
 			}
 			isMsg = true
-			if s, err = sS.initSession(ctx, args.CGREvent, sS.biJClntID(ctx.Client), ev.GetStringIgnoreErrors(utils.OriginID),
-				dbtItvl, isMsg, args.ForceDuration); err != nil {
+			if s, err = sS.initSession(ctx, args, sS.biJClntID(ctx.Client), ev.GetStringIgnoreErrors(utils.OriginID),
+				dbtItvl, isMsg, utils.OptAsBool(args.APIOpts, utils.OptsSesForceDuration)); err != nil {
 				return err //utils.NewErrRALs(err)
 			}
 			if _, err = sS.updateSession(ctx, s, ev, opts, isMsg); err != nil {
@@ -2056,7 +2058,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			return err //utils.NewErrRALs(err)
 		}
 	}
-	if args.ReleaseResources {
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSRelease) {
 		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
@@ -2065,7 +2067,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		}
 		var reply string
 		argsRU := &utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
+			CGREvent: args,
 			UsageID:  originID, // same ID should be accepted by first group since the previous resource should be expired
 			Units:    1,
 		}
@@ -2074,23 +2076,31 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			return utils.NewErrResourceS(err)
 		}
 	}
-	if args.ProcessThresholds {
-		_, err := sS.processThreshold(ctx, args.CGREvent, args.ThresholdIDs, true)
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesThresholdS) {
+		var thIDs []string
+		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
+			return
+		}
+		_, err := sS.processThreshold(ctx, args, thIDs, true)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), args))
 			withErrors = true
 		}
 	}
-	if args.ProcessStats {
-		_, err := sS.processStats(ctx, args.CGREvent, args.StatIDs, false)
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesStatS) {
+		var statIDs []string
+		if statIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
+			return
+		}
+		_, err := sS.processStats(ctx, args, statIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), args))
 			withErrors = true
 		}
 	}

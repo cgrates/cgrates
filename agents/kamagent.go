@@ -214,16 +214,14 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	tsArgs := kev.V1TerminateSessionArgs()
-	if tsArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
-			utils.KamailioAgent, kev[utils.OriginID]))
-		return
+	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	if cgrEv.APIOpts == nil {
+		cgrEv.APIOpts = map[string]interface{}{utils.OptsSesTerminate: true}
 	}
 	var reply string
-	tsArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
+	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
 	if err := ka.connMgr.Call(ka.ctx, ka.cfg.SessionSConns, utils.SessionSv1TerminateSession,
-		tsArgs, &reply); err != nil {
+		cgrEv, &reply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not terminate session with event %s, error: %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
@@ -231,9 +229,9 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 	}
 	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRFlags], utils.MetaCDRs) != -1 {
 		if err := ka.connMgr.Call(ka.ctx, ka.cfg.SessionSConns, utils.SessionSv1ProcessCDR,
-			tsArgs.CGREvent, &reply); err != nil {
+			cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
-				utils.KamailioAgent, utils.ToJSON(tsArgs.CGREvent), err.Error()))
+				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
 		}
 	}
 }

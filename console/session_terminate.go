@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdSessionsTerminate{
 		name:      "session_terminate",
 		rpcMethod: utils.SessionSv1TerminateSession,
-		rpcParams: &sessions.V1TerminateSessionArgs{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +35,7 @@ func init() {
 type CmdSessionsTerminate struct {
 	name      string
 	rpcMethod string
-	rpcParams *sessions.V1TerminateSessionArgs
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,9 +49,7 @@ func (self *CmdSessionsTerminate) RpcMethod() string {
 
 func (self *CmdSessionsTerminate) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &sessions.V1TerminateSessionArgs{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }
