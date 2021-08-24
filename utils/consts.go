@@ -2087,7 +2087,16 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, Op
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
 	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
-	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount})
+	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount,
+	OptsSesAttributeS, OptsSesAttributeIDs, OptsSesAttributeSDerivedReply, OptsSesBlockerError,
+	OptsSesCDRs, OptsSesCDRsDerivedReply, OptsSesChargerS, OptsSesResourceS, OptsSesResourceSAuthorize,
+	OptsSesResourceSAlocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsSesRouteS,
+	OptsSesRouteSDerivedReply, OptsSesRouteSIgnoreErrors, OptsSesRouteSMaxCost, OptsSesStatS,
+	OptsSesStatSDerivedReply, OptsSesStatIDs, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
+	OptsSesSTIRInitiate, OptsSesThresholdS, OptsSesThresholdSDerivedReply, OptsSesThresholdIDs,
+	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
+	OptsSesMessage, OptsCDRsAttributeS, OptsCDRsChargerS, OptsCDRsExport, OptsCDRsRefund,
+	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS})
 
 // Event Opts
 const (
@@ -2130,6 +2139,7 @@ const (
 	OptsSesInitiate               = "*sesInitiate"
 	OptsSesUpdate                 = "*sesUpdate"
 	OptsSesTerminate              = "*sesTerminate"
+	OptsSesMessage                = "*sesMessage"
 
 	OptsCDRsAttributeS = "*cdrsAttributeS"
 	OptsCDRsChargerS   = "*cdrsChargerS"

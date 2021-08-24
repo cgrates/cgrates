@@ -187,31 +187,18 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, &rply)
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
-		evArgs := sessions.NewV1ProcessMessageArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaResources),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.GetBool(utils.MetaRoutes),
-			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
-			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
-			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
-		)
+		evArgs := sessions.NewV1ProcessMessageArgs(cgrEv, cgrArgs)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ha.connMgr.Call(context.TODO(), ha.sessionConns, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else
-		if evArgs.Debit {
+		messageS := utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesMessage)
+		if messageS {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		rply.SetMaxUsageNeeded(evArgs.Debit)
+		rply.SetMaxUsageNeeded(messageS)
 		agReq.setCGRReply(nil, err)
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{

@@ -321,14 +321,16 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGRRoute:           "supplier2",
-		utils.CGRDisconnectCause: "200"}
+		utils.CGRDisconnectCause: "200",
+		utils.OptsSesMessage:     "true",
+	}
 	procEvArgs := &sessions.V1ProcessMessageArgs{
-		Debit: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Event: kamEv.AsMapStringInterface(),
+			ID:      utils.UUIDSha1Prefix(),
+			Event:   kamEv.AsMapStringInterface(),
+			APIOpts: kamEv.GetOptions(),
 		},
 	}
 	procEvhRply := &sessions.V1ProcessMessageReply{
@@ -345,14 +347,16 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	}
 	kamEv = KamEvent{"event": "CGR_PROFILE_REQUEST",
 		"Tenant": "cgrates.org", "Account": "1001",
-		KamReplyRoute: "CGR_PROFILE_REPLY"}
+		KamReplyRoute:           "CGR_PROFILE_REPLY",
+		utils.OptsSesAttributeS: "true",
+	}
 	procEvArgs = &sessions.V1ProcessMessageArgs{
-		GetAttributes: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Event: kamEv.AsMapStringInterface(),
+			ID:      utils.UUIDSha1Prefix(),
+			Event:   kamEv.AsMapStringInterface(),
+			APIOpts: kamEv.GetOptions(),
 		},
 	}
 	procEvhRply = &sessions.V1ProcessMessageReply{
