@@ -2081,47 +2081,50 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSSTTL,
-	OptsSSTTLMaxDelay, OptsSSTTLLastUsed, OptsSSTTLLastUsage, OptsSSTTLUsage,
-	OptsSSDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
+var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSesTTL,
+	OptsSesTTLMaxDelay, OptsSesTTLLastUsed, OptsSesTTLLastUsage, OptsSesTTLUsage,
+	OptsSesDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
-	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSSChargeable,
+	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
 	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount})
 
 // Event Opts
 const (
 	// SessionS
-	OptsSSTTL           = "*ssTTL"
-	OptsSSChargeable    = "*ssChargeable"
-	OptsSSDebitInterval = "*ssDebitInterval"
-	OptsSSTTLLastUsage  = "*ssTTLLastUsage"
-	OptsSSTTLLastUsed   = "*ssTTLLastUsed"
-	OptsSSTTLMaxDelay   = "*ssTTLMaxDelay"
-	OptsSSTTLUsage      = "*ssTTLUsage"
+	OptsSesTTL           = "*sesTTL"
+	OptsSesChargeable    = "*sesChargeable"
+	OptsSesDebitInterval = "*sesDebitInterval"
+	OptsSesTTLLastUsage  = "*sesTTLLastUsage"
+	OptsSesTTLLastUsed   = "*sesTTLLastUsed"
+	OptsSesTTLMaxDelay   = "*sesTTLMaxDelay"
+	OptsSesTTLUsage      = "*sesTTLUsage"
 
-	OptsSSAttributeS             = "*ssAttributeS"
-	OptsSSAttributeIDs           = "*ssAttributeIDs"
-	OptsSSAttributeSDerivedReply = "*ssAttributeSDerivedReply"
-	OptsSSBlockerError           = "*ssBlockerError"
-	OptsSSCDRs                   = "*ssCDRs"
-	OptsSSCDRsDerivedReply       = "*ssCDRsDerivedReply"
-	OptsSSChargerS               = "*ssChargerS"
-	OptsSSResourceS              = "*ssResourceS"
-	OptsSSResourceSDerivedReply  = "*ssResourceSDerivedReply"
-	OptsSSRouteS                 = "*ssRouteS"
-	OptsSSRouteSDerivedReply     = "*ssRouteSDerivedReply"
-	OptsSSRouteSIgnoreErrors     = "*ssRouteSIgnoreErrors"
-	OptsSSRouteSMaxCost          = "*ssRouteSMaxCost"
-	OptsSSStatS                  = "*ssStatS"
-	OptsSSStatSDerivedReply      = "*ssStatSDerivedReply"
-	OptsSSStatIDs                = "*ssStatIDs"
-	OptsSSSTIRAuthenticate       = "*ssSTIRAuthenticate"
-	OptsSSSTIRDerivedReply       = "*ssSTIRDerivedReply"
-	OptsSSSTIRInitiate           = "*ssSTIRInitiate"
-	OptsSSThresholdS             = "*ssThresholdS"
-	OptsSSThresholdSDerivedReply = "*ssThresholdSDerivedReply"
-	OptsSSThresholdIDs           = "*ssThresholdIDs"
+	OptsSesAttributeS             = "*sesAttributeS"
+	OptsSesAttributeIDs           = "*sesAttributeIDs"
+	OptsSesAttributeSDerivedReply = "*sesAttributeSDerivedReply"
+	OptsSesBlockerError           = "*sesBlockerError"
+	OptsSesCDRs                   = "*sesCDRs"
+	OptsSesCDRsDerivedReply       = "*sesCDRsDerivedReply"
+	OptsSesChargerS               = "*sesChargerS"
+	OptsSesResourceS              = "*sesResourceS"
+	OptsSesResourceSAuth          = "*sesResourceSAuth"
+	OptsSesResourceSDerivedReply  = "*sesResourceSDerivedReply"
+	OptsSesRouteS                 = "*sesRouteS"
+	OptsSesRouteSDerivedReply     = "*sesRouteSDerivedReply"
+	OptsSesRouteSIgnoreErrors     = "*sesRouteSIgnoreErrors"
+	OptsSesRouteSMaxCost          = "*sesRouteSMaxCost"
+	OptsSesStatS                  = "*sesStatS"
+	OptsSesStatSDerivedReply      = "*sesStatSDerivedReply"
+	OptsSesStatIDs                = "*sesStatIDs"
+	OptsSesSTIRAuthenticate       = "*sesSTIRAuthenticate"
+	OptsSesSTIRDerivedReply       = "*sesSTIRDerivedReply"
+	OptsSesSTIRInitiate           = "*sesSTIRInitiate"
+	OptsSesThresholdS             = "*sesThresholdS"
+	OptsSesThresholdSDerivedReply = "*sesThresholdSDerivedReply"
+	OptsSesThresholdIDs           = "*sesThresholdIDs"
+	OptsSesMaxUsage               = "*sesMaxUsage"
+	OptsSesForceDuration          = "*sesForceDuration"
 
 	OptsCDRsAttributeS = "*cdrsAttributeS"
 	OptsCDRsChargerS   = "*cdrsChargerS"

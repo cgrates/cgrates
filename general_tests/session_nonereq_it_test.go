@@ -142,7 +142,7 @@ func testSesNoneReqTypeItInit(t *testing.T) {
 				utils.Usage:        10 * time.Second,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsSSDebitInterval: "0s",
+				utils.OptsSesDebitInterval: "0s",
 			},
 		},
 	}
