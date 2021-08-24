@@ -183,7 +183,7 @@ func getIHFltrIdxFromCache(ctx *context.Context, dm *DataManager, fltrIdxCache *
 		return fltrVal.(utils.StringSet), nil
 	}
 	var indexes map[string]utils.StringSet
-	if indexes, err = dm.GetIndexes(ctx, idxItmType, tntGrp, idxKey, true, false); err != nil {
+	if indexes, err = dm.GetIndexes(ctx, idxItmType, tntGrp, idxKey, utils.NonTransactional, true, false); err != nil {
 		if err == utils.ErrNotFound {
 			fltrIdxCache.Set(cacheKey, nil, nil)
 		}

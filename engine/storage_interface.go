@@ -56,7 +56,7 @@ type DataDB interface {
 	RemoveResourceDrv(*context.Context, string, string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
 	RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error)

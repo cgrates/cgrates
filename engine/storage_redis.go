@@ -22,6 +22,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -761,9 +762,14 @@ func (rs *RedisStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id 
 }
 
 // GetIndexesDrv retrieves Indexes from dataDB
-func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
 	mp := make(map[string]string)
-	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	// dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	if transactionID != utils.NonTransactional {
+		originKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+	}
+	dbKey := originKey
 	if len(idxKey) == 0 {
 		if err = rs.Cmd(&mp, redisHGETALL, dbKey); err != nil {
 			return
