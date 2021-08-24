@@ -230,17 +230,11 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 // V1ProcessMessageArgs returns the arguments used in SessionSv1.ProcessMessage
 func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs) {
 	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	args = &sessions.V1ProcessMessageArgs{ // defaults
-		CGREvent: cgrEv,
+	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
+	return &sessions.V1ProcessMessageArgs{ // defaults
+		CGREvent:  cgrEv,
+		Paginator: cgrArgs,
 	}
-	subsystems, has := kev[utils.CGRFlags]
-	if !has {
-		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
-			utils.KamailioAgent))
-		return
-	}
-	args.ParseFlags(subsystems, utils.InfieldSep)
-	return
 }
 
 // AsKamProcessMessageReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
@@ -258,23 +252,23 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 		kar.Error = rplyErr.Error()
 		return
 	}
-	if procEvArgs.GetAttributes && procEvReply.Attributes != nil {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesAttributeS) && procEvReply.Attributes != nil {
 		kar.Attributes = procEvReply.Attributes.Digest()
 	}
-	if procEvArgs.AllocateResources {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesResourceSAlocate) {
 		kar.ResourceAllocation = *procEvReply.ResourceAllocation
 	}
-	if procEvArgs.Debit {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesMessage) {
 		kar.MaxUsage = procEvReply.MaxUsage.Seconds()
 	}
-	if procEvArgs.GetRoutes && procEvReply.RouteProfiles != nil {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesRouteS) && procEvReply.RouteProfiles != nil {
 		kar.Routes = procEvReply.RouteProfiles.Digest()
 	}
 
-	if procEvArgs.ProcessThresholds {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesThresholdS) {
 		kar.Thresholds = strings.Join(*procEvReply.ThresholdIDs, utils.FieldsSep)
 	}
-	if procEvArgs.ProcessStats {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesStatS) {
 		kar.StatQueues = strings.Join(*procEvReply.StatQueueIDs, utils.FieldsSep)
 	}
 	return

@@ -2185,8 +2185,12 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	me := engine.MapEvent(args.CGREvent.Event)
 	originID := me.GetStringIgnoreErrors(utils.OriginID)
 
-	if args.GetAttributes {
-		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent, args.AttributeIDs, false)
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS) {
+		var atrsIDs []string
+		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
+			return
+		}
+		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent, atrsIDs, false)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
@@ -2194,7 +2198,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	if args.AllocateResources {
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAlocate) {
 		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
@@ -2213,9 +2217,10 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		}
 		rply.ResourceAllocation = &allocMessage
 	}
-	if args.GetRoutes {
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS) {
 		routesReply, err := sS.getRoutes(ctx, args.CGREvent.Clone(), args.Paginator,
-			args.RoutesIgnoreErrors, args.RoutesMaxCost, false)
+			utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSIgnoreErrors),
+			utils.IfaceAsString(args.APIOpts[utils.OptsSesRouteSMaxCost]), false)
 		if err != nil {
 			return err
 		}
@@ -2223,15 +2228,19 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 			rply.RouteProfiles = routesReply
 		}
 	}
-	if args.Debit {
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesMessage) {
 		var maxUsage time.Duration
-		if maxUsage, err = sS.chargeEvent(ctx, args.CGREvent, args.ForceDuration); err != nil {
+		if maxUsage, err = sS.chargeEvent(ctx, args.CGREvent, utils.OptAsBool(args.APIOpts, utils.OptsSesForceDuration)); err != nil {
 			return err
 		}
 		rply.MaxUsage = &maxUsage
 	}
-	if args.ProcessThresholds {
-		tIDs, err := sS.processThreshold(ctx, args.CGREvent, args.ThresholdIDs, true)
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesThresholdS) {
+		var thIDs []string
+		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
+			return
+		}
+		tIDs, err := sS.processThreshold(ctx, args.CGREvent, thIDs, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
@@ -2240,8 +2249,12 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		}
 		rply.ThresholdIDs = &tIDs
 	}
-	if args.ProcessStats {
-		sIDs, err := sS.processStats(ctx, args.CGREvent, args.StatIDs, false)
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesStatS) {
+		var stIDs []string
+		if stIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
+			return
+		}
+		sIDs, err := sS.processStats(ctx, args.CGREvent, stIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(

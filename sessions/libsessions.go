@@ -369,87 +369,17 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 }
 
 // NewV1ProcessMessageArgs is a constructor for MessageArgs used by ProcessMessage
-func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
-	thds bool, thresholdIDs []string, stats bool, statIDs []string, resrc, acnts,
-	routes, routesIgnoreErrs, routesEventCost bool, cgrEv *utils.CGREvent,
-	routePaginator utils.Paginator, forceDuration bool, routesMaxCost string) (args *V1ProcessMessageArgs) {
-	args = &V1ProcessMessageArgs{
-		AllocateResources:  resrc,
-		Debit:              acnts,
-		GetAttributes:      attrs,
-		ProcessThresholds:  thds,
-		ProcessStats:       stats,
-		RoutesIgnoreErrors: routesIgnoreErrs,
-		GetRoutes:          routes,
-		CGREvent:           cgrEv,
-		ForceDuration:      forceDuration,
+func NewV1ProcessMessageArgs(cgrEv *utils.CGREvent, routePaginator utils.Paginator) *V1ProcessMessageArgs {
+	return &V1ProcessMessageArgs{
+		CGREvent:  cgrEv,
+		Paginator: routePaginator,
 	}
-	if routesEventCost {
-		args.RoutesMaxCost = utils.MetaEventCost
-	} else {
-		args.RoutesMaxCost = routesMaxCost
-	}
-	args.Paginator = routePaginator
-	if len(attributeIDs) != 0 {
-		args.AttributeIDs = attributeIDs
-	}
-	if len(thresholdIDs) != 0 {
-		args.ThresholdIDs = thresholdIDs
-	}
-	if len(statIDs) != 0 {
-		args.StatIDs = statIDs
-	}
-	return
 }
 
 // V1ProcessMessageArgs are the options passed to ProcessMessage API
 type V1ProcessMessageArgs struct {
-	GetAttributes      bool
-	AllocateResources  bool
-	Debit              bool
-	ForceDuration      bool
-	ProcessThresholds  bool
-	ProcessStats       bool
-	GetRoutes          bool
-	RoutesMaxCost      string
-	RoutesIgnoreErrors bool
-	AttributeIDs       []string
-	ThresholdIDs       []string
-	StatIDs            []string
 	*utils.CGREvent
 	utils.Paginator
-}
-
-// ParseFlags will populate the V1ProcessMessageArgs flags
-func (args *V1ProcessMessageArgs) ParseFlags(flags, sep string) {
-	for _, subsystem := range strings.Split(flags, sep) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.Debit = true
-		case subsystem == utils.MetaResources:
-			args.AllocateResources = true
-		case subsystem == utils.MetaRoutes:
-			args.GetRoutes = true
-		case subsystem == utils.MetaRoutesIgnoreErrors:
-			args.RoutesIgnoreErrors = true
-		case subsystem == utils.MetaRoutesEventCost:
-			args.RoutesMaxCost = utils.MetaEventCost
-		case strings.HasPrefix(subsystem, utils.MetaRoutesMaxCost):
-			args.RoutesMaxCost = strings.TrimPrefix(subsystem, utils.MetaRoutesMaxCost+utils.InInFieldSep)
-		case strings.Index(subsystem, utils.MetaAttributes) != -1:
-			args.GetAttributes = true
-			args.AttributeIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
-			args.ProcessThresholds = true
-			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.Index(subsystem, utils.MetaStats) != -1:
-			args.ProcessStats = true
-			args.StatIDs = getFlagIDs(subsystem)
-		case subsystem == utils.MetaFD:
-			args.ForceDuration = true
-		}
-	}
-	args.Paginator, _ = utils.GetRoutePaginatorFromOpts(args.APIOpts)
 }
 
 // V1ProcessMessageReply is the reply for the ProcessMessage API

@@ -241,29 +241,14 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			cgrEv, rply)
 	case utils.MetaMessage:
-		evArgs := sessions.NewV1ProcessMessageArgs(
-			rdrCfg.Flags.Has(utils.MetaAttributes),
-			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaThresholds),
-			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaStats),
-			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaResources),
-			rdrCfg.Flags.Has(utils.MetaAccounts),
-			rdrCfg.Flags.Has(utils.MetaRoutes),
-			rdrCfg.Flags.Has(utils.MetaRoutesIgnoreErrors),
-			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs,
-			rdrCfg.Flags.Has(utils.MetaFD),
-			rdrCfg.Flags.ParamValue(utils.MetaRoutesMaxCost),
-		)
+		evArgs := sessions.NewV1ProcessMessageArgs(cgrEv, cgrArgs)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else
-		if evArgs.Debit {
+		if utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesMessage) {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 	case utils.MetaEvent:

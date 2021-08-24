@@ -367,8 +367,6 @@ func TestProcessRequest(t *testing.T) {
 				id = rargs.ID
 			}
 			expargs := &sessions.V1ProcessMessageArgs{
-				GetAttributes: true,
-				Debit:         true,
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
@@ -381,7 +379,10 @@ func TestProcessRequest(t *testing.T) {
 						"ToR":         "*voice",
 						"Usage":       "10s",
 					},
-					APIOpts: map[string]interface{}{},
+					APIOpts: map[string]interface{}{
+						utils.OptsSesAttributeS: "true",
+						utils.OptsSesMessage:    "true",
+					},
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -538,6 +539,17 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
+	tmpls = []*config.FCTemplate{
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesMessage,
+			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesAttributeS,
+			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+	}
+	for _, v := range tmpls {
+		v.ComputePath()
+	}
+	clnReq = reqProcessor.Clone()
+	clnReq.RequestFields = append(clnReq.RequestFields, tmpls...)
 	cgrRplyNM = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply = utils.NewOrderedNavigableMap()
 
@@ -545,7 +557,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(reqProcessor, agReq)
+	pr, err = da.processRequest(clnReq, agReq)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
