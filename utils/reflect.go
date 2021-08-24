@@ -737,6 +737,8 @@ func IfaceAsStringSlice(fld interface{}) (ss []string, err error) {
 		for i, v := range value {
 			ss[i] = IfaceAsString(v)
 		}
+	case string:
+		ss = strings.Split(value, InfieldSep)
 	default: // Maybe we are lucky and the value converts to string
 		err = fmt.Errorf("cannot convert field: %+v to []string", value)
 	}
