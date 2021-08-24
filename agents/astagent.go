@@ -257,25 +257,24 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
-	// populate init session args
-	initSessionArgs := ev.V1InitSessionArgs(*cgrEvDisp)
-	if initSessionArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
-			utils.AsteriskAgent, ev.ChannelID()))
-		return
+	var initS bool
+	if cgrEvDisp.APIOpts == nil {
+		initS = true
+		cgrEvDisp.APIOpts = map[string]interface{}{utils.OptsSesInit: true}
+	} else {
+		initS = utils.OptAsBool(cgrEvDisp.APIOpts, utils.OptsSesInit)
 	}
-
 	//initit Session
 	var initReply sessions.V1InitSessionReply
 	if err := sma.connMgr.Call(sma.ctx, sma.cgrCfg.AsteriskAgentCfg().SessionSConns,
 		utils.SessionSv1InitiateSession,
-		initSessionArgs, &initReply); err != nil {
+		cgrEvDisp, &initReply); err != nil {
 		sma.hangupChannel(ev.ChannelID(),
 			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
-	if initSessionArgs.InitSession && (initReply.MaxUsage == nil || *initReply.MaxUsage == time.Duration(0)) {
+	if initS && (initReply.MaxUsage == nil || *initReply.MaxUsage == time.Duration(0)) {
 		sma.hangupChannel(ev.ChannelID(), "")
 		return
 	}

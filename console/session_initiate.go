@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSessionsInitiate{
 		name:      "session_initiate",
 		rpcMethod: utils.SessionSv1InitiateSessionWithDigest,
-		rpcParams: &sessions.V1InitSessionArgs{},
+		rpcParams: new(utils.CGREvent),
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdSessionsInitiate struct {
 	name      string
 	rpcMethod string
-	rpcParams *sessions.V1InitSessionArgs
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,9 +50,7 @@ func (self *CmdSessionsInitiate) RpcMethod() string {
 
 func (self *CmdSessionsInitiate) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &sessions.V1InitSessionArgs{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }

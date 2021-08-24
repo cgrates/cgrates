@@ -355,14 +355,13 @@ func (fsev FSEvent) ParseEventValue(attrName string, rsrFld *config.RSRParser, t
 }
 
 // AsCGREvent converts FSEvent into CGREvent
-func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
-	cgrEv = &utils.CGREvent{
+func (fsev FSEvent) AsCGREvent(timezone string) *utils.CGREvent {
+	return &utils.CGREvent{
 		Tenant:  fsev.GetTenant(utils.MetaDefault),
 		ID:      utils.UUIDSha1Prefix(),
 		Event:   fsev.AsMapStringInterface(timezone),
 		APIOpts: fsev.GetOptions(),
 	}
-	return cgrEv, nil
 }
 
 // Used with RLs
@@ -394,10 +393,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 
 // V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
 func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return
-	}
+	cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	cgrEv.Event[utils.Usage] = config.CgrConfig().SessionSCfg().GetDefaultUsage(utils.IfaceAsString(cgrEv.Event[utils.ToR])) // no billsec available in auth
 	args = &sessions.V1AuthorizeArgs{                                                                                        // defaults
 		CGREvent: cgrEv,
@@ -413,32 +409,9 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	return
 }
 
-// V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
-func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
-	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return
-	}
-	args = &sessions.V1InitSessionArgs{ // defaults
-		CGREvent: cgrEv,
-	}
-	subsystems, has := fsev[VarCGRFlags]
-	if !has {
-		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
-			utils.FreeSWITCHAgent))
-		args.InitSession = true
-		return
-	}
-	args.ParseFlags(subsystems, utils.InfieldSep)
-	return
-}
-
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return
-	}
+	cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		CGREvent: cgrEv,
 	}

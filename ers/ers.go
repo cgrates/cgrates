@@ -229,19 +229,9 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 	case utils.MetaInitiate:
-		initArgs := sessions.NewV1InitSessionArgs(
-			rdrCfg.Flags.Has(utils.MetaAttributes),
-			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaThresholds),
-			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaStats),
-			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaResources),
-			rdrCfg.Flags.Has(utils.MetaAccounts),
-			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
-			initArgs, rply)
+			cgrEv, rply)
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			rdrCfg.Flags.Has(utils.MetaAttributes),

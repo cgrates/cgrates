@@ -59,28 +59,28 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V
 	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEventWithDigest, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSessionArgs,
+func (dS *DispatcherService) SessionSv1InitiateSession(args *utils.CGREvent,
 	reply *sessions.V1InitSessionReply) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1InitiateSession, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.SessionSv1InitiateSession, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1InitiateSession, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1InitiateSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.V1InitSessionArgs,
+func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *utils.CGREvent,
 	reply *sessions.V1InitReplyWithDigest) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1InitiateSessionWithDigest, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.SessionSv1InitiateSessionWithDigest, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1InitiateSessionWithDigest, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1InitiateSessionWithDigest, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSessionArgs,

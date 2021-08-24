@@ -1678,23 +1678,29 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 	if err = sS.BiRPCv1AuthorizeEvent(ctx, args, &initAuthRply); err != nil {
 		return
 	}
-	if args.GetAttributes && initAuthRply.Attributes != nil {
+	if (args.GetAttributes ||
+		utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS)) && initAuthRply.Attributes != nil {
 		authReply.AttributesDigest = utils.StringPointer(initAuthRply.Attributes.Digest())
 	}
-	if args.AuthorizeResources {
+	if args.AuthorizeResources ||
+		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuth) {
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
-	if args.GetMaxUsage {
+	if args.GetMaxUsage ||
+		utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) {
 		authReply.MaxUsage = initAuthRply.MaxUsage.Seconds()
 	}
-	if args.GetRoutes {
+	if args.GetRoutes ||
+		utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS) {
 		authReply.RoutesDigest = utils.StringPointer(initAuthRply.RouteProfiles.Digest())
 	}
-	if args.ProcessThresholds {
+	if args.ProcessThresholds ||
+		utils.OptAsBool(args.APIOpts, utils.OptsSesThresholdS) {
 		authReply.Thresholds = utils.StringPointer(
 			strings.Join(*initAuthRply.ThresholdIDs, utils.FieldsSep))
 	}
-	if args.ProcessStats {
+	if args.ProcessStats ||
+		utils.OptAsBool(args.APIOpts, utils.OptsSesStatS) {
 		authReply.StatQueues = utils.StringPointer(
 			strings.Join(*initAuthRply.StatQueueIDs, utils.FieldsSep))
 	}
@@ -1703,21 +1709,21 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 
 // BiRPCv1InitiateSession initiates a new session
 func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
-	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
-	if args.CGREvent == nil {
+	args *utils.CGREvent, rply *V1InitSessionReply) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
-		args.CGREvent.ID = utils.GenUUID()
+	if args.ID == "" {
+		args.ID = utils.GenUUID()
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	if args.Tenant == "" {
+		args.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1InitiateSession, args.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1InitiateSession, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -1735,20 +1741,27 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 	// end of RPC caching
 
-	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
+	attrS := utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS)
+	initS := utils.OptAsBool(args.APIOpts, utils.OptsSesInit)
+	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAloc)
+	if !(attrS || initS || resS) {
 		return // nothing to do
 	}
-	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
-	if args.GetAttributes {
-		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent, args.AttributeIDs, false)
+	originID, _ := args.FieldAsString(utils.OriginID)
+	if attrS {
+		var atrsIDs []string
+		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
+			return
+		}
+		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs, false)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent
+			args = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	if args.AllocateResources {
+	if resS {
 		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
@@ -1756,7 +1769,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := &utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
+			CGREvent: args,
 			UsageID:  originID,
 			Units:    1,
 		}
@@ -1767,7 +1780,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		}
 		rply.ResourceAllocation = &allocMessage
 	}
-	if args.InitSession {
+	if initS {
 		var err error
 		opts := engine.MapEvent(args.APIOpts)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
@@ -1776,8 +1789,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 				return err //utils.NewErrRALs(err)
 			}
 		}
-		s, err := sS.initSession(ctx, args.CGREvent, sS.biJClntID(ctx.Client), originID, dbtItvl,
-			false, args.ForceDuration)
+		s, err := sS.initSession(ctx, args, sS.biJClntID(ctx.Client), originID, dbtItvl,
+			false, utils.OptAsBool(args.APIOpts, utils.OptsSesForceDuration))
 		if err != nil {
 			return err
 		}
@@ -1785,7 +1798,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		isPrepaid := s.debitStop != nil
 		s.RUnlock()
 		if isPrepaid { //active debit
-			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().GetDefaultUsage(utils.IfaceAsString(args.CGREvent.Event[utils.ToR])))
+			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().GetDefaultUsage(utils.IfaceAsString(args.Event[utils.ToR])))
 		} else {
 			var sRunsUsage map[string]time.Duration
 			if sRunsUsage, err = sS.updateSession(ctx, s, nil, args.APIOpts, false); err != nil {
@@ -1803,23 +1816,31 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			rply.MaxUsage = &maxUsage
 		}
 	}
-	if args.ProcessThresholds {
-		tIDs, err := sS.processThreshold(ctx, args.CGREvent, args.ThresholdIDs, true)
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesThresholdS) {
+		var thIDs []string
+		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
+			return
+		}
+		tIDs, err := sS.processThreshold(ctx, args, thIDs, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), args))
 			withErrors = true
 		}
 		rply.ThresholdIDs = &tIDs
 	}
-	if args.ProcessStats {
-		sIDs, err := sS.processStats(ctx, args.CGREvent, args.StatIDs, false)
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesStatS) {
+		var statIDs []string
+		if statIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
+			return
+		}
+		sIDs, err := sS.processStats(ctx, args, statIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), args))
 			withErrors = true
 		}
 		rply.StatQueueIDs = &sIDs
@@ -1832,30 +1853,27 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 
 // BiRPCv1InitiateSessionWithDigest returns the formated result of InitiateSession
 func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(ctx *context.Context,
-	args *V1InitSessionArgs, initReply *V1InitReplyWithDigest) (err error) {
+	args *utils.CGREvent, initReply *V1InitReplyWithDigest) (err error) {
 	var initSessionRply V1InitSessionReply
 	if err = sS.BiRPCv1InitiateSession(ctx, args, &initSessionRply); err != nil {
 		return
 	}
 
-	if args.GetAttributes &&
-		initSessionRply.Attributes != nil {
+	if initSessionRply.Attributes != nil {
 		initReply.AttributesDigest = utils.StringPointer(initSessionRply.Attributes.Digest())
 	}
 
-	if args.AllocateResources {
-		initReply.ResourceAllocation = initSessionRply.ResourceAllocation
-	}
+	initReply.ResourceAllocation = initSessionRply.ResourceAllocation
 
-	if args.InitSession {
+	if initSessionRply.MaxUsage != nil {
 		initReply.MaxUsage = initSessionRply.MaxUsage.Seconds()
 	}
 
-	if args.ProcessThresholds {
+	if initSessionRply.ThresholdIDs != nil {
 		initReply.Thresholds = utils.StringPointer(
 			strings.Join(*initSessionRply.ThresholdIDs, utils.FieldsSep))
 	}
-	if args.ProcessStats {
+	if initSessionRply.StatQueueIDs != nil {
 		initReply.StatQueues = utils.StringPointer(
 			strings.Join(*initSessionRply.StatQueueIDs, utils.FieldsSep))
 	}

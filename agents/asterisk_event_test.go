@@ -393,39 +393,6 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 	}
 }
 
-func TestSMAEventV1InitSessionArgs(t *testing.T) {
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "AsteriskEvent",
-		Event: map[string]interface{}{
-			"MissingCGRSubsustems": "",
-		},
-	}
-	exp := &sessions.V1InitSessionArgs{
-		InitSession: true,
-		CGREvent:    cgrEv,
-	}
-	var ev map[string]interface{}
-	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
-		t.Error(err)
-	}
-	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1", "")
-	if rcv := smaEv.V1InitSessionArgs(*cgrEv); !reflect.DeepEqual(exp, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
-	}
-
-	exp2 := &sessions.V1InitSessionArgs{
-		GetAttributes:     true,
-		AllocateResources: true,
-		InitSession:       true,
-		CGREvent:          cgrEv,
-	}
-	cgrEv.Event[utils.CGRFlags] = "*resources+*accounts+*attributes"
-	if rcv := smaEv.V1InitSessionArgs(*cgrEv); !reflect.DeepEqual(exp2, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp2), utils.ToJSON(rcv))
-	}
-}
-
 func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",

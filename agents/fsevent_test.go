@@ -558,9 +558,7 @@ func TestFsEvAsCGREvent(t *testing.T) {
 		ID:     utils.UUIDSha1Prefix(),
 		Event:  ev.AsMapStringInterface(timezone),
 	}
-	if rcv, err := ev.AsCGREvent(timezone); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
+	if rcv := ev.AsCGREvent(timezone); !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Tenant, rcv.Tenant)
 	} else if !reflect.DeepEqual(expected.Event, rcv.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Event, rcv.Event)
@@ -1040,29 +1038,6 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.RoutesMaxCost, rcv.RoutesMaxCost)
 	} else if !reflect.DeepEqual(expected.RoutesIgnoreErrors, rcv.RoutesIgnoreErrors) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.RoutesIgnoreErrors, rcv.RoutesIgnoreErrors)
-	}
-}
-
-func TestFsEvV1InitSessionArgs(t *testing.T) {
-	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
-	ev := NewFSEvent(hangupEv)
-	expected := &sessions.V1InitSessionArgs{
-		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: ev.GetTenant(utils.MetaDefault),
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  ev.AsMapStringInterface(timezone),
-		},
-	}
-	rcv := ev.V1InitSessionArgs()
-	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.InitSession, rcv.InitSession) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.InitSession, rcv.InitSession)
 	}
 }
 

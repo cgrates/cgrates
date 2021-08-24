@@ -170,20 +170,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
-		initArgs := sessions.NewV1InitSessionArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaResources),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.connMgr.Call(context.TODO(), ha.sessionConns, utils.SessionSv1InitiateSession,
-			initArgs, rply)
-		rply.SetMaxUsageNeeded(initArgs.InitSession)
+			cgrEv, rply)
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInit))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
