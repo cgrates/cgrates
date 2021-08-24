@@ -260,9 +260,9 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	var initS bool
 	if cgrEvDisp.APIOpts == nil {
 		initS = true
-		cgrEvDisp.APIOpts = map[string]interface{}{utils.OptsSesInit: true}
+		cgrEvDisp.APIOpts = map[string]interface{}{utils.OptsSesInitiate: true}
 	} else {
-		initS = utils.OptAsBool(cgrEvDisp.APIOpts, utils.OptsSesInit)
+		initS = utils.OptAsBool(cgrEvDisp.APIOpts, utils.OptsSesInitiate)
 	}
 	//initit Session
 	var initReply sessions.V1InitSessionReply

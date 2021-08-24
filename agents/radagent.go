@@ -231,18 +231,13 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1InitSessionReply)
 		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInit))
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInitiate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
-		updateArgs := sessions.NewV1UpdateSessionArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
-			updateArgs, rply)
-		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
+			cgrEv, rply)
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesUpdate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(

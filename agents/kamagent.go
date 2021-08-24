@@ -177,7 +177,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 	}
 	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]interface{}{utils.OptsSesInit: true}
+		cgrEv.APIOpts = map[string]interface{}{utils.OptsSesInitiate: true}
 	}
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 

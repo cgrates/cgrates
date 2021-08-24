@@ -173,18 +173,13 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.connMgr.Call(context.TODO(), ha.sessionConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInit))
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInitiate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
-		updateArgs := sessions.NewV1UpdateSessionArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ha.connMgr.Call(context.TODO(), ha.sessionConns, utils.SessionSv1UpdateSession,
-			updateArgs, rply)
-		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
+			cgrEv, rply)
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesUpdate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(

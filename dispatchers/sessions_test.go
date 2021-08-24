@@ -121,39 +121,6 @@ func TestDspSessionSv1AuthorizeEventWithDigestErrorNil(t *testing.T) {
 	}
 }
 
-func TestDspSessionSv1UpdateSessionNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &sessions.V1UpdateSessionArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
-	}
-	var reply *sessions.V1UpdateSessionReply
-	result := dspSrv.SessionSv1UpdateSession(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspSessionSv1UpdateSessionErrorNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &sessions.V1UpdateSessionArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
-	}
-	var reply *sessions.V1UpdateSessionReply
-	result := dspSrv.SessionSv1UpdateSession(CGREvent, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
 func TestDspSessionSv1SyncSessionsNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)

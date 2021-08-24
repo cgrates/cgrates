@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSessionsUpdate{
 		name:      "session_update",
 		rpcMethod: utils.SessionSv1UpdateSession,
-		rpcParams: &sessions.V1UpdateSessionArgs{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdSessionsUpdate struct {
 	name      string
 	rpcMethod string
-	rpcParams *sessions.V1UpdateSessionArgs
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,9 +50,7 @@ func (self *CmdSessionsUpdate) RpcMethod() string {
 
 func (self *CmdSessionsUpdate) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &sessions.V1UpdateSessionArgs{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }

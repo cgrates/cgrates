@@ -57,7 +57,7 @@ func (ssv1 *SessionSv1) InitiateSessionWithDigest(ctx *context.Context, args *ut
 	return ssv1.sS.BiRPCv1InitiateSessionWithDigest(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) UpdateSession(ctx *context.Context, args *sessions.V1UpdateSessionArgs,
+func (ssv1 *SessionSv1) UpdateSession(ctx *context.Context, args *utils.CGREvent,
 	rply *sessions.V1UpdateSessionReply) error {
 	return ssv1.sS.BiRPCv1UpdateSession(ctx, args, rply)
 }

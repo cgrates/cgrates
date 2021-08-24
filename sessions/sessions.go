@@ -1742,7 +1742,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	// end of RPC caching
 
 	attrS := utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS)
-	initS := utils.OptAsBool(args.APIOpts, utils.OptsSesInit)
+	initS := utils.OptAsBool(args.APIOpts, utils.OptsSesInitiate)
 	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAloc)
 	if !(attrS || initS || resS) {
 		return // nothing to do
@@ -1882,20 +1882,20 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(ctx *context.Context,
 
 // BiRPCv1UpdateSession updates an existing session, returning the duration which the session can still last
 func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
-	args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
-	if args.CGREvent == nil {
+	args *utils.CGREvent, rply *V1UpdateSessionReply) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if args.CGREvent.ID == utils.EmptyString {
-		args.CGREvent.ID = utils.GenUUID()
+	if args.ID == utils.EmptyString {
+		args.ID = utils.GenUUID()
 	}
-	if args.CGREvent.Tenant == utils.EmptyString {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1UpdateSession, args.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1UpdateSession, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -1912,22 +1912,27 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-
-	if !args.GetAttributes && !args.UpdateSession {
+	attrS := utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS)
+	updS := utils.OptAsBool(args.APIOpts, utils.OptsSesUpdate)
+	if !(attrS || updS) {
 		return // nothing to do
 	}
 
-	if args.GetAttributes {
-		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent, args.AttributeIDs, false)
+	if attrS {
+		var atrsIDs []string
+		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
+			return
+		}
+		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs, false)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent
+			args = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	if args.UpdateSession {
-		ev := engine.MapEvent(args.CGREvent.Event)
+	if updS {
+		ev := engine.MapEvent(args.Event)
 		opts := engine.MapEvent(args.APIOpts)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
 		if opts.HasField(utils.OptsSesDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
@@ -1941,8 +1946,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			ev.GetStringIgnoreErrors(utils.OriginID),
 			ev.GetStringIgnoreErrors(utils.OriginHost))
 		if s == nil {
-			if s, err = sS.initSession(ctx, args.CGREvent, sS.biJClntID(ctx.Client), ev.GetStringIgnoreErrors(utils.OriginID),
-				dbtItvl, false, args.ForceDuration); err != nil {
+			if s, err = sS.initSession(ctx, args, sS.biJClntID(ctx.Client), ev.GetStringIgnoreErrors(utils.OriginID),
+				dbtItvl, false, utils.OptAsBool(args.APIOpts, utils.OptsSesForceDuration)); err != nil {
 				return err
 			}
 		}
