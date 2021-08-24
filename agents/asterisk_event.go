@@ -298,21 +298,6 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREvent) (args *sessions.V1InitSessionArgs) {
-	args = &sessions.V1InitSessionArgs{ // defaults
-		CGREvent: &cgrEvDisp,
-	}
-	subsystems, err := cgrEvDisp.FieldAsString(utils.CGRFlags)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
-			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp), utils.CGRFlags))
-		args.InitSession = true
-		return
-	}
-	args.ParseFlags(subsystems, utils.PlusChar)
-	return
-}
-
 func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		CGREvent: &cgrEvDisp,

@@ -167,27 +167,26 @@ func TestProcessRequest(t *testing.T) {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*sessions.V1InitSessionArgs); !can {
+			} else if rargs, can := arg.(*utils.CGREvent); !can {
 				t.Errorf("args is not of sessions.V1InitSessionArgs type")
 			} else {
 				id = rargs.ID
 			}
-			expargs := &sessions.V1InitSessionArgs{
-				GetAttributes: true,
-				InitSession:   true,
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     id,
-					Event: map[string]interface{}{
-						"Account":     "1001",
-						"Category":    "call",
-						"Destination": "1003",
-						"OriginHost":  "local",
-						"OriginID":    "123456",
-						"ToR":         "*voice",
-						"Usage":       "10s",
-					},
-					APIOpts: map[string]interface{}{},
+			expargs := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     id,
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
+				},
+				APIOpts: map[string]interface{}{
+					utils.OptsSesAttributeS: "true",
+					utils.OptsSesInit:       "true",
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -450,6 +449,18 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
+
+	tmpls := []*config.FCTemplate{
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesInit,
+			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesAttributeS,
+			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+	}
+	for _, v := range tmpls {
+		v.ComputePath()
+	}
+	clnReq := reqProcessor.Clone()
+	clnReq.RequestFields = append(clnReq.RequestFields, tmpls...)
 	cgrRplyNM = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply = utils.NewOrderedNavigableMap()
 
@@ -457,7 +468,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(reqProcessor, agReq)
+	pr, err = da.processRequest(clnReq, agReq)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {

@@ -239,11 +239,15 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 			utils.NewErrMandatoryIeMissing(missing).Error())
 		return
 	}
-	initSessionArgs := fsev.V1InitSessionArgs()
-	initSessionArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID so we can properly disconnect later
+
+	cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	if cgrEv.APIOpts == nil {
+		cgrEv.APIOpts = map[string]interface{}{utils.OptsSesInit: true}
+	}
+	cgrEv.Event[FsConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 	var initReply sessions.V1InitSessionReply
 	if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1InitiateSession,
-		initSessionArgs, &initReply); err != nil {
+		cgrEv, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
 				utils.FreeSWITCHAgent, chanUUID, err.Error()))
@@ -274,10 +278,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 		}
 	}
 	if fsa.cfg.CreateCdr {
-		cgrEv, err := fsev.AsCGREvent(fsa.timezone)
-		if err != nil {
-			return
-		}
+		cgrEv := fsev.AsCGREvent(fsa.timezone)
 		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",

@@ -154,15 +154,14 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 }
 
 // AsCGREvent converts KamEvent into CGREvent
-func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
-	cgrEv = &utils.CGREvent{
+func (kev KamEvent) AsCGREvent(timezone string) *utils.CGREvent {
+	return &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
 		Event:   kev.AsMapStringInterface(),
 		APIOpts: kev.GetOptions(),
 	}
-	return cgrEv, nil
 }
 
 // String is used for pretty printing event in logs
@@ -172,10 +171,7 @@ func (kev KamEvent) String() string {
 
 // V1AuthorizeArgs returns the arguments used in SessionSv1.AuthorizeEvent
 func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return
-	}
+	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	args = &sessions.V1AuthorizeArgs{
 		CGREvent: cgrEv,
 	}
@@ -231,35 +227,10 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	return
 }
 
-// V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
-func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
-	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return
-	}
-	args = &sessions.V1InitSessionArgs{ // defaults
-
-		CGREvent: cgrEv,
-	}
-	subsystems, has := kev[utils.CGRFlags]
-	if !has {
-		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
-			utils.KamailioAgent))
-		args.InitSession = true
-		return
-	}
-	args.ParseFlags(subsystems, utils.InfieldSep)
-	return
-}
-
 // V1ProcessMessageArgs returns the arguments used in SessionSv1.ProcessMessage
 func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs) {
-	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return
-	}
+	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	args = &sessions.V1ProcessMessageArgs{ // defaults
-
 		CGREvent: cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
@@ -269,15 +240,6 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 		return
 	}
 	args.ParseFlags(subsystems, utils.InfieldSep)
-	return
-}
-
-// V1ProcessCDRArgs returns the arguments used in SessionSv1.ProcessCDR
-func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREvent) {
-	var err error
-	if args, err = kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-		return
-	}
 	return
 }
 
@@ -350,12 +312,9 @@ func (kev KamEvent) AsKamProcessMessageEmptyReply() (kar *KamReply) {
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	cgrEv, err := kev.AsCGREvent(utils.FirstNonEmpty(
+	cgrEv := kev.AsCGREvent(utils.FirstNonEmpty(
 		config.CgrConfig().KamAgentCfg().Timezone,
 		config.CgrConfig().GeneralCfg().DefaultTimezone))
-	if err != nil {
-		return
-	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
 		CGREvent:         cgrEv,

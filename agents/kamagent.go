@@ -175,17 +175,15 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 				utils.ErrMandatoryIeMissing.Error()))
 		return
 	}
-	initSessionArgs := kev.V1InitSessionArgs()
-	if initSessionArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
-			utils.KamailioAgent, kev[utils.OriginID]))
-		return
+	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	if cgrEv.APIOpts == nil {
+		cgrEv.APIOpts = map[string]interface{}{utils.OptsSesInit: true}
 	}
-	initSessionArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
+	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 
 	var initReply sessions.V1InitSessionReply
 	if err := ka.connMgr.Call(ka.ctx, ka.cfg.SessionSConns, utils.SessionSv1InitiateSession,
-		initSessionArgs, &initReply); err != nil {
+		cgrEv, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
@@ -336,7 +334,7 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 		return
 	}
 
-	procCDRArgs := kev.V1ProcessCDRArgs()
+	procCDRArgs := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if procCDRArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process cdr session arguments",
 			utils.KamailioAgent, kev[utils.OriginID]))

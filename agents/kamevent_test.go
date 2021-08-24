@@ -126,9 +126,7 @@ func TestKamEvAsCGREvent(t *testing.T) {
 		ID:    utils.UUIDSha1Prefix(),
 		Event: kamEv.AsMapStringInterface(),
 	}
-	if rcv, err := kamEv.AsCGREvent(timezone); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
+	if rcv := kamEv.AsCGREvent(timezone); !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Tenant, rcv.Tenant)
 	} else if !reflect.DeepEqual(expected.Event, rcv.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Event, rcv.Event)
@@ -285,36 +283,6 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
-	}
-}
-
-func TestKamEvV1InitSessionArgs(t *testing.T) {
-	kamEv := KamEvent{"event": "CGR_CALL_END",
-		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
-		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.MetaPostpaid, "cgr_account": "1001",
-		"cgr_destination": "1002", "cgr_answertime": "1419839310",
-		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGRRoute:           "supplier2",
-		utils.CGRDisconnectCause: "200"}
-	expected := &sessions.V1InitSessionArgs{
-		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-				config.CgrConfig().GeneralCfg().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Event: kamEv.AsMapStringInterface(),
-		},
-	}
-	rcv := kamEv.V1InitSessionArgs()
-	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.InitSession, rcv.InitSession) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.InitSession, rcv.InitSession)
 	}
 }
 

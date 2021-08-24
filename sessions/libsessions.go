@@ -674,68 +674,6 @@ type V1AuthorizeReplyWithDigest struct {
 	StatQueues         *string
 }
 
-// NewV1InitSessionArgs is a constructor for V1InitSessionArgs
-func NewV1InitSessionArgs(attrs bool, attributeIDs []string,
-	thrslds bool, thresholdIDs []string, stats bool, statIDs []string,
-	resrc, acnt bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1InitSessionArgs) {
-	args = &V1InitSessionArgs{
-		GetAttributes:     attrs,
-		AllocateResources: resrc,
-		InitSession:       acnt,
-		ProcessThresholds: thrslds,
-		ProcessStats:      stats,
-		CGREvent:          cgrEv,
-		ForceDuration:     forceDuration,
-	}
-	if len(attributeIDs) != 0 {
-		args.AttributeIDs = attributeIDs
-	}
-	if len(thresholdIDs) != 0 {
-		args.ThresholdIDs = thresholdIDs
-	}
-	if len(statIDs) != 0 {
-		args.StatIDs = statIDs
-	}
-	return
-}
-
-// V1InitSessionArgs are options for session initialization request
-type V1InitSessionArgs struct {
-	GetAttributes     bool
-	AllocateResources bool
-	InitSession       bool
-	ForceDuration     bool
-	ProcessThresholds bool
-	ProcessStats      bool
-	AttributeIDs      []string
-	ThresholdIDs      []string
-	StatIDs           []string
-	*utils.CGREvent
-}
-
-// ParseFlags will populate the V1InitSessionArgs flags
-func (args *V1InitSessionArgs) ParseFlags(flags, sep string) {
-	for _, subsystem := range strings.Split(flags, sep) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.InitSession = true
-		case subsystem == utils.MetaResources:
-			args.AllocateResources = true
-		case strings.HasPrefix(subsystem, utils.MetaAttributes):
-			args.GetAttributes = true
-			args.AttributeIDs = getFlagIDs(subsystem)
-		case strings.HasPrefix(subsystem, utils.MetaThresholds):
-			args.ProcessThresholds = true
-			args.ThresholdIDs = getFlagIDs(subsystem)
-		case strings.HasPrefix(subsystem, utils.MetaStats):
-			args.ProcessStats = true
-			args.StatIDs = getFlagIDs(subsystem)
-		case subsystem == utils.MetaFD:
-			args.ForceDuration = true
-		}
-	}
-}
-
 // V1InitSessionReply are options for initialization reply
 type V1InitSessionReply struct {
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`

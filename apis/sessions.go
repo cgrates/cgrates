@@ -47,12 +47,12 @@ func (ssv1 *SessionSv1) AuthorizeEventWithDigest(ctx *context.Context, args *ses
 	return ssv1.sS.BiRPCv1AuthorizeEventWithDigest(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) InitiateSession(ctx *context.Context, args *sessions.V1InitSessionArgs,
+func (ssv1 *SessionSv1) InitiateSession(ctx *context.Context, args *utils.CGREvent,
 	rply *sessions.V1InitSessionReply) error {
 	return ssv1.sS.BiRPCv1InitiateSession(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) InitiateSessionWithDigest(ctx *context.Context, args *sessions.V1InitSessionArgs,
+func (ssv1 *SessionSv1) InitiateSessionWithDigest(ctx *context.Context, args *utils.CGREvent,
 	rply *sessions.V1InitReplyWithDigest) error {
 	return ssv1.sS.BiRPCv1InitiateSessionWithDigest(ctx, args, rply)
 }

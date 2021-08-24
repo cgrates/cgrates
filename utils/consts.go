@@ -2109,6 +2109,7 @@ const (
 	OptsSesChargerS               = "*sesChargerS"
 	OptsSesResourceS              = "*sesResourceS"
 	OptsSesResourceSAuth          = "*sesResourceSAuth"
+	OptsSesResourceSAloc          = "*sesResourceSAloc"
 	OptsSesResourceSDerivedReply  = "*sesResourceSDerivedReply"
 	OptsSesRouteS                 = "*sesRouteS"
 	OptsSesRouteSDerivedReply     = "*sesRouteSDerivedReply"
@@ -2125,6 +2126,7 @@ const (
 	OptsSesThresholdIDs           = "*sesThresholdIDs"
 	OptsSesMaxUsage               = "*sesMaxUsage"
 	OptsSesForceDuration          = "*sesForceDuration"
+	OptsSesInit                   = "*sesInit"
 
 	OptsCDRsAttributeS = "*cdrsAttributeS"
 	OptsCDRsChargerS   = "*cdrsChargerS"
