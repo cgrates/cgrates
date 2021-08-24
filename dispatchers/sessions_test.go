@@ -182,10 +182,8 @@ func TestDspSessionSv1ProcessCDRErrorNil(t *testing.T) {
 func TestDspSessionSv1ProcessMessageNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &sessions.V1ProcessMessageArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *sessions.V1ProcessMessageReply
 	result := dspSrv.SessionSv1ProcessMessage(CGREvent, reply)
@@ -199,10 +197,8 @@ func TestDspSessionSv1ProcessMessageErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &sessions.V1ProcessMessageArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *sessions.V1ProcessMessageReply
 	result := dspSrv.SessionSv1ProcessMessage(CGREvent, reply)
@@ -215,10 +211,8 @@ func TestDspSessionSv1ProcessMessageErrorNil(t *testing.T) {
 func TestDspSessionSv1ProcessEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *sessions.V1ProcessEventReply
 	result := dspSrv.SessionSv1ProcessEvent(CGREvent, reply)
@@ -232,10 +226,8 @@ func TestDspSessionSv1ProcessEventErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *sessions.V1ProcessEventReply
 	result := dspSrv.SessionSv1ProcessEvent(CGREvent, reply)

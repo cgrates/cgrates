@@ -287,13 +287,13 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 		}
 	}
 
-	procEvArgs := kev.V1ProcessMessageArgs()
+	procEvArgs := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if procEvArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process message session arguments",
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	procEvArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
+	procEvArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
 
 	var processReply sessions.V1ProcessMessageReply
 	err = ka.connMgr.Call(ka.ctx, ka.cfg.SessionSConns, utils.SessionSv1ProcessMessage, procEvArgs, &processReply)

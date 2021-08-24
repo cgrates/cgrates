@@ -137,28 +137,28 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREvent,
 	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1ProcessCDR, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ProcessMessage(args *sessions.V1ProcessMessageArgs,
+func (dS *DispatcherService) SessionSv1ProcessMessage(args *utils.CGREvent,
 	reply *sessions.V1ProcessMessageReply) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1ProcessMessage, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.SessionSv1ProcessMessage, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessMessage, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1ProcessMessage, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEventArgs,
+func (dS *DispatcherService) SessionSv1ProcessEvent(args *utils.CGREvent,
 	reply *sessions.V1ProcessEventReply) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1ProcessEvent, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.SessionSv1ProcessEvent, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1ProcessEvent, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilter,

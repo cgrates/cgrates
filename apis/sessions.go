@@ -76,12 +76,12 @@ func (ssv1 *SessionSv1) ProcessCDR(ctx *context.Context, cgrEv *utils.CGREvent, 
 	return ssv1.sS.BiRPCv1ProcessCDR(ctx, cgrEv, rply)
 }
 
-func (ssv1 *SessionSv1) ProcessMessage(ctx *context.Context, args *sessions.V1ProcessMessageArgs,
+func (ssv1 *SessionSv1) ProcessMessage(ctx *context.Context, args *utils.CGREvent,
 	rply *sessions.V1ProcessMessageReply) error {
 	return ssv1.sS.BiRPCv1ProcessMessage(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) ProcessEvent(ctx *context.Context, args *sessions.V1ProcessEventArgs,
+func (ssv1 *SessionSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	rply *sessions.V1ProcessEventReply) error {
 	return ssv1.sS.BiRPCv1ProcessEvent(ctx, args, rply)
 }

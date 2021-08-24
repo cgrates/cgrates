@@ -334,14 +334,6 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	var cgrArgs utils.Paginator
-	if reqType == utils.MetaAuthorize || reqType == utils.MetaMessage || reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
-				utils.DiameterAgent, err.Error()))
-			err = nil // reset the error and continue the processing
-		}
-	}
 
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
@@ -369,8 +361,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
 			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs,
-			reqProcessor.Flags.Has(utils.MetaFD),
+			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
 			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
@@ -396,10 +387,9 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, &rply)
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
-		msgArgs := sessions.NewV1ProcessMessageArgs(cgrEv, cgrArgs)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1ProcessMessage,
-			msgArgs, rply)
+			cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else
@@ -410,13 +400,9 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply.SetMaxUsageNeeded(messageS)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
-		evArgs := &sessions.V1ProcessEventArgs{
-			Paginator: cgrArgs,
-			CGREvent:  cgrEv,
-		}
 		rply := new(sessions.V1ProcessEventReply)
 		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
-			evArgs, rply)
+			cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else

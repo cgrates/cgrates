@@ -274,12 +274,6 @@ func getDerivedEvents(events map[string]*utils.CGREvent, derivedReply bool) map[
 	}
 }
 
-// V1ProcessEventArgs are the options passed to ProcessEvent API
-type V1ProcessEventArgs struct {
-	*utils.CGREvent
-	utils.Paginator // for routes
-}
-
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
 	MaxUsage           map[string]time.Duration                  `json:",omitempty"`
@@ -368,20 +362,6 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 	return cgrReply
 }
 
-// NewV1ProcessMessageArgs is a constructor for MessageArgs used by ProcessMessage
-func NewV1ProcessMessageArgs(cgrEv *utils.CGREvent, routePaginator utils.Paginator) *V1ProcessMessageArgs {
-	return &V1ProcessMessageArgs{
-		CGREvent:  cgrEv,
-		Paginator: routePaginator,
-	}
-}
-
-// V1ProcessMessageArgs are the options passed to ProcessMessage API
-type V1ProcessMessageArgs struct {
-	*utils.CGREvent
-	utils.Paginator
-}
-
 // V1ProcessMessageReply is the reply for the ProcessMessage API
 type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration                 `json:",omitempty"`
@@ -448,8 +428,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() map[string]*utils.DataNode
 func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	thrslds bool, thresholdIDs []string, statQueues bool, statIDs []string,
 	res, maxUsage, routes, routesIgnoreErrs, routesEventCost bool,
-	cgrEv *utils.CGREvent, routePaginator utils.Paginator,
-	forceDuration bool, routesMaxCost string) (args *V1AuthorizeArgs) {
+	cgrEv *utils.CGREvent, forceDuration bool, routesMaxCost string) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
 		GetAttributes:      attrs,
 		AuthorizeResources: res,
@@ -466,7 +445,6 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	} else {
 		args.RoutesMaxCost = routesMaxCost
 	}
-	args.Paginator = routePaginator
 	if len(attributeIDs) != 0 {
 		args.AttributeIDs = attributeIDs
 	}
@@ -495,7 +473,6 @@ type V1AuthorizeArgs struct {
 	ThresholdIDs       []string
 	StatIDs            []string
 	*utils.CGREvent
-	utils.Paginator
 }
 
 // ParseFlags will populate the V1AuthorizeArgs flags
@@ -527,7 +504,6 @@ func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
 			args.ForceDuration = true
 		}
 	}
-	args.Paginator, _ = utils.GetRoutePaginatorFromOpts(args.APIOpts)
 }
 
 // V1AuthorizeReply are options available in auth reply

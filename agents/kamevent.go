@@ -227,18 +227,8 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	return
 }
 
-// V1ProcessMessageArgs returns the arguments used in SessionSv1.ProcessMessage
-func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs) {
-	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
-	return &sessions.V1ProcessMessageArgs{ // defaults
-		CGREvent:  cgrEv,
-		Paginator: cgrArgs,
-	}
-}
-
 // AsKamProcessMessageReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
-func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessageArgs,
+func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *utils.CGREvent,
 	procEvReply *sessions.V1ProcessMessageReply, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_PROCESS_MESSAGE
 	if kamRouReply, has := kev[KamReplyRoute]; has {
