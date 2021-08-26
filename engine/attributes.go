@@ -130,7 +130,6 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 // AttrArgsProcessEvent arguments used for proccess event
 type AttrArgsProcessEvent struct {
 	AttributeIDs []string
-	ProcessRuns  *int // number of loops for ProcessEvent
 	*utils.CGREvent
 	clnb bool //rpcclonable
 }
@@ -157,14 +156,8 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 			attrIDs[i] = id
 		}
 	}
-	var procRuns *int
-	if attr.ProcessRuns != nil {
-		procRuns = new(int)
-		*procRuns = *attr.ProcessRuns
-	}
 	return &AttrArgsProcessEvent{
 		AttributeIDs: attrIDs,
-		ProcessRuns:  procRuns,
 		CGREvent:     attr.CGREvent.Clone(),
 	}
 }
@@ -270,10 +263,15 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 
-	processRuns := alS.cgrcfg.AttributeSCfg().ProcessRuns
-	if args.ProcessRuns != nil && *args.ProcessRuns != 0 {
-		processRuns = *args.ProcessRuns
+	var processRuns int64
+	if v, has := args.APIOpts[utils.OptsAttributesProcessRuns]; has {
+		if processRuns, err = utils.IfaceAsTInt64(v); err != nil {
+			return
+		}
+	} else if processRuns, err = utils.IfaceAsTInt64(alS.cgrcfg.AttributeSCfg().DefaultOpts[utils.OptsAttributesProcessRuns]); err != nil {
+		return
 	}
+
 	args.CGREvent = args.CGREvent.Clone()
 	processedPrf := make(utils.StringSet)
 	eNV := utils.MapStorage{
@@ -295,7 +293,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	alteredFields := make(utils.StringSet)
 	dynDP := newDynamicDP(ctx, alS.cgrcfg.AttributeSCfg().ResourceSConns,
 		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().AdminSConns, args.Tenant, eNV)
-	for i := 0; i < processRuns; i++ {
+	for i := int64(0); i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.OptsAttributesProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(ctx, tnt, args, eNV, dynDP, lastID)

@@ -616,7 +616,6 @@ func testAttributeProcessEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	args := &engine.AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Event: map[string]interface{}{
 				utils.ToR:          utils.MetaVoice,
@@ -678,7 +677,6 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
@@ -778,7 +776,6 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -883,7 +880,6 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),

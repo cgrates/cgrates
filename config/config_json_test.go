@@ -753,7 +753,9 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
-		Process_runs:          utils.IntPointer(1),
+		Default_opts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(1),
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -762,7 +764,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", utils.ToJSON(cfg))
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 

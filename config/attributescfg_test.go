@@ -34,7 +34,6 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
-		Process_runs:          utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(true),
 	}
 	expected := &AttributeSCfg{
@@ -46,8 +45,10 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
-		ProcessRuns:         1,
 		NestedFields:        true,
+		DefaultOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(1),
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.attributeSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -66,7 +67,9 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"admins_conns": ["*internal"],			
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
     "string_indexed_fields": ["*req.index1"],
-	"process_runs": 3,						
+	"default_opts": {
+		"*processRuns": 3,
+	},					
 	},		
 }`
 	eMap := map[string]interface{}{
@@ -76,10 +79,12 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.AdminSConnsCfg:         []string{utils.MetaInternal},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
-		utils.ProcessRunsCfg:         3,
 		utils.IndexedSelectsCfg:      true,
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(3),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -94,7 +99,9 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
            "suffix_indexed_fields": ["*req.index1","*req.index2"],
            "nested_fields": true,
            "enabled": true,
-           "process_runs": 7,
+           "default_opts": {
+			"*processRuns": 7,
+		},	
      },
 }`
 	expectedMap := map[string]interface{}{
@@ -106,7 +113,9 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
-		utils.ProcessRunsCfg:         7,
+		utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(7),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -130,7 +139,9 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
-		utils.ProcessRunsCfg:         1,
+		utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(1),
+		},
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
@@ -149,7 +160,6 @@ func TestAttributeSCfgClone(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
-		ProcessRuns:         1,
 		NestedFields:        true,
 	}
 	rcv := ban.Clone()
@@ -188,8 +198,10 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
-		ProcessRuns:         2,
 		NestedFields:        true,
+		DefaultOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(1),
+		},
 	}
 
 	v2 := &AttributeSCfg{
@@ -201,8 +213,10 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.Field1"},
 		PrefixIndexedFields: nil,
 		SuffixIndexedFields: nil,
-		ProcessRuns:         3,
 		NestedFields:        false,
+		DefaultOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(1),
+		},
 	}
 
 	expected := &AttributeSJsonCfg{
@@ -214,8 +228,8 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{"*req.Field1"},
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
-		Process_runs:          utils.IntPointer(3),
 		Nested_fields:         utils.BoolPointer(false),
+		Default_opts:          map[string]interface{}{},
 	}
 
 	rcv := diffAttributeSJsonCfg(d, v1, v2)
@@ -224,7 +238,9 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 	}
 
 	v2_2 := v1
-	expected2 := &AttributeSJsonCfg{}
+	expected2 := &AttributeSJsonCfg{
+		Default_opts: map[string]interface{}{},
+	}
 	rcv = diffAttributeSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
