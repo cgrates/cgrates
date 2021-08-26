@@ -202,7 +202,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(ctx, utils.CacheAttributeFilterIndexes, tntCtx, idxKey,  utils.NonTransactional, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheAttributeFilterIndexes, tntCtx, idxKey, utils.NonTransactional, false, true)
 		case utils.ResourceFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
