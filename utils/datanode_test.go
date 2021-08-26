@@ -187,7 +187,7 @@ func TestFieldAsInterface(t *testing.T) {
 	///
 	testPath = []string{"path"}
 	dn.Map = map[string]*DataNode{
-		"notPath": &DataNode{
+		"notPath": {
 			Type: 1,
 		},
 	}
@@ -235,7 +235,7 @@ func TestSet(t *testing.T) {
 	dn := new(DataNode)
 	testPath := make([]string, 0)
 	val1 := map[string]*DataNode{
-		"test": &DataNode{
+		"test": {
 			Type: 1,
 		},
 	}
@@ -378,17 +378,15 @@ func TestAppend2(t *testing.T) {
 	dn.Slice = nil
 	dn.Map = map[string]*DataNode{}
 	dnMapExpect := map[string]*DataNode{
-		"0": &DataNode{
+		"0": {
 			Type: NMMapType,
 			Map: map[string]*DataNode{
-				testPath[1]: &DataNode{
+				testPath[1]: {
 					Type: NMSliceType,
-					Slice: []*DataNode{
-						{
-							Type:  NMDataType,
-							Value: val1,
-						},
-					},
+					Slice: []*DataNode{{
+						Type:  NMDataType,
+						Value: val1,
+					}},
 				},
 			},
 		},
@@ -427,22 +425,18 @@ func TestAppend2(t *testing.T) {
 	dn.Map = nil
 	dn.Slice = nil
 	testPath = []string{"0", "testPath"}
-	dnSliceExpect := []*DataNode{
-		{
-			Type: NMMapType,
-			Map: map[string]*DataNode{
-				testPath[1]: &DataNode{
-					Type: NMSliceType,
-					Slice: []*DataNode{
-						{
-							Type:  NMDataType,
-							Value: val1,
-						},
-					},
-				},
+	dnSliceExpect := []*DataNode{{
+		Type: NMMapType,
+		Map: map[string]*DataNode{
+			testPath[1]: {
+				Type: NMSliceType,
+				Slice: []*DataNode{{
+					Type:  NMDataType,
+					Value: val1,
+				}},
 			},
 		},
-	}
+	}}
 	if _, err := dn.Append(testPath, val1); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dn.Slice, dnSliceExpect) {
@@ -536,22 +530,18 @@ func TestCompose2(t *testing.T) {
 	///
 	dn.Slice = nil
 	testPath = []string{"0", "testPath"}
-	dnSliceExpect := []*DataNode{
-		{
-			Type: NMMapType,
-			Map: map[string]*DataNode{
-				testPath[1]: &DataNode{
-					Type: NMSliceType,
-					Slice: []*DataNode{
-						{
-							Type:  NMDataType,
-							Value: val,
-						},
-					},
-				},
+	dnSliceExpect := []*DataNode{{
+		Type: NMMapType,
+		Map: map[string]*DataNode{
+			testPath[1]: {
+				Type: NMSliceType,
+				Slice: []*DataNode{{
+					Type:  NMDataType,
+					Value: val,
+				}},
 			},
 		},
-	}
+	}}
 	if err := dn.Compose(testPath, val); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dn.Slice, dnSliceExpect) {
