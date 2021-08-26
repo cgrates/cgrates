@@ -48,12 +48,15 @@ var (
 		testV1FIdxStartEngine,
 		testV1FIdxRpcConn,
 
+		//testv1attr,
+
 		testV1FIdxSetAttributeSProfileWithFltr,
 		testV1FIdxSetAttributeSMoreFltrsMoreIndexing,
 		testV1FIdxAttributesRemoveIndexes,
 		testV1FIdxAttributeComputeIndexes,
 		testV1FIdxAttributeMoreProfilesForFilters,
 		testV1FIdxAttributeSRemoveComputedIndexesIDs,
+
 		testV1FIdxAttributeRemoveIndexesComputeIndexesAllProfiles,
 		testV1FIdxAttributesRemoveProfilesNoIndexes,
 		testV1IndexClearCache,
@@ -331,40 +334,38 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
 		}
 	}
-	/*
-		//update the filter for checking the indexes
-		if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-			fltrSameID, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.OK {
-			t.Error("Unexpected reply result", reply)
-		}
 
-		// check the updated indexes
-		expectedIDx = []string{"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
-			"*string:*req.CGRID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
-			"*string:*req.CGRID:IOPJKLBNM:TEST_ATTRIBUTES_IT_TEST"}
-		if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-			&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
-			&replyIdx); err != nil {
-			t.Error(err)
-		} else {
-			sort.Strings(replyIdx)
-			sort.Strings(expectedIDx)
-			if !reflect.DeepEqual(expectedIDx, replyIdx) {
-				t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
-			}
-		}
+	//update the filter for checking the indexes
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltrSameID, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
 
-		//back to our initial filter
-		if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-			fltr, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.OK {
-			t.Error("Unexpected reply result", reply)
+	// check the updated indexes
+	expectedIDx = []string{"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.CGRID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.CGRID:IOPJKLBNM:TEST_ATTRIBUTES_IT_TEST"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
 		}
+	}
 
-	*/
+	//back to our initial filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
 }
 
 func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
@@ -532,37 +533,34 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 		t.Error(err)
 	}
 
-	/*
-		var replyIdx []string
-		expectedIDx := []string{"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
-			"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
-			"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
-			"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
-			"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
-			"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr",
-			"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
-			"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
-			"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
-			"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST",
-			"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
-			"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
-			"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
-			"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
-			"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
-			"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
-			"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST"}
-		if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-			&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
-			t.Error(err)
-		} else {
-			sort.Strings(expectedIDx)
-			sort.Strings(replyIdx)
-			if !reflect.DeepEqual(expectedIDx, replyIdx) {
-				t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
-			}
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
 		}
-
-	*/
+	}
 }
 
 func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
@@ -626,7 +624,8 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned")
 	}
-	expIdx = []string{"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
+	expIdx = []string{
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
@@ -932,7 +931,7 @@ func testVF1FIdxSetAccountMoreFltrsMoreIndexing(t *testing.T) {
 func testVIFIdxAccountRemoveIndexes(t *testing.T) {
 	var reply string
 	var replyIdx []string
-	//indexes will be removed for this specific context
+	//indexes will be removed for this specific contextccounts
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
 		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts},
 		&reply); err != nil {
