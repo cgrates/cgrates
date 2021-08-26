@@ -511,6 +511,8 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Online_cdr_exports:   &[]string{},
 		Actions_conns:        &[]string{},
 		Ees_conns:            &[]string{},
+		Rates_conns:          &[]string{},
+		Accounts_conns:       &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -879,6 +881,8 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{},
 		Resources_conns:       &[]string{},
 		Stats_conns:           &[]string{},
+		Rates_conns:           &[]string{},
+		Accounts_conns:        &[]string{},
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 		Default_opts: map[string]interface{}{

@@ -305,6 +305,8 @@ const CGRATES_CFG_JSON = `
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
 	"actions_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
 	"ees_conns": [],						// connections to EventExporter
+	"rates_conns": [],						// connections to RateS
+	"accounts_conns": [],					// connections to AccountS
 },
 
 
@@ -727,6 +729,8 @@ const CGRATES_CFG_JSON = `
 	"attributes_conns": [],					// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"rates_conns": [],						// connections to RateS
+	"accounts_conns": [],					// connections to AccountS
 	"default_ratio":1,						// default ratio used in case of *load strategy
 	"default_opts":{
 		"*context": "*routes",

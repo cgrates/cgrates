@@ -35,6 +35,8 @@ type CdrsCfg struct {
 	OnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
 	ActionSConns     []string
 	EEsConns         []string
+	RateSConns       []string
+	AccountSConns    []string
 }
 
 // loadFromJSONCfg loads Cdrs config from JsonCfg
@@ -74,9 +76,14 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	if jsnCdrsCfg.Actions_conns != nil {
 		cdrscfg.ActionSConns = updateInternalConns(*jsnCdrsCfg.Actions_conns, utils.MetaActions)
 	}
-
 	if jsnCdrsCfg.Ees_conns != nil {
 		cdrscfg.EEsConns = updateInternalConns(*jsnCdrsCfg.Ees_conns, utils.MetaEEs)
+	}
+	if jsnCdrsCfg.Rates_conns != nil {
+		cdrscfg.RateSConns = updateInternalConns(*jsnCdrsCfg.Rates_conns, utils.MetaRateS)
+	}
+	if jsnCdrsCfg.Accounts_conns != nil {
+		cdrscfg.AccountSConns = updateInternalConns(*jsnCdrsCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	return nil
 }
@@ -108,6 +115,12 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	}
 	if cdrscfg.EEsConns != nil {
 		initialMP[utils.EEsConnsCfg] = getInternalJSONConns(cdrscfg.EEsConns)
+	}
+	if cdrscfg.RateSConns != nil {
+		initialMP[utils.RateSConnsCfg] = getInternalJSONConns(cdrscfg.RateSConns)
+	}
+	if cdrscfg.AccountSConns != nil {
+		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(cdrscfg.AccountSConns)
 	}
 	return
 }
@@ -141,6 +154,12 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 	if cdrscfg.EEsConns != nil {
 		cln.EEsConns = utils.CloneStringSlice(cdrscfg.EEsConns)
 	}
+	if cdrscfg.RateSConns != nil {
+		cln.RateSConns = utils.CloneStringSlice(cdrscfg.RateSConns)
+	}
+	if cdrscfg.AccountSConns != nil {
+		cln.AccountSConns = utils.CloneStringSlice(cdrscfg.AccountSConns)
+	}
 
 	return
 }
@@ -158,6 +177,8 @@ type CdrsJsonCfg struct {
 	Online_cdr_exports   *[]string
 	Actions_conns        *[]string
 	Ees_conns            *[]string
+	Rates_conns          *[]string
+	Accounts_conns       *[]string
 }
 
 func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
@@ -199,6 +220,12 @@ func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
 	}
 	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
 		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+	}
+	if !utils.SliceStringEqual(v1.RateSConns, v2.RateSConns) {
+		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
+	}
+	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	return d
 }
