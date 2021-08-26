@@ -36,6 +36,8 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		Online_cdr_exports:   &[]string{"randomVal"},
 		Actions_conns:        &[]string{utils.MetaInternal, "*conn1"},
 		Ees_conns:            &[]string{utils.MetaInternal, "*conn1"},
+		Rates_conns:          &[]string{utils.MetaInternal, "*conn1"},
+		Accounts_conns:       &[]string{utils.MetaInternal, "*conn1"},
 	}
 	expected := &CdrsCfg{
 		Enabled:          true,
@@ -48,6 +50,8 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		OnlineCDRExports: []string{"randomVal"},
 		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		RateSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "*conn1"},
+		AccountSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
 		ExtraFields:      RSRParsers{},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -84,6 +88,8 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		"online_cdr_exports":["http_localhost", "amqp_localhost", "http_test_file"],
 		"actions_conns": ["*internal:*actions","*conn1"],		
         "ees_conns": ["*internal:*ees","*conn1"],
+        "rates_conns": ["*internal:*rates","*conn1"],
+        "accounts_conns": ["*internal:*accounts","*conn1"],
 	},
 }`
 	eMap := map[string]interface{}{
@@ -98,6 +104,8 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.OnlineCDRExportsCfg: []string{"http_localhost", "amqp_localhost", "http_test_file"},
 		utils.ActionSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
 		utils.EEsConnsCfg:         []string{utils.MetaInternal, "*conn1"},
+		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
+		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -127,6 +135,8 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.OnlineCDRExportsCfg: []string{},
 		utils.ActionSConnsCfg:     []string{},
 		utils.EEsConnsCfg:         []string{"conn1"},
+		utils.RateSConnsCfg:       []string{},
+		utils.AccountSConnsCfg:    []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

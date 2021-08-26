@@ -33,6 +33,8 @@ type RouteSCfg struct {
 	AttributeSConns     []string
 	ResourceSConns      []string
 	StatSConns          []string
+	RateSConns          []string
+	AccountSConns       []string
 	DefaultRatio        int
 	DefaultOpts         map[string]interface{}
 }
@@ -64,6 +66,12 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	}
 	if jsnCfg.Stats_conns != nil {
 		rts.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+	}
+	if jsnCfg.Rates_conns != nil {
+		rts.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRateS)
+	}
+	if jsnCfg.Accounts_conns != nil {
+		rts.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
@@ -104,6 +112,12 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if rts.StatSConns != nil {
 		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(rts.StatSConns)
 	}
+	if rts.RateSConns != nil {
+		initialMP[utils.RateSConnsCfg] = getInternalJSONConns(rts.RateSConns)
+	}
+	if rts.AccountSConns != nil {
+		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(rts.AccountSConns)
+	}
 	return
 }
 
@@ -124,6 +138,12 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 	}
 	if rts.StatSConns != nil {
 		cln.StatSConns = utils.CloneStringSlice(rts.StatSConns)
+	}
+	if rts.RateSConns != nil {
+		cln.RateSConns = utils.CloneStringSlice(rts.RateSConns)
+	}
+	if rts.AccountSConns != nil {
+		cln.AccountSConns = utils.CloneStringSlice(rts.AccountSConns)
 	}
 	if rts.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.StringIndexedFields))
@@ -148,6 +168,8 @@ type RouteSJsonCfg struct {
 	Attributes_conns      *[]string
 	Resources_conns       *[]string
 	Stats_conns           *[]string
+	Rates_conns           *[]string
+	Accounts_conns        *[]string
 	Default_ratio         *int
 	Default_opts          map[string]interface{}
 }
@@ -176,6 +198,12 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	}
 	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
 		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+	}
+	if !utils.SliceStringEqual(v1.RateSConns, v2.RateSConns) {
+		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
+	}
+	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	if v1.DefaultRatio != v2.DefaultRatio {
 		d.Default_ratio = utils.IntPointer(v2.DefaultRatio)

@@ -34,6 +34,8 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{utils.MetaInternal, "conn1"},
 		Resources_conns:       &[]string{utils.MetaInternal, "conn1"},
 		Stats_conns:           &[]string{utils.MetaInternal, "conn1"},
+		Rates_conns:           &[]string{utils.MetaInternal, "conn1"},
+		Accounts_conns:        &[]string{utils.MetaInternal, "conn1"},
 		Default_ratio:         utils.IntPointer(10),
 		Nested_fields:         utils.BoolPointer(true),
 	}
@@ -46,6 +48,8 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"},
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"},
+		RateSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "conn1"},
+		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
 		DefaultOpts: map[string]interface{}{
@@ -74,6 +78,8 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.AttributeSConnsCfg:     []string{},
 		utils.ResourceSConnsCfg:      []string{},
 		utils.StatSConnsCfg:          []string{},
+		utils.RateSConnsCfg:          []string{},
+		utils.AccountSConnsCfg:       []string{},
 		utils.DefaultRatioCfg:        1,
 		utils.DefaultOptsCfg: map[string]interface{}{
 			utils.OptsContext:             utils.MetaRoutes,
@@ -100,6 +106,8 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			"resources_conns": ["*internal:*resources", "conn1"],
 			"stats_conns": ["*internal:*stats", "conn1"],
 			"rals_conns": ["*internal:*responder", "conn1"],
+			"rates_conns": ["*internal:*rates", "conn1"],
+			"accounts_conns": ["*internal:*accounts", "conn1"],
 			"default_ratio":2,
 		},
 	}`
@@ -113,6 +121,8 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.AttributeSConnsCfg:     []string{utils.MetaInternal, "conn1"},
 		utils.ResourceSConnsCfg:      []string{utils.MetaInternal, "conn1"},
 		utils.StatSConnsCfg:          []string{utils.MetaInternal, "conn1"},
+		utils.RateSConnsCfg:          []string{utils.MetaInternal, "conn1"},
+		utils.AccountSConnsCfg:       []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
 		utils.DefaultOptsCfg: map[string]interface{}{
 			utils.OptsContext:             utils.MetaRoutes,
