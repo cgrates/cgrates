@@ -1,1 +1,222 @@
-./packages/debian/changelog
+cgrates (1.0) UNRELEASED; urgency=medium
+  [DanB]
+  * [EEs] Refactored the exporter options
+  * [ERs] Refactored the reader options
+  * [ERs] Removed *flatstore and *partialcsv
+  * [ERs] Added *opts.*partial to control if the event is partial or not
+  * [AttributeS] Added any_context config to control the matching attributes
+  * [DispatcherS] Added any_subsyste config to control the matching dispatchers
+  * [StatS] AverageCallCost and TotalCallCost now returns error for negative Cost field
+  * [SessionS] The sessions are no longer terminated on shutdown if the replication_conns are set
+  * [FilterS] Added *regex filter
+  * [DispatcherS] Removed Subsystems field in favor of filters
+  * [RSRParsers] Added *len dataconverter   
+  * [ERs] Added *natsJSONMap
+  * [EEs] Added *natsJSONMap
+  * [RSRParsers] Added *slice dataconverter  
+  * [CacheS] Updated LoadCache and ReloadCache APIs
+  
+ -- DanB <danb@cgrates.org>  Thu, 4 May 2021 12:05:00 +0200
+
+cgrates (0.11.0) UNRELEASED; urgency=medium
+  [ DanB ]
+  * [FilterS] Renamed rals_conns to apiers_conns
+  * [FilterS] Updated *destination filter to get ReverseDestination form
+    API
+  * [SessionS] Added check for missing CGRevent
+  * [SessionS] Added *cost flag for SessionSv1.ProcessEvent to calculate
+    the rater cost
+  * [ConnManager] Added ApierSv2 as internal connection channel instead
+    of ApierSv1
+  * [DiameterAgent] Using String function from diam.Message instead of
+    ToJSON for request String method
+  * [DiameterAgent] Updated 3gp_vendor dictionary
+  * [Templates] Added new dataconverter: *ip2hex
+  * [AgentS] Added support for *group type and correctly overwrite
+    the values in case of *variable
+  * [ERs] Correctly populate ConcurrentRequest from config
+  * [FilterS] Updated *exists to dynamically compute the path if the
+    path
+  * [AgentS] Added support for *tmp path
+  * [SessionS] Added new API SessionSv1.GetCost
+  * [SessionS] Updateed MaxUsage field from API replies
+  * [SessionS] Added support for *cdrs flag in SessionSv1.ProcessEvent
+  * [StatS] Update metric definition to include path for example:
+    *sum:~*req.Field1
+  * [SupplierS] SupplierS require a connection to rals when give
+    AccountIDs and RatingPlanIDs to calculate
+  * [SupplierS] In case of missing usage from Event use 1 minute as
+    default value
+  * [DataDB] Mongo support different marshaler than msgpack
+  * [ConnManager] Fixed rpc_conns handling id with two connections and one of
+    it *internal
+  * [Replicator] Added Limit and StaticTTL otions for Items from
+    DataDB/StorDB
+  * [Migrator] Auto discover tenant from key instead of taking it from config
+  * [Templates] Fixed missing "*" for strip and pading strategy
+  * [DiameterAgent] Added RAR support
+  * [Loader] Added support to load CSV files from URL
+  * [Loader] Added configurable gapi_credentials
+  * [Loader] Added configurable gapi_token
+  * [AgentS] Add authentication mechanism for Radius (PAP, CHAP,
+    MSCHAPV2)
+  * [SessionS] Update subflags for *rals ( *authorize and *initiate )
+  * [AgentS] Uniformize flags (*auth -> *authorize)
+  * [SessionS] Move *cost as subflag in *rals for
+    SessionSv1.ProcessEvent
+  * [DiameterAgent] Added DPR support
+  * [SupplierS] Add verification for event filters before populating
+    data
+  * [ERs] Add support for *json type
+  * [AgentS] Add ability to inject data in cache from agents
+  * [Config] Config cache format change to include partitions
+  * [ERs] Add *none EventReader type
+  * [SessionS] Added support for *stir_authenticate
+  * [SessionS] Added support for *stir_initiate
+  * [RouteS] Renaming from SupplierS to RouteS
+  * [AgentS] Improved NavigableMap
+  * [General] Default timingIDs start from time.Now() (i.e. *monthly time.Now() + 1 month )
+  * [AgentS] FieldAsInterface return data instead of NMItem
+  * [RouteS] Add posibility to load routes with the sameID and different filters
+  * [RouteS] Correctly populate Sorting out of models
+  * [AgentS] Added SIPAgent for SIP redirection
+  * [AgentS] Added *constant: prefix to do not proccess the value
+    with RSRParsers
+  * [AgentS] Added DynamicDataProvider to AgentRequest
+  * [Server] Corectly log the server listen error
+  * [ERs] Added support to reference CSV fields by the column name
+  * [ERs] Renamed *default reader folders
+  * [FilterS] Updated Filter indexes
+  * [General] Added *mo+extraDuration time support (e.g. *mo+1h will be time.Now() + 1 month + 1 hour)
+  * [SessionS] Use correctly SessionTTLUsage when calculate end usage in case of terminate session from ttl mechanism
+  * [SessionS] Add SessionTLLLastUsage as option for an extra debit in case of ttl mechanism
+  * [LoaderS] Add *req as mandatory prefix
+  * [AgentS] Rename prefix from *cache to *uch
+  * [InternalDB] Updated InternalDB to use the global cache
+  * [RSRParsers] Removed *constant: prefix  
+  * [RSRParsers] Removed attribute sistem from RSRParser  
+  * [RSRParsers] Added grave accent(`) char as a delimiter to not split tge RSR value
+  * [RSRParsers] Moved RSRFilter from RSRParsers to the *rsr FilterS
+  * [SessionS] Rename from ResourceMessage to ResourceAllocation
+  * [LoaderS] Updated file selector from *req<FileName> to *file(FileName)
+  * [SessionS] Added *chargers flag to ProcessEvent to proccess the events from ChargerS with other subsystems
+  * [SessionS] Updated the ids handling in flags by adding *ids as a new flag
+  * [SessionS] Added *derived_reply sub flag to ProcessEvent to specify if a subsystem needs to process the events from ChargerS
+  * [Templates] Added new dataconverter: *string2hex
+  * [AttributeS] Updated AttributeProfile matching to match the second AttributeProfile with the same weight
+  * [AttributeS] Updated inline AttributeProfiles to unite all consecutive inline attributes in a single profile 
+  * [SessionS] Added *processRuns option to control the process runs for AttributeS
+  * [DispatcherS] Removed ArgDispatcher in favor of Opts
+  * [ERs] Add support for *template type
+  * [EEs] Add support for *template type
+  * [LoaderS] In case of empty output directory path don't move the processed file
+  * [FilterS] Added *ipnet filter to check if the network contains the IP
+  * [CacheS] Updated ReloadCache and LoadCache APIs to use a map instead of a structure to be compatible with gob encoding
+  * [CGR-CONSOLE] Uniformize the commands between profile and subsystem
+  * [StatS] Add rounding operation for duration metric (e.g. acd, tcd, etc...)
+  * [DispatcherH] Added DispatcherH subsystem
+  * [ERs] Added support for *amqpJSONMap type
+  * [DataDB] Moved all specific DB options in opts 
+  * [Config] Add new section "template"
+  * [LoaderS] Add support for *template type
+  * [ActionS] Replaced the poster action with *export that will send the event to EEs
+  * [AgentS] DiameterAgent return NOT_FOUND instead of "filter not passing" error and let other subsystem to handle this (e.g. FilterS)
+  * [StatS] Change format of metricID when specifying fields ( e.g. *sum#~*req.FieldName )
+  * [FilterS] Added *apiban filter
+  * [EEs] Add support for *elastic exporter
+  * [AttributeS] Add support for adding fields from other places that event (e.g. Resource.TotalUsage, Stat.MetricName, Account.Balance)
+  * [EEs] Empty fields in exporter config will export the full event for the exporters that use json format
+  * [DynamicDP] Add support for *libphonenumber prefix
+  * [Templates] Added new data converter: *unixtime
+  * [ActionsS] Add prefix *acnt and *act to cdrLog action
+  * [AttributeS] Add support for *prefix and *suffix type
+  * [ConfigS] Add "redis_" prefix to "dataDB" option for redis
+  * [DataDB] Add support for redis with TLS connection ( + integration test )
+  * [ERs] Added support for *s3JSONMap type
+  * [ERs] Added support for *sqsJSONMap type
+  * [ERs] Added support for *amqpv1JSONMap type
+  * [RALs] Send balance update event from rals to threshold ( in case of negative) only once
+  * [SessionS] Use rals_conns when sending refund rounding
+  * [General] Made tenant optional for all API calls
+  * [ConfigS] Moved MinCallDuration,MaxCallDuration from sessions config to general config
+  * [StatS] Added support for nested fields in custom metrics
+  * [AccountS] Add Initial in AccountSummary as initail value before debit operation
+  * [General] For only *asap actions don't save AccountIDs withing ActionPlans
+  * [AnalyzerS] Added AnalyzerSv1.StringQuery API to search over the recorded RPC calls
+  * [CoreS] Moved the server implementation in the new cores package
+  * [RouteS] In case of same weight sort random
+  * [ConfigS] Renamed ReloadConfigFromPath API to ReloadConfig
+  * [ConfigS] Renamed ReloadConfig API to SetConfig
+  * [ConfigS] Renamed ReloadConfigFromJSON API to SetConfigFromJSON
+  * [CDRs] Replaced RSRField with RSRParser
+  * [RouteS] Add new field RouteRateProfileIDs in RateProfiles.csv
+  * [DispatcherS] Removed connection pool from DispatcherHost structure
+  * [DispatcherS] Updated *broadcast, *broadcast_sync and *broadcast_async to behave similar to RPCPool
+  * [ActionsS] Added *remote_set_account action
+  * [SessionS] Properly charge terminate without initiate event
+  * [ServiceS] Added service dependency map to control the shutdown order
+  * [EEs] Add support for *sql exporter
+  * [ApierS] Correct handle error in case of APIerSv1.GetActionTriggers
+  * [SessionS] Added extra condition to determine if the increment is considered the roundIncrement
+  * [SessionS] Cloned the charging interval added on EventCost merge 
+  * [FilterS] Optimized the automated index fields matching
+  * [AgentS] Added *cfg as DataProvider for AgentRequest 
+  * [AgentS] Added *routes_maxcost flag
+  * [SessionS] Added *sessionChargeable session option to control session charging 
+  * [SessionS] Replaced max_call_duration config with default_usage for each ToR
+  * [SessionS] Added JSON and GOB BiRPC support
+  * [ActionS] Added *add_balance, *set_balance and *rem_balance
+  * [RegistrarC] Renamed DispatcherH to RegistrarC
+  * [DataDB] Added replication filtering
+  * [ApierS] Moved Cache field as options
+  * [RouteS] Updated RouteSv1.GetRoutes API to return multiple profiles 
+  * [Templates] Added support for Length Field in case of NMSlice
+  * [Templates] Added support for multiple indexes
+  * [AgentS] Added ~*req prefix for freeswitch extra_fields
+  * [AgentS] Changed NavigableMap with DataNode for speed improvements
+  * [SessionS] RequestType *none returns back the requested usage
+  * [DataDB] Updated config options
+  * [StorDB] Updated config options
+
+cgrates (0.10.0) UNRELEASED; urgency=medium
+
+  * Creating first stable branch. 
+
+ -- DanB <danb@cgrates.org>  Thu, 6 Feb 2020 12:05:00 +0200
+
+cgrates (0.9.1~rc8) UNRELEASED; urgency=medium
+
+  * RC8.
+
+ -- DanB <danb@cgrates.org>  Mon, 22 Sep 2015 12:05:00 +0200
+
+cgrates (0.9.1~rc7) UNRELEASED; urgency=low
+
+  * RC7.
+
+ -- DanB <danb@cgrates.org>  Wed, 3 Aug 2015 14:04:00 -0600
+
+cgrates (0.9.1~rc6) UNRELEASED; urgency=low
+
+  * RC6.
+
+ -- DanB <danb@cgrates.org>  Wed, 10 Sep 2014 13:30:00 +0100
+
+cgrates (0.9.1~rc5) UNRELEASED; urgency=low
+
+  * RC5.
+
+ -- DanB <danb@cgrates.org>  Mon, 18 Aug 2014 13:30:00 +0100
+
+
+cgrates (0.9.1~rc4) UNRELEASED; urgency=low
+
+  * RC4.
+
+ -- DanB <danb@cgrates.org>  Thu, 25 Mar 2014 17:30:00 +0100
+
+cgrates (0.9.1~rc3) UNRELEASED; urgency=low
+
+  * RC3.
+
+ -- DanB <danb@cgrates.org>  Fri, 03 Jan 2014 17:37:31 +0100

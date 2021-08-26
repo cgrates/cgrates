@@ -80,7 +80,8 @@ var (
 					"DistinctMatch": 20,
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsContext: utils.MetaSessionS,
+					utils.OptsContext:               utils.MetaSessionS,
+					utils.OptsAttributesProcessRuns: 0,
 				},
 			},
 		},
@@ -139,7 +140,6 @@ var (
 
 func TestAttributePopulateAttrService(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	defaultCfg.AttributeSCfg().StringIndexedFields = nil
 	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
 	data := NewInternalDB(nil, nil, true)
@@ -305,7 +305,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 	}
 	if _, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM,
 		newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err == nil || err != utils.ErrNotFound {
-		t.Errorf("Error: %+v", err)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
@@ -541,7 +541,6 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -549,7 +548,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 				"InitialField": "InitialValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -644,7 +644,6 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -652,7 +651,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 				"InitialField": "InitialValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -743,7 +743,6 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(2),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -751,7 +750,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 				"InitialField": "InitialValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 2,
 			},
 		},
 	}
@@ -827,7 +827,6 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -835,7 +834,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 				"InitialField": "InitialValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -929,7 +929,6 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -937,7 +936,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 				"InitialField": "InitialValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -1030,7 +1030,6 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1038,7 +1037,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 				"InitialField": "InitialValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -1098,7 +1098,6 @@ func TestAttributeProcessValue(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1175,7 +1174,6 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1246,7 +1244,6 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1320,7 +1317,6 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1401,7 +1397,6 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1472,7 +1467,6 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1545,7 +1539,6 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1620,7 +1613,6 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1667,7 +1659,6 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 
 func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
@@ -1700,7 +1691,6 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 		b.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1723,7 +1713,6 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 
 func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
@@ -1757,7 +1746,6 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 		b.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1809,7 +1797,6 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 
 func TestProcessAttributeConstant(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
@@ -1867,7 +1854,6 @@ func TestProcessAttributeConstant(t *testing.T) {
 
 func TestProcessAttributeVariable(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -1928,7 +1914,6 @@ func TestProcessAttributeVariable(t *testing.T) {
 
 func TestProcessAttributeComposed(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -1995,7 +1980,6 @@ func TestProcessAttributeComposed(t *testing.T) {
 
 func TestProcessAttributeUsageDifference(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2057,7 +2041,6 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 
 func TestProcessAttributeSum(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2119,7 +2102,6 @@ func TestProcessAttributeSum(t *testing.T) {
 
 func TestProcessAttributeDiff(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2181,7 +2163,6 @@ func TestProcessAttributeDiff(t *testing.T) {
 
 func TestProcessAttributeMultiply(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2243,7 +2224,6 @@ func TestProcessAttributeMultiply(t *testing.T) {
 
 func TestProcessAttributeDivide(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2305,7 +2285,6 @@ func TestProcessAttributeDivide(t *testing.T) {
 
 func TestProcessAttributeValueExponent(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2367,7 +2346,6 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 
 func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2429,7 +2407,6 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 
 func TestProcessAttributePrefix(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2490,7 +2467,6 @@ func TestProcessAttributePrefix(t *testing.T) {
 
 func TestProcessAttributeSuffix(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2552,7 +2528,6 @@ func TestProcessAttributeSuffix(t *testing.T) {
 func TestAttributeIndexSelectsFalse(t *testing.T) {
 	// change the IndexedSelects to false
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	defaultCfg.AttributeSCfg().StringIndexedFields = nil
 	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
 	defaultCfg.AttributeSCfg().IndexedSelects = false
@@ -2587,7 +2562,6 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	}
 
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -2609,7 +2583,6 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 
 func TestProcessAttributeWithSameWeight(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
@@ -2648,7 +2621,6 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(2),
 		CGREvent: &utils.CGREvent{ //matching ATTR_UNIX_TIMESTAMP
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "TestProcessAttributeUnixTimeStamp",
@@ -2658,7 +2630,8 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 				utils.Weight:  "20.0",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 2,
 			},
 		},
 	}
@@ -2727,7 +2700,6 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -2735,7 +2707,8 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 				"InitialField": "InitialValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -2815,7 +2788,6 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -2823,7 +2795,8 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 				"InitialField": "InitialValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
+				utils.OptsContext:               utils.MetaSessionS,
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -2974,11 +2947,13 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	attr := NewAttributeService(dm, fltrS, cfg)
 
 	args := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(2),
 		CGREvent: &utils.CGREvent{
 			Event: map[string]interface{}{
 				"Account":     "pc_test",
 				"CompanyName": "MY_company_will_be_changed",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
 			},
 		},
 	}
@@ -2993,7 +2968,9 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 				"CompanyName": "ITSYS COMMUNICATIONS SRL",
 				"Password":    "CGRateS.org",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
 	}
 	if err := attr.V1ProcessEvent(context.Background(), args, reply); err != nil {

@@ -30,8 +30,8 @@ type AttributeSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
-	ProcessRuns         int
 	NestedFields        bool
+	DefaultOpts         map[string]interface{}
 }
 
 func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -62,11 +62,11 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Suffix_indexed_fields != nil {
 		alS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
-	if jsnCfg.Process_runs != nil {
-		alS.ProcessRuns = *jsnCfg.Process_runs
-	}
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
+	}
+	if jsnCfg.Default_opts != nil {
+		alS.DefaultOpts = jsnCfg.Default_opts
 	}
 	return
 }
@@ -76,8 +76,8 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
-		utils.ProcessRunsCfg:    alS.ProcessRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,
+		utils.DefaultOptsCfg:    alS.DefaultOpts,
 	}
 	if alS.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*alS.StringIndexedFields)
@@ -107,7 +107,7 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 		Enabled:        alS.Enabled,
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
-		ProcessRuns:    alS.ProcessRuns,
+		DefaultOpts:    alS.DefaultOpts,
 	}
 	if alS.ResourceSConns != nil {
 		cln.ResourceSConns = utils.CloneStringSlice(alS.ResourceSConns)
@@ -142,7 +142,7 @@ type AttributeSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
-	Process_runs          *int
+	Default_opts          map[string]interface{}
 }
 
 func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *AttributeSJsonCfg {
@@ -167,12 +167,10 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
-	if v1.ProcessRuns != v2.ProcessRuns {
-		d.Process_runs = utils.IntPointer(v2.ProcessRuns)
-	}
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
+	d.Default_opts = diffMap(d.Default_opts, v1.DefaultOpts, v2.DefaultOpts)
 	return d
 }
 

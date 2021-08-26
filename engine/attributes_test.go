@@ -96,8 +96,10 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "adrian@itsyscom.com",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
-		ProcessRuns: utils.IntPointer(2),
 	}
 	rply := &AttrSProcessEventReply{}
 	expected := &AttrSProcessEventReply{
@@ -110,7 +112,9 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 				utils.AccountField: "andrei.itsyscom.com",
 				"Password":         "CGRATES.ORG",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
 		blocker: false,
 	}
@@ -191,15 +195,17 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "adrian@itsyscom.com",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
-		ProcessRuns: utils.IntPointer(2),
 	}
 	rply := &AttrSProcessEventReply{}
 	err = alS.V1ProcessEvent(context.Background(), args, rply)
 	sort.Strings(rply.AlteredFields)
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err == nil || err.Error() != expErr {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expErr, err)
 	}
 
 }
@@ -271,15 +277,17 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "adrian@itsyscom.com",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
-		ProcessRuns: utils.IntPointer(2),
 	}
 	rply := &AttrSProcessEventReply{}
 	err = alS.V1ProcessEvent(context.Background(), args, rply)
 	sort.Strings(rply.AlteredFields)
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err == nil || err.Error() != expErr {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expErr, err)
 	}
 
 }
@@ -351,8 +359,10 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "adrian@itsyscom.com",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
-		ProcessRuns: utils.IntPointer(2),
 	}
 	rply := &AttrSProcessEventReply{}
 	err = alS.V1ProcessEvent(context.Background(), args, rply)
@@ -708,12 +718,14 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 
 	args := &AttrArgsProcessEvent{
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		ProcessRuns:  utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
 			Event: map[string]interface{}{
 				"Password": "passwd",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -728,7 +740,9 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 				"Password":        "CGRateS.org",
 				utils.RequestType: utils.MetaPostpaid,
 			},
-			APIOpts: make(map[string]interface{}),
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 4,
+			},
 		},
 	}
 
@@ -814,11 +828,13 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	}
 
 	args := &AttrArgsProcessEvent{
-		ProcessRuns: utils.IntPointer(3),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
 			Event:  map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 3,
+			},
 		},
 	}
 
@@ -834,7 +850,9 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 				"PaypalAccount":   "cgrates@paypal.com",
 				utils.RequestType: utils.MetaPostpaid,
 			},
-			APIOpts: make(map[string]interface{}),
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 3,
+			},
 		},
 	}
 	if err := alS.V1ProcessEvent(context.Background(), args, reply); err != nil {

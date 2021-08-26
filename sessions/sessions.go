@@ -2902,19 +2902,12 @@ func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREven
 		cgrEv.APIOpts = make(engine.MapEvent)
 	}
 	cgrEv.APIOpts[utils.Subsys] = utils.MetaSessionS
-	var processRuns *int
-	if val, has := cgrEv.APIOpts[utils.OptsAttributesProcessRuns]; has {
-		if v, err := utils.IfaceAsTInt64(val); err == nil {
-			processRuns = utils.IntPointer(int(v))
-		}
-	}
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaSessionS)
 	attrArgs := &engine.AttrArgsProcessEvent{
 		CGREvent:     cgrEv,
 		AttributeIDs: attrIDs,
-		ProcessRuns:  processRuns,
 	}
 	attrArgs.SetCloneable(clnb)
 	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttrSConns, utils.AttributeSv1ProcessEvent,

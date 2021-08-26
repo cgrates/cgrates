@@ -667,7 +667,9 @@ const CGRATES_CFG_JSON = `
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"process_runs": 1,						// number of run loops when processing event
+	"default_opts":{						// 
+		"*processRuns": 1,					// number of run loops when processing event
+	},
 },
 
 
@@ -734,7 +736,6 @@ const CGRATES_CFG_JSON = `
 	"default_ratio":1,						// default ratio used in case of *load strategy
 	"default_opts":{
 		"*context": "*routes",
-		// "*processRuns": 1,
 		"*routesProfilesCount": 1,
 	},
 },

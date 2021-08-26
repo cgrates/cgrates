@@ -103,12 +103,6 @@ type ChrgSProcessEventReply struct {
 
 func (cS *ChargerService) processEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
-	var processRuns *int
-	if val, has := cgrEv.APIOpts[utils.OptsAttributesProcessRuns]; has {
-		if v, err := utils.IfaceAsTInt64(val); err == nil {
-			processRuns = utils.IntPointer(int(v))
-		}
-	}
 	if cPs, err = cS.matchingChargerProfilesForEvent(ctx, tnt, cgrEv); err != nil {
 		return nil, err
 	}
@@ -131,7 +125,6 @@ func (cS *ChargerService) processEvent(ctx *context.Context, tnt string, cgrEv *
 			utils.MetaChargers)
 		args := &AttrArgsProcessEvent{
 			AttributeIDs: cP.AttributeIDs,
-			ProcessRuns:  processRuns,
 			CGREvent:     clonedEv,
 		}
 		var evReply AttrSProcessEventReply
