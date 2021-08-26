@@ -382,7 +382,7 @@ const (
 	ServiceAlreadyRunning    = "service already running"
 	RunningCaps              = "RUNNING"
 	StoppedCaps              = "STOPPED"
-	SchedulerNotRunningCaps  = "SCHEDULLER_NOT_RUNNING"
+	SchedulerNotRunningCaps  = "SCHEDULER_NOT_RUNNING"
 	MetaScheduler            = "*scheduler"
 	MetaSessionsCosts        = "*sessions_costs"
 	MetaRALs                 = "*rals"
