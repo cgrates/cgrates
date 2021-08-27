@@ -39,7 +39,6 @@ const (
 
 var (
 	tFIdxRpc   *rpc.Client
-	emptySlice = []string{}
 
 	sTestsFilterIndexesSV1 = []func(t *testing.T){
 		testV1FIdxLoadConfig,
@@ -80,6 +79,7 @@ var (
 		testV1FIdxSecondComputeAttributeProfileIndexes,
 		testV1FIdxComputeWithAnotherContext,
 		testV1FIdxRemoveAttributeProfile,
+		testV1FIdxSetMultipleAttributesMultipleFilters,
 
 		testV1FIdxdxInitDataDb,
 		testV1FIdxPopulateDatabase,
@@ -93,6 +93,13 @@ var (
 		testV1FIdxComputeDispatcherProfileIndexes,
 		testV1FIdxSetDispatcherProfile2,
 		testV1FIdxComputeDispatcherProfileIndexes2,
+
+		// special cases with  multiple profiles and filters
+		testV1FIdxdxInitDataDb,
+		testV1FIdxResetStorDb,
+		testV1FIdxClearCache,
+		//testV1FIdxSetDispatcherComputeIDs,
+		testV1FIdxSetResourceComputeIDs,
 
 		testV1FIdxStopEngine,
 	}
@@ -800,11 +807,6 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
 	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -899,7 +901,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 }
 
 func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
-	var reply *engine.StatQueueProfile
+	var reply *engine.ResourceProfile
 	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
@@ -909,10 +911,6 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
 		},
 	}
 	var result string
@@ -930,10 +928,6 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 			Tenant:    tenant,
 			ID:        "RCFG2",
 			FilterIDs: []string{"FLTR_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
 			UsageTTL:          10 * time.Microsecond,
 			Limit:             10,
 			AllocationMessage: "MessageAllocation",
@@ -942,11 +936,6 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 			Weight:            20,
 			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
-	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
@@ -1661,6 +1650,250 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	}
 }
 
+func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
+	fltr1 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "fltr_for_attr2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Usage",
+					Values:  []string{"123s"},
+				},
+			},
+		},
+	}
+	fltr2 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "fltr_for_attr3",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"12", "33"},
+				},
+			},
+		},
+	}
+	fltr := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+	}
+	// First we will set a filter for usage
+	var reply string
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter,
+		fltr1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter,
+		fltr2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:   "cgrates.org",
+			ID:       "TEST_ATTRIBUTES_IT_TEST",
+			Contexts: []string{utils.MetaAny},
+			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions",
+				"fltr_for_attr2", "fltr_for_attr3"},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.AccountField,
+					Type:  utils.MetaConstant,
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
+				},
+				{
+					Path:  "*tenant",
+					Type:  utils.MetaConstant,
+					Value: config.NewRSRParsersMustCompile("cgrates.itsyscom", utils.InfieldSep),
+				},
+			},
+		},
+	}
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_ATTRIBUTES_new_fltr",
+			Contexts:  []string{utils.MetaAny},
+			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3", "*string:~*opts.*context:*chargers"},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.AccountField,
+					Type:  utils.MetaConstant,
+					Value: config.NewRSRParsersMustCompile("1002", utils.InfieldSep),
+				},
+			},
+		},
+	}
+	attrPrf3 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_ATTRIBUTE3",
+			Contexts:  []string{utils.MetaAny},
+			FilterIDs: []string{"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  "*req.Destinations",
+					Type:  utils.MetaConstant,
+					Value: config.NewRSRParsersMustCompile("1008", utils.InfieldSep),
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile,
+		attrPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile,
+		attrPrf3, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile,
+		attrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{
+			Tenant:   "cgrates.org",
+			Context:  utils.MetaAny,
+			ItemType: utils.MetaAttributes,
+		},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+
+	//not found for both cases
+	var replyIdx []string
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{
+			Tenant:   "cgrates.org",
+			Context:  utils.MetaAny,
+			ItemType: utils.MetaAttributes,
+		}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	// now we will ComputeFilterIndexes by IDs for *sessions context(but just only 1 profile, not both)
+	var expIdx []string
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{
+			Tenant:       "cgrates.org",
+			Context:       utils.MetaAny,
+			AttributeIDs: []string{"TEST_ATTRIBUTES_new_fltr", "TEST_ATTRIBUTE3"},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+
+	//able to get indexes with context *sessions
+	expIdx = []string{"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{
+			Tenant:   "cgrates.org",
+			Context:  utils.MetaAny,
+			ItemType: utils.MetaAttributes,
+		}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expIdx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expIdx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	// compute for the last profile remain
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: "cgrates.org",
+			Context:      utils.MetaAny,
+			AttributeIDs: []string{"TEST_ATTRIBUTES_IT_TEST"},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	expIdx = []string{
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{
+			Tenant:   "cgrates.org",
+			Context:  utils.MetaAny,
+			ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expIdx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expIdx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
 func testV1FIdxPopulateDatabase(t *testing.T) {
 	var result string
 	resPrf := engine.ResourceProfileWithAPIOpts{
@@ -2069,6 +2302,7 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
 		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(idx))
 	}
+
 }
 
 func testV1FIdxComputeDispatcherProfileIndexes(t *testing.T) {
@@ -2273,6 +2507,336 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 		t.Error(err)
 	} else if sort.Strings(indexes); !reflect.DeepEqual(expectedIndexes, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxClearCache(t *testing.T) {
+	var reply string
+	if err := tFIdxRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+		CacheIDs: nil,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Reply: ", reply)
+	}
+}
+
+func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
+	var reply string
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Type:    utils.MetaString,
+					Values:  []string{"1001"},
+				},
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject,
+					Type:    utils.MetaString,
+					Values:  []string{"2012"},
+				},
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "RandomField",
+					Type:    utils.MetaPrefix,
+					Values:  []string{"RandomValue"},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	//add a dispatcherProfile for 2 subsystems and verify if the index was created for both
+	dispatcherProfile = &DispatcherWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "DSP_Test1",
+			FilterIDs:  []string{"FLTR_1"},
+			Strategy:   utils.MetaFirst,
+			Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
+			Weight:     20,
+		},
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+		dispatcherProfile,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	//remove the indexes for *sessions subsystem
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Tenant:   tenant,
+		Context:  utils.MetaSessionS}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	//verify if was removed
+	var indexes []string
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, AttrGetFilterIndexes{
+		Tenant: tenant, Context: utils.MetaSessionS, ItemType: utils.MetaDispatchers,
+	}, &indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//verify *string index for *attributes subsystem
+	arg := &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes := []string{
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
+	}
+	var idx []string
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(idx))
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{
+			Tenant:      tenant,
+			Context:     utils.MetaSessionS,
+			DispatcherS: true,
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Error: %+v", reply)
+	}
+	expectedIndexes = []string{
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Tenant:   tenant,
+		Context:  utils.MetaSessionS}, &indexes); err != nil {
+		t.Error(err)
+	} else if sort.Strings(indexes); !reflect.DeepEqual(expectedIndexes, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, utils.ToJSON(indexes))
+	}
+
+	//verify *string index for *attributes subsystem after computing for *session subsystem
+	arg = &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes = []string{
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedIndexes), utils.ToJSON(idx))
+	}
+
+	//add a new dispatcherProfile with empty filterIDs
+	//should create an index of type *none:*any:*any for *attributes subsystem
+	dispatcherProfile = &DispatcherWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "DSP_Test2",
+			Subsystems: []string{utils.MetaAttributes},
+			Weight:     20,
+		},
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+		dispatcherProfile,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	//add a new dispatcherProfile with empty filterIDs
+	//should create an index of type *none:*any:*any for *sessions subsystem
+	dispatcherProfile2 := DispatcherWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "DSP_Test3",
+			Subsystems: []string{utils.MetaSessionS},
+			Weight:     20,
+		},
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1SetDispatcherProfile,
+		dispatcherProfile2,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	//verify indexes for *attributes subsystem
+	arg = &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes = []string{
+		"*none:*any:*any:DSP_Test2",
+		"*prefix:*req.RandomField:RandomValue:DSP_Test1",
+		"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
+	}
+}
+
+func testV1FIdxSetResourceComputeIDs(t *testing.T) {
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_RES_RCFG1",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
+			}},
+		},
+	}
+	var result string
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	rlsConfig = &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:            tenant,
+			ID:                "RCFG1",
+			FilterIDs:         []string{"FLTR_RES_RCFG1"},
+			UsageTTL:          10 * time.Microsecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1", "Val2"},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+		ItemType: utils.MetaResources, Tenant: tenant}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var indexes []string
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	var reply2 string
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes, &utils.ArgsComputeFilterIndexes{
+		Tenant:    tenant,
+		ResourceS: true,
+	}, &reply2); err != nil {
+		t.Error(err)
+	}
+	if reply2 != utils.OK {
+		t.Errorf("Error: %+v", reply2)
+	}
+	expectedIDX := []string{"*string:*req.Account:1001:RCFG1"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expectedIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			expectedIDX, utils.ToJSON(indexes))
+	}
+
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_2",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
+			}},
+		},
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	rlsConfig = &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    tenant,
+			ID:        "RCFG2",
+			FilterIDs: []string{"FLTR_2"},
+			UsageTTL:          10 * time.Microsecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1", "Val2"},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	expectedIDX = []string{
+		"*string:*req.Account:1001:RCFG1",
+		"*string:*req.Account:1001:RCFG2",
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	}
+	sort.Strings(indexes)
+	if !reflect.DeepEqual(expectedIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			expectedIDX, utils.ToJSON(indexes))
 	}
 }
 
