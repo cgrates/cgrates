@@ -26,7 +26,7 @@ import (
 type FilterSCfg struct {
 	StatSConns     []string
 	ResourceSConns []string
-	AdminSConns    []string
+	AccountSConns  []string
 }
 
 func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -39,8 +39,8 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 	if jsnCfg.Resources_conns != nil {
 		fSCfg.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
-	if jsnCfg.Admins_conns != nil {
-		fSCfg.AdminSConns = updateInternalConns(*jsnCfg.Admins_conns, utils.MetaAdminS)
+	if jsnCfg.Accounts_conns != nil {
+		fSCfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAdminS)
 	}
 	return
 }
@@ -54,8 +54,8 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if fSCfg.ResourceSConns != nil {
 		initialMP[utils.ResourceSConnsCfg] = getInternalJSONConns(fSCfg.ResourceSConns)
 	}
-	if fSCfg.AdminSConns != nil {
-		initialMP[utils.AdminSConnsCfg] = getInternalJSONConns(fSCfg.AdminSConns)
+	if fSCfg.AccountSConns != nil {
+		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(fSCfg.AccountSConns)
 	}
 	return
 }
@@ -69,8 +69,8 @@ func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
 	if fSCfg.ResourceSConns != nil {
 		cln.ResourceSConns = utils.CloneStringSlice(fSCfg.ResourceSConns)
 	}
-	if fSCfg.AdminSConns != nil {
-		cln.AdminSConns = utils.CloneStringSlice(fSCfg.AdminSConns)
+	if fSCfg.AccountSConns != nil {
+		cln.AccountSConns = utils.CloneStringSlice(fSCfg.AccountSConns)
 	}
 	return
 }
@@ -79,7 +79,7 @@ func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
 type FilterSJsonCfg struct {
 	Stats_conns     *[]string
 	Resources_conns *[]string
-	Admins_conns    *[]string
+	Accounts_conns  *[]string
 }
 
 func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
@@ -92,8 +92,8 @@ func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
 	if !utils.SliceStringEqual(v1.ResourceSConns, v2.ResourceSConns) {
 		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
 	}
-	if !utils.SliceStringEqual(v1.AdminSConns, v2.AdminSConns) {
-		d.Admins_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AdminSConns))
+	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	return d
 }

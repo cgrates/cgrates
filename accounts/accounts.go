@@ -414,3 +414,22 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 	*rply = utils.OK
 	return
 }
+
+func (aS *AccountS) V1GetAccount(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = aS.cfg.GeneralCfg().DefaultTenant
+	}
+	ap, err := aS.dm.GetAccount(ctx, tnt, arg.ID)
+	if err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = *ap
+	return nil
+}

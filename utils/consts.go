@@ -1219,6 +1219,7 @@ const (
 	AccountSv1DebitConcretes      = "AccountSv1.DebitConcretes"
 	AccountSv1ActionSetBalance    = "AccountSv1.ActionSetBalance"
 	AccountSv1ActionRemoveBalance = "AccountSv1.ActionRemoveBalance"
+	AccountSv1GetAccount          = "AccountSv1.GetAccount"
 )
 
 const (
@@ -1754,7 +1755,6 @@ const (
 const (
 	StatSConnsCfg     = "stats_conns"
 	ResourceSConnsCfg = "resources_conns"
-	AdminSConnsCfg    = "admins_conns"
 )
 
 const (

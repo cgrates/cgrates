@@ -747,7 +747,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Enabled:               utils.BoolPointer(false),
 		Stats_conns:           &[]string{},
 		Resources_conns:       &[]string{},
-		Admins_conns:          &[]string{},
+		Accounts_conns:        &[]string{},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
@@ -793,7 +793,7 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
 		Stats_conns:     &[]string{},
 		Resources_conns: &[]string{},
-		Admins_conns:    &[]string{},
+		Accounts_conns:  &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

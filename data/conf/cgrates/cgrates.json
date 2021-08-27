@@ -45,7 +45,20 @@
 
 // "rpc_conns": {
 // 	//"*localhost": {
-// 		//"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+// 		//"conns": [
+// 			//{
+// 				//"address": "127.0.0.1:2012", 
+// 				//"transport":"*json",
+// 				//"connect_attempts": 5,
+// 				//"reconnects": -1,
+// 				//"connect_timeout":"1s",
+// 				//"reply_timeout":"2s",
+// 				//"tls":false,
+// 				//"client_key":"",
+// 				//"client_certificate":"",
+// 				//"ca_certificate":""
+// 			//}
+// 		//],
 // 	//},
 // },							// rpc connections definitions
 
@@ -254,7 +267,7 @@
 // "filters": {								// Filters configuration (*new)
 // 	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-// 	"admins_conns": [],						// connections to adminS for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"accounts_conns": [],					// connections to AccountS for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // },
 
 
@@ -271,6 +284,8 @@
 // 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
 // 	"actions_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
 // 	"ees_conns": [],						// connections to EventExporter
+// 	"rates_conns": [],						// connections to RateS
+// 	"accounts_conns": [],					// connections to AccountS
 // },
 
 
@@ -411,6 +426,7 @@
 // 			"id": "*default",									// identifier of the EventReader profile
 // 			"type": "*none",									// exporter type 
 // 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
+// 			"concurrent_requests": 0,							// maximum simultaneous requests to process, 0 for unlimited
 // 			"opts": {
 
 // 				// CSV
@@ -483,6 +499,7 @@
 // 			"synchronous": false,								// block processing until export has a result
 // 			"attempts": 1,										// export attempts
 // 			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+// 			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
 // 		},
 // 	],
 // },
@@ -623,13 +640,15 @@
 // 	"enabled": false,						// starts attribute service: <true|false>
 // 	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],					// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
-// 	"admins_conns": [],						// connections to ApierS, empty to disable: <""|*internal|$rpc_conns_id>
+// 	"accounts_conns": [],						// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"process_runs": 1,						// number of run loops when processing event
+// 	"default_opts":{						// 
+// 		"*processRuns": 1,					// number of run loops when processing event
+// 	},
 // },
 
 
@@ -691,7 +710,13 @@
 // 	"attributes_conns": [],					// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 // 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-// 	"default_ratio":1						// default ratio used in case of *load strategy
+// 	"rates_conns": [],						// connections to RateS
+// 	"accounts_conns": [],					// connections to AccountS
+// 	"default_ratio":1,						// default ratio used in case of *load strategy
+// 	"default_opts":{
+// 		"*context": "*routes",
+// 		"*routesProfilesCount": 1,
+// 	},
 // },
 
 
@@ -842,7 +867,14 @@
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~*req.2"},
 // 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
-// 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "ConnectAttempts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.4"},
+// 					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.5"},
+// 					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.6"},
+// 					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.7"},
+// 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.9"},
+// 					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.10"},
+// 					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.11"},
 // 				],
 // 			},
 // 			{

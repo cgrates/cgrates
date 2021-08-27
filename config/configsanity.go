@@ -936,9 +936,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)
 		}
 	}
-	for _, connID := range cfg.filterSCfg.AdminSConns {
-		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.admS.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AdminS, utils.FilterS)
+	for _, connID := range cfg.filterSCfg.AccountSConns {
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.accountSCfg.Enabled {
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AccountS, utils.FilterS)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)

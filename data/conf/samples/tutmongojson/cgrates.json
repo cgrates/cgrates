@@ -87,7 +87,7 @@
 		"enabled": true,
 		"stats_conns": ["*localhost"],
 		"resources_conns": ["*localhost"],
-		"admins_conns": ["*localhost"]
+		"accounts_conns": ["*localhost"]
 	},
 
 
@@ -132,7 +132,7 @@
 
 
 	"filters": {
-		"admins_conns": ["*internal"],
+		"accounts_conns": ["*internal"],
 	},
 
 

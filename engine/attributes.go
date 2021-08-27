@@ -292,7 +292,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	matchedIDs := make([]string, 0, processRuns)
 	alteredFields := make(utils.StringSet)
 	dynDP := newDynamicDP(ctx, alS.cgrcfg.AttributeSCfg().ResourceSConns,
-		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().AdminSConns, args.Tenant, eNV)
+		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().AccountSConns, args.Tenant, eNV)
 	for i := int64(0); i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.OptsAttributesProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply

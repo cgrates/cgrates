@@ -25,12 +25,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newDynamicDP(ctx *context.Context, resConns, stsConns, apiConns []string,
+func newDynamicDP(ctx *context.Context, resConns, stsConns, actsConns []string,
 	tenant string, initialDP utils.DataProvider) *dynamicDP {
 	return &dynamicDP{
 		resConns:  resConns,
 		stsConns:  stsConns,
-		apiConns:  apiConns,
+		actsConns: actsConns,
 		tenant:    tenant,
 		initialDP: initialDP,
 		cache:     utils.MapStorage{},
@@ -41,7 +41,7 @@ func newDynamicDP(ctx *context.Context, resConns, stsConns, apiConns []string,
 type dynamicDP struct {
 	resConns  []string
 	stsConns  []string
-	apiConns  []string
+	actsConns []string
 	tenant    string
 	initialDP utils.DataProvider
 
@@ -91,7 +91,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		// fieldNameType (~*accounts), accountID(1001) and queried part (BalanceMap.*monetary[0].Value)
 
 		var account utils.Account
-		if err = connMgr.Call(dDP.ctx, dDP.apiConns, utils.AdminSv1GetAccount,
+		if err = connMgr.Call(dDP.ctx, dDP.actsConns, utils.AccountSv1GetAccount,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &account); err != nil {
 			return
 		}
