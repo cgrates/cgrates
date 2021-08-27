@@ -45,7 +45,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.0
 	github.com/nats-io/nats-server/v2 v2.2.6 // indirect
 	github.com/nats-io/nats.go v1.11.0
-	github.com/nyaruka/phonenumbers v1.0.70
+	github.com/nyaruka/phonenumbers v1.0.71
 	github.com/peterh/liner v1.2.1
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
