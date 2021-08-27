@@ -14,6 +14,7 @@ require (
 	github.com/Azure/go-autorest/autorest/validation v0.2.0 // indirect
 	github.com/antchfx/xmlquery v1.0.1-0.20190615060324-ebb6e8b1d119
 	github.com/antchfx/xpath v1.0.1-0.20190715042825-b6dbe470e102 // indirect
+	github.com/aws/aws-lambda-go v1.8.1 // indirect
 	github.com/aws/aws-sdk-go v1.23.18
 	github.com/cenk/hub v1.0.0 // indirect
 	github.com/cenkalti/hub v1.0.1-0.20160527103212-11382a9960d3 // indirect
@@ -29,6 +30,7 @@ require (
 	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.8-0.20190312181446-1485a34d5d57
 	github.com/go-sql-driver/mysql v1.4.1
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/hashicorp/golang-lru v0.5.2-0.20190520140433-59383c442f7d // indirect
 	github.com/ishidawataru/sctp v0.0.0-20180918013207-6e2cb1366111 // indirect
@@ -39,7 +41,7 @@ require (
 	github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9
 	github.com/miekg/dns v1.1.17
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/nyaruka/phonenumbers v1.0.45
+	github.com/nyaruka/phonenumbers v1.0.71
 	github.com/peterh/liner v1.1.1-0.20190305032635-6f820f8f90ce
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/pkg/errors v0.8.2-0.20190227000051-27936f6d90f9 // indirect
@@ -57,5 +59,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20201008064518-c1f3e3309c71 // indirect
 	google.golang.org/api v0.10.0
+	google.golang.org/protobuf v1.27.1 // indirect
 	pack.ag/amqp v0.12.2
 )
