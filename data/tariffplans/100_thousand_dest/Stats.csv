@@ -1,8 +1,0 @@
-#Tenant[0],Id[1],FilterIDs[2],Weight[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
-cgrates.org,Stat_1,FLTR_STAT_1,30,100,10s,0,*acd;*tcd;*asr,,false,true,*none
-cgrates.org,Stat_1_1,FLTR_STAT_1_1,30,100,1s,0,*acd;*tcd;*pdd,,false,true,*none
-cgrates.org,Stat_2,FLTR_STAT_2,30,100,1s,0,*acd;*tcd;*asr,,false,true,*none
-cgrates.org,Stat_3,FLTR_STAT_3,30,100,1s,0,*acd;*tcd;*asr,,false,true,*none
-cgrates.org,Stat_Supplier1,*string:~*req.StatID:Stat_Supplier1,30,100,1s,0,*sum#~*req.LoadReq,,true,true,*none
-cgrates.org,Stat_Supplier2,*string:~*req.StatID:Stat_Supplier2,30,100,1s,0,*sum#~*req.LoadReq,,true,true,*none
-cgrates.org,Stat_Supplier3,*string:~*req.StatID:Stat_Supplier3,30,100,1s,0,*sum#~*req.LoadReq,,true,true,*none

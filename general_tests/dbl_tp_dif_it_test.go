@@ -21,14 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
+	"os"
 	"path"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,13 +39,14 @@ var (
 	testDblTpDifDestRPC  *birpc.Client
 
 	testDblTpDifDestTests = []func(t *testing.T){
-		testDblTpDifDestLoadConfig,
-		testDblTpDifDestResetDataDB,
-		testDblTpDifDestResetStorDb,
-		testDblTpDifDestStartEngine,
-		testDblTpDifDestRPCConn,
-		testDblTpDifDestLoadersLoad,
-		testDblTpDifDestStopCgrEngine,
+		//testGenerateCsv,
+		// testDblTpDifDestLoadConfig,
+		// testDblTpDifDestResetDataDB,
+		// testDblTpDifDestResetStorDb,
+		// //testDblTpDifDestStartEngine,
+		// testDblTpDifDestRPCConn,
+		// testDblTpDifDestLoadersLoad,
+		//testDblTpDifDestStopCgrEngine,
 	}
 )
 
@@ -102,18 +103,33 @@ func testDblTpDifDestRPCConn(t *testing.T) {
 }
 
 func testDblTpDifDestLoadersLoad(t *testing.T) {
-	var reply string
-	if err := testDblTpDifDestRPC.Call(context.Background(), utils.LoaderSv1Load,
-		&loaders.ArgsProcessFolder{
-			StopOnError: true,
-			Caching:     utils.StringPointer(utils.MetaReload),
-		}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
+	// var reply string
+	// if err := testDblTpDifDestRPC.Call(context.Background(), utils.LoaderSv1Load,
+	// 	&loaders.ArgsProcessFolder{
+	// 		LoaderID:    "LoaderRatesTest",
+	// 		StopOnError: true,
+	// 		Caching:     utils.StringPointer(utils.MetaReload),
+	// 		ForceLock:   true,
+	// 	}, &reply); err != nil {
+	// 	t.Error(err)
+	// } else if reply != utils.OK {
+	// 	t.Error("Unexpected reply returned:", reply)
+	// }
+
+}
+func testGenerateCsv(t *testing.T) {
+	filename := "/tmp/dat2"
+	os.Remove(filename)
+	f, _ := os.Create(filename)
+	fmt.Fprintf(f, `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement`+"\n")
+	n := 100000
+	for i := 1; i <= n; i++ {
+		fmt.Fprintf(f, `cgrates.org,RT_RETAIL%v,,,,,,RT_1,*prefix:~*req.Destination:%v,"* * * * *",,,0s,,0.4,1m,30s`, i, i)
+		fmt.Fprintf(f, "\n")
+		fmt.Fprintf(f, `cgrates.org,RT_RETAIL%v,,,,,,RT_1_CHRISTMAS,*prefix:~*req.Destination:%v,* * 24 12 *,;30,false,0s,,0.06,1m,1s`, i, i)
+		fmt.Fprintf(f, "\n")
 	}
 }
-
 func testDblTpDifDestStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
