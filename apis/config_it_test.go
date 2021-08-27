@@ -424,7 +424,7 @@ func testCfgGetConfigStore(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Process_runs:          nil,
+		Default_opts:          make(map[string]interface{}),
 	}
 	if !reflect.DeepEqual(attr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(attr))
@@ -502,7 +502,9 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Process_runs:          utils.IntPointer(2),
+		Default_opts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(2),
+		},
 	}
 	if !reflect.DeepEqual(attr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(attr))
@@ -520,7 +522,9 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Process_runs:          utils.IntPointer(2),
+		Default_opts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: float64(2),
+		},
 	}
 	err := connDb.SetSection(context.Background(), "attributes", attrSect)
 
