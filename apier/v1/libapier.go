@@ -172,7 +172,7 @@ func (apierSv1 *APIerSv1) callCacheForRemoveIndexes(cacheopt string, tnt, cacheI
 		method = utils.CacheSv1RemoveItems
 	case utils.MetaClear:
 		method = utils.CacheSv1Clear
-		args = utils.AttrCacheIDsWithAPIOpts{
+		args = &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   tnt,
 			CacheIDs: []string{cacheID},
 			APIOpts:  opts,
@@ -201,7 +201,7 @@ func (apierSv1 *APIerSv1) callCacheForComputeIndexes(cacheopt, tnt string,
 		for idx := range cacheItems {
 			cacheIDs = append(cacheIDs, idx)
 		}
-		args = utils.AttrCacheIDsWithAPIOpts{
+		args = &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   tnt,
 			CacheIDs: cacheIDs,
 			APIOpts:  opts,
