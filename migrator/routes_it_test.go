@@ -187,12 +187,12 @@ func testSupITMigrateAndMove(t *testing.T) {
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{{
-			ID:            "Sup",
-			FilterIDs:     []string{},
-			AccountIDs:    []string{"1001"},
-			RatingPlanIDs: []string{"RT_PLAN1"},
-			ResourceIDs:   []string{"RES1"},
-			Weight:        10,
+			ID:             "Sup",
+			FilterIDs:      []string{},
+			AccountIDs:     []string{"1001"},
+			RateProfileIDs: []string{"RT_PLAN1"},
+			ResourceIDs:    []string{"RES1"},
+			Weight:         10,
 		}},
 	}
 	switch supAction {

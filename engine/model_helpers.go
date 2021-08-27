@@ -797,7 +797,7 @@ type RouteMdls []*RouteMdl
 func (tps RouteMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
-		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteRateProfileIDs,
+		utils.RouteAccountIDs, utils.RouteRateProfileIDs, utils.RouteRateProfileIDs,
 		utils.RouteResourceIDs, utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
 		utils.RouteParameters,
 	}
@@ -841,9 +841,9 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 				supFilterSplit := strings.Split(tp.RouteFilterIDs, utils.InfieldSep)
 				sup.FilterIDs = append(sup.FilterIDs, supFilterSplit...)
 			}
-			if tp.RouteRatingplanIDs != utils.EmptyString {
-				ratingPlanSplit := strings.Split(tp.RouteRatingplanIDs, utils.InfieldSep)
-				sup.RatingPlanIDs = append(sup.RatingPlanIDs, ratingPlanSplit...)
+			if tp.RouteRateProfileIDs != utils.EmptyString {
+				ratingPlanSplit := strings.Split(tp.RouteRateProfileIDs, utils.InfieldSep)
+				sup.RateProfileIDs = append(sup.RateProfileIDs, ratingPlanSplit...)
 			}
 			if tp.RouteResourceIDs != utils.EmptyString {
 				resSplit := strings.Split(tp.RouteResourceIDs, utils.InfieldSep)
@@ -926,11 +926,11 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 			}
 			mdl.RouteAccountIDs += val
 		}
-		for i, val := range supl.RatingPlanIDs {
+		for i, val := range supl.RateProfileIDs {
 			if i != 0 {
-				mdl.RouteRatingplanIDs += utils.InfieldSep
+				mdl.RouteRateProfileIDs += utils.InfieldSep
 			}
-			mdl.RouteRatingplanIDs += val
+			mdl.RouteRateProfileIDs += val
 		}
 		for i, val := range supl.FilterIDs {
 			if i != 0 {
@@ -979,7 +979,7 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 			ID:              route.ID,
 			Weight:          route.Weight,
 			Blocker:         route.Blocker,
-			RatingPlanIDs:   route.RatingPlanIDs,
+			RateProfileIDs:  route.RateProfileIDs,
 			AccountIDs:      route.AccountIDs,
 			FilterIDs:       route.FilterIDs,
 			ResourceIDs:     route.ResourceIDs,
@@ -1006,7 +1006,7 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 			ID:              route.ID,
 			FilterIDs:       route.FilterIDs,
 			AccountIDs:      route.AccountIDs,
-			RatingPlanIDs:   route.RatingPlanIDs,
+			RateProfileIDs:  route.RateProfileIDs,
 			ResourceIDs:     route.ResourceIDs,
 			StatIDs:         route.StatIDs,
 			Weight:          route.Weight,

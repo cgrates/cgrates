@@ -118,7 +118,7 @@
 					{"tag": "SupplierID", "path": "SupplierID", "type": "*variable", "value": "~6"},
 					{"tag": "SupplierFilterIDs", "path": "SupplierFilterIDs", "type": "*variable", "value": "~7"},
 					{"tag": "SupplierAccountIDs", "path": "SupplierAccountIDs", "type": "*variable", "value": "~8"},
-					{"tag": "SupplierRatingPlanIDs", "path": "SupplierRatingPlanIDs", "type": "*variable", "value": "~9"},
+					{"tag": "RouteRateProfileIDs", "path": "RouteRateProfileIDs", "type": "*variable", "value": "~9"},
 					{"tag": "SupplierResourceIDs", "path": "SupplierResourceIDs", "type": "*variable", "value": "~10"},
 					{"tag": "SupplierStatIDs", "path": "SupplierStatIDs", "type": "*variable", "value": "~11"},
 					{"tag": "SupplierWeight", "path": "SupplierWeight", "type": "*variable", "value": "~12"},

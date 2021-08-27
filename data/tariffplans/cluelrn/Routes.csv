@@ -1,4 +1,4 @@
-#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
+#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
 cgrates.org,ROUTE_CLUELRN_INTER,*string:~*req.Account:9174269000;*string:~*req.LRNJurisdiction:INTER,10,*lc,,LEVEL3,,,RP_LEVEL3_INTER,,,,false,
 cgrates.org,ROUTE_CLUELRN_INTER,,,,,TMOBILE,,,RP_TMOBILE_INTER,,,,false,
 cgrates.org,ROUTE_CLUELRN_INTER,,,,,COMCAST,,,RP_COMCAST_INTER,,,,false,

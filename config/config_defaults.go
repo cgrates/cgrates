@@ -843,7 +843,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "RouteID", "path": "RouteID", "type": "*variable", "value": "~*req.6"},
 					{"tag": "RouteFilterIDs", "path": "RouteFilterIDs", "type": "*variable", "value": "~*req.7"},
 					{"tag": "RouteAccountIDs", "path": "RouteAccountIDs", "type": "*variable", "value": "~*req.8"},
-					{"tag": "RouteRatingPlanIDs", "path": "RouteRatingPlanIDs", "type": "*variable", "value": "~*req.9"},
+					{"tag": "RouteRateProfileIDs", "path": "RouteRateProfileIDs", "type": "*variable", "value": "~*req.9"},
 					{"tag": "RouteResourceIDs", "path": "RouteResourceIDs", "type": "*variable", "value": "~*req.10"},
 					{"tag": "RouteStatIDs", "path": "RouteStatIDs", "type": "*variable", "value": "~*req.11"},
 					{"tag": "RouteWeight", "path": "RouteWeight", "type": "*variable", "value": "~*req.12"},

@@ -931,14 +931,14 @@ func testFltrRplRouteProfile(t *testing.T) {
 			Sorting:   utils.MetaWeight,
 			Routes: []*engine.Route{
 				{
-					ID:            "local",
-					RatingPlanIDs: []string{"RP_LOCAL"},
-					Weight:        10,
+					ID:             "local",
+					RateProfileIDs: []string{"RP_LOCAL"},
+					Weight:         10,
 				},
 				{
-					ID:            "mobile",
-					RatingPlanIDs: []string{"RP_MOBILE"},
-					Weight:        30,
+					ID:             "mobile",
+					RateProfileIDs: []string{"RP_MOBILE"},
+					Weight:         30,
 				},
 			},
 			Weight: 10,

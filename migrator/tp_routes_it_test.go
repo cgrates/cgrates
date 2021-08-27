@@ -119,7 +119,7 @@ func testTpSplITPopulate(t *testing.T) {
 					ID:              "supplier1",
 					FilterIDs:       []string{"FLTR_1"},
 					AccountIDs:      []string{"Acc1", "Acc2"},
-					RatingPlanIDs:   []string{"RPL_1"},
+					RateProfileIDs:  []string{"RPL_1"},
 					ResourceIDs:     []string{"ResGroup1"},
 					StatIDs:         []string{"Stat1"},
 					Weight:          10,

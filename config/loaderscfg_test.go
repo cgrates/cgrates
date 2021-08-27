@@ -531,9 +531,9 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 							Layout:    time.RFC3339,
 						},
 						{
-							Tag:       "RouteRatingPlanIDs",
-							Path:      "RouteRatingPlanIDs",
-							pathSlice: []string{"RouteRatingPlanIDs"},
+							Tag:       "RouteRateProfileIDs",
+							Path:      "RouteRateProfileIDs",
+							pathSlice: []string{"RouteRateProfileIDs"},
 							Type:      utils.MetaVariable,
 							Value:     NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
 							Mandatory: false,
@@ -1863,8 +1863,8 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 							utils.ValueCfg: "~*req.8",
 						},
 						{
-							utils.TagCfg:   "RouteRatingPlanIDs",
-							utils.PathCfg:  "RouteRatingPlanIDs",
+							utils.TagCfg:   "RouteRateProfileIDs",
+							utils.PathCfg:  "RouteRateProfileIDs",
 							utils.TypeCfg:  "*variable",
 							utils.ValueCfg: "~*req.9",
 						},
