@@ -125,6 +125,17 @@
 	"stats_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"admins_conns": ["*internal"]
-}
+},
+
+
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/100_thousand_dest",
+		"tp_out_dir": "",
+	},
+],
 
 }
