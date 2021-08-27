@@ -399,6 +399,7 @@ func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 	indexes = make(utils.StringSet)
 	var profilesIDs []string
 	if IDs == nil { // get all items
+		Cache.Clear([]string{idxItmType})
 		var ids []string
 		if ids, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[idxItmType]); err != nil {
 			return
