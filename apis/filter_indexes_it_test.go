@@ -3601,14 +3601,14 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 			Sorting: utils.MetaWeight,
 			Routes: []*engine.Route{
 				{
-					ID:            "local",
-					RatingPlanIDs: []string{"RP_LOCAL"},
-					Weight:        10,
+					ID:             "local",
+					RateProfileIDs: []string{"RP_LOCAL"},
+					Weight:         10,
 				},
 				{
-					ID:            "mobile",
-					RatingPlanIDs: []string{"RP_MOBILE"},
-					Weight:        30,
+					ID:             "mobile",
+					RateProfileIDs: []string{"RP_MOBILE"},
+					Weight:         30,
 				},
 			},
 			Weight: 10,
@@ -3700,14 +3700,14 @@ func testV1FIdxSetRouteSMoreFltrsMoreIndexing(t *testing.T) {
 			Sorting: utils.MetaWeight,
 			Routes: []*engine.Route{
 				{
-					ID:            "local",
-					RatingPlanIDs: []string{"RP_LOCAL"},
-					Weight:        10,
+					ID:             "local",
+					RateProfileIDs: []string{"RP_LOCAL"},
+					Weight:         10,
 				},
 				{
-					ID:            "mobile",
-					RatingPlanIDs: []string{"RP_MOBILE"},
-					Weight:        30,
+					ID:             "mobile",
+					RateProfileIDs: []string{"RP_MOBILE"},
+					Weight:         30,
 				},
 			},
 			Weight: 10,
@@ -3809,9 +3809,9 @@ func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 			Sorting: utils.MetaWeight,
 			Routes: []*engine.Route{
 				{
-					ID:            "route1",
-					RatingPlanIDs: []string{"RP_LOCAL"},
-					Weight:        10,
+					ID:             "route1",
+					RateProfileIDs: []string{"RP_LOCAL"},
+					Weight:         10,
 				},
 			},
 			Weight: 10,
@@ -3826,9 +3826,9 @@ func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 			Sorting: utils.MetaWeight,
 			Routes: []*engine.Route{
 				{
-					ID:            "route2",
-					RatingPlanIDs: []string{"RP_LOCAL"},
-					Weight:        10,
+					ID:             "route2",
+					RateProfileIDs: []string{"RP_LOCAL"},
+					Weight:         10,
 				},
 			},
 			Weight: 10,

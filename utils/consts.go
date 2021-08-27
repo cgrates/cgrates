@@ -541,7 +541,6 @@ const (
 	Sorting                  = "Sorting"
 	SortingParameters        = "SortingParameters"
 	RouteAccountIDs          = "RouteAccountIDs"
-	RouteRatingplanIDs       = "RouteRatingplanIDs"
 	RouteRateProfileIDs      = "RouteRateProfileIDs"
 	RouteStatIDs             = "RouteStatIDs"
 	RouteWeight              = "RouteWeight"

@@ -364,7 +364,7 @@ cgrates.org,RES_ACNT_1001,FLTR_ACCOUNT_1001,10,1h,1,,false,false,`
 	}
 	defer csvRoutes.Close()
 
-	data = `#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
+	data = `#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
 cgrates.org,ROUTE_ACNT_1001,FLTR_ACCOUNT_1001,10,*weight,,route1,,,,,,20,,`
 
 	_, err = csvRoutes.WriteString(data)

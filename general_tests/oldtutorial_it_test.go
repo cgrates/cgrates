@@ -113,11 +113,11 @@ package general_tests
 // 	}
 // 	expKeys := utils.ArgsCache{
 // 		DestinationIDs: &[]string{"DST_1003", "DST_1002", "DST_DE_MOBILE", "DST_1007", "DST_FS"},
-// 		RatingPlanIDs:  &[]string{"RP_RETAIL1", "RP_GENERIC"},
+// 		RateProfileIDs:  &[]string{"RP_RETAIL1", "RP_GENERIC"},
 // 	}
 // 	var rcvKeys utils.ArgsCache
 // 	argsAPI := utils.ArgsCacheKeys{ArgsCache: utils.ArgsCache{
-// 		DestinationIDs: &[]string{}, RatingPlanIDs: &[]string{"RP_RETAIL1", "RP_GENERIC", "NONEXISTENT"}}}
+// 		DestinationIDs: &[]string{}, RateProfileIDs: &[]string{"RP_RETAIL1", "RP_GENERIC", "NONEXISTENT"}}}
 // 	if err := tutLocalRpc.Call(utils.APIerSv1GetCacheKeys, argsAPI, &rcvKeys); err != nil {
 // 		t.Error("Got error on APIerSv1.GetCacheStats: ", err.Error())
 // 	} else {
@@ -131,8 +131,8 @@ package general_tests
 // 		if len(*expKeys.DestinationIDs) != len(*rcvKeys.DestinationIDs) {
 // 			t.Errorf("Expected: %+v, received: %+v", expKeys.DestinationIDs, rcvKeys.DestinationIDs)
 // 		}
-// 		if !reflect.DeepEqual(*expKeys.RatingPlanIDs, *rcvKeys.RatingPlanIDs) {
-// 			t.Errorf("Expected: %+v, received: %+v", expKeys.RatingPlanIDs, rcvKeys.RatingPlanIDs)
+// 		if !reflect.DeepEqual(*expKeys.RateProfileIDs, *rcvKeys.RateProfileIDs) {
+// 			t.Errorf("Expected: %+v, received: %+v", expKeys.RateProfileIDs, rcvKeys.RateProfileIDs)
 // 		}
 // 	}
 // 	if _, err := engine.StopStartEngine(tutLocalCfgPath, 1500); err != nil {

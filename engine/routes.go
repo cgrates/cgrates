@@ -36,7 +36,7 @@ type Route struct {
 	ID              string // RouteID
 	FilterIDs       []string
 	AccountIDs      []string
-	RatingPlanIDs   []string // used when computing price
+	RateProfileIDs  []string // used when computing price
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
 	Weight          float64
@@ -260,7 +260,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		// 		Destination:   dst,
 		// 		SetupTime:     sTime,
 		// 		Usage:         usage,
-		// 		RatingPlanIDs: rpIDs,
+		// 		RateProfileIDs: rpIDs,
 		// 	}, &rpCost); err != nil {
 		// 	return nil, err
 		// }
@@ -378,8 +378,8 @@ func (rpS *RouteService) populateSortingData(ctx *context.Context, ev *utils.CGR
 		RouteParameters: route.RouteParameters,
 	}
 	//calculate costData if we have fields
-	if len(route.AccountIDs) != 0 || len(route.RatingPlanIDs) != 0 {
-		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RatingPlanIDs)
+	if len(route.AccountIDs) != 0 || len(route.RateProfileIDs) != 0 {
+		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RateProfileIDs)
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(

@@ -43,11 +43,11 @@ func (lcs *LeastCostSorter) SortRoutes(ctx *context.Context, prflID string, rout
 		Sorting: lcs.sorting,
 		Routes:  make([]*SortedRoute, 0)}
 	for _, s := range routes {
-		if len(s.RatingPlanIDs) == 0 && len(s.AccountIDs) == 0 {
+		if len(s.RateProfileIDs) == 0 && len(s.AccountIDs) == 0 {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> supplier: <%s> - empty RatingPlanIDs or AccountIDs",
+				fmt.Sprintf("<%s> supplier: <%s> - empty RateProfileIDs or AccountIDs",
 					utils.RouteS, s.ID))
-			return nil, utils.NewErrMandatoryIeMissing("RatingPlanIDs or AccountIDs")
+			return nil, utils.NewErrMandatoryIeMissing("RateProfileIDs or AccountIDs")
 		}
 		if srtSpl, pass, err := lcs.rS.populateSortingData(ctx, ev, s, extraOpts); err != nil {
 			return nil, err

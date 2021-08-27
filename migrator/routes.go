@@ -214,7 +214,7 @@ func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 			ID:              supl.ID,
 			FilterIDs:       supl.FilterIDs,
 			AccountIDs:      supl.AccountIDs,
-			RatingPlanIDs:   supl.RatingPlanIDs,
+			RateProfileIDs:  supl.RatingPlanIDs,
 			ResourceIDs:     supl.ResourceIDs,
 			StatIDs:         supl.StatIDs,
 			Weight:          supl.Weight,

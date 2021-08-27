@@ -47,7 +47,7 @@ var (
 		testV1SplSStartEngine,
 		testV1SplSRpcConn,
 		testV1SplSFromFolder,
-		testV1SplSSetSupplierProfilesWithoutRatingPlanIDs,
+		testV1SplSSetSupplierProfilesWithoutRateProfileIDs,
 		//tests for *reas sorting strategy
 		testV1SplSAddNewSplPrf,
 		testV1SplSAddNewResPrf,
@@ -126,7 +126,7 @@ func testV1SplSFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
+func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err == nil ||
