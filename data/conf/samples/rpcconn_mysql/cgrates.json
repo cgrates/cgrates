@@ -68,7 +68,7 @@
     "enabled": true,
     "stats_conns": ["*localhost"],
     "resources_conns": ["*localhost"],
-    "apiers_conns": ["*localhost"]
+    "accounts_conns": ["*localhost"]
 },
 
 
@@ -133,9 +133,12 @@
 "filters": {
     "stats_conns": ["*localhost"],
     "resources_conns": ["*internal"],
-    "apiers_conns": ["*internal"],
+	"accounts_conns": ["*internal"],
 },
-    
+
+"accounts": {
+    "enabled": true
+},
     
 }
     

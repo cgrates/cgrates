@@ -288,7 +288,7 @@ const CGRATES_CFG_JSON = `
 "filters": {								// Filters configuration (*new)
 	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"admins_conns": [],						// connections to adminS for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"accounts_conns": [],					// connections to AccountS for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 },
 
 
@@ -661,7 +661,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts attribute service: <true|false>
 	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
-	"admins_conns": [],						// connections to ApierS, empty to disable: <""|*internal|$rpc_conns_id>
+	"accounts_conns": [],						// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing

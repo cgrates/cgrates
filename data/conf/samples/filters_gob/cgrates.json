@@ -47,9 +47,12 @@
 "filters": {								
 	"stats_conns": ["conn1"],
 	"resources_conns": ["conn1"],
-	"admins_conns": ["conn1"],
+	"accounts_conns": ["conn1"],
 },
 
+"accounts": {
+    "enabled": true
+},
 
 "resources": {
 	"enabled": true,

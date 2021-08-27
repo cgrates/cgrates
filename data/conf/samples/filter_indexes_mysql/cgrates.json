@@ -25,8 +25,13 @@
   "admins": {
     "enabled": true,
   },
-
-  "filters": {
-    "admins_conns": ["*internal"]
-  }
+ 
+  "filters": {								
+    "accounts_conns": ["*internal"],
+  },
+  
+  "accounts": {
+      "enabled": true
+  },
+  
 },

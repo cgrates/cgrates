@@ -148,13 +148,16 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 	}
 	expAttr := &AttributeSCfg{
 		Enabled:             true,
-		AdminSConns:         []string{},
+		AccountSConns:       []string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
+		DefaultOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 1.,
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.AttributeSCfg()))
@@ -184,12 +187,15 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 	expAttr := &AttributeSCfg{
 		Enabled:             true,
 		ResourceSConns:      []string{},
-		AdminSConns:         []string{},
+		AccountSConns:       []string{},
 		StatSConns:          []string{utils.MetaLocalHost},
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
+		DefaultOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 1.,
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.AttributeSCfg()))
@@ -346,6 +352,8 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
 		AttributeSConns:     []string{},
+		RateSConns:          []string{},
+		AccountSConns:       []string{},
 		IndexedSelects:      true,
 		DefaultRatio:        1,
 		DefaultOpts: map[string]interface{}{

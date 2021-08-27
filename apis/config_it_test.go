@@ -145,7 +145,7 @@ func testCfgGetConfig(t *testing.T) {
 	var reply map[string]interface{}
 	expected := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"admins_conns":          []string{"*localhost"},
+			"accounts_conns":        []string{"*localhost"},
 			"enabled":               true,
 			"indexed_selects":       true,
 			"nested_fields":         false,
@@ -179,7 +179,7 @@ func testCfgSetGetConfig(t *testing.T) {
 			Tenant:  "",
 			Config: map[string]interface{}{
 				"attributes": map[string]interface{}{
-					"admins_conns":          []string{"*internal"},
+					"accounts_conns":        []string{"*internal"},
 					"enabled":               true,
 					"indexed_selects":       false,
 					"nested_fields":         false,
@@ -200,7 +200,7 @@ func testCfgSetGetConfig(t *testing.T) {
 	}
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"admins_conns":          []string{"*internal"},
+			"accounts_conns":        []string{"*internal"},
 			"enabled":               true,
 			"indexed_selects":       false,
 			"nested_fields":         false,
@@ -296,7 +296,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 		&config.SetConfigFromJSONArgs{
 			APIOpts: nil,
 			Tenant:  "",
-			Config:  "{\"attributes\":{\"admins_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":2,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}",
+			Config:  "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":2,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}",
 			DryRun:  false,
 		},
 		&reply); err != nil {
@@ -305,7 +305,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := "{\"attributes\":{\"admins_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":2,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":2,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -418,7 +418,7 @@ func testCfgGetConfigStore(t *testing.T) {
 		Enabled:               utils.BoolPointer(true),
 		Stats_conns:           &[]string{"*localhost"},
 		Resources_conns:       &[]string{"*localhost"},
-		Admins_conns:          &[]string{"*localhost"},
+		Accounts_conns:        &[]string{"*localhost"},
 		Indexed_selects:       nil,
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: nil,
@@ -440,7 +440,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			Tenant:  "",
 			Config: map[string]interface{}{
 				"attributes": map[string]interface{}{
-					"admins_conns":          []string{"*internal"},
+					"accounts_conns":        []string{"*internal"},
 					"enabled":               true,
 					"indexed_selects":       false,
 					"nested_fields":         false,
@@ -461,7 +461,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 	}
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"admins_conns":          []string{"*internal"},
+			"accounts_conns":        []string{"*internal"},
 			"enabled":               true,
 			"indexed_selects":       false,
 			"nested_fields":         false,
@@ -496,7 +496,7 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		Enabled:               utils.BoolPointer(true),
 		Stats_conns:           &[]string{"*internal"},
 		Resources_conns:       &[]string{"*internal"},
-		Admins_conns:          &[]string{"*internal"},
+		Accounts_conns:        &[]string{"*internal"},
 		Indexed_selects:       utils.BoolPointer(false),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: nil,
@@ -516,7 +516,7 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Enabled:               utils.BoolPointer(true),
 		Stats_conns:           &[]string{"*internal"},
 		Resources_conns:       &[]string{"*internal"},
-		Admins_conns:          &[]string{"*internal"},
+		Accounts_conns:        &[]string{"*internal"},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: nil,
@@ -553,7 +553,7 @@ func testCfgReloadConfigStore(t *testing.T) {
 func testCfgGetAfterReloadStore(t *testing.T) {
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"admins_conns":          []string{"*internal"},
+			"accounts_conns":        []string{"*internal"},
 			"enabled":               true,
 			"indexed_selects":       true,
 			"nested_fields":         false,

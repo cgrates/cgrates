@@ -108,7 +108,11 @@
 
 
 "filters": {								
-	"admins_conns": ["*internal"],
+	"accounts_conns": ["*internal"],
+},
+
+"accounts": {
+    "enabled": true
 },
 
 }

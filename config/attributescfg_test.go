@@ -30,7 +30,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		Indexed_selects:       utils.BoolPointer(false),
 		Resources_conns:       &[]string{"*internal", "*conn1"},
 		Stats_conns:           &[]string{"*internal", "*conn1"},
-		Admins_conns:          &[]string{"*internal", "*conn1"},
+		Accounts_conns:        &[]string{"*internal", "*conn1"},
 		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
@@ -38,7 +38,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &AttributeSCfg{
 		Enabled:             true,
-		AdminSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
+		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		IndexedSelects:      false,
@@ -64,7 +64,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"enabled": true,	
 	"stats_conns": ["*internal"],			
 	"resources_conns": ["*internal"],		
-	"admins_conns": ["*internal"],			
+	"accounts_conns": ["*internal"],			
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
     "string_indexed_fields": ["*req.index1"],
 	"default_opts": {
@@ -76,7 +76,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.EnabledCfg:             true,
 		utils.StatSConnsCfg:          []string{utils.MetaInternal},
 		utils.ResourceSConnsCfg:      []string{utils.MetaInternal},
-		utils.AdminSConnsCfg:         []string{utils.MetaInternal},
+		utils.AccountSConnsCfg:       []string{utils.MetaInternal},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.IndexedSelectsCfg:      true,
@@ -108,7 +108,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.EnabledCfg:             true,
 		utils.StatSConnsCfg:          []string{},
 		utils.ResourceSConnsCfg:      []string{},
-		utils.AdminSConnsCfg:         []string{},
+		utils.AccountSConnsCfg:       []string{},
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
@@ -134,7 +134,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.EnabledCfg:             false,
 		utils.StatSConnsCfg:          []string{},
 		utils.ResourceSConnsCfg:      []string{},
-		utils.AdminSConnsCfg:         []string{},
+		utils.AccountSConnsCfg:       []string{},
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
@@ -153,7 +153,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 func TestAttributeSCfgClone(t *testing.T) {
 	ban := &AttributeSCfg{
 		Enabled:             true,
-		AdminSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
+		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		IndexedSelects:      false,
@@ -166,7 +166,7 @@ func TestAttributeSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.AdminSConns[1] = ""; ban.AdminSConns[1] != "*conn1" {
+	if rcv.AccountSConns[1] = ""; ban.AccountSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
@@ -193,7 +193,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Enabled:             false,
 		StatSConns:          []string{"*localhost"},
 		ResourceSConns:      []string{"*localhost"},
-		AdminSConns:         []string{"*localhost"},
+		AccountSConns:       []string{"*localhost"},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{},
 		PrefixIndexedFields: &[]string{},
@@ -208,7 +208,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Enabled:             true,
 		StatSConns:          []string{"*birpc"},
 		ResourceSConns:      []string{"*birpc"},
-		AdminSConns:         []string{"*birpc"},
+		AccountSConns:       []string{"*birpc"},
 		IndexedSelects:      true,
 		StringIndexedFields: &[]string{"*req.Field1"},
 		PrefixIndexedFields: nil,
@@ -223,7 +223,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Enabled:               utils.BoolPointer(true),
 		Stats_conns:           &[]string{"*birpc"},
 		Resources_conns:       &[]string{"*birpc"},
-		Admins_conns:          &[]string{"*birpc"},
+		Accounts_conns:        &[]string{"*birpc"},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: &[]string{"*req.Field1"},
 		Prefix_indexed_fields: nil,

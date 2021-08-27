@@ -25,7 +25,7 @@ type AttributeSCfg struct {
 	Enabled             bool
 	ResourceSConns      []string
 	StatSConns          []string
-	AdminSConns         []string
+	AccountSConns       []string
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
@@ -47,8 +47,8 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Resources_conns != nil {
 		alS.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
-	if jsnCfg.Admins_conns != nil {
-		alS.AdminSConns = updateInternalConns(*jsnCfg.Admins_conns, utils.MetaAdminS)
+	if jsnCfg.Accounts_conns != nil {
+		alS.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAdminS)
 	}
 	if jsnCfg.Indexed_selects != nil {
 		alS.IndexedSelects = *jsnCfg.Indexed_selects
@@ -95,8 +95,8 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if alS.ResourceSConns != nil {
 		initialMP[utils.ResourceSConnsCfg] = getInternalJSONConns(alS.ResourceSConns)
 	}
-	if alS.AdminSConns != nil {
-		initialMP[utils.AdminSConnsCfg] = getInternalJSONConns(alS.AdminSConns)
+	if alS.AccountSConns != nil {
+		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(alS.AccountSConns)
 	}
 	return
 }
@@ -115,8 +115,8 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 	if alS.StatSConns != nil {
 		cln.StatSConns = utils.CloneStringSlice(alS.StatSConns)
 	}
-	if alS.AdminSConns != nil {
-		cln.AdminSConns = utils.CloneStringSlice(alS.AdminSConns)
+	if alS.AccountSConns != nil {
+		cln.AccountSConns = utils.CloneStringSlice(alS.AccountSConns)
 	}
 
 	if alS.StringIndexedFields != nil {
@@ -136,7 +136,7 @@ type AttributeSJsonCfg struct {
 	Enabled               *bool
 	Stats_conns           *[]string
 	Resources_conns       *[]string
-	Admins_conns          *[]string
+	Accounts_conns        *[]string
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
@@ -158,8 +158,8 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
 		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
 	}
-	if !utils.SliceStringEqual(v1.AdminSConns, v2.AdminSConns) {
-		d.Admins_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AdminSConns))
+	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
