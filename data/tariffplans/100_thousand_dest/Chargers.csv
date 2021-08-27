@@ -1,4 +1,0 @@
-#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
-cgrates.org,Raw,,20,raw,*constant:*req.RequestType:*none
-cgrates.org,CustomerCharges,,20,CustomerCharges,*none
-cgrates.org,SupplierCharges,,10,SupplierCharges,ATTR_SUPPLIER1
