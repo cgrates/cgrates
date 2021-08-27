@@ -212,7 +212,7 @@ func testITGetFilterIndexes(t *testing.T) {
 	if exsbjDan, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes, "cgrates.org",
 		utils.ConcatenatedKey(utils.MetaString, "Subject", "dan"),
-		false, false); err != nil {
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedsbjDan, exsbjDan) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedsbjDan, exsbjDan)
@@ -220,15 +220,15 @@ func testITGetFilterIndexes(t *testing.T) {
 	if rcv, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes,
 		"cgrates.org", utils.EmptyString,
-		false, false); err != nil {
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 	}
 	//invalid tnt:context or index key
 	if _, err := dataManager.GetIndexes(context.Background(),
-		"unknown_key", "unkonwn_tenant",
-		utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
+		"unknown_key", "unkonwn_tenant", utils.EmptyString,
+		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -243,7 +243,7 @@ func testITMatchFilterIndex(t *testing.T) {
 	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes, "cgrates.org",
 		utils.ConcatenatedKey(utils.MetaString, "Account", "1002"),
-		false, true); err != nil {
+		utils.NonTransactional, false, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
@@ -253,7 +253,7 @@ func testITMatchFilterIndex(t *testing.T) {
 	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes, "cgrates.org",
 		utils.ConcatenatedKey(utils.MetaString, "NonexistentField", "1002"),
-		true, true); err == nil ||
+		utils.NonTransactional, true, true); err == nil ||
 		err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -311,8 +311,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -354,8 +354,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -399,8 +399,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
@@ -428,8 +428,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheReverseFilterIndexes, "cgrates.org:Filter3",
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheReverseFilterIndexes, "cgrates.org:Filter3", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
@@ -452,8 +452,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
@@ -469,13 +469,13 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheReverseFilterIndexes, "cgrates.org:Filter3",
-		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		utils.CacheReverseFilterIndexes, "cgrates.org:Filter3", utils.EmptyString,
+		utils.NonTransactional, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -541,7 +541,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
 		"cgrates.org", //utils.ConcatenatedKey(attrProfile.Tenant, "con3"),
-		utils.EmptyString, false, false); err != nil {
+		utils.EmptyString, utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
@@ -550,8 +550,8 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	for _, ctx := range []string{"con1", "con2"} {
 		if _, err = dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
-			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
-			utils.EmptyString, false, false); err == nil ||
+			utils.ConcatenatedKey(attrProfile.Tenant, ctx), utils.EmptyString,
+			utils.NonTransactional, false, false); err == nil ||
 			err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -584,8 +584,8 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes,
-		fp.TenantID(),
-		utils.EmptyString, false, false); err != nil {
+		fp.TenantID(), utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -598,15 +598,15 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	//check if index is removed
 	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey("cgrates.org", "con3"),
-		utils.MetaString, false, false); err != nil && err != utils.ErrNotFound {
+		utils.ConcatenatedKey("cgrates.org", "con3"), utils.MetaString,
+		utils.NonTransactional, false, false); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
 	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes,
-		fp.TenantID(),
-		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		fp.TenantID(), utils.EmptyString,
+		utils.NonTransactional, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -672,8 +672,8 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	//check indexes with the new context (con3)
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
-		"cgrates.org",
-		utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -682,8 +682,8 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	for _, ctx := range []string{"con1", "con2"} {
 		if _, err = dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
-			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
-			utils.EmptyString, false, false); err == nil ||
+			utils.ConcatenatedKey(attrProfile.Tenant, ctx), utils.EmptyString,
+			utils.NonTransactional, false, false); err == nil ||
 			err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -716,8 +716,8 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes,
-		fp.TenantID(),
-		utils.EmptyString, false, false); err != nil {
+		fp.TenantID(), utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -730,15 +730,15 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	//check if index is removed
 	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey("cgrates.org", "con3"),
-		utils.MetaString, false, false); err != nil && err != utils.ErrNotFound {
+		utils.ConcatenatedKey("cgrates.org", "con3"), utils.MetaString,
+		utils.NonTransactional, false, false); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
 	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes,
-		fp.TenantID(),
-		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		fp.TenantID(), utils.EmptyString,
+		utils.NonTransactional, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -781,8 +781,8 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -813,8 +813,8 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
@@ -825,8 +825,8 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -887,8 +887,8 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 
 	//verify new key and check if data was moved
 	if rcv, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheResourceFilterIndexes, "cgrates.org",
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheResourceFilterIndexes, "cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdx, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdx, rcv)
@@ -956,7 +956,8 @@ func testITAccountIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1015,7 +1016,8 @@ func testITAccountIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1028,7 +1030,8 @@ func testITAccountIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
-		"cgrates.org", "*string:*req.Destination:DEST1", false, false); err != nil {
+		"cgrates.org", "*string:*req.Destination:DEST1",
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1065,7 +1068,8 @@ func testITAccountIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1079,7 +1083,8 @@ func testITAccountIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:FIRST", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:FIRST", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1091,7 +1096,8 @@ func testITAccountIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:SECOND", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:SECOND", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1100,7 +1106,8 @@ func testITAccountIndexes(t *testing.T) {
 	//invalid tnt:context or index key
 	eIdxes = nil
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
-		"cgrates.org", "*string:*req.Destination:DEST6", false, false); err == nil || err != utils.ErrNotFound {
+		"cgrates.org", "*string:*req.Destination:DEST6",
+		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1165,7 +1172,8 @@ func testITResourceProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1208,7 +1216,8 @@ func testITResourceProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1224,7 +1233,8 @@ func testITResourceProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:RES_FLTR1", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:RES_FLTR1", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1232,7 +1242,8 @@ func testITResourceProfileIndexes(t *testing.T) {
 
 	//as we updated our filter, the old one is deleted
 	if _, err := dataManager.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
-		"cgrates.org", "*string:*req.Destinations:DEST_RES1", false, false); err == nil || err != utils.ErrNotFound {
+		"cgrates.org", "*string:*req.Destinations:DEST_RES1",
+		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, receive %+v", utils.ErrNotFound, err)
 	}
 }
@@ -1301,7 +1312,8 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheStatFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1315,7 +1327,8 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:SQUEUE1", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:SQUEUE1", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1328,7 +1341,8 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:SQUEUE2", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:SQUEUE2", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1337,7 +1351,8 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 	//invalid tnt:context or index key
 	eIdxes = nil
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheStatFilterIndexes,
-		"cgrates.org", "*string:~*opts.ToR:~*req.Usage", false, false); err == nil || err != utils.ErrNotFound {
+		"cgrates.org", "*string:~*opts.ToR:~*req.Usage",
+		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, receive %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIDx))
@@ -1383,7 +1398,8 @@ func testITChargerProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
@@ -1415,7 +1431,8 @@ func testITChargerProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
@@ -1431,7 +1448,8 @@ func testITChargerProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:CHARGER_FLTR", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:CHARGER_FLTR", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
@@ -1440,7 +1458,8 @@ func testITChargerProfileIndexes(t *testing.T) {
 	//the old filter is deleted
 	expIdx = nil
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes,
-		"cgrates.org", "*string:*req.Usage", false, false); err == nil || err != utils.ErrNotFound {
+		"cgrates.org", "*string:*req.Usage",
+		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.Error, err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
@@ -1502,7 +1521,8 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheDispatcherFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
@@ -1515,7 +1535,8 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:DISPATCHER_FLTR1", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:DISPATCHER_FLTR1", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
@@ -1527,7 +1548,8 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:DISPATCHER_FLTR2", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:DISPATCHER_FLTR2", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
@@ -1536,7 +1558,8 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 	//invalid tnt:context or index key
 	expIdx = nil
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheDispatcherFilterIndexes,
-		"cgrates.org:attributes", utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
+		"cgrates.org:attributes", utils.EmptyString,
+		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expectedd %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
@@ -1594,7 +1617,8 @@ func testITActionProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes,
-		"itsyscom", utils.EmptyString, false, false); err != nil {
+		"itsyscom", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1606,7 +1630,8 @@ func testITActionProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes,
-		"itsyscom", "*string:*req.Destination:ACC1", false, false); err != nil {
+		"itsyscom", "*string:*req.Destination:ACC1",
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1661,7 +1686,8 @@ func testITActionProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes,
-		"itsyscom", utils.EmptyString, false, false); err != nil {
+		"itsyscom", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1675,7 +1701,8 @@ func testITActionProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"itsyscom:ACTPRF_FLTR1", utils.EmptyString, false, false); err != nil {
+		"itsyscom:ACTPRF_FLTR1", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1688,7 +1715,8 @@ func testITActionProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"itsyscom:ACTPRF_FLTR2", utils.EmptyString, false, false); err != nil {
+		"itsyscom:ACTPRF_FLTR2", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1697,7 +1725,8 @@ func testITActionProfileIndexes(t *testing.T) {
 	//invalid tnt:context or index key
 	expIdx = nil
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes,
-		"itsyscom", "*string:*req.Destination:ACC7", false, false); err == nil || err != utils.ErrNotFound {
+		"itsyscom", "*string:*req.Destination:ACC7",
+		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1728,14 +1757,15 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 	//verify if old key was deleted
 	if _, err := dataManager.GetIndexes(context.Background(),
 		"tmp_"+utils.CacheResourceFilterIndexes,
-		utils.ConcatenatedKey("cgrates.org", transID),
-		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		utils.ConcatenatedKey("cgrates.org", transID), utils.EmptyString,
+		utils.NonTransactional, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//verify new key and check if data was moved
 	if rcv, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(idxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(idxes), utils.ToJSON(rcv))
@@ -1777,8 +1807,8 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
-		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.CacheThresholdFilterIndexes, th.Tenant, utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -1794,7 +1824,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny),
-		true, true); err != nil {
+		utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
@@ -1855,7 +1885,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRouteFilterIndexes, splProfile.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.EmptyString, utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -1871,7 +1901,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRouteFilterIndexes, splProfile.Tenant,
 		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny),
-		true, true); err != nil {
+		utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
@@ -1921,7 +1951,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1934,7 +1965,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes,
-		"cgrates.org", "*string:*opts.CGRID:ORG_ID", false, false); err != nil {
+		"cgrates.org", "*string:*opts.CGRID:ORG_ID",
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1948,7 +1980,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:FIRST", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:FIRST", utils.EmptyString,
+		utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIdx))
@@ -1956,7 +1989,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 
 	//invalid tnt:context or index key
 	if _, err := dataManager.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes,
-		"cgrates.org", "*string:DAN:ORG_ID", false, false); err == nil || err != utils.ErrNotFound {
+		"cgrates.org", "*string:DAN:ORG_ID",
+		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
@@ -2000,7 +2034,7 @@ func testITTestIndexingThresholds(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.EmptyString, utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -2016,7 +2050,7 @@ func testITTestIndexingThresholds(t *testing.T) {
 	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, "1001"),
-		true, true); err != nil {
+		utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
@@ -2061,7 +2095,7 @@ func testITTestIndexingMetaNot(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.EmptyString, utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -2076,7 +2110,7 @@ func testITTestIndexingMetaNot(t *testing.T) {
 	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, "1001"),
-		true, true); err != nil {
+		utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
@@ -2130,7 +2164,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP1",
-		utils.EmptyString, true, true); err != nil {
+		utils.EmptyString, utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -2198,7 +2232,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP1",
-		utils.EmptyString, true, true); err != nil {
+		utils.EmptyString, utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -2267,7 +2301,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP2",
-		utils.EmptyString, true, true); err != nil {
+		utils.EmptyString, utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -2281,7 +2315,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes, "cgrates.org:FLTR",
-		utils.EmptyString, true, true); err != nil {
+		utils.EmptyString, utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
@@ -2314,7 +2348,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP2",
-		utils.EmptyString, true, true); err != nil {
+		utils.EmptyString, utils.NonTransactional, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
@@ -2324,7 +2358,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 	eIdxes = nil
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP4",
-		utils.EmptyString, true, true); err == nil || err != utils.ErrNotFound {
+		utils.EmptyString, utils.NonTransactional, true, true); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
@@ -2397,7 +2431,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcv, err := dataManager.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString, utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcv))
@@ -2434,7 +2468,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcv, err := dataManager.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes,
-		"cgrates.org", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString, utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcv))
@@ -2447,7 +2481,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcv, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:FLTR", utils.EmptyString, false, false); err != nil {
+		"cgrates.org:FLTR", utils.EmptyString, utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcv))
@@ -2456,7 +2490,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 	//nothing to get with with an invalid indexKey
 	expIdx = nil
 	if rcv, err := dataManager.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes,
-		"cgrates.org", "*string:*req.CustomField:2346", false, false); err == nil || err != utils.ErrNotFound {
+		"cgrates.org", "*string:*req.CustomField:2346", utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcv))
@@ -2514,7 +2548,7 @@ func testITTestIndexingMetaSuffix(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		utils.EmptyString, utils.NonTransactional, false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
