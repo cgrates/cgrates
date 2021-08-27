@@ -25,8 +25,10 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -42,7 +44,7 @@ var (
 		testDblTpDifDestResetStorDb,
 		testDblTpDifDestStartEngine,
 		testDblTpDifDestRPCConn,
-
+		testDblTpDifDestLoadersLoad,
 		testDblTpDifDestStopCgrEngine,
 	}
 )
@@ -50,11 +52,11 @@ var (
 func TestDblTpDifDest(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		testDblTpDifDestDir = "tutinternal"
+		testDblTpDifDestDir = "dblTpDifInternal"
 	case utils.MetaMySQL:
-		testDblTpDifDestDir = "tutmysql"
+		testDblTpDifDestDir = "dblTpDifMySql"
 	case utils.MetaMongo:
-		testDblTpDifDestDir = "tutmongo"
+		testDblTpDifDestDir = "dblTpDifInternalMongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -96,6 +98,19 @@ func testDblTpDifDestRPCConn(t *testing.T) {
 	testDblTpDifDestRPC, err = newRPCClient(testDblTpDifDestCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testDblTpDifDestLoadersLoad(t *testing.T) {
+	var reply string
+	if err := testDblTpDifDestRPC.Call(context.Background(), utils.LoaderSv1Load,
+		&loaders.ArgsProcessFolder{
+			StopOnError: true,
+			Caching:     utils.StringPointer(utils.MetaReload),
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
 	}
 }
 
