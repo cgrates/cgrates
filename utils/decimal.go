@@ -106,6 +106,9 @@ func NewDecimalFromFloat64(f float64) *Decimal {
 // NewDecimalFromUsage is a constructor for Decimal out of unit represents as string
 func NewDecimalFromUsage(u string) (d *Decimal, err error) {
 	switch {
+	// There was no duration present, equivalent of 0 decimal
+	case u == EmptyString:
+		d = NewDecimal(0, 0)
 	//"ns", "us" (or "µs"), "ms", "s", "m", "h"
 	case strings.HasSuffix(u, NsSuffix), strings.HasSuffix(u, UsSuffix), strings.HasSuffix(u, µSuffix), strings.HasSuffix(u, MsSuffix),
 		strings.HasSuffix(u, SSuffix), strings.HasSuffix(u, MSuffix), strings.HasSuffix(u, HSuffix):
@@ -114,16 +117,14 @@ func NewDecimalFromUsage(u string) (d *Decimal, err error) {
 			return
 		}
 		d = NewDecimal(int64(tm), 0)
-		return
 	default:
 		var i int64
 		if i, err = strconv.ParseInt(u, 10, 64); err != nil {
 			return
 		}
 		d = NewDecimal(i, 0)
-		return
 	}
-
+	return
 }
 
 // NewDecimal is a constructor for Decimal, following the one of decimal.Big
@@ -199,4 +200,9 @@ func (d *Decimal) Round(rndDec int) *Decimal {
 	ctx := d.Big.Context
 	ctx.Precision = rndDec
 	return &Decimal{ctx.Round(d.Big)}
+}
+
+// Float64 returns the decimal as float64 number or !ok otherwise
+func (d *Decimal) Float64() (f float64, ok bool) {
+	return d.Big.Float64()
 }

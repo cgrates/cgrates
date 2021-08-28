@@ -183,91 +183,22 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt
 
 // costForEvent will compute cost out of accounts and rating plans for event
 // returns map[string]interface{} with cost and relevant matching information inside
-func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
+func (rpS *RouteService) costForEvent(ctx *context.Context, ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	costData = make(map[string]interface{})
-	if err = ev.CheckMandatoryFields([]string{utils.AccountField,
-		utils.Destination, utils.SetupTime}); err != nil {
-		return
-	}
-	// var acnt , subj, dst string
-	// if acnt, err = ev.FieldAsString(utils.AccountField); err != nil {
-	// return
-	// }
-	// if subj, err = ev.FieldAsString(utils.Subject); err != nil {
-	// 	if err != utils.ErrNotFound {
-	// 		return
-	// 	}
-	// 	subj = acnt
-	// }
-	// if dst, err = ev.FieldAsString(utils.Destination); err != nil {
-	// 	return
-	// }
-	var sTime time.Time
-	if sTime, err = ev.FieldAsTime(utils.SetupTime, rpS.cgrcfg.GeneralCfg().DefaultTimezone); err != nil {
-		return
-	}
-	var usage time.Duration
-	if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		// in case usage is missing from event we decide to use 1 minute as default
-		usage = time.Duration(1 * time.Minute)
-		err = nil
-	}
-	var accountMaxUsage time.Duration
-	var acntCost map[string]interface{}
-	var initialUsage time.Duration
-	if len(acntIDs) != 0 {
-		// if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
-		// 	&utils.GetMaxSessionTimeOnAccountsArgs{
-		// 		Tenant:      ev.Tenant,
-		// 		Subject:     subj,
-		// 		Destination: dst,
-		// 		SetupTime:   sTime,
-		// 		Usage:       usage,
-		// 		AccountIDs:  acntIDs,
-		// 	}, &acntCost); err != nil {
-		// 	return nil, err
-		// }
-		if ifaceMaxUsage, has := acntCost[utils.CapMaxUsage]; has {
-			if accountMaxUsage, err = utils.IfaceAsDuration(ifaceMaxUsage); err != nil {
-				return nil, err
-			}
-			if usage > accountMaxUsage {
-				// remain usage needs to be covered by rating plans
-				if len(rpIDs) == 0 {
-					return nil, fmt.Errorf("no rating plans defined for remaining usage")
-				}
-				// update the setup time and the usage
-				sTime = sTime.Add(accountMaxUsage)
-				initialUsage = usage
-			}
-			for k, v := range acntCost { // update the costData with the infos from AccountS
-				costData[k] = v
-			}
-		}
+	var rpCost utils.RateProfileCost
+	if err = rpS.connMgr.Call(ctx, rpS.cgrcfg.RouteSCfg().RateSConns,
+		utils.RateSv1CostForEvent,
+		&utils.ArgsCostForEvent{
+			RateProfileIDs: rpIDs,
+			CGREvent:       ev,
+		}, &rpCost); err != nil {
+		return nil, err
+	} else {
+		costData[utils.Cost], _ = rpCost.Cost.Float64()
+		costData[utils.RatingPlanID] = rpCost.ID
 	}
 
-	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
-		var rpCost map[string]interface{}
-		// if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
-		// 	&utils.GetCostOnRatingPlansArgs{
-		// 		Tenant:        ev.Tenant,
-		// 		Account:       acnt,
-		// 		Subject:       subj,
-		// 		Destination:   dst,
-		// 		SetupTime:     sTime,
-		// 		Usage:         usage,
-		// 		RateProfileIDs: rpIDs,
-		// 	}, &rpCost); err != nil {
-		// 	return nil, err
-		// }
-		for k, v := range rpCost { // do not overwrite the return map
-			costData[k] = v
-		}
-	}
 	return
 }
 
@@ -379,7 +310,7 @@ func (rpS *RouteService) populateSortingData(ctx *context.Context, ev *utils.CGR
 	}
 	//calculate costData if we have fields
 	if len(route.AccountIDs) != 0 || len(route.RateProfileIDs) != 0 {
-		costData, err := rpS.costForEvent(ev, route.AccountIDs, route.RateProfileIDs)
+		costData, err := rpS.costForEvent(ctx, ev, route.AccountIDs, route.RateProfileIDs)
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
@@ -675,7 +606,7 @@ func (rpS *RouteService) sortedRoutesForProfile(ctx *context.Context, tnt string
 	return
 }
 
-// sortedRoutesForEvent will return the list of valid route IDs
+// sortedRoutesForEvent will return the list of sortedRoutes
 // for event based on filters and sorting algorithms
 func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, args *ArgsGetRoutes) (sortedRoutes SortedRoutesList, err error) {
 	if _, has := args.CGREvent.Event[utils.Usage]; !has {

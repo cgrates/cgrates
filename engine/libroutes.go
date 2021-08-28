@@ -36,7 +36,7 @@ type SortedRoute struct {
 	sortingDataF64  map[string]float64     // only the data we sort after
 }
 
-// SortedRoutes is returned as part of GetRoutes call
+// SortedRoutes represents all viable routes inside one routing profile
 type SortedRoutes struct {
 	ProfileID string         // Profile matched
 	Sorting   string         // Sorting algorithm
