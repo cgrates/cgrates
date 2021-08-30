@@ -195,21 +195,21 @@ func (t TBLVersion) TableName() string {
 type RouteMdl struct {
 	PK                  uint `gorm:"primary_key"`
 	Tpid                string
-	Tenant              string  `index:"0" re:""`
-	ID                  string  `index:"1" re:""`
-	FilterIDs           string  `index:"2" re:""`
-	Weight              float64 `index:"3" re:"\d+\.?\d*"`
-	Sorting             string  `index:"4" re:""`
-	SortingParameters   string  `index:"5" re:""`
-	RouteID             string  `index:"6" re:""`
-	RouteFilterIDs      string  `index:"7" re:""`
-	RouteAccountIDs     string  `index:"8" re:""`
-	RouteRateProfileIDs string  `index:"9" re:""`
-	RouteResourceIDs    string  `index:"10" re:""`
-	RouteStatIDs        string  `index:"11" re:""`
-	RouteWeight         float64 `index:"12" re:"\d+\.?\d*"`
-	RouteBlocker        bool    `index:"13" re:""`
-	RouteParameters     string  `index:"14" re:""`
+	Tenant              string `index:"0" re:""`
+	ID                  string `index:"1" re:""`
+	FilterIDs           string `index:"2" re:""`
+	Weights             string `index:"3" re:""`
+	Sorting             string `index:"4" re:""`
+	SortingParameters   string `index:"5" re:""`
+	RouteID             string `index:"6" re:""`
+	RouteFilterIDs      string `index:"7" re:""`
+	RouteAccountIDs     string `index:"8" re:""`
+	RouteRateProfileIDs string `index:"9" re:""`
+	RouteResourceIDs    string `index:"10" re:""`
+	RouteStatIDs        string `index:"11" re:""`
+	RouteWeights        string `index:"12" re:""`
+	RouteBlocker        bool   `index:"13" re:""`
+	RouteParameters     string `index:"14" re:""`
 	CreatedAt           time.Time
 }
 

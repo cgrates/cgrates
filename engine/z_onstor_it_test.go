@@ -674,11 +674,11 @@ func testOnStorITRouteProfile(t *testing.T) {
 				RateProfileIDs:  []string{"RPL_1"},
 				ResourceIDs:     []string{"ResGR1"},
 				StatIDs:         []string{"Stat1"},
-				Weight:          10,
+				Weights:         utils.DynamicWeights{{Weight: 10}},
 				RouteParameters: "param1",
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{{Weight: 20}},
 	}
 	if _, rcvErr := onStor.GetRouteProfile(context.Background(), "cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -716,7 +716,7 @@ func testOnStorITRouteProfile(t *testing.T) {
 			RateProfileIDs:  []string{"RPL_1"},
 			ResourceIDs:     []string{"ResGR1"},
 			StatIDs:         []string{"Stat1"},
-			Weight:          10,
+			Weights:         utils.DynamicWeights{{Weight: 10}},
 			RouteParameters: "param1",
 		},
 		{
@@ -726,7 +726,7 @@ func testOnStorITRouteProfile(t *testing.T) {
 			RateProfileIDs:  []string{"RPL_2"},
 			ResourceIDs:     []string{"ResGR2"},
 			StatIDs:         []string{"Stat2"},
-			Weight:          20,
+			Weights:         utils.DynamicWeights{{Weight: 20}},
 			RouteParameters: "param2",
 		},
 	}

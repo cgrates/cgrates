@@ -142,11 +142,11 @@ func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 				{
 					ID:         "ROUTE1",
 					AccountIDs: []string{"accc"},
-					Weight:     20,
+					Weights:    20,
 					Blocker:    false,
 				},
 			},
-			Weight: 10,
+			Weights: 10,
 		},
 	}
 	var result string
@@ -208,24 +208,24 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 				{
 					ID:          "route1",
 					ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
-					Weight:      20,
+					Weights:     20,
 					Blocker:     false,
 				},
 				//route2 and route3 will have the same ResourceUsage = 7
 				{
 					ID:          "route2",
 					ResourceIDs: []string{"ResourceSupplier2"},
-					Weight:      20,
+					Weights:     20,
 					Blocker:     false,
 				},
 				{
 					ID:          "route3",
 					ResourceIDs: []string{"ResourceSupplier3"},
-					Weight:      35,
+					Weights:     35,
 					Blocker:     false,
 				},
 			},
-			Weight: 10,
+			Weights: 10,
 		},
 	}
 	var result string
@@ -468,24 +468,24 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 				{
 					ID:          "route1",
 					ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
-					Weight:      20,
+					Weights:     20,
 					Blocker:     false,
 				},
 				//route2 and route3 will have the same ResourceUsage = 7
 				{
 					ID:          "route2",
 					ResourceIDs: []string{"ResourceSupplier2"},
-					Weight:      20,
+					Weights:     20,
 					Blocker:     false,
 				},
 				{
 					ID:          "route3",
 					ResourceIDs: []string{"ResourceSupplier3"},
-					Weight:      35,
+					Weights:     35,
 					Blocker:     false,
 				},
 			},
-			Weight: 10,
+			Weights: 10,
 		},
 	}
 	var result string

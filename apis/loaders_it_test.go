@@ -364,8 +364,8 @@ cgrates.org,RES_ACNT_1001,FLTR_ACCOUNT_1001,10,1h,1,,false,false,`
 	}
 	defer csvRoutes.Close()
 
-	data = `#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
-cgrates.org,ROUTE_ACNT_1001,FLTR_ACCOUNT_1001,10,*weight,,route1,,,,,,20,,`
+	data = `#Tenant,ID,FilterIDs,Weights,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeights,RouteBlocker,RouteParameters
+cgrates.org,ROUTE_ACNT_1001,FLTR_ACCOUNT_1001,;10,*weight,,route1,,,,,,;20,,`
 
 	_, err = csvRoutes.WriteString(data)
 	if err != nil {
@@ -807,11 +807,11 @@ func testLoadersGetRouteProfile(t *testing.T) {
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:     "route1",
-				Weight: 20,
+				ID:      "route1",
+				Weights: utils.DynamicWeights{{Weight: 20}},
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{{Weight: 10}},
 	}
 
 	var rplyRtPrf engine.RouteProfile

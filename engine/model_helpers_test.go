@@ -963,10 +963,10 @@ func TestFilterToTPFilter(t *testing.T) {
 func TestCsvHeader(t *testing.T) {
 	var tps RouteMdls
 	eOut := []string{
-		"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+		"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
 		utils.RouteAccountIDs, utils.RouteRateProfileIDs, utils.RouteRateProfileIDs, utils.RouteResourceIDs,
-		utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
+		utils.RouteStatIDs, utils.RouteWeights, utils.RouteBlocker,
 		utils.RouteParameters,
 	}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(eOut, rcv) {
@@ -2065,10 +2065,10 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "",
-			RouteWeight:         10.0,
+			RouteWeights:        ";10.0",
 			RouteBlocker:        false,
 			RouteParameters:     "",
-			Weight:              10.0,
+			Weights:             ";10",
 			CreatedAt:           time.Time{},
 		},
 		&RouteMdl{
@@ -2085,10 +2085,9 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "",
-			RouteWeight:         20.0,
+			RouteWeights:        ";20.0",
 			RouteBlocker:        false,
 			RouteParameters:     "",
-			Weight:              0,
 			CreatedAt:           time.Time{},
 		},
 	}
@@ -2102,15 +2101,15 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			FilterIDs:         []string{"*ai:~*req.AnswerTime:2017-11-27T00:00:00Z", "FltrRoute"},
 			Routes: []*utils.TPRoute{
 				{
-					ID:     "route1",
-					Weight: 10.0,
+					ID:      "route1",
+					Weights: ";10.0",
 				},
 				{
-					ID:     "route2",
-					Weight: 20.0,
+					ID:      "route2",
+					Weights: ";20.0",
 				},
 			},
-			Weight: 10,
+			Weights: ";10",
 		},
 	}
 	rcv := mdl.AsTPRouteProfile()
@@ -2137,10 +2136,10 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "",
-			RouteWeight:         20.0,
+			RouteWeights:        ";20.0",
 			RouteBlocker:        false,
 			RouteParameters:     "",
-			Weight:              0,
+			Weights:             ";0",
 			CreatedAt:           time.Time{},
 		},
 		&RouteMdl{
@@ -2157,10 +2156,10 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "",
-			RouteWeight:         10.0,
+			RouteWeights:        ";10.0",
 			RouteBlocker:        false,
 			RouteParameters:     "",
-			Weight:              10.0,
+			Weights:             ";10",
 			CreatedAt:           time.Time{},
 		},
 	}
@@ -2174,15 +2173,15 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			FilterIDs:         []string{"*ai:~*req.AnswerTime:2017-11-27T00:00:00Z", "FltrRoute"},
 			Routes: []*utils.TPRoute{
 				{
-					ID:     "route1",
-					Weight: 10.0,
+					ID:      "route1",
+					Weights: ";10.0",
 				},
 				{
-					ID:     "route2",
-					Weight: 20.0,
+					ID:      "route2",
+					Weights: ";20.0",
 				},
 			},
-			Weight: 10,
+			Weights: ";10",
 		},
 	}
 	rcvRev := mdlReverse.AsTPRouteProfile()
@@ -2212,10 +2211,10 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "",
-			RouteWeight:         10.0,
+			RouteWeights:        ";10.0",
 			RouteBlocker:        false,
 			RouteParameters:     "",
-			Weight:              10.0,
+			Weights:             ";10",
 			CreatedAt:           time.Time{},
 		},
 		&RouteMdl{
@@ -2232,10 +2231,9 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "",
-			RouteWeight:         20.0,
+			RouteWeights:        ";20.0",
 			RouteBlocker:        false,
 			RouteParameters:     "",
-			Weight:              0,
 			CreatedAt:           time.Time{},
 		},
 	}
@@ -2249,15 +2247,15 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			FilterIDs:         []string{"*ai:~*req.AnswerTime:2017-11-27T00:00:00Z|2017-11-28T00:00:00Z", "FltrRoute"},
 			Routes: []*utils.TPRoute{
 				{
-					ID:     "route1",
-					Weight: 10.0,
+					ID:      "route1",
+					Weights: ";10.0",
 				},
 				{
-					ID:     "route2",
-					Weight: 20.0,
+					ID:      "route2",
+					Weights: ";20.0",
 				},
 			},
-			Weight: 10,
+			Weights: ";10",
 		},
 	}
 	rcv := mdl.AsTPRouteProfile()
@@ -2284,10 +2282,10 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "",
-			RouteWeight:         20.0,
+			RouteWeights:        ";20.0",
 			RouteBlocker:        false,
 			RouteParameters:     "",
-			Weight:              0,
+			Weights:             ";0",
 			CreatedAt:           time.Time{},
 		},
 		&RouteMdl{
@@ -2304,10 +2302,10 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "",
-			RouteWeight:         10.0,
+			RouteWeights:        ";10.0",
 			RouteBlocker:        false,
 			RouteParameters:     "",
-			Weight:              10.0,
+			Weights:             ";10",
 			CreatedAt:           time.Time{},
 		},
 	}
@@ -2321,15 +2319,15 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			FilterIDs:         []string{"*ai:~*req.AnswerTime:2017-11-27T00:00:00Z|2017-11-28T00:00:00Z", "FltrRoute"},
 			Routes: []*utils.TPRoute{
 				{
-					ID:     "route1",
-					Weight: 10.0,
+					ID:      "route1",
+					Weights: ";10.0",
 				},
 				{
-					ID:     "route2",
-					Weight: 20.0,
+					ID:      "route2",
+					Weights: ";20.0",
 				},
 			},
-			Weight: 10,
+			Weights: ";10",
 		},
 	}
 	rcvRev := mdlReverse.AsTPRouteProfile()
@@ -2986,12 +2984,12 @@ func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{"Stat1", "Stat2"},
-					Weight:          10,
+					Weights:         ";10",
 					Blocker:         false,
 					RouteParameters: "SortingParam1",
 				},
 			},
-			Weight: 20,
+			Weights: ";20",
 		},
 	}
 	expMdl := RouteMdls{
@@ -3007,10 +3005,10 @@ func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 			RouteRateProfileIDs: "",
 			RouteResourceIDs:    "",
 			RouteStatIDs:        "Stat1;Stat2",
-			RouteWeight:         10,
+			RouteWeights:        ";10",
 			RouteBlocker:        false,
 			RouteParameters:     "SortingParam1",
-			Weight:              20,
+			Weights:             ";20",
 		},
 	}
 	var mdl RouteMdls
@@ -3047,12 +3045,12 @@ func TestAPItoModelTPRoutesCase2(t *testing.T) {
 				RateProfileIDs:  []string{"RPL_1", "RPL_2"},
 				ResourceIDs:     []string{"ResGroup1", "ResGroup2"},
 				StatIDs:         []string{"Stat1", "Stat2"},
-				Weight:          10,
+				Weights:         ";10",
 				Blocker:         false,
 				RouteParameters: "SortingParam1",
 			},
 		},
-		Weight: 20,
+		Weights: ";20",
 	}
 	expStructTest := RouteMdls{{
 		Tpid:                "TP1",
@@ -3067,10 +3065,10 @@ func TestAPItoModelTPRoutesCase2(t *testing.T) {
 		RouteRateProfileIDs: "RPL_1;RPL_2",
 		RouteResourceIDs:    "ResGroup1;ResGroup2",
 		RouteStatIDs:        "Stat1;Stat2",
-		RouteWeight:         10,
+		RouteWeights:        ";10",
 		RouteBlocker:        false,
 		RouteParameters:     "SortingParam1",
-		Weight:              20,
+		Weights:             ";20",
 	},
 	}
 	sort.Strings(structTest.FilterIDs)

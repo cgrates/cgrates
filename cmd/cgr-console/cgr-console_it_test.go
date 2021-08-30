@@ -444,7 +444,7 @@ func testConsoleItRoutesProfilesForEvent(t *testing.T) {
 					RateProfileIDs:  nil,
 					ResourceIDs:     nil,
 					StatIDs:         nil,
-					Weight:          10.,
+					Weights:         utils.DynamicWeights{{Weight: 10.}},
 					Blocker:         false,
 					RouteParameters: "",
 				},
@@ -455,12 +455,12 @@ func testConsoleItRoutesProfilesForEvent(t *testing.T) {
 					RateProfileIDs:  nil,
 					ResourceIDs:     nil,
 					StatIDs:         nil,
-					Weight:          20.,
+					Weights:         utils.DynamicWeights{{Weight: 20.}},
 					Blocker:         false,
 					RouteParameters: "",
 				},
 			},
-			Weight: 20.,
+			Weights: utils.DynamicWeights{{Weight: 20.}},
 		},
 	}
 	if err := cmd.Run(); err != nil {
@@ -542,7 +542,7 @@ func testConsoleItRoutesProfile(t *testing.T) {
 				RateProfileIDs:  nil,
 				ResourceIDs:     nil,
 				StatIDs:         nil,
-				Weight:          10.,
+				Weights:         utils.DynamicWeights{{Weight: 10.}},
 				Blocker:         false,
 				RouteParameters: "",
 			},
@@ -553,12 +553,12 @@ func testConsoleItRoutesProfile(t *testing.T) {
 				RateProfileIDs:  nil,
 				ResourceIDs:     nil,
 				StatIDs:         nil,
-				Weight:          20.,
+				Weights:         utils.DynamicWeights{{Weight: 20.}},
 				Blocker:         false,
 				RouteParameters: "",
 			},
 		},
-		Weight: 20.,
+		Weights: utils.DynamicWeights{{Weight: 20.}},
 	}
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)

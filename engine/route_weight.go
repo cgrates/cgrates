@@ -20,29 +20,44 @@ package engine
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewWeightSorter(rS *RouteService) *WeightSorter {
-	return &WeightSorter{rS: rS,
-		sorting: utils.MetaWeight}
+func NewWeightSorter(cfg *config.CGRConfig) *WeightSorter {
+	return &WeightSorter{cfg: cfg}
 }
 
 // WeightSorter orders routes based on their weight, no cost involved
 type WeightSorter struct {
-	sorting string
-	rS      *RouteService
+	cfg *config.CGRConfig
 }
 
 func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
-	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	sortedRoutes = &SortedRoutes{ProfileID: prflID,
-		Sorting: ws.sorting,
-		Routes:  make([]*SortedRoute, 0)}
+	routes map[string]*RouteWithWeight, ev *utils.CGREvent, _ *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	sortedRoutes = &SortedRoutes{
+		ProfileID: prflID,
+		Sorting:   utils.MetaWeight,
+		Routes:    make([]*SortedRoute, 0, len(routes)),
+	}
 	for _, route := range routes {
-		if srtRoute, pass, err := ws.rS.populateSortingData(ctx, suplEv, route, extraOpts); err != nil {
-			return nil, err
-		} else if pass && srtRoute != nil {
+		srtRoute := &SortedRoute{
+			RouteID: route.ID,
+			SortingData: map[string]interface{}{
+				utils.Weight: route.Weight,
+			},
+			sortingDataF64: map[string]float64{
+				utils.Weight: route.Weight,
+			},
+			RouteParameters: route.RouteParameters,
+		}
+		var pass bool
+		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
+			ws.cfg.FilterSCfg().ResourceSConns,
+			ws.cfg.FilterSCfg().StatSConns,
+			ws.cfg.FilterSCfg().AccountSConns); err != nil {
+			return
+		} else if pass {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)
 		}
 	}

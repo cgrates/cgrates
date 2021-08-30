@@ -122,12 +122,12 @@ func testTpSplITPopulate(t *testing.T) {
 					RateProfileIDs:  []string{"RPL_1"},
 					ResourceIDs:     []string{"ResGroup1"},
 					StatIDs:         []string{"Stat1"},
-					Weight:          10,
+					Weights:         10,
 					Blocker:         false,
 					RouteParameters: "SortingParam1",
 				},
 			},
-			Weight: 20,
+			Weights: 20,
 		},
 	}
 	if err := tpSplMigrator.storDBIn.StorDB().SetTPRoutes(tpSuppliers); err != nil {

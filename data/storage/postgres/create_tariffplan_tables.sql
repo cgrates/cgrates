@@ -113,10 +113,10 @@ CREATE TABLE tp_routes (
   "route_ratingplan_ids" varchar(64) NOT NULL,
   "route_resource_ids" varchar(64) NOT NULL,
   "route_stat_ids" varchar(64) NOT NULL,
-  "route_weight" decimal(8,2) NOT NULL,
+  "route_weights" varchar(64) NOT NULL,
   "route_blocker" BOOLEAN NOT NULL,
   "route_parameters" varchar(64) NOT NULL,
-  "weight" decimal(8,2) NOT NULL,
+  "weights" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_routes_idx ON tp_routes (tpid);

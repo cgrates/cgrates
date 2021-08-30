@@ -933,15 +933,15 @@ func testFltrRplRouteProfile(t *testing.T) {
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weight:         10,
+					Weights:        10,
 				},
 				{
 					ID:             "mobile",
 					RateProfileIDs: []string{"RP_MOBILE"},
-					Weight:         30,
+					Weights:        30,
 				},
 			},
-			Weight: 10,
+			Weights: 10,
 		},
 	}
 	var result string

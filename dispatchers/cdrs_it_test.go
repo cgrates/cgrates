@@ -119,7 +119,7 @@ func testDspCDRsPing(t *testing.T) {
 func testDspCDRsProcessEvent(t *testing.T) {
 	var reply string
 	args := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaStore},
+		// Flags: []string{utils.MetaStore},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{

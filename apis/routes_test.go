@@ -51,7 +51,7 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "routeID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Weight:    10,
+			Weights:   utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 
@@ -221,9 +221,9 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 
 	rtPrf := &RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
-			ID:     "TestRoutesRemoveRouteProfileCheckErrors",
-			Tenant: "cgrates.org",
-			Weight: 10,
+			ID:      "TestRoutesRemoveRouteProfileCheckErrors",
+			Tenant:  "cgrates.org",
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	var reply string
