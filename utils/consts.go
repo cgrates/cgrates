@@ -543,7 +543,7 @@ const (
 	RouteAccountIDs          = "RouteAccountIDs"
 	RouteRateProfileIDs      = "RouteRateProfileIDs"
 	RouteStatIDs             = "RouteStatIDs"
-	RouteWeight              = "RouteWeight"
+	RouteWeights             = "RouteWeights"
 	RouteParameters          = "RouteParameters"
 	RouteBlocker             = "RouteBlocker"
 	RouteResourceIDs         = "RouteResourceIDs"

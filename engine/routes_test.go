@@ -28,106 +28,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestRoutesSort(t *testing.T) {
-	sprs := RouteProfiles{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RoutePrf1",
-			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
-			Sorting:           "",
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weight: 10,
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RoutePrf2",
-			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
-			Sorting:           "",
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          20.0,
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weight: 20.0,
-		},
-	}
-	eRouteProfile := RouteProfiles{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RoutePrf2",
-			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
-			Sorting:           "",
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          20.0,
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weight: 20.0,
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RoutePrf1",
-			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
-			Sorting:           "",
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weight: 10.0,
-		},
-	}
-	sprs.Sort()
-	if !reflect.DeepEqual(eRouteProfile, sprs) {
-		t.Errorf("Expecting: %+v, received: %+v", eRouteProfile, sprs)
-	}
-}
-
 func TestRoutesCache(t *testing.T) {
 	var expTimeRoutes = time.Now().Add(20 * time.Minute)
 	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var dmSPP *DataManager
-	sppTest := RouteProfiles{
+	sppTest := []*RouteProfile{
 		&RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RouteProfile1",
@@ -142,12 +47,12 @@ func TestRoutesCache(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -163,7 +68,7 @@ func TestRoutesCache(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          20.0,
+					Weights:         utils.DynamicWeights{{Weight: 20}},
 					RouteParameters: "param2",
 				},
 				{
@@ -173,7 +78,7 @@ func TestRoutesCache(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param3",
 				},
 				{
@@ -183,12 +88,12 @@ func TestRoutesCache(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          30.0,
+					Weights:         utils.DynamicWeights{{Weight: 30}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 20.0,
+			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -204,12 +109,12 @@ func TestRoutesCache(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 
@@ -296,87 +201,96 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	var dmSPP *DataManager
-	var sppTest = RouteProfiles{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile1",
-			FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					Blocker:         false,
-					RouteParameters: "param1",
+	var sppTest = RouteProfilesWithWeight{
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfile1",
+				FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
+				Weights: utils.DynamicWeights{{Weight: 10}},
 			},
 			Weight: 10,
 		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile2",
-			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route2",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          20.0,
-					RouteParameters: "param2",
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfile2",
+				FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route2",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 20}},
+						RouteParameters: "param2",
+					},
+					{
+						ID:              "route3",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						RouteParameters: "param3",
+					},
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 30}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
-				{
-					ID:              "route3",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					RouteParameters: "param3",
-				},
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          30.0,
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
+				Weights: utils.DynamicWeights{{Weight: 20}},
 			},
-			Weight: 20.0,
+			Weight: 20,
 		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfilePrefix",
-			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					Blocker:         false,
-					RouteParameters: "param1",
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfilePrefix",
+				FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
+				Weights: utils.DynamicWeights{{Weight: 10}},
 			},
 			Weight: 10,
 		},
@@ -494,7 +408,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	}
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp.RouteProfile, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -503,7 +417,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp, tempSpp) {
+		} else if !reflect.DeepEqual(spp.RouteProfile, tempSpp) {
 			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
 		}
 	}
@@ -537,7 +451,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	var dmSPP *DataManager
-	var sppTest = RouteProfiles{
+	var sppTest = []*RouteProfile{
 		&RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RouteProfile1",
@@ -552,12 +466,12 @@ func TestRoutesSortedForEvent(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -573,7 +487,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          20.0,
+					Weights:         utils.DynamicWeights{{Weight: 20}},
 					RouteParameters: "param2",
 				},
 				{
@@ -583,7 +497,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param3",
 				},
 				{
@@ -593,12 +507,12 @@ func TestRoutesSortedForEvent(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          30.0,
+					Weights:         utils.DynamicWeights{{Weight: 30}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 20.0,
+			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -614,12 +528,12 @@ func TestRoutesSortedForEvent(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	argsGetRoutes := []*ArgsGetRoutes{
@@ -847,7 +761,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
 	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
-	sppTest := RouteProfiles{
+	sppTest := []*RouteProfile{
 		&RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RouteProfile1",
@@ -862,12 +776,12 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -883,7 +797,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          20.0,
+					Weights:         utils.DynamicWeights{{Weight: 20}},
 					RouteParameters: "param2",
 				},
 				{
@@ -893,7 +807,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param3",
 				},
 				{
@@ -903,12 +817,12 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          30.0,
+					Weights:         utils.DynamicWeights{{Weight: 30}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 20.0,
+			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -924,12 +838,12 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	argsGetRoutes := []*ArgsGetRoutes{
@@ -1102,7 +1016,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
 	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
-	sppTest := RouteProfiles{
+	sppTest := []*RouteProfile{
 		&RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RouteProfile1",
@@ -1117,12 +1031,12 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -1138,7 +1052,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          20.0,
+					Weights:         utils.DynamicWeights{{Weight: 20}},
 					RouteParameters: "param2",
 				},
 				{
@@ -1148,7 +1062,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param3",
 				},
 				{
@@ -1158,12 +1072,12 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          30.0,
+					Weights:         utils.DynamicWeights{{Weight: 30}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 20.0,
+			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -1179,12 +1093,12 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	argsGetRoutes := []*ArgsGetRoutes{
@@ -1347,7 +1261,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
 	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
-	sppTest := RouteProfiles{
+	sppTest := []*RouteProfile{
 		&RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RouteProfile1",
@@ -1362,12 +1276,12 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -1383,7 +1297,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          20.0,
+					Weights:         utils.DynamicWeights{{Weight: 20}},
 					RouteParameters: "param2",
 				},
 				{
@@ -1393,7 +1307,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param3",
 				},
 				{
@@ -1403,12 +1317,12 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          30.0,
+					Weights:         utils.DynamicWeights{{Weight: 30}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 20.0,
+			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
 		&RouteProfile{
 			Tenant:            "cgrates.org",
@@ -1424,12 +1338,12 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					RateProfileIDs:  []string{},
 					ResourceIDs:     []string{},
 					StatIDs:         []string{},
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	argsGetRoutes := []*ArgsGetRoutes{
@@ -1593,6 +1507,7 @@ func TestRoutesAsOptsGetRoutes(t *testing.T) {
 	s := &ArgsGetRoutes{
 		IgnoreErrors: true,
 		MaxCost:      "10.0",
+		CGREvent:     &utils.CGREvent{},
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
@@ -1610,6 +1525,7 @@ func TestRoutesAsOptsGetRoutes(t *testing.T) {
 func TestRoutesAsOptsGetRoutesIgnoreErrors(t *testing.T) {
 	s := &ArgsGetRoutes{
 		IgnoreErrors: true,
+		CGREvent:     &utils.CGREvent{},
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
@@ -1627,87 +1543,96 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
 	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
-	sppTest := RouteProfiles{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile1",
-			FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					Blocker:         false,
-					RouteParameters: "param1",
+	sppTest := RouteProfilesWithWeight{
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfile1",
+				FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
+				Weights: utils.DynamicWeights{{Weight: 10}},
 			},
 			Weight: 10,
 		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile2",
-			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route2",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          20.0,
-					RouteParameters: "param2",
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfile2",
+				FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route2",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 20}},
+						RouteParameters: "param2",
+					},
+					{
+						ID:              "route3",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						RouteParameters: "param3",
+					},
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 30}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
-				{
-					ID:              "route3",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					RouteParameters: "param3",
-				},
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          30.0,
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
+				Weights: utils.DynamicWeights{{Weight: 20}},
 			},
-			Weight: 20.0,
+			Weight: 20,
 		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfilePrefix",
-			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					Blocker:         false,
-					RouteParameters: "param1",
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfilePrefix",
+				FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
+				Weights: utils.DynamicWeights{{Weight: 10}},
 			},
 			Weight: 10,
 		},
@@ -1826,7 +1751,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp.RouteProfile, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -1835,12 +1760,12 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp, tempSpp) {
+		} else if !reflect.DeepEqual(spp.RouteProfile, tempSpp) {
 			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
 		}
 	}
 
-	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
+	routeService.cfg.RouteSCfg().IndexedSelects = false
 	sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1870,87 +1795,96 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
 	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
-	sppTest := RouteProfiles{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile1",
-			FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					Blocker:         false,
-					RouteParameters: "param1",
+	sppTest := RouteProfilesWithWeight{
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfile1",
+				FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
+				Weights: utils.DynamicWeights{{Weight: 10}},
 			},
 			Weight: 10,
 		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile2",
-			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route2",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          20.0,
-					RouteParameters: "param2",
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfile2",
+				FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route2",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 20}},
+						RouteParameters: "param2",
+					},
+					{
+						ID:              "route3",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						RouteParameters: "param3",
+					},
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 30}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
-				{
-					ID:              "route3",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					RouteParameters: "param3",
-				},
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          30.0,
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
+				Weights: utils.DynamicWeights{{Weight: 20}},
 			},
-			Weight: 20.0,
+			Weight: 20,
 		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfilePrefix",
-			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weight:          10.0,
-					Blocker:         false,
-					RouteParameters: "param1",
+		&RouteProfileWithWeight{
+			RouteProfile: &RouteProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RouteProfilePrefix",
+				FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
+				Sorting:           utils.MetaWeight,
+				SortingParameters: []string{},
+				Routes: []*Route{
+					{
+						ID:              "route1",
+						FilterIDs:       []string{},
+						AccountIDs:      []string{},
+						RateProfileIDs:  []string{},
+						ResourceIDs:     []string{},
+						StatIDs:         []string{},
+						Weights:         utils.DynamicWeights{{Weight: 10}},
+						Blocker:         false,
+						RouteParameters: "param1",
+					},
 				},
+				Weights: utils.DynamicWeights{{Weight: 10}},
 			},
 			Weight: 10,
 		},
@@ -2069,7 +2003,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp.RouteProfile, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -2078,12 +2012,12 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp, tempSpp) {
+		} else if !reflect.DeepEqual(spp.RouteProfile, tempSpp) {
 			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
 		}
 	}
 
-	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
+	routeService.cfg.RouteSCfg().IndexedSelects = false
 	sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -2111,7 +2045,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 
 func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	var routeService *RouteService
-	sppTest := RouteProfiles{
+	sppTest := []*RouteProfile{
 		&RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfile1",
@@ -2119,11 +2053,11 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Routes: []*Route{
 				{
 					ID:              "route2",
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 		&RouteProfile{
 			Tenant:  "cgrates.org",
@@ -2132,21 +2066,21 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Routes: []*Route{
 				{
 					ID:              "route2",
-					Weight:          20.0,
+					Weights:         utils.DynamicWeights{{Weight: 20}},
 					RouteParameters: "param2",
 				},
 				{
 					ID:              "route3",
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param3",
 				},
 				{
 					ID:              "route1",
-					Weight:          30.0,
+					Weights:         utils.DynamicWeights{{Weight: 30}},
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 5,
+			Weights: utils.DynamicWeights{{Weight: 5}},
 		},
 		&RouteProfile{
 			Tenant:  "cgrates.org",
@@ -2155,11 +2089,11 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Routes: []*Route{
 				{
 					ID:              "route1",
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 20,
+			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
 		&RouteProfile{
 			Tenant:  "cgrates.org",
@@ -2168,11 +2102,11 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Routes: []*Route{
 				{
 					ID:              "route1",
-					Weight:          10.0,
+					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param1",
 				},
 			},
-			Weight: 0,
+			Weights: utils.DynamicWeights{{}},
 		},
 	}
 	argsGetRoutes := &ArgsGetRoutes{

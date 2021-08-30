@@ -673,18 +673,18 @@ func TestHealthIndexRoutes(t *testing.T) {
 		Routes: []*Route{
 			{
 				ID:              "route1",
-				Weight:          10,
+				Weights:         utils.DynamicWeights{{Weight: 10}},
 				Blocker:         false,
 				RouteParameters: "",
 			},
 			{
 				ID:             "route2",
 				RateProfileIDs: []string{"RP_1002"},
-				Weight:         20,
+				Weights:        utils.DynamicWeights{{Weight: 20}},
 				Blocker:        false,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{{Weight: 10}},
 	}
 	if err := dm.SetRouteProfile(context.Background(), rtPrf, false); err != nil {
 		t.Error(err)
@@ -779,18 +779,18 @@ func TestHealthIndexRoutes(t *testing.T) {
 		Routes: []*Route{
 			{
 				ID:              "route1",
-				Weight:          10,
+				Weights:         utils.DynamicWeights{{Weight: 10}},
 				Blocker:         false,
 				RouteParameters: "",
 			},
 			{
 				ID:             "route2",
 				RateProfileIDs: []string{"RP_1002"},
-				Weight:         20,
+				Weights:        utils.DynamicWeights{{Weight: 20}},
 				Blocker:        false,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{{Weight: 10}},
 	}
 	if err := dm.SetRouteProfile(context.Background(), rtPrf, false); err != nil {
 		t.Error(err)

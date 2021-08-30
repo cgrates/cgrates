@@ -304,18 +304,18 @@ func testExpVerifyRoutes(t *testing.T) {
 		Routes: []*engine.Route{
 			{
 				ID:              "route1",
-				Weight:          20,
+				Weights:         20,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 			{
 				ID:              "route2",
-				Weight:          10,
+				Weights:         10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 		},
-		Weight: 10,
+		Weights: 10,
 	}
 
 	splPrf2 := &engine.RouteProfile{
@@ -328,18 +328,18 @@ func testExpVerifyRoutes(t *testing.T) {
 			{
 				ID: "route2",
 
-				Weight:          10,
+				Weights:         10,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 			{
 				ID:              "route1",
-				Weight:          20,
+				Weights:         20,
 				Blocker:         false,
 				RouteParameters: utils.EmptyString,
 			},
 		},
-		Weight: 10,
+		Weights: 10,
 	}
 	if err := expRpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}, &reply); err != nil {

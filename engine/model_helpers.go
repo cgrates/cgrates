@@ -795,10 +795,10 @@ type RouteMdls []*RouteMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps RouteMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
 		utils.RouteAccountIDs, utils.RouteRateProfileIDs, utils.RouteRateProfileIDs,
-		utils.RouteResourceIDs, utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
+		utils.RouteResourceIDs, utils.RouteStatIDs, utils.RouteWeights, utils.RouteBlocker,
 		utils.RouteParameters,
 	}
 }
@@ -832,7 +832,7 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			if !found {
 				sup = &utils.TPRoute{
 					ID:              tp.RouteID,
-					Weight:          tp.RouteWeight,
+					Weights:         tp.RouteWeights,
 					Blocker:         tp.RouteBlocker,
 					RouteParameters: tp.RouteParameters,
 				}
@@ -868,8 +868,8 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 			}
 			sortingParameterMap[tenID].AddSlice(strings.Split(tp.SortingParameters, utils.InfieldSep))
 		}
-		if tp.Weight != 0 {
-			th.Weight = tp.Weight
+		if tp.Weights != utils.EmptyString {
+			th.Weights = tp.Weights
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
@@ -905,7 +905,7 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 		}
 		if i == 0 {
 			mdl.Sorting = st.Sorting
-			mdl.Weight = st.Weight
+			mdl.Weights = st.Weights
 			for i, val := range st.FilterIDs {
 				if i != 0 {
 					mdl.FilterIDs += utils.InfieldSep
@@ -950,7 +950,7 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 			}
 			mdl.RouteStatIDs += val
 		}
-		mdl.RouteWeight = supl.Weight
+		mdl.RouteWeights = supl.Weights
 		mdl.RouteParameters = supl.RouteParameters
 		mdl.RouteBlocker = supl.Blocker
 		mdls = append(mdls, mdl)
@@ -963,10 +963,16 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 		Tenant:            tpRp.Tenant,
 		ID:                tpRp.ID,
 		Sorting:           tpRp.Sorting,
-		Weight:            tpRp.Weight,
 		Routes:            make([]*Route, len(tpRp.Routes)),
 		SortingParameters: make([]string, len(tpRp.SortingParameters)),
 		FilterIDs:         make([]string, len(tpRp.FilterIDs)),
+	}
+	if tpRp.Weights != utils.EmptyString {
+		weight, err := utils.NewDynamicWeightsFromString(tpRp.Weights, utils.InfieldSep, utils.ANDSep)
+		if err != nil {
+			return nil, err
+		}
+		rp.Weights = weight
 	}
 	for i, stp := range tpRp.SortingParameters {
 		rp.SortingParameters[i] = stp
@@ -977,7 +983,6 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 	for i, route := range tpRp.Routes {
 		rp.Routes[i] = &Route{
 			ID:              route.ID,
-			Weight:          route.Weight,
 			Blocker:         route.Blocker,
 			RateProfileIDs:  route.RateProfileIDs,
 			AccountIDs:      route.AccountIDs,
@@ -985,6 +990,13 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 			ResourceIDs:     route.ResourceIDs,
 			StatIDs:         route.StatIDs,
 			RouteParameters: route.RouteParameters,
+		}
+		if route.Weights != utils.EmptyString {
+			weight, err := utils.NewDynamicWeightsFromString(route.Weights, utils.InfieldSep, utils.ANDSep)
+			if err != nil {
+				return nil, err
+			}
+			rp.Routes[i].Weights = weight
 		}
 	}
 	return rp, nil
@@ -998,7 +1010,7 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 		Sorting:           rp.Sorting,
 		SortingParameters: make([]string, len(rp.SortingParameters)),
 		Routes:            make([]*utils.TPRoute, len(rp.Routes)),
-		Weight:            rp.Weight,
+		Weights:           rp.Weights.String(utils.InfieldSep, utils.ANDSep),
 	}
 
 	for i, route := range rp.Routes {
@@ -1009,7 +1021,7 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 			RateProfileIDs:  route.RateProfileIDs,
 			ResourceIDs:     route.ResourceIDs,
 			StatIDs:         route.StatIDs,
-			Weight:          route.Weight,
+			Weights:         route.Weights.String(utils.InfieldSep, utils.ANDSep),
 			Blocker:         route.Blocker,
 			RouteParameters: route.RouteParameters,
 		}
@@ -1863,7 +1875,7 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *utils.Rat
 		MaxCost:         utils.NewDecimalFromFloat64(tpRp.MaxCost),
 	}
 	if tpRp.Weights != utils.EmptyString {
-		weight, err := utils.NewDynamicWeightsFromString(tpRp.Weights, ";", "&")
+		weight, err := utils.NewDynamicWeightsFromString(tpRp.Weights, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
@@ -1881,7 +1893,7 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *utils.Rat
 			IntervalRates:   make([]*utils.IntervalRate, len(rate.IntervalRates)),
 		}
 		if rate.Weights != utils.EmptyString {
-			weight, err := utils.NewDynamicWeightsFromString(rate.Weights, ";", "&")
+			weight, err := utils.NewDynamicWeightsFromString(rate.Weights, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}
@@ -1910,7 +1922,7 @@ func RateProfileToAPI(rp *utils.RateProfile) (tpRp *utils.TPRateProfile) {
 		Tenant:          rp.Tenant,
 		ID:              rp.ID,
 		FilterIDs:       make([]string, len(rp.FilterIDs)),
-		Weights:         rp.Weights.String(";", "&"),
+		Weights:         rp.Weights.String(utils.InfieldSep, utils.ANDSep),
 		MaxCostStrategy: rp.MaxCostStrategy,
 		Rates:           make(map[string]*utils.TPRate),
 	}
@@ -1928,7 +1940,7 @@ func RateProfileToAPI(rp *utils.RateProfile) (tpRp *utils.TPRateProfile) {
 	for key, rate := range rp.Rates {
 		tpRp.Rates[key] = &utils.TPRate{
 			ID:              rate.ID,
-			Weights:         rate.Weights.String(";", "&"),
+			Weights:         rate.Weights.String(utils.InfieldSep, utils.ANDSep),
 			Blocker:         rate.Blocker,
 			FilterIDs:       rate.FilterIDs,
 			ActivationTimes: rate.ActivationTimes,
@@ -2367,7 +2379,7 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 		ThresholdIDs: make([]string, len(tpAp.ThresholdIDs)),
 	}
 	if tpAp.Weights != utils.EmptyString {
-		weight, err := utils.NewDynamicWeightsFromString(tpAp.Weights, ";", "&")
+		weight, err := utils.NewDynamicWeightsFromString(tpAp.Weights, utils.InfieldSep, utils.ANDSep)
 		if err != nil {
 			return nil, err
 		}
@@ -2384,7 +2396,7 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 			Units:     utils.NewDecimalFromFloat64(bal.Units),
 		}
 		if bal.Weights != utils.EmptyString {
-			weight, err := utils.NewDynamicWeightsFromString(bal.Weights, ";", "&")
+			weight, err := utils.NewDynamicWeightsFromString(bal.Weights, utils.InfieldSep, utils.ANDSep)
 			if err != nil {
 				return nil, err
 			}
@@ -2450,7 +2462,7 @@ func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 	tpAp = &utils.TPAccount{
 		Tenant:       ap.Tenant,
 		ID:           ap.ID,
-		Weights:      ap.Weights.String(";", "&"),
+		Weights:      ap.Weights.String(utils.InfieldSep, utils.ANDSep),
 		FilterIDs:    make([]string, len(ap.FilterIDs)),
 		Balances:     make(map[string]*utils.TPAccountBalance, len(ap.Balances)),
 		ThresholdIDs: make([]string, len(ap.ThresholdIDs)),
@@ -2462,7 +2474,7 @@ func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 		tpAp.Balances[i] = &utils.TPAccountBalance{
 			ID:             bal.ID,
 			FilterIDs:      make([]string, len(bal.FilterIDs)),
-			Weights:        bal.Weights.String(";", "&"),
+			Weights:        bal.Weights.String(utils.InfieldSep, utils.ANDSep),
 			Type:           bal.Type,
 			CostIncrement:  make([]*utils.TPBalanceCostIncrement, len(bal.CostIncrements)),
 			AttributeIDs:   make([]string, len(bal.AttributeIDs)),

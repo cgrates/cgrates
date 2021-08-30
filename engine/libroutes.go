@@ -219,20 +219,7 @@ func (sRoutes *SortedRoutes) AsNavigableMap() (nm *utils.DataNode) {
 
 // RoutesSorter is the interface which needs to be implemented by routes sorters
 type RoutesSorter interface {
-	SortRoutes(*context.Context, string, map[string]*Route, *utils.CGREvent, *optsGetRoutes) (*SortedRoutes, error)
-}
-
-// NewRouteSortDispatcher constructs RouteSortDispatcher
-func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher) {
-	rsd = make(map[string]RoutesSorter)
-	rsd[utils.MetaWeight] = NewWeightSorter(lcrS)
-	rsd[utils.MetaLC] = NewLeastCostSorter(lcrS)
-	rsd[utils.MetaHC] = NewHighestCostSorter(lcrS)
-	rsd[utils.MetaQOS] = NewQOSRouteSorter(lcrS)
-	rsd[utils.MetaReas] = NewResourceAscendetSorter(lcrS)
-	rsd[utils.MetaReds] = NewResourceDescendentSorter(lcrS)
-	rsd[utils.MetaLoad] = NewLoadDistributionSorter(lcrS)
-	return
+	SortRoutes(*context.Context, string, map[string]*RouteWithWeight, *utils.CGREvent, *optsGetRoutes) (*SortedRoutes, error)
 }
 
 // RouteSortDispatcher will initialize strategies
@@ -240,10 +227,11 @@ func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher) {
 type RouteSortDispatcher map[string]RoutesSorter
 
 func (ssd RouteSortDispatcher) SortRoutes(ctx *context.Context, prflID, strategy string,
-	suppls map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	suppls map[string]*RouteWithWeight, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (_ *SortedRoutes, err error) {
 	sd, has := ssd[strategy]
 	if !has {
-		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
+		err = fmt.Errorf("unsupported sorting strategy: %s", strategy)
+		return
 	}
 	return sd.SortRoutes(ctx, prflID, suppls, suplEv, extraOpts)
 }
@@ -288,4 +276,47 @@ func (sRs SortedRoutesList) AsNavigableMap() (nm *utils.DataNode) {
 		nm.Slice[i] = ss.AsNavigableMap()
 	}
 	return
+}
+
+// RouteProfileWithWeight attaches static weight to RouteProfile
+type RouteProfileWithWeight struct {
+	*RouteProfile
+	Weight float64
+}
+
+// RouteProfiles is a sortable list of RouteProfile
+type RouteProfilesWithWeight []*RouteProfileWithWeight
+
+// Sort is part of sort interface, sort based on Weight
+func (lps RouteProfilesWithWeight) Sort() {
+	sort.Slice(lps, func(i, j int) bool { return lps[i].Weight > lps[j].Weight })
+}
+
+//routeLazyPass filters the route based on
+func routeLazyPass(ctx *context.Context, filters []*FilterRule, ev *utils.CGREvent, data utils.MapStorage,
+	resConns, statConns, acntConns []string) (pass bool, err error) {
+	if len(filters) == 0 {
+		return true, nil
+	}
+
+	dynDP := newDynamicDP(ctx, resConns, statConns, acntConns, //construct the DP and pass it to filterS
+		ev.Tenant, utils.MapStorage{
+			utils.MetaReq:  ev.Event,
+			utils.MetaOpts: ev.APIOpts,
+			utils.MetaVars: data,
+		})
+
+	for _, rule := range filters { // verify the rules remaining from PartialPass
+		if pass, err = rule.Pass(ctx, dynDP); err != nil || !pass {
+			return
+		}
+	}
+	return true, nil
+}
+
+// RouteWithWeight attaches static weight to Route
+type RouteWithWeight struct {
+	*Route
+	Weight         float64
+	lazyCheckRules []*FilterRule
 }

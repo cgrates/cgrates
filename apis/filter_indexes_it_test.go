@@ -3603,15 +3603,15 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weight:         10,
+					Weights:        utils.DynamicWeights{{Weight: 10}},
 				},
 				{
 					ID:             "mobile",
 					RateProfileIDs: []string{"RP_MOBILE"},
-					Weight:         30,
+					Weights:        utils.DynamicWeights{{Weight: 30}},
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRouteProfile,
@@ -3702,15 +3702,15 @@ func testV1FIdxSetRouteSMoreFltrsMoreIndexing(t *testing.T) {
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weight:         10,
+					Weights:        utils.DynamicWeights{{Weight: 10}},
 				},
 				{
 					ID:             "mobile",
 					RateProfileIDs: []string{"RP_MOBILE"},
-					Weight:         30,
+					Weights:        utils.DynamicWeights{{Weight: 30}},
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRouteProfile,
@@ -3811,10 +3811,10 @@ func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 				{
 					ID:             "route1",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weight:         10,
+					Weights:        utils.DynamicWeights{{Weight: 10}},
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	rtPrf2 := &RouteWithAPIOpts{
@@ -3828,10 +3828,10 @@ func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 				{
 					ID:             "route2",
 					RateProfileIDs: []string{"RP_LOCAL"},
-					Weight:         10,
+					Weights:        utils.DynamicWeights{{Weight: 10}},
 				},
 			},
-			Weight: 10,
+			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
 	var reply string

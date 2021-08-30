@@ -1845,11 +1845,11 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 				RateProfileIDs:  []string{""},
 				ResourceIDs:     []string{""},
 				StatIDs:         []string{""},
-				Weight:          10,
+				Weights:         utils.DynamicWeights{{Weight: 10}},
 				RouteParameters: "",
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{{Weight: 20}},
 	}
 	splProfile2 := &RouteProfile{
 		Tenant:            "cgrates.org",
@@ -1864,11 +1864,11 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 				RateProfileIDs:  []string{""},
 				ResourceIDs:     []string{""},
 				StatIDs:         []string{""},
-				Weight:          10,
+				Weights:         utils.DynamicWeights{{Weight: 10}},
 				RouteParameters: "",
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{{Weight: 20}},
 	}
 
 	if err := dataManager.SetRouteProfile(context.Background(), splProfile, true); err != nil {

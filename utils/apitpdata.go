@@ -620,7 +620,7 @@ type TPRoute struct {
 	RateProfileIDs  []string // used when computing price
 	ResourceIDs     []string // queried in some strategies
 	StatIDs         []string // queried in some strategies
-	Weight          float64
+	Weights         string
 	Blocker         bool
 	RouteParameters string
 }
@@ -634,7 +634,7 @@ type TPRouteProfile struct {
 	Sorting           string
 	SortingParameters []string
 	Routes            []*TPRoute
-	Weight            float64
+	Weights           string
 }
 
 // TPAttribute is used in TPAttributeProfile

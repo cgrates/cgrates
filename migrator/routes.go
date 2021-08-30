@@ -206,7 +206,7 @@ func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 		FilterIDs:         spp.FilterIDs,
 		Sorting:           spp.Sorting,
 		SortingParameters: spp.SortingParameters,
-		Weight:            spp.Weight,
+		Weights:           utils.DynamicWeights{{Weight: spp.Weight}},
 	}
 	route.Routes = make([]*engine.Route, len(spp.Suppliers))
 	for i, supl := range spp.Suppliers {
@@ -217,7 +217,7 @@ func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 			RateProfileIDs:  supl.RatingPlanIDs,
 			ResourceIDs:     supl.ResourceIDs,
 			StatIDs:         supl.StatIDs,
-			Weight:          supl.Weight,
+			Weights:         utils.DynamicWeights{{Weight: supl.Weight}},
 			Blocker:         supl.Blocker,
 			RouteParameters: supl.SupplierParameters,
 		}

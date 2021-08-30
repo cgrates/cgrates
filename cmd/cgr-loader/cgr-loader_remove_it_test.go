@@ -538,17 +538,17 @@ func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
 		ID:                "ROUTE_ACNT_1001",
 		Tenant:            "cgrates.org",
 		FilterIDs:         []string{"FLTR_ACCOUNT_1001"},
-		Weight:            10,
+		Weights:           utils.DynamicWeights{{Weight: 10}},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:     "route1",
-				Weight: 20,
+				ID:      "route1",
+				Weights: utils.DynamicWeights{{Weight: 20}},
 			},
 			{
-				ID:     "route2",
-				Weight: 10,
+				ID:      "route2",
+				Weights: utils.DynamicWeights{{Weight: 10}},
 			},
 		},
 	}
