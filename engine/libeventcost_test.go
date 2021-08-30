@@ -266,7 +266,7 @@ func TestChargingIntervalCost(t *testing.T) {
 		},
 		CompressFactor: 3,
 	}
-	tCi1 := ci1.Cost(Accounting{"Acc1": {}})
+	tCi1 := ci1.Cost()
 	eTCi1 := 10.84
 	if tCi1 != eTCi1 {
 		t.Errorf("Expecting: %+v, received: %+v", eTCi1, tCi1)
@@ -298,7 +298,7 @@ func TestChargingIntervalTotalCost(t *testing.T) {
 		},
 		CompressFactor: 3,
 	}
-	tCi1 := ci1.TotalCost(Accounting{"Acc1": {}})
+	tCi1 := ci1.TotalCost()
 	eTCi1 := 32.52
 	if tCi1 != eTCi1 {
 		t.Errorf("Expecting: %+v, received: %+v", eTCi1, tCi1)
