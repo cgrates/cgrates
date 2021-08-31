@@ -46,7 +46,7 @@ With explanations in the comments:
 			],
 			"source_path": "/tmp/ers2/in",		// location of the files
 			"processed_path": "/tmp/ers2/out",	// move the files here once processed
-			"content_fields":[					// mapping definition between line index in the file and CGRateS field 
+			"fields":[					// mapping definition between line index in the file and CGRateS field 
 				{
 					"tag": "OriginID",			// OriginID together with OriginHost will 
 					"path": "*cgreq.OriginID",	//   uniquely identify the session on CGRateS side
