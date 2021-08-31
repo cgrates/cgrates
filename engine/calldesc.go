@@ -37,7 +37,6 @@ const (
 )
 
 var (
-	debitPeriod                  = 10 * time.Second
 	globalRoundingDecimals       = 6
 	rpSubjectPrefixMatching      bool
 	rpSubjectPrefixMatchingMutex sync.RWMutex // used to reload rpSubjectPrefixMatching
@@ -777,7 +776,6 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 			}
 			return err
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
-		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+cd.GetAccountKey())
 	return
 }
@@ -1001,14 +999,7 @@ func (cd *CallDescriptor) AccountSummary(initialAcnt *AccountSummary) *AccountSu
 		return nil
 	}
 	acntSummary := cd.account.AsAccountSummary()
-	for _, initialBal := range initialAcnt.BalanceSummaries {
-		for _, currentBal := range acntSummary.BalanceSummaries {
-			if currentBal.UUID == initialBal.UUID {
-				currentBal.Initial = initialBal.Value
-				break
-			}
-		}
-	}
+	acntSummary.SetInitialValue(initialAcnt)
 	return acntSummary
 }
 
