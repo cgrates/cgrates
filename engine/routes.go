@@ -217,7 +217,7 @@ func (attr *ArgsGetRoutes) Clone() *ArgsGetRoutes {
 }
 
 func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
-	opts = &optsGetRoutes{ignoreErrors: utils.OptAsBoolOrDef(attr.APIOpts, utils.MetaIgnoreErrors, attr.IgnoreErrors)}
+	opts = &optsGetRoutes{ignoreErrors: utils.OptAsBoolOrDef(config.CgrConfig().RouteSCfg().DefaultOpts, utils.MetaIgnoreErrors, attr.IgnoreErrors)}
 	if attr.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
 		if err = attr.CGREvent.CheckMandatoryFields([]string{utils.AccountField,
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {

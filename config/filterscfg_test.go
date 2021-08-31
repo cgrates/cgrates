@@ -33,7 +33,7 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	expected := &FilterSCfg{
 		StatSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		ResourceSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		AccountSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
+		AccountSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.filterSCfg.loadFromJSONCfg(cfgJSONS); err != nil {
