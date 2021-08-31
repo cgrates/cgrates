@@ -659,7 +659,7 @@ const (
 	MetaAnalyzer            = "*analyzer"
 	CGREventString          = "CGREvent"
 	MetaTextPlain           = "*text_plain"
-	MetaIgnoreErrors        = "*ignore_errors"
+	MetaIgnoreErrors        = "*ignoreErrors"
 	MetaRelease             = "*release"
 	MetaAllocate            = "*allocate"
 	MetaAuthorize           = "*authorize"

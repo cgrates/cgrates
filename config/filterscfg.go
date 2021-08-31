@@ -40,7 +40,7 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		fSCfg.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
 	if jsnCfg.Accounts_conns != nil {
-		fSCfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAdminS)
+		fSCfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	return
 }

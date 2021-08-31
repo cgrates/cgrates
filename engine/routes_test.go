@@ -1522,6 +1522,22 @@ func TestRoutesAsOptsGetRoutes(t *testing.T) {
 	}
 }
 
+func TestRoutesAsOptsGetRoutesFromCfg(t *testing.T) {
+	config.CgrConfig().RouteSCfg().DefaultOpts[utils.MetaIgnoreErrors] = true
+	s := &ArgsGetRoutes{}
+	spl := &optsGetRoutes{
+		ignoreErrors: true,
+	}
+	sprf, err := s.asOptsGetRoutes()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(spl, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", spl, sprf)
+	}
+	delete(config.CgrConfig().RouteSCfg().DefaultOpts, utils.MetaIgnoreErrors)
+}
+
 func TestRoutesAsOptsGetRoutesIgnoreErrors(t *testing.T) {
 	s := &ArgsGetRoutes{
 		IgnoreErrors: true,

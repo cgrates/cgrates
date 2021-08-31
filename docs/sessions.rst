@@ -341,7 +341,7 @@ Instead of arguments, the options for enabling various functionaity will come in
 \*routes
 	Process the event with :ref:`Routes`. Auxiliary flags available:
 
-	**\*ignore_errors**
+	**\*ignoreErrors**
 		Ignore the routes with errors instead of failing the request completely.
 
 	**\*event_cost**
