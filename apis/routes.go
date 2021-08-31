@@ -24,7 +24,7 @@ import (
 )
 
 // GetRouteProfile returns a Route configuration
-func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
+func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.APIRouteProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -35,7 +35,7 @@ func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDW
 	if rp, err := adms.dm.GetRouteProfile(ctx, tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
-		*reply = *rp
+		*reply = *engine.NewAPIRouteProfile(rp)
 	}
 	return nil
 }
@@ -81,20 +81,19 @@ func (adms *AdminSv1) GetRouteProfileCount(ctx *context.Context, args *utils.Ten
 	return nil
 }
 
-type RouteWithAPIOpts struct {
-	*engine.RouteProfile
-	APIOpts map[string]interface{}
-}
-
 //SetRouteProfile add a new Route configuration
-func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *RouteWithAPIOpts, reply *string) error {
-	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
+func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.APIRouteProfileWithAPIOpts, reply *string) error {
+	if missing := utils.MissingStructFields(args.APIRouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := adms.dm.SetRouteProfile(ctx, args.RouteProfile, true); err != nil {
+	rp, err := args.AsRouteProfile()
+	if err != nil {
+		return err
+	}
+	if err := adms.dm.SetRouteProfile(ctx, rp, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRouteProfiles and store it in database
@@ -103,7 +102,7 @@ func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *RouteWithAPIOp
 	}
 	//handle caching for SupplierProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheRouteProfiles,
-		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
+		rp.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
