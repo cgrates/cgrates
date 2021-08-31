@@ -799,22 +799,22 @@ func testLoadersGetRouteProfile(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rtIDs)
 	}
 
-	expRtPrf := engine.RouteProfile{
+	expRtPrf := engine.APIRouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ROUTE_ACNT_1001",
 		FilterIDs:         []string{"FLTR_ACCOUNT_1001"},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*engine.ExternalRoute{
 			{
 				ID:      "route1",
-				Weights: utils.DynamicWeights{{Weight: 20}},
+				Weights: ";20",
 			},
 		},
-		Weights: utils.DynamicWeights{{Weight: 10}},
+		Weights: ";10",
 	}
 
-	var rplyRtPrf engine.RouteProfile
+	var rplyRtPrf engine.APIRouteProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",
@@ -1116,7 +1116,7 @@ func testLoadersGetRouteProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplyRtPrf engine.RouteProfile
+	var rplyRtPrf engine.APIRouteProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

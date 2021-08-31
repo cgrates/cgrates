@@ -43,15 +43,16 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 			ID: "routeID",
 		},
 	}
-	var result engine.RouteProfile
+	var result engine.APIRouteProfile
 	var reply string
 
-	rtPrf := &RouteWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &engine.APIRouteProfileWithAPIOpts{
+		APIRouteProfile: &engine.APIRouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "routeID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Weights:   utils.DynamicWeights{{Weight: 10}},
+			Weights:   ";10",
+			Routes:    []*engine.ExternalRoute{{}},
 		},
 	}
 
@@ -63,9 +64,9 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 
 	if err := adms.GetRouteProfile(context.Background(), arg, &result); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, *rtPrf.RouteProfile) {
+	} else if !reflect.DeepEqual(result, *rtPrf.APIRouteProfile) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(rtPrf.RouteProfile), utils.ToJSON(result))
+			utils.ToJSON(rtPrf.APIRouteProfile), utils.ToJSON(result))
 	}
 
 	var rtPrfIDs []string
@@ -112,7 +113,7 @@ func TestRoutesGetRouteProfileCheckErrors(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	var rcv engine.RouteProfile
+	var rcv engine.APIRouteProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
 	if err := adms.GetRouteProfile(context.Background(), &utils.TenantIDWithAPIOpts{
@@ -145,8 +146,10 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	rtPrf := &RouteWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{},
+	rtPrf := &engine.APIRouteProfileWithAPIOpts{
+		APIRouteProfile: &engine.APIRouteProfile{
+			Routes: []*engine.ExternalRoute{{}},
+		},
 	}
 
 	var reply string
@@ -219,11 +222,12 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	rtPrf := &RouteWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &engine.APIRouteProfileWithAPIOpts{
+		APIRouteProfile: &engine.APIRouteProfile{
 			ID:      "TestRoutesRemoveRouteProfileCheckErrors",
 			Tenant:  "cgrates.org",
-			Weights: utils.DynamicWeights{{Weight: 10}},
+			Weights: ";10",
+			Routes:  []*engine.ExternalRoute{{}},
 		},
 	}
 	var reply string
@@ -249,7 +253,7 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	var rcv engine.RouteProfile
+	var rcv engine.APIRouteProfile
 
 	if err := adms.GetRouteProfile(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{

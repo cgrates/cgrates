@@ -320,3 +320,97 @@ type RouteWithWeight struct {
 	Weight         float64
 	lazyCheckRules []*FilterRule
 }
+
+// ExternalRoute the attribute for external profile
+type ExternalRoute struct {
+	ID              string // RouteID
+	FilterIDs       []string
+	AccountIDs      []string
+	RateProfileIDs  []string // used when computing price
+	ResourceIDs     []string // queried in some strategies
+	StatIDs         []string // queried in some strategies
+	Weights         string
+	Blocker         bool // do not process further route after this one
+	RouteParameters string
+}
+
+// APIRouteProfile used by APIs
+type APIRouteProfile struct {
+	Tenant            string
+	ID                string // LCR Profile ID
+	FilterIDs         []string
+	Sorting           string // Sorting strategy
+	SortingParameters []string
+	Routes            []*ExternalRoute
+	Weights           string
+}
+
+type APIRouteProfileWithAPIOpts struct {
+	*APIRouteProfile
+	APIOpts map[string]interface{}
+}
+
+func NewAPIRouteProfile(attr *RouteProfile) (ext *APIRouteProfile) {
+	ext = &APIRouteProfile{
+		Tenant:            attr.Tenant,
+		ID:                attr.ID,
+		FilterIDs:         attr.FilterIDs,
+		Sorting:           attr.Sorting,
+		SortingParameters: attr.SortingParameters,
+		Routes:            make([]*ExternalRoute, len(attr.Routes)),
+		Weights:           attr.Weights.String(utils.InfieldSep, utils.ANDSep),
+	}
+	for i, r := range attr.Routes {
+		ext.Routes[i] = &ExternalRoute{
+			ID:              r.ID,
+			FilterIDs:       r.FilterIDs,
+			AccountIDs:      r.AccountIDs,
+			RateProfileIDs:  r.RateProfileIDs,
+			ResourceIDs:     r.ResourceIDs,
+			StatIDs:         r.StatIDs,
+			Weights:         r.Weights.String(utils.InfieldSep, utils.ANDSep),
+			Blocker:         r.Blocker,
+			RouteParameters: r.RouteParameters,
+		}
+	}
+	return
+}
+
+// AsAttributeProfile converts the external attribute format to the actual AttributeProfile
+func (ext *APIRouteProfile) AsRouteProfile() (rp *RouteProfile, err error) {
+	if len(ext.Routes) == 0 {
+		return nil, utils.NewErrMandatoryIeMissing("Routes")
+	}
+	rp = &RouteProfile{
+		Tenant:            ext.Tenant,
+		ID:                ext.ID,
+		FilterIDs:         ext.FilterIDs,
+		Sorting:           ext.Sorting,
+		SortingParameters: ext.SortingParameters,
+		Routes:            make([]*Route, len(ext.Routes)),
+	}
+	if ext.Weights != utils.EmptyString {
+		if rp.Weights, err = utils.NewDynamicWeightsFromString(ext.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+			return
+		}
+	}
+	for i, extR := range ext.Routes {
+		rp.Routes[i] = &Route{
+			ID:              extR.ID,
+			FilterIDs:       extR.FilterIDs,
+			AccountIDs:      extR.AccountIDs,
+			RateProfileIDs:  extR.RateProfileIDs,
+			ResourceIDs:     extR.ResourceIDs,
+			StatIDs:         extR.StatIDs,
+			Blocker:         extR.Blocker,
+			RouteParameters: extR.RouteParameters,
+		}
+		if extR.Weights != utils.EmptyString {
+			if rp.Routes[i].Weights, err = utils.NewDynamicWeightsFromString(extR.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+				return
+			}
+		}
+	}
+	err = rp.Compile()
+	return
+}
