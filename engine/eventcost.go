@@ -641,6 +641,7 @@ func (ec *EventCost) SyncKeys(refEC *EventCost) {
 // Merge will merge a list of EventCosts into this one
 func (ec *EventCost) Merge(ecs ...*EventCost) {
 	for _, newEC := range ecs {
+		newEC.AccountSummary.UpdateBalances(ec.AccountSummary)
 		ec.AccountSummary = newEC.AccountSummary // updated AccountSummary information
 		for cIlIdx := range newEC.Charges {
 			ec.appendChargingIntervalFromEventCost(newEC, cIlIdx)

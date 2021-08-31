@@ -1212,3 +1212,23 @@ func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 		return as.Disabled, nil
 	}
 }
+
+// UpdateBalances will add the expired balances back
+func (as *AccountSummary) UpdateBalances(old *AccountSummary) {
+	if old == nil {
+		return
+	}
+	for _, initialBal := range old.BalanceSummaries {
+		removed := true
+		for _, currentBal := range as.BalanceSummaries {
+			if currentBal.UUID == initialBal.UUID {
+				removed = false
+				break
+			}
+		}
+		if removed { // add back the expired balances
+			initialBal.Value = 0 // it expired so lose all the values only keep track of it in this
+			as.BalanceSummaries = append(as.BalanceSummaries, initialBal)
+		}
+	}
+}

@@ -598,7 +598,9 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		return
 	}
 	if acnt.ID != "" { // Account info updated, update also cached AccountSummary
-		sr.EventCost.AccountSummary = acnt.AsAccountSummary()
+		acntSummary := acnt.AsAccountSummary()
+		acntSummary.UpdateBalances(sr.EventCost.AccountSummary)
+		sr.EventCost.AccountSummary = acntSummary
 	}
 	return
 }
