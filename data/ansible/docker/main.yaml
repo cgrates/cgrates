@@ -79,6 +79,14 @@
       include: nginx.yaml
       when: nginxConfig.stdout_lines|length < 1 or users_filename|length > 0
 
+    - name: Enable nginx
+      become: true
+      shell: "systemctl enable nginx"
+
+    - name: Start nginx
+      become: true
+      shell: "systemctl start nginx"
+      
     - name: Configure docker 
       include: docker.yaml
 
