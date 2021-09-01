@@ -76,6 +76,14 @@
     - name: Configure NGINX server
       include: nginx.yaml
       when: nginxConfig.stdout_lines|length < 1
+    
+    - name: Enable nginx
+      become: true
+      shell: "systemctl enable nginx"
+
+    - name: Start nginx
+      become: true
+      shell: "systemctl start nginx"
 
 ###########################################################################################################################
 ###########################################################################################################################
