@@ -911,7 +911,8 @@ func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 		cc := cd.CreateCallCost()
 		if increment.BalanceInfo.Unit != nil && increment.BalanceInfo.Unit.UUID != "" {
 			if balance = account.BalanceMap[unitType].GetBalance(increment.BalanceInfo.Unit.UUID); balance == nil {
-				return
+				utils.Logger.Warning(fmt.Sprintf("Could not get the balnce: <%s> to be refunded for account: <%s>", increment.BalanceInfo.Unit.UUID, increment.BalanceInfo.AccountID))
+				continue
 			}
 			balance.AddValue(float64(increment.Duration.Nanoseconds()))
 			account.countUnits(-float64(increment.Duration.Nanoseconds()), unitType, cc, balance)
@@ -919,7 +920,8 @@ func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 		// check money too
 		if increment.BalanceInfo.Monetary != nil && increment.BalanceInfo.Monetary.UUID != "" {
 			if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.Monetary.UUID); balance == nil {
-				return
+				utils.Logger.Warning(fmt.Sprintf("Could not get the balnce: <%s> to be refunded for account: <%s>", increment.BalanceInfo.Unit.UUID, increment.BalanceInfo.AccountID))
+				continue
 			}
 			balance.AddValue(increment.Cost)
 			account.countUnits(-increment.Cost, utils.MONETARY, cc, balance)
