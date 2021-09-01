@@ -38,7 +38,7 @@ const (
 )
 
 var (
-	tFIdxRpc   *rpc.Client
+	tFIdxRpc *rpc.Client
 
 	sTestsFilterIndexesSV1 = []func(t *testing.T){
 		testV1FIdxLoadConfig,
@@ -925,9 +925,9 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	}
 	rlsConfig = &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    tenant,
-			ID:        "RCFG2",
-			FilterIDs: []string{"FLTR_2"},
+			Tenant:            tenant,
+			ID:                "RCFG2",
+			FilterIDs:         []string{"FLTR_2"},
 			UsageTTL:          10 * time.Microsecond,
 			Limit:             10,
 			AllocationMessage: "MessageAllocation",
@@ -1819,7 +1819,7 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{
 			Tenant:       "cgrates.org",
-			Context:       utils.MetaAny,
+			Context:      utils.MetaAny,
 			AttributeIDs: []string{"TEST_ATTRIBUTES_new_fltr", "TEST_ATTRIBUTE3"},
 		}, &reply); err != nil {
 		t.Error(err)
@@ -2801,9 +2801,9 @@ func testV1FIdxSetResourceComputeIDs(t *testing.T) {
 
 	rlsConfig = &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    tenant,
-			ID:        "RCFG2",
-			FilterIDs: []string{"FLTR_2"},
+			Tenant:            tenant,
+			ID:                "RCFG2",
+			FilterIDs:         []string{"FLTR_2"},
 			UsageTTL:          10 * time.Microsecond,
 			Limit:             10,
 			AllocationMessage: "MessageAllocation",
