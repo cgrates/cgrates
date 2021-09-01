@@ -422,7 +422,45 @@
 				"natsJetStream": true,
 				"natsSubject": "processed_cdrs",
 			}
-		}
+		},
+		{
+			"id": "SQLExportCDR",
+			"type": "*sql",
+			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"attempts": 1,
+			"opts": {
+				"sqlTableName": "cdrs", // tableName is mandatory in opts for sql exporter
+			},
+			"fields":[
+				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
+				{"tag": "OriginHost", "path": "*exp.OriginHost", "type": "*variable", "value": "~*req.OriginHost"},
+				{"tag": "Source", "path": "*exp.Source", "type": "*variable", "value": "~*req.Source"},
+				{"tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
+				{"tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR"},
+				{"tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType"},
+				{"tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*req.Tenant"},
+				{"tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category"},
+				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+				{"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
+				{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+				{"tag": "ExtraInfo", "path": "*exp.ExtraInfo", "type": "*variable", "value": "~*req.ExtraInfo"},
+				{"tag": "CostSource", "path": "*exp.CostSource", "type": "*variable", "value": "~*req.CostSource"},
+				{"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime{*time_string}"},
+				{"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime{*time_string}"},
+				{"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage{*duration}"},
+				{"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*float64}"},
+				{"tag": "Partial", "path": "*exp.Partial", "type": "*variable", "value": "true","filters": ["*string:~*req.Partial:true"]},
+				{"tag": "PreRated", "path": "*exp.PreRated", "type": "*variable", "value": "true","filters": ["*string:~*req.PreRated:true"]},
+			
+				// extra fields
+				{"tag": "Opts", "path": "*opts.ExtraFields.extra1", "type": "*variable", "value": "value"}, // put all the extrafields inside *opts
+				{"tag": "ExtraFields", "path": "*exp.ExtraFields", "type": "*variable", "value": "~*opts.ExtraFields"}, // and then move them to *exp
+			
+				// cost details ??
+				{"tag": "CostDetails", "path": "*exp.CostDetails", "type": "*variable", "value": "~*req.CostDetails"}
+			]
+		},
 	]
 },
 
