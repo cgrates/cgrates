@@ -77,13 +77,12 @@
       include: nginx.yaml
       when: nginxConfig.stdout_lines|length < 1
     
-    - name: Enable nginx
-      become: true
-      shell: "systemctl enable nginx"
-
-    - name: Start nginx
-      become: true
-      shell: "systemctl start nginx"
+    - name: Enable and start nginx
+      systemd:
+        name: nginx
+        state: started
+        masked: no
+        enabled: yes
 
 ###########################################################################################################################
 ###########################################################################################################################
