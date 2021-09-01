@@ -193,7 +193,7 @@ func testCDRsOnExpInitMasterRPC(t *testing.T) {
 }
 
 func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
-	// //add a default charger
+	//add a default charger
 	chargerProfile := &engine.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Default",

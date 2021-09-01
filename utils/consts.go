@@ -683,7 +683,6 @@ const (
 	Local                   = "local"
 	TCP                     = "tcp"
 	UDP                     = "udp"
-	CGRDebitInterval        = "CGRDebitInterval"
 	VersionName             = "Version"
 	MetaTenant              = "*tenant"
 	ResourceUsage           = "ResourceUsage"
