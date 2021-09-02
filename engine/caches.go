@@ -217,7 +217,7 @@ func (chS *CacheS) GetPrecacheChannel(chID string) chan struct{} {
 }
 
 // Precache loads data from DataDB into cache at engine start
-func (chS *CacheS) Precache() (err error) {
+func (chS *CacheS) Precache(ctx *context.Context) (err error) {
 	var wg sync.WaitGroup // wait for precache to finish
 	errChan := make(chan error)
 	doneChan := make(chan struct{})
@@ -228,7 +228,7 @@ func (chS *CacheS) Precache() (err error) {
 		}
 		wg.Add(1)
 		go func(cacheID string) {
-			errCache := chS.dm.CacheDataFromDB(context.TODO(),
+			errCache := chS.dm.CacheDataFromDB(ctx,
 				utils.CacheInstanceToPrefix[cacheID],
 				[]string{utils.MetaAny},
 				false)
@@ -247,6 +247,8 @@ func (chS *CacheS) Precache() (err error) {
 	select {
 	case err = <-errChan:
 	case <-doneChan:
+	case <-ctx.Done():
+		err = ctx.Err()
 	}
 	return
 }

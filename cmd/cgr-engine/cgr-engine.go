@@ -84,7 +84,7 @@ func initCacheS(internalCacheSChan chan birpc.ClientConnector,
 	cpS *engine.CapsStats) (chS *engine.CacheS) {
 	chS = engine.NewCacheS(cfg, dm, cpS)
 	go func() {
-		if err := chS.Precache(); err != nil {
+		if err := chS.Precache(context.TODO()); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> could not init, error: %s", utils.CacheS, err.Error()))
 			shdChan.CloseOnce()
 		}
@@ -141,6 +141,7 @@ func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 	internalConfigChan <- rpc
 }
 
+/*
 func startRPC(server *cores.Server, internalAdminSChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalRouteSChan,
@@ -251,6 +252,7 @@ func startRPC(server *cores.Server, internalAdminSChan,
 		)
 	}
 }
+*/
 
 func writePid() {
 	utils.Logger.Info(*pidFile)
