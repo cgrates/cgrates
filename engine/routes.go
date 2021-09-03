@@ -186,10 +186,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt
 
 // ArgsGetRoutes the argument for GetRoutes API
 type ArgsGetRoutes struct {
-	IgnoreErrors bool
-	MaxCost      string // toDo: try with interface{} here
 	*utils.CGREvent
-	utils.Paginator
 	clnb bool //rpcclonable
 }
 
@@ -209,34 +206,47 @@ func (attr *ArgsGetRoutes) RPCClone() (interface{}, error) {
 // Clone creates a clone of the object
 func (attr *ArgsGetRoutes) Clone() *ArgsGetRoutes {
 	return &ArgsGetRoutes{
-		IgnoreErrors: attr.IgnoreErrors,
-		MaxCost:      attr.MaxCost,
-		Paginator:    attr.Paginator.Clone(),
-		CGREvent:     attr.CGREvent.Clone(),
+		CGREvent: attr.CGREvent.Clone(),
 	}
 }
 
 func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
-	opts = &optsGetRoutes{ignoreErrors: utils.OptAsBoolOrDef(config.CgrConfig().RouteSCfg().DefaultOpts, utils.MetaIgnoreErrors, attr.IgnoreErrors)}
-	if attr.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
+	opts = &optsGetRoutes{}
+	if ignoreErrors, has := attr.APIOpts[utils.OptsRoutesIgnoreErrors]; has {
+		opts.ignoreErrors, err = utils.IfaceAsBool(ignoreErrors)
+		if err != nil {
+			return
+		}
+	} else {
+		opts.ignoreErrors = config.CgrConfig().RouteSCfg().DefaultOpts.IgnoreErrors
+	}
+
+	maxCost, has := attr.APIOpts[utils.OptsRoutesMaxCost]
+	if !has {
+		maxCost = config.CgrConfig().RouteSCfg().DefaultOpts.MaxCost
+	}
+
+	switch maxCost {
+	case utils.EmptyString:
+		// TO DO
+	case utils.MetaEventCost:
 		if err = attr.CGREvent.CheckMandatoryFields([]string{utils.AccountField,
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}
-		// ToDoNext: rates.V1CostForEvent
-		// cd, err := NewCallDescriptorFromCGREvent(attr.CGREvent,
-		// 	config.CgrConfig().GeneralCfg().DefaultTimezone)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// cc, err := cd.GetCost()
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// opts.maxCost = cc.Cost
-	} else if attr.MaxCost != "" {
-		if opts.maxCost, err = strconv.ParseFloat(attr.MaxCost,
-			64); err != nil {
+	// ToDoNext: rates.V1CostForEvent
+	// cd, err := NewCallDescriptorFromCGREvent(attr.CGREvent,
+	// 	config.CgrConfig().GeneralCfg().DefaultTimezone)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// cc, err := cd.GetCost()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// opts.maxCost = cc.Cost
+	default:
+		if opts.maxCost, err = utils.IfaceAsFloat64(maxCost); err != nil {
 			return nil, err
 		}
 	}
@@ -271,7 +281,7 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *ArgsGetRoutes, 
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
 		args.CGREvent.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 			utils.IfaceAsString(args.CGREvent.APIOpts[utils.OptsContext]),
-			utils.IfaceAsString(rpS.cfg.RouteSCfg().DefaultOpts[utils.OptsContext]),
+			rpS.cfg.RouteSCfg().DefaultOpts.Context,
 			utils.MetaRoutes)
 		attrArgs := &AttrArgsProcessEvent{
 			CGREvent: args.CGREvent,
@@ -390,11 +400,11 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
-	prfCountOptInf, has := args.APIOpts[utils.OptsRoutesProfilesCount]
+	prfCountOptInf, has := args.APIOpts[utils.OptsRoutesProfileCount]
 	if !has {
-		prfCountOptInf, has = rpS.cfg.RouteSCfg().DefaultOpts[utils.OptsRoutesProfilesCount]
+		prfCountOptInf = rpS.cfg.RouteSCfg().DefaultOpts.ProfileCount
 	}
-	if has {
+	if prfCountOptInf != nil {
 		prfCountOpt, err := utils.IfaceAsTInt64(prfCountOptInf)
 		if err != nil {
 			return nil, err
@@ -408,19 +418,29 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 	}
 
 	var startIdx, noSrtRoutes int
-	if args.Paginator.Offset != nil { // save the offset in a varible to not duble check if we have offset and is still not 0
-		startIdx = *args.Paginator.Offset
+	if optsOffset, has := args.APIOpts[utils.OptsRoutesOffset]; has {
+		var val int64
+		val, err = utils.IfaceAsTInt64(optsOffset)
+		if err != nil {
+			return
+		}
+		startIdx = int(val)
 	}
 	sortedRoutes = make(SortedRoutesList, 0, prfCount)
 	for _, rPrfl := range rPrfs {
 		var prfPag utils.Paginator
-		if args.Paginator.Limit != nil { // we have a limit
-			if noSrtRoutes >= *args.Paginator.Limit { // the limit was reached
+		if val, has := args.APIOpts[utils.OptsRoutesLimit]; has { // we have a limit
+			var optsLimit int64
+			optsLimit, err = utils.IfaceAsTInt64(val)
+			if err != nil {
+				return
+			}
+			if noSrtRoutes >= int(optsLimit) { // the limit was reached
 				break
 			}
-			if noSrtRoutes+len(rPrfl.Routes) > *args.Paginator.Limit { // the limit will be reached in this profile
-				limit := *args.Paginator.Limit - noSrtRoutes // make it relative to current profile
-				prfPag.Limit = &limit                        // add the limit to the paginator
+			if noSrtRoutes+len(rPrfl.Routes) > int(optsLimit) { // the limit will be reached in this profile
+				limit := int(optsLimit) - noSrtRoutes // make it relative to current profile
+				prfPag.Limit = &limit                 // add the limit to the paginator
 			}
 		}
 		if startIdx > 0 { // we have offest

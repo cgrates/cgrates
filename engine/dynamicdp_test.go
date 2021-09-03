@@ -17,21 +17,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
-/*
 import (
+	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/nyaruka/phonenumbers"
 )
 
-func TestNewLibPhoneNumberDP(t *testing.T) {
-	utils.Logger.SetLogLevel(7)
-	dp, err := newLibPhoneNumberDP("+447825602604")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Error(dp.FieldAsInterface(nil))
+func TestDynamicDPnewDynamicDP(t *testing.T) {
 
+	expDDP := &dynamicDP{
+		resConns:  []string{"conn1"},
+		stsConns:  []string{"conn2"},
+		actsConns: []string{"conn3"},
+		tenant:    "cgrates.org",
+		initialDP: utils.StringSet{
+			"test": struct{}{},
+		},
+		cache: utils.MapStorage{},
+		ctx:   context.Background(),
+	}
+
+	if rcv := newDynamicDP(context.Background(), []string{"conn1"}, []string{"conn2"},
+		[]string{"conn3"}, "cgrates.org",
+		utils.StringSet{"test": struct{}{}}); !reflect.DeepEqual(rcv, expDDP) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expDDP), utils.ToJSON(rcv))
+	}
 }
-*/
+
+func TestDynamicDPString(t *testing.T) {
+	dDP := &dynamicDP{
+		tenant: "cgrates.org",
+		initialDP: utils.StringSet{
+			"test1": struct{}{},
+			"test2": struct{}{},
+		},
+		cache: utils.MapStorage{},
+		ctx:   context.Background(),
+	}
+
+	exp := `["test1","test2"]`
+	rcv := dDP.String()
+	if rcv != exp {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}

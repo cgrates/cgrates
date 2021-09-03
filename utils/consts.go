@@ -2089,7 +2089,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, Op
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
-	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount,
+	RemoteHostOpt, CacheOpt, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
 	OptsSesAttributeS, OptsSesAttributeIDs, OptsSesAttributeSDerivedReply, OptsSesBlockerError,
 	OptsSesCDRs, OptsSesCDRsDerivedReply, OptsSesChargerS, OptsSesResourceS, OptsSesResourceSAuthorize,
 	OptsSesResourceSAlocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsSesRouteS,
@@ -2153,12 +2153,15 @@ const (
 	OptsCDRsThresholdS = "*cdrsThresholdS"
 	OptsCDRsRateS      = "*cdrsRateS"
 
-	OptsRoutesProfilesCount = "*routesProfilesCount"
-	OptsRoutesLimit         = "*routes_limit"
-	OptsRoutesOffset        = "*routes_offset"
-	OptsRatesStartTime      = "*ratesStartTime"
-	OptsRatesUsage          = "*ratesUsage"
-	OptsRatesIntervalStart  = "*ratesIntervalStart"
+	OptsRoutesProfileCount = "*rouProfileCount"
+	OptsRoutesLimit        = "*rouLimit"
+	OptsRoutesOffset       = "*rouOffset"
+	OptsRoutesIgnoreErrors = "*routesIgnoreErrors"
+	OptsRoutesMaxCost      = "*routesMaxCost"
+
+	OptsRatesStartTime     = "*ratesStartTime"
+	OptsRatesUsage         = "*ratesUsage"
+	OptsRatesIntervalStart = "*ratesIntervalStart"
 	// STIR
 	OptsStirATest              = "*stirATest"
 	OptsStirPayloadMaxDuration = "*stirPayloadMaxDuration"

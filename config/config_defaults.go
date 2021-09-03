@@ -737,7 +737,11 @@ const CGRATES_CFG_JSON = `
 	"default_ratio":1,						// default ratio used in case of *load strategy
 	"default_opts":{
 		"*context": "*routes",
-		"*routesProfilesCount": 1,
+		"*profileCount": 1,
+		"*ignoreErrors": false,
+		"*maxCost": "",
+		"*limit": 1,
+		"*offset": 1,
 	},
 },
 

@@ -858,6 +858,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					"PddInterval":    "1s",
 					utils.Weight:     "20.0",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching RouteProfile2
@@ -871,6 +872,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					"PddInterval":    "1s",
 					utils.Weight:     "20.0",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching RouteProfilePrefix
@@ -880,6 +882,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 				Event: map[string]interface{}{
 					"Route": "RouteProfilePrefix",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching
@@ -890,6 +893,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					"UsageInterval": "1s",
 					"PddInterval":   "1s",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 	}
@@ -1000,9 +1004,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 		},
 	}}
-	argsGetRoutes[1].Paginator = utils.Paginator{
-		Limit: utils.IntPointer(2),
-	}
+	argsGetRoutes[1].APIOpts[utils.OptsRoutesLimit] = 2
 	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1113,6 +1115,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					"PddInterval":    "1s",
 					utils.Weight:     "20.0",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching RouteProfile2
@@ -1126,6 +1129,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					"PddInterval":    "1s",
 					utils.Weight:     "20.0",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching RouteProfilePrefix
@@ -1135,6 +1139,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 				Event: map[string]interface{}{
 					"Route": "RouteProfilePrefix",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching
@@ -1145,6 +1150,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					"UsageInterval": "1s",
 					"PddInterval":   "1s",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 	}
@@ -1245,9 +1251,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			},
 		},
 	}}
-	argsGetRoutes[1].Paginator = utils.Paginator{
-		Offset: utils.IntPointer(2),
-	}
+	argsGetRoutes[1].APIOpts[utils.OptsRoutesOffset] = 2
 	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1358,6 +1362,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					"PddInterval":    "1s",
 					utils.Weight:     "20.0",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching RouteProfile2
@@ -1371,6 +1376,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					"PddInterval":    "1s",
 					utils.Weight:     "20.0",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching RouteProfilePrefix
@@ -1380,6 +1386,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 				Event: map[string]interface{}{
 					"Route": "RouteProfilePrefix",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 		{ //matching
@@ -1390,6 +1397,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					"UsageInterval": "1s",
 					"PddInterval":   "1s",
 				},
+				APIOpts: map[string]interface{}{},
 			},
 		},
 	}
@@ -1490,10 +1498,8 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			},
 		},
 	}}
-	argsGetRoutes[1].Paginator = utils.Paginator{
-		Limit:  utils.IntPointer(1),
-		Offset: utils.IntPointer(1),
-	}
+	argsGetRoutes[1].APIOpts[utils.OptsRoutesLimit] = 1
+	argsGetRoutes[1].APIOpts[utils.OptsRoutesOffset] = 1
 	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1505,9 +1511,12 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 
 func TestRoutesAsOptsGetRoutes(t *testing.T) {
 	s := &ArgsGetRoutes{
-		IgnoreErrors: true,
-		MaxCost:      "10.0",
-		CGREvent:     &utils.CGREvent{},
+		CGREvent: &utils.CGREvent{
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesMaxCost:      10,
+				utils.OptsRoutesIgnoreErrors: true,
+			},
+		},
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
@@ -1523,8 +1532,12 @@ func TestRoutesAsOptsGetRoutes(t *testing.T) {
 }
 
 func TestRoutesAsOptsGetRoutesFromCfg(t *testing.T) {
-	config.CgrConfig().RouteSCfg().DefaultOpts[utils.MetaIgnoreErrors] = true
-	s := &ArgsGetRoutes{}
+	config.CgrConfig().RouteSCfg().DefaultOpts.IgnoreErrors = true
+	s := &ArgsGetRoutes{
+		CGREvent: &utils.CGREvent{
+			APIOpts: map[string]interface{}{},
+		},
+	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
 	}
@@ -1535,13 +1548,15 @@ func TestRoutesAsOptsGetRoutesFromCfg(t *testing.T) {
 	if !reflect.DeepEqual(spl, sprf) {
 		t.Errorf("Expecting: %+v,received: %+v", spl, sprf)
 	}
-	delete(config.CgrConfig().RouteSCfg().DefaultOpts, utils.MetaIgnoreErrors)
 }
 
 func TestRoutesAsOptsGetRoutesIgnoreErrors(t *testing.T) {
 	s := &ArgsGetRoutes{
-		IgnoreErrors: true,
-		CGREvent:     &utils.CGREvent{},
+		CGREvent: &utils.CGREvent{
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesIgnoreErrors: true,
+			},
+		},
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
@@ -2130,7 +2145,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ID:      "utils.CGREvent1",
 			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 3},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 3},
 		},
 	}
 
@@ -2188,10 +2203,8 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			},
 		},
 	}
-	argsGetRoutes.Paginator = utils.Paginator{
-		Limit:  utils.IntPointer(2),
-		Offset: utils.IntPointer(1),
-	}
+	argsGetRoutes.APIOpts[utils.OptsRoutesLimit] = 2
+	argsGetRoutes.APIOpts[utils.OptsRoutesOffset] = 1
 	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes.Tenant, argsGetRoutes)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
