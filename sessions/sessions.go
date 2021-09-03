@@ -2881,11 +2881,13 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent, pag u
 		cgrEv.Event[utils.Usage] = acd
 	}
 	sArgs := &engine.ArgsGetRoutes{
-		CGREvent:     cgrEv,
-		Paginator:    pag,
-		IgnoreErrors: ignoreErrors,
-		MaxCost:      maxCost,
+		CGREvent: cgrEv,
 	}
+	sArgs.APIOpts[utils.OptsRoutesMaxCost] = maxCost
+	sArgs.APIOpts[utils.OptsRoutesIgnoreErrors] = ignoreErrors
+	sArgs.APIOpts[utils.OptsRoutesLimit] = pag.Limit
+	sArgs.APIOpts[utils.OptsRoutesOffset] = pag.Offset
+
 	sArgs.SetCloneable(clnb)
 	if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().RouteSConns, utils.RouteSv1GetRoutes,
 		sArgs, &routesReply); err != nil {

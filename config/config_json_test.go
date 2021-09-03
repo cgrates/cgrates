@@ -875,6 +875,8 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 }
 
 func TestDfRouteSJsonCfg(t *testing.T) {
+	var maxCost interface{}
+	maxCost = utils.EmptyString
 	eCfg := &RouteSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Indexed_selects:       utils.BoolPointer(true),
@@ -888,9 +890,13 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Accounts_conns:        &[]string{},
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
-		Default_opts: map[string]interface{}{
-			utils.OptsContext:             utils.MetaRoutes,
-			utils.OptsRoutesProfilesCount: float64(1),
+		Default_opts: &RoutesOptsJson{
+			Context:      utils.StringPointer(utils.MetaRoutes),
+			ProfileCount: utils.Float64Pointer(float64(1)),
+			IgnoreErrors: utils.BoolPointer(false),
+			MaxCost:      &maxCost,
+			Limit:        utils.IntPointer(1),
+			Offset:       utils.IntPointer(1),
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

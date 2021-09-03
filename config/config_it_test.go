@@ -356,9 +356,9 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		AccountSConns:       []string{},
 		IndexedSelects:      true,
 		DefaultRatio:        1,
-		DefaultOpts: map[string]interface{}{
-			utils.OptsContext:             utils.MetaRoutes,
-			utils.OptsRoutesProfilesCount: float64(1),
+		DefaultOpts: &RoutesOpts{
+			Context:      utils.MetaRoutes,
+			ProfileCount: 1,
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RouteSCfg()) {

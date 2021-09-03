@@ -716,7 +716,7 @@
 // 	"default_ratio":1,						// default ratio used in case of *load strategy
 // 	"default_opts":{
 // 		"*context": "*routes",
-// 		"*routesProfilesCount": 1,
+// 		"*rouProfileCount": 1,
 // 	},
 // },
 

@@ -52,9 +52,13 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
-		DefaultOpts: map[string]interface{}{
-			utils.OptsContext:             utils.MetaRoutes,
-			utils.OptsRoutesProfilesCount: float64(1),
+		DefaultOpts: &RoutesOpts{
+			Context:      utils.MetaRoutes,
+			ProfileCount: float64(1),
+			IgnoreErrors: false,
+			MaxCost:      utils.EmptyString,
+			Limit:        1,
+			Offset:       1,
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -82,8 +86,12 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{},
 		utils.DefaultRatioCfg:        1,
 		utils.DefaultOptsCfg: map[string]interface{}{
-			utils.OptsContext:             utils.MetaRoutes,
-			utils.OptsRoutesProfilesCount: float64(1),
+			utils.OptsContext:            utils.MetaRoutes,
+			utils.OptsRoutesProfileCount: float64(1),
+			utils.OptsRoutesIgnoreErrors: false,
+			utils.OptsRoutesLimit:        1,
+			utils.OptsRoutesOffset:       1,
+			utils.OptsRoutesMaxCost:      utils.EmptyString,
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -125,8 +133,8 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
 		utils.DefaultOptsCfg: map[string]interface{}{
-			utils.OptsContext:             utils.MetaRoutes,
-			utils.OptsRoutesProfilesCount: float64(1),
+			utils.OptsContext:            utils.MetaRoutes,
+			utils.OptsRoutesProfileCount: float64(1),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -187,6 +195,14 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		ResourceSConns:      []string{"*localhost"},
 		StatSConns:          []string{"*localhost"},
 		DefaultRatio:        2,
+		DefaultOpts: &RoutesOpts{
+			Context:      utils.MetaAny,
+			IgnoreErrors: true,
+			MaxCost:      5,
+			Limit:        1,
+			Offset:       1,
+			ProfileCount: 1,
+		},
 	}
 
 	v2 := &RouteSCfg{
@@ -200,6 +216,14 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		ResourceSConns:      []string{"*birpc"},
 		StatSConns:          []string{"*birpc"},
 		DefaultRatio:        3,
+		DefaultOpts: &RoutesOpts{
+			Context:      utils.MetaRoutes,
+			IgnoreErrors: false,
+			MaxCost:      utils.MetaEventCost,
+			Limit:        2,
+			Offset:       2,
+			ProfileCount: 2,
+		},
 	}
 
 	expected := &RouteSJsonCfg{
@@ -213,7 +237,14 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Resources_conns:       &[]string{"*birpc"},
 		Stats_conns:           &[]string{"*birpc"},
 		Default_ratio:         utils.IntPointer(3),
-		Default_opts:          make(map[string]interface{}),
+		Default_opts: &RoutesOptsJson{
+			Context:      utils.StringPointer(utils.MetaRoutes),
+			IgnoreErrors: utils.BoolPointer(false),
+			MaxCost:      &v2.DefaultOpts.MaxCost,
+			Limit:        utils.IntPointer(2),
+			Offset:       utils.IntPointer(2),
+			ProfileCount: utils.Float64Pointer(2),
+		},
 	}
 
 	rcv := diffRouteSJsonCfg(d, v1, v2)
@@ -223,7 +254,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &RouteSJsonCfg{
-		Default_opts: make(map[string]interface{}),
+		Default_opts: &RoutesOptsJson{},
 	}
 	rcv = diffRouteSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
