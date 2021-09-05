@@ -15,7 +15,7 @@ Asterisk_
 We got Asterisk14_  installed via following commands:
 ::
 
- apt-get install autoconf build-essential openssl libssl-dev libsrtp-dev libxml2-dev libncurses5-dev uuid-dev sqlite3 libsqlite3-dev pkg-config libedit-dev
+ apt-get install autoconf build-essential openssl libssl-dev libsrtp2-dev libxml2-dev libncurses5-dev uuid-dev sqlite3 libsqlite3-dev pkg-config libedit-dev
  cd /tmp
  wget --no-check-certificate https://raw.githubusercontent.com/asterisk/third-party/master/pjproject/2.7.2/pjproject-2.7.2.tar.bz2
  wget --no-check-certificate https://raw.githubusercontent.com/asterisk/third-party/master/jansson/2.11/jansson-2.11.tar.bz2
