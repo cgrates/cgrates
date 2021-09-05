@@ -217,7 +217,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 						utils.CDRs, err.Error(), utils.ToJSON(ev), utils.RateS))
 				partiallyExecuted = true
 			} else {
-				cgrEv.Event[utils.MetaCost] = rtsEvCost
+				cgrEv.Event[utils.MetaRateSCost] = rtsEvCost
 			}
 		}
 	}

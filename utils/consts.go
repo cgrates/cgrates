@@ -699,6 +699,8 @@ const (
 	TmpSuffix               = ".tmp"
 	MetaDiamreq             = "*diamreq"
 	MetaCost                = "*cost"
+	MetaRateSCost           = "*rateSCost"
+	MetaAccountSCost        = "*accountSCost"
 	MetaGroup               = "*group"
 	InternalRPCSet          = "InternalRPCSet"
 	FileName                = "FileName"
