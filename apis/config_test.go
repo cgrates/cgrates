@@ -106,10 +106,12 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				"indexed_selects":       false,
 				"nested_fields":         false,
 				"prefix_indexed_fields": []string{},
-				"process_runs":          2,
 				"resources_conns":       []string{"*internal"},
 				"stats_conns":           []string{"*internal"},
 				"suffix_indexed_fields": []string{},
+				utils.DefaultOptsCfg: map[string]interface{}{
+					utils.OptsAttributesProcessRuns: 2,
+				},
 			},
 		},
 		DryRun: true,

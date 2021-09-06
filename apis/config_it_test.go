@@ -150,10 +150,12 @@ func testCfgGetConfig(t *testing.T) {
 			"indexed_selects":       true,
 			"nested_fields":         false,
 			"prefix_indexed_fields": []string{},
-			"process_runs":          1,
 			"resources_conns":       []string{"*localhost"},
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
+			utils.DefaultOptsCfg: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: float64(1),
+			},
 		},
 	}
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfig,
@@ -184,10 +186,12 @@ func testCfgSetGetConfig(t *testing.T) {
 					"indexed_selects":       false,
 					"nested_fields":         false,
 					"prefix_indexed_fields": []string{},
-					"process_runs":          2,
 					"resources_conns":       []string{"*internal"},
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
+					utils.DefaultOptsCfg: map[string]interface{}{
+						utils.OptsAttributesProcessRuns: 2,
+					},
 				},
 			},
 			DryRun: false,
@@ -205,10 +209,12 @@ func testCfgSetGetConfig(t *testing.T) {
 			"indexed_selects":       false,
 			"nested_fields":         false,
 			"prefix_indexed_fields": []string{},
-			"process_runs":          2,
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
+			utils.DefaultOptsCfg: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: float64(2),
+			},
 		},
 	}
 	var replyGet map[string]interface{}
@@ -296,7 +302,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 		&config.SetConfigFromJSONArgs{
 			APIOpts: nil,
 			Tenant:  "",
-			Config:  "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":2,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}",
+			Config:  "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[],\"default_opts\":{\"*processRuns\":2}}}",
 			DryRun:  false,
 		},
 		&reply); err != nil {
@@ -305,7 +311,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":2,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"default_opts\":{\"*processRuns\":2},\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -445,10 +451,12 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"indexed_selects":       false,
 					"nested_fields":         false,
 					"prefix_indexed_fields": []string{},
-					"process_runs":          2,
 					"resources_conns":       []string{"*internal"},
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
+					utils.DefaultOptsCfg: map[string]interface{}{
+						utils.OptsAttributesProcessRuns: 2,
+					},
 				},
 			},
 			DryRun: false,
@@ -466,10 +474,12 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"indexed_selects":       false,
 			"nested_fields":         false,
 			"prefix_indexed_fields": []string{},
-			"process_runs":          2,
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
+			utils.DefaultOptsCfg: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
 	}
 	var replyGet map[string]interface{}
@@ -558,10 +568,12 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"indexed_selects":       true,
 			"nested_fields":         false,
 			"prefix_indexed_fields": []string{},
-			"process_runs":          2,
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
+			utils.DefaultOptsCfg: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
 	}
 	var replyGet map[string]interface{}

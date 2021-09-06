@@ -45,7 +45,9 @@
 
 "attributes": {
 	"enabled": true,
-	"process_runs": 5,						// number of run loops when processing event
+	"default_opts":{
+		"*processRuns": 5,                      // number of run loops when processing event
+	},
 },
 
 
