@@ -70,11 +70,13 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, fi
 	case utils.MetaKafkajsonMap:
 		return NewKafkaEE(cfg, dc), nil
 	case utils.MetaVirt:
-		return NewVirtualEE(cfg, dc)
+		return NewVirtualEE(cfg, dc), nil
 	case utils.MetaElastic:
 		return NewElasticEE(cfg, dc)
 	case utils.MetaSQL:
 		return NewSQLEe(cfg, dc)
+	case utils.MetaLog:
+		return NewLogEE(cfg, dc), nil
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cfg.Type)
 	}

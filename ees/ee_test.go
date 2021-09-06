@@ -157,10 +157,7 @@ func TestNewEventExporterCase6(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eeExpect, err := NewVirtualEE(cgrCfg.EEsCfg().Exporters[0], dc)
-	if err != nil {
-		t.Error(err)
-	}
+	eeExpect := NewVirtualEE(cgrCfg.EEsCfg().Exporters[0], dc)
 	newEE := ee.(*VirtualEE)
 	newEE.dc.MapStorage[utils.TimeNow] = nil
 	eeExpect.dc.MapStorage[utils.TimeNow] = nil
