@@ -991,7 +991,7 @@ func TestConfigSanityAttributesCfg(t *testing.T) {
 			utils.OptsAttributesProcessRuns: float64(0),
 		},
 	}
-	expected := "<AttributeS> process_runs needs to be bigger than 0"
+	expected := "<AttributeS> processRuns needs to be bigger than 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

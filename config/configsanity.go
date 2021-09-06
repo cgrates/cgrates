@@ -549,7 +549,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> invalid type", utils.AttributeS)
 		}
 		if processRuns < 1 {
-			return fmt.Errorf("<%s> process_runs needs to be bigger than 0", utils.AttributeS)
+			return fmt.Errorf("<%s> processRuns needs to be bigger than 0", utils.AttributeS)
 		}
 	}
 	if cfg.chargerSCfg.Enabled {

@@ -1873,7 +1873,6 @@ const (
 
 	// AttributeSCfg
 	IndexedSelectsCfg = "indexed_selects"
-	ProcessRunsCfg    = "process_runs"
 	ProfileRunsCfg    = "profile_runs"
 	NestedFieldsCfg   = "nested_fields"
 
