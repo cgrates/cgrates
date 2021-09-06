@@ -24,17 +24,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type EventExporter interface {
-	Cfg() *config.EventExporterCfg         // return the config
-	Connect() error                        // called before exporting an event to make sure it is connected
-	ExportEvent(interface{}, string) error // called on each event to be exported
-	Close() error                          // called when the exporter needs to terminate
-	GetMetrics() *utils.SafeMapStorage     // called to get metrics
+	Cfg() *config.EventExporterCfg                           // return the config
+	Connect() error                                          // called before exporting an event to make sure it is connected
+	ExportEvent(*context.Context, interface{}, string) error // called on each event to be exported
+	Close() error                                            // called when the exporter needs to terminate
+	GetMetrics() *utils.SafeMapStorage                       // called to get metrics
 	PrepareMap(map[string]interface{}) (interface{}, error)
 	PrepareOrderMap(*utils.OrderedNavigableMap) (interface{}, error)
 }
@@ -110,26 +111,13 @@ func (c *concReq) done() {
 }
 
 // composeHeaderTrailer will return the orderNM for *hdr or *trl
-func composeHeaderTrailer(prfx string, fields []*config.FCTemplate, dc utils.DataStorage, cfg *config.CGRConfig, fltS *engine.FilterS) (r *utils.OrderedNavigableMap, err error) {
+func composeHeaderTrailer(ctx *context.Context, prfx string, fields []*config.FCTemplate, dc utils.DataStorage, cfg *config.CGRConfig, fltS *engine.FilterS) (r *utils.OrderedNavigableMap, err error) {
 	r = utils.NewOrderedNavigableMap()
 	err = engine.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaDC:  dc,
 		utils.MetaCfg: cfg.GetDataProvider(),
 	}, cfg.GeneralCfg().DefaultTenant, fltS,
-		map[string]*utils.OrderedNavigableMap{prfx: r}).SetFields(fields)
-	return
-}
-
-func composeExp(fields []*config.FCTemplate, cgrEv *utils.CGREvent, dc utils.DataStorage, cfg *config.CGRConfig, fltS *engine.FilterS) (r *utils.OrderedNavigableMap, err error) {
-	r = utils.NewOrderedNavigableMap()
-	err = engine.NewExportRequest(map[string]utils.DataStorage{
-		utils.MetaReq:  utils.MapStorage(cgrEv.Event),
-		utils.MetaDC:   dc,
-		utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
-		utils.MetaCfg:  cfg.GetDataProvider(),
-	}, utils.FirstNonEmpty(cgrEv.Tenant, cfg.GeneralCfg().DefaultTenant),
-		fltS,
-		map[string]*utils.OrderedNavigableMap{utils.MetaExp: r}).SetFields(fields)
+		map[string]*utils.OrderedNavigableMap{prfx: r}).SetFields(ctx, fields)
 	return
 }
 

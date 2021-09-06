@@ -25,6 +25,7 @@ import (
 	"path"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -75,7 +76,7 @@ func (fFwv *FileFWVee) composeHeader() (err error) {
 		return
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(utils.MetaHdr, fFwv.Cfg().HeaderFields(), fFwv.dc, fFwv.cgrCfg, fFwv.filterS); err != nil {
+	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, fFwv.Cfg().HeaderFields(), fFwv.dc, fFwv.cgrCfg, fFwv.filterS); err != nil {
 		return
 	}
 	for _, record := range exp.OrderedFieldsAsStrings() {
@@ -93,7 +94,7 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 		return
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(utils.MetaTrl, fFwv.Cfg().TrailerFields(), fFwv.dc, fFwv.cgrCfg, fFwv.filterS); err != nil {
+	if exp, err = composeHeaderTrailer(context.Background(), utils.MetaTrl, fFwv.Cfg().TrailerFields(), fFwv.dc, fFwv.cgrCfg, fFwv.filterS); err != nil {
 		return
 	}
 	for _, record := range exp.OrderedFieldsAsStrings() {
@@ -109,7 +110,7 @@ func (fFwv *FileFWVee) Cfg() *config.EventExporterCfg { return fFwv.cfg }
 
 func (fFwv *FileFWVee) Connect() (_ error) { return }
 
-func (fFwv *FileFWVee) ExportEvent(records interface{}, _ string) (err error) {
+func (fFwv *FileFWVee) ExportEvent(_ *context.Context, records interface{}, _ string) (err error) {
 	fFwv.Lock() // make sure that only one event is writen in file at once
 	defer fFwv.Unlock()
 	for _, record := range records.([]string) {

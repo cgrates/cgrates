@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -61,7 +62,7 @@ func TestHttpPostExportEvent(t *testing.T) {
 		"Test1": 3,
 	}
 	errExpect := `Post "/var/spool/cgrates/ees": unsupported protocol scheme ""`
-	if err := httpPost.ExportEvent(&HTTPPosterRequest{Body: url.Values{}, Header: make(http.Header)}, ""); err == nil || err.Error() != errExpect {
+	if err := httpPost.ExportEvent(context.Background(), &HTTPPosterRequest{Body: url.Values{}, Header: make(http.Header)}, ""); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 }
@@ -91,7 +92,7 @@ func TestHttpPostExportEvent2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := httpPost.ExportEvent(vals, ""); err != nil {
+	if err := httpPost.ExportEvent(context.Background(), vals, ""); err != nil {
 		t.Error(err)
 	}
 }
@@ -135,7 +136,7 @@ func TestHttpPostSync(t *testing.T) {
 	}
 
 	for i := 0; i < 3; i++ {
-		go exp.ExportEvent(vals, "")
+		go exp.ExportEvent(context.Background(), vals, "")
 	}
 
 	select {
@@ -188,7 +189,7 @@ func TestHttpPostSyncLimit(t *testing.T) {
 	}
 
 	for i := 0; i < 3; i++ {
-		go exp.ExportEvent(vals, "")
+		go exp.ExportEvent(context.Background(), vals, "")
 	}
 	select {
 	case <-test:

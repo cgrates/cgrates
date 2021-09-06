@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -105,7 +106,7 @@ func TestNatsEE(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := exportEventWithExporter(evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
+	if err := exportEventWithExporter(context.Background(), evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)
@@ -171,7 +172,7 @@ func TestNatsEE2(t *testing.T) {
 			"Destination": "1002",
 		},
 	}
-	if err := exportEventWithExporter(evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
+	if err := exportEventWithExporter(context.Background(), evExp, cgrEv, true, cgrCfg, new(engine.FilterS)); err != nil {
 		t.Fatal(err)
 	}
 	testCleanDirectory(t)

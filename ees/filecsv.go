@@ -26,6 +26,7 @@ import (
 	"path"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -83,7 +84,7 @@ func (fCsv *FileCSVee) init() (err error) {
 func (fCsv *FileCSVee) composeHeader() (err error) {
 	if len(fCsv.Cfg().HeaderFields()) != 0 {
 		var exp *utils.OrderedNavigableMap
-		if exp, err = composeHeaderTrailer(utils.MetaHdr, fCsv.Cfg().HeaderFields(), fCsv.dc, fCsv.cgrCfg, fCsv.filterS); err != nil {
+		if exp, err = composeHeaderTrailer(context.Background(), utils.MetaHdr, fCsv.Cfg().HeaderFields(), fCsv.dc, fCsv.cgrCfg, fCsv.filterS); err != nil {
 			return
 		}
 		return fCsv.csvWriter.Write(exp.OrderedFieldsAsStrings())
@@ -95,7 +96,7 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 func (fCsv *FileCSVee) composeTrailer() (err error) {
 	if len(fCsv.Cfg().TrailerFields()) != 0 {
 		var exp *utils.OrderedNavigableMap
-		if exp, err = composeHeaderTrailer(utils.MetaTrl, fCsv.Cfg().TrailerFields(), fCsv.dc, fCsv.cgrCfg, fCsv.filterS); err != nil {
+		if exp, err = composeHeaderTrailer(context.Background(), utils.MetaTrl, fCsv.Cfg().TrailerFields(), fCsv.dc, fCsv.cgrCfg, fCsv.filterS); err != nil {
 			return
 		}
 		return fCsv.csvWriter.Write(exp.OrderedFieldsAsStrings())
@@ -107,7 +108,7 @@ func (fCsv *FileCSVee) Cfg() *config.EventExporterCfg { return fCsv.cfg }
 
 func (fCsv *FileCSVee) Connect() (_ error) { return }
 
-func (fCsv *FileCSVee) ExportEvent(ev interface{}, _ string) error {
+func (fCsv *FileCSVee) ExportEvent(_ *context.Context, ev interface{}, _ string) error {
 	fCsv.Lock() // make sure that only one event is writen in file at once
 	defer fCsv.Unlock()
 	return fCsv.csvWriter.Write(ev.([]string))

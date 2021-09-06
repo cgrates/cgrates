@@ -136,7 +136,7 @@ func (rdr *NatsER) Serve() (err error) {
 								utils.ERs, string(msg.Data), err.Error()))
 					}
 					if rdr.poster != nil { // post it
-						if err := ees.ExportWithAttempts(rdr.poster, msg.Data, utils.EmptyString); err != nil {
+						if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Data, utils.EmptyString); err != nil {
 							utils.Logger.Warning(
 								fmt.Sprintf("<%s> writing message %s error: %s",
 									utils.ERs, string(msg.Data), err.Error()))

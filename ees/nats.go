@@ -26,6 +26,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
@@ -99,7 +100,7 @@ func (pstr *NatsEE) Connect() (err error) {
 	return
 }
 
-func (pstr *NatsEE) ExportEvent(content interface{}, _ string) (err error) {
+func (pstr *NatsEE) ExportEvent(ctx *context.Context, content interface{}, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.poster == nil {
@@ -108,7 +109,7 @@ func (pstr *NatsEE) ExportEvent(content interface{}, _ string) (err error) {
 		return utils.ErrDisconnected
 	}
 	if pstr.jetStream {
-		_, err = pstr.posterJS.Publish(pstr.subject, content.([]byte))
+		_, err = pstr.posterJS.Publish(pstr.subject, content.([]byte), nats.Context(ctx))
 	} else {
 		err = pstr.poster.Publish(pstr.subject, content.([]byte))
 	}

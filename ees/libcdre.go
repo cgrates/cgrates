@@ -173,7 +173,7 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 		keyFunc = utils.UUIDSha1Prefix
 	}
 	for _, ev := range expEv.Events {
-		if err = ExportWithAttempts(ee, ev, keyFunc()); err != nil {
+		if err = ExportWithAttempts(context.Background(), ee, ev, keyFunc()); err != nil {
 			failedEvents.AddEvent(ev)
 		}
 	}

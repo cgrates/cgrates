@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"gorm.io/driver/mysql"
@@ -297,7 +298,7 @@ func TestSQLExportEvent1(t *testing.T) {
 	if err := sqlEe.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if err := sqlEe.ExportEvent(&sqlPosterRequest{Querry: "INSERT INTO cdrs VALUES (); ", Values: []interface{}{}}, ""); err != nil {
+	if err := sqlEe.ExportEvent(context.Background(), &sqlPosterRequest{Querry: "INSERT INTO cdrs VALUES (); ", Values: []interface{}{}}, ""); err != nil {
 		t.Error(err)
 	}
 	sqlEe.Close()

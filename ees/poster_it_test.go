@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"net/http"
@@ -38,6 +37,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -76,7 +76,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
+	if err = ExportWithAttempts(context.Background(), pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
 	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, "test1", jsn, make(map[string]interface{}))
@@ -112,7 +112,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
+	if err = ExportWithAttempts(context.Background(), pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
 	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, "test2", content, make(map[string]interface{}))
@@ -166,7 +166,7 @@ func TestSQSPoster(t *testing.T) {
 		Attempts:   5,
 		Opts:       opts,
 	}, nil)
-	if err := ExportWithAttempts(pstr, []byte(body), ""); err != nil {
+	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), ""); err != nil {
 		t.Fatal(err)
 	}
 
@@ -249,7 +249,7 @@ func TestS3Poster(t *testing.T) {
 		Attempts:   5,
 		Opts:       opts,
 	}, nil)
-	if err := ExportWithAttempts(pstr, []byte(body), key); err != nil {
+	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), key); err != nil {
 		t.Fatal(err)
 	}
 	key += ".json"
@@ -308,7 +308,7 @@ func TestAMQPv1Poster(t *testing.T) {
 		Attempts:   5,
 		Opts:       opts,
 	}, nil)
-	if err := ExportWithAttempts(pstr, []byte(body), ""); err != nil {
+	if err := ExportWithAttempts(context.Background(), pstr, []byte(body), ""); err != nil {
 		t.Fatal(err)
 	}
 	// Create client

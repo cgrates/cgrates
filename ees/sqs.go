@@ -26,6 +26,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -129,10 +130,10 @@ func (pstr *SQSee) Connect() (err error) {
 	return
 }
 
-func (pstr *SQSee) ExportEvent(message interface{}, _ string) (err error) {
+func (pstr *SQSee) ExportEvent(ctx *context.Context, message interface{}, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
-	_, err = pstr.svc.SendMessage(
+	_, err = pstr.svc.SendMessageWithContext(ctx,
 		&sqs.SendMessageInput{
 			MessageBody: aws.String(string(message.([]byte))),
 			QueueUrl:    pstr.queueURL,

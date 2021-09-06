@@ -115,7 +115,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 	})
 	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
 	// cgrEv := &utils.CGREvent{}
-	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
+	if err := eeS.attrSProcessEvent(context.TODO(), cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -141,7 +141,7 @@ func TestAttrSProcessEvent2(t *testing.T) {
 	})
 	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
 	cgrEv := &utils.CGREvent{}
-	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
+	if err := eeS.attrSProcessEvent(context.TODO(), cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -189,7 +189,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	rplyExpect := map[string]map[string]interface{}{
 		"SQLExporterFull": {},
 	}
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
+	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, rplyExpect) {
 		t.Errorf("Expected %q but received %q", rplyExpect, rply)
@@ -225,13 +225,13 @@ func TestV1ProcessEvent2(t *testing.T) {
 	}
 	var rply map[string]map[string]interface{}
 	errExpect := "NOT_FOUND"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
 
 	errExpect = "NOT_FOUND:test"
 	eeS.cfg.EEsCfg().Exporters[0].Filters = []string{"test"}
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
 }
@@ -257,7 +257,7 @@ func TestV1ProcessEvent3(t *testing.T) {
 	}
 	var rply map[string]map[string]interface{}
 	errExpect := "MANDATORY_IE_MISSING: [connIDs]"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
 }
@@ -293,7 +293,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	}
 	var rply map[string]map[string]interface{}
 	errExpect := "PARTIALLY_EXECUTED"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	} else if len(rply) != 0 {
 		t.Error("Unexpected reply result")
@@ -318,9 +318,9 @@ func (m mockEventExporter) GetMetrics() *utils.SafeMapStorage {
 	return m.dc
 }
 
-func (mockEventExporter) Cfg() *config.EventExporterCfg         { return new(config.EventExporterCfg) }
-func (mockEventExporter) Connect() error                        { return nil }
-func (mockEventExporter) ExportEvent(interface{}, string) error { return nil }
+func (mockEventExporter) Cfg() *config.EventExporterCfg                           { return new(config.EventExporterCfg) }
+func (mockEventExporter) Connect() error                                          { return nil }
+func (mockEventExporter) ExportEvent(*context.Context, interface{}, string) error { return nil }
 func (mockEventExporter) Close() error {
 	utils.Logger.Warning("NOT IMPLEMENTED")
 	return nil
@@ -354,7 +354,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	}
 	var rply map[string]map[string]interface{}
 	errExpect := "cannot cast to map[string]interface{} 5 for positive exports"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expecting %q but received %q", errExpect, err)
 	}
 }
@@ -386,7 +386,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 	eeS := NewEventExporterS(cgrCfg, filterS, nil)
 	var rply map[string]map[string]interface{}
 	errExpect := "unsupported exporter type: <invalid_type>"
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -411,7 +411,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 		},
 	}
 	var rply map[string]map[string]interface{}
-	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
+	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err != nil {
 		t.Error(err)
 	}
 }

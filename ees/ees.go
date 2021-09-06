@@ -98,18 +98,21 @@ func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Unlock()
 }
 
-func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []string, ctx string) (err error) {
+func (eeS *EventExporterS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, attrIDs []string, attributeSCtx string) (err error) {
 	var rplyEv engine.AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]interface{})
 	}
 	cgrEv.APIOpts[utils.Subsys] = utils.MetaEEs
-	cgrEv.APIOpts[utils.OptsContext] = ctx
+	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
+		attributeSCtx,
+		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+		utils.MetaEEs)
 	attrArgs := &engine.AttrArgsProcessEvent{
 		AttributeIDs: attrIDs,
 		CGREvent:     cgrEv,
 	}
-	if err = eeS.connMgr.Call(context.TODO(),
+	if err = eeS.connMgr.Call(ctx,
 		eeS.cfg.EEsNoLksCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
@@ -122,7 +125,7 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 
 // V1ProcessEvent will be called each time a new event is received from readers
 // rply -> map[string]map[string]interface{}
-func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
 	eeS.cfg.RLocks(config.EEsJSON)
 	defer eeS.cfg.RUnlocks(config.EEsJSON)
 
@@ -146,7 +149,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 
 		if len(eeCfg.Filters) != 0 {
 			tnt := utils.FirstNonEmpty(cgrEv.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
-			if pass, errPass := eeS.filterS.Pass(context.TODO(), tnt,
+			if pass, errPass := eeS.filterS.Pass(ctx, tnt,
 				eeCfg.Filters, cgrDp); errPass != nil {
 				return errPass
 			} else if !pass {
@@ -155,12 +158,8 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		}
 
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
-			if err = eeS.attrSProcessEvent(
-				cgrEv.CGREvent,
-				eeCfg.AttributeSIDs, utils.FirstNonEmpty(
-					eeCfg.AttributeSCtx,
-					utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
-					utils.MetaEEs)); err != nil {
+			if err = eeS.attrSProcessEvent(ctx, cgrEv.CGREvent,
+				eeCfg.AttributeSIDs, eeCfg.AttributeSCtx); err != nil {
 				return
 			}
 		}
@@ -188,9 +187,11 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		metricMapLock.Lock()
 		metricsMap[ee.Cfg().ID] = utils.MapStorage{} // will return the ID for all processed exporters
 		metricMapLock.Unlock()
-
+		ctx := ctx
 		if eeCfg.Synchronous {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
+		} else {
+			ctx = context.Background() // is async so lose the API context
 		}
 		// log the message before starting the gorutine, but still execute the exporter
 		if hasVerbose && !eeCfg.Synchronous {
@@ -199,7 +200,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 					utils.EEs, ee.Cfg().ID))
 		}
 		go func(evict, sync bool, ee EventExporter) {
-			if err := exportEventWithExporter(ee, cgrEv.CGREvent, evict, eeS.cfg, eeS.filterS); err != nil {
+			if err := exportEventWithExporter(ctx, ee, cgrEv.CGREvent, evict, eeS.cfg, eeS.filterS); err != nil {
 				withErr = true
 			}
 			if sync {
@@ -243,7 +244,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 	return
 }
 
-func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS) (err error) {
+func exportEventWithExporter(ctx *context.Context, exp EventExporter, ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, filterS *engine.FilterS) (err error) {
 	defer func() {
 		updateEEMetrics(exp.GetMetrics(), ev.ID, ev.Event, err != nil, utils.FirstNonEmpty(exp.Cfg().Timezone,
 			cfg.GeneralCfg().DefaultTimezone))
@@ -269,7 +270,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 			utils.MetaCfg:  cfg.GetDataProvider(),
 		}, utils.FirstNonEmpty(ev.Tenant, cfg.GeneralCfg().DefaultTenant),
 			filterS,
-			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(exp.Cfg().ContentFields())
+			map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}).SetFields(ctx, exp.Cfg().ContentFields())
 		if eEv, err = exp.PrepareOrderMap(expNM); err != nil {
 			return
 		}
@@ -277,10 +278,10 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 	key := utils.ConcatenatedKey(utils.FirstNonEmpty(engine.MapEvent(ev.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID()),
 		utils.FirstNonEmpty(engine.MapEvent(ev.Event).GetStringIgnoreErrors(utils.RunID), utils.MetaDefault))
 
-	return ExportWithAttempts(exp, eEv, key)
+	return ExportWithAttempts(ctx, exp, eEv, key)
 }
 
-func ExportWithAttempts(exp EventExporter, eEv interface{}, key string) (err error) {
+func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}, key string) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {
 			if err != nil {
@@ -307,7 +308,7 @@ func ExportWithAttempts(exp EventExporter, eEv interface{}, key string) (err err
 		return
 	}
 	for i := 0; i < exp.Cfg().Attempts; i++ {
-		if err = exp.ExportEvent(eEv, key); err == nil ||
+		if err = exp.ExportEvent(ctx, eEv, key); err == nil ||
 			err == utils.ErrDisconnected { // special error in case the exporter was closed
 			break
 		}

@@ -167,7 +167,7 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 							utils.ERs, msg.MessageId, err.Error()))
 				}
 				if rdr.poster != nil { // post it
-					if err := ees.ExportWithAttempts(rdr.poster, msg.Body, utils.EmptyString); err != nil {
+					if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Body, utils.EmptyString); err != nil {
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> writing message %s error: %s",
 								utils.ERs, msg.MessageId, err.Error()))

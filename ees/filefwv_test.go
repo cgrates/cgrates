@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -184,7 +185,7 @@ func TestFileFwvExportEvent(t *testing.T) {
 		file:    nopCloser{byteBuff},
 		dc:      dc,
 	}
-	if err := fFwv.ExportEvent([]string{"value", "3"}, ""); err != nil {
+	if err := fFwv.ExportEvent(context.Background(), []string{"value", "3"}, ""); err != nil {
 		t.Error(err)
 	}
 	csvNW.Flush()
@@ -220,7 +221,7 @@ func TestFileFwvExportEventWriteError(t *testing.T) {
 		file:    nopCloserWrite{byteBuff},
 		dc:      dc,
 	}
-	if err := fFwv.ExportEvent([]string{""}, ""); err == nil || err != utils.ErrNotImplemented {
+	if err := fFwv.ExportEvent(context.Background(), []string{""}, ""); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %q but received %q", utils.ErrNotImplemented, err)
 	}
 }
