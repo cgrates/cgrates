@@ -68,7 +68,7 @@ func TestListenAndServe(t *testing.T) {
 	logBuf := new(bytes.Buffer)
 	log.SetOutput(logBuf)
 	eeS.ListenAndServe(stopChan, cfgRld)
-	logExpect := "[INFO] <CoreS> starting <EEs>"
+	logExpect := "[INFO] <EEs> reloading configuration internals."
 	if rcv := logBuf.String(); !strings.Contains(rcv, logExpect) {
 		t.Errorf("Expected %q but received %q", logExpect, rcv)
 	}
