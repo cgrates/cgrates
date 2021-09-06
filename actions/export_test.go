@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -65,7 +66,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 	log.SetOutput(buff)
 
 	expected := `<EEs> Exporter <TEST_ACTION_HTTPPOST> could not export because err: <Post "~*balance.TestBalance.Value": unsupported protocol scheme "">`
-	if err := http.execute(nil, dataStorage, utils.EmptyString); err != nil {
+	if err := http.execute(context.Background(), dataStorage, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
@@ -76,7 +77,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 	// channels cannot be marshaled
 	dataStorage[utils.MetaReq] = make(chan struct{}, 1)
 	expected = "json: unsupported type: chan struct {}"
-	if err := http.execute(nil, dataStorage, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := http.execute(context.Background(), dataStorage, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -88,7 +89,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 	http.aCfg.Opts = make(map[string]interface{})
 	http.aCfg.Opts[utils.MetaAsync] = true
 	http.config.GeneralCfg().FailedPostsDir = utils.MetaNone
-	if err := http.execute(nil, dataStorage, utils.EmptyString); err != nil {
+	if err := http.execute(context.Background(), dataStorage, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -114,7 +115,7 @@ func TestACHTTPPostValues(t *testing.T) {
 		},
 	}
 
-	if err := http.execute(nil, dataStorage,
+	if err := http.execute(context.Background(), dataStorage,
 		utils.EmptyString); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}

@@ -89,7 +89,7 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 	}, aL.config.GeneralCfg().DefaultTenant,
 		aL.filterS, oNm)
 
-	if err = cdrLogReq.SetFields(template); err != nil {
+	if err = cdrLogReq.SetFields(ctx, template); err != nil {
 		return
 	}
 	var rply string

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/streadway/amqp"
@@ -136,7 +137,7 @@ func (pstr *AMQPee) Connect() (err error) {
 	return
 }
 
-func (pstr *AMQPee) ExportEvent(content interface{}, _ string) (err error) {
+func (pstr *AMQPee) ExportEvent(_ *context.Context, content interface{}, _ string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.postChan == nil {

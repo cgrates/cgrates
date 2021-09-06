@@ -370,7 +370,7 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 				utils.MetaExp: utils.NewOrderedNavigableMap(),
 			})
 
-		if err = eeReq.SetFields(eEvs.rdrCfg.CacheDumpFields); err != nil {
+		if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
 					utils.ERs, id, err.Error()))

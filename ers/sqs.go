@@ -261,7 +261,7 @@ func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 	}
 
 	if rdr.poster != nil { // post it
-		if err = ees.ExportWithAttempts(rdr.poster, body, key); err != nil {
+		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, body, key); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> writing message %s error: %s",
 					utils.ERs, key, err.Error()))

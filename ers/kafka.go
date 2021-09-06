@@ -141,7 +141,7 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 						utils.ERs, string(msg.Key), err.Error()))
 			}
 			if rdr.poster != nil { // post it
-				if err := ees.ExportWithAttempts(rdr.poster, msg.Value, string(msg.Key)); err != nil {
+				if err := ees.ExportWithAttempts(context.Background(), rdr.poster, msg.Value, string(msg.Key)); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> writing message %s error: %s",
 							utils.ERs, string(msg.Key), err.Error()))

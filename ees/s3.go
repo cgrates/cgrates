@@ -27,6 +27,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -111,10 +112,10 @@ func (pstr *S3EE) Connect() (err error) {
 	return
 }
 
-func (pstr *S3EE) ExportEvent(message interface{}, key string) (err error) {
+func (pstr *S3EE) ExportEvent(ctx *context.Context, message interface{}, key string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
-	_, err = pstr.up.Upload(&s3manager.UploadInput{
+	_, err = pstr.up.UploadWithContext(ctx, &s3manager.UploadInput{
 		Bucket: aws.String(pstr.bucket),
 
 		// Can also use the `filepath` standard library package to modify the

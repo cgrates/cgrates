@@ -246,7 +246,7 @@ func (rdr *S3ER) readMsg(scv *s3.S3, key string) (err error) {
 	}
 
 	if rdr.poster != nil { // post it
-		if err = ees.ExportWithAttempts(rdr.poster, msg, key); err != nil {
+		if err = ees.ExportWithAttempts(context.Background(), rdr.poster, msg, key); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> writing message %s error: %s",
 					utils.ERs, key, err.Error()))

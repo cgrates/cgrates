@@ -24,6 +24,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -261,7 +262,7 @@ func TestElasticExportEvent(t *testing.T) {
 		t.Error(err)
 	}
 	eEe.eClnt.Transport = new(mockClientErr)
-	if err := eEe.ExportEvent([]byte{}, ""); err != nil {
+	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err != nil {
 		t.Error(err)
 	}
 }
@@ -293,7 +294,7 @@ func TestElasticExportEvent2(t *testing.T) {
 	eEe.eClnt.Transport = new(mockClientErr2)
 
 	errExpect := io.EOF
-	if err := eEe.ExportEvent([]byte{}, ""); err == nil || err != errExpect {
+	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err == nil || err != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -324,7 +325,7 @@ func TestElasticExportEvent3(t *testing.T) {
 	eEe.eClnt.Transport = new(mockClient)
 	// errExpect := `unsupported protocol scheme ""`
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := eEe.ExportEvent([]byte{}, ""); err != nil {
+	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err != nil {
 		t.Error(err)
 	}
 }
@@ -343,7 +344,7 @@ func TestElasticExportEvent4(t *testing.T) {
 		t.Error(err)
 	}
 	errExpect := `unsupported protocol scheme ""`
-	if err := eEe.ExportEvent([]byte{}, ""); err == nil || err.Error() != errExpect {
+	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but got %q", errExpect, err)
 	}
 }

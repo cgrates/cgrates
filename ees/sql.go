@@ -29,6 +29,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -142,7 +143,7 @@ func (sqlEe *SQLEe) Connect() (err error) {
 	return
 }
 
-func (sqlEe *SQLEe) ExportEvent(req interface{}, _ string) error {
+func (sqlEe *SQLEe) ExportEvent(_ *context.Context, req interface{}, _ string) error {
 	sqlEe.reqs.get()
 	sqlEe.RLock()
 	defer func() {

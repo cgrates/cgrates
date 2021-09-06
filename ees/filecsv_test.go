@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -200,7 +201,7 @@ func TestFileCsvExportEvent(t *testing.T) {
 		dc:        dc,
 	}
 
-	if err := fCsv.ExportEvent([]string{"value", "3"}, ""); err != nil {
+	if err := fCsv.ExportEvent(context.Background(), []string{"value", "3"}, ""); err != nil {
 		t.Error(err)
 	}
 	csvNW.Flush()

@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"context"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	kafka "github.com/segmentio/kafka-go"
@@ -72,7 +72,7 @@ func (pstr *KafkaEE) Connect() (_ error) {
 	return
 }
 
-func (pstr *KafkaEE) ExportEvent(content interface{}, key string) (err error) {
+func (pstr *KafkaEE) ExportEvent(ctx *context.Context, content interface{}, key string) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.writer == nil {
@@ -80,7 +80,7 @@ func (pstr *KafkaEE) ExportEvent(content interface{}, key string) (err error) {
 		pstr.reqs.done()
 		return utils.ErrDisconnected
 	}
-	err = pstr.writer.WriteMessages(context.Background(), kafka.Message{
+	err = pstr.writer.WriteMessages(ctx, kafka.Message{
 		Key:   []byte(key),
 		Value: content.([]byte),
 	})

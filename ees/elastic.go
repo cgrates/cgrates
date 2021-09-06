@@ -20,7 +20,6 @@ package ees
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -28,6 +27,7 @@ import (
 
 	"github.com/elastic/go-elasticsearch/esapi"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	elasticsearch "github.com/elastic/go-elasticsearch"
@@ -120,7 +120,7 @@ func (eEe *ElasticEE) Connect() (err error) {
 }
 
 // ExportEvent implements EventExporter
-func (eEe *ElasticEE) ExportEvent(ev interface{}, key string) (err error) {
+func (eEe *ElasticEE) ExportEvent(ctx *context.Context, ev interface{}, key string) (err error) {
 	eEe.reqs.get()
 	eEe.RLock()
 	defer func() {
@@ -148,7 +148,7 @@ func (eEe *ElasticEE) ExportEvent(ev interface{}, key string) (err error) {
 	}
 
 	var resp *esapi.Response
-	if resp, err = eReq.Do(context.Background(), eEe.eClnt); err != nil {
+	if resp, err = eReq.Do(ctx, eEe.eClnt); err != nil {
 		return
 	}
 	defer resp.Body.Close()

@@ -145,7 +145,7 @@ func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
 						utils.ERs, err.Error()))
 			}
 			if rdr.poster != nil { // post it
-				if err := ees.ExportWithAttempts(rdr.poster, body, utils.EmptyString); err != nil {
+				if err := ees.ExportWithAttempts(context.Background(), rdr.poster, body, utils.EmptyString); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> writing message error: %s",
 							utils.ERs, err.Error()))
