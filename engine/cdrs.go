@@ -80,9 +80,9 @@ func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) {
 }
 
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles
-func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
+func (cdrS *CDRServer) chrgrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
 	var chrgrs []*ChrgSProcessEventReply
-	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().ChargerSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().ChargerSConns,
 		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		return
@@ -98,7 +98,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) (cgrEvs []*util
 }
 
 // attrSProcessEvent will send the event to StatS if the connection is configured
-func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
+func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var rplyEv AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]interface{})
@@ -110,7 +110,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	attrArgs := &AttrArgsProcessEvent{
 		CGREvent: cgrEv,
 	}
-	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().AttributeSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
@@ -135,7 +135,7 @@ func (cdrS *CDRServer) rateSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 }
 
 // thdSProcessEvent will send the event to ThresholdS
-func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
+func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var tIDs []string
 	// we clone the CGREvent so we can add EventType without being propagated
 	thArgs := &ThresholdsArgsProcessEvent{
@@ -145,7 +145,7 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 		thArgs.APIOpts = make(map[string]interface{})
 	}
 	thArgs.APIOpts[utils.MetaEventType] = utils.CDR
-	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().ThresholdSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().ThresholdSConns,
 		utils.ThresholdSv1ProcessEvent,
 		thArgs, &tIDs); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -155,12 +155,12 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 }
 
 // statSProcessEvent will send the event to StatS
-func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) (err error) {
+func (cdrS *CDRServer) statSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var reply []string
 	statArgs := &StatsArgsProcessEvent{
 		CGREvent: cgrEv.Clone(),
 	}
-	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().StatSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().StatSConns,
 		utils.StatSv1ProcessEvent,
 		statArgs, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -170,9 +170,9 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 }
 
 // eeSProcessEvent will process the event with the EEs component
-func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithEeIDs) (err error) {
+func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs) (err error) {
 	var reply map[string]map[string]interface{}
-	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().EEsConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().EEsConns,
 		utils.EeSv1ProcessEvent,
 		cgrEv, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -186,7 +186,7 @@ func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithEeIDs) (err erro
 func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	chrgS, attrS, rateS, eeS, thdS, stS bool) (evs []*utils.EventWithFlags, err error) {
 	if attrS {
-		if err = cdrS.attrSProcessEvent(ev); err != nil {
+		if err = cdrS.attrSProcessEvent(ctx, ev); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.AttributeS))
@@ -196,7 +196,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	}
 	var cgrEvs []*utils.CGREvent
 	if chrgS {
-		if cgrEvs, err = cdrS.chrgrSProcessEvent(ev); err != nil {
+		if cgrEvs, err = cdrS.chrgrSProcessEvent(ctx, ev); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.ChargerS))
@@ -229,7 +229,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 					CGREvent: cgrEv,
 					EeIDs:    cdrS.cgrCfg.CdrsCfg().OnlineCDRExports,
 				}
-				if err = cdrS.eeSProcessEvent(evWithOpts); err != nil {
+				if err = cdrS.eeSProcessEvent(ctx, evWithOpts); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> exporting cdr %+v",
 							utils.CDRs, err.Error(), utils.ToJSON(evWithOpts)))
@@ -240,7 +240,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	}
 	if thdS {
 		for _, cgrEv := range cgrEvs {
-			if err = cdrS.thdSProcessEvent(cgrEv); err != nil {
+			if err = cdrS.thdSProcessEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.ThresholdS))
@@ -250,7 +250,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	}
 	if stS {
 		for _, cgrEv := range cgrEvs {
-			if err = cdrS.statSProcessEvent(cgrEv); err != nil {
+			if err = cdrS.statSProcessEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.StatS))
@@ -312,7 +312,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -356,7 +356,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *ArgV1Pro
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: evs, Error: err},
 			nil, true, utils.NonTransactional)
 	}
