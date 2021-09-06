@@ -162,22 +162,20 @@ func testDspSupGetSupFailover(t *testing.T) {
 			},
 		},
 	}}
-	args := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.EventName:    "Event1",
-				utils.AccountField: "1002",
-				utils.Subject:      "1002",
-				utils.Destination:  "1001",
-				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        "1m20s",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.EventName:    "Event1",
+			utils.AccountField: "1002",
+			utils.Subject:      "1002",
+			utils.Destination:  "1001",
+			utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        "1m20s",
+		},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "sup12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "sup12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
@@ -198,20 +196,18 @@ func testDspSupGetSupFailover(t *testing.T) {
 
 func testDspSupTestAuthKey(t *testing.T) {
 	var rpl engine.SortedRoutesList
-	args := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID: utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Subject:      "1002",
-				utils.Destination:  "1001",
-				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        "1m20s",
-			},
+	args := &utils.CGREvent{
+		ID: utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Subject:      "1002",
+			utils.Destination:  "1001",
+			utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        "1m20s",
+		},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
@@ -246,21 +242,19 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			},
 		},
 	}}
-	args := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Subject:      "1002",
-				utils.Destination:  "1001",
-				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        "1m20s",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Subject:      "1002",
+			utils.Destination:  "1001",
+			utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        "1m20s",
+		},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "sup12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "sup12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1GetRoutes,
@@ -310,8 +304,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			},
 		},
 	}}
-	args := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
+	args :=  &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{

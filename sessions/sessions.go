@@ -1616,11 +1616,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	if args.GetRoutes ||
 		utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS) {
-		cgrArgs, _ := utils.GetRoutePaginatorFromOpts(args.APIOpts)
-		routesReply, err := sS.getRoutes(ctx, args.CGREvent.Clone(), cgrArgs,
-			args.RoutesIgnoreErrors || utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSIgnoreErrors),
-			utils.FirstNonEmpty(args.RoutesMaxCost, utils.IfaceAsString(args.APIOpts[utils.OptsSesRouteSMaxCost])),
-			false)
+		args.APIOpts[utils.OptsRoutesMaxCost] = utils.FirstNonEmpty(args.RoutesMaxCost, utils.IfaceAsString(args.APIOpts[utils.OptsSesRouteSMaxCost]))
+		args.APIOpts[utils.OptsRoutesIgnoreErrors] = args.RoutesIgnoreErrors || utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSIgnoreErrors)
+		routesReply, err := sS.getRoutes(ctx, args.CGREvent.Clone())
 		if err != nil {
 			return err
 		}
@@ -2221,10 +2219,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		rply.ResourceAllocation = &allocMessage
 	}
 	if utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS) {
-		cgrArgs, _ := utils.GetRoutePaginatorFromOpts(args.APIOpts)
-		routesReply, err := sS.getRoutes(ctx, args.Clone(), cgrArgs,
-			utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSIgnoreErrors),
-			utils.IfaceAsString(args.APIOpts[utils.OptsSesRouteSMaxCost]), false)
+		routesReply, err := sS.getRoutes(ctx, args.Clone())
 		if err != nil {
 			return err
 		}
@@ -2351,10 +2346,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		rply.RouteProfiles = make(map[string]engine.SortedRoutesList)
 		// check in case we have options for suppliers
 		for runID, cgrEv := range getDerivedEvents(events, utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSDerivedReply)) {
-			cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
-			routesReply, err := sS.getRoutes(ctx, cgrEv.Clone(), cgrArgs,
-				utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesRouteSIgnoreErrors),
-				utils.IfaceAsString(cgrEv.APIOpts[utils.OptsSesRouteSMaxCost]), false)
+			routesReply, err := sS.getRoutes(ctx, cgrEv.Clone())
 			if err != nil {
 				return err
 			}
@@ -2872,25 +2864,16 @@ func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, st
 }
 
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
-func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent, pag utils.Paginator, ignoreErrors bool,
-	maxCost string, clnb bool) (routesReply engine.SortedRoutesList, err error) {
+func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply engine.SortedRoutesList, err error) {
 	if len(sS.cgrCfg.SessionSCfg().RouteSConns) == 0 {
 		return routesReply, utils.NewErrNotConnected(utils.RouteS)
 	}
 	if acd, has := cgrEv.Event[utils.ACD]; has {
 		cgrEv.Event[utils.Usage] = acd
 	}
-	sArgs := &engine.ArgsGetRoutes{
-		CGREvent: cgrEv,
-	}
-	sArgs.APIOpts[utils.OptsRoutesMaxCost] = maxCost
-	sArgs.APIOpts[utils.OptsRoutesIgnoreErrors] = ignoreErrors
-	sArgs.APIOpts[utils.OptsRoutesLimit] = pag.Limit
-	sArgs.APIOpts[utils.OptsRoutesOffset] = pag.Offset
 
-	sArgs.SetCloneable(clnb)
 	if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().RouteSConns, utils.RouteSv1GetRoutes,
-		sArgs, &routesReply); err != nil {
+		cgrEv, &routesReply); err != nil {
 		return routesReply, utils.NewErrRouteS(err)
 	}
 	return

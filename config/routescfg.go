@@ -26,8 +26,8 @@ type RoutesOpts struct {
 	Context      string
 	IgnoreErrors bool
 	MaxCost      interface{}
-	Limit        int
-	Offset       int
+	Limit        *int
+	Offset       *int
 	ProfileCount float64
 }
 
@@ -61,13 +61,13 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 		rtsOpts.IgnoreErrors = *jsnCfg.IgnoreErrors
 	}
 	if jsnCfg.MaxCost != nil {
-		rtsOpts.MaxCost = *jsnCfg.MaxCost
+		rtsOpts.MaxCost = jsnCfg.MaxCost
 	}
 	if jsnCfg.Limit != nil {
-		rtsOpts.Limit = *jsnCfg.Limit
+		rtsOpts.Limit = jsnCfg.Limit
 	}
 	if jsnCfg.Offset != nil {
-		rtsOpts.Offset = *jsnCfg.Offset
+		rtsOpts.Offset = jsnCfg.Offset
 	}
 	if jsnCfg.ProfileCount != nil {
 		rtsOpts.ProfileCount = *jsnCfg.ProfileCount
@@ -113,7 +113,6 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
 	}
-	rts.DefaultOpts = &RoutesOpts{}
 	if jsnCfg.Default_opts != nil {
 		rts.DefaultOpts.loadFromJSONCfg(jsnCfg.Default_opts)
 	}
@@ -125,12 +124,25 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.OptsContext:         rts.DefaultOpts.Context,
+		utils.MetaProfileCountCfg: rts.DefaultOpts.ProfileCount,
+		utils.MetaIgnoreErrorsCfg: rts.DefaultOpts.IgnoreErrors,
+		utils.MetaMaxCostCfg:      rts.DefaultOpts.MaxCost,
+	}
+	if rts.DefaultOpts.Limit != nil {
+		opts[utils.MetaLimitCfg] = *rts.DefaultOpts.Limit
+	}
+	if rts.DefaultOpts.Offset != nil {
+		opts[utils.MetaOffsetCfg] = *rts.DefaultOpts.Offset
+	}
+
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        rts.Enabled,
 		utils.IndexedSelectsCfg: rts.IndexedSelects,
 		utils.DefaultRatioCfg:   rts.DefaultRatio,
 		utils.NestedFieldsCfg:   rts.NestedFields,
-		utils.DefaultOptsCfg:    rts.DefaultOpts,
+		utils.DefaultOptsCfg:    opts,
 	}
 	if rts.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rts.StringIndexedFields)
@@ -196,12 +208,12 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 }
 
 type RoutesOptsJson struct {
-	Context      *string      `json:"*context"`
-	IgnoreErrors *bool        `json:"*ignoreErrors"`
-	MaxCost      *interface{} `json:"*maxCost"`
-	Limit        *int         `json:"*limit"`
-	Offset       *int         `json:"*offset"`
-	ProfileCount *float64     `json:"*profileCount"`
+	Context      *string     `json:"*context"`
+	IgnoreErrors *bool       `json:"*ignoreErrors"`
+	MaxCost      interface{} `json:"*maxCost"`
+	Limit        *int        `json:"*limit"`
+	Offset       *int        `json:"*offset"`
+	ProfileCount *float64    `json:"*profileCount"`
 }
 
 // Route service config section
@@ -261,10 +273,10 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 		d.Default_opts.Context = utils.StringPointer(v2.DefaultOpts.Context)
 	}
 	if v1.DefaultOpts.Limit != v2.DefaultOpts.Limit {
-		d.Default_opts.Limit = utils.IntPointer(v2.DefaultOpts.Limit)
+		d.Default_opts.Limit = v2.DefaultOpts.Limit
 	}
 	if v1.DefaultOpts.Offset != v2.DefaultOpts.Offset {
-		d.Default_opts.Offset = utils.IntPointer(v2.DefaultOpts.Offset)
+		d.Default_opts.Offset = v2.DefaultOpts.Offset
 	}
 	if v1.DefaultOpts.MaxCost != v2.DefaultOpts.MaxCost {
 		d.Default_opts.MaxCost = &v2.DefaultOpts.MaxCost

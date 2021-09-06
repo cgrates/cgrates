@@ -39,28 +39,28 @@ func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREvent, reply *string) (
 	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) RouteSv1GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesList) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+func (dS *DispatcherService) RouteSv1GetRoutes(args *utils.CGREvent, reply *engine.SortedRoutesList) (err error) {
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1GetRoutes,
-			args.CGREvent.Tenant,
+			args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
 }
 
-func (dS *DispatcherService) RouteSv1GetRoutesList(args *engine.ArgsGetRoutes, reply *[]string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+func (dS *DispatcherService) RouteSv1GetRoutesList(args *utils.CGREvent, reply *[]string) (err error) {
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1GetRoutesList,
-			args.CGREvent.Tenant,
+			args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaRoutes, utils.RouteSv1GetRoutesList, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1GetRoutesList, args, reply)
 }
 
 func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) (err error) {

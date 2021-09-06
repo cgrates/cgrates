@@ -359,6 +359,8 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		DefaultOpts: &RoutesOpts{
 			Context:      utils.MetaRoutes,
 			ProfileCount: 1,
+			IgnoreErrors: false,
+			MaxCost:      utils.EmptyString,
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RouteSCfg()) {

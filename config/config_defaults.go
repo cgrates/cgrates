@@ -740,8 +740,8 @@ const CGRATES_CFG_JSON = `
 		"*profileCount": 1,
 		"*ignoreErrors": false,
 		"*maxCost": "",
-		"*limit": 1,
-		"*offset": 1,
+		// "*limit": 1,
+		// "*offset": 1,
 	},
 },
 

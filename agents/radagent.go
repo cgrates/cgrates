@@ -208,10 +208,10 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
-			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.Has(utils.OptsRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
+			reqProcessor.Flags.ParamValue(utils.OptsRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,

@@ -208,7 +208,7 @@ flags
 	**\*auth**
 		Sends the Event for authorization on CGRateS.
 
-		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*routes**, **\*routesIgnoreErrors**, **\*routesEventCost**, **\*routesMaxcost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component's API behavior.
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*routes**, **\*rouIgnoreErrors**, **\*routesEventCost**, **\*rouMaxCost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component's API behavior.
 
 	**\*initiate**
 		Initiates a session out of Event on CGRateS side.
@@ -228,7 +228,7 @@ flags
 	**\*message**
 		Process the Event as individual message charging on CGRateS side.
 
-		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*routes**, **\*routesIgnoreErrors**, **\*routesEventCost**, **\*routesMaxcost** which are used to influence the behavior on CGRateS side.
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*routes**, **\*rouIgnoreErrors**, **\*routesEventCost**, **\*rouMaxCost** which are used to influence the behavior on CGRateS side.
 
 	**\*event**
 		Process the Event as generic event on CGRateS side.
