@@ -970,7 +970,7 @@ func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts;*fd;*resources;*routes;*routesIgnoreErrors;*routesEventCost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
+	strArg = "*accounts;*fd;*resources;*routes;*rouIgnoreErrors;*routesEventCost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -994,7 +994,7 @@ func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routesIgnoreErrors;*routesEventCost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
+	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*rouIgnoreErrors;*routesEventCost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -1017,7 +1017,7 @@ func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routesIgnoreErrors;*routesMaxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
+	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*rouIgnoreErrors;*rouMaxCost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)

@@ -57,8 +57,6 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 			ProfileCount: float64(1),
 			IgnoreErrors: false,
 			MaxCost:      utils.EmptyString,
-			Limit:        1,
-			Offset:       1,
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -86,12 +84,10 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{},
 		utils.DefaultRatioCfg:        1,
 		utils.DefaultOptsCfg: map[string]interface{}{
-			utils.OptsContext:            utils.MetaRoutes,
-			utils.OptsRoutesProfileCount: float64(1),
-			utils.OptsRoutesIgnoreErrors: false,
-			utils.OptsRoutesLimit:        1,
-			utils.OptsRoutesOffset:       1,
-			utils.OptsRoutesMaxCost:      utils.EmptyString,
+			utils.OptsContext:         utils.MetaRoutes,
+			utils.MetaProfileCountCfg: float64(1),
+			utils.MetaIgnoreErrorsCfg: false,
+			utils.MetaMaxCostCfg:      utils.EmptyString,
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -133,8 +129,10 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
 		utils.DefaultOptsCfg: map[string]interface{}{
-			utils.OptsContext:            utils.MetaRoutes,
-			utils.OptsRoutesProfileCount: float64(1),
+			utils.OptsContext:         utils.MetaRoutes,
+			utils.MetaProfileCountCfg: float64(1),
+			utils.MetaIgnoreErrorsCfg: false,
+			utils.MetaMaxCostCfg:      utils.EmptyString,
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -199,8 +197,8 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 			Context:      utils.MetaAny,
 			IgnoreErrors: true,
 			MaxCost:      5,
-			Limit:        1,
-			Offset:       1,
+			Limit:        utils.IntPointer(1),
+			Offset:       utils.IntPointer(1),
 			ProfileCount: 1,
 		},
 	}
@@ -220,8 +218,8 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 			Context:      utils.MetaRoutes,
 			IgnoreErrors: false,
 			MaxCost:      utils.MetaEventCost,
-			Limit:        2,
-			Offset:       2,
+			Limit:        utils.IntPointer(2),
+			Offset:       utils.IntPointer(2),
 			ProfileCount: 2,
 		},
 	}

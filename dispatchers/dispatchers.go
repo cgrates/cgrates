@@ -151,7 +151,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 
 // Dispatch is the method forwarding the request towards the right connection
 func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, subsys string,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	serviceMethod string, args, reply interface{}) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant

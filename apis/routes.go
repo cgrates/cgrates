@@ -145,7 +145,7 @@ type RouteSv1 struct {
 }
 
 // GetRoutes returns sorted list of routes for Event
-func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *engine.ArgsGetRoutes, reply *engine.SortedRoutesList) error {
+func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
 	return rS.rS.V1GetRoutes(ctx, args, reply)
 }
 
@@ -155,6 +155,6 @@ func (rS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.C
 }
 
 // GetRoutesList returns sorted list of routes for Event as a string slice
-func (rS *RouteSv1) GetRoutesList(ctx *context.Context, args *engine.ArgsGetRoutes, reply *[]string) error {
+func (rS *RouteSv1) GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	return rS.rS.V1GetRoutesList(ctx, args, reply)
 }

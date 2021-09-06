@@ -209,10 +209,10 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaResources),
 			rdrCfg.Flags.Has(utils.MetaAccounts),
 			rdrCfg.Flags.Has(utils.MetaRoutes),
-			rdrCfg.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			rdrCfg.Flags.Has(utils.OptsRoutesIgnoreErrors),
 			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, rdrCfg.Flags.Has(utils.MetaFD),
-			rdrCfg.Flags.ParamValue(utils.MetaRoutesMaxCost),
+			rdrCfg.Flags.ParamValue(utils.OptsRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,

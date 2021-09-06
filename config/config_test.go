@@ -745,8 +745,6 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 			ProfileCount: float64(1),
 			IgnoreErrors: false,
 			MaxCost:      utils.EmptyString,
-			Limit:        1,
-			Offset:       1,
 		},
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.routeSCfg) {
@@ -1963,8 +1961,6 @@ func TestRouteSConfig(t *testing.T) {
 			ProfileCount: float64(1),
 			IgnoreErrors: false,
 			MaxCost:      utils.EmptyString,
-			Limit:        1,
-			Offset:       1,
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -4298,12 +4294,10 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.AccountSConnsCfg:       []string{},
 			utils.DefaultRatioCfg:        1,
 			utils.DefaultOptsCfg: map[string]interface{}{
-				utils.OptsContext:            utils.MetaRoutes,
-				utils.OptsRoutesProfileCount: float64(1),
-				utils.OptsRoutesIgnoreErrors: false,
-				utils.OptsRoutesMaxCost:      utils.EmptyString,
-				utils.OptsRoutesLimit:        1,
-				utils.OptsRoutesOffset:       1,
+				utils.OptsContext:         utils.MetaRoutes,
+				utils.MetaProfileCountCfg: float64(1),
+				utils.MetaIgnoreErrorsCfg: false,
+				utils.MetaMaxCostCfg:      utils.EmptyString,
 			},
 		},
 	}
@@ -5085,7 +5079,7 @@ func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 
 func TestV1GetConfigAsJSONRouteS(t *testing.T) {
 	var reply string
-	expected := `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_opts":{"*context":"*routes","*rouProfileCount":1},"default_ratio":1,"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expected := `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_opts":{"*context":"*routes","*ignoreErrors":false,"*maxCost":"","*profileCount":1},"default_ratio":1,"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{RouteSJSON}}, &reply); err != nil {
 		t.Error(err)

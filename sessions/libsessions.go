@@ -485,12 +485,12 @@ func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
 			args.AuthorizeResources = true
 		case subsystem == utils.MetaRoutes:
 			args.GetRoutes = true
-		case subsystem == utils.MetaRoutesIgnoreErrors:
+		case subsystem == utils.OptsRoutesIgnoreErrors:
 			args.RoutesIgnoreErrors = true
 		case subsystem == utils.MetaRoutesEventCost:
 			args.RoutesMaxCost = utils.MetaEventCost
-		case strings.HasPrefix(subsystem, utils.MetaRoutesMaxCost):
-			args.RoutesMaxCost = strings.TrimPrefix(subsystem, utils.MetaRoutesMaxCost+utils.InInFieldSep)
+		case strings.HasPrefix(subsystem, utils.OptsRoutesMaxCost):
+			args.RoutesMaxCost = strings.TrimPrefix(subsystem, utils.OptsRoutesMaxCost+utils.InInFieldSep)
 		case strings.HasPrefix(subsystem, utils.MetaAttributes):
 			args.GetAttributes = true
 			args.AttributeIDs = getFlagIDs(subsystem)

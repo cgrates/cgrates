@@ -421,10 +421,10 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.GetBool(utils.MetaResources),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			reqProcessor.Flags.GetBool(utils.MetaRoutes),
-			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
+			reqProcessor.Flags.Has(utils.OptsRoutesIgnoreErrors),
 			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
+			reqProcessor.Flags.ParamValue(utils.OptsRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = sa.connMgr.Call(context.TODO(), sa.cfg.SIPAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,

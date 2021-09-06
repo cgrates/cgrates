@@ -562,9 +562,6 @@ const (
 	MetaPositiveExports      = "*positive_exports"
 	MetaNegativeExports      = "*negative_exports"
 	MetaRoutesEventCost      = "*routesEventCost"
-	MetaRoutesMaxCost        = "*routesMaxcost"
-	MetaMaxCost              = "*maxcost"
-	MetaRoutesIgnoreErrors   = "*routesIgnoreErrors"
 	Freeswitch               = "freeswitch"
 	Kamailio                 = "kamailio"
 	Opensips                 = "opensips"
@@ -659,7 +656,6 @@ const (
 	MetaAnalyzer            = "*analyzer"
 	CGREventString          = "CGREvent"
 	MetaTextPlain           = "*text_plain"
-	MetaIgnoreErrors        = "*ignoreErrors"
 	MetaRelease             = "*release"
 	MetaAllocate            = "*allocate"
 	MetaAuthorize           = "*authorize"
@@ -1912,7 +1908,14 @@ const (
 	TransportCfg      = "transport"
 	StrategyCfg       = "strategy"
 
-	//RateSCfg
+	// RouteSCfg
+	MetaProfileCountCfg = "*profileCount"
+	MetaIgnoreErrorsCfg = "*ignoreErrors"
+	MetaMaxCostCfg      = "*maxCost"
+	MetaLimitCfg        = "*limit"
+	MetaOffsetCfg       = "*offset"
+
+	// RateSCfg
 	RateIndexedSelectsCfg      = "rate_indexed_selects"
 	RateNestedFieldsCfg        = "rate_nested_fields"
 	RateStringIndexedFieldsCfg = "rate_string_indexed_fields"
@@ -2155,8 +2158,8 @@ const (
 	OptsRoutesProfileCount = "*rouProfileCount"
 	OptsRoutesLimit        = "*rouLimit"
 	OptsRoutesOffset       = "*rouOffset"
-	OptsRoutesIgnoreErrors = "*routesIgnoreErrors"
-	OptsRoutesMaxCost      = "*routesMaxCost"
+	OptsRoutesIgnoreErrors = "*rouIgnoreErrors"
+	OptsRoutesMaxCost      = "*rouMaxCost"
 
 	OptsRatesStartTime     = "*ratesStartTime"
 	OptsRatesUsage         = "*ratesUsage"

@@ -47,20 +47,20 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 	}
 }
 
-func TestDynamicDPString(t *testing.T) {
-	dDP := &dynamicDP{
-		tenant: "cgrates.org",
-		initialDP: utils.StringSet{
-			"test1": struct{}{},
-			"test2": struct{}{},
-		},
-		cache: utils.MapStorage{},
-		ctx:   context.Background(),
-	}
+// func TestDynamicDPString(t *testing.T) {
+// 	dDP := &dynamicDP{
+// 		tenant: "cgrates.org",
+// 		initialDP: utils.StringSet{
+// 			"test1": struct{}{},
+// 			"test2": struct{}{},
+// 		},
+// 		cache: utils.MapStorage{},
+// 		ctx:   context.Background(),
+// 	}
 
-	exp := `["test1","test2"]`
-	rcv := dDP.String()
-	if rcv != exp {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-}
+// 	exp := `["test1","test2"]`
+// 	rcv := dDP.String()
+// 	if rcv != exp {
+// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+// 	}
+// }
