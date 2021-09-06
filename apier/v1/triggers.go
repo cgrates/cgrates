@@ -339,7 +339,7 @@ func (attr *AttrSetActionTrigger) UpdateActionTrigger(at *engine.ActionTrigger, 
 	}
 	if minQ, has := attr.ActionTrigger[utils.MinQueuedItems]; has {
 		var mQ int64
-		if mQ, err = utils.IfaceAsInt64(minQ); err != nil {
+		if mQ, err = utils.IfaceAsTInt64(minQ); err != nil {
 			return
 		}
 		at.MinQueuedItems = int(mQ)

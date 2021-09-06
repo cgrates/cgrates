@@ -23,12 +23,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewVirtualEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (vEe *VirtualEE, err error) {
-	vEe = &VirtualEE{
+func NewVirtualEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *VirtualEE {
+	return &VirtualEE{
 		cfg: cfg,
 		dc:  dc,
 	}
-	return
 }
 
 // VirtualEE implements EventExporter interface for .csv files
