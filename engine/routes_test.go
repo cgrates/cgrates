@@ -2082,7 +2082,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Weights: utils.DynamicWeights{{}},
 		},
 	}
-	argsGetRoutes := &utils.CGREvent{
+	args := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "utils.CGREvent1",
 		Event:   map[string]interface{}{},
@@ -2143,9 +2143,9 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			},
 		},
 	}
-	argsGetRoutes.APIOpts[utils.OptsRoutesLimit] = 2
-	argsGetRoutes.APIOpts[utils.OptsRoutesOffset] = 1
-	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes.Tenant, argsGetRoutes)
+	args.APIOpts[utils.OptsRoutesLimit] = 2
+	args.APIOpts[utils.OptsRoutesOffset] = 1
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args.Tenant, args)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
