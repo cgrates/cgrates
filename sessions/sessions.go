@@ -1749,7 +1749,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		return // nothing to do
 	}
 	originID, _ := args.FieldAsString(utils.OriginID)
-	rply.MaxUsage = utils.InvalidUsage
+	rply.MaxUsage = utils.DurationPointer(time.Duration(utils.InvalidUsage)) // temp
 	if attrS {
 		var atrsIDs []string
 		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
