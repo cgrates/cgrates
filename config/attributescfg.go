@@ -148,12 +148,8 @@ type AttributeSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
-<<<<<<< HEAD
-	Default_opts          map[string]interface{}
 	Profile_runs          *int
-=======
 	Opts                  map[string]interface{}
->>>>>>> 3df2de22e (Rename default_opts to opts)
 }
 
 func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *AttributeSJsonCfg {
