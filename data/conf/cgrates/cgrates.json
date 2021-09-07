@@ -45,7 +45,20 @@
 
 // "rpc_conns": {
 // 	//"*localhost": {
-// 		//"conns": [{"address": "127.0.0.1:2012", "transport":"*json",}],
+// 		//"conns": [
+// 			//{
+// 				//"address": "127.0.0.1:2012", 
+// 				//"transport":"*json",
+// 				//"connect_attempts": 5,
+// 				//"reconnects": -1,
+// 				//"connect_timeout":"1s",
+// 				//"reply_timeout":"2s",
+// 				//"tls":false,
+// 				//"client_key":"",
+// 				//"client_certificate":"",
+// 				//"ca_certificate":""
+// 			//}
+// 		//],
 // 	//},
 // },							// rpc connections definitions
 
@@ -470,6 +483,7 @@
 // 			"id": "*default",									// identifier of the EventReader profile
 // 			"type": "*none",									// exporter type 
 // 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
+// 			"concurrent_requests": 0,							// maximum simultaneous requests to process, 0 for unlimited
 // 			"opts": {
 
 // 				// CSV
@@ -542,6 +556,7 @@
 // 			"synchronous": false,								// block processing until export has a result
 // 			"attempts": 1,										// export attempts
 // 			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+// 			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
 // 		},
 // 	],
 // },
@@ -690,6 +705,7 @@
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"process_runs": 1,						// number of run loops when processing event
+// 	"profile_runs": 0,						// number of run a profile will process thes event
 // 	"any_context": true,					// if we match the *any context
 // },
 
@@ -913,15 +929,14 @@
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~*req.2"},
 // 					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
-// 					{"tag": "Synchronous", "path": "Synchronous", "type": "*variable", "value":"~*req.4"},
-// 					{"tag": "ConnectAttemmpts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.5"},
-// 					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.6"},
-// 					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.7"},
-// 					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.8"},
-// 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.9"},
-// 					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.10"},
-// 					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.11"},
-// 					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.12"},
+// 					{"tag": "ConnectAttempts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.4"},
+// 					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.5"},
+// 					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.6"},
+// 					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.7"},
+// 					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.8"},
+// 					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.9"},
+// 					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.10"},
+// 					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.11"},
 // 				],
 // 			},
 // 		],

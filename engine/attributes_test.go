@@ -597,7 +597,7 @@ func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
 	lastID := ""
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
-		lastID); err != nil {
+		lastID, make(map[string]int), 0); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if !reflect.DeepEqual(rcv, ap2) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap2, rcv)
@@ -606,7 +606,7 @@ func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
 	lastID = "cgrates.org:ATTR_2"
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
-		lastID); err == nil || err != utils.ErrNotFound {
+		lastID, make(map[string]int), 0); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -683,7 +683,7 @@ func TestAttributesattributeProfileForEventAnyCtxFalseFound(t *testing.T) {
 	lastID := ""
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
-		lastID); err != nil {
+		lastID, make(map[string]int), 0); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if !reflect.DeepEqual(rcv, ap1) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap1, rcv)
@@ -759,7 +759,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueBothFound(t *testing.T) {
 	lastID := ""
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
-		lastID); err != nil {
+		lastID, make(map[string]int), 0); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if !reflect.DeepEqual(rcv, ap1) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap1, rcv)
@@ -772,7 +772,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueBothFound(t *testing.T) {
 	}
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
-		lastID); err != nil {
+		lastID, make(map[string]int), 0); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if !reflect.DeepEqual(rcv, ap2) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap2, rcv)
@@ -856,7 +856,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueErrMatching(t *testing.T) {
 	alS.dm = NewDataManager(dbm, cfg.CacheCfg(), nil)
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
-		lastID); err == nil || err != utils.ErrExists {
+		lastID, make(map[string]int), 0); err == nil || err != utils.ErrExists {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrExists, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -932,7 +932,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueNotFound(t *testing.T) {
 	lastID := ""
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
-		lastID); err == nil || err != utils.ErrNotFound {
+		lastID, make(map[string]int), 0); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -1009,7 +1009,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 	alS.dm = nil
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_3"}, nil, evNm,
-		lastID); err == nil || err != utils.ErrNoDatabaseConn {
+		lastID, make(map[string]int), 0); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNoDatabaseConn, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -1049,7 +1049,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	lastID := ""
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_3"}, nil, evNm,
-		lastID); err == nil || err != utils.ErrNotFound {
+		lastID, make(map[string]int), 0); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -1110,7 +1110,7 @@ func TestAttributesattributeProfileForEventNotActive(t *testing.T) {
 	tnt := "cgrates.org"
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, actTime, evNm,
-		lastID); err == nil || err != utils.ErrNotFound {
+		lastID, make(map[string]int), 0); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -1171,7 +1171,7 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	}
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_1"}, nil, evNm,
-		lastID); err == nil || err != utils.ErrWrongPath {
+		lastID, make(map[string]int), 0); err == nil || err != utils.ErrWrongPath {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrWrongPath, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
