@@ -670,6 +670,7 @@ const CGRATES_CFG_JSON = `
 	"default_opts":{						// 
 		"*processRuns": 1,					// number of run loops when processing event
 	},
+	"profile_runs": 0,						// number of run a profile will process the event
 },
 
 

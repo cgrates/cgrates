@@ -79,6 +79,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{utils.MetaInternal},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
+		utils.ProfileRunsCfg:         0,
 		utils.IndexedSelectsCfg:      true,
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
@@ -116,6 +117,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.DefaultOptsCfg: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(7),
 		},
+		utils.ProfileRunsCfg: 0,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -142,6 +144,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.DefaultOptsCfg: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(1),
 		},
+		utils.ProfileRunsCfg: 0,
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)

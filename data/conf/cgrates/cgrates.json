@@ -649,6 +649,7 @@
 // 	"default_opts":{						// 
 // 		"*processRuns": 1,					// number of run loops when processing event
 // 	},
+// 	"profile_runs": 0,						// number of run a profile will process the event
 // },
 
 
@@ -816,7 +817,7 @@
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 // 					{"tag": "Sorting", "path": "Sorting", "type": "*variable", "value": "~*req.4"},
 // 					{"tag": "SortingParameters", "path": "SortingParameters", "type": "*variable", "value": "~*req.5"},
 // 					{"tag": "RouteID", "path": "RouteID", "type": "*variable", "value": "~*req.6"},
@@ -825,7 +826,7 @@
 // 					{"tag": "RouteRateProfileIDs", "path": "RouteRateProfileIDs", "type": "*variable", "value": "~*req.9"},
 // 					{"tag": "RouteResourceIDs", "path": "RouteResourceIDs", "type": "*variable", "value": "~*req.10"},
 // 					{"tag": "RouteStatIDs", "path": "RouteStatIDs", "type": "*variable", "value": "~*req.11"},
-// 					{"tag": "RouteWeight", "path": "RouteWeight", "type": "*variable", "value": "~*req.12"},
+// 					{"tag": "RouteWeights", "path": "RouteWeights", "type": "*variable", "value": "~*req.12"},
 // 					{"tag": "RouteBlocker", "path": "RouteBlocker", "type": "*variable", "value": "~*req.13"},
 // 					{"tag": "RouteParameters", "path": "RouteParameters", "type": "*variable", "value": "~*req.14"},
 // 				],

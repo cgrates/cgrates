@@ -36,13 +36,12 @@ func TestConfigNewConfigSv1(t *testing.T) {
 	}
 	result := NewConfigSv1(cfg)
 	if !reflect.DeepEqual(expected, result) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
 func TestConfigSetGetConfig(t *testing.T) {
 	//for coverage purposes only
-	var err error
 	cfgTestPath := path.Join(*dataDir, "conf", "samples", "tutinternal")
 	cfg, err := config.NewCGRConfigFromPath(cfgTestPath)
 	if err != nil {
@@ -54,16 +53,16 @@ func TestConfigSetGetConfig(t *testing.T) {
 	err = rlcCfg.SetConfig(context.Background(), args, &reply)
 	expected := `OK`
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, reply)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expected, reply)
 	}
 	argsGet := &config.SectionWithAPIOpts{
 		Sections: []string{"attributes"},
 	}
 	var replyGet map[string]interface{}
-	errGet := rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
+	err = rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
 			"accounts_conns":        []string{"*localhost"},
@@ -77,13 +76,14 @@ func TestConfigSetGetConfig(t *testing.T) {
 			utils.DefaultOptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(1),
 			},
+			utils.ProfileRunsCfg: 0,
 		},
 	}
-	if errGet != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errGet)
+	if err != nil {
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	if !reflect.DeepEqual(expectedGet, replyGet) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(replyGet))
 	}
 }
 
@@ -118,10 +118,10 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	err = rlcCfg.SetConfig(context.Background(), args, &reply)
 	expected := `OK`
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, reply)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expected, reply)
 	}
 	argsGet := &config.SectionWithAPIOpts{
 		Sections: []string{"attributes"},
@@ -141,13 +141,14 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			utils.DefaultOptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(1),
 			},
+			utils.ProfileRunsCfg: 0,
 		},
 	}
 	if errGet != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errGet)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}
 	if !reflect.DeepEqual(expectedGet, replyGet) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
 	}
 	argsRld := &config.ReloadArgs{
 		DryRun:  true,
@@ -158,10 +159,10 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	errRld := rlcCfg.ReloadConfig(context.Background(), argsRld, &replyRld)
 	expectedRld := `OK`
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errRld)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errRld)
 	}
 	if !reflect.DeepEqual(expectedRld, replyRld) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedRld, replyRld)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expectedRld, replyRld)
 	}
 	argsGetRld := &config.SectionWithAPIOpts{
 		Sections: []string{"attributes"},
@@ -181,13 +182,14 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			utils.DefaultOptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(1),
 			},
+			utils.ProfileRunsCfg: 0,
 		},
 	}
 	if errGetRld != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errGetRld)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGetRld)
 	}
 	if !reflect.DeepEqual(expectedGetRld, replyGetRld) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGetRld, replyGetRld)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expectedGetRld, replyGetRld)
 	}
 }
 
@@ -210,10 +212,10 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	err = rlcCfg.SetConfigFromJSON(context.Background(), args, &reply)
 	expected := "OK"
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, reply)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expected, reply)
 	}
 
 	argsGet := &config.SectionWithAPIOpts{
@@ -223,12 +225,12 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
-	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*localhost\"],\"default_opts\":{\"*processRuns\":1},\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"default_opts":{"*processRuns":1},"enabled":true,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"profile_runs":0,"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errGet)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}
 	if !reflect.DeepEqual(expectedGet, replyGet) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
 	}
 }
 
@@ -241,6 +243,6 @@ func TestConfigStoreCfgInDBErr(t *testing.T) {
 	err := rlcCfg.StoreCfgInDB(context.Background(), args, &reply)
 	expected := "no DB connection for config"
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
