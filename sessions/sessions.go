@@ -1741,6 +1741,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
+	rply.MaxUsage = utils.DurationPointer(time.Duration(utils.InvalidUsage)) // temp
 
 	attrS := utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS)
 	initS := utils.OptAsBool(args.APIOpts, utils.OptsSesInitiate)
@@ -1749,7 +1750,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		return // nothing to do
 	}
 	originID, _ := args.FieldAsString(utils.OriginID)
-	rply.MaxUsage = utils.DurationPointer(time.Duration(utils.InvalidUsage)) // temp
 	if attrS {
 		var atrsIDs []string
 		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
@@ -1867,9 +1867,10 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(ctx *context.Context,
 
 	initReply.ResourceAllocation = initSessionRply.ResourceAllocation
 
-	if initSessionRply.MaxUsage != nil {
-		initReply.MaxUsage = initSessionRply.MaxUsage.Seconds()
-	}
+	//if initSessionRply.MaxUsage != nil {
+	//	initReply.MaxUsage = initSessionRply.MaxUsage.Seconds()
+	//}
+	initReply.MaxUsage = utils.InvalidUsage // temp
 
 	if initSessionRply.ThresholdIDs != nil {
 		initReply.Thresholds = utils.StringPointer(
