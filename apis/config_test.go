@@ -73,7 +73,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"resources_conns":       []string{"*localhost"},
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(1),
 			},
 			utils.ProfileRunsCfg: 0,
@@ -109,7 +109,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				"resources_conns":       []string{"*internal"},
 				"stats_conns":           []string{"*internal"},
 				"suffix_indexed_fields": []string{},
-				utils.DefaultOptsCfg: map[string]interface{}{
+				utils.OptsCfg: map[string]interface{}{
 					utils.OptsAttributesProcessRuns: 2,
 				},
 			},
@@ -140,7 +140,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"resources_conns":       []string{"*localhost"},
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(1),
 			},
 			utils.ProfileRunsCfg: 0,
@@ -181,7 +181,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"resources_conns":       []string{"*localhost"},
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(1),
 			},
 			utils.ProfileRunsCfg: 0,
@@ -207,7 +207,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	args := &config.SetConfigFromJSONArgs{
 		APIOpts: nil,
 		Tenant:  utils.CGRateSorg,
-		Config:  "{\"attributes\":{\"accounts_conns\":[\"*localhost\"],\"default_opts\":{\"*processRuns\":2},\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}",
+		Config:  "{\"attributes\":{\"accounts_conns\":[\"*localhost\"],\"opts\":{\"*processRuns\":2},\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}",
 		DryRun:  true,
 	}
 	var reply string
@@ -227,7 +227,11 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
+<<<<<<< HEAD
 	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"default_opts":{"*processRuns":1},"enabled":true,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"profile_runs":0,"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+=======
+	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*localhost\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"opts\":{\"*processRuns\":1},\"prefix_indexed_fields\":[],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+>>>>>>> 3df2de22e (Rename default_opts to opts)
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}

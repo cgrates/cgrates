@@ -153,7 +153,7 @@ func testCfgGetConfig(t *testing.T) {
 			"resources_conns":       []string{"*localhost"},
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(1),
 			},
 		},
@@ -189,7 +189,7 @@ func testCfgSetGetConfig(t *testing.T) {
 					"resources_conns":       []string{"*internal"},
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
-					utils.DefaultOptsCfg: map[string]interface{}{
+					utils.OptsCfg: map[string]interface{}{
 						utils.OptsAttributesProcessRuns: 2,
 					},
 				},
@@ -212,7 +212,7 @@ func testCfgSetGetConfig(t *testing.T) {
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(2),
 			},
 		},
@@ -302,7 +302,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 		&config.SetConfigFromJSONArgs{
 			APIOpts: nil,
 			Tenant:  "",
-			Config:  "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[],\"default_opts\":{\"*processRuns\":2}}}",
+			Config:  "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[],\"opts\":{\"*processRuns\":2}}}",
 			DryRun:  false,
 		},
 		&reply); err != nil {
@@ -311,7 +311,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"default_opts\":{\"*processRuns\":2},\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"opts\":{\"*processRuns\":2},\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -430,7 +430,7 @@ func testCfgGetConfigStore(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Default_opts:          make(map[string]interface{}),
+		Opts:                  make(map[string]interface{}),
 	}
 	if !reflect.DeepEqual(attr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(attr))
@@ -454,7 +454,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"resources_conns":       []string{"*internal"},
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
-					utils.DefaultOptsCfg: map[string]interface{}{
+					utils.OptsCfg: map[string]interface{}{
 						utils.OptsAttributesProcessRuns: 2,
 					},
 				},
@@ -477,7 +477,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: 2,
 			},
 		},
@@ -512,7 +512,7 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Default_opts: map[string]interface{}{
+		Opts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(2),
 		},
 	}
@@ -532,7 +532,7 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Default_opts: map[string]interface{}{
+		Opts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(2),
 		},
 	}
@@ -571,7 +571,7 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: 2,
 			},
 		},

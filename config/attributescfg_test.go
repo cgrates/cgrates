@@ -67,7 +67,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"accounts_conns": ["*internal"],			
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
     "string_indexed_fields": ["*req.index1"],
-	"default_opts": {
+	"opts": {
 		"*processRuns": 3,
 	},					
 	},		
@@ -83,7 +83,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.IndexedSelectsCfg:      true,
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
-		utils.DefaultOptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(3),
 		},
 	}
@@ -100,7 +100,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
            "suffix_indexed_fields": ["*req.index1","*req.index2"],
            "nested_fields": true,
            "enabled": true,
-           "default_opts": {
+           "opts": {
 			"*processRuns": 7,
 		},	
      },
@@ -114,7 +114,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
-		utils.DefaultOptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(7),
 		},
 		utils.ProfileRunsCfg: 0,
@@ -141,7 +141,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
-		utils.DefaultOptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(1),
 		},
 		utils.ProfileRunsCfg: 0,
@@ -232,7 +232,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         utils.BoolPointer(false),
-		Default_opts:          map[string]interface{}{},
+		Opts:                  map[string]interface{}{},
 	}
 
 	rcv := diffAttributeSJsonCfg(d, v1, v2)
@@ -242,7 +242,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 
 	v2_2 := v1
 	expected2 := &AttributeSJsonCfg{
-		Default_opts: map[string]interface{}{},
+		Opts: map[string]interface{}{},
 	}
 	rcv = diffAttributeSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {

@@ -667,7 +667,7 @@ const CGRATES_CFG_JSON = `
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"default_opts":{						// 
+	"opts":{								// 
 		"*processRuns": 1,					// number of run loops when processing event
 	},
 	"profile_runs": 0,						// number of run a profile will process the event
@@ -735,7 +735,7 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"default_ratio":1,						// default ratio used in case of *load strategy
-	"default_opts":{
+	"opts":{
 		"*context": "*routes",
 		"*profileCount": 1,
 		"*ignoreErrors": false,

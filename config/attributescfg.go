@@ -69,8 +69,8 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
-	if jsnCfg.Default_opts != nil {
-		alS.DefaultOpts = jsnCfg.Default_opts
+	if jsnCfg.Opts != nil {
+		alS.DefaultOpts = jsnCfg.Opts
 	}
 	return
 }
@@ -82,7 +82,7 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.ProfileRunsCfg:    alS.ProfileRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,
-		utils.DefaultOptsCfg:    alS.DefaultOpts,
+		utils.OptsCfg:           alS.DefaultOpts,
 	}
 	if alS.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*alS.StringIndexedFields)
@@ -148,8 +148,12 @@ type AttributeSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
+<<<<<<< HEAD
 	Default_opts          map[string]interface{}
 	Profile_runs          *int
+=======
+	Opts                  map[string]interface{}
+>>>>>>> 3df2de22e (Rename default_opts to opts)
 }
 
 func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *AttributeSJsonCfg {
@@ -177,7 +181,7 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
-	d.Default_opts = diffMap(d.Default_opts, v1.DefaultOpts, v2.DefaultOpts)
+	d.Opts = diffMap(d.Opts, v1.DefaultOpts, v2.DefaultOpts)
 	return d
 }
 

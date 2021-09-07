@@ -740,7 +740,7 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		RateSConns:          []string{},
 		AccountSConns:       []string{},
 		DefaultRatio:        1,
-		DefaultOpts: &RoutesOpts{
+		Opts: &RoutesOpts{
 			Context:      utils.MetaRoutes,
 			ProfileCount: float64(1),
 			IgnoreErrors: false,
@@ -1956,7 +1956,7 @@ func TestRouteSConfig(t *testing.T) {
 		AccountSConns:       []string{},
 		DefaultRatio:        1,
 		NestedFields:        false,
-		DefaultOpts: &RoutesOpts{
+		Opts: &RoutesOpts{
 			Context:      utils.MetaRoutes,
 			ProfileCount: float64(1),
 			IgnoreErrors: false,
@@ -4156,7 +4156,7 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: float64(1),
 			},
 			utils.ProfileRunsCfg: 0,
@@ -4293,7 +4293,7 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.RateSConnsCfg:          []string{},
 			utils.AccountSConnsCfg:       []string{},
 			utils.DefaultRatioCfg:        1,
-			utils.DefaultOptsCfg: map[string]interface{}{
+			utils.OptsCfg: map[string]interface{}{
 				utils.OptsContext:         utils.MetaRoutes,
 				utils.MetaProfileCountCfg: float64(1),
 				utils.MetaIgnoreErrorsCfg: false,
@@ -5079,7 +5079,7 @@ func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 
 func TestV1GetConfigAsJSONRouteS(t *testing.T) {
 	var reply string
-	expected := `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_opts":{"*context":"*routes","*ignoreErrors":false,"*maxCost":"","*profileCount":1},"default_ratio":1,"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expected := `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_ratio":1,"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*context":"*routes","*ignoreErrors":false,"*maxCost":"","*profileCount":1},"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{RouteSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5957,7 +5957,7 @@ func TestSetCfgInDb(t *testing.T) {
 				String_indexed_fields: &[]string{"field2"},
 				Suffix_indexed_fields: &[]string{"field2"},
 				Prefix_indexed_fields: &[]string{"field2"},
-				Default_opts: map[string]interface{}{
+				Opts: map[string]interface{}{
 					utils.OptsAttributesProcessRuns: float64(3),
 				},
 				Nested_fields: utils.BoolPointer(false),
@@ -5973,7 +5973,7 @@ func TestSetCfgInDb(t *testing.T) {
 		String_indexed_fields: &[]string{"field2"},
 		Suffix_indexed_fields: &[]string{"field2"},
 		Prefix_indexed_fields: &[]string{"field2"},
-		Default_opts: map[string]interface{}{
+		Opts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(3),
 		},
 		Nested_fields: utils.BoolPointer(false),
@@ -6019,7 +6019,7 @@ func TestSetNilCfgInDb(t *testing.T) {
 		},
 	}
 	expected := &AttributeSJsonCfg{
-		Default_opts: make(map[string]interface{}),
+		Opts: make(map[string]interface{}),
 	}
 	var reply string
 	if err := cfg.V1SetConfig(context.Background(), args, &reply); err != nil {
@@ -6066,7 +6066,7 @@ func TestReloadCfgInDb(t *testing.T) {
 		String_indexed_fields: &[]string{"field2"},
 		Suffix_indexed_fields: &[]string{"field2"},
 		Prefix_indexed_fields: &[]string{"field2"},
-		Default_opts: map[string]interface{}{
+		Opts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(3),
 		},
 		Nested_fields: utils.BoolPointer(false),

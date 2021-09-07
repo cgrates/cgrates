@@ -1482,7 +1482,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 		maxCost:      10.0,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(ev, config.CgrConfig().RouteSCfg().DefaultOpts)
+	sprf, err := newOptsGetRoutes(ev, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1492,7 +1492,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 }
 
 func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
-	config.CgrConfig().RouteSCfg().DefaultOpts.IgnoreErrors = true
+	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = true
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{},
 	}
@@ -1500,7 +1500,7 @@ func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
 		ignoreErrors: true,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(ev, config.CgrConfig().RouteSCfg().DefaultOpts)
+	sprf, err := newOptsGetRoutes(ev, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1519,7 +1519,7 @@ func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 		ignoreErrors: true,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(ev, config.CgrConfig().RouteSCfg().DefaultOpts)
+	sprf, err := newOptsGetRoutes(ev, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
