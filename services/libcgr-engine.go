@@ -44,42 +44,42 @@ func NewCGREngineFlags() *CGREngineFlags {
 	fs := flag.NewFlagSet(utils.CgrEngine, flag.ContinueOnError)
 	return &CGREngineFlags{
 		FlagSet:           fs,
-		Cfgpath:           fs.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path."),
+		CfgPath:           fs.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path."),
 		Version:           fs.Bool(utils.VersionCgr, false, "Prints the application version."),
-		Checkconfig:       fs.Bool(utils.CheckCfgCgr, false, "Verify the config without starting the engine"),
-		Pidfile:           fs.String(utils.PidCgr, utils.EmptyString, "Write pid file"),
-		Httppprofpath:     fs.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling"),
-		Cpuprofdir:        fs.String(utils.CpuProfDirCgr, utils.EmptyString, "write cpu profile to files"),
-		Memprofdir:        fs.String(utils.MemProfDirCgr, utils.EmptyString, "write memory profile to file"),
-		Memprofinterval:   fs.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Time between memory profile saves"),
-		Memprofnrfiles:    fs.Int(utils.MemProfNrFilesCgr, 1, "Number of memory profile to write"),
-		Scheduledshutdown: fs.String(utils.ScheduledShutdownCgr, utils.EmptyString, "shutdown the engine after this duration"),
+		PidFile:           fs.String(utils.PidCgr, utils.EmptyString, "Write pid file"),
+		HttPrfPath:        fs.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling"),
+		CpuPrfDir:         fs.String(utils.CpuProfDirCgr, utils.EmptyString, "write cpu profile to files"),
+		MemPrfDir:         fs.String(utils.MemProfDirCgr, utils.EmptyString, "write memory profile to file"),
+		MemPrfInterval:    fs.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Time between memory profile saves"),
+		MemPrfNoF:         fs.Int(utils.MemProfNrFilesCgr, 1, "Number of memory profile to write"),
+		ScheduledShutDown: fs.String(utils.ScheduledShutdownCgr, utils.EmptyString, "shutdown the engine after this duration"),
 		Singlecpu:         fs.Bool(utils.SingleCpuCgr, false, "Run on single CPU core"),
-		Syslogger:         fs.String(utils.LoggerCfg, utils.EmptyString, "logger <*syslog|*stdout>"),
-		Nodeid:            fs.String(utils.NodeIDCfg, utils.EmptyString, "The node ID of the engine"),
-		Loglevel:          fs.Int(utils.LogLevelCfg, -1, "Log level (0-emergency to 7-debug)"),
+		SysLogger:         fs.String(utils.LoggerCfg, utils.EmptyString, "logger <*syslog|*stdout>"),
+		NodeID:            fs.String(utils.NodeIDCfg, utils.EmptyString, "The node ID of the engine"),
+		LogLevel:          fs.Int(utils.LogLevelCfg, -1, "Log level (0-emergency to 7-debug)"),
 		Preload:           fs.String(utils.PreloadCgr, utils.EmptyString, "LoaderIDs used to load the data before the engine starts"),
+		CheckConfig:       fs.Bool(utils.CheckCfgCgr, false, "Verify the config without starting the engine"),
 	}
 }
 
 type CGREngineFlags struct {
 	*flag.FlagSet
 
-	Cfgpath           *string
+	CfgPath           *string
 	Version           *bool
-	Checkconfig       *bool
-	Pidfile           *string
-	Httppprofpath     *string
-	Cpuprofdir        *string
-	Memprofdir        *string
-	Memprofinterval   *time.Duration
-	Memprofnrfiles    *int
-	Scheduledshutdown *string
+	PidFile           *string
+	HttPrfPath        *string
+	CpuPrfDir         *string
+	MemPrfDir         *string
+	MemPrfInterval    *time.Duration
+	MemPrfNoF         *int
+	ScheduledShutDown *string
 	Singlecpu         *bool
-	Syslogger         *string
-	Nodeid            *string
-	Loglevel          *int
+	SysLogger         *string
+	NodeID            *string
+	LogLevel          *int
 	Preload           *string
+	CheckConfig       *bool
 }
 
 func cgrSingnalHandler(ctx *context.Context, shutdown context.CancelFunc,
@@ -231,18 +231,17 @@ func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
 	iConfigCh <- rpc
 }
 
-func startRPC(server *cores.Server, internalAdminSChan,
-	internalCdrSChan, internalRsChan, internalStatSChan,
+func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
+	cfg *config.CGRConfig, server *cores.Server,
+	internalAdminSChan, internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalRouteSChan,
 	internalSessionSChan, internalAnalyzerSChan, internalDispatcherSChan,
-	internalLoaderSChan, internalCacheSChan,
-	internalEEsChan, internalRateSChan, internalActionSChan,
-	internalAccountSChan chan birpc.ClientConnector,
-	shdChan *utils.SyncedChan) {
+	internalLoaderSChan, internalCacheSChan, internalEEsChan, internalRateSChan,
+	internalActionSChan, internalAccountSChan chan birpc.ClientConnector) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
-		// case cdrs := <-internalCdrSChan:
-		// 	internalCdrSChan <- cdrs
+		case cdrs := <-internalCdrSChan:
+			internalCdrSChan <- cdrs
 		case smg := <-internalSessionSChan:
 			internalSessionSChan <- smg
 		case rls := <-internalRsChan:
@@ -259,85 +258,30 @@ func startRPC(server *cores.Server, internalAdminSChan,
 			internalThdSChan <- thS
 		case rtS := <-internalRouteSChan:
 			internalRouteSChan <- rtS
-		// case analyzerS := <-internalAnalyzerSChan:
-		// 	internalAnalyzerSChan <- analyzerS
+		case analyzerS := <-internalAnalyzerSChan:
+			internalAnalyzerSChan <- analyzerS
 		case loaderS := <-internalLoaderSChan:
 			internalLoaderSChan <- loaderS
 		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
 			internalCacheSChan <- chS
-		// case eeS := <-internalEEsChan:
-		// 	internalEEsChan <- eeS
+		case eeS := <-internalEEsChan:
+			internalEEsChan <- eeS
 		case rateS := <-internalRateSChan:
 			internalRateSChan <- rateS
 		case actionS := <-internalActionSChan:
 			internalActionSChan <- actionS
 		case accountS := <-internalAccountSChan:
 			internalAccountSChan <- accountS
-		case <-shdChan.Done():
+		case <-ctx.Done():
 			return
 		}
 	} else {
 		select {
 		case dispatcherS := <-internalDispatcherSChan:
 			internalDispatcherSChan <- dispatcherS
-		case <-shdChan.Done():
+		case <-ctx.Done():
 			return
 		}
 	}
-
-	go server.ServeJSON(cfg.ListenCfg().RPCJSONListen, shdChan)
-	go server.ServeGOB(cfg.ListenCfg().RPCGOBListen, shdChan)
-	go server.ServeHTTP(
-		cfg.ListenCfg().HTTPListen,
-		cfg.HTTPCfg().JsonRPCURL,
-		cfg.HTTPCfg().WSURL,
-		cfg.HTTPCfg().UseBasicAuth,
-		cfg.HTTPCfg().AuthUsers,
-		shdChan,
-	)
-	if (len(cfg.ListenCfg().RPCGOBTLSListen) != 0 ||
-		len(cfg.ListenCfg().RPCJSONTLSListen) != 0 ||
-		len(cfg.ListenCfg().HTTPTLSListen) != 0) &&
-		(len(cfg.TLSCfg().ServerCerificate) == 0 ||
-			len(cfg.TLSCfg().ServerKey) == 0) {
-		utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
-		return
-	}
-	if cfg.ListenCfg().RPCGOBTLSListen != utils.EmptyString {
-		go server.ServeGOBTLS(
-			cfg.ListenCfg().RPCGOBTLSListen,
-			cfg.TLSCfg().ServerCerificate,
-			cfg.TLSCfg().ServerKey,
-			cfg.TLSCfg().CaCertificate,
-			cfg.TLSCfg().ServerPolicy,
-			cfg.TLSCfg().ServerName,
-			shdChan,
-		)
-	}
-	if cfg.ListenCfg().RPCJSONTLSListen != utils.EmptyString {
-		go server.ServeJSONTLS(
-			cfg.ListenCfg().RPCJSONTLSListen,
-			cfg.TLSCfg().ServerCerificate,
-			cfg.TLSCfg().ServerKey,
-			cfg.TLSCfg().CaCertificate,
-			cfg.TLSCfg().ServerPolicy,
-			cfg.TLSCfg().ServerName,
-			shdChan,
-		)
-	}
-	if cfg.ListenCfg().HTTPTLSListen != utils.EmptyString {
-		go server.ServeHTTPTLS(
-			cfg.ListenCfg().HTTPTLSListen,
-			cfg.TLSCfg().ServerCerificate,
-			cfg.TLSCfg().ServerKey,
-			cfg.TLSCfg().CaCertificate,
-			cfg.TLSCfg().ServerPolicy,
-			cfg.TLSCfg().ServerName,
-			cfg.HTTPCfg().JsonRPCURL,
-			cfg.HTTPCfg().WSURL,
-			cfg.HTTPCfg().UseBasicAuth,
-			cfg.HTTPCfg().AuthUsers,
-			shdChan,
-		)
-	}
+	server.StartServer(ctx, shtdwnEngine, cfg)
 }

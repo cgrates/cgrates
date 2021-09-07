@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -31,12 +32,13 @@ import (
 
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) servmanager.Service {
 	return &RadiusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
+		shtDwn:      shtDwn,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -47,7 +49,7 @@ type RadiusAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	shdChan     *utils.SyncedChan
+	shtDwn      context.CancelFunc
 	stopChan    chan struct{}
 
 	rad     *agents.RadiusAgent
@@ -89,7 +91,7 @@ func (rad *RadiusAgent) Start() (err error) {
 func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent) (err error) {
 	if err = r.ListenAndServe(rad.stopChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
-		rad.shdChan.CloseOnce()
+		rad.shtDwn()
 	}
 	return
 }

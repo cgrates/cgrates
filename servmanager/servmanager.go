@@ -22,21 +22,20 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewServiceManager returns a service manager
-func NewServiceManager(cfg *config.CGRConfig, shdChan *utils.SyncedChan, shdWg *sync.WaitGroup, connMgr *engine.ConnManager) *ServiceManager {
-	sm := &ServiceManager{
+func NewServiceManager(cfg *config.CGRConfig, shdWg *sync.WaitGroup, connMgr *engine.ConnManager) *ServiceManager {
+	return &ServiceManager{
 		cfg:        cfg,
 		subsystems: make(map[string]Service),
-		shdChan:    shdChan,
 		shdWg:      shdWg,
 		connMgr:    connMgr,
 	}
-	return sm
 }
 
 // ServiceManager handles service management ran by the engine
@@ -45,7 +44,6 @@ type ServiceManager struct {
 	cfg          *config.CGRConfig
 	subsystems   map[string]Service
 
-	shdChan *utils.SyncedChan
 	shdWg   *sync.WaitGroup
 	connMgr *engine.ConnManager
 }
@@ -58,8 +56,8 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 }
 
 // StartServices starts all enabled services
-func (srvMngr *ServiceManager) StartServices() (err error) {
-	go srvMngr.handleReload()
+func (srvMngr *ServiceManager) StartServices(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+	go srvMngr.handleReload(ctx, shtDwn)
 	for _, service := range srvMngr.subsystems {
 		if service.ShouldRun() && !service.IsRunning() {
 			srvMngr.shdWg.Add(1)
@@ -67,7 +65,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 				if err := srv.Start(); err != nil &&
 					err != utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, srv.ServiceName(), err))
-					srvMngr.shdChan.CloseOnce()
+					shtDwn()
 				}
 			}(service)
 		}
@@ -87,100 +85,100 @@ func (srvMngr *ServiceManager) AddServices(services ...Service) {
 	srvMngr.Unlock()
 }
 
-func (srvMngr *ServiceManager) handleReload() {
+func (srvMngr *ServiceManager) handleReload(ctx *context.Context, shtDwn context.CancelFunc) {
 	for {
 		select {
-		case <-srvMngr.shdChan.Done():
+		case <-ctx.Done():
 			srvMngr.ShutdownServices()
 			return
 		case <-srvMngr.GetConfig().GetReloadChan(config.AttributeSJSON):
-			go srvMngr.reloadService(utils.AttributeS)
+			go srvMngr.reloadService(utils.AttributeS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ChargerSJSON):
-			go srvMngr.reloadService(utils.ChargerS)
+			go srvMngr.reloadService(utils.ChargerS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ThresholdSJSON):
-			go srvMngr.reloadService(utils.ThresholdS)
+			go srvMngr.reloadService(utils.ThresholdS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.StatSJSON):
-			go srvMngr.reloadService(utils.StatS)
+			go srvMngr.reloadService(utils.StatS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ResourceSJSON):
-			go srvMngr.reloadService(utils.ResourceS)
+			go srvMngr.reloadService(utils.ResourceS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RouteSJSON):
-			go srvMngr.reloadService(utils.RouteS)
+			go srvMngr.reloadService(utils.RouteS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.AdminSJSON):
-			go srvMngr.reloadService(utils.AdminS)
+			go srvMngr.reloadService(utils.AdminS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.CDRsJSON):
-			go srvMngr.reloadService(utils.CDRServer)
+			go srvMngr.reloadService(utils.CDRServer, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJSON):
-			go srvMngr.reloadService(utils.SessionS)
+			go srvMngr.reloadService(utils.SessionS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ERsJSON):
-			go srvMngr.reloadService(utils.ERs)
+			go srvMngr.reloadService(utils.ERs, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DNSAgentJSON):
-			go srvMngr.reloadService(utils.DNSAgent)
+			go srvMngr.reloadService(utils.DNSAgent, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.FreeSWITCHAgentJSON):
-			go srvMngr.reloadService(utils.FreeSWITCHAgent)
+			go srvMngr.reloadService(utils.FreeSWITCHAgent, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.KamailioAgentJSON):
-			go srvMngr.reloadService(utils.KamailioAgent)
+			go srvMngr.reloadService(utils.KamailioAgent, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSON):
-			go srvMngr.reloadService(utils.AsteriskAgent)
+			go srvMngr.reloadService(utils.AsteriskAgent, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RadiusAgentJSON):
-			go srvMngr.reloadService(utils.RadiusAgent)
+			go srvMngr.reloadService(utils.RadiusAgent, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DiameterAgentJSON):
-			go srvMngr.reloadService(utils.DiameterAgent)
+			go srvMngr.reloadService(utils.DiameterAgent, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.HTTPAgentJSON):
-			go srvMngr.reloadService(utils.HTTPAgent)
+			go srvMngr.reloadService(utils.HTTPAgent, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.LoaderSJSON):
-			go srvMngr.reloadService(utils.LoaderS)
+			go srvMngr.reloadService(utils.LoaderS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.AnalyzerSJSON):
-			go srvMngr.reloadService(utils.AnalyzerS)
+			go srvMngr.reloadService(utils.AnalyzerS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DispatcherSJSON):
-			go srvMngr.reloadService(utils.DispatcherS)
+			go srvMngr.reloadService(utils.DispatcherS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.DataDBJSON):
-			go srvMngr.reloadService(utils.DataDB)
+			go srvMngr.reloadService(utils.DataDB, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.StorDBJSON):
-			go srvMngr.reloadService(utils.StorDB)
+			go srvMngr.reloadService(utils.StorDB, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.EEsJSON):
-			go srvMngr.reloadService(utils.EEs)
+			go srvMngr.reloadService(utils.EEs, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJSON):
-			go srvMngr.reloadService(utils.RateS)
+			go srvMngr.reloadService(utils.RateS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJSON):
 			go srvMngr.connMgr.Reload()
 		case <-srvMngr.GetConfig().GetReloadChan(config.SIPAgentJSON):
-			go srvMngr.reloadService(utils.SIPAgent)
+			go srvMngr.reloadService(utils.SIPAgent, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RegistrarCJSON):
-			go srvMngr.reloadService(utils.RegistrarC)
+			go srvMngr.reloadService(utils.RegistrarC, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.HTTPJSON):
-			go srvMngr.reloadService(utils.GlobalVarS)
+			go srvMngr.reloadService(utils.GlobalVarS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.AccountSJSON):
-			go srvMngr.reloadService(utils.AccountS)
+			go srvMngr.reloadService(utils.AccountS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ActionSJSON):
-			go srvMngr.reloadService(utils.ActionS)
+			go srvMngr.reloadService(utils.ActionS, shtDwn)
 		case <-srvMngr.GetConfig().GetReloadChan(config.CoreSJSON):
-			go srvMngr.reloadService(utils.CoreS)
+			go srvMngr.reloadService(utils.CoreS, shtDwn)
 		}
 		// handle RPC server
 	}
 }
 
-func (srvMngr *ServiceManager) reloadService(srviceName string) (err error) {
+func (srvMngr *ServiceManager) reloadService(srviceName string, shtDwn context.CancelFunc) (err error) {
 	srv := srvMngr.GetService(srviceName)
 	if srv.ShouldRun() {
 		if srv.IsRunning() {
 			if err = srv.Reload(); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-				srvMngr.shdChan.CloseOnce()
+				shtDwn()
 				return // stop if we encounter an error
 			}
 		} else {
 			srvMngr.shdWg.Add(1)
 			if err = srv.Start(); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-				srvMngr.shdChan.CloseOnce()
+				shtDwn()
 				return // stop if we encounter an error
 			}
 		}
 	} else if srv.IsRunning() {
 		if err = srv.Shutdown(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to stop service <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-			srvMngr.shdChan.CloseOnce()
+			shtDwn()
 		}
 		srvMngr.shdWg.Done()
 	}

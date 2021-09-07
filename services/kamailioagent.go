@@ -23,6 +23,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/agents"
@@ -33,11 +34,12 @@ import (
 
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) servmanager.Service {
 	return &KamailioAgent{
 		cfg:     cfg,
-		shdChan: shdChan,
+		shtDwn:  shtDwn,
 		connMgr: connMgr,
 		srvDep:  srvDep,
 	}
@@ -46,8 +48,8 @@ func NewKamailioAgent(cfg *config.CGRConfig,
 // KamailioAgent implements Agent interface
 type KamailioAgent struct {
 	sync.RWMutex
-	cfg     *config.CGRConfig
-	shdChan *utils.SyncedChan
+	cfg    *config.CGRConfig
+	shtDwn context.CancelFunc
 
 	kam     *agents.KamailioAgent
 	connMgr *engine.ConnManager
@@ -66,13 +68,7 @@ func (kam *KamailioAgent) Start() (err error) {
 	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), kam.connMgr,
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 
-	go func(k *agents.KamailioAgent) {
-		if err = k.Connect(); err != nil &&
-			!strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
-			kam.shdChan.CloseOnce()
-		}
-	}(kam.kam)
+	go kam.connect(kam.kam)
 	return
 }
 
@@ -84,17 +80,16 @@ func (kam *KamailioAgent) Reload() (err error) {
 		return
 	}
 	kam.kam.Reload()
-	go kam.reload(kam.kam)
+	go kam.connect(kam.kam)
 	return
 }
 
-func (kam *KamailioAgent) reload(k *agents.KamailioAgent) (err error) {
+func (kam *KamailioAgent) connect(k *agents.KamailioAgent) (err error) {
 	if err = k.Connect(); err != nil {
-		if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
-			return
+		if !strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
+			kam.shtDwn()
 		}
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
-		kam.shdChan.CloseOnce()
 	}
 	return
 }

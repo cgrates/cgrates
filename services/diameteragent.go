@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -31,12 +32,13 @@ import (
 
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) servmanager.Service {
 	return &DiameterAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
+		shtDwn:      shtDwn,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -47,8 +49,8 @@ type DiameterAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	shdChan     *utils.SyncedChan
 	stopChan    chan struct{}
+	shtDwn      context.CancelFunc
 
 	da      *agents.DiameterAgent
 	connMgr *engine.ConnManager
@@ -87,7 +89,7 @@ func (da *DiameterAgent) start(filterS *engine.FilterS) (err error) {
 		if err = d.ListenAndServe(da.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
-			da.shdChan.CloseOnce()
+			da.shtDwn()
 		}
 	}(da.da)
 	return

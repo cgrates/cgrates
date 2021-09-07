@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -32,15 +33,16 @@ import (
 
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server,
-	filterSChan chan *engine.FilterS, shdChan *utils.SyncedChan,
+	filterSChan chan *engine.FilterS,
 	internalAnalyzerSChan chan birpc.ClientConnector,
-	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
 		server:      server,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
+		shtDwn:      shtDwn,
 		srvDep:      srvDep,
 	}
 }
@@ -52,7 +54,7 @@ type AnalyzerService struct {
 	server      *cores.Server
 	filterSChan chan *engine.FilterS
 	stopChan    chan struct{}
-	shdChan     *utils.SyncedChan
+	shtDwn      context.CancelFunc
 
 	anz *analyzers.AnalyzerService
 	// rpc      *v1.AnalyzerSv1
@@ -76,7 +78,7 @@ func (anz *AnalyzerService) Start() (err error) {
 	go func(a *analyzers.AnalyzerService) {
 		if err := a.ListenAndServe(anz.stopChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
-			anz.shdChan.CloseOnce()
+			anz.shtDwn()
 		}
 		return
 	}(anz.anz)

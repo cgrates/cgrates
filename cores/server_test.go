@@ -45,6 +45,10 @@ func TestNewServer(t *testing.T) {
 	}
 	rcv := NewServer(caps)
 	rcv.stopbiRPCServer = nil
+	rcv.httpServer = nil
+	rcv.httpsServer = nil
+	rcv.rpcServer = nil
+	rcv.birpcSrv = nil
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}

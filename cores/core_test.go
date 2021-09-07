@@ -33,7 +33,7 @@ func TestNewCoreService(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = time.Second
 	stopchan := make(chan struct{}, 1)
-	shdChan := utils.NewSyncedChan()
+	shdChan := func() {}
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopchan)
 	stopMemChan := make(chan struct{})
@@ -42,9 +42,9 @@ func TestNewCoreService(t *testing.T) {
 		cfg:        cfgDflt,
 		CapsStats:  sts,
 		fileMEM:    "/tmp",
-		shdChan:    shdChan,
+		shtDw:      shdChan,
 	}
-	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopMemChan, nil, stopchan, shdChan)
+	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopMemChan, stopchan, nil, shdChan)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -57,10 +57,7 @@ func TestCoreServiceStatus(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = 1
 	caps := engine.NewCaps(1, utils.MetaBusy)
-	stopChan := make(chan struct{}, 1)
-	shdChan := utils.NewSyncedChan()
-
-	cores := NewCoreService(cfgDflt, caps, nil, "/tmp", nil, nil, stopChan, shdChan)
+	cores := NewCoreService(cfgDflt, caps, nil, "/tmp", nil, nil, nil, func() {})
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]interface{}{},

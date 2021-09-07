@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
@@ -31,13 +32,14 @@ import (
 
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
+		shtDwn:      shtDwn,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -48,7 +50,7 @@ type EventReaderService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	shdChan     *utils.SyncedChan
+	shtDwn      context.CancelFunc
 
 	ers      *ers.ERService
 	rldChan  chan struct{}
@@ -83,7 +85,7 @@ func (erS *EventReaderService) Start() (err error) {
 func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan chan struct{}, rldChan chan struct{}) (err error) {
 	if err = ers.ListenAndServe(stopChan, rldChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
-		erS.shdChan.CloseOnce()
+		erS.shtDwn()
 	}
 	return
 }

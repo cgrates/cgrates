@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/agents"
@@ -32,11 +33,12 @@ import (
 
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) servmanager.Service {
 	return &FreeswitchAgent{
 		cfg:     cfg,
-		shdChan: shdChan,
+		shtDwn:  shtDwn,
 		connMgr: connMgr,
 		srvDep:  srvDep,
 	}
@@ -45,8 +47,8 @@ func NewFreeswitchAgent(cfg *config.CGRConfig,
 // FreeswitchAgent implements Agent interface
 type FreeswitchAgent struct {
 	sync.RWMutex
-	cfg     *config.CGRConfig
-	shdChan *utils.SyncedChan
+	cfg    *config.CGRConfig
+	shtDwn context.CancelFunc
 
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
@@ -64,12 +66,7 @@ func (fS *FreeswitchAgent) Start() (err error) {
 
 	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
 
-	go func(f *agents.FSsessions) {
-		if err := f.Connect(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			fS.shdChan.CloseOnce() // stop the engine here
-		}
-	}(fS.fS)
+	go fS.connect(fS.fS)
 	return
 }
 
@@ -81,14 +78,14 @@ func (fS *FreeswitchAgent) Reload() (err error) {
 		return
 	}
 	fS.fS.Reload()
-	go fS.reload(fS.fS)
+	go fS.connect(fS.fS)
 	return
 }
 
-func (fS *FreeswitchAgent) reload(f *agents.FSsessions) (err error) {
+func (fS *FreeswitchAgent) connect(f *agents.FSsessions) (err error) {
 	if err := fS.fS.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-		fS.shdChan.CloseOnce() // stop the engine here
+		fS.shtDwn() // stop the engine here
 	}
 	return
 }

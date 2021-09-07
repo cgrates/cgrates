@@ -20,8 +20,10 @@ package services
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/apis"
 	"sync"
+
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/cores"
@@ -36,14 +38,15 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) servmanager.Service {
 	return &SessionService{
 		connChan: internalChan,
 		cfg:      cfg,
 		dm:       dm,
 		server:   server,
-		shdChan:  shdChan,
+		shtDwn:   shtDwn,
 		connMgr:  connMgr,
 		anz:      anz,
 		srvDep:   srvDep,
@@ -56,7 +59,7 @@ type SessionService struct {
 	cfg      *config.CGRConfig
 	dm       *DataDBService
 	server   *cores.Server
-	shdChan  *utils.SyncedChan
+	shtDwn   context.CancelFunc
 	stopChan chan struct{}
 
 	sm *sessions.SessionS
@@ -116,7 +119,7 @@ func (smg *SessionService) start() (err error) {
 		smg.Lock()
 		smg.bircpEnabled = false
 		smg.Unlock()
-		smg.shdChan.CloseOnce()
+		smg.shtDwn()
 	}
 	return
 }
