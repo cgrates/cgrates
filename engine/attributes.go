@@ -54,7 +54,8 @@ func (alS *AttributeService) Shutdown() {
 }
 
 // attributeProfileForEvent returns the matching attribute
-func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, attrsIDs []string, actTime *time.Time, evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
+func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, attrsIDs []string, actTime *time.Time, evNm utils.MapStorage,
+	lastID string, processedPrfNo map[string]int, profileRuns int) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
 	contextVal := utils.MetaDefault
 	if ctx != nil && *ctx != "" {
@@ -113,7 +114,8 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			!aPrfl.ActivationInterval.IsActiveAtTime(*actTime) { // not active
 			continue
 		}
-		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = aPrfl.TenantIDInline()
+		tntID := aPrfl.TenantIDInline()
+		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = tntID
 		if pass, err := alS.filterS.Pass(tnt, aPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
@@ -121,7 +123,8 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			continue
 		}
 		if (matchAttrPrfl == nil || matchAttrPrfl.Weight < aPrfl.Weight) &&
-			aPrfl.TenantIDInline() != lastID {
+			tntID != lastID &&
+			(profileRuns <= 0 || processedPrfNo[tntID] < profileRuns) {
 			matchAttrPrfl = aPrfl
 		}
 	}
@@ -207,10 +210,11 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
+func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider,
+	lastID string, processedPrfNo map[string]int, profileRuns int) (
 	rply *AttrSProcessEventReply, err error) {
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID, processedPrfNo, profileRuns); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -285,7 +289,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 		utils.MetaVars: utils.MapStorage{
 			utils.OptsAttributesProcessRuns: 0,
 		},
-	}, utils.EmptyString)
+	}, utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -314,8 +318,17 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	if args.ProcessRuns != nil && *args.ProcessRuns != 0 {
 		processRuns = *args.ProcessRuns
 	}
+	profileRuns := alS.cgrcfg.AttributeSCfg().ProfileRuns
+	if opt, has := args.APIOpts[utils.OptsAttributesProfileRuns]; has {
+		var val int64
+		if val, err = utils.IfaceAsTInt64(opt); err != nil {
+			return
+		}
+		profileRuns = int(val)
+	}
 	args.CGREvent = args.CGREvent.Clone()
 	processedPrf := make(utils.StringSet)
+	processedPrfNo := make(map[string]int)
 	eNV := utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
@@ -333,7 +346,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	for i := 0; i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.OptsAttributesProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply
-		evRply, err = alS.processEvent(tnt, args, eNV, dynDP, lastID)
+		evRply, err = alS.processEvent(tnt, args, eNV, dynDP, lastID, processedPrfNo, profileRuns)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				err = utils.NewErrServerError(err)
@@ -347,6 +360,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		lastID = evRply.MatchedProfiles[0]
 		matchedIDs = append(matchedIDs, lastID)
 		processedPrf.Add(lastID)
+		processedPrfNo[lastID] = processedPrfNo[lastID] + 1
 		for _, fldName := range evRply.AlteredFields {
 			alteredFields.Add(fldName)
 		}

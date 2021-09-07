@@ -2126,6 +2126,7 @@ const (
 	// AttributeSCfg
 	IndexedSelectsCfg = "indexed_selects"
 	ProcessRunsCfg    = "process_runs"
+	ProfileRunsCfg    = "profile_runs"
 	NestedFieldsCfg   = "nested_fields"
 	AnyContextCfg     = "any_context"
 
@@ -2347,7 +2348,8 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, Op
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
 	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
-	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount})
+	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount,
+	OptsAttributesProfileRuns})
 
 // EventExporter metrics
 const (
@@ -2402,6 +2404,7 @@ const (
 	Subsys                    = "*subsys"
 	MetaMethod                = "*reqMethod"
 	OptsAttributesProcessRuns = "*processRuns"
+	OptsAttributesProfileRuns = "*profileRuns"
 	MetaEventType             = "*eventType"
 	EventType                 = "EventType"
 	SchedulerInit             = "SchedulerInit"

@@ -244,7 +244,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaVars: utils.MapStorage{
 				utils.OptsAttributesProcessRuns: 0,
 			},
-		}, utils.EmptyString)
+		}, utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -258,7 +258,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaVars: utils.MapStorage{
 				utils.OptsAttributesProcessRuns: 0,
 			},
-		}, utils.EmptyString)
+		}, utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -273,7 +273,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaVars: utils.MapStorage{
 				utils.OptsAttributesProcessRuns: 0,
 			},
-		}, utils.EmptyString)
+		}, utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -296,7 +296,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	atrp, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[0], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	atrp, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[0], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -315,7 +315,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 		},
 	}
 	if _, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM,
-		newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err == nil || err != utils.ErrNotFound {
+		newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
 }
@@ -335,7 +335,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	if atrp, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err != nil {
+	if atrp, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
 	} else if !reflect.DeepEqual(eRply, atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(atrp))
 	}
@@ -1931,7 +1931,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1991,7 +1991,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2058,7 +2058,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2120,7 +2120,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2182,7 +2182,7 @@ func TestProcessAttributeSum(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2244,7 +2244,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2306,7 +2306,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2368,7 +2368,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2430,7 +2430,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2492,7 +2492,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2553,7 +2553,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2614,7 +2614,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3104,5 +3104,128 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 		t.Error(err)
 	} else if sort.Strings(reply.AlteredFields); !reflect.DeepEqual(expReply, reply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expReply), utils.ToJSON(reply))
+	}
+}
+
+func TestAttributeMultipleProfileRunns(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AttributeSCfg().IndexedSelects = false
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	Cache.Clear(nil)
+	attrS = NewAttributeService(dm, &FilterS{dm: dm, cfg: cfg}, cfg)
+	attrPrf1Exists := &AttributeProfile{
+		Tenant:    cfg.GeneralCfg().DefaultTenant,
+		ID:        "ATTR_1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{},
+		Attributes: []*Attribute{{
+			Path:  utils.MetaReq + utils.NestingSep + "Field1",
+			Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
+		}},
+		Weight: 10,
+	}
+	attrPrf2Exists := &AttributeProfile{
+		Tenant:    cfg.GeneralCfg().DefaultTenant,
+		ID:        "ATTR_2",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{},
+		Attributes: []*Attribute{{
+			Path:  utils.MetaReq + utils.NestingSep + "Field2",
+			Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
+		}},
+		Weight: 5,
+	}
+	// Add attribute in DM
+	if err := dm.SetAttributeProfile(attrPrf1Exists, true); err != nil {
+		t.Error(err)
+	}
+	if err = dm.SetAttributeProfile(attrPrf2Exists, true); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	// Add attribute in DM
+	if _, err := dm.GetAttributeProfile(attrPrf1Exists.Tenant, attrPrf1Exists.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetAttributeProfile(attrPrf2Exists.Tenant, attrPrf2Exists.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	args := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(40),
+		CGREvent: &utils.CGREvent{
+			Tenant: cfg.GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"InitialField": "InitialValue",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProfileRuns: 2,
+			},
+		},
+	}
+	eRply := AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent: &utils.CGREvent{
+			Tenant: cfg.GeneralCfg().DefaultTenant,
+			ID:     args.CGREvent.ID,
+			Event: map[string]interface{}{
+				"InitialField": "InitialValue",
+				"Field1":       "Value1",
+				"Field2":       "Value2",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProfileRuns: 2,
+			},
+		},
+	}
+	var reply AttrSProcessEventReply
+	if err := attrS.V1ProcessEvent(args, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	sort.Strings(reply.AlteredFields)
+	if !reflect.DeepEqual(eRply, reply) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(reply))
+	}
+
+	args = &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(40),
+		CGREvent: &utils.CGREvent{
+			Tenant: cfg.GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"InitialField": "InitialValue",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProfileRuns: 1,
+			},
+		},
+	}
+	eRply = AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2"},
+		CGREvent: &utils.CGREvent{
+			Tenant: cfg.GeneralCfg().DefaultTenant,
+			ID:     args.CGREvent.ID,
+			Event: map[string]interface{}{
+				"InitialField": "InitialValue",
+				"Field1":       "Value1",
+				"Field2":       "Value2",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProfileRuns: 1,
+			},
+		},
+	}
+	reply = AttrSProcessEventReply{}
+	if err := attrS.V1ProcessEvent(args, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	sort.Strings(reply.AlteredFields)
+	if !reflect.DeepEqual(eRply, reply) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(reply))
 	}
 }

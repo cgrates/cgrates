@@ -31,6 +31,7 @@ type AttributeSCfg struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	ProcessRuns         int
+	ProfileRuns         int
 	NestedFields        bool
 	AnyContext          bool
 }
@@ -99,6 +100,9 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Process_runs != nil {
 		alS.ProcessRuns = *jsnCfg.Process_runs
 	}
+	if jsnCfg.Profile_runs != nil {
+		alS.ProfileRuns = *jsnCfg.Profile_runs
+	}
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -114,6 +118,7 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.EnabledCfg:        alS.Enabled,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.ProcessRunsCfg:    alS.ProcessRuns,
+		utils.ProfileRunsCfg:    alS.ProfileRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,
 		utils.AnyContextCfg:     alS.AnyContext,
 	}
@@ -179,6 +184,7 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
 		ProcessRuns:    alS.ProcessRuns,
+		ProfileRuns:    alS.ProfileRuns,
 		AnyContext:     alS.AnyContext,
 	}
 	if alS.ResourceSConns != nil {
