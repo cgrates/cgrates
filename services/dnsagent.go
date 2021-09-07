@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -31,12 +32,13 @@ import (
 
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) servmanager.Service {
 	return &DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
+		shtDwn:      shtDwn,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -47,7 +49,7 @@ type DNSAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	shdChan     *utils.SyncedChan
+	shtDwn      context.CancelFunc
 
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
@@ -98,7 +100,7 @@ func (dns *DNSAgent) Reload() (err error) {
 func (dns *DNSAgent) listenAndServe() (err error) {
 	if err = dns.dns.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-		dns.shdChan.CloseOnce() // stop the engine here
+		dns.shtDwn() // stop the engine here
 	}
 	return
 }

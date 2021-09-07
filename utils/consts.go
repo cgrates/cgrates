@@ -1435,9 +1435,6 @@ const (
 	CDRsV1StoreSessionCost   = "CDRsV1.StoreSessionCost"
 	CDRsV1ProcessEvent       = "CDRsV1.ProcessEvent"
 	CDRsV1Ping               = "CDRsV1.Ping"
-	CDRsV2                   = "CDRsV2"
-	CDRsV2StoreSessionCost   = "CDRsV2.StoreSessionCost"
-	CDRsV2ProcessEvent       = "CDRsV2.ProcessEvent"
 )
 
 // EEs

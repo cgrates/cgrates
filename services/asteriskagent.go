@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/agents"
@@ -32,11 +33,12 @@ import (
 
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager,
+	srvDep map[string]*sync.WaitGroup,
+	shtDwn context.CancelFunc) servmanager.Service {
 	return &AsteriskAgent{
 		cfg:     cfg,
-		shdChan: shdChan,
+		shtDwn:  shtDwn,
 		connMgr: connMgr,
 		srvDep:  srvDep,
 	}
@@ -46,7 +48,7 @@ func NewAsteriskAgent(cfg *config.CGRConfig,
 type AsteriskAgent struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	shdChan  *utils.SyncedChan
+	shtDwn   context.CancelFunc
 	stopChan chan struct{}
 
 	smas    []*agents.AsteriskAgent
@@ -63,17 +65,17 @@ func (ast *AsteriskAgent) Start() (err error) {
 	ast.Lock()
 	defer ast.Unlock()
 
-	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}, shdChan *utils.SyncedChan) {
+	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}) {
 		if err := sma.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, err))
-			shdChan.CloseOnce()
+			ast.shtDwn()
 		}
 	}
 	ast.stopChan = make(chan struct{})
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
 		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
-		go listenAndServe(ast.smas[connIdx], ast.stopChan, ast.shdChan)
+		go listenAndServe(ast.smas[connIdx], ast.stopChan)
 	}
 	return
 }

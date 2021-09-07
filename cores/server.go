@@ -44,9 +44,8 @@ func NewServer(caps *engine.Caps) (s *Server) {
 		stopbiRPCServer: make(chan struct{}, 1),
 		caps:            caps,
 
-		rpcStarted: utils.NewSyncedChan(),
-		rpcServer:  birpc.NewServer(),
-		birpcSrv:   birpc.NewBirpcServer(),
+		rpcServer: birpc.NewServer(),
+		birpcSrv:  birpc.NewBirpcServer(),
 	}
 	s.httpServer = &http.Server{Handler: s.httpMux}
 	s.httpsServer = &http.Server{Handler: s.httpsMux}
@@ -63,7 +62,6 @@ type Server struct {
 	caps            *engine.Caps
 	anz             *analyzers.AnalyzerService
 
-	rpcStarted  *utils.SyncedChan
 	rpcServer   *birpc.Server
 	rpcJSONl    net.Listener
 	rpcGOBl     net.Listener
@@ -208,7 +206,7 @@ func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc, addr, jsonRPCURL, ws
 }
 
 // ServeBiRPC create a goroutine to listen and serve as BiRPC server
-func (s *Server) ServeBiRPC2(addrJSON, addrGOB string, onConn, onDis func(birpc.ClientConnector)) (err error) {
+func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis func(birpc.ClientConnector)) (err error) {
 	s.birpcSrv.OnConnect(onConn)
 	s.birpcSrv.OnDisconnect(onDis)
 	if addrJSON != utils.EmptyString {
@@ -320,12 +318,24 @@ func (s *Server) ServeHTTPS(shtdwnEngine context.CancelFunc,
 }
 
 func (s *Server) Stop() {
-	s.rpcJSONl.Close()
-	s.rpcGOBl.Close()
-	s.rpcJSONlTLS.Close()
-	s.rpcGOBlTLS.Close()
-	s.httpServer.Shutdown(context.Background())
-	s.httpsServer.Shutdown(context.Background())
+	if s.rpcJSONl != nil {
+		s.rpcJSONl.Close()
+	}
+	if s.rpcGOBl != nil {
+		s.rpcGOBl.Close()
+	}
+	if s.rpcJSONlTLS != nil {
+		s.rpcJSONlTLS.Close()
+	}
+	if s.rpcGOBlTLS != nil {
+		s.rpcGOBlTLS.Close()
+	}
+	if s.httpServer != nil {
+		s.httpServer.Shutdown(context.Background())
+	}
+	if s.httpsServer != nil {
+		s.httpsServer.Shutdown(context.Background())
+	}
 	s.StopBiRPC()
 }
 

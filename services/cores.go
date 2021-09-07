@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -34,10 +35,11 @@ import (
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
-	fileCpu io.Closer, fileMEM string, shdWg *sync.WaitGroup, stopMemPrf chan struct{},
-	shdChan *utils.SyncedChan, srvDep map[string]*sync.WaitGroup) *CoreService {
+	fileCpu io.Closer, fileMEM string, stopMemPrf chan struct{},
+	shdWg *sync.WaitGroup, srvDep map[string]*sync.WaitGroup,
+	shtDw context.CancelFunc) *CoreService {
 	return &CoreService{
-		shdChan:    shdChan,
+		shtDw:      shtDw,
 		shdWg:      shdWg,
 		stopMemPrf: stopMemPrf,
 		connChan:   internalCoreSChan,
@@ -60,7 +62,7 @@ type CoreService struct {
 	stopChan   chan struct{}
 	shdWg      *sync.WaitGroup
 	stopMemPrf chan struct{}
-	shdChan    *utils.SyncedChan
+	shtDw      context.CancelFunc
 	fileCpu    io.Closer
 	fileMem    string
 	cS         *cores.CoreService
@@ -80,7 +82,7 @@ func (cS *CoreService) Start() (err error) {
 	defer cS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.shdWg, cS.stopMemPrf, cS.shdChan)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.stopMemPrf, cS.shdWg, cS.shtDw)
 	cS.rpc = apis.NewCoreSv1(cS.cS)
 	srv, _ := birpc.NewService(cS.rpc, utils.EmptyString, false)
 	if !cS.cfg.DispatcherSCfg().Enabled {

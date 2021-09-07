@@ -39,7 +39,6 @@ import (
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/registrarc"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -323,126 +322,7 @@ func main() {
 	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
 		return
 	}
-	vers, err := utils.GetCGRVersion()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	goVers := runtime.Version()
-	if *version {
-		fmt.Println(vers)
-		return
-	}
-	if *pidFile != utils.EmptyString {
-		writePid()
-	}
-	if *singlecpu {
-		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
-	}
 
-	shdWg := new(sync.WaitGroup)
-	shdChan := utils.NewSyncedChan()
-
-	shdWg.Add(1)
-	go singnalHandler(shdWg, shdChan)
-
-	var cS *cores.CoreService
-	var stopMemProf chan struct{}
-	var memPrfDirForCores string
-	if *memProfDir != utils.EmptyString {
-		shdWg.Add(1)
-		stopMemProf = make(chan struct{})
-		memPrfDirForCores = *memProfDir
-		go cores.MemProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, stopMemProf, shdChan)
-		defer func() {
-			if cS == nil {
-				close(stopMemProf)
-			}
-		}()
-	}
-
-	var cpuProfileFile io.Closer
-	if *cpuProfDir != utils.EmptyString {
-		cpuPath := path.Join(*cpuProfDir, utils.CpuPathCgr)
-		cpuProfileFile, err = cores.StartCPUProfiling(cpuPath)
-		if err != nil {
-			return
-		}
-		defer func() {
-			if cS != nil {
-				cS.StopCPUProfiling()
-				return
-			}
-			if cpuProfileFile != nil {
-				pprof.StopCPUProfile()
-				cpuProfileFile.Close()
-			}
-		}()
-	}
-
-	if *scheduledShutdown != utils.EmptyString {
-		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
-		if err != nil {
-			log.Fatal(err)
-		}
-		shdWg.Add(1)
-		go func() { // Schedule shutdown
-			tm := time.NewTimer(shutdownDur)
-			select {
-			case <-tm.C:
-				shdChan.CloseOnce()
-			case <-shdChan.Done():
-				tm.Stop()
-			}
-			shdWg.Done()
-		}()
-	}
-
-	// Init config
-	cfg, err = config.NewCGRConfigFromPath(*cfgPath)
-	if err != nil {
-		log.Fatalf("Could not parse config: <%s>", err.Error())
-		return
-	}
-	if *checkConfig {
-		if err := cfg.CheckConfigSanity(); err != nil {
-			fmt.Println(err)
-		}
-		return
-	}
-
-	if *nodeID != utils.EmptyString {
-		cfg.GeneralCfg().NodeID = *nodeID
-	}
-
-	if cfg.ConfigDBCfg().Type != utils.MetaInternal {
-		d, err := engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
-			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
-			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
-			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-			cfg.ConfigDBCfg().Opts)
-		if err != nil { // Cannot configure getter database, show stopper
-			log.Fatalf("Could not configure configDB: %s exiting!", err)
-			return
-		}
-		if err = cfg.LoadFromDB(d); err != nil {
-			log.Fatalf("Could not parse config: <%s>", err.Error())
-			return
-		}
-	}
-	config.SetCgrConfig(cfg) // Share the config object
-
-	// init syslog
-	if utils.Logger, err = utils.Newlogger(utils.FirstNonEmpty(*syslogger,
-		cfg.GeneralCfg().Logger), cfg.GeneralCfg().NodeID); err != nil {
-		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())
-		return
-	}
-	lgLevel := cfg.GeneralCfg().LogLevel
-	if *logLevel != -1 { // Modify the log level if provided by command arguments
-		lgLevel = *logLevel
-	}
-	utils.Logger.SetLogLevel(lgLevel)
 	// init the concurrentRequests
 	cncReqsLimit := cfg.CoreSCfg().Caps
 	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
@@ -453,8 +333,6 @@ func main() {
 		cncReqsStrategy = utils.ConcurrentReqsStrategy
 	}
 	caps := engine.NewCaps(cncReqsLimit, cncReqsStrategy)
-	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
-	cfg.LazySanityCheck()
 
 	// init the channel here because we need to pass them to connManager
 	internalServeManagerChan := make(chan birpc.ClientConnector, 1)
@@ -539,146 +417,13 @@ func main() {
 		utils.ActionS:         new(sync.WaitGroup),
 		utils.AccountS:        new(sync.WaitGroup),
 	}
-	gvService := services.NewGlobalVarS(cfg, srvDep)
-	shdWg.Add(1)
-	if err = gvService.Start(); err != nil {
-		return
-	}
-	dmService := services.NewDataDBService(cfg, connManager, srvDep)
-	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
-		shdWg.Add(1)
-		if err = dmService.Start(); err != nil {
-			return
-		}
-	}
 
-	storDBService := services.NewStorDBService(cfg, srvDep)
-	if storDBService.ShouldRun() { // Some services can run without db, ie:  ERs
-		shdWg.Add(1)
-		if err = storDBService.Start(); err != nil {
-			return
-		}
-	}
-
-	// Rpc/http server
-	server := cores.NewServer(caps)
-	if len(cfg.HTTPCfg().RegistrarSURL) != 0 {
-		server.RegisterHTTPFunc(cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
-	}
-	if cfg.ConfigSCfg().Enabled {
-		server.RegisterHTTPFunc(cfg.ConfigSCfg().URL, config.HandlerConfigS)
-	}
-	if *httpPprofPath != utils.EmptyString {
-		server.RegisterProfiler(*httpPprofPath)
-	}
-
-	// Define internal connections via channels
-	filterSChan := make(chan *engine.FilterS, 1)
-
-	// init AnalyzerS
-	anz := services.NewAnalyzerService(cfg, server, filterSChan, shdChan, internalAnalyzerSChan, srvDep)
-	if anz.ShouldRun() {
-		shdWg.Add(1)
-		if err := anz.Start(); err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-
-	// init CoreSv1
-
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, memPrfDirForCores, shdWg, stopMemProf, shdChan, srvDep)
-	shdWg.Add(1)
-	if err := coreS.Start(); err != nil {
-		fmt.Println(err)
-		return
-	}
-	cS = coreS.GetCoreS()
-
-	// init CacheS
-	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), shdChan, anz, coreS.GetCoreS().CapsStats)
-	engine.Cache = cacheS
-
-	// init GuardianSv1
-	initGuardianSv1(internalGuardianSChan, server, anz)
-
-	// Start ServiceManager
-	srvManager := servmanager.NewServiceManager(cfg, shdChan, shdWg, connManager)
-	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager, anz, srvDep)
-	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz, dspS, srvDep)
-	dspH := services.NewRegistrarCService(cfg, server, connManager, anz, srvDep)
-	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
-		internalChargerSChan, connManager, anz, srvDep)
-	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan,
-		connManager, server, internalThresholdSChan, anz, srvDep)
-	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
-		internalStatSChan, connManager, anz, srvDep)
-	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
-		internalResourceSChan, connManager, anz, srvDep)
-	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
-		internalRouteSChan, connManager, anz, srvDep)
-
-	admS := services.NewAdminSv1Service(cfg, dmService, storDBService, filterSChan, server,
-		internalAdminSChan, connManager, anz, srvDep)
-
-	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
-		connManager, anz, srvDep)
-
-	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, shdChan, connManager, anz, srvDep)
-
-	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
-		internalLoaderSChan, connManager, anz, srvDep)
-
-	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS,
-		admS, cdrS, smg, coreS,
-		services.NewEventReaderService(cfg, filterSChan, shdChan, connManager, srvDep),
-		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
-		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
-		services.NewKamailioAgent(cfg, shdChan, connManager, srvDep),
-		services.NewAsteriskAgent(cfg, shdChan, connManager, srvDep),              // partial reload
-		services.NewRadiusAgent(cfg, filterSChan, shdChan, connManager, srvDep),   // partial reload
-		services.NewDiameterAgent(cfg, filterSChan, shdChan, connManager, srvDep), // partial reload
-		services.NewHTTPAgent(cfg, filterSChan, server, connManager, srvDep),      // no reload
-		ldrs, anz, dspS, dspH, dmService, storDBService,
-		services.NewEventExporterService(cfg, filterSChan,
-			connManager, server, internalEEsChan, anz, srvDep),
-		services.NewRateService(cfg, cacheS, filterSChan, dmService,
-			server, internalRateSChan, anz, srvDep),
-		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
-		services.NewActionService(cfg, dmService, cacheS, filterSChan, connManager, server, internalActionSChan, anz, srvDep),
-		services.NewAccountService(cfg, dmService, cacheS, filterSChan, connManager, server, internalAccountSChan, anz, srvDep),
-	)
 	srvManager.StartServices()
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, connManager,
 		cfg, dmService.GetDM())
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server, anz)
-
-	// init internalRPCSet to share internal connections among the engine
-	engine.IntRPC = engine.NewRPCClientSet()
-	engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, internalAnalyzerSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.AdminS, internalAdminSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, internalAttributeSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, internalCDRServerChan)
-	engine.IntRPC.AddInternalRPCClient(utils.CDRsV2, internalCDRServerChan)
-	engine.IntRPC.AddInternalRPCClient(utils.ChargerSv1, internalChargerSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.GuardianSv1, internalGuardianSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.LoaderSv1, internalLoaderSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.ResourceSv1, internalResourceSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSessionSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.StatSv1, internalStatSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.RouteSv1, internalRouteSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, internalThresholdSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
-	engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
-	engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
-	engine.IntRPC.AddInternalRPCClient(utils.RateSv1, internalRateSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.ActionSv1, internalActionSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.EeSv1, internalEEsChan)
-	engine.IntRPC.AddInternalRPCClient(utils.DispatcherSv1, internalDispatcherSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.AccountSv1, internalAccountSChan)
 
 	initConfigSv1(internalConfigChan, server, anz)
 
@@ -687,13 +432,13 @@ func main() {
 	}
 
 	// Serve rpc connections
-	go startRPC(server, internalAdminSChan, internalCDRServerChan,
-		internalResourceSChan, internalStatSChan,
-		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
-		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
-		internalDispatcherSChan, internalLoaderSChan,
-		internalCacheSChan, internalEEsChan, internalRateSChan, internalActionSChan,
-		internalAccountSChan, shdChan)
+	// go startRPC(server, internalAdminSChan, internalCDRServerChan,
+	// 	internalResourceSChan, internalStatSChan,
+	// 	internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
+	// 	internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
+	// 	internalDispatcherSChan, internalLoaderSChan,
+	// 	internalCacheSChan, internalEEsChan, internalRateSChan, internalActionSChan,
+	// 	internalAccountSChan, shdChan)
 
 	<-shdChan.Done()
 	shtdDone := make(chan struct{})

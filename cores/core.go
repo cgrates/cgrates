@@ -29,13 +29,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU io.Closer, fileMem string, stopChan chan struct{},
-	shdWg *sync.WaitGroup, stopMemPrf chan struct{}, shdChan *utils.SyncedChan) *CoreService {
+	stopMemPrf chan struct{}, shdWg *sync.WaitGroup, shtDw context.CancelFunc) *CoreService {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
 		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
@@ -43,7 +44,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU io.Closer,
 	return &CoreService{
 		shdWg:      shdWg,
 		stopMemPrf: stopMemPrf,
-		shdChan:    shdChan,
+		shtDw:      shtDw,
 		cfg:        cfg,
 		CapsStats:  st,
 		fileCPU:    fileCPU,
@@ -56,26 +57,27 @@ type CoreService struct {
 	CapsStats  *engine.CapsStats
 	shdWg      *sync.WaitGroup
 	stopMemPrf chan struct{}
-	shdChan    *utils.SyncedChan
 	fileMEM    string
 	fileCPU    io.Closer
 	fileMx     sync.Mutex
+	shtDw      context.CancelFunc
 }
 
 func (cS *CoreService) ShutdownEngine() {
-	cS.shdChan.CloseOnce()
+	cS.shtDw()
 }
 
 // Shutdown is called to shutdown the service
 func (cS *CoreService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
-	cS.StopChanMemProf()
+	cS.stopChanMemProf()
+	cS.StopCPUProfiling()
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
 }
 
-// StopChanMemProf will stop the MemoryProfiling Channel in order to create
+// stopChanMemProf will stop the MemoryProfiling Channel in order to create
 // the final MemoryProfiling when CoreS subsystem will stop.
-func (cS *CoreService) StopChanMemProf() {
+func (cS *CoreService) stopChanMemProf() {
 	if cS.stopMemPrf != nil {
 		MemProfFile(cS.fileMEM)
 		close(cS.stopMemPrf)
@@ -108,7 +110,7 @@ func MemProfFile(memProfPath string) bool {
 	return true
 }
 
-func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg *sync.WaitGroup, stopChan chan struct{}, shdChan *utils.SyncedChan) {
+func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg *sync.WaitGroup, stopChan chan struct{}, shDw context.CancelFunc) {
 	tm := time.NewTimer(interval)
 	for i := 1; ; i++ {
 		select {
@@ -119,7 +121,7 @@ func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg 
 		case <-tm.C:
 		}
 		if !MemProfFile(path.Join(memProfDir, fmt.Sprintf("mem%v.prof", i))) {
-			shdChan.CloseOnce()
+			shDw()
 			shdWg.Done()
 			return
 		}
@@ -192,7 +194,7 @@ func (cS *CoreService) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 	cS.shdWg.Add(1)
 	cS.stopMemPrf = make(chan struct{})
 	cS.fileMEM = args.DirPath
-	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, cS.shdWg, cS.stopMemPrf, cS.shdChan)
+	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, cS.shdWg, cS.stopMemPrf, cS.shtDw)
 	return
 }
 
@@ -202,6 +204,6 @@ func (cS *CoreService) StopMemoryProfiling() (err error) {
 		return errors.New(" Memory Profiling is not started")
 	}
 	cS.fileMEM = path.Join(cS.fileMEM, utils.MemProfFileCgr)
-	cS.StopChanMemProf()
+	cS.stopChanMemProf()
 	return
 }
