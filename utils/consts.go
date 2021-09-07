@@ -1874,6 +1874,7 @@ const (
 	// AttributeSCfg
 	IndexedSelectsCfg = "indexed_selects"
 	ProcessRunsCfg    = "process_runs"
+	ProfileRunsCfg    = "profile_runs"
 	NestedFieldsCfg   = "nested_fields"
 
 	// ChargerSCfg
@@ -2087,7 +2088,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, Op
 	OptsSesDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
-	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
+	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
 	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount,
 	OptsSesAttributeS, OptsSesAttributeIDs, OptsSesAttributeSDerivedReply, OptsSesBlockerError,
 	OptsSesCDRs, OptsSesCDRsDerivedReply, OptsSesChargerS, OptsSesResourceS, OptsSesResourceSAuthorize,
@@ -2179,6 +2180,7 @@ const (
 	Subsys                    = "*subsys"
 	MetaMethod                = "*reqMethod"
 	OptsAttributesProcessRuns = "*processRuns"
+	OptsAttributesProfileRuns = "*profileRuns"
 	MetaEventType             = "*eventType"
 	EventType                 = "EventType"
 	SchedulerInit             = "SchedulerInit"

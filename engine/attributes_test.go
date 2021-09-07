@@ -440,7 +440,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 	lastID := ""
 	alS.dm = nil
 
-	if rcv, err := alS.attributeProfileForEvent(context.Background(), tnt, []string{"ATTR_3"}, evNm, lastID); err == nil || err != utils.ErrNoDatabaseConn {
+	if rcv, err := alS.attributeProfileForEvent(context.Background(), tnt, []string{"ATTR_3"}, evNm, lastID, make(map[string]int), 0); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNoDatabaseConn, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -478,7 +478,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	}
 	lastID := ""
 
-	if rcv, err := alS.attributeProfileForEvent(context.Background(), tnt, []string{"ATTR_3"}, evNm, lastID); err == nil || err != utils.ErrNotFound {
+	if rcv, err := alS.attributeProfileForEvent(context.Background(), tnt, []string{"ATTR_3"}, evNm, lastID, make(map[string]int), 0); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -537,7 +537,7 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 		utils.MetaVars: utils.MapStorage{},
 	}
 
-	if rcv, err := alS.attributeProfileForEvent(context.Background(), tnt, []string{"ATTR_1"}, evNm, lastID); err == nil || err != utils.ErrWrongPath {
+	if rcv, err := alS.attributeProfileForEvent(context.Background(), tnt, []string{"ATTR_1"}, evNm, lastID, make(map[string]int), 0); err == nil || err != utils.ErrWrongPath {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrWrongPath, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)

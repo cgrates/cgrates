@@ -756,6 +756,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Default_opts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(1),
 		},
+		Profile_runs: utils.IntPointer(0),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

@@ -31,6 +31,7 @@ type AttributeSCfg struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+	ProfileRuns         int
 	DefaultOpts         map[string]interface{}
 }
 
@@ -62,6 +63,9 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Suffix_indexed_fields != nil {
 		alS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
+	if jsnCfg.Profile_runs != nil {
+		alS.ProfileRuns = *jsnCfg.Profile_runs
+	}
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -76,6 +80,7 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
+		utils.ProfileRunsCfg:    alS.ProfileRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,
 		utils.DefaultOptsCfg:    alS.DefaultOpts,
 	}
@@ -108,6 +113,7 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
 		DefaultOpts:    alS.DefaultOpts,
+		ProfileRuns:    alS.ProfileRuns,
 	}
 	if alS.ResourceSConns != nil {
 		cln.ResourceSConns = utils.CloneStringSlice(alS.ResourceSConns)
@@ -143,6 +149,7 @@ type AttributeSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Default_opts          map[string]interface{}
+	Profile_runs          *int
 }
 
 func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *AttributeSJsonCfg {
