@@ -275,3 +275,22 @@ func TestDivideBigWithReminder(t *testing.T) {
 		t.Errorf("Expected divident <+%v> but received <+%v>", rExpected, rReceived)
 	}
 }
+
+func TestDecimalNewDecimalFromUsageEmptyStringCase(t *testing.T) {
+	exp := NewDecimal(0, 0)
+	if rcv, err := NewDecimalFromUsage(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv.Compare(exp) != 0 {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestDecimalFloat64(t *testing.T) {
+	d := NewDecimal(123, 2)
+	exp := 1.23
+	if rcv, ok := d.Float64(); !ok {
+		t.Error("expected ok to be true")
+	} else if rcv != exp {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
