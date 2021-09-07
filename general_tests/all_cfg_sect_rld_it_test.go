@@ -916,7 +916,7 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"attributes\":{\"any_context\":true,\"apiers_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"process_runs\":1,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*internal\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
+	cfgStr := "{\"attributes\":{\"any_context\":true,\"apiers_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"process_runs\":1,\"profile_runs\":0,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*internal\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
 
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
