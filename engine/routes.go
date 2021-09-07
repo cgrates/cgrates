@@ -269,7 +269,7 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent,
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
 		args.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 			utils.IfaceAsString(args.APIOpts[utils.OptsContext]),
-			rpS.cfg.RouteSCfg().DefaultOpts.Context,
+			rpS.cfg.RouteSCfg().Opts.Context,
 			utils.MetaRoutes)
 		attrArgs := &AttrArgsProcessEvent{
 			CGREvent: args,
@@ -390,7 +390,7 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
 	prfCountOptInf, has := args.APIOpts[utils.OptsRoutesProfileCount]
 	if !has {
-		prfCountOptInf = rpS.cfg.RouteSCfg().DefaultOpts.ProfileCount
+		prfCountOptInf = rpS.cfg.RouteSCfg().Opts.ProfileCount
 	}
 	if prfCountOptInf != nil {
 		prfCountOpt, err := utils.IfaceAsTInt64(prfCountOptInf)
@@ -401,7 +401,7 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 		}
 	}
 	var extraOpts *optsGetRoutes
-	if extraOpts, err = newOptsGetRoutes(args, rpS.cfg.RouteSCfg().DefaultOpts); err != nil { // convert routes arguments into internal options used to limit data
+	if extraOpts, err = newOptsGetRoutes(args, rpS.cfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
 		return
 	}
 

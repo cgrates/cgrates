@@ -52,7 +52,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
-		DefaultOpts: &RoutesOpts{
+		Opts: &RoutesOpts{
 			Context:      utils.MetaRoutes,
 			ProfileCount: float64(1),
 			IgnoreErrors: false,
@@ -83,7 +83,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.RateSConnsCfg:          []string{},
 		utils.AccountSConnsCfg:       []string{},
 		utils.DefaultRatioCfg:        1,
-		utils.DefaultOptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]interface{}{
 			utils.OptsContext:         utils.MetaRoutes,
 			utils.MetaProfileCountCfg: float64(1),
 			utils.MetaIgnoreErrorsCfg: false,
@@ -128,7 +128,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.RateSConnsCfg:          []string{utils.MetaInternal, "conn1"},
 		utils.AccountSConnsCfg:       []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
-		utils.DefaultOptsCfg: map[string]interface{}{
+		utils.OptsCfg: map[string]interface{}{
 			utils.OptsContext:         utils.MetaRoutes,
 			utils.MetaProfileCountCfg: float64(1),
 			utils.MetaIgnoreErrorsCfg: false,
@@ -193,7 +193,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		ResourceSConns:      []string{"*localhost"},
 		StatSConns:          []string{"*localhost"},
 		DefaultRatio:        2,
-		DefaultOpts: &RoutesOpts{
+		Opts: &RoutesOpts{
 			Context:      utils.MetaAny,
 			IgnoreErrors: true,
 			MaxCost:      5,
@@ -214,7 +214,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		ResourceSConns:      []string{"*birpc"},
 		StatSConns:          []string{"*birpc"},
 		DefaultRatio:        3,
-		DefaultOpts: &RoutesOpts{
+		Opts: &RoutesOpts{
 			Context:      utils.MetaRoutes,
 			IgnoreErrors: false,
 			MaxCost:      utils.MetaEventCost,
@@ -235,10 +235,10 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Resources_conns:       &[]string{"*birpc"},
 		Stats_conns:           &[]string{"*birpc"},
 		Default_ratio:         utils.IntPointer(3),
-		Default_opts: &RoutesOptsJson{
+		Opts: &RoutesOptsJson{
 			Context:      utils.StringPointer(utils.MetaRoutes),
 			IgnoreErrors: utils.BoolPointer(false),
-			MaxCost:      &v2.DefaultOpts.MaxCost,
+			MaxCost:      &v2.Opts.MaxCost,
 			Limit:        utils.IntPointer(2),
 			Offset:       utils.IntPointer(2),
 			ProfileCount: utils.Float64Pointer(2),
@@ -252,7 +252,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &RouteSJsonCfg{
-		Default_opts: &RoutesOptsJson{},
+		Opts: &RoutesOptsJson{},
 	}
 	rcv = diffRouteSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {

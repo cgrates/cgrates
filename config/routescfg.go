@@ -45,8 +45,7 @@ type RouteSCfg struct {
 	RateSConns          []string
 	AccountSConns       []string
 	DefaultRatio        int
-	DefaultOpts         *RoutesOpts
-	// DefaultOpts         map[string]interface{}
+	Opts                *RoutesOpts
 }
 
 func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
@@ -113,8 +112,8 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
 	}
-	if jsnCfg.Default_opts != nil {
-		rts.DefaultOpts.loadFromJSONCfg(jsnCfg.Default_opts)
+	if jsnCfg.Opts != nil {
+		rts.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	if jsnCfg.Nested_fields != nil {
 		rts.NestedFields = *jsnCfg.Nested_fields
@@ -125,16 +124,16 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	opts := map[string]interface{}{
-		utils.OptsContext:         rts.DefaultOpts.Context,
-		utils.MetaProfileCountCfg: rts.DefaultOpts.ProfileCount,
-		utils.MetaIgnoreErrorsCfg: rts.DefaultOpts.IgnoreErrors,
-		utils.MetaMaxCostCfg:      rts.DefaultOpts.MaxCost,
+		utils.OptsContext:         rts.Opts.Context,
+		utils.MetaProfileCountCfg: rts.Opts.ProfileCount,
+		utils.MetaIgnoreErrorsCfg: rts.Opts.IgnoreErrors,
+		utils.MetaMaxCostCfg:      rts.Opts.MaxCost,
 	}
-	if rts.DefaultOpts.Limit != nil {
-		opts[utils.MetaLimitCfg] = *rts.DefaultOpts.Limit
+	if rts.Opts.Limit != nil {
+		opts[utils.MetaLimitCfg] = *rts.Opts.Limit
 	}
-	if rts.DefaultOpts.Offset != nil {
-		opts[utils.MetaOffsetCfg] = *rts.DefaultOpts.Offset
+	if rts.Opts.Offset != nil {
+		opts[utils.MetaOffsetCfg] = *rts.Opts.Offset
 	}
 
 	initialMP = map[string]interface{}{
@@ -142,7 +141,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: rts.IndexedSelects,
 		utils.DefaultRatioCfg:   rts.DefaultRatio,
 		utils.NestedFieldsCfg:   rts.NestedFields,
-		utils.DefaultOptsCfg:    opts,
+		utils.OptsCfg:           opts,
 	}
 	if rts.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rts.StringIndexedFields)
@@ -178,7 +177,7 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		IndexedSelects: rts.IndexedSelects,
 		DefaultRatio:   rts.DefaultRatio,
 		NestedFields:   rts.NestedFields,
-		DefaultOpts:    rts.DefaultOpts,
+		Opts:           rts.Opts,
 	}
 	if rts.AttributeSConns != nil {
 		cln.AttributeSConns = utils.CloneStringSlice(rts.AttributeSConns)
@@ -230,8 +229,7 @@ type RouteSJsonCfg struct {
 	Rates_conns           *[]string
 	Accounts_conns        *[]string
 	Default_ratio         *int
-	Default_opts          *RoutesOptsJson
-	// Default_opts          map[string]interface{}
+	Opts                  *RoutesOptsJson
 }
 
 func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
@@ -268,24 +266,24 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	if v1.DefaultRatio != v2.DefaultRatio {
 		d.Default_ratio = utils.IntPointer(v2.DefaultRatio)
 	}
-	d.Default_opts = &RoutesOptsJson{}
-	if v1.DefaultOpts.Context != v2.DefaultOpts.Context {
-		d.Default_opts.Context = utils.StringPointer(v2.DefaultOpts.Context)
+	d.Opts = &RoutesOptsJson{}
+	if v1.Opts.Context != v2.Opts.Context {
+		d.Opts.Context = utils.StringPointer(v2.Opts.Context)
 	}
-	if v1.DefaultOpts.Limit != v2.DefaultOpts.Limit {
-		d.Default_opts.Limit = v2.DefaultOpts.Limit
+	if v1.Opts.Limit != v2.Opts.Limit {
+		d.Opts.Limit = v2.Opts.Limit
 	}
-	if v1.DefaultOpts.Offset != v2.DefaultOpts.Offset {
-		d.Default_opts.Offset = v2.DefaultOpts.Offset
+	if v1.Opts.Offset != v2.Opts.Offset {
+		d.Opts.Offset = v2.Opts.Offset
 	}
-	if v1.DefaultOpts.MaxCost != v2.DefaultOpts.MaxCost {
-		d.Default_opts.MaxCost = &v2.DefaultOpts.MaxCost
+	if v1.Opts.MaxCost != v2.Opts.MaxCost {
+		d.Opts.MaxCost = &v2.Opts.MaxCost
 	}
-	if v1.DefaultOpts.IgnoreErrors != v2.DefaultOpts.IgnoreErrors {
-		d.Default_opts.IgnoreErrors = utils.BoolPointer(v2.DefaultOpts.IgnoreErrors)
+	if v1.Opts.IgnoreErrors != v2.Opts.IgnoreErrors {
+		d.Opts.IgnoreErrors = utils.BoolPointer(v2.Opts.IgnoreErrors)
 	}
-	if v1.DefaultOpts.ProfileCount != v2.DefaultOpts.ProfileCount {
-		d.Default_opts.ProfileCount = utils.Float64Pointer(v2.DefaultOpts.ProfileCount)
+	if v1.Opts.ProfileCount != v2.Opts.ProfileCount {
+		d.Opts.ProfileCount = utils.Float64Pointer(v2.Opts.ProfileCount)
 	}
 	return d
 }

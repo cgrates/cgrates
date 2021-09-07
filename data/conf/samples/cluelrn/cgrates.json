@@ -24,7 +24,7 @@
 
 
 "stor_db": {
-	"db_password": "CGRateS.org",
+	"db_password": "CGRateS.org"
 },
 
 
@@ -45,8 +45,8 @@
 
 "attributes": {
 	"enabled": true,
-	"default_opts":{
-		"*processRuns": 5,                      // number of run loops when processing event
+	"opts":{
+		"*processRuns": 5                      // number of run loops when processing event
 	},
 },
 

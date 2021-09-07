@@ -753,7 +753,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
-		Default_opts: map[string]interface{}{
+		Opts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: float64(1),
 		},
 		Profile_runs: utils.IntPointer(0),
@@ -890,7 +890,7 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Accounts_conns:        &[]string{},
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
-		Default_opts: &RoutesOptsJson{
+		Opts: &RoutesOptsJson{
 			Context:      utils.StringPointer(utils.MetaRoutes),
 			ProfileCount: utils.Float64Pointer(float64(1)),
 			IgnoreErrors: utils.BoolPointer(false),
