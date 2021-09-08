@@ -56,7 +56,7 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 }
 
 // StartServices starts all enabled services
-func (srvMngr *ServiceManager) StartServices(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (srvMngr *ServiceManager) StartServices(ctx *context.Context, shtDwn context.CancelFunc) {
 	go srvMngr.handleReload(ctx, shtDwn)
 	for _, service := range srvMngr.subsystems {
 		if service.ShouldRun() && !service.IsRunning() {
@@ -71,7 +71,6 @@ func (srvMngr *ServiceManager) StartServices(ctx *context.Context, shtDwn contex
 		}
 	}
 	// startServer()
-	return
 }
 
 // AddServices adds given services
