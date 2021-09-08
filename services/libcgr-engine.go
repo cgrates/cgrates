@@ -47,7 +47,7 @@ func NewCGREngineFlags() *CGREngineFlags {
 		CfgPath:           fs.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path."),
 		Version:           fs.Bool(utils.VersionCgr, false, "Prints the application version."),
 		PidFile:           fs.String(utils.PidCgr, utils.EmptyString, "Write pid file"),
-		HttPrfPath:        fs.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling"),
+		HttpPrfPath:       fs.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling"),
 		CpuPrfDir:         fs.String(utils.CpuProfDirCgr, utils.EmptyString, "write cpu profile to files"),
 		MemPrfDir:         fs.String(utils.MemProfDirCgr, utils.EmptyString, "write memory profile to file"),
 		MemPrfInterval:    fs.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Time between memory profile saves"),
@@ -68,7 +68,7 @@ type CGREngineFlags struct {
 	CfgPath           *string
 	Version           *bool
 	PidFile           *string
-	HttPrfPath        *string
+	HttpPrfPath       *string
 	CpuPrfDir         *string
 	MemPrfDir         *string
 	MemPrfInterval    *time.Duration
@@ -184,11 +184,7 @@ func cgrInitCacheS(ctx *context.Context, shutdown context.CancelFunc,
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(chSv1)
 	}
-	var rpc birpc.ClientConnector = chSv1
-	if anz.IsRunning() {
-		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CacheS)
-	}
-	iCacheSCh <- rpc
+	iCacheSCh <- anz.GetInternalCodec(chSv1, utils.CacheS)
 	return
 }
 

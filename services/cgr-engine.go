@@ -48,7 +48,8 @@ type CGREngine struct {
 	cM         *engine.ConnManager
 	server     *cores.Server
 
-	cS *cores.CoreService
+	cS         *cores.CoreService
+	iFilterSCh chan *engine.FilterS
 }
 
 func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefix string,
@@ -89,8 +90,8 @@ func (cgr *CGREngine) InitConfigFromPath(path, nodeID string, lgLevel int) (err 
 	return
 }
 
-func (cgr *CGREngine) InitServices(ctx *context.Context, shtDwn context.CancelFunc, pprofPath string, cpuPrfFl io.Closer, memPrfDir string, memPrfStop chan struct{}) (err error) {
-	iFilterSCh := make(chan *engine.FilterS, 1)
+func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFunc, httpPrfPath string, cpuPrfFl io.Closer, memPrfDir string, memPrfStop chan struct{}) (err error) {
+	cgr.iFilterSCh = make(chan *engine.FilterS, 1)
 	// init the channel here because we need to pass them to connManager
 	iServeManagerCh := make(chan birpc.ClientConnector, 1)
 	iConfigCh := make(chan birpc.ClientConnector, 1)
@@ -213,12 +214,12 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDwn context.CancelFu
 	if cgr.cfg.ConfigSCfg().Enabled {
 		cgr.server.RegisterHTTPFunc(cgr.cfg.ConfigSCfg().URL, config.HandlerConfigS)
 	}
-	if pprofPath != utils.EmptyString {
-		cgr.server.RegisterProfiler(pprofPath)
+	if httpPrfPath != utils.EmptyString {
+		cgr.server.RegisterProfiler(httpPrfPath)
 	}
 
 	// init AnalyzerS
-	anz := NewAnalyzerService(cgr.cfg, cgr.server, iFilterSCh, iAnalyzerSCh, cgr.srvDep, shtDwn)
+	anz := NewAnalyzerService(cgr.cfg, cgr.server, cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep, shtDw)
 	if anz.ShouldRun() {
 		cgr.shdWg.Add(1)
 		if err = anz.Start(); err != nil {
@@ -227,7 +228,7 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDwn context.CancelFu
 	}
 
 	// init CoreSv1
-	coreS := NewCoreService(cgr.cfg, caps, cgr.server, iCoreSv1Ch, anz, cpuPrfFl, memPrfDir, memPrfStop, &cgr.shdWg, cgr.srvDep, shtDwn)
+	coreS := NewCoreService(cgr.cfg, caps, cgr.server, iCoreSv1Ch, anz, cpuPrfFl, memPrfDir, memPrfStop, &cgr.shdWg, cgr.srvDep, shtDw)
 	cgr.shdWg.Add(1)
 	if err = coreS.Start(); err != nil {
 		return
@@ -235,7 +236,7 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDwn context.CancelFu
 	cgr.cS = coreS.GetCoreS()
 
 	// init CacheS
-	cacheS := cgrInitCacheS(ctx, shtDwn, iCacheSCh, cgr.server, cgr.cfg, dmService.GetDM(), anz, coreS.GetCoreS().CapsStats)
+	cacheS := cgrInitCacheS(ctx, shtDw, iCacheSCh, cgr.server, cgr.cfg, dmService.GetDM(), anz, coreS.GetCoreS().CapsStats)
 	engine.Cache = cacheS
 
 	// init GuardianSv1
@@ -243,50 +244,58 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDwn context.CancelFu
 
 	// Start ServiceManager
 	cgr.srvManager = servmanager.NewServiceManager(cgr.cfg, &cgr.shdWg, cgr.cM)
-	dspS := NewDispatcherService(cgr.cfg, dmService, cacheS, iFilterSCh, cgr.server, iDispatcherSCh, cgr.cM, anz, cgr.srvDep)
-	attrS := NewAttributeService(cgr.cfg, dmService, cacheS, iFilterSCh, cgr.server, iAttributeSCh, anz, dspS, cgr.srvDep)
+	dspS := NewDispatcherService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server, iDispatcherSCh, cgr.cM, anz, cgr.srvDep)
+	attrS := NewAttributeService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server, iAttributeSCh, anz, dspS, cgr.srvDep)
 	dspH := NewRegistrarCService(cgr.cfg, cgr.server, cgr.cM, anz, cgr.srvDep)
-	chrS := NewChargerService(cgr.cfg, dmService, cacheS, iFilterSCh, cgr.server,
+	chrS := NewChargerService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server,
 		iChargerSCh, cgr.cM, anz, cgr.srvDep)
-	tS := NewThresholdService(cgr.cfg, dmService, cacheS, iFilterSCh,
+	tS := NewThresholdService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh,
 		cgr.cM, cgr.server, iThresholdSCh, anz, cgr.srvDep)
-	stS := NewStatService(cgr.cfg, dmService, cacheS, iFilterSCh, cgr.server,
+	stS := NewStatService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server,
 		iStatSCh, cgr.cM, anz, cgr.srvDep)
-	reS := NewResourceService(cgr.cfg, dmService, cacheS, iFilterSCh, cgr.server,
+	reS := NewResourceService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server,
 		iResourceSCh, cgr.cM, anz, cgr.srvDep)
-	routeS := NewRouteService(cgr.cfg, dmService, cacheS, iFilterSCh, cgr.server,
+	routeS := NewRouteService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server,
 		iRouteSCh, cgr.cM, anz, cgr.srvDep)
 
-	admS := NewAdminSv1Service(cgr.cfg, dmService, storDBService, iFilterSCh, cgr.server,
+	admS := NewAdminSv1Service(cgr.cfg, dmService, storDBService, cgr.iFilterSCh, cgr.server,
 		iAdminSCh, cgr.cM, anz, cgr.srvDep)
 
-	cdrS := NewCDRServer(cgr.cfg, dmService, storDBService, iFilterSCh, cgr.server, iCDRServerCh,
+	cdrS := NewCDRServer(cgr.cfg, dmService, storDBService, cgr.iFilterSCh, cgr.server, iCDRServerCh,
 		cgr.cM, anz, cgr.srvDep)
 
-	smg := NewSessionService(cgr.cfg, dmService, cgr.server, iSessionSCh, cgr.cM, anz, cgr.srvDep, shtDwn)
+	smg := NewSessionService(cgr.cfg, dmService, cgr.server, iSessionSCh, cgr.cM, anz, cgr.srvDep, shtDw)
 
-	ldrs := NewLoaderService(cgr.cfg, dmService, iFilterSCh, cgr.server,
+	ldrs := NewLoaderService(cgr.cfg, dmService, cgr.iFilterSCh, cgr.server,
 		iLoaderSCh, cgr.cM, anz, cgr.srvDep)
 
 	cgr.srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS,
 		admS, cdrS, smg, coreS,
-		NewEventReaderService(cgr.cfg, iFilterSCh, cgr.cM, cgr.srvDep, shtDwn),
-		NewDNSAgent(cgr.cfg, iFilterSCh, cgr.cM, cgr.srvDep, shtDwn),
-		NewFreeswitchAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDwn),
-		NewKamailioAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDwn),
-		NewAsteriskAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDwn),             // partial reload
-		NewRadiusAgent(cgr.cfg, iFilterSCh, cgr.cM, cgr.srvDep, shtDwn),   // partial reload
-		NewDiameterAgent(cgr.cfg, iFilterSCh, cgr.cM, cgr.srvDep, shtDwn), // partial reload
-		NewHTTPAgent(cgr.cfg, iFilterSCh, cgr.server, cgr.cM, cgr.srvDep), // no reload
+		NewEventReaderService(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),
+		NewDNSAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),
+		NewFreeswitchAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDw),
+		NewKamailioAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDw),
+		NewAsteriskAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDw),                  // partial reload
+		NewRadiusAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),    // partial reload
+		NewDiameterAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),  // partial reload
+		NewHTTPAgent(cgr.cfg, cgr.iFilterSCh, cgr.server, cgr.cM, cgr.srvDep), // no reload
 		ldrs, anz, dspS, dspH, dmService, storDBService,
-		NewEventExporterService(cgr.cfg, iFilterSCh,
+		NewEventExporterService(cgr.cfg, cgr.iFilterSCh,
 			cgr.cM, cgr.server, iEEsCh, anz, cgr.srvDep),
-		NewRateService(cgr.cfg, cacheS, iFilterSCh, dmService,
+		NewRateService(cgr.cfg, cacheS, cgr.iFilterSCh, dmService,
 			cgr.server, iRateSCh, anz, cgr.srvDep),
-		NewSIPAgent(cgr.cfg, iFilterSCh, cgr.cM, cgr.srvDep, shtDwn),
-		NewActionService(cgr.cfg, dmService, cacheS, iFilterSCh, cgr.cM, cgr.server, iActionSCh, anz, cgr.srvDep),
-		NewAccountService(cgr.cfg, dmService, cacheS, iFilterSCh, cgr.cM, cgr.server, iAccountSCh, anz, cgr.srvDep),
+		NewSIPAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),
+		NewActionService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iActionSCh, anz, cgr.srvDep),
+		NewAccountService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iAccountSCh, anz, cgr.srvDep),
 	)
+	cgr.srvManager.StartServices(ctx, shtDw)
+	// Start FilterS
+	go cgrStartFilterService(ctx, cgr.iFilterSCh, cacheS, cgr.cM,
+		cgr.cfg, dmService.GetDM())
+
+	cgrInitServiceManagerV1(iServeManagerCh, cgr.srvManager, cgr.server, anz)
+
+	cgrInitConfigSv1(iConfigCh, cgr.cfg, cgr.server, anz)
 	return
 }
 
@@ -309,28 +318,28 @@ func (cgr *CGREngine) Start(ctx *context.Context, shtDw context.CancelFunc, flag
 	cgr.shdWg.Add(1)
 	go cgrSingnalHandler(ctx, shtDw, cgr.cfg, &cgr.shdWg)
 
-	var stopMemProf chan struct{}
+	var memPrfStop chan struct{}
 	if *flags.MemPrfDir != utils.EmptyString {
 		cgr.shdWg.Add(1)
-		stopMemProf = make(chan struct{})
-		go cores.MemProfiling(*flags.MemPrfDir, *flags.MemPrfInterval, *flags.MemPrfNoF, &cgr.shdWg, stopMemProf, shtDw)
+		memPrfStop = make(chan struct{})
+		go cores.MemProfiling(*flags.MemPrfDir, *flags.MemPrfInterval, *flags.MemPrfNoF, &cgr.shdWg, memPrfStop, shtDw)
 		defer func() { //here
 			if cgr.cS == nil {
-				close(stopMemProf)
+				close(memPrfStop)
 			}
 		}()
 	}
 
-	var cpuProfileFile io.Closer
+	var cpuPrfF io.Closer
 	if *flags.CpuPrfDir != utils.EmptyString {
-		cpuProfileFile, err = cores.StartCPUProfiling(path.Join(*flags.CpuPrfDir, utils.CpuPathCgr))
-		if err != nil {
+		if cpuPrfF, err = cores.StartCPUProfiling(
+			path.Join(*flags.CpuPrfDir, utils.CpuPathCgr)); err != nil {
 			return
 		}
 		defer func() { //here
 			if cgr.cS == nil {
 				pprof.StopCPUProfile()
-				cpuProfileFile.Close()
+				cpuPrfF.Close()
 			}
 		}()
 	}
@@ -370,6 +379,23 @@ func (cgr *CGREngine) Start(ctx *context.Context, shtDw context.CancelFunc, flag
 	utils.Logger.SetLogLevel(cgr.cfg.GeneralCfg().LogLevel)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cgr.cfg.LazySanityCheck()
+
+	if err = cgr.InitServices(ctx, shtDw, *flags.HttpPrfPath, cpuPrfF, *flags.MemPrfDir, memPrfStop); err != nil {
+		return
+	}
+
+	if *preload != utils.EmptyString {
+		runPreload(ldrs, internalLoaderSChan, shdChan)
+	}
+
+	// Serve rpc connections
+	// go startRPC(server, internalAdminSChan, internalCDRServerChan,
+	// 	internalResourceSChan, internalStatSChan,
+	// 	internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
+	// 	internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
+	// 	internalDispatcherSChan, internalLoaderSChan,
+	// 	internalCacheSChan, internalEEsChan, internalRateSChan, internalActionSChan,
+	// 	internalAccountSChan, shdChan)
 
 	return
 }
