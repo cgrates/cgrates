@@ -45,23 +45,21 @@ func TestSIPAgentReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+		nil, anz, srvDep)
+	srv := NewSIPAgent(cfg, filterSChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -80,11 +78,11 @@ func TestSIPAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	srvStart := srv.Start()
+	srvStart := srv.Start(ctx, cancel)
 	if srvStart != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, srvStart)
 	}
-	err := srv.Reload()
+	err := srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -95,7 +93,7 @@ func TestSIPAgentReload(t *testing.T) {
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -107,9 +105,8 @@ func TestSIPAgentReload2(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewSIPAgent(cfg, filterSChan, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -122,7 +119,8 @@ func TestSIPAgentReload2(t *testing.T) {
 			},
 		},
 	}
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err == nil || err.Error() != "no template with id: <>" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "no template with id: <>", err)
 	}
@@ -137,18 +135,18 @@ func TestSIPAgentReload3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewSIPAgent(cfg, filterSChan, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
 	srv.(*SIPAgent).oldListen = "test"
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}

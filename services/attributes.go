@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -33,7 +34,7 @@ import (
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, dspS *DispatcherService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -55,7 +56,7 @@ type AttributeService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
@@ -68,19 +69,26 @@ type AttributeService struct {
 }
 
 // Start should handle the service start
-func (attrS *AttributeService) Start() (err error) {
+func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if attrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	<-attrS.cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
-	<-attrS.cacheS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes)
+	if err = attrS.cacheS.WaitToPrecache(ctx,
+		utils.CacheAttributeProfiles,
+		utils.CacheAttributeFilterIndexes); err != nil {
+		return
+	}
 
-	filterS := <-attrS.filterSChan
-	attrS.filterSChan <- filterS
-	dbchan := attrS.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, attrS.filterSChan); err != nil {
+		return
+	}
+
+	var datadb *engine.DataManager
+	if datadb, err = attrS.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	attrS.Lock()
 	defer attrS.Unlock()
@@ -97,7 +105,9 @@ func (attrS *AttributeService) Start() (err error) {
 			if _, closed := <-dspShtdChan; closed {
 				return
 			}
-			attrS.server.RpcRegister(srv)
+			if attrS.IsRunning() {
+				attrS.server.RpcRegister(srv)
+			}
 
 		}
 	}()
@@ -106,7 +116,7 @@ func (attrS *AttributeService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (attrS *AttributeService) Reload() (err error) {
+func (attrS *AttributeService) Reload(*context.Context, context.CancelFunc) (err error) {
 	return // for the moment nothing to reload
 }
 

@@ -41,17 +41,16 @@ func TestStorDBReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	cfg.ChargerSCfg().Enabled = true
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
@@ -59,9 +58,8 @@ func TestStorDBReload(t *testing.T) {
 	srvMngr.AddServices(cdrS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server,
 			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db, stordb)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 	if cdrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -93,7 +91,7 @@ func TestStorDBReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	time.Sleep(10 * time.Millisecond)
-	if err := stordb.Reload(); err != nil {
+	if err := stordb.Reload(ctx, cancel); err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -107,32 +105,32 @@ func TestStorDBReload(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 
-	if err := cdrS.Reload(); err != nil {
+	if err := cdrS.Reload(ctx, cancel); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 
-	if err := stordb.Reload(); err != nil {
+	if err := stordb.Reload(ctx, cancel); err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.StorDbCfg().Type = utils.Internal
-	if err := stordb.Reload(); err != nil {
+	if err := stordb.Reload(ctx, cancel); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	err := stordb.Start()
+	err := stordb.Start(ctx, cancel)
 	if err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	if err := stordb.Reload(); err != nil {
+	if err := stordb.Reload(ctx, cancel); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	if err := db.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+	if err := db.Start(ctx, cancel); err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	if err := cdrS.Start(); err == nil || err != utils.ErrServiceAlreadyRunning {
+	if err := cdrS.Start(ctx, cancel); err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 
-	if err := cdrS.Reload(); err != nil {
+	if err := cdrS.Reload(ctx, cancel); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 
@@ -142,7 +140,7 @@ func TestStorDBReload(t *testing.T) {
 	if cdrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -188,28 +186,28 @@ func TestStorDBReloadVersion1(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
-	err = stordb.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err = stordb.Start(ctx, cancel)
 	if err != nil {
 		t.Fatal(err)
 	}
 	stordb.db = nil
-	err = stordb.Reload()
+	err = stordb.Reload(ctx, cancel)
 	if err == nil || err.Error() != "can't conver StorDB of type mongo to MongoStorage" {
 		t.Fatal(err)
 	}
 
 	cfg.CdrsCfg().Enabled = false
-	err = stordb.Reload()
+	err = stordb.Reload(ctx, cancel)
 	if err == nil || err.Error() != "can't conver StorDB of type mongo to MongoStorage" {
 		t.Fatal(err)
 	}
 	time.Sleep(10 * time.Millisecond)
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -255,30 +253,28 @@ func TestStorDBReloadVersion2(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
-	err = stordb.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err = stordb.Start(ctx, cancel)
 	if err != nil {
 		t.Fatal(err)
 	}
 	stordb.db = nil
-	err = stordb.Reload()
+	err = stordb.Reload(ctx, cancel)
 	if err == nil || err.Error() != "can't conver StorDB of type mysql to SQLStorage" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "can't convert StorDB of type mysql to SQLStorage", err)
 	}
 	cfg.CdrsCfg().Enabled = false
-	err = stordb.Reload()
+	err = stordb.Reload(ctx, cancel)
 	if err == nil || err.Error() != "can't conver StorDB of type mysql to SQLStorage" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "can't convert StorDB of type mysql to SQLStorage", err)
-
-		time.Sleep(10 * time.Millisecond)
-		shdChan.CloseOnce()
-		time.Sleep(10 * time.Millisecond)
 	}
+	cancel()
+	time.Sleep(10 * time.Millisecond)
 }
 func TestStorDBReloadVersion3(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutinternal"))
@@ -319,28 +315,28 @@ func TestStorDBReloadVersion3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
 	stordb.db = nil
-	err = stordb.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+
+	err = stordb.Reload(ctx, cancel)
 	if err == nil || err.Error() != "can't conver StorDB of type internal to InternalDB" {
 		t.Fatal(err)
 	}
-	err = stordb.Start()
+	err = stordb.Start(ctx, cancel)
 	if err == nil {
 		t.Fatal(err)
 	}
 	cfg.CdrsCfg().Enabled = false
-	err = stordb.Reload()
+	err = stordb.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(10 * time.Millisecond)
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -350,7 +346,6 @@ func TestStorDBReloadNewStorDBConnError(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
@@ -364,11 +359,12 @@ func TestStorDBReloadNewStorDBConnError(t *testing.T) {
 		Password: "test_pass",
 	}
 	cfg.StorDbCfg().Type = "badType"
-	err := stordb.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := stordb.Reload(ctx, cancel)
 	if err == nil || err.Error() != "unknown db 'badType' valid options are [mysql, mongo, postgres, internal]" {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "unknown db 'badType' valid options are [mysql, mongo, postgres, internal]", err)
 	}
-	shdChan.CloseOnce()
+	cancel()
 }
 
 func TestStorDBReloadCanCastError(t *testing.T) {
@@ -377,7 +373,6 @@ func TestStorDBReloadCanCastError(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
@@ -388,11 +383,12 @@ func TestStorDBReloadCanCastError(t *testing.T) {
 	}
 	stordb.db = &engine.MongoStorage{}
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
-	err := stordb.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := stordb.Reload(ctx, cancel)
 	if err == nil || err.Error() != "cannot convert field: false to time.Duration" {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "cannot convert field: false to time.Duration", err)
 	}
-	shdChan.CloseOnce()
+	cancel()
 }
 
 func TestStorDBReloadIfaceAsTIntMaxOpenConnsCfgError(t *testing.T) {
@@ -401,7 +397,6 @@ func TestStorDBReloadIfaceAsTIntMaxOpenConnsCfgError(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
@@ -412,12 +407,13 @@ func TestStorDBReloadIfaceAsTIntMaxOpenConnsCfgError(t *testing.T) {
 	}
 	stordb.db = &engine.SQLStorage{}
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
-	err := stordb.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := stordb.Reload(ctx, cancel)
 	expected := "cannot convert field<bool>: false to int"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, err)
 	}
-	shdChan.CloseOnce()
+	cancel()
 }
 
 func TestStorDBReloadIfaceAsTIntConnMaxLifetimeCfgError(t *testing.T) {
@@ -426,7 +422,6 @@ func TestStorDBReloadIfaceAsTIntConnMaxLifetimeCfgError(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
@@ -439,12 +434,13 @@ func TestStorDBReloadIfaceAsTIntConnMaxLifetimeCfgError(t *testing.T) {
 	}
 	stordb.db = &engine.SQLStorage{}
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
-	err := stordb.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := stordb.Reload(ctx, cancel)
 	expected := "cannot convert field<bool>: false to int"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, err)
 	}
-	shdChan.CloseOnce()
+	cancel()
 }
 
 func TestStorDBReloadIfaceAsTIntMaxIdleConnsCfgError(t *testing.T) {
@@ -453,7 +449,6 @@ func TestStorDBReloadIfaceAsTIntMaxIdleConnsCfgError(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
@@ -466,12 +461,13 @@ func TestStorDBReloadIfaceAsTIntMaxIdleConnsCfgError(t *testing.T) {
 	}
 	stordb.db = &engine.SQLStorage{}
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
-	err := stordb.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := stordb.Reload(ctx, cancel)
 	expected := "cannot convert field<bool>: false to int"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, err)
 	}
-	shdChan.CloseOnce()
+	cancel()
 }
 
 func TestStorDBReloadStartDBError(t *testing.T) {
@@ -480,16 +476,16 @@ func TestStorDBReloadStartDBError(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	cfg.StorDbCfg().Type = "badType"
-	err := stordb.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := stordb.Start(ctx, cancel)
 	expected := "unknown db 'badType' valid options are [mysql, mongo, postgres, internal]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, err)
 	}
-	shdChan.CloseOnce()
+	cancel()
 }

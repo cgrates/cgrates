@@ -35,16 +35,14 @@ func TestSIPAgentCoverage(t *testing.T) {
 	cfg.SessionSCfg().ListenBijson = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewSIPAgent(cfg, filterSChan, nil, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	srv2 := SIPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
 		sip:         &agents.SIPAgent{},
 		connMgr:     nil,
 		srvDep:      srvDep,

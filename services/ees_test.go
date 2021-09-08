@@ -37,10 +37,9 @@ func TestEventExporterSCoverage(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil), server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")

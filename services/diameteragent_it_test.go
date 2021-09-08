@@ -43,22 +43,20 @@ func TestDiameterAgentReload1(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, srvDep)
+		nil, anz, srvDep)
+	srv := NewDiameterAgent(cfg, filterSChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -75,11 +73,11 @@ func TestDiameterAgentReload1(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := srv.Start()
+	err := srv.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -87,7 +85,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	cfg.DiameterAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DiameterAgentJSON) <- struct{}{}
 	srv.(*DiameterAgent).lnet = "bad_lnet_test"
-	err2 := srv.Reload()
+	err2 := srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err2)
 	}
@@ -95,7 +93,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -107,9 +105,8 @@ func TestDiameterAgentReload2(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDiameterAgent(cfg, filterSChan, nil, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -119,8 +116,6 @@ func TestDiameterAgentReload2(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
-	time.Sleep(10 * time.Millisecond)
 }
 
 func TestDiameterAgentReload3(t *testing.T) {
@@ -129,19 +124,19 @@ func TestDiameterAgentReload3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDiameterAgent(cfg, filterSChan, nil, srvDep)
 
 	cfg.DiameterAgentCfg().ListenNet = "bad"
 	cfg.DiameterAgentCfg().DictionariesPath = ""
 
-	err := srv.(*DiameterAgent).start(nil)
+	err := srv.(*DiameterAgent).start(nil, func() {})
 	if err != nil {
 		t.Fatal(err)
 	}
 	cfg.DiameterAgentCfg().Enabled = false
-	err = srv.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -45,27 +45,25 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
+	ctx, cancel := context.WithCancel(context.TODO())
 	defer func() {
-		shdChan.CloseOnce()
+		cancel()
 		time.Sleep(10 * time.Millisecond)
 	}()
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+		nil, anz, srvDep)
+	srv := NewFreeswitchAgent(cfg, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	srvMngr.StartServices(ctx, cancel)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -93,9 +91,8 @@ func TestFreeSwitchAgentReload2(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	srv := NewFreeswitchAgent(cfg, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -104,7 +101,8 @@ func TestFreeSwitchAgentReload2(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err == nil || err.Error() != "service already running" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "service already running", err)
 	}
@@ -122,9 +120,8 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	srv := NewFreeswitchAgent(cfg, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -133,7 +130,8 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err == nil || err.Error() != "service already running" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "service already running", err)
 	}
@@ -150,9 +148,8 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	srv := NewFreeswitchAgent(cfg, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -176,7 +173,7 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 		},
 	}
 	srv.(*FreeswitchAgent).fS = agents.NewFSsessions(agentCfg, "", nil)
-	err := srv.(*FreeswitchAgent).reload(srv.(*FreeswitchAgent).fS)
+	err := srv.(*FreeswitchAgent).connect(srv.(*FreeswitchAgent).fS, func() {})
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -189,15 +186,15 @@ func TestFreeSwitchAgentReload5(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	srv := NewFreeswitchAgent(cfg, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
 
 	srv.(*FreeswitchAgent).fS = nil
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -210,9 +207,8 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	srv := NewFreeswitchAgent(cfg, nil, srvDep)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -236,7 +232,8 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 		},
 	}
 	srv.(*FreeswitchAgent).fS = agents.NewFSsessions(agentCfg, "", nil)
-	err := srv.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

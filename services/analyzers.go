@@ -35,14 +35,12 @@ import (
 func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server,
 	filterSChan chan *engine.FilterS,
 	internalAnalyzerSChan chan birpc.ClientConnector,
-	srvDep map[string]*sync.WaitGroup,
-	shtDwn context.CancelFunc) *AnalyzerService {
+	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
 		server:      server,
 		filterSChan: filterSChan,
-		shtDwn:      shtDwn,
 		srvDep:      srvDep,
 	}
 }
@@ -54,7 +52,6 @@ type AnalyzerService struct {
 	server      *cores.Server
 	filterSChan chan *engine.FilterS
 	stopChan    chan struct{}
-	shtDwn      context.CancelFunc
 
 	anz *analyzers.AnalyzerService
 	// rpc      *v1.AnalyzerSv1
@@ -63,7 +60,7 @@ type AnalyzerService struct {
 }
 
 // Start should handle the sercive start
-func (anz *AnalyzerService) Start() (err error) {
+func (anz *AnalyzerService) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
 	if anz.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -78,7 +75,7 @@ func (anz *AnalyzerService) Start() (err error) {
 	go func(a *analyzers.AnalyzerService) {
 		if err := a.ListenAndServe(anz.stopChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
-			anz.shtDwn()
+			shtDwn()
 		}
 		return
 	}(anz.anz)
@@ -109,7 +106,7 @@ func (anz *AnalyzerService) start() {
 }
 
 // Reload handles the change of config
-func (anz *AnalyzerService) Reload() (err error) {
+func (anz *AnalyzerService) Reload(*context.Context, context.CancelFunc) (err error) {
 	return // for the momment nothing to reload
 }
 

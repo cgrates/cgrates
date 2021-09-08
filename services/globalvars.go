@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 
@@ -47,19 +48,19 @@ type GlobalVarS struct {
 }
 
 // Start should handle the sercive start
-func (gv *GlobalVarS) Start() (err error) {
+func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
 	ees.SetFailedPostCacheTTL(gv.cfg.GeneralCfg().FailedPostsTTL)
 	return gv.initHTTPTransport()
 }
 
 // Reload handles the change of config
-func (gv *GlobalVarS) Reload() (err error) {
+func (gv *GlobalVarS) Reload(*context.Context, context.CancelFunc) error {
 	return gv.initHTTPTransport()
 }
 
 // Shutdown stops the service
-func (gv *GlobalVarS) Shutdown() (err error) {
-	return
+func (gv *GlobalVarS) Shutdown() error {
+	return nil
 }
 
 // IsRunning returns if the service is running

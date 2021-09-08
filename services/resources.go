@@ -34,7 +34,7 @@ import (
 
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalResourceSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -56,12 +56,11 @@ type ResourceService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
 	reS      *engine.ResourceService
-	rpc      *apis.ResourceSv1
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
@@ -69,28 +68,35 @@ type ResourceService struct {
 }
 
 // Start should handle the service start
-func (reS *ResourceService) Start() (err error) {
+func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if reS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 	reS.srvDep[utils.DataDB].Add(1)
-	<-reS.cacheS.GetPrecacheChannel(utils.CacheResourceProfiles)
-	<-reS.cacheS.GetPrecacheChannel(utils.CacheResources)
-	<-reS.cacheS.GetPrecacheChannel(utils.CacheResourceFilterIndexes)
 
-	filterS := <-reS.filterSChan
-	reS.filterSChan <- filterS
-	dbchan := reS.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	if err = reS.cacheS.WaitToPrecache(ctx,
+		utils.CacheResourceProfiles,
+		utils.CacheResources,
+		utils.CacheResourceFilterIndexes); err != nil {
+		return
+	}
+
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, reS.filterSChan); err != nil {
+		return
+	}
+
+	var datadb *engine.DataManager
+	if datadb, err = reS.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	reS.Lock()
 	defer reS.Unlock()
 	reS.reS = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
-	reS.reS.StartLoop(context.TODO())
-	reS.rpc = apis.NewResourceSv1(reS.reS)
-	srv, _ := birpc.NewService(reS.rpc, "", false)
+	reS.reS.StartLoop(ctx)
+	srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
 	if !reS.cfg.DispatcherSCfg().Enabled {
 		reS.server.RpcRegister(srv)
 	}
@@ -99,9 +105,9 @@ func (reS *ResourceService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (reS *ResourceService) Reload() (err error) {
+func (reS *ResourceService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
 	reS.Lock()
-	reS.reS.Reload(context.TODO())
+	reS.reS.Reload(ctx)
 	reS.Unlock()
 	return
 }
@@ -113,7 +119,6 @@ func (reS *ResourceService) Shutdown() (err error) {
 	defer reS.Unlock()
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
-	reS.rpc = nil
 	<-reS.connChan
 	return
 }

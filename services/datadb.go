@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -52,7 +53,7 @@ type DataDBService struct {
 }
 
 // Start should handle the sercive start
-func (db *DataDBService) Start() (err error) {
+func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -75,7 +76,6 @@ func (db *DataDBService) Start() (err error) {
 	}
 
 	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
-	engine.SetDataStorage(db.dm)
 	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
 		fmt.Println(err)
 		return
@@ -85,7 +85,7 @@ func (db *DataDBService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (db *DataDBService) Reload() (err error) {
+func (db *DataDBService) Reload(*context.Context, context.CancelFunc) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
@@ -118,7 +118,7 @@ func (db *DataDBService) Reload() (err error) {
 }
 
 // Shutdown stops the service
-func (db *DataDBService) Shutdown() (err error) {
+func (db *DataDBService) Shutdown() (_ error) {
 	db.srvDep[utils.DataDB].Wait()
 	db.Lock()
 	db.dm.DataDB().Close()
@@ -153,13 +153,6 @@ func (db *DataDBService) mandatoryDB() bool {
 		db.cfg.AccountSCfg().Enabled || db.cfg.ActionSCfg().Enabled || db.cfg.AnalyzerSCfg().Enabled
 }
 
-// GetDM returns the DataManager
-func (db *DataDBService) GetDM() *engine.DataManager {
-	db.RLock()
-	defer db.RUnlock()
-	return db.dm
-}
-
 // needsConnectionReload returns if the DB connection needs to reloaded
 func (db *DataDBService) needsConnectionReload() bool {
 	if db.oldDBCfg.Type != db.cfg.DataDbCfg().Type ||
@@ -182,4 +175,18 @@ func (db *DataDBService) GetDMChan() chan *engine.DataManager {
 	db.RLock()
 	defer db.RUnlock()
 	return db.dbchan
+}
+
+// GetDM returns the DataManager
+func (db *DataDBService) WaitForDM(ctx *context.Context) (datadb *engine.DataManager, err error) {
+	db.RLock()
+	dbCh := db.dbchan
+	db.RUnlock()
+	select {
+	case <-ctx.Done():
+		err = ctx.Err()
+	case datadb = <-dbCh:
+		dbCh <- datadb
+	}
+	return
 }

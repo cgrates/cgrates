@@ -34,7 +34,7 @@ import (
 
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	server *cores.Server, internalThresholdSChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -56,43 +56,47 @@ type ThresholdService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
 	thrs     *engine.ThresholdService
-	rpc      *apis.ThresholdSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (thrs *ThresholdService) Start() (err error) {
+func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if thrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 	thrs.srvDep[utils.DataDB].Add(1)
+	if err = thrs.cacheS.WaitToPrecache(ctx,
+		utils.CacheThresholdProfiles,
+		utils.CacheThresholds,
+		utils.CacheThresholdFilterIndexes); err != nil {
+		return
+	}
 
-	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholdProfiles)
-	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholds)
-	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes)
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, thrs.filterSChan); err != nil {
+		return
+	}
 
-	filterS := <-thrs.filterSChan
-	thrs.filterSChan <- filterS
-	dbchan := thrs.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var datadb *engine.DataManager
+	if datadb, err = thrs.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	thrs.Lock()
 	defer thrs.Unlock()
 	thrs.thrs = engine.NewThresholdService(datadb, thrs.cfg, filterS, thrs.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
-	thrs.thrs.StartLoop(context.TODO())
-	thrs.rpc = apis.NewThresholdSv1(thrs.thrs)
-	srv, _ := birpc.NewService(thrs.rpc, "", false)
+	thrs.thrs.StartLoop(ctx)
+	srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
 	if !thrs.cfg.DispatcherSCfg().Enabled {
 		thrs.server.RpcRegister(srv)
 	}
@@ -101,21 +105,20 @@ func (thrs *ThresholdService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (thrs *ThresholdService) Reload() (err error) {
+func (thrs *ThresholdService) Reload(ctx *context.Context, _ context.CancelFunc) (_ error) {
 	thrs.Lock()
-	thrs.thrs.Reload(context.TODO())
+	thrs.thrs.Reload(ctx)
 	thrs.Unlock()
 	return
 }
 
 // Shutdown stops the service
-func (thrs *ThresholdService) Shutdown() (err error) {
+func (thrs *ThresholdService) Shutdown() (_ error) {
 	defer thrs.srvDep[utils.DataDB].Done()
 	thrs.Lock()
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
-	thrs.rpc = nil
 	<-thrs.connChan
 	return
 }

@@ -23,8 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"runtime"
-	"sync"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -217,40 +215,25 @@ func (chS *CacheS) GetPrecacheChannel(chID string) chan struct{} {
 }
 
 // Precache loads data from DataDB into cache at engine start
-func (chS *CacheS) Precache(ctx *context.Context) (err error) {
-	var wg sync.WaitGroup // wait for precache to finish
-	errChan := make(chan error)
-	doneChan := make(chan struct{})
+func (chS *CacheS) Precache(ctx *context.Context, shutdown context.CancelFunc) {
 	for cacheID, cacheCfg := range chS.cfg.CacheCfg().Partitions {
 		if !cacheCfg.Precache {
 			close(chS.pcItems[cacheID]) // no need of precache
 			continue
 		}
-		wg.Add(1)
 		go func(cacheID string) {
-			errCache := chS.dm.CacheDataFromDB(ctx,
+			err := chS.dm.CacheDataFromDB(ctx,
 				utils.CacheInstanceToPrefix[cacheID],
 				[]string{utils.MetaAny},
 				false)
-			if errCache != nil {
-				errChan <- fmt.Errorf("precaching cacheID <%s>, got error: %s", cacheID, errCache)
+			if err != nil && err != context.Canceled {
+				utils.Logger.Crit(fmt.Sprintf("<%s> precaching cacheID <%s>, got error: %s", utils.CacheS, cacheID, err))
+				shutdown()
+				return
 			}
 			close(chS.pcItems[cacheID])
-			wg.Done()
 		}(cacheID)
 	}
-	runtime.Gosched() // switch context
-	go func() {       // report wg.Wait on doneChan
-		wg.Wait()
-		close(doneChan)
-	}()
-	select {
-	case err = <-errChan:
-	case <-doneChan:
-	case <-ctx.Done():
-		err = ctx.Err()
-	}
-	return
 }
 
 // APIs start here

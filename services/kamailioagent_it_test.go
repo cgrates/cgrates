@@ -47,23 +47,21 @@ func TestKamailioAgentReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
+		nil, anz, srvDep)
+	srv := NewKamailioAgent(cfg, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -90,14 +88,14 @@ func TestKamailioAgentReload(t *testing.T) {
 
 	srv.(*KamailioAgent).kam = agents.NewKamailioAgent(kaCfg, nil, "")
 
-	err := srv.Reload()
+	err := srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	// the engine should be stopped as we could not connect to kamailio
 
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -109,9 +107,8 @@ func TestKamailioAgentReload2(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
+	srv := NewKamailioAgent(cfg, nil, srvDep)
 	srvKam := &agents.KamailioAgent{}
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -120,7 +117,8 @@ func TestKamailioAgentReload2(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err == nil || err.Error() != "service already running" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "service already running", err)
 	}
@@ -134,9 +132,8 @@ func TestKamailioAgentReload3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
+	srv := NewKamailioAgent(cfg, nil, srvDep)
 	srvKam := &agents.KamailioAgent{}
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -145,7 +142,8 @@ func TestKamailioAgentReload3(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err == nil || err.Error() != "service already running" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "service already running", err)
 	}

@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -33,7 +34,7 @@ import (
 
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *DispatcherService {
@@ -56,7 +57,7 @@ type DispatcherService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager
@@ -70,24 +71,32 @@ type DispatcherService struct {
 }
 
 // Start should handle the sercive start
-func (dspS *DispatcherService) Start() (err error) {
+func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if dspS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 	utils.Logger.Info("Starting CGRateS DispatcherS service.")
-	fltrS := <-dspS.filterSChan
-	dspS.filterSChan <- fltrS
-	<-dspS.cacheS.GetPrecacheChannel(utils.CacheDispatcherProfiles)
-	<-dspS.cacheS.GetPrecacheChannel(utils.CacheDispatcherHosts)
-	<-dspS.cacheS.GetPrecacheChannel(utils.CacheDispatcherFilterIndexes)
-	dbchan := dspS.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	if err = dspS.cacheS.WaitToPrecache(ctx,
+		utils.CacheDispatcherProfiles,
+		utils.CacheDispatcherHosts,
+		utils.CacheDispatcherFilterIndexes); err != nil {
+		return
+	}
+
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, dspS.filterSChan); err != nil {
+		return
+	}
+
+	var datadb *engine.DataManager
+	if datadb, err = dspS.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	dspS.Lock()
 	defer dspS.Unlock()
 
-	dspS.dspS = dispatchers.NewDispatcherService(datadb, dspS.cfg, fltrS, dspS.connMgr)
+	dspS.dspS = dispatchers.NewDispatcherService(datadb, dspS.cfg, filterS, dspS.connMgr)
 
 	dspS.unregisterAllDispatchedSubsystems() // unregister all rpc services that can be dispatched
 
@@ -163,7 +172,7 @@ func (dspS *DispatcherService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (dspS *DispatcherService) Reload() (err error) {
+func (dspS *DispatcherService) Reload(*context.Context, context.CancelFunc) (err error) {
 	return // for the momment nothing to reload
 }
 

@@ -152,21 +152,3 @@ func TestSetHTTPPstrTransport(t *testing.T) {
 	}
 	httpPstrTransport = tmp
 }
-
-func TestSetCdrStorage(t *testing.T) {
-	tmp := cdrStorage
-	SetCdrStorage(nil)
-	if cdrStorage != nil {
-		t.Error("Expected the cdrStorage to be nil", cdrStorage)
-	}
-	cdrStorage = tmp
-}
-
-func TestSetDataStorage(t *testing.T) {
-	tmp := dm
-	SetDataStorage(nil)
-	if dm != nil {
-		t.Error("Expected the dm to be nil", dm)
-	}
-	dm = tmp
-}

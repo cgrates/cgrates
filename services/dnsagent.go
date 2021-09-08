@@ -33,12 +33,10 @@ import (
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	shtDwn context.CancelFunc) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shtDwn:      shtDwn,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -49,7 +47,6 @@ type DNSAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	shtDwn      context.CancelFunc
 
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
@@ -59,12 +56,14 @@ type DNSAgent struct {
 }
 
 // Start should handle the sercive start
-func (dns *DNSAgent) Start() (err error) {
+func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	filterS := <-dns.filterSChan
-	dns.filterSChan <- filterS
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, dns.filterSChan); err != nil {
+		return
+	}
 
 	dns.Lock()
 	defer dns.Unlock()
@@ -75,12 +74,12 @@ func (dns *DNSAgent) Start() (err error) {
 		dns.dns = nil
 		return
 	}
-	go dns.listenAndServe()
+	go dns.listenAndServe(shtDwn)
 	return
 }
 
 // Reload handles the change of config
-func (dns *DNSAgent) Reload() (err error) {
+func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	if dns.oldListen == dns.cfg.DNSAgentCfg().Listen {
 		return
 	}
@@ -93,14 +92,14 @@ func (dns *DNSAgent) Reload() (err error) {
 	if err = dns.dns.Reload(); err != nil {
 		return
 	}
-	go dns.listenAndServe()
+	go dns.listenAndServe(shtDwn)
 	return
 }
 
-func (dns *DNSAgent) listenAndServe() (err error) {
+func (dns *DNSAgent) listenAndServe(shtDwn context.CancelFunc) (err error) {
 	if err = dns.dns.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-		dns.shtDwn() // stop the engine here
+		shtDwn() // stop the engine here
 	}
 	return
 }

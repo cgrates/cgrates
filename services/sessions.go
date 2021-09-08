@@ -39,14 +39,12 @@ import (
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup,
-	shtDwn context.CancelFunc) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SessionService{
 		connChan: internalChan,
 		cfg:      cfg,
 		dm:       dm,
 		server:   server,
-		shtDwn:   shtDwn,
 		connMgr:  connMgr,
 		anz:      anz,
 		srvDep:   srvDep,
@@ -59,12 +57,9 @@ type SessionService struct {
 	cfg      *config.CGRConfig
 	dm       *DataDBService
 	server   *cores.Server
-	shtDwn   context.CancelFunc
 	stopChan chan struct{}
 
-	sm *sessions.SessionS
-	//rpc      *apis.SMGenericV1
-	rpcv1    *apis.SessionSv1
+	sm       *sessions.SessionS
 	connChan chan birpc.ClientConnector
 
 	// in order to stop the bircp server if necesary
@@ -75,16 +70,16 @@ type SessionService struct {
 }
 
 // Start should handle the service start
-func (smg *SessionService) Start() (err error) {
+func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
 	if smg.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
 	var datadb *engine.DataManager
 	if smg.dm.IsRunning() {
-		dbchan := smg.dm.GetDMChan()
-		datadb = <-dbchan
-		dbchan <- datadb
+		if datadb, err = smg.dm.WaitForDM(ctx); err != nil {
+			return
+		}
 	}
 	smg.Lock()
 	defer smg.Unlock()
@@ -96,8 +91,7 @@ func (smg *SessionService) Start() (err error) {
 	// Pass internal connection via BiRPCClient
 
 	// Register RPC handler
-	smg.rpcv1 = apis.NewSessionSv1(smg.sm) // methods with multiple options
-	srv, _ := birpc.NewService(smg.rpcv1, utils.EmptyString, false)
+	srv, _ := birpc.NewService(apis.NewSessionSv1(smg.sm), utils.EmptyString, false) // methods with multiple options
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(srv)
 	}
@@ -105,27 +99,27 @@ func (smg *SessionService) Start() (err error) {
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
 		smg.bircpEnabled = true
-		smg.server.BiRPCRegisterName(utils.SessionSv1, smg.rpcv1)
+		smg.server.BiRPCRegisterName(utils.SessionSv1, srv)
 		// run this in it's own goroutine
-		go smg.start()
+		go smg.start(shtDw)
 	}
 	return
 }
 
-func (smg *SessionService) start() (err error) {
+func (smg *SessionService) start(shtDw context.CancelFunc) (err error) {
 	if err := smg.server.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
 		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
 		smg.Lock()
 		smg.bircpEnabled = false
 		smg.Unlock()
-		smg.shtDwn()
+		shtDw()
 	}
 	return
 }
 
 // Reload handles the change of config
-func (smg *SessionService) Reload() (err error) {
+func (smg *SessionService) Reload(*context.Context, context.CancelFunc) (err error) {
 	return
 }
 
@@ -142,8 +136,6 @@ func (smg *SessionService) Shutdown() (err error) {
 		smg.bircpEnabled = false
 	}
 	smg.sm = nil
-	// smg.rpc = nil
-	smg.rpcv1 = nil
 	<-smg.connChan
 	return
 }

@@ -33,12 +33,10 @@ import (
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	shtDwn context.CancelFunc) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &DiameterAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shtDwn:      shtDwn,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -50,7 +48,6 @@ type DiameterAgent struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	stopChan    chan struct{}
-	shtDwn      context.CancelFunc
 
 	da      *agents.DiameterAgent
 	connMgr *engine.ConnManager
@@ -62,20 +59,21 @@ type DiameterAgent struct {
 }
 
 // Start should handle the sercive start
-func (da *DiameterAgent) Start() (err error) {
+func (da *DiameterAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	if da.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	filterS := <-da.filterSChan
-	da.filterSChan <- filterS
-
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, da.filterSChan); err != nil {
+		return
+	}
 	da.Lock()
 	defer da.Unlock()
-	return da.start(filterS)
+	return da.start(filterS, shtDwn)
 }
 
-func (da *DiameterAgent) start(filterS *engine.FilterS) (err error) {
+func (da *DiameterAgent) start(filterS *engine.FilterS, shtDwn context.CancelFunc) (err error) {
 	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
@@ -89,14 +87,14 @@ func (da *DiameterAgent) start(filterS *engine.FilterS) (err error) {
 		if err = d.ListenAndServe(da.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
-			da.shtDwn()
+			shtDwn()
 		}
 	}(da.da)
 	return
 }
 
 // Reload handles the change of config
-func (da *DiameterAgent) Reload() (err error) {
+func (da *DiameterAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	da.Lock()
 	defer da.Unlock()
 	if da.lnet == da.cfg.DiameterAgentCfg().ListenNet &&
@@ -104,9 +102,11 @@ func (da *DiameterAgent) Reload() (err error) {
 		return
 	}
 	close(da.stopChan)
-	filterS := <-da.filterSChan
-	da.filterSChan <- filterS
-	return da.start(filterS)
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, da.filterSChan); err != nil {
+		return
+	}
+	return da.start(filterS, shtDwn)
 }
 
 // Shutdown stops the service

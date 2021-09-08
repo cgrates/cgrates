@@ -45,27 +45,25 @@ func TestDNSAgentReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
+	ctx, cancel := context.WithCancel(context.TODO())
 	defer func() {
-		shdChan.CloseOnce()
+		cancel()
 		time.Sleep(10 * time.Millisecond)
 	}()
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+		nil, anz, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	srvMngr.StartServices(ctx, cancel)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -83,16 +81,16 @@ func TestDNSAgentReload(t *testing.T) {
 	if !srv.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	err := srv.Start()
+	err := srv.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -117,9 +115,8 @@ func TestDNSAgentReload2(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, nil, srvDep)
 	agentSrv, err := agents.NewDNSAgent(cfg, nil, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -127,7 +124,7 @@ func TestDNSAgentReload2(t *testing.T) {
 	runtime.Gosched()
 	dnsSrv := srv.(*DNSAgent)
 	dnsSrv.dns = agentSrv
-	err = dnsSrv.listenAndServe()
+	err = dnsSrv.listenAndServe(func() {})
 	if err == nil || err.Error() != "dns: bad network" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "dns: bad network", err)
 	}
@@ -143,9 +140,8 @@ func TestDNSAgentReload3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, nil, srvDep)
 	agentSrv, err := agents.NewDNSAgent(cfg, nil, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -153,7 +149,8 @@ func TestDNSAgentReload3(t *testing.T) {
 	runtime.Gosched()
 	dnsSrv := srv.(*DNSAgent)
 	dnsSrv.dns = agentSrv
-	err = dnsSrv.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err = dnsSrv.Reload(ctx, cancel)
 	if err == nil || err.Error() != "dns: server not started" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "dns: server not started", err)
 	}
@@ -170,14 +167,14 @@ func TestDNSAgentReload4(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, nil, srvDep)
 
 	runtime.Gosched()
 	dnsSrv := srv.(*DNSAgent)
 	dnsSrv.dns = nil
-	err := dnsSrv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := dnsSrv.Start(ctx, cancel)
 	if err == nil || err.Error() != "open bad_certificate: no such file or directory" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "open bad_certificate: no such file or directory", err)
 	}
@@ -193,10 +190,10 @@ func TestDNSAgentReload5(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
-	err := srv.Start()
+	srv := NewDNSAgent(cfg, filterSChan, nil, srvDep)
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -204,7 +201,7 @@ func TestDNSAgentReload5(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
 	runtime.Gosched()
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -219,11 +216,11 @@ func TestDNSAgentReload6(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, nil, srvDep)
 	cfg.DNSAgentCfg().Listen = "127.0.0.1:0"
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -234,7 +231,7 @@ func TestDNSAgentReload6(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
 	runtime.Gosched()
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err == nil || err.Error() != "open bad_certificate: no such file or directory" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "open bad_certificate: no such file or directory", err)
 	}

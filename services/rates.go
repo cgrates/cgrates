@@ -22,10 +22,10 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
-	"github.com/cgrates/cgrates/cores"
-
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/servmanager"
@@ -34,7 +34,7 @@ import (
 
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	dmS *DataDBService, server *cores.Server,
 	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -58,14 +58,13 @@ type RateService struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	dmS         *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	server      *cores.Server
 
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
 	rateS       *rates.RateS
-	rpc         *apis.RateSv1
 	intConnChan chan birpc.ClientConnector
 	anz         *AnalyzerService
 	srvDep      map[string]*sync.WaitGroup
@@ -89,7 +88,7 @@ func (rs *RateService) IsRunning() bool {
 }
 
 // Reload handles the change of config
-func (rs *RateService) Reload() (err error) {
+func (rs *RateService) Reload(*context.Context, context.CancelFunc) (_ error) {
 	rs.rldChan <- struct{}{}
 	return
 }
@@ -107,30 +106,36 @@ func (rs *RateService) Shutdown() (err error) {
 }
 
 // Start should handle the service start
-func (rs *RateService) Start() (err error) {
+func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if rs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	<-rs.cacheS.GetPrecacheChannel(utils.CacheRateProfiles)
-	<-rs.cacheS.GetPrecacheChannel(utils.CacheRateProfilesFilterIndexes)
-	<-rs.cacheS.GetPrecacheChannel(utils.CacheRateFilterIndexes)
+	if err = rs.cacheS.WaitToPrecache(ctx,
+		utils.CacheRateProfiles,
+		utils.CacheRateProfilesFilterIndexes,
+		utils.CacheRateFilterIndexes); err != nil {
+		return
+	}
 
-	fltrS := <-rs.filterSChan
-	rs.filterSChan <- fltrS
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, rs.filterSChan); err != nil {
+		return
+	}
 
-	dbchan := rs.dmS.GetDMChan()
-	dm := <-dbchan
-	dbchan <- dm
+	var datadb *engine.DataManager
+	if datadb, err = rs.dmS.WaitForDM(ctx); err != nil {
+		return
+	}
+
 	rs.Lock()
-	rs.rateS = rates.NewRateS(rs.cfg, fltrS, dm)
+	rs.rateS = rates.NewRateS(rs.cfg, filterS, datadb)
 	rs.Unlock()
 
 	rs.stopChan = make(chan struct{})
 	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
 
-	rs.rpc = apis.NewRateSv1(rs.rateS)
-	srv, _ := birpc.NewService(rs.rpc, "", false)
+	srv, _ := birpc.NewService(apis.NewRateSv1(rs.rateS), "", false)
 	if !rs.cfg.DispatcherSCfg().Enabled {
 		rs.server.RpcRegister(srv)
 	}

@@ -33,12 +33,10 @@ import (
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	shtDwn context.CancelFunc) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SIPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shtDwn:      shtDwn,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -49,7 +47,6 @@ type SIPAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	shtDwn      context.CancelFunc
 
 	sip     *agents.SIPAgent
 	connMgr *engine.ConnManager
@@ -59,13 +56,15 @@ type SIPAgent struct {
 }
 
 // Start should handle the sercive start
-func (sip *SIPAgent) Start() (err error) {
+func (sip *SIPAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	if sip.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	filterS := <-sip.filterSChan
-	sip.filterSChan <- filterS
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, sip.filterSChan); err != nil {
+		return
+	}
 
 	sip.Lock()
 	defer sip.Unlock()
@@ -76,19 +75,19 @@ func (sip *SIPAgent) Start() (err error) {
 			utils.SIPAgent, err))
 		return
 	}
-	go sip.listenAndServe()
+	go sip.listenAndServe(shtDwn)
 	return
 }
 
-func (sip *SIPAgent) listenAndServe() {
+func (sip *SIPAgent) listenAndServe(shtDwn context.CancelFunc) {
 	if err := sip.sip.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
-		sip.shtDwn() // stop the engine here
+		shtDwn() // stop the engine here
 	}
 }
 
 // Reload handles the change of config
-func (sip *SIPAgent) Reload() (err error) {
+func (sip *SIPAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) (err error) {
 	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
 		return
 	}
@@ -97,7 +96,7 @@ func (sip *SIPAgent) Reload() (err error) {
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
 	sip.sip.InitStopChan()
 	sip.Unlock()
-	go sip.listenAndServe()
+	go sip.listenAndServe(shtDwn)
 	return
 }
 
