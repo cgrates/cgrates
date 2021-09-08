@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -58,13 +59,15 @@ type HTTPAgent struct {
 }
 
 // Start should handle the sercive start
-func (ha *HTTPAgent) Start() (err error) {
+func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if ha.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	filterS := <-ha.filterSChan
-	ha.filterSChan <- filterS
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, ha.filterSChan); err != nil {
+		return
+	}
 
 	ha.Lock()
 	ha.started = true
@@ -80,7 +83,7 @@ func (ha *HTTPAgent) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (ha *HTTPAgent) Reload() (err error) {
+func (ha *HTTPAgent) Reload(*context.Context, context.CancelFunc) (err error) {
 	return // no reload
 }
 

@@ -34,7 +34,7 @@ import (
 
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalStatSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -56,34 +56,39 @@ type StatService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
 	sts      *engine.StatService
-	rpc      *apis.StatSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (sts *StatService) Start() (err error) {
+func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if sts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 	sts.srvDep[utils.DataDB].Add(1)
+	if err = sts.cacheS.WaitToPrecache(ctx,
+		utils.CacheStatQueueProfiles,
+		utils.CacheStatQueues,
+		utils.CacheStatFilterIndexes); err != nil {
+		return
+	}
 
-	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
-	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatQueues)
-	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, sts.filterSChan); err != nil {
+		return
+	}
 
-	filterS := <-sts.filterSChan
-	sts.filterSChan <- filterS
-	dbchan := sts.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var datadb *engine.DataManager
+	if datadb, err = sts.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	sts.Lock()
 	defer sts.Unlock()
@@ -91,9 +96,8 @@ func (sts *StatService) Start() (err error) {
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.StatS))
-	sts.sts.StartLoop(context.TODO())
-	sts.rpc = apis.NewStatSv1(sts.sts)
-	srv, _ := birpc.NewService(sts.rpc, "", false)
+	sts.sts.StartLoop(ctx)
+	srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
 	if !sts.cfg.DispatcherSCfg().Enabled {
 		sts.server.RpcRegister(srv)
 	}
@@ -102,9 +106,9 @@ func (sts *StatService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (sts *StatService) Reload() (err error) {
+func (sts *StatService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
 	sts.Lock()
-	sts.sts.Reload(context.TODO())
+	sts.sts.Reload(ctx)
 	sts.Unlock()
 	return
 }
@@ -116,7 +120,6 @@ func (sts *StatService) Shutdown() (err error) {
 	defer sts.Unlock()
 	sts.sts.Shutdown(context.TODO())
 	sts.sts = nil
-	sts.rpc = nil
 	<-sts.connChan
 	return
 }

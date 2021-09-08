@@ -30,12 +30,11 @@ import (
 //TestDispatcherCoverage for cover testing
 func TestDispatcherHCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	rpcInternal := map[string]chan birpc.ClientConnector{}
 	cM := engine.NewConnManager(cfg, rpcInternal)
 	srv := NewRegistrarCService(cfg, server, cM, anz, srvDep)

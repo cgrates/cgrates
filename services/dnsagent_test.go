@@ -34,9 +34,8 @@ func TestDNSAgentCoverage(t *testing.T) {
 	cfg.SessionSCfg().ListenBijson = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, nil, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -44,7 +43,6 @@ func TestDNSAgentCoverage(t *testing.T) {
 	srv2 := DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
 		connMgr:     nil,
 		srvDep:      srvDep,
 		dns:         dns,

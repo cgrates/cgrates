@@ -35,17 +35,15 @@ func TestFreeSwitchAgentCoverage(t *testing.T) {
 	cfg.SessionSCfg().ListenBijson = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 
-	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
+	srv := NewFreeswitchAgent(cfg, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	srv2 := FreeswitchAgent{
 		cfg:     cfg,
-		shdChan: shdChan,
 		fS:      &agents.FSsessions{},
 		connMgr: nil,
 		srvDep:  srvDep,

@@ -53,26 +53,27 @@ func TestEventExporterSReload(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	chSCh := make(chan *engine.CacheS, 1)
+	chSCh <- chS
+	css := &CacheService{cacheCh: chSCh}
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	attrS := NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan birpc.ClientConnector, 1),
+		css, filterSChan, server, make(chan birpc.ClientConnector, 1),
 		anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil),
 		server, make(chan birpc.ClientConnector, 2), anz, srvDep)
 	srvMngr.AddServices(ees, attrS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 	if ees.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -98,11 +99,11 @@ func TestEventExporterSReload(t *testing.T) {
 	if !ees.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-	err := ees.Start()
+	err := ees.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = ees.Reload()
+	err = ees.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -112,7 +113,7 @@ func TestEventExporterSReload(t *testing.T) {
 	if ees.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -133,10 +134,9 @@ func TestEventExporterSReload2(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil),
 		server, make(chan birpc.ClientConnector, 2), anz, srvDep)
 	if ees.IsRunning() {

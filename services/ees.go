@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -85,7 +86,7 @@ func (es *EventExporterService) IsRunning() bool {
 }
 
 // Reload handles the change of config
-func (es *EventExporterService) Reload() (err error) {
+func (es *EventExporterService) Reload(*context.Context, context.CancelFunc) (err error) {
 	es.rldChan <- struct{}{}
 	return // for the momment nothing to reload
 }
@@ -102,20 +103,22 @@ func (es *EventExporterService) Shutdown() (err error) {
 }
 
 // Start should handle the service start
-func (es *EventExporterService) Start() (err error) {
+func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if es.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	fltrS := <-es.filterSChan
-	es.filterSChan <- fltrS
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, es.filterSChan); err != nil {
+		return
+	}
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EEs))
 
 	es.Lock()
 	defer es.Unlock()
 
-	es.eeS = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
+	es.eeS = ees.NewEventExporterS(es.cfg, filterS, es.connMgr)
 	es.stopChan = make(chan struct{})
 	go es.eeS.ListenAndServe(es.stopChan, es.rldChan)
 

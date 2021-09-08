@@ -42,25 +42,26 @@ func TestDataDBReload(t *testing.T) {
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
+	chSCh := make(chan *engine.CacheS, 1)
+	chSCh <- chS
+	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srvMngr.AddServices(NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep),
+		css, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep),
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -77,10 +78,6 @@ func TestDataDBReload(t *testing.T) {
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
-	}
-	getDm := db.GetDM()
-	if !reflect.DeepEqual(getDm, db.dm) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dm, getDm)
 	}
 	oldcfg := &config.DataDbCfg{
 		Type: utils.Mongo,
@@ -162,7 +159,7 @@ func TestDataDBReload(t *testing.T) {
 		t.Errorf("Expected %s \n received:%s", utils.ToJSON(oldcfg), utils.ToJSON(db.oldDBCfg))
 	}
 
-	err := db.Reload()
+	err := db.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -172,7 +169,7 @@ func TestDataDBReload(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -216,7 +213,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -303,12 +299,13 @@ func TestDataDBReloadBadType(t *testing.T) {
 	}
 	cfg.DataDbCfg().Type = "dbtype"
 	db.dm = nil
-	err = db.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err = db.Reload(ctx, cancel)
 	if err == nil || err.Error() != "unsupported db_type <dbtype>" {
 		t.Fatal(err)
 	}
 
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -317,7 +314,6 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 	cfg.GeneralCfg().DBDataEncoding = ""
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -407,11 +403,12 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 		},
 	}
 
-	err := db.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := db.Reload(ctx, cancel)
 	if err == nil || err.Error() != "Unsupported marshaler: " {
 		t.Fatal(err)
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -454,18 +451,17 @@ func TestDataDBStartVersion(t *testing.T) {
 	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
-	err = db.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err = db.Start(ctx, cancel)
 	if err == nil || err.Error() != "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>" {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>", err)
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -509,7 +505,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -596,12 +591,13 @@ func TestDataDBReloadCastError(t *testing.T) {
 	}
 
 	db.dm = nil
-	err = db.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err = db.Reload(ctx, cancel)
 	if err == nil || err.Error() != "can't conver DataDB of type mongo to MongoStorage" {
 		t.Fatal(err)
 	}
 
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -645,7 +641,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -732,12 +727,13 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 	}
 	cfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg] = true
 	db.dm = nil
-	err = db.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err = db.Reload(ctx, cancel)
 	if err == nil || err.Error() != "cannot convert field: true to time.Duration" {
 		t.Fatal(err)
 	}
 
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }
 
@@ -749,7 +745,8 @@ func TestDataDBStartSessionSCfgErr(t *testing.T) {
 	cfg.DataDbCfg().Type = "badtype"
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	err := db.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := db.Start(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
@@ -763,7 +760,8 @@ func TestDataDBStartAttributeSCfgErr(t *testing.T) {
 	cfg.DataDbCfg().Type = "badtype"
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	err := db.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := db.Start(ctx, cancel)
 	if err == nil || err.Error() != "unsupported db_type <badtype>" {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", "unsupported db_type <badtype>", err)
 	}
@@ -856,7 +854,8 @@ func TestDataDBReloadError(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true)
 	db.dm = engine.NewDataManager(data, nil, nil)
-	err := db.Reload()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := db.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}

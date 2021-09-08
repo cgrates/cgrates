@@ -43,23 +43,24 @@ func TestRouteSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheRouteProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheRouteFilterIndexes))
+	chSCh := make(chan *engine.CacheS, 1)
+	chSCh <- chS
+	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
-	routeS := NewRouteService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	routeS := NewRouteService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(routeS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 	if routeS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -83,11 +84,11 @@ func TestRouteSReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 
-	err := routeS.Start()
+	err := routeS.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = routeS.Reload()
+	err = routeS.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -97,6 +98,6 @@ func TestRouteSReload(t *testing.T) {
 	if routeS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }

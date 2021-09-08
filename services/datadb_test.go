@@ -138,10 +138,4 @@ func TestDataDBCoverage(t *testing.T) {
 	if !reflect.DeepEqual(getDMChan, db.dbchan) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dbchan, getDMChan)
 	}
-	db.dm = &engine.DataManager{}
-	getDM := db.GetDM()
-	if !reflect.DeepEqual(getDM, db.dm) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dm, getDM)
-	}
-
 }

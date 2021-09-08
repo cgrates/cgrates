@@ -34,11 +34,9 @@ import (
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	shtDwn context.CancelFunc) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &FreeswitchAgent{
 		cfg:     cfg,
-		shtDwn:  shtDwn,
 		connMgr: connMgr,
 		srvDep:  srvDep,
 	}
@@ -47,8 +45,7 @@ func NewFreeswitchAgent(cfg *config.CGRConfig,
 // FreeswitchAgent implements Agent interface
 type FreeswitchAgent struct {
 	sync.RWMutex
-	cfg    *config.CGRConfig
-	shtDwn context.CancelFunc
+	cfg *config.CGRConfig
 
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
@@ -56,7 +53,7 @@ type FreeswitchAgent struct {
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start() (err error) {
+func (fS *FreeswitchAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
 	if fS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -66,26 +63,26 @@ func (fS *FreeswitchAgent) Start() (err error) {
 
 	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
 
-	go fS.connect(fS.fS)
+	go fS.connect(fS.fS, shtDwn)
 	return
 }
 
 // Reload handles the change of config
-func (fS *FreeswitchAgent) Reload() (err error) {
+func (fS *FreeswitchAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 	if err = fS.fS.Shutdown(); err != nil {
 		return
 	}
 	fS.fS.Reload()
-	go fS.connect(fS.fS)
+	go fS.connect(fS.fS, shtDwn)
 	return
 }
 
-func (fS *FreeswitchAgent) connect(f *agents.FSsessions) (err error) {
+func (fS *FreeswitchAgent) connect(f *agents.FSsessions, shtDwn context.CancelFunc) (err error) {
 	if err := fS.fS.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-		fS.shtDwn() // stop the engine here
+		shtDwn() // stop the engine here
 	}
 	return
 }

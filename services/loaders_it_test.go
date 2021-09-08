@@ -65,23 +65,21 @@ func TestLoaderSReload(t *testing.T) {
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	conMngr := engine.NewConnManager(cfg, nil)
 	srv := NewLoaderService(cfg, db, filterSChan,
 		server, make(chan birpc.ClientConnector, 1),
 		conMngr, anz, srvDep)
 	srvMngr.AddServices(srv, db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -109,12 +107,12 @@ func TestLoaderSReload(t *testing.T) {
 		t.Fatal("Expected service to be running")
 	}
 
-	err := srv.Start()
+	err := srv.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	time.Sleep(10 * time.Millisecond)
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -130,7 +128,7 @@ func TestLoaderSReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 	testCleanupFiles(t)
 }
@@ -148,18 +146,18 @@ func TestLoaderSReload2(t *testing.T) {
 	for _, ld := range cfg.LoaderCfg() {
 		ld.Enabled = false
 	}
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	db.dbchan <- new(engine.DataManager)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewLoaderService(cfg, db, filterSChan,
 		server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,22 +171,22 @@ func TestLoaderSReload3(t *testing.T) {
 	cfg.LoaderCfg()[0].Enabled = true
 	cfg.LoaderCfg()[0].TpInDir = "/tmp/TestLoaderSReload3"
 	cfg.LoaderCfg()[0].RunDelay = -1
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	db.dbchan <- new(engine.DataManager)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewLoaderService(cfg, db, filterSChan,
 		server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
-	err := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err == nil || err.Error() != "no such file or directory" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "no such file or directory", err)
 	}
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err == nil || err.Error() != "no such file or directory" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "no such file or directory", err)
 	}

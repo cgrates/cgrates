@@ -39,11 +39,11 @@ func newMapEventFromReqForm(r *http.Request) (mp MapEvent, err error) {
 }
 
 // NewCDRServer is a constructor for CDRServer
-func NewCDRServer(cgrCfg *config.CGRConfig, storDBChan chan StorDB, dm *DataManager, filterS *FilterS,
+func NewCDRServer(cfg *config.CGRConfig, storDBChan chan StorDB, dm *DataManager, filterS *FilterS,
 	connMgr *ConnManager) *CDRServer {
 	cdrDB := <-storDBChan
 	return &CDRServer{
-		cgrCfg:     cgrCfg,
+		cfg:        cfg,
 		cdrDB:      cdrDB,
 		dm:         dm,
 		guard:      guardian.Guardian,
@@ -55,7 +55,7 @@ func NewCDRServer(cgrCfg *config.CGRConfig, storDBChan chan StorDB, dm *DataMana
 
 // CDRServer stores and rates CDRs
 type CDRServer struct {
-	cgrCfg     *config.CGRConfig
+	cfg        *config.CGRConfig
 	cdrDB      CdrStorage
 	dm         *DataManager
 	guard      *guardian.GuardianLocker
@@ -82,7 +82,7 @@ func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) {
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles
 func (cdrS *CDRServer) chrgrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
 	var chrgrs []*ChrgSProcessEventReply
-	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().ChargerSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().ChargerSConns,
 		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		return
@@ -108,7 +108,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaCDRs)
 
-	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().AttributeSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
@@ -121,7 +121,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 
 // rateSProcessEvent will send the event to rateS and return the result
 func (cdrS *CDRServer) rateSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (rpCost utils.RateProfileCost, err error) {
-	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().RateSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().RateSConns,
 		utils.RateSv1CostForEvent,
 		&utils.ArgsCostForEvent{
 			//RateProfileIDs: route.RateProfileIDs,
@@ -143,7 +143,7 @@ func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREv
 		thArgs.APIOpts = make(map[string]interface{})
 	}
 	thArgs.APIOpts[utils.MetaEventType] = utils.CDR
-	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().ThresholdSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().ThresholdSConns,
 		utils.ThresholdSv1ProcessEvent,
 		thArgs, &tIDs); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -158,7 +158,7 @@ func (cdrS *CDRServer) statSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 	statArgs := &StatsArgsProcessEvent{
 		CGREvent: cgrEv.Clone(),
 	}
-	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().StatSConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().StatSConns,
 		utils.StatSv1ProcessEvent,
 		statArgs, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -170,7 +170,7 @@ func (cdrS *CDRServer) statSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 // eeSProcessEvent will process the event with the EEs component
 func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs) (err error) {
 	var reply map[string]map[string]interface{}
-	if err = cdrS.connMgr.Call(ctx, cdrS.cgrCfg.CdrsCfg().EEsConns,
+	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().EEsConns,
 		utils.EeSv1ProcessEvent,
 		cgrEv, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -221,11 +221,11 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	}
 
 	if eeS {
-		if len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0 {
+		if len(cdrS.cfg.CdrsCfg().EEsConns) != 0 {
 			for _, cgrEv := range cgrEvs {
 				evWithOpts := &utils.CGREventWithEeIDs{
 					CGREvent: cgrEv,
-					EeIDs:    cdrS.cgrCfg.CdrsCfg().OnlineCDRExports,
+					EeIDs:    cdrS.cfg.CdrsCfg().OnlineCDRExports,
 				}
 				if err = cdrS.eeSProcessEvent(ctx, evWithOpts); err != nil {
 					utils.Logger.Warning(
@@ -294,7 +294,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 		arg.CGREvent.ID = utils.GenUUID()
 	}
 	if arg.CGREvent.Tenant == utils.EmptyString {
-		arg.CGREvent.Tenant = cdrS.cgrCfg.GeneralCfg().DefaultTenant
+		arg.CGREvent.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
@@ -317,13 +317,13 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 	// end of RPC caching
 
 	// processing options
-	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsAttributeS, len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0)
-	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 ||
-		len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0)
-	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsThresholdS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
-	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
-	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
-	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsRateS, len(cdrS.cgrCfg.CdrsCfg().RateSConns) != 0)
+	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsAttributeS, len(cdrS.cfg.CdrsCfg().AttributeSConns) != 0)
+	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, len(cdrS.cfg.CdrsCfg().OnlineCDRExports) != 0 ||
+		len(cdrS.cfg.CdrsCfg().EEsConns) != 0)
+	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsThresholdS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
+	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
+	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
+	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
 
 	// end of processing options
 
@@ -342,7 +342,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *ArgV1Pro
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV2ProcessEvent, arg.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.CGREvent.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -361,13 +361,13 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *ArgV1Pro
 	// end of RPC caching
 
 	// processing options
-	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsAttributeS, len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0)
-	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 ||
-		len(cdrS.cgrCfg.CdrsCfg().EEsConns) != 0)
-	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsThresholdS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
-	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
-	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0)
-	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsRateS, len(cdrS.cgrCfg.CdrsCfg().RateSConns) != 0)
+	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsAttributeS, len(cdrS.cfg.CdrsCfg().AttributeSConns) != 0)
+	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, len(cdrS.cfg.CdrsCfg().OnlineCDRExports) != 0 ||
+		len(cdrS.cfg.CdrsCfg().EEsConns) != 0)
+	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsThresholdS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
+	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
+	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
+	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
 	// end of processing options
 
 	var procEvs []*utils.EventWithFlags

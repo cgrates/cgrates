@@ -39,6 +39,51 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+func NewCGREngine(cfg *config.CGRConfig) (cgr *CGREngine) {
+	cgr = &CGREngine{
+		cfg:  cfg,
+		cM:   engine.NewConnManager(cfg, nil),
+		caps: engine.NewCaps(cgr.cfg.CoreSCfg().Caps, cgr.cfg.CoreSCfg().CapsStrategy),
+		srvDep: map[string]*sync.WaitGroup{
+			utils.AnalyzerS:       new(sync.WaitGroup),
+			utils.AdminS:          new(sync.WaitGroup),
+			utils.AsteriskAgent:   new(sync.WaitGroup),
+			utils.AttributeS:      new(sync.WaitGroup),
+			utils.CDRServer:       new(sync.WaitGroup),
+			utils.ChargerS:        new(sync.WaitGroup),
+			utils.CoreS:           new(sync.WaitGroup),
+			utils.DataDB:          new(sync.WaitGroup),
+			utils.DiameterAgent:   new(sync.WaitGroup),
+			utils.RegistrarC:      new(sync.WaitGroup),
+			utils.DispatcherS:     new(sync.WaitGroup),
+			utils.DNSAgent:        new(sync.WaitGroup),
+			utils.EEs:             new(sync.WaitGroup),
+			utils.ERs:             new(sync.WaitGroup),
+			utils.FreeSWITCHAgent: new(sync.WaitGroup),
+			utils.GlobalVarS:      new(sync.WaitGroup),
+			utils.HTTPAgent:       new(sync.WaitGroup),
+			utils.KamailioAgent:   new(sync.WaitGroup),
+			utils.LoaderS:         new(sync.WaitGroup),
+			utils.RadiusAgent:     new(sync.WaitGroup),
+			utils.RateS:           new(sync.WaitGroup),
+			utils.ResourceS:       new(sync.WaitGroup),
+			utils.RouteS:          new(sync.WaitGroup),
+			utils.SchedulerS:      new(sync.WaitGroup),
+			utils.SessionS:        new(sync.WaitGroup),
+			utils.SIPAgent:        new(sync.WaitGroup),
+			utils.StatS:           new(sync.WaitGroup),
+			utils.StorDB:          new(sync.WaitGroup),
+			utils.ThresholdS:      new(sync.WaitGroup),
+			utils.ActionS:         new(sync.WaitGroup),
+			utils.AccountS:        new(sync.WaitGroup),
+		},
+		iFilterSCh: make(chan *engine.FilterS, 1),
+	}
+	cgr.srvManager = servmanager.NewServiceManager(cgr.cfg, &cgr.shdWg, cgr.cM)
+	cgr.server = cores.NewServer(cgr.caps) // Rpc/http server
+	return
+}
+
 type CGREngine struct {
 	cfg *config.CGRConfig
 
@@ -48,8 +93,22 @@ type CGREngine struct {
 	cM         *engine.ConnManager
 	server     *cores.Server
 
-	cS         *cores.CoreService
-	iFilterSCh chan *engine.FilterS
+	caps *engine.Caps
+
+	// services
+	gvS    servmanager.Service
+	dmS    *DataDBService
+	sdbS   *StorDBService
+	anzS   *AnalyzerService
+	coreS  *CoreService
+	cacheS *CacheService
+	ldrs   *LoaderService
+
+	// chans (need to move this as services)
+	iFilterSCh      chan *engine.FilterS
+	iGuardianSCh    chan birpc.ClientConnector
+	iConfigCh       chan birpc.ClientConnector
+	iServeManagerCh chan birpc.ClientConnector
 }
 
 func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefix string,
@@ -59,45 +118,59 @@ func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefi
 	cgr.cM.AddInternalConn(connName, apiPrefix, iConnCh)
 }
 
-func (cgr *CGREngine) InitConfigFromPath(path, nodeID string, lgLevel int) (err error) {
+func InitConfigFromPath(path, nodeID string, lgLevel int) (cfg *config.CGRConfig, err error) {
 	// Init config
-	if cgr.cfg, err = config.NewCGRConfigFromPath(path); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(path); err != nil {
 		err = fmt.Errorf("could not parse config: <%s>", err)
 		return
 	}
-	if cgr.cfg.ConfigDBCfg().Type != utils.MetaInternal {
+	if cfg.ConfigDBCfg().Type != utils.MetaInternal {
 		var d config.ConfigDB
-		if d, err = engine.NewDataDBConn(cgr.cfg.ConfigDBCfg().Type,
-			cgr.cfg.ConfigDBCfg().Host, cgr.cfg.ConfigDBCfg().Port,
-			cgr.cfg.ConfigDBCfg().Name, cgr.cfg.ConfigDBCfg().User,
-			cgr.cfg.ConfigDBCfg().Password, cgr.cfg.GeneralCfg().DBDataEncoding,
-			cgr.cfg.ConfigDBCfg().Opts); err != nil { // Cannot configure getter database, show stopper
+		if d, err = engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
+			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
+			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
+			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+			cfg.ConfigDBCfg().Opts); err != nil { // Cannot configure getter database, show stopper
 			err = fmt.Errorf("could not configure configDB: <%s>", err)
 			return
 		}
-		if err = cgr.cfg.LoadFromDB(d); err != nil {
+		if err = cfg.LoadFromDB(d); err != nil {
 			err = fmt.Errorf("could not parse config from DB: <%s>", err)
 			return
 		}
 	}
 	if nodeID != utils.EmptyString {
-		cgr.cfg.GeneralCfg().NodeID = nodeID
+		cfg.GeneralCfg().NodeID = nodeID
 	}
 	if lgLevel != -1 { // Modify the log level if provided by command arguments
-		cgr.cfg.GeneralCfg().LogLevel = lgLevel
+		cfg.GeneralCfg().LogLevel = lgLevel
 	}
-	config.SetCgrConfig(cgr.cfg) // Share the config object
+	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
+		cfg.CoreSCfg().Caps = utils.ConcurrentReqsLimit
+	}
+	if len(utils.ConcurrentReqsStrategy) != 0 {
+		cfg.CoreSCfg().CapsStrategy = utils.ConcurrentReqsStrategy
+	}
+	config.SetCgrConfig(cfg) // Share the config object
 	return
 }
 
 func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFunc, httpPrfPath string, cpuPrfFl io.Closer, memPrfDir string, memPrfStop chan struct{}) (err error) {
-	cgr.iFilterSCh = make(chan *engine.FilterS, 1)
+	if len(cgr.cfg.HTTPCfg().RegistrarSURL) != 0 {
+		cgr.server.RegisterHTTPFunc(cgr.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
+	}
+	if cgr.cfg.ConfigSCfg().Enabled {
+		cgr.server.RegisterHTTPFunc(cgr.cfg.ConfigSCfg().URL, config.HandlerConfigS)
+	}
+	if httpPrfPath != utils.EmptyString {
+		cgr.server.RegisterProfiler(httpPrfPath)
+	}
 	// init the channel here because we need to pass them to connManager
-	iServeManagerCh := make(chan birpc.ClientConnector, 1)
-	iConfigCh := make(chan birpc.ClientConnector, 1)
+	cgr.iServeManagerCh = make(chan birpc.ClientConnector, 1)
+	cgr.iConfigCh = make(chan birpc.ClientConnector, 1)
 	iCoreSv1Ch := make(chan birpc.ClientConnector, 1)
 	iCacheSCh := make(chan birpc.ClientConnector, 1)
-	iGuardianSCh := make(chan birpc.ClientConnector, 1)
+	cgr.iGuardianSCh = make(chan birpc.ClientConnector, 1)
 	iAnalyzerSCh := make(chan birpc.ClientConnector, 1)
 	iCDRServerCh := make(chan birpc.ClientConnector, 1)
 	iAttributeSCh := make(chan birpc.ClientConnector, 1)
@@ -115,187 +188,137 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFun
 	iActionSCh := make(chan birpc.ClientConnector, 1)
 	iAccountSCh := make(chan birpc.ClientConnector, 1)
 
-	cgr.srvDep = map[string]*sync.WaitGroup{
-		utils.AnalyzerS:       new(sync.WaitGroup),
-		utils.AdminS:          new(sync.WaitGroup),
-		utils.AsteriskAgent:   new(sync.WaitGroup),
-		utils.AttributeS:      new(sync.WaitGroup),
-		utils.CDRServer:       new(sync.WaitGroup),
-		utils.ChargerS:        new(sync.WaitGroup),
-		utils.CoreS:           new(sync.WaitGroup),
-		utils.DataDB:          new(sync.WaitGroup),
-		utils.DiameterAgent:   new(sync.WaitGroup),
-		utils.RegistrarC:      new(sync.WaitGroup),
-		utils.DispatcherS:     new(sync.WaitGroup),
-		utils.DNSAgent:        new(sync.WaitGroup),
-		utils.EEs:             new(sync.WaitGroup),
-		utils.ERs:             new(sync.WaitGroup),
-		utils.FreeSWITCHAgent: new(sync.WaitGroup),
-		utils.GlobalVarS:      new(sync.WaitGroup),
-		utils.HTTPAgent:       new(sync.WaitGroup),
-		utils.KamailioAgent:   new(sync.WaitGroup),
-		utils.LoaderS:         new(sync.WaitGroup),
-		utils.RadiusAgent:     new(sync.WaitGroup),
-		utils.RateS:           new(sync.WaitGroup),
-		utils.ResourceS:       new(sync.WaitGroup),
-		utils.RouteS:          new(sync.WaitGroup),
-		utils.SchedulerS:      new(sync.WaitGroup),
-		utils.SessionS:        new(sync.WaitGroup),
-		utils.SIPAgent:        new(sync.WaitGroup),
-		utils.StatS:           new(sync.WaitGroup),
-		utils.StorDB:          new(sync.WaitGroup),
-		utils.ThresholdS:      new(sync.WaitGroup),
-		utils.ActionS:         new(sync.WaitGroup),
-		utils.AccountS:        new(sync.WaitGroup),
-	}
-
-	cncReqsLimit := cgr.cfg.CoreSCfg().Caps
-	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
-		cncReqsLimit = utils.ConcurrentReqsLimit
-	}
-	cncReqsStrategy := cgr.cfg.CoreSCfg().CapsStrategy
-	if len(utils.ConcurrentReqsStrategy) != 0 {
-		cncReqsStrategy = utils.ConcurrentReqsStrategy
-	}
-	caps := engine.NewCaps(cncReqsLimit, cncReqsStrategy)
-
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
-	cgr.cM = engine.NewConnManager(cgr.cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       iAnalyzerSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS):         iAdminSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     iAttributeSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         iCacheSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           iCDRServerCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       iChargerSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       iGuardianSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        iLoaderSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      iResourceSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       iSessionSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          iStatSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         iRouteSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     iThresholdSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): iServeManagerCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         iConfigCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           iCoreSv1Ch,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            iEEsCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          iRateSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    iDispatcherSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts):       iAccountSCh,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions):        iActionSCh,
-		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS):  iSessionSCh,
-	})
-	gvService := NewGlobalVarS(cgr.cfg, cgr.srvDep)
-	cgr.shdWg.Add(1)
-	if err = gvService.Start(); err != nil {
-		return
-	}
-	dmService := NewDataDBService(cgr.cfg, cgr.cM, cgr.srvDep)
-	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
-		cgr.shdWg.Add(1)
-		if err = dmService.Start(); err != nil {
-			return
-		}
-	}
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer), utils.AnalyzerSv1, iAnalyzerSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, iAdminSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, iAttributeSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, iCacheSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, iCDRServerCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), utils.ChargerSv1, iChargerSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian), utils.GuardianSv1, cgr.iGuardianSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders), utils.LoaderSv1, iLoaderSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, iResourceSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS), utils.SessionSv1, iSessionSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), utils.SessionSv1, iSessionSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, iStatSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), utils.RouteSv1, iRouteSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, iThresholdSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager), utils.ServiceManagerV1, cgr.iServeManagerCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig), utils.ConfigSv1, cgr.iConfigCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore), utils.CoreSv1, iCoreSv1Ch)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, iEEsCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, iRateSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers), utils.DispatcherSv1, iDispatcherSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, iAccountSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), utils.ActionSv1, iActionSCh)
 
-	storDBService := NewStorDBService(cgr.cfg, cgr.srvDep)
-	if storDBService.ShouldRun() { // Some services can run without db, ie:  ERs
-		cgr.shdWg.Add(1)
-		if err = storDBService.Start(); err != nil {
-			return
-		}
-	}
-
-	// Rpc/http server
-	cgr.server = cores.NewServer(caps)
-	if len(cgr.cfg.HTTPCfg().RegistrarSURL) != 0 {
-		cgr.server.RegisterHTTPFunc(cgr.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
-	}
-	if cgr.cfg.ConfigSCfg().Enabled {
-		cgr.server.RegisterHTTPFunc(cgr.cfg.ConfigSCfg().URL, config.HandlerConfigS)
-	}
-	if httpPrfPath != utils.EmptyString {
-		cgr.server.RegisterProfiler(httpPrfPath)
-	}
-
-	// init AnalyzerS
-	anz := NewAnalyzerService(cgr.cfg, cgr.server, cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep, shtDw)
-	if anz.ShouldRun() {
-		cgr.shdWg.Add(1)
-		if err = anz.Start(); err != nil {
-			return
-		}
-	}
+	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep)
+	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, cgr.srvDep)
+	cgr.sdbS = NewStorDBService(cgr.cfg, cgr.srvDep)
+	cgr.anzS = NewAnalyzerService(cgr.cfg, cgr.server,
+		cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep) // init AnalyzerS
 
 	// init CoreSv1
-	coreS := NewCoreService(cgr.cfg, caps, cgr.server, iCoreSv1Ch, anz, cpuPrfFl, memPrfDir, memPrfStop, &cgr.shdWg, cgr.srvDep, shtDw)
+	cgr.coreS = NewCoreService(cgr.cfg, cgr.caps, cgr.server,
+		iCoreSv1Ch, cgr.anzS, cpuPrfFl, memPrfDir, memPrfStop,
+		&cgr.shdWg, cgr.srvDep)
+
+	cgr.cacheS = NewCacheService(cgr.cfg, cgr.dmS, cgr.server,
+		iCacheSCh, cgr.anzS, cgr.coreS.GetCoreS().CapsStats,
+		cgr.srvDep) // init CacheS
+
+	dspS := NewDispatcherService(cgr.cfg, cgr.dmS, cgr.cacheS,
+		cgr.iFilterSCh, cgr.server, iDispatcherSCh, cgr.cM,
+		cgr.anzS, cgr.srvDep)
+	admS := NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.server,
+		iAdminSCh, cgr.cM, cgr.anzS, cgr.srvDep)
+
+	cgr.ldrs = NewLoaderService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server,
+		iLoaderSCh, cgr.cM, cgr.anzS, cgr.srvDep)
+
+	cgr.srvManager.AddServices(cgr.gvS, admS, cgr.coreS,
+		NewSessionService(cgr.cfg, cgr.dmS, cgr.server, iSessionSCh, cgr.cM, cgr.anzS, cgr.srvDep),
+		NewAttributeService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server, iAttributeSCh,
+			cgr.anzS, dspS, cgr.srvDep),
+		NewChargerService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
+			iChargerSCh, cgr.cM, cgr.anzS, cgr.srvDep),
+		NewRouteService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
+			iRouteSCh, cgr.cM, cgr.anzS, cgr.srvDep),
+		NewResourceService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
+			iResourceSCh, cgr.cM, cgr.anzS, cgr.srvDep),
+		NewThresholdService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh,
+			cgr.cM, cgr.server, iThresholdSCh, cgr.anzS, cgr.srvDep),
+		NewStatService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
+			iStatSCh, cgr.cM, cgr.anzS, cgr.srvDep),
+
+		NewEventReaderService(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
+		NewDNSAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
+		NewFreeswitchAgent(cgr.cfg, cgr.cM, cgr.srvDep),
+		NewKamailioAgent(cgr.cfg, cgr.cM, cgr.srvDep),
+		NewAsteriskAgent(cgr.cfg, cgr.cM, cgr.srvDep),                         // partial reload
+		NewRadiusAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),           // partial reload
+		NewDiameterAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),         // partial reload
+		NewHTTPAgent(cgr.cfg, cgr.iFilterSCh, cgr.server, cgr.cM, cgr.srvDep), // no reload
+		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.sdbS,
+		NewSIPAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
+
+		NewEventExporterService(cgr.cfg, cgr.iFilterSCh,
+			cgr.cM, cgr.server, iEEsCh, cgr.anzS, cgr.srvDep),
+		NewCDRServer(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.server, iCDRServerCh,
+			cgr.cM, cgr.anzS, cgr.srvDep),
+
+		NewRegistrarCService(cgr.cfg, cgr.server, cgr.cM, cgr.anzS, cgr.srvDep),
+
+		NewRateService(cgr.cfg, cgr.cacheS, cgr.iFilterSCh, cgr.dmS,
+			cgr.server, iRateSCh, cgr.anzS, cgr.srvDep),
+		NewActionService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iActionSCh, cgr.anzS, cgr.srvDep),
+		NewAccountService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iAccountSCh, cgr.anzS, cgr.srvDep),
+	)
+
+	return
+}
+func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFunc) (err error) {
 	cgr.shdWg.Add(1)
-	if err = coreS.Start(); err != nil {
+	if err = cgr.gvS.Start(ctx, shtDw); err != nil {
 		return
 	}
-	cgr.cS = coreS.GetCoreS()
+	if cgr.dmS.ShouldRun() { // Some services can run without db, ie:  ERs
+		cgr.shdWg.Add(1)
+		if err = cgr.dmS.Start(ctx, shtDw); err != nil {
+			return
+		}
+	}
+	if cgr.sdbS.ShouldRun() { // Some services can run without db, ie:  ERs
+		cgr.shdWg.Add(1)
+		if err = cgr.sdbS.Start(ctx, shtDw); err != nil {
+			return
+		}
+	}
 
-	// init CacheS
-	cacheS := cgrInitCacheS(ctx, shtDw, iCacheSCh, cgr.server, cgr.cfg, dmService.GetDM(), anz, coreS.GetCoreS().CapsStats)
-	engine.Cache = cacheS
+	if cgr.anzS.ShouldRun() {
+		cgr.shdWg.Add(1)
+		if err = cgr.anzS.Start(ctx, shtDw); err != nil {
+			return
+		}
+	}
 
-	// init GuardianSv1
-	cgrInitGuardianSv1(iGuardianSCh, cgr.server, anz)
-
-	// Start ServiceManager
-	cgr.srvManager = servmanager.NewServiceManager(cgr.cfg, &cgr.shdWg, cgr.cM)
-	dspS := NewDispatcherService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server, iDispatcherSCh, cgr.cM, anz, cgr.srvDep)
-	attrS := NewAttributeService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server, iAttributeSCh, anz, dspS, cgr.srvDep)
-	dspH := NewRegistrarCService(cgr.cfg, cgr.server, cgr.cM, anz, cgr.srvDep)
-	chrS := NewChargerService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server,
-		iChargerSCh, cgr.cM, anz, cgr.srvDep)
-	tS := NewThresholdService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh,
-		cgr.cM, cgr.server, iThresholdSCh, anz, cgr.srvDep)
-	stS := NewStatService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server,
-		iStatSCh, cgr.cM, anz, cgr.srvDep)
-	reS := NewResourceService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server,
-		iResourceSCh, cgr.cM, anz, cgr.srvDep)
-	routeS := NewRouteService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.server,
-		iRouteSCh, cgr.cM, anz, cgr.srvDep)
-
-	admS := NewAdminSv1Service(cgr.cfg, dmService, storDBService, cgr.iFilterSCh, cgr.server,
-		iAdminSCh, cgr.cM, anz, cgr.srvDep)
-
-	cdrS := NewCDRServer(cgr.cfg, dmService, storDBService, cgr.iFilterSCh, cgr.server, iCDRServerCh,
-		cgr.cM, anz, cgr.srvDep)
-
-	smg := NewSessionService(cgr.cfg, dmService, cgr.server, iSessionSCh, cgr.cM, anz, cgr.srvDep, shtDw)
-
-	ldrs := NewLoaderService(cgr.cfg, dmService, cgr.iFilterSCh, cgr.server,
-		iLoaderSCh, cgr.cM, anz, cgr.srvDep)
-
-	cgr.srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS,
-		admS, cdrS, smg, coreS,
-		NewEventReaderService(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),
-		NewDNSAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),
-		NewFreeswitchAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDw),
-		NewKamailioAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDw),
-		NewAsteriskAgent(cgr.cfg, cgr.cM, cgr.srvDep, shtDw),                  // partial reload
-		NewRadiusAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),    // partial reload
-		NewDiameterAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),  // partial reload
-		NewHTTPAgent(cgr.cfg, cgr.iFilterSCh, cgr.server, cgr.cM, cgr.srvDep), // no reload
-		ldrs, anz, dspS, dspH, dmService, storDBService,
-		NewEventExporterService(cgr.cfg, cgr.iFilterSCh,
-			cgr.cM, cgr.server, iEEsCh, anz, cgr.srvDep),
-		NewRateService(cgr.cfg, cacheS, cgr.iFilterSCh, dmService,
-			cgr.server, iRateSCh, anz, cgr.srvDep),
-		NewSIPAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, shtDw),
-		NewActionService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iActionSCh, anz, cgr.srvDep),
-		NewAccountService(cgr.cfg, dmService, cacheS, cgr.iFilterSCh, cgr.cM, cgr.server, iAccountSCh, anz, cgr.srvDep),
-	)
+	cgr.shdWg.Add(1)
+	if err = cgr.coreS.Start(ctx, shtDw); err != nil {
+		return
+	}
+	cgr.shdWg.Add(1)
+	if err = cgr.cacheS.Start(ctx, shtDw); err != nil {
+		return
+	}
 	cgr.srvManager.StartServices(ctx, shtDw)
 	// Start FilterS
-	go cgrStartFilterService(ctx, cgr.iFilterSCh, cacheS, cgr.cM,
-		cgr.cfg, dmService.GetDM())
+	go cgrStartFilterService(ctx, cgr.iFilterSCh, cgr.cacheS.GetCacheSChan(), cgr.cM,
+		cgr.cfg, cgr.dmS.GetDM())
 
-	cgrInitServiceManagerV1(iServeManagerCh, cgr.srvManager, cgr.server, anz)
-
-	cgrInitConfigSv1(iConfigCh, cgr.cfg, cgr.server, anz)
+	cgrInitServiceManagerV1(cgr.iServeManagerCh, cgr.srvManager, cgr.server, cgr.anzS)
+	cgrInitGuardianSv1(cgr.iGuardianSCh, cgr.server, cgr.anzS) // init GuardianSv1
+	cgrInitConfigSv1(cgr.iConfigCh, cgr.cfg, cgr.server, cgr.anzS)
 	return
 }
 
@@ -384,8 +407,10 @@ func (cgr *CGREngine) Start(ctx *context.Context, shtDw context.CancelFunc, flag
 		return
 	}
 
-	if *preload != utils.EmptyString {
-		runPreload(ldrs, internalLoaderSChan, shdChan)
+	if *flags.Preload != utils.EmptyString {
+		if err = cgrRunPreload(ctx, cgr.cfg, *flags.Preload, cgr.ldrs); err != nil {
+			return
+		}
 	}
 
 	// Serve rpc connections

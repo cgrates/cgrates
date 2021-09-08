@@ -44,7 +44,6 @@ func TestStatSReload(t *testing.T) {
 	cfg.ThresholdSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
@@ -53,19 +52,21 @@ func TestStatSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheStatQueueProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheStatQueues))
 	close(chS.GetPrecacheChannel(utils.CacheStatFilterIndexes))
+	chSCh := make(chan *engine.CacheS, 1)
+	chSCh <- chS
+	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
-	sS := NewStatService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	tS := NewThresholdService(cfg, db, css, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	sS := NewStatService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(tS, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 	if sS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -88,11 +89,11 @@ func TestStatSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := sS.Start()
+	err := sS.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = sS.Reload()
+	err = sS.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -102,6 +103,6 @@ func TestStatSReload(t *testing.T) {
 	if sS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }

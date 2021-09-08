@@ -36,10 +36,8 @@ import (
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
 	fileCpu io.Closer, fileMEM string, stopMemPrf chan struct{},
-	shdWg *sync.WaitGroup, srvDep map[string]*sync.WaitGroup,
-	shtDw context.CancelFunc) *CoreService {
+	shdWg *sync.WaitGroup, srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
-		shtDw:      shtDw,
 		shdWg:      shdWg,
 		stopMemPrf: stopMemPrf,
 		connChan:   internalCoreSChan,
@@ -62,18 +60,16 @@ type CoreService struct {
 	stopChan   chan struct{}
 	shdWg      *sync.WaitGroup
 	stopMemPrf chan struct{}
-	shtDw      context.CancelFunc
 	fileCpu    io.Closer
 	fileMem    string
 	cS         *cores.CoreService
-	rpc        *apis.CoreSv1
 	connChan   chan birpc.ClientConnector
 	anz        *AnalyzerService
 	srvDep     map[string]*sync.WaitGroup
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start() (err error) {
+func (cS *CoreService) Start(_ *context.Context, shtDw context.CancelFunc) (_ error) {
 	if cS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -82,9 +78,8 @@ func (cS *CoreService) Start() (err error) {
 	defer cS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.stopMemPrf, cS.shdWg, cS.shtDw)
-	cS.rpc = apis.NewCoreSv1(cS.cS)
-	srv, _ := birpc.NewService(cS.rpc, utils.EmptyString, false)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.stopMemPrf, cS.shdWg, shtDw)
+	srv, _ := birpc.NewService(apis.NewCoreSv1(cS.cS), utils.EmptyString, false)
 	if !cS.cfg.DispatcherSCfg().Enabled {
 		cS.server.RpcRegister(srv)
 	}
@@ -93,18 +88,17 @@ func (cS *CoreService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (cS *CoreService) Reload() (err error) {
-	return
+func (cS *CoreService) Reload(*context.Context, context.CancelFunc) error {
+	return nil
 }
 
 // Shutdown stops the service
-func (cS *CoreService) Shutdown() (err error) {
+func (cS *CoreService) Shutdown() (_ error) {
 	cS.Lock()
 	defer cS.Unlock()
 	cS.cS.Shutdown()
 	close(cS.stopChan)
 	cS.cS = nil
-	cS.rpc = nil
 	<-cS.connChan
 	return
 }

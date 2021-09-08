@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -32,15 +33,14 @@ import (
 //TestAttributeSCoverage for cover testing
 func TestAttributeSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	chS := engine.NewCacheS(cfg, nil, nil)
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	attrRPC := make(chan birpc.ClientConnector, 1)
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	chS := NewCacheService(cfg, db, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, attrRPC, anz, &DispatcherService{srvsReload: map[string]chan struct{}{}}, srvDep)
 	if attrS == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(attrS))
@@ -72,7 +72,7 @@ func TestAttributeSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(serviceName, utils.AttributeS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AttributeS, serviceName)
 	}
-	chS = engine.NewCacheS(cfg, nil, nil)
+
 	attrS2.connChan <- &testMockClients{}
 	shutdownErr := attrS2.Shutdown()
 	if shutdownErr != nil {

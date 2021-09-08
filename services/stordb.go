@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -50,7 +51,7 @@ type StorDBService struct {
 }
 
 // Start should handle the sercive start
-func (db *StorDBService) Start() (err error) {
+func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -67,7 +68,6 @@ func (db *StorDBService) Start() (err error) {
 		return
 	}
 	db.db = d
-	engine.SetCdrStorage(db.db)
 	if err = engine.CheckVersions(db.db); err != nil {
 		fmt.Println(err)
 		return
@@ -77,7 +77,7 @@ func (db *StorDBService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (db *StorDBService) Reload() (err error) {
+func (db *StorDBService) Reload(*context.Context, context.CancelFunc) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
@@ -139,7 +139,7 @@ func (db *StorDBService) Reload() (err error) {
 }
 
 // Shutdown stops the service
-func (db *StorDBService) Shutdown() (err error) {
+func (db *StorDBService) Shutdown() (_ error) {
 	db.Lock()
 	db.db.Close()
 	db.db = nil

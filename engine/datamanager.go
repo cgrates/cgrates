@@ -273,7 +273,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(ctx, utils.EmptyString, true)
 		case utils.MetaAPIBan:
-			_, err = dm.GetAPIBan(ctx, utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
+			_, err = GetAPIBan(ctx, utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
 		}
 		if err != nil {
 			if err != utils.ErrNotFound {
@@ -2392,7 +2392,7 @@ func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx, i
 	return
 }
 
-func (dm *DataManager) GetAPIBan(ctx *context.Context, ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {
+func GetAPIBan(ctx *context.Context, ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {
 	if cacheRead {
 		if x, ok := Cache.Get(utils.MetaAPIBan, ip); ok && x != nil { // Attempt to find in cache first
 			return x.(bool), nil

@@ -35,9 +35,8 @@ func TestEventReaderSCoverage(t *testing.T) {
 	cfg.SessionSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewEventReaderService(cfg, filterSChan, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -47,7 +46,6 @@ func TestEventReaderSCoverage(t *testing.T) {
 		RWMutex:     sync.RWMutex{},
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		shdChan:     shdChan,
 		ers:         &ers.ERService{},
 		rldChan:     make(chan struct{}, 1),
 		stopChan:    make(chan struct{}, 1),

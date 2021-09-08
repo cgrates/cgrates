@@ -68,7 +68,6 @@ func TestSessionSReload1(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 
@@ -93,33 +92,34 @@ func TestSessionSReload1(t *testing.T) {
 	conMng := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, new(DataDBService), server, make(chan birpc.ClientConnector, 1), shdChan, conMng, anz, srvDep)
-	err := srv.Start()
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, new(DataDBService), server, make(chan birpc.ClientConnector, 1), conMng, anz, srvDep)
+	ctx, cancel := context.WithCancel(context.TODO())
+	err := srv.Start(ctx, cancel)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !srv.IsRunning() {
 		t.Fatal("Expected service to be running")
 	}
-	args := &sessions.V1InitSessionArgs{
-		InitSession:       true,
-		ProcessThresholds: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSSv1ItProcessEventInitiateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:           "cgrates.org",
-				utils.ToR:              utils.MetaVoice,
-				utils.OriginID:         "testSSv1ItProcessEvent",
-				utils.RequestType:      utils.MetaPostpaid,
-				utils.AccountField:     "1001",
-				utils.CGRDebitInterval: 10,
-				utils.Destination:      "1002",
-				utils.SetupTime:        time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:       time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:            0,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testSSv1ItProcessEventInitiateSession",
+		Event: map[string]interface{}{
+			utils.Tenant:           "cgrates.org",
+			utils.ToR:              utils.MetaVoice,
+			utils.OriginID:         "testSSv1ItProcessEvent",
+			utils.RequestType:      utils.MetaPostpaid,
+			utils.AccountField:     "1001",
+			utils.CGRDebitInterval: 10,
+			utils.Destination:      "1002",
+			utils.SetupTime:        time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:       time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.Usage:            0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsSesInitiate:   true,
+			utils.OptsSesThresholdS: true,
 		},
 	}
 
@@ -140,7 +140,6 @@ func TestSessionSReload2(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
@@ -153,20 +152,21 @@ func TestSessionSReload2(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 
 	srv.(*SessionService).sm = &sessions.SessionS{}
 	if !srv.IsRunning() {
 		t.Fatalf("\nExpecting service to be running")
 	}
-	err2 := srv.Start()
+	ctx, cancel := context.WithCancel(context.TODO())
+	err2 := srv.Start(ctx, cancel)
 	if err2 != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err2)
 	}
 	cfg.SessionSCfg().Enabled = false
-	err := srv.Reload()
+	err := srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -175,7 +175,7 @@ func TestSessionSReload2(t *testing.T) {
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 
 }
@@ -189,7 +189,6 @@ func TestSessionSReload3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
@@ -202,10 +201,10 @@ func TestSessionSReload3(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-	err2 := srv.(*SessionService).start()
+	err2 := srv.(*SessionService).start(func() {})
 	if err2 != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err2)
 	}

@@ -55,25 +55,23 @@ func TestEventReaderSReload(t *testing.T) {
 	cfg.SessionSCfg().ListenBijson = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
+	ctx, cancel := context.WithCancel(context.TODO())
 	defer func() {
-		shdChan.CloseOnce()
+		cancel()
 		time.Sleep(10 * time.Millisecond)
 	}()
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
-	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
-	erS := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
+	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	erS := NewEventReaderService(cfg, filterSChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(erS, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	srvMngr.StartServices(ctx, cancel)
 	if erS.IsRunning() {
 		t.Fatal("Expected service to be down")
 	}
@@ -92,13 +90,13 @@ func TestEventReaderSReload(t *testing.T) {
 	}
 
 	runtime.Gosched()
-	err := erS.Start()
+	err := erS.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	time.Sleep(10 * time.Millisecond)
 	runtime.Gosched()
-	err = erS.Reload()
+	err = erS.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -132,16 +130,15 @@ func TestEventReaderSReload2(t *testing.T) {
 	}
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	erS := NewEventReaderService(cfg, filterSChan, shdChan, nil, srvDep)
+	erS := NewEventReaderService(cfg, filterSChan, nil, srvDep)
 	ers := ers.NewERService(cfg, nil, nil)
 
 	runtime.Gosched()
 	srv := erS.(*EventReaderService)
 	srv.stopChan = make(chan struct{})
 	srv.rldChan = make(chan struct{})
-	err := srv.listenAndServe(ers, srv.stopChan, srv.rldChan)
+	err := srv.listenAndServe(ers, srv.stopChan, srv.rldChan, func() {})
 	if err == nil || err.Error() != "unsupported reader type: <bad_type>" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "unsupported reader type: <bad_type>", err)
 	}

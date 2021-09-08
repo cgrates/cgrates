@@ -34,7 +34,6 @@ import (
 //TestLoaderSCoverage for cover testing
 func TestLoaderSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
@@ -43,7 +42,7 @@ func TestLoaderSCoverage(t *testing.T) {
 	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
 	rpcInternal := map[string]chan birpc.ClientConnector{}
 	cM := engine.NewConnManager(cfg, rpcInternal)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewLoaderService(cfg, db,
 		filterSChan, server, internalLoaderSChan,
 		cM, anz, srvDep)

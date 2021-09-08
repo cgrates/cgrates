@@ -21,6 +21,7 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
@@ -68,16 +69,18 @@ type LoaderService struct {
 }
 
 // Start should handle the service start
-func (ldrs *LoaderService) Start() (err error) {
+func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if ldrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
-	filterS := <-ldrs.filterSChan
-	ldrs.filterSChan <- filterS
-	dbchan := ldrs.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, ldrs.filterSChan); err != nil {
+		return
+	}
+	var datadb *engine.DataManager
+	if datadb, err = ldrs.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	ldrs.Lock()
 	defer ldrs.Unlock()
@@ -101,28 +104,28 @@ func (ldrs *LoaderService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (ldrs *LoaderService) Reload() (err error) {
-	filterS := <-ldrs.filterSChan
-	ldrs.filterSChan <- filterS
-	dbchan := ldrs.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+func (ldrs *LoaderService) Reload(ctx *context.Context, _ context.CancelFunc) error {
+	filterS, err := waitForFilterS(ctx, ldrs.filterSChan)
+	if err != nil {
+		return err
+	}
+	datadb, err := ldrs.dm.WaitForDM(ctx)
+	if err != nil {
+		return err
+	}
 	close(ldrs.stopChan)
 	ldrs.stopChan = make(chan struct{})
 
 	ldrs.RLock()
+	defer ldrs.RUnlock()
 
 	ldrs.ldrs.Reload(datadb, ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
 		filterS, ldrs.connMgr)
-	if err = ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
-		return
-	}
-	ldrs.RUnlock()
-	return
+	return ldrs.ldrs.ListenAndServe(ldrs.stopChan)
 }
 
 // Shutdown stops the service
-func (ldrs *LoaderService) Shutdown() (err error) {
+func (ldrs *LoaderService) Shutdown() (_ error) {
 	ldrs.Lock()
 	ldrs.ldrs = nil
 	ldrs.rpc = nil
@@ -152,4 +155,9 @@ func (ldrs *LoaderService) ShouldRun() bool {
 // GetLoaderS returns the initialized LoaderService
 func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderService {
 	return ldrs.ldrs
+}
+
+// GetRPCChan returns the conn chan
+func (ldrs *LoaderService) GetRPCChan() chan birpc.ClientConnector {
+	return ldrs.connChan
 }

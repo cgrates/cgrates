@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
@@ -34,7 +35,7 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *cores.Server,
+	cacheS *CacheService, filterSChan chan *engine.FilterS, server *cores.Server,
 	internalChargerSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ChargerService{
@@ -55,39 +56,44 @@ type ChargerService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
 	chrS     *engine.ChargerService
-	rpc      *apis.ChargerSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (chrS *ChargerService) Start() (err error) {
+func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if chrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	<-chrS.cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
-	<-chrS.cacheS.GetPrecacheChannel(utils.CacheChargerFilterIndexes)
+	if err = chrS.cacheS.WaitToPrecache(ctx,
+		utils.CacheChargerProfiles,
+		utils.CacheChargerFilterIndexes); err != nil {
+		return
+	}
 
-	filterS := <-chrS.filterSChan
-	chrS.filterSChan <- filterS
-	dbchan := chrS.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, chrS.filterSChan); err != nil {
+		return
+	}
+
+	var datadb *engine.DataManager
+	if datadb, err = chrS.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	chrS.Lock()
 	defer chrS.Unlock()
 	chrS.chrS = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
-	chrS.rpc = apis.NewChargerSv1(chrS.chrS)
-	srv, _ := birpc.NewService(chrS.rpc, "", false)
+	srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
 	if !chrS.cfg.DispatcherSCfg().Enabled {
 		chrS.server.RpcRegister(srv)
 	}
@@ -96,7 +102,7 @@ func (chrS *ChargerService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (chrS *ChargerService) Reload() (err error) {
+func (chrS *ChargerService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
 	return
 }
 

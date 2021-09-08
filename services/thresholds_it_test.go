@@ -39,29 +39,29 @@ import (
 func TestThresholdSReload(t *testing.T) {
 	// utils.Logger.SetLogLevel(7)
 	cfg := config.NewDefaultCGRConfig()
-
+	ctx, cancel := context.WithCancel(context.TODO())
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
+	chSCh := make(chan *engine.CacheS, 1)
+	chSCh <- chS
+	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	tS := NewThresholdService(cfg, db, css, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(tS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+	srvMngr.StartServices(ctx, cancel)
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -87,11 +87,11 @@ func TestThresholdSReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	runtime.Gosched()
-	err := tS.Start()
+	err := tS.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = tS.Reload()
+	err = tS.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -101,35 +101,37 @@ func TestThresholdSReload(t *testing.T) {
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
+
 	time.Sleep(10 * time.Millisecond)
 }
 func TestThresholdSReload2(t *testing.T) {
 	// utils.Logger.SetLogLevel(7)
 	cfg := config.NewDefaultCGRConfig()
+	ctx, cancel := context.WithCancel(context.TODO())
 
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
+	chSCh := make(chan *engine.CacheS, 1)
+	chSCh <- chS
+	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	tS := NewThresholdService(cfg, db, css, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(tS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+	srvMngr.StartServices(ctx, cancel)
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -152,11 +154,11 @@ func TestThresholdSReload2(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := tS.Start()
+	err := tS.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = tS.Reload()
+	err = tS.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -166,6 +168,6 @@ func TestThresholdSReload2(t *testing.T) {
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 }

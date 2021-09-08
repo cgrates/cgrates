@@ -21,6 +21,7 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -57,7 +58,7 @@ type RegistrarCService struct {
 }
 
 // Start should handle the sercive start
-func (dspS *RegistrarCService) Start() (err error) {
+func (dspS *RegistrarCService) Start(*context.Context, context.CancelFunc) (err error) {
 	if dspS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -74,7 +75,7 @@ func (dspS *RegistrarCService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (dspS *RegistrarCService) Reload() (err error) {
+func (dspS *RegistrarCService) Reload(*context.Context, context.CancelFunc) (err error) {
 	dspS.rldChan <- struct{}{}
 	return // for the momment nothing to reload
 }

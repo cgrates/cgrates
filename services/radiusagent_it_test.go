@@ -46,27 +46,25 @@ func TestRadiusAgentReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
+	ctx, cancel := context.WithCancel(context.TODO())
 	defer func() {
-		shdChan.CloseOnce()
+		cancel()
 		time.Sleep(10 * time.Millisecond)
 	}()
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+		nil, anz, srvDep)
+	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	srvMngr.StartServices(ctx, cancel)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -85,11 +83,11 @@ func TestRadiusAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be running")
 	}
 	runtime.Gosched()
-	err := srv.Start()
+	err := srv.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -110,27 +108,25 @@ func TestRadiusAgentReload2(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
+	ctx, cancel := context.WithCancel(context.TODO())
 	defer func() {
-		shdChan.CloseOnce()
+		cancel()
 		time.Sleep(10 * time.Millisecond)
 	}()
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+		nil, anz, srvDep)
+	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Fatal(err)
-	}
+	srvMngr.StartServices(ctx, cancel)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
@@ -151,11 +147,11 @@ func TestRadiusAgentReload2(t *testing.T) {
 	}
 	runtime.Gosched()
 	runtime.Gosched()
-	err := srv.Start()
+	err := srv.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -164,12 +160,12 @@ func TestRadiusAgentReload2(t *testing.T) {
 		t.Fatalf("cannot cast")
 	}
 
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	castSrv.lnet = "test_string"
-	err = srv.Reload()
+	err = srv.Reload(ctx, cancel)
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -193,14 +189,14 @@ func TestRadiusAgentReload3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
+	ctx, cancel := context.WithCancel(context.TODO())
 	defer func() {
-		shdChan.CloseOnce()
+		cancel()
 		time.Sleep(10 * time.Millisecond)
 	}()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
-	err := srv.Start()
+	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
+	err := srv.Start(ctx, cancel)
 	if err == nil || err.Error() != "stat test: no such file or directory" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "stat test: no such file or directory", err)
 	}
@@ -215,9 +211,8 @@ func TestRadiusAgentReload4(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
 	r, err := agents.NewRadiusAgent(cfg, nil, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -225,7 +220,7 @@ func TestRadiusAgentReload4(t *testing.T) {
 	runtime.Gosched()
 	rad := srv.(*RadiusAgent)
 	rad.stopChan = make(chan struct{})
-	err = rad.listenAndServe(r)
+	err = rad.listenAndServe(r, func() {})
 	if err == nil || err.Error() != "unsupported network: <test>" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "unsupported network: <test>", err)
 	}

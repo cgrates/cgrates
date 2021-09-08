@@ -130,14 +130,15 @@ func cgrWritePid(pidFile string) (err error) {
 }
 
 func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string,
-	loader *LoaderService, iLoaderSCh chan birpc.ClientConnector) (err error) {
+	loader *LoaderService) (err error) {
 	if !cfg.LoaderCfg().Enabled() {
 		err = fmt.Errorf("<%s> not enabled but required by preload mechanism", utils.LoaderS)
 		return
 	}
+	ch := loader.GetRPCChan()
 	select {
-	case ldrs := <-iLoaderSCh:
-		iLoaderSCh <- ldrs
+	case ldrs := <-ch:
+		ch <- ldrs
 	case <-ctx.Done():
 		return
 	}
@@ -158,34 +159,19 @@ func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string
 
 // cgrStartFilterService fires up the FilterS
 func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS,
-	cacheS *engine.CacheS, connMgr *engine.ConnManager,
+	cacheSCh chan *engine.CacheS, connMgr *engine.ConnManager,
 	cfg *config.CGRConfig, dm *engine.DataManager) {
+	var cacheS *engine.CacheS
+	select {
+	case cacheS = <-cacheSCh:
+	case <-ctx.Done():
+		return
+	}
 	select {
 	case <-cacheS.GetPrecacheChannel(utils.CacheFilters):
 		iFilterSCh <- engine.NewFilterS(cfg, connMgr, dm)
 	case <-ctx.Done():
 	}
-}
-
-// cgrInitCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
-func cgrInitCacheS(ctx *context.Context, shutdown context.CancelFunc,
-	iCacheSCh chan birpc.ClientConnector, server *cores.Server,
-	cfg *config.CGRConfig, dm *engine.DataManager, anz *AnalyzerService,
-	cpS *engine.CapsStats) (chS *engine.CacheS) {
-	chS = engine.NewCacheS(cfg, dm, cpS)
-	go func() {
-		if err := chS.Precache(ctx); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> could not init, error: %s", utils.CacheS, err.Error()))
-			shutdown()
-		}
-	}()
-
-	chSv1, _ := birpc.NewService(apis.NewCacheSv1(chS), "", false)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(chSv1)
-	}
-	iCacheSCh <- anz.GetInternalCodec(chSv1, utils.CacheS)
-	return
 }
 
 func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector,
@@ -194,11 +180,7 @@ func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector,
 	// if !cfg.DispatcherSCfg().Enabled {
 	// server.RpcRegister(grdSv1)
 	// }
-	// var rpc birpc.ClientConnector = grdSv1
-	// if anz.IsRunning() {
-	// rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.GuardianS)
-	// }
-	// iGuardianSCh <- rpc
+	// iGuardianSCh <- anz.GetInternalCodec(grdSv1,  utils.GuardianS)
 }
 
 func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
@@ -207,11 +189,7 @@ func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
 	// if !cfg.DispatcherSCfg().Enabled {
 	// server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
 	// }
-	// var rpc birpc.ClientConnector = srvMngr
-	// if anz.IsRunning() {
-	// rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ServiceManager)
-	// }
-	// iServMngrCh <- rpc
+	// iServMngrCh <- anz.GetInternalCodec(srvMngr,  utils.ServiceManager)
 }
 
 func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
@@ -220,11 +198,7 @@ func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(cfgSv1)
 	}
-	var rpc birpc.ClientConnector = cfgSv1
-	if anz.IsRunning() {
-		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ConfigSv1)
-	}
-	iConfigCh <- rpc
+	iConfigCh <- anz.GetInternalCodec(cfgSv1, utils.ConfigSv1)
 }
 
 func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
@@ -280,4 +254,24 @@ func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
 		}
 	}
 	server.StartServer(ctx, shtdwnEngine, cfg)
+}
+
+func waitForFilterS(ctx *context.Context, fsCh chan *engine.FilterS) (filterS *engine.FilterS, err error) {
+	select {
+	case <-ctx.Done():
+		err = ctx.Err()
+	case filterS = <-fsCh:
+		fsCh <- filterS
+	}
+	return
+}
+
+func getCacheS(ctx *context.Context, csCh chan *engine.CacheS) (cS *engine.CacheS, err error) {
+	select {
+	case <-ctx.Done():
+		err = ctx.Err()
+	case cS = <-csCh:
+		csCh <- cS
+	}
+	return
 }

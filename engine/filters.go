@@ -595,7 +595,7 @@ func (fltr *FilterRule) passAPIBan(ctx *context.Context, dDP utils.DataProvider)
 		fltr.Values[0] != utils.MetaSingle { // force only valid values
 		return false, fmt.Errorf("invalid value for apiban filter: <%s>", fltr.Values[0])
 	}
-	return dm.GetAPIBan(ctx, strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
+	return GetAPIBan(ctx, strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
 }
 
 func parseTime(rsr *config.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {

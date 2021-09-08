@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
@@ -34,7 +35,7 @@ import (
 
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalRouteSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -56,40 +57,44 @@ type RouteService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
 	routeS   *engine.RouteService
-	rpc      *apis.RouteSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (routeS *RouteService) Start() (err error) {
+func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if routeS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	<-routeS.cacheS.GetPrecacheChannel(utils.CacheRouteProfiles)
-	<-routeS.cacheS.GetPrecacheChannel(utils.CacheRouteFilterIndexes)
+	if err = routeS.cacheS.WaitToPrecache(ctx,
+		utils.CacheRouteProfiles,
+		utils.CacheRouteFilterIndexes); err != nil {
+		return
+	}
 
-	filterS := <-routeS.filterSChan
-	routeS.filterSChan <- filterS
-	dbchan := routeS.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, routeS.filterSChan); err != nil {
+		return
+	}
 
+	var datadb *engine.DataManager
+	if datadb, err = routeS.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 	routeS.Lock()
 	defer routeS.Unlock()
 	routeS.routeS = engine.NewRouteService(datadb, filterS, routeS.cfg, routeS.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
-	routeS.rpc = apis.NewRouteSv1(routeS.routeS)
-	srv, _ := birpc.NewService(routeS.rpc, "", false)
+	srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
 	if !routeS.cfg.DispatcherSCfg().Enabled {
 		routeS.server.RpcRegister(srv)
 	}
@@ -98,7 +103,7 @@ func (routeS *RouteService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (routeS *RouteService) Reload() (err error) {
+func (routeS *RouteService) Reload(*context.Context, context.CancelFunc) (err error) {
 	return
 }
 
@@ -108,7 +113,6 @@ func (routeS *RouteService) Shutdown() (err error) {
 	defer routeS.Unlock()
 	routeS.routeS.Shutdown() //we don't verify the error because shutdown never returns an error
 	routeS.routeS = nil
-	routeS.rpc = nil
 	<-routeS.connChan
 	return
 }
