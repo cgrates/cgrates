@@ -170,3 +170,50 @@ func TestHttpJsonMapSyncLimit(t *testing.T) {
 		return
 	}
 }
+
+func TestHTTPJsonMapPrepareOrderMap(t *testing.T) {
+	httpEE := new(HTTPjsonMapEE)
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+	rcv, err := httpEE.PrepareOrderMap(onm)
+	if err != nil {
+		t.Error(err)
+	}
+	valMp := map[string]interface{}{
+		"*req.*tenant": "value1",
+	}
+	body, err := json.Marshal(valMp)
+	exp := &HTTPPosterRequest{
+		Header: httpEE.hdr,
+		Body:   body,
+	}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(exp), utils.IfaceAsString(rcv))
+	}
+}
+
+func TestHTTPJsonMapPrepareMap(t *testing.T) {
+	httpEE := new(HTTPjsonMapEE)
+	valMp := map[string]interface{}{
+		"*req.*tenant": "value1",
+	}
+	rcv, err := httpEE.PrepareMap(valMp)
+	if err != nil {
+		t.Error(err)
+	}
+	body, err := json.Marshal(valMp)
+	exp := &HTTPPosterRequest{
+		Header: httpEE.hdr,
+		Body:   body,
+	}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(exp), utils.IfaceAsString(rcv))
+	}
+}

@@ -197,3 +197,70 @@ func TestHttpPostSyncLimit(t *testing.T) {
 		return
 	}
 }
+
+func TestHTTPPostPrepareOrderMap(t *testing.T) {
+	httpPost := new(HTTPPostEE)
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+	rcv, err := httpPost.PrepareOrderMap(onm)
+	if err != nil {
+		t.Error(err)
+	}
+	urlVals := url.Values{
+		"*req.*tenant": {"value1"},
+	}
+	exp := &HTTPPosterRequest{
+		Header: httpPost.hdr,
+		Body:   urlVals,
+	}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+// func TestComposeHeader(t *testing.T) {
+// 	// 	cfgJSONStr := `{
+// 	// "ees": {
+// 	// 	"enabled": true,
+// 	// 	"attributes_conns":["*internal", "*conn1"],
+// 	// 	"cache": {
+// 	// 		"*file_csv": {"limit": -2, "ttl": "3s", "static_ttl": true},
+// 	// 	},
+// 	// 	"exporters": [
+// 	// 		{
+// 	// 			"id": "cgrates",
+// 	// 			"type": "*none",
+// 	// 			"export_path": "/var/spool/cgrates/ees",
+// 	// 			"opts": {
+// 	// 			"*default": "randomVal"
+// 	// 			},
+// 	// 			"timezone": "local",
+// 	// 			"filters": ["randomFiletrs"],
+// 	// 			"flags": [],
+// 	// 			"attribute_ids": ["randomID"],
+// 	// 			"attribute_context": "",
+// 	// 			"synchronous": false,
+// 	// 			"attempts": 2,
+// 	// 			"field_separator": ",",
+// 	// 			"fields":[
+// 	// 				{"tag": "CGRID", "path": "*hdr.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+// 	// 			],
+// 	// 		},
+// 	// 	],
+// 	// },
+// 	// }`
+// 	// 	if jsonCfg, err := config.NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
+// 	// 		t.Error(err)
+// 	// 	}
+// 	// 	httpPost := &HTTPPostEE{
+// 	// 		cfg:
+// 	// 	}
+
+// }

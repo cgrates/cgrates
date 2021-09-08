@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -262,5 +263,30 @@ func TestDone(t *testing.T) {
 	c.done()
 	if len(c.reqs) != 3 {
 		t.Error("Expected length of 3")
+	}
+}
+
+func TestEEPrepareOrderMap(t *testing.T) {
+	bP := new(bytePreparing)
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+	rcv, err := bP.PrepareOrderMap(onm)
+	if err != nil {
+		t.Error(err)
+	}
+
+	valMp := map[string]interface{}{
+		"*req.*tenant": "value1",
+	}
+	body, err := json.Marshal(valMp)
+	if !reflect.DeepEqual(rcv, body) {
+		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(body), utils.IfaceAsString(rcv))
 	}
 }
