@@ -2001,9 +2001,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-	attrS := utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS)
+	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSRelease)
 	termS := utils.OptAsBool(args.APIOpts, utils.OptsSesTerminate)
-	if !(attrS || termS) {
+	if !(resS || termS) {
 		return // nothing to do
 	}
 
@@ -2059,7 +2059,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			return err //utils.NewErrRALs(err)
 		}
 	}
-	if utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSRelease) {
+	if resS {
 		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
