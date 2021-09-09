@@ -74,8 +74,9 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProcessRunsCfg: 1,
-				utils.MetaProfileRunsCfg: 0,
+				utils.MetaAttributeIDsCfg: []string(nil),
+				utils.MetaProcessRunsCfg:  1,
+				utils.MetaProfileRunsCfg:  0,
 			},
 		},
 	}
@@ -141,8 +142,9 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProcessRunsCfg: 2,
-				utils.MetaProfileRunsCfg: 0,
+				utils.MetaAttributeIDsCfg: []string(nil),
+				utils.MetaProcessRunsCfg:  2,
+				utils.MetaProfileRunsCfg:  0,
 			},
 		},
 	}
@@ -183,8 +185,9 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProcessRunsCfg: 2,
-				utils.MetaProfileRunsCfg: 0,
+				utils.MetaAttributeIDsCfg: []string(nil),
+				utils.MetaProcessRunsCfg:  2,
+				utils.MetaProfileRunsCfg:  0,
 			},
 		},
 	}

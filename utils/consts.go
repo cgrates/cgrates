@@ -1869,11 +1869,12 @@ const (
 	ClientDictionariesCfg = "client_dictionaries"
 
 	// AttributeSCfg
-	IndexedSelectsCfg  = "indexed_selects"
-	ProfileRunsCfg     = "profile_runs"
-	NestedFieldsCfg    = "nested_fields"
-	MetaProcessRunsCfg = "*processRuns"
-	MetaProfileRunsCfg = "*profileRuns"
+	IndexedSelectsCfg   = "indexed_selects"
+	ProfileRunsCfg      = "profile_runs"
+	NestedFieldsCfg     = "nested_fields"
+	MetaAttributeIDsCfg = "*attributeIDs"
+	MetaProcessRunsCfg  = "*processRuns"
+	MetaProfileRunsCfg  = "*profileRuns"
 
 	// ChargerSCfg
 	StoreIntervalCfg = "store_interval"
@@ -2091,7 +2092,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, Op
 	OptsSesTTLMaxDelay, OptsSesTTLLastUsed, OptsSesTTLLastUsage, OptsSesTTLUsage,
 	OptsSesDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
-	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
+	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesAttributeIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
 	RemoteHostOpt, CacheOpt, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
 	OptsSesAttributeS, OptsSesAttributeIDs, OptsSesAttributeSDerivedReply, OptsSesBlockerError,
@@ -2183,14 +2184,15 @@ const (
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
 	// Others
-	OptsContext               = "*context"
-	Subsys                    = "*subsys"
-	MetaMethod                = "*reqMethod"
-	OptsAttributesProfileRuns = "*profileRuns"
-	OptsAttributesProcessRuns = "*attrProcessRuns"
-	MetaEventType             = "*eventType"
-	EventType                 = "EventType"
-	SchedulerInit             = "SchedulerInit"
+	OptsContext                = "*context"
+	Subsys                     = "*subsys"
+	MetaMethod                 = "*reqMethod"
+	OptsAttributesAttributeIDs = "*attributeIDs"
+	OptsAttributesProfileRuns  = "*attrProfileRuns"
+	OptsAttributesProcessRuns  = "*attrProcessRuns"
+	MetaEventType              = "*eventType"
+	EventType                  = "EventType"
+	SchedulerInit              = "SchedulerInit"
 
 	RemoteHostOpt = "*rmtHost"
 	CacheOpt      = "*cache"

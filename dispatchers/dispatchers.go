@@ -58,10 +58,7 @@ func (dS *DispatcherService) Shutdown() {
 func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	if err = dS.connMgr.Call(context.TODO(), dS.cfg.DispatcherSCfg().AttributeSConns,
-		utils.AttributeSv1ProcessEvent,
-		&engine.AttrArgsProcessEvent{
-			CGREvent: ev,
-		}, reply); err != nil {
+		utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
 		}

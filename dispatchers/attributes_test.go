@@ -84,11 +84,10 @@ func TestDspAttributeSv1GetAttributeForEventError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{},
-	}
+	ev := &utils.CGREvent{}
+
 	var reply *engine.AttributeProfile
-	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), processEvent, reply)
+	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), ev, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -99,13 +98,11 @@ func TestDspAttributeSv1GetAttributeForEventErrorTenant(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	ev := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *engine.AttributeProfile
-	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), processEvent, reply)
+	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), ev, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -115,14 +112,12 @@ func TestDspAttributeSv1GetAttributeForEventErrorTenant(t *testing.T) {
 func TestDspAttributeSv1GetAttributeForEventErrorAttributeS(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	ev := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 
 	var reply *engine.AttributeProfile
-	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), processEvent, reply)
+	err := dspSrv.AttributeSv1GetAttributeForEvent(context.Background(), ev, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -132,14 +127,12 @@ func TestDspAttributeSv1GetAttributeForEventErrorAttributeS(t *testing.T) {
 func TestDspAttributeSv1ProcessEventError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	ev := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 
 	var reply *engine.AttrSProcessEventReply
-	err := dspSrv.AttributeSv1ProcessEvent(context.Background(), processEvent, reply)
+	err := dspSrv.AttributeSv1ProcessEvent(context.Background(), ev, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -150,14 +143,12 @@ func TestDspAttributeSv1ProcessEventErrorAttributeSConns(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	processEvent := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	ev := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 
 	var reply *engine.AttrSProcessEventReply
-	err := dspSrv.AttributeSv1ProcessEvent(context.Background(), processEvent, reply)
+	err := dspSrv.AttributeSv1ProcessEvent(context.Background(), ev, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)

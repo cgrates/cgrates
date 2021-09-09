@@ -1032,18 +1032,16 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 			APIOpts: map[string]interface{}{},
 		},
 	}
-	cgrEv := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.new",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				"CustomField":     "+2007",
-				"CustomField2":    "+2007",
-				utils.Destination: "+1207",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: "prefix",
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.new",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			"CustomField":     "+2007",
+			"CustomField2":    "+2007",
+			utils.Destination: "+1207",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: "prefix",
 		},
 	}
 	var result2 *engine.AttrSProcessEventReply

@@ -89,16 +89,14 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	}
 
 	alS := NewAttributeService(dm, filterS, cfg)
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "123",
-			Event: map[string]interface{}{
-				utils.AccountField: "adrian@itsyscom.com",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "123",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
 	rply := &AttrSProcessEventReply{}
@@ -118,7 +116,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 		},
 		blocker: false,
 	}
-	err = alS.V1ProcessEvent(context.Background(), args, rply)
+	err = alS.V1ProcessEvent(context.Background(), ev, rply)
 	sort.Strings(rply.AlteredFields)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -188,20 +186,18 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	}
 
 	alS := NewAttributeService(dm, filterS, cfg)
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "123",
-			Event: map[string]interface{}{
-				utils.AccountField: "adrian@itsyscom.com",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "123",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
 	rply := &AttrSProcessEventReply{}
-	err = alS.V1ProcessEvent(context.Background(), args, rply)
+	err = alS.V1ProcessEvent(context.Background(), ev, rply)
 	sort.Strings(rply.AlteredFields)
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err == nil || err.Error() != expErr {
@@ -270,20 +266,18 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	}
 
 	alS := NewAttributeService(dm, filterS, cfg)
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "123",
-			Event: map[string]interface{}{
-				utils.AccountField: "adrian@itsyscom.com",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "123",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
 	rply := &AttrSProcessEventReply{}
-	err = alS.V1ProcessEvent(context.Background(), args, rply)
+	err = alS.V1ProcessEvent(context.Background(), ev, rply)
 	sort.Strings(rply.AlteredFields)
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err == nil || err.Error() != expErr {
@@ -352,20 +346,18 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	}
 
 	alS := NewAttributeService(dm, filterS, cfg)
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "123",
-			Event: map[string]interface{}{
-				utils.AccountField: "adrian@itsyscom.com",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "123",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
 	rply := &AttrSProcessEventReply{}
-	err = alS.V1ProcessEvent(context.Background(), args, rply)
+	err = alS.V1ProcessEvent(context.Background(), ev, rply)
 	sort.Strings(rply.AlteredFields)
 	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\"}]> to *valueExponent"
 	if err == nil || err.Error() != expErr {
@@ -716,17 +708,15 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &AttrArgsProcessEvent{
-		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "AttrProcessEventMultipleRuns",
-			Event: map[string]interface{}{
-				"Password": "passwd",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 4,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AttrProcessEventMultipleRuns",
+		Event: map[string]interface{}{
+			"Password": "passwd",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns:  4,
+			utils.OptsAttributesAttributeIDs: []string{"ATTR1", "ATTR2"},
 		},
 	}
 	reply := &AttrSProcessEventReply{}
@@ -741,12 +731,13 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 				utils.RequestType: utils.MetaPostpaid,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 4,
+				utils.OptsAttributesAttributeIDs: []string{"ATTR1", "ATTR2"},
+				utils.OptsAttributesProcessRuns:  4,
 			},
 		},
 	}
 
-	if err := alS.V1ProcessEvent(context.Background(), args, reply); err != nil {
+	if err := alS.V1ProcessEvent(context.Background(), ev, reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply.AlteredFields)
@@ -827,14 +818,12 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "AttrProcessEventMultipleRuns",
-			Event:  map[string]interface{}{},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 3,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AttrProcessEventMultipleRuns",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 3,
 		},
 	}
 
@@ -855,7 +844,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 			},
 		},
 	}
-	if err := alS.V1ProcessEvent(context.Background(), args, reply); err != nil {
+	if err := alS.V1ProcessEvent(context.Background(), ev, reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply.AlteredFields)

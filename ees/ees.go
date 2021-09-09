@@ -106,14 +106,12 @@ func (eeS *EventExporterS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.
 		attributeSCtx,
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaEEs)
-	attrArgs := &engine.AttrArgsProcessEvent{
-		AttributeIDs: attrIDs,
-		CGREvent:     cgrEv,
-	}
+	cgrEv.APIOpts[utils.OptsAttributesAttributeIDs] = attrIDs
+
 	if err = eeS.connMgr.Call(ctx,
 		eeS.cfg.EEsNoLksCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
-		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 	} else if err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound

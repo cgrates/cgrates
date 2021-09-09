@@ -1570,7 +1570,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		if atrsIDs == nil {
 			atrsIDs = args.AttributeIDs
 		}
-		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent, atrsIDs, false)
+		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent, atrsIDs)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
 			authReply.Attributes = &rplyAttr
@@ -1756,7 +1756,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
 			return
 		}
-		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs, false)
+		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
@@ -1927,7 +1927,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
 			return
 		}
-		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs, false)
+		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
@@ -2194,7 +2194,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		if atrsIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesAttributeIDs); err != nil {
 			return
 		}
-		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs, false)
+		rplyAttr, err := sS.processAttributes(ctx, args, atrsIDs)
 		if err == nil {
 			args = rplyAttr.CGREvent
 			rply.Attributes = &rplyAttr
@@ -2331,7 +2331,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		rply.Attributes = make(map[string]*engine.AttrSProcessEventReply)
 
 		for runID, cgrEv := range getDerivedEvents(events, utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeSDerivedReply)) {
-			rplyAttr, err := sS.processAttributes(ctx, cgrEv, attrIDs, false)
+			rplyAttr, err := sS.processAttributes(ctx, cgrEv, attrIDs)
 			if err != nil {
 				if err.Error() != utils.ErrNotFound.Error() {
 					return utils.NewErrAttributeS(err)
@@ -2883,25 +2883,21 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 }
 
 // processAttributes will receive the event and send it to AttributeS to be processed
-func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREvent, attrIDs []string,
-	clnb bool) (rplyEv engine.AttrSProcessEventReply, err error) {
+func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREvent,
+	attrIDs []string) (rplyEv engine.AttrSProcessEventReply, err error) {
 	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(engine.MapEvent)
 	}
+	cgrEv.APIOpts[utils.OptsAttributesAttributeIDs] = attrIDs
 	cgrEv.APIOpts[utils.Subsys] = utils.MetaSessionS
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaSessionS)
-	attrArgs := &engine.AttrArgsProcessEvent{
-		CGREvent:     cgrEv,
-		AttributeIDs: attrIDs,
-	}
-	attrArgs.SetCloneable(clnb)
 	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttrSConns, utils.AttributeSv1ProcessEvent,
-		attrArgs, &rplyEv)
+		cgrEv, &rplyEv)
 	return
 }
 

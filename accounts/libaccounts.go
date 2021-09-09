@@ -97,16 +97,13 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	if len(attrSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.AttributeS)
 	}
+	cgrEv.APIOpts[utils.OptsAttributesAttributeIDs] = attrIDs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaAccounts)
-	attrArgs := &engine.AttrArgsProcessEvent{
-		CGREvent:     cgrEv,
-		AttributeIDs: attrIDs,
-	}
 	var tmpReply engine.AttrSProcessEventReply
 	if err = connMgr.Call(ctx, attrSConns, utils.AttributeSv1ProcessEvent,
-		attrArgs, &tmpReply); err != nil {
+		cgrEv, &tmpReply); err != nil {
 		return
 	}
 	return &tmpReply, nil
