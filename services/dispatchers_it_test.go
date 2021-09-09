@@ -61,7 +61,7 @@ func TestDispatcherSReload(t *testing.T) {
 	srv := NewDispatcherService(cfg, db, css, filterSChan, server,
 		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	attrS := NewAttributeService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srv, srvDep)
-	engine.NewConnManager(cfg, nil)
+	engine.NewConnManager(cfg)
 	srvMngr.AddServices(attrS, srv,
 		NewLoaderService(cfg, db, filterSChan, server,
 			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)

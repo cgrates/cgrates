@@ -31,11 +31,11 @@ import (
 )
 
 // NewConnManager returns the Connection Manager
-func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan birpc.ClientConnector) (cM *ConnManager) {
+func NewConnManager(cfg *config.CGRConfig) (cM *ConnManager) {
 	cM = &ConnManager{
 		cfg:         cfg,
-		rpcInternal: rpcInternal,
-		dynIntCh:    NewRPCClientSet(rpcInternal),
+		rpcInternal: make(map[string]chan context.ClientConnector),
+		dynIntCh:    make(RPCClientSet),
 		connCache:   ltcache.NewCache(-1, 0, true, nil),
 	}
 	SetConnManager(cM)

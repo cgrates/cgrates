@@ -68,7 +68,7 @@ func TestEventReaderSReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	erS := NewEventReaderService(cfg, filterSChan, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
+	engine.NewConnManager(cfg)
 	srvMngr.AddServices(erS, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	srvMngr.StartServices(ctx, cancel)

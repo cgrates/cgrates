@@ -91,36 +91,6 @@ func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, cer
 	return
 }
 
-func NewRPCClientSet(m map[string]chan birpc.ClientConnector) (s RPCClientSet) {
-	s = make(RPCClientSet)
-	for k, v := range map[string]string{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       utils.AnalyzerSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS):         utils.AdminSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     utils.AttributeSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         utils.CacheSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           utils.CDRsV1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       utils.ChargerSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       utils.GuardianSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        utils.LoaderSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      utils.ResourceSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       utils.SessionSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          utils.StatSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         utils.RouteSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     utils.ThresholdSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): utils.ServiceManagerV1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         utils.ConfigSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           utils.CoreSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            utils.EeSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          utils.RateSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    utils.DispatcherSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts):       utils.AccountSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions):        utils.ActionSv1,
-	} {
-		s[v] = m[k]
-	}
-	return
-}
-
 // RPCClientSet is a RPC ClientConnector for the internal subsystems
 type RPCClientSet map[string]chan birpc.ClientConnector
 

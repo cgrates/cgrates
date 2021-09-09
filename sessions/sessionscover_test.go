@@ -4604,9 +4604,8 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	clntConn := make(chan birpc.ClientConnector, 1)
 	clntConn <- testMk
 	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
-	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clntConn,
-	})
+	connMngr := engine.NewConnManager(cfg)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, clntConn)
 	sessions.connMgr = connMngr
 	sessions.biJIDs = map[string]*biJClient{
 		"client1": {

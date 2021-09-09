@@ -25,6 +25,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -41,8 +42,8 @@ func init() {
 // there will be different implementations based on strategy
 type Dispatcher interface {
 	// Dispatch is used to send the method over the connections given
-	Dispatch(dm *engine.DataManager, flts *engine.FilterS,
-		ctx *context.Context,
+	Dispatch(dm *engine.DataManager, flts *engine.FilterS, cfg *config.CGRConfig,
+		ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 		ev utils.DataProvider, tnt, routeID, subsystem,
 		serviceMethod string, args interface{}, reply interface{}) (err error)
 }
@@ -160,8 +161,8 @@ type singleResultDispatcher struct {
 	hosts  engine.DispatcherHostProfiles
 }
 
-func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
-	ctx *context.Context,
+func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS, cfg *config.CGRConfig,
+	ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 	ev utils.DataProvider, tnt, routeID, subsystem string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var dH *engine.DispatcherHost
@@ -172,7 +173,7 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
-			if err = dH.Call(ctx, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+			if err = callDH(ctx, dH, cfg, iPRCCh, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
 				return
 			}
 		}
@@ -194,7 +195,7 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 			return
 		}
 		called = true
-		if err = dH.Call(ctx, serviceMethod, args, reply); rpcclient.IsNetworkError(err) {
+		if err = callDH(ctx, dH, cfg, iPRCCh, serviceMethod, args, reply); rpcclient.IsNetworkError(err) {
 			continue
 		}
 		if routeID != utils.EmptyString { // cache the discovered route
@@ -217,8 +218,8 @@ type broadcastDispatcher struct {
 	hosts    engine.DispatcherHostProfiles
 }
 
-func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
-	ctx *context.Context,
+func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS, cfg *config.CGRConfig,
+	ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 	ev utils.DataProvider, tnt, routeID, subsystem string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var hostIDs []string
@@ -239,7 +240,11 @@ func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.Filt
 			return utils.NewErrDispatcherS(err)
 		}
 		hasHosts = true
-		pool.AddClient(dH)
+		pool.AddClient(&lazzyDH{
+			dh:     dH,
+			cfg:    cfg,
+			iPRCCh: iPRCCh,
+		})
 	}
 	if !hasHosts { // in case we do not match any host
 		return utils.ErrHostNotFound
@@ -254,8 +259,8 @@ type loadDispatcher struct {
 	hosts        engine.DispatcherHostProfiles
 }
 
-func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
-	ctx *context.Context,
+func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS, cfg *config.CGRConfig,
+	ctx *context.Context, iPRCCh chan birpc.ClientConnector,
 	ev utils.DataProvider, tnt, routeID, subsystem string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var dH *engine.DispatcherHost
@@ -277,7 +282,7 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 			routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
 			lM.incrementLoad(ctx, dH.ID, ld.tntID)
-			err = dH.Call(ctx, serviceMethod, args, reply)
+			err = callDH(ctx, dH, cfg, iPRCCh, serviceMethod, args, reply)
 			lM.decrementLoad(ctx, dH.ID, ld.tntID) // call ended
 			if !rpcclient.IsNetworkError(err) {
 				return
@@ -302,7 +307,7 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 		}
 		called = true
 		lM.incrementLoad(ctx, hostID, ld.tntID)
-		err = dH.Call(ctx, serviceMethod, args, reply)
+		err = callDH(ctx, dH, cfg, iPRCCh, serviceMethod, args, reply)
 		lM.decrementLoad(ctx, hostID, ld.tntID) // call ended
 		if rpcclient.IsNetworkError(err) {
 			continue
@@ -394,4 +399,24 @@ func (lM *LoadMetrics) decrementLoad(ctx *context.Context, hostID, tntID string)
 	lM.HostsLoad[hostID]--
 	engine.Cache.ReplicateSet(ctx, utils.CacheDispatcherLoads, tntID, lM)
 	lM.mutex.Unlock()
+}
+
+func callDH(ctx *context.Context,
+	dh *engine.DispatcherHost, cfg *config.CGRConfig, iPRCCh chan birpc.ClientConnector,
+	method string, args, reply interface{}) (err error) {
+	var conn birpc.ClientConnector
+	if conn, err = dh.GetConn(ctx, cfg, iPRCCh); err != nil {
+		return
+	}
+	return conn.Call(ctx, method, args, reply)
+}
+
+type lazzyDH struct {
+	dh     *engine.DispatcherHost
+	cfg    *config.CGRConfig
+	iPRCCh chan birpc.ClientConnector
+}
+
+func (l *lazzyDH) Call(ctx *context.Context, method string, args, reply interface{}) error {
+	return callDH(ctx, l.dh, l.cfg, l.iPRCCh, method, args, reply)
 }

@@ -54,7 +54,7 @@ func TestDataDBReload(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srvMngr.AddServices(NewAttributeService(cfg, db,
@@ -216,7 +216,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
 		Type: utils.Mongo,
@@ -317,7 +317,7 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 
 	if db.IsRunning() {
@@ -454,7 +454,7 @@ func TestDataDBStartVersion(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	ctx, cancel := context.WithCancel(context.TODO())
 	err = db.Start(ctx, cancel)
@@ -508,7 +508,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
 		Type: utils.Mongo,
@@ -644,7 +644,7 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
 		Type: utils.Mongo,
@@ -740,7 +740,7 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 func TestDataDBStartSessionSCfgErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	cfg.DataDbCfg().Type = "badtype"
 	cfg.SessionSCfg().Enabled = true
@@ -755,7 +755,7 @@ func TestDataDBStartSessionSCfgErr(t *testing.T) {
 func TestDataDBStartAttributeSCfgErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	cfg.DataDbCfg().Type = "badtype"
 	cfg.AttributeSCfg().Enabled = true
@@ -770,7 +770,7 @@ func TestDataDBStartAttributeSCfgErr(t *testing.T) {
 func TestDataDBReloadError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	cfg.GeneralCfg().DBDataEncoding = utils.JSON
 	db.oldDBCfg = &config.DataDbCfg{

@@ -146,7 +146,7 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 		},
 	}
 	var result string
-	if err := a1rpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := a1rpc.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

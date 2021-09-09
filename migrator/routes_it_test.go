@@ -180,10 +180,10 @@ func testSupITFlush(t *testing.T) {
 
 func testSupITMigrateAndMove(t *testing.T) {
 	supPrfl := &engine.RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "SUP1",
-		FilterIDs:         []string{"*string:~*req.Account:1001"},
-		Weights:           10,
+		Tenant:    "cgrates.org",
+		ID:        "SUP1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		// Weights:           10,
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{{
@@ -192,7 +192,7 @@ func testSupITMigrateAndMove(t *testing.T) {
 			AccountIDs:     []string{"1001"},
 			RateProfileIDs: []string{"RT_PLAN1"},
 			ResourceIDs:    []string{"RES1"},
-			Weights:        10,
+			// Weights:        10,
 		}},
 	}
 	switch supAction {

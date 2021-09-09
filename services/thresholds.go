@@ -120,6 +120,7 @@ func (thrs *ThresholdService) Shutdown() (_ error) {
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
 	<-thrs.connChan
+	thrs.server.RpcUnregisterName(utils.ThresholdSv1)
 	return
 }
 

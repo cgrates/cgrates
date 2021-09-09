@@ -1062,7 +1062,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetChargerProfile, chPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(utils.AdminSv1SetChargerProfile, chPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1094,7 +1094,7 @@ func testFltrRplChargerProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 	chPrf.Weight = 15
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetChargerProfile, chPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(utils.AdminSv1SetChargerProfile, chPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

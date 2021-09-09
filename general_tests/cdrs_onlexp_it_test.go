@@ -202,7 +202,7 @@ func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
 		Weight:       20,
 	}
 	var result string
-	if err := cdrsMasterRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := cdrsMasterRpc.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

@@ -159,11 +159,11 @@ func testServeHHTPFail(t *testing.T) {
 
 	select {
 	case <-ch:
+		if closed {
+			t.Errorf("Expected to be close")
+		}
 	case <-time.After(50 * time.Millisecond):
 		t.Fatal("Timeout")
-	}
-	if closed {
-		t.Errorf("Expected to be close")
 	}
 	server.Stop()
 }
@@ -271,7 +271,7 @@ func testRpcRegisterActions(t *testing.T) {
 	rmtIP, _ := utils.GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
 
-	rpcReq := newRPCRequest(r.Body, rmtAddr, server.caps, nil)
+	rpcReq := newRPCRequest(birpc.DefaultServer, r.Body, rmtAddr, server.caps, nil)
 	rpcReq.remoteAddr = utils.NewNetAddr("network", "127.0.0.1:2012")
 
 	if n, err := rpcReq.Write([]byte(`TEST`)); err != nil {

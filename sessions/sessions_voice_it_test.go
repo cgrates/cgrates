@@ -24,7 +24,6 @@ import (
 	"net/rpc"
 	"path"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -41,10 +40,10 @@ var (
 		testSessionsVoiceInitCfg,
 		testSessionsVoiceResetDataDb,
 		testSessionsVoiceResetStorDb,
-		testSessionsVoiceStartEngine,
-		testSessionsVoiceApierRpcConn,
-		testSessionsVoiceTPFromFolder,
 		/*
+			testSessionsVoiceStartEngine,
+			testSessionsVoiceApierRpcConn,
+			testSessionsVoiceTPFromFolder,
 			testSessionsVoiceMonetaryRefund,
 			testSessionsVoiceVoiceRefund,
 			testSessionsVoiceMixedRefund,
@@ -118,6 +117,8 @@ func testSessionsVoiceApierRpcConn(t *testing.T) {
 	}
 }
 
+/*
+
 // Load the tariff plan, creating accounts and their balances
 func testSessionsVoiceTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
@@ -128,7 +129,6 @@ func testSessionsVoiceTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-/*
 func testSessionsVoiceMonetaryRefund(t *testing.T) {
 	usage := time.Minute + 30*time.Second
 	initArgs := &V1InitSessionArgs{

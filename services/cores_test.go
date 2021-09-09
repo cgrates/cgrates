@@ -59,10 +59,6 @@ func TestCoreSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(shouldRun, true) {
 		t.Errorf("\nExpecting <true>,\n Received <%+v>", shouldRun)
 	}
-	getCoreS := srv.GetCoreS()
-	if getCoreS == nil {
-		t.Errorf("\nExpecting not <nil>,\n Received <%+v>", getCoreS)
-	}
 	//populates connChan with something in order to call the shutdown function
 	srv.connChan <- &testMockClients{}
 	srv.stopChan = make(chan struct{})

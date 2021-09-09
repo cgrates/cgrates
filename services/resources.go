@@ -120,6 +120,7 @@ func (reS *ResourceService) Shutdown() (err error) {
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
 	<-reS.connChan
+	reS.server.RpcUnregisterName(utils.ResourceSv1)
 	return
 }
 

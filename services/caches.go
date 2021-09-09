@@ -34,13 +34,13 @@ import (
 func NewCacheService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, // dspS *DispatcherService,
-	cps *engine.CapsStats,
+	cores *CoreService,
 	srvDep map[string]*sync.WaitGroup) *CacheService {
 	return &CacheService{
 		cfg:     cfg,
 		srvDep:  srvDep,
 		anz:     anz,
-		cps:     cps,
+		cores:   cores,
 		server:  server,
 		dm:      dm,
 		rpc:     internalChan,
@@ -52,7 +52,7 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService,
 type CacheService struct {
 	cfg    *config.CGRConfig
 	anz    *AnalyzerService
-	cps    *engine.CapsStats
+	cores  *CoreService
 	server *cores.Server
 	dm     *DataDBService
 	rpc    chan birpc.ClientConnector
@@ -62,14 +62,16 @@ type CacheService struct {
 }
 
 // Start should handle the sercive start
-func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (_ error) {
+func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
 	var dm *engine.DataManager
-	select {
-	case dm = <-cS.dm.GetDMChan():
-	case <-ctx.Done():
-		return ctx.Err()
+	if dm, err = cS.dm.WaitForDM(ctx); err != nil {
+		return
 	}
-	engine.Cache = engine.NewCacheS(cS.cfg, dm, cS.cps)
+	var cs *cores.CoreService
+	if cs, err = cS.cores.WaitForCoreS(ctx); err != nil {
+		return
+	}
+	engine.Cache = engine.NewCacheS(cS.cfg, dm, cs.CapsStats)
 	go engine.Cache.Precache(ctx, shtDw)
 
 	cS.cacheCh <- engine.Cache
@@ -89,6 +91,7 @@ func (cS *CacheService) Reload(*context.Context, context.CancelFunc) (_ error) {
 
 // Shutdown stops the service
 func (cS *CacheService) Shutdown() (_ error) {
+	cS.server.RpcUnregisterName(utils.CacheSv1)
 	return
 }
 

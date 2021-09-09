@@ -34,13 +34,12 @@ import (
 //TestAnalyzerCoverage for cover testing
 func TestAnalyzerCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	shdChan := utils.NewSyncedChan()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	connChan := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, connChan, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, connChan, srvDep)
 	if anz == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(anz))
 	}
@@ -50,7 +49,6 @@ func TestAnalyzerCoverage(t *testing.T) {
 		server:      server,
 		filterSChan: filterSChan,
 		stopChan:    make(chan struct{}, 1),
-		shdChan:     shdChan,
 		connChan:    connChan,
 		srvDep:      srvDep,
 	}

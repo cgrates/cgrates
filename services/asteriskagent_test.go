@@ -35,16 +35,14 @@ func TestAsteriskAgentCoverage(t *testing.T) {
 	cfg.SessionSCfg().ListenBijson = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewAsteriskAgent(cfg, shdChan, nil, srvDep)
+	srv := NewAsteriskAgent(cfg, nil, srvDep)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
 	}
 	srv2 := &AsteriskAgent{
 		RWMutex:  sync.RWMutex{},
 		cfg:      cfg,
-		shdChan:  shdChan,
 		stopChan: nil,
 		smas:     nil,
 		connMgr:  nil,

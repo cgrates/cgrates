@@ -147,7 +147,7 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 		},
 	}
 	var result1 string
-	if err := smgRplcRPC1.Call(utils.APIerSv1SetChargerProfile, chargerProfile1, &result1); err != nil {
+	if err := smgRplcRPC1.Call(utils.AdminSv1SetChargerProfile, chargerProfile1, &result1); err != nil {
 		t.Error(err)
 	} else if result1 != utils.OK {
 		t.Error("Unexpected reply returned", result1)
@@ -163,7 +163,7 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 		},
 	}
 	var result2 string
-	if err := smgRplcRPC2.Call(utils.APIerSv1SetChargerProfile, chargerProfile2, &result2); err != nil {
+	if err := smgRplcRPC2.Call(utils.AdminSv1SetChargerProfile, chargerProfile2, &result2); err != nil {
 		t.Error(err)
 	} else if result2 != utils.OK {
 		t.Error("Unexpected reply returned", result2)

@@ -143,9 +143,8 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	}
 	attrPrf.Attributes[0].Path = "*req.RequestType"
 
-	admS.connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): make(chan birpc.ClientConnector),
-	})
+	admS.connMgr = engine.NewConnManager(cfg)
+	admS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	expected = "SERVER_ERROR: context deadline exceeded"
 	cfg.GeneralCfg().DefaultCaching = utils.MetaRemove
@@ -242,9 +241,8 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	admS.cfg.GeneralCfg().DefaultCaching = "not_a_caching_type"
-	admS.connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): make(chan birpc.ClientConnector),
-	})
+	admS.connMgr = engine.NewConnManager(cfg)
+	admS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	expected := "SERVER_ERROR: context deadline exceeded"
 	if err := admS.RemoveAttributeProfile(ctx,
 		&utils.TenantIDWithAPIOpts{

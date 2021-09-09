@@ -342,7 +342,7 @@ func main() {
 
 	ldrCfg := loadConfig()
 	// we initialize connManager here with nil for InternalChannels
-	engine.NewConnManager(ldrCfg, nil)
+	engine.NewConnManager(ldrCfg)
 
 	if !*toStorDB {
 		if dataDB, err = engine.NewDataDBConn(ldrCfg.DataDbCfg().Type,

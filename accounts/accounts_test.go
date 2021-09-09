@@ -1467,10 +1467,9 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 
 	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
 
-	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): attrSConn,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):      rateSConn,
-	})
+	connMngr := engine.NewConnManager(cfg)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, rateSConn)
 
 	// provision the data
 	atrPrfl := &engine.AttributeProfile{

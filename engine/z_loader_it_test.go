@@ -110,9 +110,8 @@ func testLoaderITInitDataDB(t *testing.T) {
 		return strings.TrimPrefix(key, "V1")
 	})
 	cacheChan <- srv
-	connMgr = NewConnManager(lCfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): cacheChan,
-	})
+	connMgr = NewConnManager(lCfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, cacheChan)
 }
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also

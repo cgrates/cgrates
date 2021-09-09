@@ -23,7 +23,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -51,7 +50,7 @@ func TestLibengineNewRPCConnection(t *testing.T) {
 		ClientKey:       "key1",
 	}
 	expectedErr := "dial tcp [::1]:6012: connect: connection refused"
-	cM := NewConnManager(config.NewDefaultCGRConfig(), nil)
+	cM := NewConnManager(config.NewDefaultCGRConfig())
 	exp, err := rpcclient.NewRPCClient(context.Background(), utils.TCP, cfg.Address, cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
 		cM.cfg.TLSCfg().CaCertificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 		cfg.Transport, nil, false, nil)
@@ -88,7 +87,7 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 		TLS:             true,
 		ClientKey:       "key1",
 	}
-	cM := NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
+	cM := NewConnManager(config.NewDefaultCGRConfig())
 	exp, err := rpcclient.NewRPCClient(context.Background(), "", "", cfg.TLS, cfg.ClientKey, cM.cfg.TLSCfg().ClientCerificate,
 		cM.cfg.TLSCfg().ClientCerificate, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 		rpcclient.InternalRPC, cM.rpcInternal["a4f3f"], false, nil)

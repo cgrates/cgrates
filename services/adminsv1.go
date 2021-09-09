@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -71,16 +72,17 @@ type AdminSv1Service struct {
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (apiService *AdminSv1Service) Start() (err error) {
+func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if apiService.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
 	// filterS := <-apiService.filterSChan
 	// apiService.filterSChan <- filterS
-	dbchan := apiService.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var datadb *engine.DataManager
+	if datadb, err = apiService.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	// apiService.stopChan = make(chan struct{})
 	// storDBChan := make(chan engine.StorDB, 1)
@@ -107,7 +109,7 @@ func (apiService *AdminSv1Service) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (apiService *AdminSv1Service) Reload() (err error) {
+func (apiService *AdminSv1Service) Reload(*context.Context, context.CancelFunc) (err error) {
 	return
 }
 

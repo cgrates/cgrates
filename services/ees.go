@@ -99,6 +99,7 @@ func (es *EventExporterService) Shutdown() (err error) {
 	es.eeS.Shutdown()
 	es.eeS = nil
 	<-es.intConnChan
+	es.server.RpcUnregisterName(utils.EeSv1)
 	return
 }
 

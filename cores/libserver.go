@@ -46,16 +46,18 @@ type rpcRequest struct {
 	remoteAddr net.Addr
 	caps       *engine.Caps
 	anzWarpper *analyzers.AnalyzerService
+	srv        *birpc.Server
 }
 
 // newRPCRequest returns a new rpcRequest.
-func newRPCRequest(r io.ReadCloser, remoteAddr net.Addr, caps *engine.Caps, anz *analyzers.AnalyzerService) *rpcRequest {
+func newRPCRequest(srv *birpc.Server, r io.ReadCloser, remoteAddr net.Addr, caps *engine.Caps, anz *analyzers.AnalyzerService) *rpcRequest {
 	return &rpcRequest{
 		r:          r,
 		rw:         new(bytes.Buffer),
 		remoteAddr: remoteAddr,
 		caps:       caps,
 		anzWarpper: anz,
+		srv:        srv,
 	}
 }
 
@@ -80,7 +82,7 @@ func (r *rpcRequest) Close() error {
 
 // Call invokes the RPC request, waits for it to complete, and returns the results.
 func (r *rpcRequest) Call() io.Reader {
-	birpc.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
+	r.srv.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
 	return r.rw
 }
 
@@ -148,7 +150,7 @@ func acceptRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
 			}
 			continue
 		}
-		go birpc.ServeCodec(newCodec(conn))
+		go srv.ServeCodec(newCodec(conn))
 	}
 }
 

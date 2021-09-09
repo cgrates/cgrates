@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1454,23 +1455,23 @@ func testDiamItEmulateTerminate(t *testing.T) {
 	}
 	var result string
 	//add the second charger
-	// chargerProfile := &v1.ChargerWithAPIOpts{
-	// 	ChargerProfile: &engine.ChargerProfile{
-	// 		Tenant:       "cgrates.com",
-	// 		ID:           "CustomCharger",
-	// 		RunID:        "CustomCharger",
-	// 		AttributeIDs: []string{"*constant:*req.Category:custom_charger"},
-	// 		Weight:       20,
-	// 	},
-	// }
+	chargerProfile := &apis.ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.com",
+			ID:           "CustomCharger",
+			RunID:        "CustomCharger",
+			AttributeIDs: []string{"*constant:*req.Category:custom_charger"},
+			Weight:       20,
+		},
+	}
 
-	if err := apierRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := apierRpc.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add the second charger
-	chargerProfile2 := &v1.ChargerWithAPIOpts{
+	chargerProfile2 := &apis.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.com",
 			ID:           "Default",
@@ -1480,7 +1481,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 		},
 	}
 
-	if err := apierRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile2, &result); err != nil {
+	if err := apierRpc.Call(utils.AdminSv1SetChargerProfile, chargerProfile2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

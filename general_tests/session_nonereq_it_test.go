@@ -116,7 +116,7 @@ func testSesNoneReqTypeItAddChargerS(t *testing.T) {
 		},
 	}
 	var result string
-	if err := sesNoneReqTypeRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := sesNoneReqTypeRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

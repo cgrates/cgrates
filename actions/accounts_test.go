@@ -32,9 +32,8 @@ import (
 func TestACExecuteAccountsSetBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	internalChan := make(chan birpc.ClientConnector, 1)
-	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): internalChan,
-	})
+	connMngr := engine.NewConnManager(cfg)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
 	apAction := &engine.APAction{
 		ID:   "TestACExecuteAccounts",
 		Type: utils.MetaSetBalance,
@@ -85,9 +84,8 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 func TestACExecuteAccountsRemBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	internalChan := make(chan birpc.ClientConnector, 1)
-	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): internalChan,
-	})
+	connMngr := engine.NewConnManager(cfg)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
 	apAction := &engine.APAction{
 		ID:   "TestACExecuteAccountsRemBalance",
 		Type: utils.MetaSetBalance,
@@ -124,9 +122,8 @@ func TestACExecuteAccountsParseError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
 	internalChan := make(chan birpc.ClientConnector, 1)
-	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): internalChan,
-	})
+	connMngr := engine.NewConnManager(cfg)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
 	apAction := &engine.APAction{
 		ID:   "TestACExecuteAccountsRemBalance",
 		Type: utils.MetaSetBalance,

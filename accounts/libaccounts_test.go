@@ -123,9 +123,8 @@ func TestProcessAttributeS(t *testing.T) {
 	}
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID1",
@@ -154,9 +153,8 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	}
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID1",
@@ -192,9 +190,8 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	}
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID1",
@@ -314,9 +311,8 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	}
 	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, chanInternal)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	cb1 := &concreteBalance{
 		blnCfg: &utils.Balance{

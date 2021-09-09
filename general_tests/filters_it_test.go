@@ -896,7 +896,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		},
 	}
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -912,7 +912,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 			Weight:       20,
 		},
 	}
-	if err := fltrRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile2, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetChargerProfile, chargerProfile2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

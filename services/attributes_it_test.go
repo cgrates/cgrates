@@ -59,7 +59,7 @@ func TestAttributeSReload(t *testing.T) {
 	attrS := NewAttributeService(cfg, db,
 		css, filterSChan, server, attrRPC,
 		anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep)
-	engine.NewConnManager(cfg, nil)
+	engine.NewConnManager(cfg)
 	srvMngr.AddServices(attrS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())

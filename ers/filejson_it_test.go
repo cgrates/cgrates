@@ -135,7 +135,7 @@ func testJSONAddData(t *testing.T) {
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
-	if err := jsonRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+	if err := jsonRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)

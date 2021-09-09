@@ -119,6 +119,7 @@ func (cdrService *CDRServer) Shutdown() (err error) {
 	cdrService.cdrS = nil
 	<-cdrService.connChan
 	cdrService.Unlock()
+	cdrService.server.RpcUnregisterName(utils.CDRsV1)
 	return
 }
 

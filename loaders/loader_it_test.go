@@ -477,7 +477,7 @@ cgrates.org,SET_ACTPROFILE_3
 	}
 
 	// checking the error by adding a caching method
-	ldr.connMgr = engine.NewConnManager(config.NewDefaultCGRConfig(), nil)
+	ldr.connMgr = engine.NewConnManager(config.NewDefaultCGRConfig())
 	ldr.cacheConns = []string{utils.MetaInternal}
 	rdr := io.NopCloser(strings.NewReader(string(content)))
 	csvRdr := csv.NewReader(rdr)

@@ -34,7 +34,7 @@ func TestDataDBCoverage(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg, nil)
+	cM := engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, cM, srvDep)
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -133,9 +133,5 @@ func TestDataDBCoverage(t *testing.T) {
 	shouldRun := db.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-	getDMChan := db.GetDMChan()
-	if !reflect.DeepEqual(getDMChan, db.dbchan) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", db.dbchan, getDMChan)
 	}
 }

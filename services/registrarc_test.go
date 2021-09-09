@@ -35,8 +35,7 @@ func TestDispatcherHCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	rpcInternal := map[string]chan birpc.ClientConnector{}
-	cM := engine.NewConnManager(cfg, rpcInternal)
+	cM := engine.NewConnManager(cfg)
 	srv := NewRegistrarCService(cfg, server, cM, anz, srvDep)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))

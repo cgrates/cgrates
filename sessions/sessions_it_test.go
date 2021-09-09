@@ -24,7 +24,6 @@ import (
 	"net/rpc"
 	"path"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -113,6 +112,8 @@ func testSessionsItApierRpcConn(t *testing.T) {
 	}
 }
 
+/*
+
 // Load the tariff plan, creating accounts and their balances
 func testSessionsItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
@@ -123,7 +124,6 @@ func testSessionsItTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-/*
 func testSessionsItTerminatNonexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
