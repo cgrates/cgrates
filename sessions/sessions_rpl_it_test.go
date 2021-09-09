@@ -21,11 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"fmt"
 	"net/rpc"
 	"path"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -41,15 +39,17 @@ var (
 	SessionsRplTests = []func(t *testing.T){
 		testSessionSRplInitCfg,
 		testSessionSRplResetDB,
-		testSessionSRplStartEngine,
-		testSessionSRplApierRpcConn,
-		testSessionSRplTPFromFolder,
-		testSessionSRplInitiate,
-		testSessionSRplUpdate,
-		testSessionSRplTerminate,
-		testSessionSRplManualReplicate,
-		testSessionSRplActivateSessions,
-		testSessionSRplStopCgrEngine,
+		/*
+			testSessionSRplStartEngine,
+			testSessionSRplApierRpcConn,
+			testSessionSRplTPFromFolder,
+			testSessionSRplInitiate,
+			testSessionSRplUpdate,
+			testSessionSRplTerminate,
+			testSessionSRplManualReplicate,
+			testSessionSRplActivateSessions,
+			testSessionSRplStopCgrEngine,
+		*/
 	}
 )
 
@@ -117,6 +117,8 @@ func testSessionSRplApierRpcConn(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+/*
 
 // Load the tariff plan, creating accounts and their balances
 func testSessionSRplTPFromFolder(t *testing.T) {
@@ -553,3 +555,4 @@ func testSessionSRplStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

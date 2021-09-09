@@ -190,6 +190,7 @@ func testCfgSetGetConfig(t *testing.T) {
 					"prefix_indexed_fields": []string{},
 					"resources_conns":       []string{"*internal"},
 					"stats_conns":           []string{"*internal"},
+					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
 						utils.MetaProcessRunsCfg: 2,
@@ -213,6 +214,7 @@ func testCfgSetGetConfig(t *testing.T) {
 			"prefix_indexed_fields": []string{},
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
+			"profile_runs":          0.,
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: []string(nil),
@@ -457,6 +459,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"prefix_indexed_fields": []string{},
 					"resources_conns":       []string{"*internal"},
 					"stats_conns":           []string{"*internal"},
+					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
 						utils.MetaProcessRunsCfg: 2,
@@ -480,6 +483,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"prefix_indexed_fields": []string{},
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
+			"profile_runs":          0.,
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: []string(nil),
@@ -576,6 +580,7 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"prefix_indexed_fields": []string{},
 			"resources_conns":       []string{"*internal"},
 			"stats_conns":           []string{"*internal"},
+			"profile_runs":          0.,
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: []string(nil),

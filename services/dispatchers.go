@@ -183,6 +183,9 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
 	<-dspS.connChan
+	dspS.server.RpcUnregisterName(utils.DispatcherSv1)
+	dspS.server.RpcUnregisterName(utils.AttributeSv1)
+
 	dspS.unregisterAllDispatchedSubsystems()
 	dspS.sync()
 	return

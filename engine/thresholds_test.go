@@ -28,7 +28,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -1225,7 +1224,7 @@ func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 	cfg.ThresholdSCfg().ActionSConns = []string{"actPrfID"}
 	cfg.RPCConns()["actPrfID"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	config.SetCgrConfig(cfg)
-	connMgr := NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+	connMgr := NewConnManager(cfg)
 
 	thPrf := &ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -1591,7 +1590,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true)
-	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+	connMgr = NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(nil, cfg, filterS, connMgr)
@@ -2286,7 +2285,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	}()
 	Cache = NewCacheS(cfg, nil, nil)
 	db := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), NewConnManager(cfg))
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
@@ -2976,7 +2975,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+	connMgr = NewConnManager(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, connMgr)

@@ -34,7 +34,7 @@ import (
 func TestRatesGetRateProfileErrMandatoryIeMissing(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -52,7 +52,7 @@ func TestRatesGetRateProfileErrMandatoryIeMissing(t *testing.T) {
 func TestRatesGetRateProfile1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -113,7 +113,7 @@ func TestRatesGetRateProfile1(t *testing.T) {
 func TestRatesGetRateProfileErrorNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -133,7 +133,7 @@ func TestRatesGetRateProfileErrorNotFound(t *testing.T) {
 func TestRatesGetRateProfileIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -171,7 +171,7 @@ func TestRatesGetRateProfileIDs(t *testing.T) {
 func TestRatesGetRateProfile2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -209,7 +209,7 @@ func TestRatesGetRateProfile2(t *testing.T) {
 func TestRatesGetRateProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDBMock := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -226,7 +226,7 @@ func TestRatesGetRateProfileErr(t *testing.T) {
 func TestRatesGetRateProfileErr2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDBMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(*context.Context, string) ([]string, error) {
 			return []string{}, nil
@@ -247,7 +247,7 @@ func TestRatesGetRateProfileErr2(t *testing.T) {
 func TestRatesGetRateProfileCount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -285,7 +285,7 @@ func TestRatesGetRateProfileCount(t *testing.T) {
 func TestRatesGetRateProfileCountEmptyTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -323,7 +323,7 @@ func TestRatesGetRateProfileCountEmptyTenant(t *testing.T) {
 func TestRatesGetRateProfileCountGetKeysError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDBMock := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -340,7 +340,7 @@ func TestRatesGetRateProfileCountGetKeysError(t *testing.T) {
 func TestRatesGetRateProfileCountKeysLenError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDBMock := &engine.DataDBMock{
 		GetKeysForPrefixF: func(*context.Context, string) ([]string, error) {
 			return []string{}, nil
@@ -361,7 +361,7 @@ func TestRatesGetRateProfileCountKeysLenError(t *testing.T) {
 func TestRatesSetRateProfileMissingStructFieldError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -386,7 +386,7 @@ func TestRatesSetRateProfileMissingStructFieldError(t *testing.T) {
 func TestRatesSetRateProfileEmptyTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -446,7 +446,7 @@ func TestRatesSetRateProfileEmptyTenant(t *testing.T) {
 func TestRatesSetRateProfileError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -506,7 +506,7 @@ func TestRatesSetRateProfileError(t *testing.T) {
 func TestRatesSetRateProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -578,7 +578,7 @@ func TestRatesNewRateSv1(t *testing.T) {
 func TestRatesCostForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	rateS := rates.NewRateS(cfg, nil, dm)
@@ -613,7 +613,7 @@ func TestRatesCostForEvent(t *testing.T) {
 func TestRatesRemoveRateProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -665,7 +665,7 @@ func TestRatesRemoveRateProfile(t *testing.T) {
 func TestRatesRemoveRateProfileMissing(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -704,7 +704,7 @@ func TestRatesRemoveRateProfileMissing(t *testing.T) {
 func TestRatesRemoveRateProfileEmptyTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -754,7 +754,7 @@ func TestRatesSetGetRateProfileError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -796,7 +796,7 @@ func TestRatesSetRemoveRateProfileError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -851,7 +851,7 @@ func TestRatesSetRateProfileError2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -890,7 +890,7 @@ func TestRatesSetRateProfileRates(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -964,7 +964,7 @@ func TestRatesSetRateProfileRatesNoTenant(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -1035,7 +1035,7 @@ func TestRatesSetRateProfileRatesMissingField(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -1067,7 +1067,7 @@ func TestRatesSetRateProfileRatesErr(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -1101,7 +1101,7 @@ func TestRatesSetRateProfileRatesErr2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -1144,7 +1144,7 @@ func TestRatesRemoveRateProfileRate(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -1225,7 +1225,7 @@ func TestRatesRemoveRateProfileRateEmptyTenant(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -1305,7 +1305,7 @@ func TestRatesRemoveRateProfileRateError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -1329,7 +1329,7 @@ func TestRatesRemoveRateProfileRateErrorMissingField(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -1354,7 +1354,7 @@ func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return nil, utils.ErrNotFound
@@ -1398,7 +1398,7 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{
@@ -1447,7 +1447,7 @@ func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil
@@ -1490,7 +1490,7 @@ func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil
@@ -1535,7 +1535,7 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().CachesConns = []string{}
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return nil, utils.ErrNotFound
@@ -1590,7 +1590,7 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().CachesConns = []string{}
 
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{
@@ -1643,7 +1643,7 @@ func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().CachesConns = []string{}
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil
@@ -1690,7 +1690,7 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().CachesConns = []string{}
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil

@@ -2999,7 +2999,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	config.SetCgrConfig(cfg)
-	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), NewConnManager(cfg))
 	rS := NewResourceService(dm, cfg, nil, nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	r := &Resource{
@@ -3110,11 +3110,10 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	rS := &ResourceService{
-		cgrcfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
-		}),
+		cgrcfg:  cfg,
+		connMgr: NewConnManager(cfg),
 	}
+	rS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	r := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RES_1",
@@ -3184,11 +3183,10 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	rS := &ResourceService{
-		cgrcfg: cfg,
-		connMgr: NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
-		}),
+		cgrcfg:  cfg,
+		connMgr: NewConnManager(cfg),
 	}
+	rS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	r := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RES_1",
@@ -5214,9 +5212,8 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
-	})
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, cM)
 
@@ -5696,9 +5693,8 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
-	})
+	cM := NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	rsPrf := &ResourceProfile{
 		Tenant:            "cgrates.org",
@@ -5781,7 +5777,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	defer config.SetCgrConfig(dft)
 
 	db := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
+	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg))
 
 	rS := NewResourceService(dm, cfg, NewFilterS(cfg, nil, dm), nil)
 
@@ -6292,7 +6288,7 @@ func TestResourcesStartLoop(t *testing.T) {
 // 	config.SetCgrConfig(cfg)
 // 	data := NewInternalDB(nil, nil, true)
 // 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+// 	connMgr = NewConnManager(cfg)
 // 	Cache = NewCacheS(cfg, dm, nil)
 
 // 	fltrs := NewFilterS(cfg, nil, dm)
@@ -6349,7 +6345,7 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+	connMgr = NewConnManager(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 
@@ -6389,7 +6385,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
+	connMgr = NewConnManager(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 

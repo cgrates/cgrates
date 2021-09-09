@@ -612,9 +612,8 @@ func TestCDRLogActionExecute(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalCDRsChann,
-	})
+	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
 	apA := &engine.APAction{
 		ID:   "ACT_CDRLOG",
 		Type: utils.MetaCdrLog,
@@ -718,9 +717,8 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalCDRsChann,
-	})
+	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
 	apA := &engine.APAction{
 		ID:   "ACT_CDRLOG2",
 		Type: utils.MetaCdrLog,
@@ -773,9 +771,8 @@ func TestExportAction(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs): internalCDRsChann,
-	})
+	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
 	apA := &engine.APAction{
 		ID:   "ACT_CDRLOG2",
 		Type: utils.MetaExport,
@@ -828,9 +825,8 @@ func TestExportActionWithEeIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs): internalCDRsChann,
-	})
+	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
 	apA := &engine.APAction{
 		ID:   "ACT_CDRLOG2",
 		Type: utils.MetaExport,
@@ -886,9 +882,8 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
-	})
+	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
 	apA := &engine.APAction{
 		ID:      "ACT_RESET_TH",
 		Type:    utils.MetaResetThreshold,
@@ -933,9 +928,8 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
-	})
+	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
 	apA := &engine.APAction{
 		ID:      "ACT_RESET_TH",
 		Type:    utils.MetaResetThreshold,
@@ -980,9 +974,8 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
-	})
+	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)
 	apA := &engine.APAction{
 		ID:      "ACT_RESET_ST",
 		Type:    utils.MetaResetStatQueue,
@@ -1027,9 +1020,8 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
-	})
+	connMgr := engine.NewConnManager(config.CgrConfig())
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)
 	apA := &engine.APAction{
 		ID:   "ACT_RESET_ST",
 		Type: utils.MetaResetStatQueue,

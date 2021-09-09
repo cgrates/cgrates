@@ -121,6 +121,7 @@ func (sts *StatService) Shutdown() (err error) {
 	sts.sts.Shutdown(context.TODO())
 	sts.sts = nil
 	<-sts.connChan
+	sts.server.RpcUnregisterName(utils.StatSv1)
 	return
 }
 

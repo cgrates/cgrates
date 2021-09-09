@@ -114,6 +114,7 @@ func (routeS *RouteService) Shutdown() (err error) {
 	routeS.routeS.Shutdown() //we don't verify the error because shutdown never returns an error
 	routeS.routeS = nil
 	<-routeS.connChan
+	routeS.server.RpcUnregisterName(utils.RouteSv1)
 	return
 }
 

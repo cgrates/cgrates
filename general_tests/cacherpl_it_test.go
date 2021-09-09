@@ -238,7 +238,7 @@ func testCacheRplAddData(t *testing.T) {
 		},
 	}
 	var result string
-	if err := engine1RPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := engine1RPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -297,7 +297,7 @@ func testCacheRplAAAddData(t *testing.T) {
 		},
 	}
 	var result string
-	if err := engine1RPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := engine1RPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

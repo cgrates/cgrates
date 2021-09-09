@@ -137,6 +137,8 @@ func (smg *SessionService) Shutdown() (err error) {
 	}
 	smg.sm = nil
 	<-smg.connChan
+	smg.server.RpcUnregisterName(utils.SessionSv1)
+	// smg.server.BiRPCUnregisterName(utils.SessionSv1)
 	return
 }
 

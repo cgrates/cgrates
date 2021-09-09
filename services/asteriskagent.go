@@ -34,11 +34,9 @@ import (
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	shtDwn context.CancelFunc) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AsteriskAgent{
 		cfg:     cfg,
-		shtDwn:  shtDwn,
 		connMgr: connMgr,
 		srvDep:  srvDep,
 	}
@@ -48,7 +46,6 @@ func NewAsteriskAgent(cfg *config.CGRConfig,
 type AsteriskAgent struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	shtDwn   context.CancelFunc
 	stopChan chan struct{}
 
 	smas    []*agents.AsteriskAgent
@@ -57,7 +54,7 @@ type AsteriskAgent struct {
 }
 
 // Start should handle the sercive start
-func (ast *AsteriskAgent) Start() (err error) {
+func (ast *AsteriskAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
 	if ast.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -68,7 +65,7 @@ func (ast *AsteriskAgent) Start() (err error) {
 	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}) {
 		if err := sma.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, err))
-			ast.shtDwn()
+			shtDwn()
 		}
 	}
 	ast.stopChan = make(chan struct{})
@@ -81,9 +78,9 @@ func (ast *AsteriskAgent) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (ast *AsteriskAgent) Reload() (err error) {
+func (ast *AsteriskAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	ast.shutdown()
-	return ast.Start()
+	return ast.Start(ctx, shtDwn)
 }
 
 // Shutdown stops the service

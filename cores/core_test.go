@@ -33,7 +33,6 @@ func TestNewCoreService(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = time.Second
 	stopchan := make(chan struct{}, 1)
-	shdChan := func() {}
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopchan)
 	stopMemChan := make(chan struct{})
@@ -42,13 +41,13 @@ func TestNewCoreService(t *testing.T) {
 		cfg:        cfgDflt,
 		CapsStats:  sts,
 		fileMEM:    "/tmp",
-		shtDw:      shdChan,
 	}
-	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopMemChan, stopchan, nil, shdChan)
+	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopMemChan, stopchan, nil, nil)
 	if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
 	//shut down the service
+	rcv.shtDw = func() {}
 	rcv.Shutdown()
 	rcv.ShutdownEngine()
 }

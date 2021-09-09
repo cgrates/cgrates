@@ -24,7 +24,6 @@ package sessions
 import (
 	"path"
 	"testing"
-	"time"
 
 	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/config"
@@ -45,7 +44,7 @@ var (
 		testSessionsBiRPCResetStorDb,
 		testSessionsBiRPCStartEngine,
 		testSessionsBiRPCApierRpcConn,
-		testSessionsBiRPCTPFromFolder,
+		// testSessionsBiRPCTPFromFolder,
 		//testSessionsBiRPCSessionAutomaticDisconnects,
 		//testSessionsBiRPCSessionOriginatorTerminate,
 		testSessionsBiRPCStopCgrEngine,
@@ -126,6 +125,8 @@ func testSessionsBiRPCApierRpcConn(t *testing.T) {
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
 }
 
+/*
+
 // Load the tariff plan, creating accounts and their balances
 func testSessionsBiRPCTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
@@ -136,7 +137,6 @@ func testSessionsBiRPCTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-/*
 func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	// Create a balance with 1 second inside and rating increments of 1ms (to be compatible with debit interval)
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",

@@ -237,23 +237,6 @@ func (v *testRPCHost) Call(_ *context.Context, serviceMethod string, args interf
 	return nil
 }
 
-func TestDispatcherHostCall(t *testing.T) {
-	tRPC := &testRPCHost{}
-	dspHost := DispatcherHost{}
-	etRPC := &testRPCHost{
-		serviceMethod: utils.AttributeSv1Ping,
-		args:          &utils.CGREvent{},
-		reply:         utils.StringPointer(""),
-	}
-	var reply string
-	dspHost.rpcConn = tRPC
-	if err := dspHost.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(*etRPC, *tRPC) {
-		t.Errorf("Expected: %s , received: %s", utils.ToJSON(etRPC), utils.ToJSON(tRPC))
-	}
-}
-
 func TestDispatcherHostIDsProfilesReorderFromIndex(t *testing.T) {
 	dConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}
 	eConns := DispatcherHostIDs{"DSP_1", "DSP_2", "DSP_3"}

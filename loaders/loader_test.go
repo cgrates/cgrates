@@ -4742,9 +4742,8 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 
@@ -4792,9 +4791,8 @@ func TestStoreLoadedDataResources(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 
@@ -4841,9 +4839,8 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 
@@ -4891,9 +4888,8 @@ func TestStoreLoadedDataStats(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 
@@ -4941,9 +4937,8 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 
@@ -4990,9 +4985,8 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 
@@ -5039,9 +5033,8 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 
@@ -5088,9 +5081,8 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 
@@ -5137,9 +5129,8 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	// ldr := &Loader{
 

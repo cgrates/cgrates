@@ -41,26 +41,27 @@ func TestAccountSReload(t *testing.T) {
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 
-	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheAccounts))
 	close(chS.GetPrecacheChannel(utils.CacheAccountsFilterIndexes))
+	chSCh := make(chan *engine.CacheS, 1)
+	chSCh <- chS
+	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	acctRPC := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	acctS := NewAccountService(cfg, db, chS, filterSChan, nil, server, acctRPC, anz, srvDep)
-	engine.NewConnManager(cfg, nil)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	acctS := NewAccountService(cfg, db, css, filterSChan, nil, server, acctRPC, anz, srvDep)
+	engine.NewConnManager(cfg)
 	srvMngr.AddServices(acctS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	if err := srvMngr.StartServices(); err != nil {
-		t.Error(err)
-	}
+	ctx, cancel := context.WithCancel(context.TODO())
+	srvMngr.StartServices(ctx, cancel)
 	if acctS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -89,11 +90,11 @@ func TestAccountSReload(t *testing.T) {
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	err := acctS.Start()
+	err := acctS.Start(ctx, cancel)
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
-	err = acctS.Reload()
+	err = acctS.Reload(ctx, cancel)
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -105,7 +106,7 @@ func TestAccountSReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 
-	shdChan.CloseOnce()
+	cancel()
 	time.Sleep(10 * time.Millisecond)
 
 }

@@ -56,7 +56,7 @@ func TestRouteSReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
 	routeS := NewRouteService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
-	engine.NewConnManager(cfg, nil)
+	engine.NewConnManager(cfg)
 	srvMngr.AddServices(routeS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())

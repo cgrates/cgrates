@@ -23,11 +23,10 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/cgrates/loaders"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -40,8 +39,7 @@ func TestLoaderSCoverage(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
-	rpcInternal := map[string]chan birpc.ClientConnector{}
-	cM := engine.NewConnManager(cfg, rpcInternal)
+	cM := engine.NewConnManager(cfg)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewLoaderService(cfg, db,
 		filterSChan, server, internalLoaderSChan,

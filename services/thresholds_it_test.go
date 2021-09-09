@@ -58,7 +58,7 @@ func TestThresholdSReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
 	tS := NewThresholdService(cfg, db, css, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
-	engine.NewConnManager(cfg, nil)
+	engine.NewConnManager(cfg)
 	srvMngr.AddServices(tS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	srvMngr.StartServices(ctx, cancel)
@@ -128,7 +128,7 @@ func TestThresholdSReload2(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
 	tS := NewThresholdService(cfg, db, css, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
-	engine.NewConnManager(cfg, nil)
+	engine.NewConnManager(cfg)
 	srvMngr.AddServices(tS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	srvMngr.StartServices(ctx, cancel)

@@ -42,7 +42,6 @@ func TestStorDBReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
 	cfg.ChargerSCfg().Enabled = true
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
@@ -51,6 +50,7 @@ func TestStorDBReload(t *testing.T) {
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	chS := NewCacheService(cfg, db, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,

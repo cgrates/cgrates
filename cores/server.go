@@ -77,15 +77,15 @@ func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerService) {
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
-	birpc.Register(rcvr)
+	s.rpcServer.Register(rcvr)
 }
 
 func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
-	birpc.RegisterName(name, rcvr)
+	s.rpcServer.RegisterName(name, rcvr)
 }
 
 func (s *Server) RpcUnregisterName(name string) {
-	birpc.DefaultServer.UnregisterName(name)
+	s.rpcServer.UnregisterName(name)
 }
 
 func (s *Server) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
@@ -107,6 +107,10 @@ func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 // Registers a new BiJsonRpc name
 func (s *Server) BiRPCRegisterName(name string, rcv interface{}) {
 	s.birpcSrv.RegisterName(name, rcv)
+}
+
+func (s *Server) BiRPCUnregisterName(name string) {
+	s.birpcSrv.UnregisterName(name)
 }
 
 func registerProfiler(addr string, mux *http.ServeMux) {
@@ -135,13 +139,13 @@ func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	rmtIP, _ := utils.GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
-	res := newRPCRequest(r.Body, rmtAddr, s.caps, s.anz).Call()
+	res := newRPCRequest(s.rpcServer, r.Body, rmtAddr, s.caps, s.anz).Call()
 	io.Copy(w, res)
 	r.Body.Close()
 }
 
 func (s *Server) handleWebSocket(ws *websocket.Conn) {
-	birpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
+	s.rpcServer.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
 }
 
 func (s *Server) ServeJSON(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {

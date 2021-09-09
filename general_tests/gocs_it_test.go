@@ -144,7 +144,7 @@ func testGOCSLoadData(t *testing.T) {
 		},
 	}
 	var result string
-	if err := usRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := usRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -156,7 +156,7 @@ func testGOCSLoadData(t *testing.T) {
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, rpl)
 	}
-	if err := usRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := usRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

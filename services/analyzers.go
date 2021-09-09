@@ -53,8 +53,7 @@ type AnalyzerService struct {
 	filterSChan chan *engine.FilterS
 	stopChan    chan struct{}
 
-	anz *analyzers.AnalyzerService
-	// rpc      *v1.AnalyzerSv1
+	anz      *analyzers.AnalyzerService
 	connChan chan birpc.ClientConnector
 	srvDep   map[string]*sync.WaitGroup
 }
@@ -80,7 +79,6 @@ func (anz *AnalyzerService) Start(_ *context.Context, shtDwn context.CancelFunc)
 		return
 	}(anz.anz)
 	anz.server.SetAnalyzer(anz.anz)
-	// anz.rpc = v1.NewAnalyzerSv1(anz.anz)
 	go anz.start()
 	return
 }
@@ -117,7 +115,6 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.server.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
-	// anz.rpc = nil
 	<-anz.connChan
 	anz.Unlock()
 	return

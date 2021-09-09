@@ -100,12 +100,11 @@ func TestProcessContentCallsLoadCache(t *testing.T) {
 		ldrID:         "TestProcessContentCallsLoadCache",
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChann,
-		}),
-		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		timezone:   "UTC",
+		connMgr:       engine.NewConnManager(config.CgrConfig()),
+		cacheConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		timezone:      "UTC",
 	}
+	ldr.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "", internalCacheSChann)
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
 			{Tag: "TenantID",
@@ -197,13 +196,12 @@ func TestProcessContentCallsReloadCache(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCalls",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
-		}),
-		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		timezone:   "UTC",
+		connMgr:       engine.NewConnManager(config.CgrConfig()),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		cacheConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		timezone:      "UTC",
 	}
+	ldr.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "", internalCacheSChan)
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
 			{Tag: "TenantID",
@@ -295,13 +293,12 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCallsRemoveItems",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
-		}),
-		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		timezone:   "UTC",
+		connMgr:       engine.NewConnManager(config.CgrConfig()),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		cacheConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		timezone:      "UTC",
 	}
+	ldr.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "", internalCacheSChan)
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
 			{Tag: "TenantID",
@@ -399,13 +396,12 @@ func TestProcessContentCallsClear(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCallsClear",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
-		}),
-		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		timezone:   "UTC",
+		connMgr:       engine.NewConnManager(config.CgrConfig()),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		cacheConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		timezone:      "UTC",
 	}
+	ldr.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "", internalCacheSChan)
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
 			{Tag: "TenantID",
@@ -510,13 +506,12 @@ func TestRemoveContentCallsReload(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
-		}),
-		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:   "UTC",
+		connMgr:       engine.NewConnManager(config.CgrConfig()),
+		cacheConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
 	}
+	ldr.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "", internalCacheSChan)
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
 			{Tag: "TenantID",
@@ -616,13 +611,12 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
-		}),
-		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:   "UTC",
+		connMgr:       engine.NewConnManager(config.CgrConfig()),
+		cacheConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
 	}
+	ldr.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "", internalCacheSChan)
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
 			{Tag: "TenantID",
@@ -722,13 +716,12 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
-		}),
-		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:   "UTC",
+		connMgr:       engine.NewConnManager(config.CgrConfig()),
+		cacheConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
 	}
+	ldr.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "", internalCacheSChan)
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
 			{Tag: "TenantID",
@@ -839,13 +832,12 @@ func TestRemoveContentCallsClear(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
-		}),
-		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:   "UTC",
+		connMgr:       engine.NewConnManager(config.CgrConfig()),
+		cacheConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		timezone:      "UTC",
 	}
+	ldr.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "", internalCacheSChan)
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
 			{Tag: "TenantID",

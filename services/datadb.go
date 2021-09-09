@@ -123,6 +123,7 @@ func (db *DataDBService) Shutdown() (_ error) {
 	db.Lock()
 	db.dm.DataDB().Close()
 	db.dm = nil
+	<-db.dbchan
 	db.Unlock()
 	return
 }
@@ -168,13 +169,6 @@ func (db *DataDBService) needsConnectionReload() bool {
 			db.oldDBCfg.Opts[utils.RedisClusterCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterCfg] ||
 			db.oldDBCfg.Opts[utils.RedisClusterSyncCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] ||
 			db.oldDBCfg.Opts[utils.RedisClusterOnDownDelayCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg])
-}
-
-// GetDMChan returns the DataManager chanel
-func (db *DataDBService) GetDMChan() chan *engine.DataManager {
-	db.RLock()
-	defer db.RUnlock()
-	return db.dbchan
 }
 
 // GetDM returns the DataManager

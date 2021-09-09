@@ -57,7 +57,7 @@ func TestKamailioAgentReload(t *testing.T) {
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	srv := NewKamailioAgent(cfg, nil, srvDep)
-	engine.NewConnManager(cfg, nil)
+	engine.NewConnManager(cfg)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())

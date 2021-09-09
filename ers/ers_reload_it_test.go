@@ -130,7 +130,7 @@ func testReloadVerifyDisabledReaders(t *testing.T) {
 func testReloadReloadConfigFromPath(t *testing.T) {
 	var reply string
 	if err := reloadRPC.Call(utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
-		Path:    path.Join(*dataDir, "conf", "samples", "ers_reload", "first_reload"),
+		// Path:    path.Join(*dataDir, "conf", "samples", "ers_reload", "first_reload"),
 		Section: config.ERsJSON,
 	}, &reply); err != nil {
 		t.Error(err)

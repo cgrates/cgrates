@@ -365,7 +365,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 				RateProfileIDs:  []string{"RP_1002_LOW"},
 				ResourceIDs:     nil,
 				StatIDs:         nil,
-				Weights:         10,
+				Weights:         utils.DynamicWeights{{Weight: 10}},
 				Blocker:         false,
 				RouteParameters: "",
 			},
@@ -376,12 +376,12 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 				RateProfileIDs:  []string{"RP_1002"},
 				ResourceIDs:     nil,
 				StatIDs:         nil,
-				Weights:         20,
+				Weights:         utils.DynamicWeights{{Weight: 20}},
 				Blocker:         false,
 				RouteParameters: "",
 			},
 		},
-		Weights: 10,
+		Weights: utils.DynamicWeights{{Weight: 10}},
 	}
 	if *encoding == utils.MetaGOB {
 		expected.SortingParameters = nil // empty slices are nil in gob
@@ -391,11 +391,8 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}
-	sort.Slice(expected.Routes, func(i, j int) bool {
-		return expected.Routes[i].Weights < expected.Routes[j].Weights
-	})
 	sort.Slice(supProf[0].Routes, func(i, j int) bool {
-		return supProf[0].Routes[i].Weights < supProf[0].Routes[j].Weights
+		return supProf[0].Routes[i].Weights[0].Weight < supProf[0].Routes[j].Weights[0].Weight
 	})
 	if !reflect.DeepEqual(expected, *supProf[0]) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))

@@ -32,7 +32,7 @@ import (
 func TestChargerSSetGetChargerProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -84,7 +84,7 @@ func TestChargerSSetGetChargerProfile(t *testing.T) {
 func TestChargerSSetGetChargerProfileErrMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -125,7 +125,7 @@ func TestChargerSSetGetChargerProfileErrMissingID(t *testing.T) {
 func TestChargerSSetGetChargerProfileErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -165,7 +165,7 @@ func TestChargerSSetGetChargerProfileErrNotFound(t *testing.T) {
 func TestChargerSSetChargerProfileErrMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -192,7 +192,7 @@ func TestChargerSDmSetChargerProfileErr(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -224,7 +224,7 @@ func TestChargerSSetChargerProfileSetLoadIDsErr(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		SetChargerProfileDrvF: func(ctx *context.Context, chr *engine.ChargerProfile) (err error) {
 			return nil
@@ -270,7 +270,7 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().CachesConns = []string{}
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		SetChargerProfileDrvF: func(ctx *context.Context, chr *engine.ChargerProfile) (err error) {
 			return nil
@@ -320,7 +320,7 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -392,7 +392,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
 			return nil, nil
@@ -416,7 +416,7 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -435,7 +435,7 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -515,7 +515,7 @@ func TestChargerSSetGetRmvGetChargerProfile(t *testing.T) {
 func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -593,7 +593,7 @@ func TestChargerSSetGetRmvGetChargerProfileNoTenant(t *testing.T) {
 func TestChargerSRmvChargerProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
@@ -613,7 +613,7 @@ func TestChargerSRmvChargerProfileErrRemoveChargerProfile(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
@@ -638,7 +638,7 @@ func TestChargerSRmvChargerProfileErrSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		RemoveChargerProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil
@@ -683,7 +683,7 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().CachesConns = []string{}
-	connMgr := engine.NewConnManager(cfg, nil)
+	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		RemoveChargerProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil

@@ -110,9 +110,8 @@ func TestAttrSProcessEvent(t *testing.T) {
 	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cgrCfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
-	})
+	connMgr := engine.NewConnManager(cgrCfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, clientConn)
 	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
 	// cgrEv := &utils.CGREvent{}
 	if err := eeS.attrSProcessEvent(context.TODO(), cgrEv, []string{}, utils.EmptyString); err != nil {
@@ -136,9 +135,8 @@ func TestAttrSProcessEvent2(t *testing.T) {
 	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cgrCfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
-	})
+	connMgr := engine.NewConnManager(cgrCfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, clientConn)
 	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
 	cgrEv := &utils.CGREvent{}
 	if err := eeS.attrSProcessEvent(context.TODO(), cgrEv, []string{}, utils.EmptyString); err != nil {

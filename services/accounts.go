@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
@@ -36,7 +37,7 @@ import (
 
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, server *cores.Server,
 	internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -59,7 +60,7 @@ type AccountService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
 	server      *cores.Server
@@ -68,26 +69,32 @@ type AccountService struct {
 	stopChan chan struct{}
 
 	acts     *accounts.AccountS
-	rpc      *apis.AccountSv1           // useful on restart
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the service start
-func (acts *AccountService) Start() (err error) {
+func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if acts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	<-acts.cacheS.GetPrecacheChannel(utils.CacheAccounts)
-	<-acts.cacheS.GetPrecacheChannel(utils.CacheAccountsFilterIndexes)
+	if err = acts.cacheS.WaitToPrecache(ctx,
+		utils.CacheAccounts,
+		utils.CacheAccountsFilterIndexes); err != nil {
+		return
+	}
 
-	filterS := <-acts.filterSChan
-	acts.filterSChan <- filterS
-	dbchan := acts.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, acts.filterSChan); err != nil {
+		return
+	}
+
+	var datadb *engine.DataManager
+	if datadb, err = acts.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 
 	acts.Lock()
 	defer acts.Unlock()
@@ -96,8 +103,7 @@ func (acts *AccountService) Start() (err error) {
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AccountS))
-	acts.rpc = apis.NewAccountSv1(acts.acts)
-	srv, _ := birpc.NewService(acts.rpc, "", false)
+	srv, _ := birpc.NewService(apis.NewAccountSv1(acts.acts), "", false)
 	if !acts.cfg.DispatcherSCfg().Enabled {
 		acts.server.RpcRegister(srv)
 	}
@@ -106,7 +112,7 @@ func (acts *AccountService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (acts *AccountService) Reload() (err error) {
+func (acts *AccountService) Reload(*context.Context, context.CancelFunc) (err error) {
 	acts.rldChan <- struct{}{}
 	return // for the moment nothing to reload
 }
@@ -117,9 +123,9 @@ func (acts *AccountService) Shutdown() (err error) {
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
-	acts.rpc = nil
 	<-acts.connChan
 	acts.Unlock()
+	acts.server.RpcUnregisterName(utils.AccountSv1)
 	return
 }
 

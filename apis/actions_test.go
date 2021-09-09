@@ -173,9 +173,8 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 	}
 
 	actPrf.FilterIDs = []string{}
-	adms.connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): make(chan birpc.ClientConnector),
-	})
+	adms.connMgr = engine.NewConnManager(cfg)
+	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	experr = "SERVER_ERROR: context deadline exceeded"
 	cfg.GeneralCfg().DefaultCaching = utils.MetaRemove
@@ -241,9 +240,8 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	adms.cfg.GeneralCfg().DefaultCaching = "not_a_caching_type"
-	adms.connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): make(chan birpc.ClientConnector),
-	})
+	adms.connMgr = engine.NewConnManager(cfg)
+	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	experr := "SERVER_ERROR: context deadline exceeded"
 
 	if err := adms.RemoveActionProfile(ctx, &utils.TenantIDWithAPIOpts{
@@ -557,9 +555,8 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
-	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
-	})
+	cM := engine.NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -650,9 +647,8 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
-	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): rpcInternal,
-	})
+	cM := engine.NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -818,9 +814,8 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
-	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs): rpcInternal,
-	})
+	cM := engine.NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs), utils.CDRsV1, rpcInternal)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -911,9 +906,8 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
-	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): rpcInternal,
-	})
+	cM := engine.NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -1004,9 +998,8 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
-	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): rpcInternal,
-	})
+	cM := engine.NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -1098,9 +1091,8 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cc
-	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): rpcInternal,
-	})
+	cM := engine.NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,

@@ -34,8 +34,7 @@ import (
 func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(&engine.DataDBMock{
 		GetKeysForPrefixF: func(*context.Context, string) ([]string, error) {
 			return []string{"dpp_cgrates.org:123"}, nil
@@ -95,8 +94,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 func TestDispatcherServiceDispatcherProfileForEventMIIDENotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
@@ -203,7 +201,7 @@ func TestDispatcherAuthorizeError(t *testing.T) {
 			},
 		},
 	}
-	connMng := engine.NewConnManager(cfg, nil)
+	connMng := engine.NewConnManager(cfg)
 	dsp := NewDispatcherService(nil, cfg, nil, connMng)
 	err := dsp.authorize("", "cgrates.org", utils.APIMethods)
 	expected := "dial tcp: address error: missing port in address"
@@ -227,7 +225,7 @@ func TestDispatcherAuthorizeError2(t *testing.T) {
 			},
 		},
 	}
-	connMng := engine.NewConnManager(cfg, nil)
+	connMng := engine.NewConnManager(cfg)
 	dsp := NewDispatcherService(nil, cfg, nil, connMng)
 	err := dsp.authorize("", "cgrates.org", utils.APIMethods)
 	expected := "dial tcp: address error: missing port in address"
@@ -270,7 +268,7 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
 	ev := &utils.CGREvent{}
 	reply := &engine.AttrSProcessEventReply{}
-	value := &engine.DispatcherHost{
+	dh := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:        "testID",
@@ -279,11 +277,12 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 			TLS:       false,
 		},
 	}
+	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: nil}
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
 		value, nil, true, utils.NonTransactional)
-	err := dsp.authorizeEvent(ev, reply)
+
 	expected := "dial tcp: missing address"
-	if err == nil || err.Error() != expected {
+	if err := dsp.authorizeEvent(ev, reply); err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
@@ -302,10 +301,8 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 	dm := engine.NewDataManager(nil, nil, nil)
 	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeCon2)
-	rpcInt := map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanRPC,
-	}
-	connMgr := engine.NewConnManager(cfg, rpcInt)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanRPC)
 
 	dsp := NewDispatcherService(dm, cfg, nil, connMgr)
 	ev := &utils.CGREvent{
@@ -314,7 +311,7 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 		Event:   map[string]interface{}{},
 		APIOpts: nil,
 	}
-	value := &engine.DispatcherHost{
+	dh := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:        "testID",
@@ -323,13 +320,14 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 			TLS:       false,
 		},
 	}
+	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
+
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
 	rply := &engine.AttrSProcessEventReply{}
-	err := dsp.authorizeEvent(ev, rply)
-	if err != nil {
+	if err := dsp.authorizeEvent(ev, rply); err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	engine.Cache = cacheInit
@@ -359,13 +357,11 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 	dm := engine.NewDataManager(nil, nil, nil)
 	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeCon3)
-	rpcInt := map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanRPC,
-	}
-	connMgr := engine.NewConnManager(cfg, rpcInt)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanRPC)
 
 	dsp := NewDispatcherService(dm, cfg, nil, connMgr)
-	value := &engine.DispatcherHost{
+	dh := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:        "testID",
@@ -374,13 +370,13 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 			TLS:       false,
 		},
 	}
+	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
-	err := dsp.authorize(utils.APIMethods, "testTenant", "apikey")
 	expected := "UNAUTHORIZED_API"
-	if err == nil || err.Error() != expected {
+	if err := dsp.authorize(utils.APIMethods, "testTenant", "apikey"); err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
@@ -408,13 +404,11 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 	dm := engine.NewDataManager(nil, nil, nil)
 	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeCon4)
-	rpcInt := map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanRPC,
-	}
-	connMgr := engine.NewConnManager(cfg, rpcInt)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanRPC)
 
 	dsp := NewDispatcherService(dm, cfg, nil, connMgr)
-	value := &engine.DispatcherHost{
+	dh := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:        "testID",
@@ -423,13 +417,14 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 			TLS:       false,
 		},
 	}
+	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
+
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
-	err := dsp.authorize(utils.APIMethods, "testTenant", "apikey")
 	expected := "NOT_FOUND"
-	if err == nil || err.Error() != expected {
+	if err := dsp.authorize(utils.APIMethods, "testTenant", "apikey"); err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
@@ -459,13 +454,11 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 	dm := engine.NewDataManager(nil, nil, nil)
 	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeCon5)
-	rpcInt := map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanRPC,
-	}
-	connMgr := engine.NewConnManager(cfg, rpcInt)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, chanRPC)
 
 	dsp := NewDispatcherService(dm, cfg, nil, connMgr)
-	value := &engine.DispatcherHost{
+	dh := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:        "testID",
@@ -474,12 +467,13 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 			TLS:       false,
 		},
 	}
+	value := &lazzyDH{dh: dh, cfg: cfg, iPRCCh: chanRPC}
+
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
-	err := dsp.authorize("testMethod", "testTenant", "apikey")
-	if err != nil {
+	if err := dsp.authorize("testMethod", "testTenant", "apikey"); err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	engine.Cache = cacheInit
@@ -488,8 +482,7 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -535,8 +528,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -588,8 +580,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -635,8 +626,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -682,8 +672,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -730,8 +719,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -773,8 +761,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -824,8 +811,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -872,8 +858,7 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = true
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	var cnt int
 
 	dm := engine.NewDataManager(&engine.DataDBMock{
@@ -919,8 +904,7 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -968,8 +952,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
-	rpcCl := map[string]chan birpc.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
+	connMng := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
@@ -1032,10 +1015,8 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	cfg.DispatcherSCfg().IndexedSelects = false
 	chanRPC := make(chan birpc.ClientConnector, 1)
 	chanRPC <- new(mockTypeConSetCache)
-	rpcInt := map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanRPC,
-	}
-	connMgr := engine.NewConnManager(cfg, rpcInt)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, chanRPC)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	dsp := &engine.DispatcherProfile{

@@ -130,12 +130,10 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			dm:  dm,
 			cfg: defaultCfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
-		}),
+		cfg:     defaultCfg,
+		connMgr: NewConnManager(defaultCfg),
 	}
-
+	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cgrEvID",
@@ -208,12 +206,10 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 			dm:  dm,
 			cfg: defaultCfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
-		}),
+		cfg:     defaultCfg,
+		connMgr: NewConnManager(defaultCfg),
 	}
-
+	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "cgrEvID",
@@ -303,11 +299,10 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 			dm:  dm,
 			cfg: defaultCfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
-		}),
+		cfg:     defaultCfg,
+		connMgr: NewConnManager(defaultCfg),
 	}
+	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
 		Event: map[string]interface{}{
@@ -374,11 +369,10 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 			dm:  dm,
 			cfg: defaultCfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
-		}),
+		cfg:     defaultCfg,
+		connMgr: NewConnManager(defaultCfg),
 	}
+	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
 		Event: map[string]interface{}{
@@ -451,11 +445,10 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			dm:  dm,
 			cfg: defaultCfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
-		}),
+		cfg:     defaultCfg,
+		connMgr: NewConnManager(defaultCfg),
 	}
+	cS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, rpcInternal)
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
 		Event: map[string]interface{}{

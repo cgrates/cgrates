@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -124,7 +125,7 @@ func testPartITRpcConn(t *testing.T) {
 
 func testPartITLoadTPFromFolder(t *testing.T) {
 	//add a default charger
-	chargerProfile := &v1.ChargerWithAPIOpts{
+	chargerProfile := &apis.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",
@@ -134,7 +135,7 @@ func testPartITLoadTPFromFolder(t *testing.T) {
 		},
 	}
 	var result string
-	if err := partRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := partRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

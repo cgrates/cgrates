@@ -166,9 +166,8 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 	}
 
 	sqPrf.FilterIDs = []string{}
-	adms.connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): make(chan birpc.ClientConnector),
-	})
+	adms.connMgr = engine.NewConnManager(cfg)
+	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	experr = "SERVER_ERROR: context deadline exceeded"
 	cfg.GeneralCfg().DefaultCaching = utils.MetaRemove
@@ -233,9 +232,8 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	adms.cfg.GeneralCfg().DefaultCaching = "not_a_caching_type"
-	adms.connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): make(chan birpc.ClientConnector),
-	})
+	adms.connMgr = engine.NewConnManager(cfg)
+	adms.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, make(chan birpc.ClientConnector))
 	experr := "SERVER_ERROR: context deadline exceeded"
 
 	if err := adms.RemoveStatQueueProfile(ctx, &utils.TenantIDWithAPIOpts{
@@ -504,9 +502,8 @@ func TestStatsAPIs(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- mCC
-	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
-	})
+	cM := engine.NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
 
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)

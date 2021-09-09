@@ -23,8 +23,8 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/actions"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -34,15 +34,14 @@ import (
 //TestActionSCoverage for cover testing
 func TestActionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	actRPC := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	chS := NewCacheService(cfg, db, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	actS := NewActionService(cfg, db,
 		chS, filterSChan, nil, server, actRPC,
 		anz, srvDep)

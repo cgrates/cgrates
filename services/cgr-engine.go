@@ -21,7 +21,7 @@ package services
 import (
 	"fmt"
 	"io"
-	"log"
+	"os"
 	"path"
 	"runtime"
 	"runtime/pprof"
@@ -41,9 +41,10 @@ import (
 
 func NewCGREngine(cfg *config.CGRConfig) (cgr *CGREngine) {
 	cgr = &CGREngine{
-		cfg:  cfg,
-		cM:   engine.NewConnManager(cfg, nil),
-		caps: engine.NewCaps(cgr.cfg.CoreSCfg().Caps, cgr.cfg.CoreSCfg().CapsStrategy),
+		cfg:   cfg,
+		cM:    engine.NewConnManager(cfg),
+		caps:  engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy),
+		shdWg: new(sync.WaitGroup),
 		srvDep: map[string]*sync.WaitGroup{
 			utils.AnalyzerS:       new(sync.WaitGroup),
 			utils.AdminS:          new(sync.WaitGroup),
@@ -79,7 +80,7 @@ func NewCGREngine(cfg *config.CGRConfig) (cgr *CGREngine) {
 		},
 		iFilterSCh: make(chan *engine.FilterS, 1),
 	}
-	cgr.srvManager = servmanager.NewServiceManager(cgr.cfg, &cgr.shdWg, cgr.cM)
+	cgr.srvManager = servmanager.NewServiceManager(cgr.cfg, cgr.shdWg, cgr.cM)
 	cgr.server = cores.NewServer(cgr.caps) // Rpc/http server
 	return
 }
@@ -89,11 +90,13 @@ type CGREngine struct {
 
 	srvManager *servmanager.ServiceManager
 	srvDep     map[string]*sync.WaitGroup
-	shdWg      sync.WaitGroup
+	shdWg      *sync.WaitGroup
 	cM         *engine.ConnManager
 	server     *cores.Server
 
-	caps *engine.Caps
+	caps       *engine.Caps
+	memPrfStop chan struct{}
+	cpuPrfF    io.Closer
 
 	// services
 	gvS    servmanager.Service
@@ -109,6 +112,8 @@ type CGREngine struct {
 	iGuardianSCh    chan birpc.ClientConnector
 	iConfigCh       chan birpc.ClientConnector
 	iServeManagerCh chan birpc.ClientConnector
+
+	iDispatcherSCh chan birpc.ClientConnector
 }
 
 func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefix string,
@@ -155,7 +160,7 @@ func InitConfigFromPath(path, nodeID string, lgLevel int) (cfg *config.CGRConfig
 	return
 }
 
-func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFunc, httpPrfPath string, cpuPrfFl io.Closer, memPrfDir string, memPrfStop chan struct{}) (err error) {
+func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPrfDir string, memPrfStop chan struct{}) (err error) {
 	if len(cgr.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cgr.server.RegisterHTTPFunc(cgr.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
 	}
@@ -165,6 +170,7 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFun
 	if httpPrfPath != utils.EmptyString {
 		cgr.server.RegisterProfiler(httpPrfPath)
 	}
+
 	// init the channel here because we need to pass them to connManager
 	cgr.iServeManagerCh = make(chan birpc.ClientConnector, 1)
 	cgr.iConfigCh = make(chan birpc.ClientConnector, 1)
@@ -174,7 +180,7 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFun
 	iAnalyzerSCh := make(chan birpc.ClientConnector, 1)
 	iCDRServerCh := make(chan birpc.ClientConnector, 1)
 	iAttributeSCh := make(chan birpc.ClientConnector, 1)
-	iDispatcherSCh := make(chan birpc.ClientConnector, 1)
+	cgr.iDispatcherSCh = make(chan birpc.ClientConnector, 1)
 	iSessionSCh := make(chan birpc.ClientConnector, 1)
 	iChargerSCh := make(chan birpc.ClientConnector, 1)
 	iThresholdSCh := make(chan birpc.ClientConnector, 1)
@@ -209,7 +215,7 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFun
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore), utils.CoreSv1, iCoreSv1Ch)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, iEEsCh)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, iRateSCh)
-	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers), utils.DispatcherSv1, iDispatcherSCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers), utils.DispatcherSv1, cgr.iDispatcherSCh)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, iAccountSCh)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), utils.ActionSv1, iActionSCh)
 
@@ -219,25 +225,27 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFun
 	cgr.anzS = NewAnalyzerService(cgr.cfg, cgr.server,
 		cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep) // init AnalyzerS
 
-	// init CoreSv1
 	cgr.coreS = NewCoreService(cgr.cfg, cgr.caps, cgr.server,
 		iCoreSv1Ch, cgr.anzS, cpuPrfFl, memPrfDir, memPrfStop,
-		&cgr.shdWg, cgr.srvDep)
+		cgr.shdWg, cgr.srvDep) // init CoreSv1
+	cgr.memPrfStop = memPrfStop
+	cgr.cpuPrfF = cpuPrfFl
 
 	cgr.cacheS = NewCacheService(cgr.cfg, cgr.dmS, cgr.server,
-		iCacheSCh, cgr.anzS, cgr.coreS.GetCoreS().CapsStats,
+		iCacheSCh, cgr.anzS, cgr.coreS,
 		cgr.srvDep) // init CacheS
 
 	dspS := NewDispatcherService(cgr.cfg, cgr.dmS, cgr.cacheS,
-		cgr.iFilterSCh, cgr.server, iDispatcherSCh, cgr.cM,
+		cgr.iFilterSCh, cgr.server, cgr.iDispatcherSCh, cgr.cM,
 		cgr.anzS, cgr.srvDep)
-	admS := NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.server,
-		iAdminSCh, cgr.cM, cgr.anzS, cgr.srvDep)
 
 	cgr.ldrs = NewLoaderService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server,
 		iLoaderSCh, cgr.cM, cgr.anzS, cgr.srvDep)
 
-	cgr.srvManager.AddServices(cgr.gvS, admS, cgr.coreS,
+	cgr.srvManager.AddServices(cgr.gvS, cgr.coreS, cgr.cacheS,
+		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.sdbS,
+		NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.server,
+			iAdminSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 		NewSessionService(cgr.cfg, cgr.dmS, cgr.server, iSessionSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 		NewAttributeService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server, iAttributeSCh,
 			cgr.anzS, dspS, cgr.srvDep),
@@ -260,7 +268,6 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFun
 		NewRadiusAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),           // partial reload
 		NewDiameterAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),         // partial reload
 		NewHTTPAgent(cgr.cfg, cgr.iFilterSCh, cgr.server, cgr.cM, cgr.srvDep), // no reload
-		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.sdbS,
 		NewSIPAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
 
 		NewEventExporterService(cgr.cfg, cgr.iFilterSCh,
@@ -278,7 +285,7 @@ func (cgr *CGREngine) InitServices(ctx *context.Context, shtDw context.CancelFun
 
 	return
 }
-func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFunc) (err error) {
+func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFunc, preload string) (err error) {
 	cgr.shdWg.Add(1)
 	if err = cgr.gvS.Start(ctx, shtDw); err != nil {
 		return
@@ -314,43 +321,33 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 	cgr.srvManager.StartServices(ctx, shtDw)
 	// Start FilterS
 	go cgrStartFilterService(ctx, cgr.iFilterSCh, cgr.cacheS.GetCacheSChan(), cgr.cM,
-		cgr.cfg, cgr.dmS.GetDM())
+		cgr.cfg, cgr.dmS)
 
 	cgrInitServiceManagerV1(cgr.iServeManagerCh, cgr.srvManager, cgr.server, cgr.anzS)
 	cgrInitGuardianSv1(cgr.iGuardianSCh, cgr.server, cgr.anzS) // init GuardianSv1
 	cgrInitConfigSv1(cgr.iConfigCh, cgr.cfg, cgr.server, cgr.anzS)
+
+	if preload != utils.EmptyString {
+		if err = cgrRunPreload(ctx, cgr.cfg, preload, cgr.ldrs); err != nil {
+			return
+		}
+	}
+
+	// Serve rpc connections
+	cgrStartRPC(ctx, shtDw, cgr.cfg, cgr.server, cgr.iDispatcherSCh)
+
 	return
 }
 
-func (cgr *CGREngine) Start(ctx *context.Context, shtDw context.CancelFunc, flags *CGREngineFlags) (err error) {
-	var vers string
-	goVers := runtime.Version()
-	if vers, err = utils.GetCGRVersion(); err != nil {
-		return
-	}
-	if *flags.Version {
-		fmt.Println(vers)
-		return
-	}
-	if *flags.PidFile != utils.EmptyString {
-		cgrWritePid(*flags.PidFile)
-	}
-	if *flags.Singlecpu {
-		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
-	}
+func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags *CGREngineFlags, vers string) (err error) {
 	cgr.shdWg.Add(1)
-	go cgrSingnalHandler(ctx, shtDw, cgr.cfg, &cgr.shdWg)
+	go cgrSingnalHandler(ctx, shtDw, cgr.cfg, cgr.shdWg)
 
 	var memPrfStop chan struct{}
 	if *flags.MemPrfDir != utils.EmptyString {
 		cgr.shdWg.Add(1)
 		memPrfStop = make(chan struct{})
-		go cores.MemProfiling(*flags.MemPrfDir, *flags.MemPrfInterval, *flags.MemPrfNoF, &cgr.shdWg, memPrfStop, shtDw)
-		defer func() { //here
-			if cgr.cS == nil {
-				close(memPrfStop)
-			}
-		}()
+		go cores.MemProfiling(*flags.MemPrfDir, *flags.MemPrfInterval, *flags.MemPrfNoF, cgr.shdWg, memPrfStop, shtDw)
 	}
 
 	var cpuPrfF io.Closer
@@ -359,12 +356,6 @@ func (cgr *CGREngine) Start(ctx *context.Context, shtDw context.CancelFunc, flag
 			path.Join(*flags.CpuPrfDir, utils.CpuPathCgr)); err != nil {
 			return
 		}
-		defer func() { //here
-			if cgr.cS == nil {
-				pprof.StopCPUProfile()
-				cpuPrfF.Close()
-			}
-		}()
 	}
 
 	if *flags.ScheduledShutDown != utils.EmptyString {
@@ -385,42 +376,83 @@ func (cgr *CGREngine) Start(ctx *context.Context, shtDw context.CancelFunc, flag
 		}()
 	}
 
-	// Init config
-	if err = cgr.InitConfigFromPath(*flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil {
-		return
-	}
-	if *flags.CheckConfig {
-		return
-	}
-
 	// init syslog
 	if utils.Logger, err = utils.Newlogger(utils.FirstNonEmpty(*flags.SysLogger,
 		cgr.cfg.GeneralCfg().Logger), cgr.cfg.GeneralCfg().NodeID); err != nil {
-		log.Fatalf("Could not initialize syslog connection, err: <%s>", err)
-		return
+		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
 	}
 	utils.Logger.SetLogLevel(cgr.cfg.GeneralCfg().LogLevel)
-	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
+	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 	cgr.cfg.LazySanityCheck()
 
-	if err = cgr.InitServices(ctx, shtDw, *flags.HttpPrfPath, cpuPrfF, *flags.MemPrfDir, memPrfStop); err != nil {
-		return
+	return cgr.InitServices(*flags.HttpPrfPath, cpuPrfF, *flags.MemPrfDir, memPrfStop)
+}
+
+func (cgr *CGREngine) Stop(memPrfDir, pidFile string) {
+	if cgr.memPrfStop != nil && cgr.coreS == nil {
+		close(cgr.memPrfStop)
 	}
 
-	if *flags.Preload != utils.EmptyString {
-		if err = cgrRunPreload(ctx, cgr.cfg, *flags.Preload, cgr.ldrs); err != nil {
-			return
+	ctx, cancel := context.WithTimeout(context.Background(), cgr.cfg.CoreSCfg().ShutdownTimeout)
+	go func() {
+		cgr.shdWg.Wait()
+		cancel()
+	}()
+	<-ctx.Done()
+	if ctx.Err() != context.Canceled {
+		utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown all subsystems in the given time",
+			utils.ServiceManager))
+	}
+
+	if memPrfDir != utils.EmptyString { // write last memory profiling
+		cores.MemProfFile(path.Join(memPrfDir, utils.MemProfFileCgr))
+	}
+	if pidFile != utils.EmptyString {
+		if err := os.Remove(pidFile); err != nil {
+			utils.Logger.Warning("Could not remove pid file: " + err.Error())
 		}
 	}
+	if cgr.cpuPrfF != nil && cgr.coreS == nil {
+		pprof.StopCPUProfile()
+		cgr.cpuPrfF.Close()
+	}
+	utils.Logger.Info("<CoreS> stopped all components. CGRateS shutdown!")
+}
 
-	// Serve rpc connections
-	// go startRPC(server, internalAdminSChan, internalCDRServerChan,
-	// 	internalResourceSChan, internalStatSChan,
-	// 	internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
-	// 	internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
-	// 	internalDispatcherSChan, internalLoaderSChan,
-	// 	internalCacheSChan, internalEEsChan, internalRateSChan, internalActionSChan,
-	// 	internalAccountSChan, shdChan)
+func RunCGREngine(fs []string) (err error) {
+	flags := NewCGREngineFlags()
+	if err = flags.Parse(fs); err != nil {
+		return
+	}
+	var vers string
+	if vers, err = utils.GetCGRVersion(); err != nil {
+		return
+	}
+	if *flags.Version {
+		return
+	}
+	if *flags.PidFile != utils.EmptyString {
+		cgrWritePid(*flags.PidFile)
+	}
+	if *flags.Singlecpu {
+		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
+	}
 
+	// Init config
+	var cfg *config.CGRConfig
+	if cfg, err = InitConfigFromPath(*flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
+		return
+	}
+	cgr := NewCGREngine(cfg)
+	defer cgr.Stop(*flags.MemPrfDir, *flags.PidFile)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {
+		return
+	}
+	if err = cgr.StartServices(ctx, cancel, *flags.Preload); err != nil {
+		return
+	}
+	<-ctx.Done()
 	return
 }

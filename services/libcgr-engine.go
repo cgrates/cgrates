@@ -160,11 +160,15 @@ func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string
 // cgrStartFilterService fires up the FilterS
 func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS,
 	cacheSCh chan *engine.CacheS, connMgr *engine.ConnManager,
-	cfg *config.CGRConfig, dm *engine.DataManager) {
+	cfg *config.CGRConfig, db *DataDBService) {
 	var cacheS *engine.CacheS
 	select {
 	case cacheS = <-cacheSCh:
 	case <-ctx.Done():
+		return
+	}
+	dm, err := db.WaitForDM(ctx)
+	if err != nil {
 		return
 	}
 	select {
@@ -202,50 +206,8 @@ func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
 }
 
 func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
-	cfg *config.CGRConfig, server *cores.Server,
-	internalAdminSChan, internalCdrSChan, internalRsChan, internalStatSChan,
-	internalAttrSChan, internalChargerSChan, internalThdSChan, internalRouteSChan,
-	internalSessionSChan, internalAnalyzerSChan, internalDispatcherSChan,
-	internalLoaderSChan, internalCacheSChan, internalEEsChan, internalRateSChan,
-	internalActionSChan, internalAccountSChan chan birpc.ClientConnector) {
-	if !cfg.DispatcherSCfg().Enabled {
-		select { // Any of the rpc methods will unlock listening to rpc requests
-		case cdrs := <-internalCdrSChan:
-			internalCdrSChan <- cdrs
-		case smg := <-internalSessionSChan:
-			internalSessionSChan <- smg
-		case rls := <-internalRsChan:
-			internalRsChan <- rls
-		case statS := <-internalStatSChan:
-			internalStatSChan <- statS
-		case admS := <-internalAdminSChan:
-			internalAdminSChan <- admS
-		case attrS := <-internalAttrSChan:
-			internalAttrSChan <- attrS
-		case chrgS := <-internalChargerSChan:
-			internalChargerSChan <- chrgS
-		case thS := <-internalThdSChan:
-			internalThdSChan <- thS
-		case rtS := <-internalRouteSChan:
-			internalRouteSChan <- rtS
-		case analyzerS := <-internalAnalyzerSChan:
-			internalAnalyzerSChan <- analyzerS
-		case loaderS := <-internalLoaderSChan:
-			internalLoaderSChan <- loaderS
-		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
-			internalCacheSChan <- chS
-		case eeS := <-internalEEsChan:
-			internalEEsChan <- eeS
-		case rateS := <-internalRateSChan:
-			internalRateSChan <- rateS
-		case actionS := <-internalActionSChan:
-			internalActionSChan <- actionS
-		case accountS := <-internalAccountSChan:
-			internalAccountSChan <- accountS
-		case <-ctx.Done():
-			return
-		}
-	} else {
+	cfg *config.CGRConfig, server *cores.Server, internalDispatcherSChan chan birpc.ClientConnector) {
+	if cfg.DispatcherSCfg().Enabled { // wait only for dispatcher as cache is allways registered before this
 		select {
 		case dispatcherS := <-internalDispatcherSChan:
 			internalDispatcherSChan <- dispatcherS

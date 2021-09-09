@@ -25,7 +25,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -56,7 +55,7 @@ func TestDispatcherHostsService(t *testing.T) {
 	cfg.RegistrarCCfg().Dispatchers.RefreshInterval = 100 * time.Millisecond
 	cfg.RegistrarCCfg().Dispatchers.RegistrarSConns = []string{"conn1"}
 
-	ds := NewRegistrarCService(cfg, engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{}))
+	ds := NewRegistrarCService(cfg, engine.NewConnManager(cfg))
 
 	ds.registerDispHosts()
 
@@ -116,7 +115,7 @@ func TestDispatcherHostsService(t *testing.T) {
 	cfg.ListenCfg().RPCJSONListen = "2012"
 	ds.registerDispHosts()
 
-	ds = NewRegistrarCService(cfg, engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{}))
+	ds = NewRegistrarCService(cfg, engine.NewConnManager(cfg))
 	ds.Shutdown()
 	stopChan := make(chan struct{})
 	close(stopChan)
@@ -174,11 +173,11 @@ func TestRegisterRPCHosts(t *testing.T) {
 	}
 	regist := &RegistrarCService{
 		cfg:     cfg,
-		connMgr: engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{}),
+		connMgr: engine.NewConnManager(cfg),
 	}
 	registCmp := &RegistrarCService{
 		cfg:     cfg,
-		connMgr: engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{}),
+		connMgr: engine.NewConnManager(cfg),
 	}
 	regist.registerRPCHosts()
 	if !reflect.DeepEqual(regist, registCmp) {

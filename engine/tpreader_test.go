@@ -41,7 +41,7 @@ func TestCallCacheNoCaching(t *testing.T) {
 
 	defaultCfg := config.NewDefaultCGRConfig()
 	Cache = NewCacheS(defaultCfg, nil, nil)
-	cM := NewConnManager(defaultCfg, nil)
+	cM := NewConnManager(defaultCfg)
 	args := map[string][]string{
 		utils.CacheFilters:   {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 		utils.CacheResources: {},
@@ -93,9 +93,8 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	}
 	client <- mCC
 
-	cM := NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
-	})
+	cM := NewConnManager(defaultCfg)
+	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaReload
 	args := map[string][]string{
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -163,9 +162,8 @@ func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	}
 	client <- mCC
 
-	cM := NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
-	})
+	cM := NewConnManager(defaultCfg)
+	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaReload
 	args := map[string][]string{
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -259,9 +257,8 @@ func TestCallCacheLoadCache(t *testing.T) {
 	}
 	client <- mCC
 
-	cM := NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
-	})
+	cM := NewConnManager(defaultCfg)
+	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaLoad
 	args := map[string][]string{
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -330,9 +327,8 @@ func TestCallCacheRemoveItems(t *testing.T) {
 	}
 	client <- mCC
 
-	cM := NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
-	})
+	cM := NewConnManager(defaultCfg)
+	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaRemove
 	args := map[string][]string{
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -383,9 +379,8 @@ func TestCallCacheClear(t *testing.T) {
 	}
 	client <- mCC
 
-	cM := NewConnManager(defaultCfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
-	})
+	cM := NewConnManager(defaultCfg)
+	cM.AddInternalConn("cacheConn1", "", client)
 	caching := utils.MetaClear
 	args := map[string][]string{
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -670,9 +665,8 @@ func TestReloadCache(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- cM
-	cnMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
-	})
+	cnMgr := NewConnManager(cfg)
+	cnMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
 	tpr := &TpReader{
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},

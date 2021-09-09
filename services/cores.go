@@ -48,6 +48,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Serv
 		server:     server,
 		anz:        anz,
 		srvDep:     srvDep,
+		csCh:       make(chan *cores.CoreService, 1),
 	}
 }
 
@@ -66,6 +67,7 @@ type CoreService struct {
 	connChan   chan birpc.ClientConnector
 	anz        *AnalyzerService
 	srvDep     map[string]*sync.WaitGroup
+	csCh       chan *cores.CoreService
 }
 
 // Start should handle the service start
@@ -79,6 +81,7 @@ func (cS *CoreService) Start(_ *context.Context, shtDw context.CancelFunc) (_ er
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
 	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.stopMemPrf, cS.shdWg, shtDw)
+	cS.csCh <- cS.cS
 	srv, _ := birpc.NewService(apis.NewCoreSv1(cS.cS), utils.EmptyString, false)
 	if !cS.cfg.DispatcherSCfg().Enabled {
 		cS.server.RpcRegister(srv)
@@ -100,6 +103,8 @@ func (cS *CoreService) Shutdown() (_ error) {
 	close(cS.stopChan)
 	cS.cS = nil
 	<-cS.connChan
+	<-cS.csCh
+	cS.server.RpcUnregisterName(utils.CoreSv1)
 	return
 }
 
@@ -121,8 +126,15 @@ func (cS *CoreService) ShouldRun() bool {
 }
 
 // GetCoreS returns the coreS
-func (cS *CoreService) GetCoreS() *cores.CoreService {
+func (cS *CoreService) WaitForCoreS(ctx *context.Context) (cs *cores.CoreService, err error) {
 	cS.RLock()
-	defer cS.RUnlock()
-	return cS.cS
+	cSCh := cS.csCh
+	cS.RUnlock()
+	select {
+	case <-ctx.Done():
+		err = ctx.Err()
+	case cs = <-cSCh:
+		cSCh <- cs
+	}
+	return
 }

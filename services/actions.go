@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
@@ -36,7 +37,7 @@ import (
 
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -59,38 +60,41 @@ type ActionService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	dm          *DataDBService
-	cacheS      *engine.CacheS
+	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
 	server      *cores.Server
 
-	rpc *apis.ActionSv1
-
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
-	acts *actions.ActionS
-	// rpc      *v1.ActionSv1              // useful on restart
+	acts     *actions.ActionS
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the service start
-func (acts *ActionService) Start() (err error) {
+func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
 	if acts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	<-acts.cacheS.GetPrecacheChannel(utils.CacheActionProfiles)
-	<-acts.cacheS.GetPrecacheChannel(utils.CacheActionProfilesFilterIndexes)
+	if err = acts.cacheS.WaitToPrecache(ctx,
+		utils.CacheActionProfiles,
+		utils.CacheActionProfilesFilterIndexes); err != nil {
+		return
+	}
 
-	filterS := <-acts.filterSChan
-	acts.filterSChan <- filterS
-	dbchan := acts.dm.GetDMChan()
-	datadb := <-dbchan
-	dbchan <- datadb
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, acts.filterSChan); err != nil {
+		return
+	}
 
+	var datadb *engine.DataManager
+	if datadb, err = acts.dm.WaitForDM(ctx); err != nil {
+		return
+	}
 	acts.Lock()
 	defer acts.Unlock()
 	acts.acts = actions.NewActionS(acts.cfg, filterS, datadb, acts.connMgr)
@@ -98,8 +102,7 @@ func (acts *ActionService) Start() (err error) {
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ActionS))
-	acts.rpc = apis.NewActionSv1(acts.acts)
-	srv, _ := birpc.NewService(acts.rpc, "", false)
+	srv, _ := birpc.NewService(apis.NewActionSv1(acts.acts), "", false)
 	if !acts.cfg.DispatcherSCfg().Enabled {
 		acts.server.RpcRegister(srv)
 	}
@@ -108,7 +111,7 @@ func (acts *ActionService) Start() (err error) {
 }
 
 // Reload handles the change of config
-func (acts *ActionService) Reload() (err error) {
+func (acts *ActionService) Reload(*context.Context, context.CancelFunc) (err error) {
 	acts.rldChan <- struct{}{}
 	return // for the moment nothing to reload
 }
@@ -120,8 +123,8 @@ func (acts *ActionService) Shutdown() (err error) {
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
-	acts.rpc = nil
 	<-acts.connChan
+	acts.server.RpcUnregisterName(utils.ActionSv1)
 	return
 }
 

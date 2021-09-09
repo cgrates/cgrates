@@ -61,7 +61,6 @@ type LoaderService struct {
 	stopChan    chan struct{}
 
 	ldrs     *loaders.LoaderService
-	rpc      *apis.LoaderSv1
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
@@ -94,8 +93,7 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if err = ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
 		return
 	}
-	ldrs.rpc = apis.NewLoaderSv1(ldrs.ldrs)
-	srv, _ := birpc.NewService(ldrs.rpc, "", false)
+	srv, _ := birpc.NewService(apis.NewLoaderSv1(ldrs.ldrs), "", false)
 	if !ldrs.cfg.DispatcherSCfg().Enabled {
 		ldrs.server.RpcRegister(srv)
 	}
@@ -128,9 +126,9 @@ func (ldrs *LoaderService) Reload(ctx *context.Context, _ context.CancelFunc) er
 func (ldrs *LoaderService) Shutdown() (_ error) {
 	ldrs.Lock()
 	ldrs.ldrs = nil
-	ldrs.rpc = nil
 	close(ldrs.stopChan)
 	<-ldrs.connChan
+	ldrs.server.RpcUnregisterName(utils.LoaderSv1)
 	ldrs.Unlock()
 	return
 }

@@ -143,23 +143,22 @@ func (dH *DispatcherHost) TenantID() string {
 	return utils.ConcatenatedKey(dH.Tenant, dH.ID)
 }
 
-// Call will build and cache the connection if it is not defined yet then will execute the method on conn
-func (dH *DispatcherHost) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
+// GetConn will build and cache the connection if it is not defined yet
+func (dH *DispatcherHost) GetConn(ctx *context.Context, cfg *config.CGRConfig, iPRCCh chan birpc.ClientConnector) (_ birpc.ClientConnector, err error) {
 	if dH.rpcConn == nil {
 		// connect the rpcConn
-		cfg := config.CgrConfig()
 		if dH.rpcConn, err = NewRPCConnection(ctx, dH.RemoteHost,
 			cfg.TLSCfg().ClientKey,
 			cfg.TLSCfg().ClientCerificate, cfg.TLSCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			IntRPC.GetInternalChanel(), false, nil,
+			iPRCCh, false, nil,
 			utils.EmptyString, utils.EmptyString, nil); err != nil {
 			return
 		}
 
 	}
-	return dH.rpcConn.Call(ctx, serviceMethod, args, reply)
+	return dH.rpcConn, nil
 }
 
 type DispatcherHostIDs []string

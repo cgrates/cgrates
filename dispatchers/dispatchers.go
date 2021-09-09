@@ -178,7 +178,8 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 		if err = engine.Cache.Set(ctx, utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); err != nil {
 			return utils.NewErrDispatcherS(err)
 		}
-		if err = d.Dispatch(dS.dm, dS.fltrS, ctx, evNm, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]),
+		if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
+			ctx, dS.connMgr.GetInternalChan(), evNm, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]),
 			subsys, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
 			return
 		}
