@@ -669,8 +669,8 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								// 
 		"*processRuns": 1,					// number of run loops when processing event
+		"*profileRuns": 0,					// number of runs a profile will process during the event
 	},
-	"profile_runs": 0,						// number of run a profile will process the event
 },
 
 

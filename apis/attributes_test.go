@@ -485,11 +485,9 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 	}
 
 	attsv1 := NewAttributeSv1(attrS)
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-			},
+	ev := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
 		},
 	}
 	var reply engine.APIAttributeProfile
@@ -507,7 +505,7 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 		},
 	}
 
-	if err := attsv1.GetAttributeForEvent(context.Background(), args, &reply); err != nil {
+	if err := attsv1.GetAttributeForEvent(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else {
 		rplyPntr := &reply
@@ -517,7 +515,7 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 	}
 
 	var rplyev engine.AttrSProcessEventReply
-	args.Event[utils.RequestType] = utils.MetaPseudoPrepaid
+	ev.Event[utils.RequestType] = utils.MetaPseudoPrepaid
 	//now we will process the event for our attr
 	expectedEv := engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:TestGetAttributeProfile"},
@@ -531,7 +529,7 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 			APIOpts: map[string]interface{}{},
 		},
 	}
-	if err := attsv1.ProcessEvent(context.Background(), args, &rplyev); err != nil {
+	if err := attsv1.ProcessEvent(context.Background(), ev, &rplyev); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedEv, rplyev) {
 		t.Errorf("Expected %+v ,received %+v", utils.ToJSON(expectedEv), utils.ToJSON(rplyev))

@@ -129,51 +129,20 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 	return
 }
 
-// AttrArgsProcessEvent arguments used for proccess event
-type AttrArgsProcessEvent struct {
-	AttributeIDs []string
-	*utils.CGREvent
-	clnb bool //rpcclonable
-}
-
-// SetCloneable sets if the args should be clonned on internal connections
-func (attr *AttrArgsProcessEvent) SetCloneable(rpcCloneable bool) {
-	attr.clnb = rpcCloneable
-}
-
-// RPCClone implements rpcclient.RPCCloner interface
-func (attr *AttrArgsProcessEvent) RPCClone() (interface{}, error) {
-	if !attr.clnb {
-		return attr, nil
-	}
-	return attr.Clone(), nil
-}
-
-// Clone creates a clone of the object
-func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
-	var attrIDs []string
-	if attr.AttributeIDs != nil {
-		attrIDs = make([]string, len(attr.AttributeIDs))
-		for i, id := range attr.AttributeIDs {
-			attrIDs[i] = id
-		}
-	}
-	return &AttrArgsProcessEvent{
-		AttributeIDs: attrIDs,
-		CGREvent:     attr.CGREvent.Clone(),
-	}
-}
-
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider,
+func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *AttrSProcessEventReply, err error) {
+	var attrIDs []string
+	if attrIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsAttributesAttributeIDs); err != nil {
+		return
+	}
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, args.AttributeIDs, evNm, lastID, processedPrfNo, profileRuns); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, attrIDs, evNm, lastID, processedPrfNo, profileRuns); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.TenantIDInline()},
-		CGREvent:        args.CGREvent,
+		CGREvent:        args,
 		blocker:         attrPrf.Blocker,
 	}
 	rply.Tenant = tnt
@@ -228,17 +197,21 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 }
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
-func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *AttrArgsProcessEvent,
+func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	attrPrfl *APIAttributeProfile) (err error) {
-	if args.CGREvent == nil {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, args.AttributeIDs, utils.MapStorage{
-		utils.MetaReq:  args.CGREvent.Event,
+	var attrIDs []string
+	if attrIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsAttributesAttributeIDs); err != nil {
+		return
+	}
+	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, attrIDs, utils.MapStorage{
+		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.OptsAttributesProcessRuns: 0,
@@ -255,9 +228,9 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgsProcessEvent,
+func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *AttrSProcessEventReply) (err error) {
-	if args.CGREvent == nil {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	tnt := args.Tenant
@@ -280,7 +253,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 		}
 		profileRuns = int(val)
 	}
-	args.CGREvent = args.CGREvent.Clone()
+	args = args.Clone()
 	processedPrf := make(utils.StringSet)
 	processedPrfNo := make(map[string]int)
 	eNV := utils.MapStorage{
@@ -293,8 +266,8 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	if args.APIOpts != nil {
 		eNV[utils.MetaOpts] = args.APIOpts
 	}
-	if args.CGREvent.Event != nil {
-		eNV[utils.MetaReq] = args.CGREvent.Event
+	if args.Event != nil {
+		eNV[utils.MetaReq] = args.Event
 	}
 
 	var lastID string
@@ -314,7 +287,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 			}
 			break
 		}
-		args.CGREvent.Tenant = evRply.CGREvent.Tenant
+		args.Tenant = evRply.CGREvent.Tenant
 		tnt = evRply.CGREvent.Tenant
 		lastID = evRply.MatchedProfiles[0]
 		matchedIDs = append(matchedIDs, lastID)
@@ -329,7 +302,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	}
 	if err == nil || err == utils.ErrNotFound {
 		// Make sure the requested fields were populated
-		for field, val := range args.CGREvent.Event {
+		for field, val := range args.Event {
 			if val == utils.MetaAttributes {
 				// mandatory IE missing
 				err = utils.NewErrMandatoryIeMissing(field)
@@ -343,7 +316,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	*reply = AttrSProcessEventReply{
 		MatchedProfiles: matchedIDs,
 		AlteredFields:   alteredFields.AsSlice(),
-		CGREvent:        args.CGREvent,
+		CGREvent:        args,
 	}
 	return
 }

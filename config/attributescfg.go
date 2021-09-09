@@ -18,11 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/utils"
+)
 
 type AttributesOpts struct {
-	ProcessRuns int
-	ProfileRuns int
+	AttributeIDs []string
+	ProcessRuns  int
+	ProfileRuns  int
 }
 
 // AttributeSCfg is the configuration of attribute service
@@ -42,6 +45,9 @@ type AttributeSCfg struct {
 func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) (err error) {
 	if jsnCfg == nil {
 		return nil
+	}
+	if jsnCfg.AttributeIDs != nil {
+		attrOpts.AttributeIDs = *jsnCfg.AttributeIDs
 	}
 	if jsnCfg.ProcessRuns != nil {
 		attrOpts.ProcessRuns = *jsnCfg.ProcessRuns
@@ -93,8 +99,9 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 // AsMapInterface returns the config as a map[string]interface{}
 func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	opts := map[string]interface{}{
-		utils.MetaProcessRunsCfg: alS.Opts.ProcessRuns,
-		utils.MetaProfileRunsCfg: alS.Opts.ProfileRuns,
+		utils.MetaAttributeIDsCfg: alS.Opts.AttributeIDs,
+		utils.MetaProcessRunsCfg:  alS.Opts.ProcessRuns,
+		utils.MetaProfileRunsCfg:  alS.Opts.ProfileRuns,
 	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
@@ -124,13 +131,27 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+func (attrOpts *AttributesOpts) Clone() *AttributesOpts {
+	var attrIDs []string
+	if attrOpts.AttributeIDs != nil {
+		attrIDs = utils.CloneStringSlice(attrOpts.AttributeIDs)
+	}
+	return &AttributesOpts{
+		AttributeIDs: attrIDs,
+		ProcessRuns:  attrOpts.ProcessRuns,
+		ProfileRuns:  attrOpts.ProfileRuns,
+	}
+}
+
 // Clone returns a deep copy of AttributeSCfg
 func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 	cln = &AttributeSCfg{
 		Enabled:        alS.Enabled,
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
-		Opts:           alS.Opts,
+	}
+	if alS.Opts != nil {
+		cln.Opts = alS.Opts.Clone()
 	}
 	if alS.ResourceSConns != nil {
 		cln.ResourceSConns = utils.CloneStringSlice(alS.ResourceSConns)
@@ -155,8 +176,9 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 }
 
 type AttributesOptsJson struct {
-	ProcessRuns *int `json:"*processRuns"`
-	ProfileRuns *int `json:"*profileRuns"`
+	AttributeIDs *[]string `json:"*attributeIDs"`
+	ProcessRuns  *int      `json:"*processRuns"`
+	ProfileRuns  *int      `json:"*profileRuns"`
 }
 
 // Attribute service config section
@@ -176,6 +198,9 @@ type AttributeSJsonCfg struct {
 func diffAttributesOptsJsonCfg(d *AttributesOptsJson, v1, v2 *AttributesOpts) *AttributesOptsJson {
 	if d == nil {
 		d = new(AttributesOptsJson)
+	}
+	if !utils.SliceStringEqual(v1.AttributeIDs, v2.AttributeIDs) {
+		d.AttributeIDs = utils.SliceStringPointer(v2.AttributeIDs)
 	}
 	if v1.ProcessRuns != v2.ProcessRuns {
 		d.ProcessRuns = utils.IntPointer(v2.ProcessRuns)

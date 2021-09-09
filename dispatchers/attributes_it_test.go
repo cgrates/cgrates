@@ -211,22 +211,20 @@ func testDspAttrPingFailover2(t *testing.T) {
 }
 
 func testDspAttrGetAttrFailover(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.EventName:    "Event1",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:  "attr12345",
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.EventName:    "Event1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:  "attr12345",
+			utils.OptsContext: "simpleauth",
 		},
 	}
 	eAttrPrf := &engine.AttributeProfile{
-		Tenant:    args.Tenant,
+		Tenant:    ev.Tenant,
 		ID:        "ATTR_1002_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*opts.*context:simpleauth"},
 		Attributes: []*engine.Attribute{
@@ -264,12 +262,12 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 	var attrReply *engine.AttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
-		args, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	} else if reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
@@ -279,7 +277,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 	allEngine2.stopEngine(t)
 
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err != nil {
+		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
 	if attrReply != nil {
@@ -290,7 +288,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 	}
 
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
-		args, &rplyEv); err != nil {
+		ev, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
@@ -323,102 +321,92 @@ func testDspAttrPing(t *testing.T) {
 }
 
 func testDspAttrTestMissingArgDispatcher(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: "simpleauth",
 		},
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
+		ev, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
 }
 
 func testDspAttrTestMissingApiKey(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: "simpleauth",
 		},
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
+		ev, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
 }
 
 func testDspAttrTestUnknownApiKey(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "1234",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "1234",
 		},
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
+		ev, &attrReply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
 		t.Error(err)
 	}
 }
 
 func testDspAttrTestAuthKey(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:  "12345",
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:  "12345",
+			utils.OptsContext: "simpleauth",
 		},
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
+		ev, &attrReply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }
 
 func testDspAttrTestAuthKey2(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:  "attr12345",
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:  "attr12345",
+			utils.OptsContext: "simpleauth",
 		},
 	}
 	eAttrPrf := &engine.AttributeProfile{
-		Tenant:    args.Tenant,
+		Tenant:    ev.Tenant,
 		ID:        "ATTR_1001_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:simpleauth"},
 		Attributes: []*engine.Attribute{
@@ -437,7 +425,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err != nil {
+		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
 	if attrReply != nil {
@@ -466,7 +454,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 
 	var rplyEv engine.AttrSProcessEventReply
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
-		args, &rplyEv); err != nil {
+		ev, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
@@ -475,44 +463,40 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 }
 
 func testDspAttrTestAuthKey3(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.EventName:    "Event1",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:  "attr12345",
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.EventName:    "Event1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:  "attr12345",
+			utils.OptsContext: "simpleauth",
 		},
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
 func testDspAttrGetAttrRoundRobin(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.EventName:    "RoundRobin",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:  "attr12345",
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.EventName:    "RoundRobin",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:  "attr12345",
+			utils.OptsContext: "simpleauth",
 		},
 	}
 	eAttrPrf := &engine.AttributeProfile{
-		Tenant:    args.Tenant,
+		Tenant:    ev.Tenant,
 		ID:        "ATTR_1002_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*opts.*context:simpleauth"},
 		Attributes: []*engine.Attribute{
@@ -551,13 +535,13 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	// To ALL2
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	// To ALL
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err != nil {
+		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
 	if attrReply != nil {
@@ -569,7 +553,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 
 	// To ALL2
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
-		args, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	} else if reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
@@ -578,7 +562,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 
 	// To ALL
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
-		args, &rplyEv); err != nil {
+		ev, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
@@ -587,18 +571,16 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 }
 
 func testDspAttrGetAttrInternal(t *testing.T) {
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.EventName:    "Internal",
-				utils.AccountField: "1003",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:  "attr12345",
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.EventName:    "Internal",
+			utils.AccountField: "1003",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:  "attr12345",
+			utils.OptsContext: "simpleauth",
 		},
 	}
 
@@ -621,7 +603,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 
 	var rplyEv engine.AttrSProcessEventReply
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
-		args, &rplyEv); err != nil {
+		ev, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",

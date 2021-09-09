@@ -387,24 +387,22 @@ func testAttributeSetAttributeProfileBrokenReference(t *testing.T) {
 func testAttributeSGetAttributeForEventMissingEvent(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
-		&engine.AttrArgsProcessEvent{}, &rplyEv); err == nil ||
+		&utils.CGREvent{}, &rplyEv); err == nil ||
 		err.Error() != "MANDATORY_IE_MISSING: [CGREvent]" {
 		t.Error(err)
 	}
 }
 
 func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-			Event: map[string]interface{}{
-				utils.AccountField: "dan",
-				utils.Destination:  "+491511231234",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaCDRs,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
+		Event: map[string]interface{}{
+			utils.AccountField: "dan",
+			utils.Destination:  "+491511231234",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaCDRs,
 		},
 	}
 	eAttrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
@@ -462,14 +460,12 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 }
 
 func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-			Event: map[string]interface{}{
-				utils.AccountField: "dan",
-				utils.Destination:  "+491511231234",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
+		Event: map[string]interface{}{
+			utils.AccountField: "dan",
+			utils.Destination:  "+491511231234",
 		},
 	}
 	var attrReply *engine.APIAttributeProfile
@@ -497,17 +493,15 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 }
 
 func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
-			Event: map[string]interface{}{
-				utils.AccountField: "dann",
-				utils.Destination:  "+491511231234",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaCDRs,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
+		Event: map[string]interface{}{
+			utils.AccountField: "dann",
+			utils.Destination:  "+491511231234",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaCDRs,
 		},
 	}
 	var attrReply *engine.APIAttributeProfile
@@ -518,17 +512,15 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 }
 
 func testAttributeSGetAttributeForEvent(t *testing.T) {
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSGetAttributeForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1007",
-				utils.Destination:  "+491511231234",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSGetAttributeForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1007",
+			utils.Destination:  "+491511231234",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -615,15 +607,13 @@ func testAttributeProcessEvent(t *testing.T) {
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	args := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.ToR:          utils.MetaVoice,
-				utils.AccountField: "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaCDRs,
-			},
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaCDRs,
 		},
 	}
 	expEvReply := &engine.AttrSProcessEventReply{
@@ -676,16 +666,14 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	attrArgs := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     "HeaderEventForAttribute",
-			Event: map[string]interface{}{
-				"Category": "call",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	attrArgs := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "HeaderEventForAttribute",
+		Event: map[string]interface{}{
+			"Category": "call",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
@@ -775,16 +763,14 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	attrArgs := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"InitialField": "InitialValue",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	attrArgs := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			"InitialField": "InitialValue",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
@@ -879,16 +865,14 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	attrArgs := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"InitialField": "InitialValue",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	attrArgs := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			"InitialField": "InitialValue",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{

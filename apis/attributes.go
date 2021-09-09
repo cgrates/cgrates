@@ -153,14 +153,14 @@ type AttributeSv1 struct {
 }
 
 // GetAttributeForEvent returns matching AttributeProfile for Event
-func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *engine.AttrArgsProcessEvent,
+func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.APIAttributeProfile) (err error) {
 	return alSv1.attrS.V1GetAttributeForEvent(ctx, args, reply)
 }
 
 // ProcessEvent will replace event fields with the ones in matching AttributeProfile
 // and return a list of altered fields
-func (alSv1 *AttributeSv1) ProcessEvent(ctx *context.Context, args *engine.AttrArgsProcessEvent,
+func (alSv1 *AttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) error {
 	return alSv1.attrS.V1ProcessEvent(ctx, args, reply)
 }

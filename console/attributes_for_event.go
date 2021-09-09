@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetAttributeForEvent{
 		name:      "attributes_for_event",
 		rpcMethod: utils.AttributeSv1GetAttributeForEvent,
-		rpcParams: &engine.AttrArgsProcessEvent{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetAttributeForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.AttrArgsProcessEvent
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,9 +50,7 @@ func (self *CmdGetAttributeForEvent) RpcMethod() string {
 
 func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.AttrArgsProcessEvent{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }
