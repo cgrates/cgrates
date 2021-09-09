@@ -228,12 +228,39 @@ func waitForFilterS(ctx *context.Context, fsCh chan *engine.FilterS) (filterS *e
 	return
 }
 
-func getCacheS(ctx *context.Context, csCh chan *engine.CacheS) (cS *engine.CacheS, err error) {
-	select {
-	case <-ctx.Done():
-		err = ctx.Err()
-	case cS = <-csCh:
-		csCh <- cS
+func InitConfigFromPath(path, nodeID string, lgLevel int) (cfg *config.CGRConfig, err error) {
+	// Init config
+	if cfg, err = config.NewCGRConfigFromPath(path); err != nil {
+		err = fmt.Errorf("could not parse config: <%s>", err)
+		return
 	}
+	if cfg.ConfigDBCfg().Type != utils.MetaInternal {
+		var d config.ConfigDB
+		if d, err = engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
+			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
+			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
+			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+			cfg.ConfigDBCfg().Opts); err != nil { // Cannot configure getter database, show stopper
+			err = fmt.Errorf("could not configure configDB: <%s>", err)
+			return
+		}
+		if err = cfg.LoadFromDB(d); err != nil {
+			err = fmt.Errorf("could not parse config from DB: <%s>", err)
+			return
+		}
+	}
+	if nodeID != utils.EmptyString {
+		cfg.GeneralCfg().NodeID = nodeID
+	}
+	if lgLevel != -1 { // Modify the log level if provided by command arguments
+		cfg.GeneralCfg().LogLevel = lgLevel
+	}
+	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
+		cfg.CoreSCfg().Caps = utils.ConcurrentReqsLimit
+	}
+	if len(utils.ConcurrentReqsStrategy) != 0 {
+		cfg.CoreSCfg().CapsStrategy = utils.ConcurrentReqsStrategy
+	}
+	config.SetCgrConfig(cfg) // Share the config object
 	return
 }
