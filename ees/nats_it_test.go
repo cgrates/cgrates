@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"os"
 	"os/exec"
 	"path"
 	"testing"
@@ -181,5 +182,34 @@ func TestNatsEE(t *testing.T) {
 		}
 	case <-time.After(50 * time.Millisecond):
 		t.Fatal("Time limit exceeded")
+	}
+}
+
+func TestGetNatsOptsSeedFile(t *testing.T) {
+	if _, err := os.Create("/tmp/nkey.txt"); err != nil {
+		t.Error(err)
+	}
+	defer os.Remove("/tmp/nkey.txt")
+	nkey := "SUACSSL3UAHUDXKFSNVUZRF5UHPMWZ6BFDTJ7M6USDXIEDNPPQYYYCU3VY"
+	os.WriteFile("/tmp/nkey.txt", []byte(nkey), 0777)
+
+	opts := map[string]interface{}{
+		utils.NatsSeedFile: "/tmp/nkey.txt",
+		// utils.NatsSeedFile: "file",
+	}
+
+	nodeID := "node_id1"
+	connTimeout := 2 * time.Second
+
+	_, err := GetNatsOpts(opts, nodeID, connTimeout)
+	if err != nil {
+		t.Error(err)
+	}
+
+	//test error
+	os.WriteFile("/tmp/nkey.txt", []byte(""), 0777)
+	_, err = GetNatsOpts(opts, nodeID, connTimeout)
+	if err.Error() != "no nkey seed found" {
+		t.Errorf("Expected %v \n but received \n %v", err.Error(), "no nkey seed found")
 	}
 }
