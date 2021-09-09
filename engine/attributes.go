@@ -265,16 +265,14 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 
-	var processRuns int64
+	processRuns := int64(alS.cgrcfg.AttributeSCfg().Opts.ProcessRuns)
 	if v, has := args.APIOpts[utils.OptsAttributesProcessRuns]; has {
 		if processRuns, err = utils.IfaceAsTInt64(v); err != nil {
 			return
 		}
-	} else if processRuns, err = utils.IfaceAsTInt64(alS.cgrcfg.AttributeSCfg().DefaultOpts[utils.OptsAttributesProcessRuns]); err != nil {
-		return
 	}
 
-	profileRuns := alS.cgrcfg.AttributeSCfg().ProfileRuns
+	profileRuns := alS.cgrcfg.AttributeSCfg().Opts.ProfileRuns
 	if opt, has := args.APIOpts[utils.OptsAttributesProfileRuns]; has {
 		var val int64
 		if val, err = utils.IfaceAsTInt64(opt); err != nil {
@@ -287,8 +285,8 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	processedPrfNo := make(map[string]int)
 	eNV := utils.MapStorage{
 		utils.MetaVars: utils.MapStorage{
-			utils.OptsAttributesProcessRuns: 0,
-			utils.MetaProcessedProfileIDs:   processedPrf,
+			utils.MetaProcessRunsCfg:      0,
+			utils.MetaProcessedProfileIDs: processedPrf,
 		},
 		utils.MetaTenant: tnt,
 	}
@@ -305,7 +303,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	dynDP := newDynamicDP(ctx, alS.cgrcfg.AttributeSCfg().ResourceSConns,
 		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().AccountSConns, args.Tenant, eNV)
 	for i := int64(0); i < processRuns; i++ {
-		(eNV[utils.MetaVars].(utils.MapStorage))[utils.OptsAttributesProcessRuns] = i + 1
+		(eNV[utils.MetaVars].(utils.MapStorage))[utils.MetaProcessRunsCfg] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(ctx, tnt, args, eNV, dynDP, lastID, processedPrfNo, profileRuns)
 		if err != nil {

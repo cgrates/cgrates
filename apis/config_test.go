@@ -74,9 +74,9 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: float64(1),
+				utils.MetaProcessRunsCfg: 1,
+				utils.MetaProfileRunsCfg: 0,
 			},
-			utils.ProfileRunsCfg: 0,
 		},
 	}
 	if err != nil {
@@ -110,7 +110,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				"stats_conns":           []string{"*internal"},
 				"suffix_indexed_fields": []string{},
 				utils.OptsCfg: map[string]interface{}{
-					utils.OptsAttributesProcessRuns: 2,
+					utils.MetaProcessRunsCfg: 2,
 				},
 			},
 		},
@@ -141,16 +141,17 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: float64(1),
+				utils.MetaProcessRunsCfg: 2,
+				utils.MetaProfileRunsCfg: 0,
 			},
-			utils.ProfileRunsCfg: 0,
 		},
 	}
 	if errGet != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}
 	if !reflect.DeepEqual(expectedGet, replyGet) {
-		t.Errorf("Expected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>",
+			utils.ToJSON(expectedGet), utils.ToJSON(replyGet))
 	}
 	argsRld := &config.ReloadArgs{
 		DryRun:  true,
@@ -182,16 +183,16 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: float64(1),
+				utils.MetaProcessRunsCfg: 2,
+				utils.MetaProfileRunsCfg: 0,
 			},
-			utils.ProfileRunsCfg: 0,
 		},
 	}
 	if errGetRld != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGetRld)
 	}
 	if !reflect.DeepEqual(expectedGetRld, replyGetRld) {
-		t.Errorf("Expected <%+v>, \nReceived <%+v>", expectedGetRld, replyGetRld)
+		t.Errorf("Expected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGetRld), utils.ToJSON(replyGetRld))
 	}
 }
 
@@ -227,7 +228,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
-	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*processRuns":1},"prefix_indexed_fields":[],"profile_runs":0,"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*processRuns":2},"prefix_indexed_fields":[],"profile_runs":0,"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}

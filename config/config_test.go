@@ -1849,8 +1849,8 @@ func TestAttributeSConfig(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
-		DefaultOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(1),
+		Opts: &AttributesOpts{
+			ProcessRuns: 1,
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -4157,9 +4157,9 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: float64(1),
+				utils.MetaProcessRunsCfg: 1,
+				utils.MetaProfileRunsCfg: 0,
 			},
-			utils.ProfileRunsCfg: 0,
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -5939,8 +5939,8 @@ func TestSetCfgInDb(t *testing.T) {
 		StringIndexedFields: &[]string{"field1"},
 		SuffixIndexedFields: &[]string{"field1"},
 		PrefixIndexedFields: &[]string{"field1"},
-		DefaultOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(2),
+		Opts: &AttributesOpts{
+			ProcessRuns: 2,
 		},
 		NestedFields: true,
 	}
@@ -5957,8 +5957,8 @@ func TestSetCfgInDb(t *testing.T) {
 				String_indexed_fields: &[]string{"field2"},
 				Suffix_indexed_fields: &[]string{"field2"},
 				Prefix_indexed_fields: &[]string{"field2"},
-				Opts: map[string]interface{}{
-					utils.OptsAttributesProcessRuns: float64(3),
+				Opts: &AttributesOptsJson{
+					ProcessRuns: utils.IntPointer(3),
 				},
 				Nested_fields: utils.BoolPointer(false),
 			},
@@ -5973,8 +5973,8 @@ func TestSetCfgInDb(t *testing.T) {
 		String_indexed_fields: &[]string{"field2"},
 		Suffix_indexed_fields: &[]string{"field2"},
 		Prefix_indexed_fields: &[]string{"field2"},
-		Opts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(3),
+		Opts: &AttributesOptsJson{
+			ProcessRuns: utils.IntPointer(3),
 		},
 		Nested_fields: utils.BoolPointer(false),
 	}
@@ -5988,7 +5988,7 @@ func TestSetCfgInDb(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected %v \n but received \n %v", expected, rcv)
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
@@ -6005,8 +6005,8 @@ func TestSetNilCfgInDb(t *testing.T) {
 		StringIndexedFields: &[]string{"field1"},
 		SuffixIndexedFields: &[]string{"field1"},
 		PrefixIndexedFields: &[]string{"field1"},
-		DefaultOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(2),
+		Opts: &AttributesOpts{
+			ProcessRuns: 2,
 		},
 		NestedFields: true,
 	}
@@ -6019,7 +6019,7 @@ func TestSetNilCfgInDb(t *testing.T) {
 		},
 	}
 	expected := &AttributeSJsonCfg{
-		Opts: make(map[string]interface{}),
+		Opts: &AttributesOptsJson{},
 	}
 	var reply string
 	if err := cfg.V1SetConfig(context.Background(), args, &reply); err != nil {
@@ -6048,8 +6048,8 @@ func TestReloadCfgInDb(t *testing.T) {
 		StringIndexedFields: &[]string{"field1"},
 		SuffixIndexedFields: &[]string{"field1"},
 		PrefixIndexedFields: &[]string{"field1"},
-		DefaultOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(2),
+		Opts: &AttributesOpts{
+			ProcessRuns: 2,
 		},
 		NestedFields: true,
 	}
@@ -6066,8 +6066,8 @@ func TestReloadCfgInDb(t *testing.T) {
 		String_indexed_fields: &[]string{"field2"},
 		Suffix_indexed_fields: &[]string{"field2"},
 		Prefix_indexed_fields: &[]string{"field2"},
-		Opts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(3),
+		Opts: &AttributesOptsJson{
+			ProcessRuns: utils.IntPointer(3),
 		},
 		Nested_fields: utils.BoolPointer(false),
 	}
@@ -6081,8 +6081,8 @@ func TestReloadCfgInDb(t *testing.T) {
 		StringIndexedFields: &[]string{"field2"},
 		SuffixIndexedFields: &[]string{"field2"},
 		PrefixIndexedFields: &[]string{"field2"},
-		DefaultOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(3),
+		Opts: &AttributesOpts{
+			ProcessRuns: 3,
 		},
 		NestedFields: false,
 	}

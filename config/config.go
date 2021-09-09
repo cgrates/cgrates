@@ -142,6 +142,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.radiusAgentCfg.ClientSecrets = make(map[string]string)
 	cfg.dnsAgentCfg = new(DNSAgentCfg)
 	cfg.attributeSCfg = new(AttributeSCfg)
+	cfg.AttributeSCfg().Opts = &AttributesOpts{}
 	cfg.chargerSCfg = new(ChargerSCfg)
 	cfg.resourceSCfg = new(ResourceSConfig)
 	cfg.statsCfg = new(StatSCfg)

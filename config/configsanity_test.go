@@ -987,8 +987,8 @@ func TestConfigSanityAttributesCfg(t *testing.T) {
 
 	cfg.attributeSCfg = &AttributeSCfg{
 		Enabled: true,
-		DefaultOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(0),
+		Opts: &AttributesOpts{
+			ProcessRuns: 0,
 		},
 	}
 	expected := "<AttributeS> processRuns needs to be bigger than 0"

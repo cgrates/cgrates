@@ -232,6 +232,31 @@ type RouteSJsonCfg struct {
 	Opts                  *RoutesOptsJson
 }
 
+func diffRoutesOptsJsonCfg(d *RoutesOptsJson, v1, v2 *RoutesOpts) *RoutesOptsJson {
+	if d == nil {
+		d = new(RoutesOptsJson)
+	}
+	if v1.Context != v2.Context {
+		d.Context = utils.StringPointer(v2.Context)
+	}
+	if v1.Limit != v2.Limit {
+		d.Limit = v2.Limit
+	}
+	if v1.Offset != v2.Offset {
+		d.Offset = v2.Offset
+	}
+	if v1.MaxCost != v2.MaxCost {
+		d.MaxCost = &v2.MaxCost
+	}
+	if v1.IgnoreErrors != v2.IgnoreErrors {
+		d.IgnoreErrors = utils.BoolPointer(v2.IgnoreErrors)
+	}
+	if v1.ProfileCount != v2.ProfileCount {
+		d.ProfileCount = utils.Float64Pointer(v2.ProfileCount)
+	}
+	return d
+}
+
 func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	if d == nil {
 		d = new(RouteSJsonCfg)
@@ -266,24 +291,6 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	if v1.DefaultRatio != v2.DefaultRatio {
 		d.Default_ratio = utils.IntPointer(v2.DefaultRatio)
 	}
-	d.Opts = &RoutesOptsJson{}
-	if v1.Opts.Context != v2.Opts.Context {
-		d.Opts.Context = utils.StringPointer(v2.Opts.Context)
-	}
-	if v1.Opts.Limit != v2.Opts.Limit {
-		d.Opts.Limit = v2.Opts.Limit
-	}
-	if v1.Opts.Offset != v2.Opts.Offset {
-		d.Opts.Offset = v2.Opts.Offset
-	}
-	if v1.Opts.MaxCost != v2.Opts.MaxCost {
-		d.Opts.MaxCost = &v2.Opts.MaxCost
-	}
-	if v1.Opts.IgnoreErrors != v2.Opts.IgnoreErrors {
-		d.Opts.IgnoreErrors = utils.BoolPointer(v2.Opts.IgnoreErrors)
-	}
-	if v1.Opts.ProfileCount != v2.Opts.ProfileCount {
-		d.Opts.ProfileCount = utils.Float64Pointer(v2.Opts.ProfileCount)
-	}
+	d.Opts = diffRoutesOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
