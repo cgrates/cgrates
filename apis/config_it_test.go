@@ -154,7 +154,7 @@ func testCfgGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: float64(1),
+				utils.MetaProcessRunsCfg: 1,
 			},
 		},
 	}
@@ -190,7 +190,7 @@ func testCfgSetGetConfig(t *testing.T) {
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
-						utils.OptsAttributesProcessRuns: 2,
+						utils.MetaProcessRunsCfg: 2,
 					},
 				},
 			},
@@ -213,7 +213,7 @@ func testCfgSetGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: float64(2),
+				utils.MetaProcessRunsCfg: 2,
 			},
 		},
 	}
@@ -430,7 +430,7 @@ func testCfgGetConfigStore(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Opts:                  make(map[string]interface{}),
+		Opts:                  &config.AttributesOptsJson{},
 	}
 	if !reflect.DeepEqual(attr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(attr))
@@ -455,7 +455,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
-						utils.OptsAttributesProcessRuns: 2,
+						utils.MetaProcessRunsCfg: 2,
 					},
 				},
 			},
@@ -478,7 +478,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
+				utils.MetaProcessRunsCfg: 2,
 			},
 		},
 	}
@@ -512,8 +512,8 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Opts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(2),
+		Opts: &config.AttributesOptsJson{
+			ProcessRuns: utils.IntPointer(2),
 		},
 	}
 	if !reflect.DeepEqual(attr, expected) {
@@ -532,8 +532,8 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Opts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: float64(2),
+		Opts: &config.AttributesOptsJson{
+			ProcessRuns: utils.IntPointer(2),
 		},
 	}
 	err := connDb.SetSection(context.Background(), "attributes", attrSect)
@@ -572,7 +572,7 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
+				utils.MetaProcessRunsCfg: 2,
 			},
 		},
 	}

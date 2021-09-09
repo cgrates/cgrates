@@ -20,6 +20,11 @@ package config
 
 import "github.com/cgrates/cgrates/utils"
 
+type AttributesOpts struct {
+	ProcessRuns int
+	ProfileRuns int
+}
+
 // AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
 	Enabled             bool
@@ -31,8 +36,21 @@ type AttributeSCfg struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
-	ProfileRuns         int
-	DefaultOpts         map[string]interface{}
+	Opts                *AttributesOpts
+}
+
+func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.ProcessRuns != nil {
+		attrOpts.ProcessRuns = *jsnCfg.ProcessRuns
+	}
+	if jsnCfg.ProfileRuns != nil {
+		attrOpts.ProfileRuns = *jsnCfg.ProfileRuns
+	}
+
+	return nil
 }
 
 func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -63,26 +81,26 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Suffix_indexed_fields != nil {
 		alS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
-	if jsnCfg.Profile_runs != nil {
-		alS.ProfileRuns = *jsnCfg.Profile_runs
-	}
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Opts != nil {
-		alS.DefaultOpts = jsnCfg.Opts
+		alS.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.MetaProcessRunsCfg: alS.Opts.ProcessRuns,
+		utils.MetaProfileRunsCfg: alS.Opts.ProfileRuns,
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
-		utils.ProfileRunsCfg:    alS.ProfileRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,
-		utils.OptsCfg:           alS.DefaultOpts,
+		utils.OptsCfg:           opts,
 	}
 	if alS.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*alS.StringIndexedFields)
@@ -112,8 +130,7 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 		Enabled:        alS.Enabled,
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
-		DefaultOpts:    alS.DefaultOpts,
-		ProfileRuns:    alS.ProfileRuns,
+		Opts:           alS.Opts,
 	}
 	if alS.ResourceSConns != nil {
 		cln.ResourceSConns = utils.CloneStringSlice(alS.ResourceSConns)
@@ -137,6 +154,11 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 	return
 }
 
+type AttributesOptsJson struct {
+	ProcessRuns *int `json:"*processRuns"`
+	ProfileRuns *int `json:"*profileRuns"`
+}
+
 // Attribute service config section
 type AttributeSJsonCfg struct {
 	Enabled               *bool
@@ -148,8 +170,20 @@ type AttributeSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
-	Profile_runs          *int
-	Opts                  map[string]interface{}
+	Opts                  *AttributesOptsJson
+}
+
+func diffAttributesOptsJsonCfg(d *AttributesOptsJson, v1, v2 *AttributesOpts) *AttributesOptsJson {
+	if d == nil {
+		d = new(AttributesOptsJson)
+	}
+	if v1.ProcessRuns != v2.ProcessRuns {
+		d.ProcessRuns = utils.IntPointer(v2.ProcessRuns)
+	}
+	if v1.ProfileRuns != v2.ProfileRuns {
+		d.ProfileRuns = utils.IntPointer(v2.ProfileRuns)
+	}
+	return d
 }
 
 func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *AttributeSJsonCfg {
@@ -177,7 +211,7 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
-	d.Opts = diffMap(d.Opts, v1.DefaultOpts, v2.DefaultOpts)
+	d.Opts = diffAttributesOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
 

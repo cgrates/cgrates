@@ -544,10 +544,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 
 	if cfg.attributeSCfg.Enabled {
-		processRuns, err := utils.IfaceAsTInt64(cfg.attributeSCfg.DefaultOpts[utils.OptsAttributesProcessRuns])
-		if err != nil {
-			return fmt.Errorf("<%s> invalid type", utils.AttributeS)
-		}
+		processRuns := cfg.attributeSCfg.Opts.ProcessRuns
 		if processRuns < 1 {
 			return fmt.Errorf("<%s> processRuns needs to be bigger than 0", utils.AttributeS)
 		}

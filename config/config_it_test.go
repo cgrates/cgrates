@@ -155,8 +155,8 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
-		DefaultOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: 1.,
+		Opts: &AttributesOpts{
+			ProcessRuns: 1.,
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
@@ -193,8 +193,8 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
-		DefaultOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: 1.,
+		Opts: &AttributesOpts{
+			ProcessRuns: 1.,
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
