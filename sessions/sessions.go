@@ -1557,6 +1557,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		args.GetRoutes || utils.OptAsBool(args.APIOpts, utils.OptsSesRouteS)) {
 		return // Nothing to do
 	}
+	if args.APIOpts == nil {
+		args.APIOpts = make(map[string]interface{})
+	}
 
 	if args.GetAttributes ||
 		utils.OptAsBool(args.APIOpts, utils.OptsSesAttributeS) {
