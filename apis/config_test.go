@@ -98,8 +98,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	}
 	rlcCfg := NewConfigSv1(cfg)
 	args := &config.SetConfigArgs{
-		APIOpts: nil,
-		Tenant:  utils.CGRateSorg,
+		Tenant: utils.CGRateSorg,
 		Config: map[string]interface{}{
 			"attributes": map[string]interface{}{
 				"accounts_conns":        []string{"*internal"},
@@ -123,7 +122,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	if !reflect.DeepEqual(expected, reply) {
+	if expected != reply {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", expected, reply)
 	}
 	argsGet := &config.SectionWithAPIOpts{
@@ -143,7 +142,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: []string(nil),
-				utils.MetaProcessRunsCfg:  2,
+				utils.MetaProcessRunsCfg:  1,
 				utils.MetaProfileRunsCfg:  0,
 			},
 		},
@@ -186,7 +185,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: []string(nil),
-				utils.MetaProcessRunsCfg:  2,
+				utils.MetaProcessRunsCfg:  1,
 				utils.MetaProfileRunsCfg:  0,
 			},
 		},
@@ -231,7 +230,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
-	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*processRuns":2},"prefix_indexed_fields":[],"profile_runs":0,"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":null,"*processRuns":1,"*profileRuns":0},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}

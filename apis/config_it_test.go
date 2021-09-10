@@ -154,7 +154,9 @@ func testCfgGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProcessRunsCfg: 1,
+				utils.MetaAttributeIDsCfg: []string(nil),
+				utils.MetaProcessRunsCfg:  1,
+				utils.MetaProfileRunsCfg:  0,
 			},
 		},
 	}
@@ -213,7 +215,9 @@ func testCfgSetGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProcessRunsCfg: 2,
+				utils.MetaAttributeIDsCfg: []string(nil),
+				utils.MetaProcessRunsCfg:  2,
+				utils.MetaProfileRunsCfg:  0,
 			},
 		},
 	}
@@ -311,7 +315,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"opts\":{\"*processRuns\":2},\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"opts\":{\"*attributeIDs\":null,\"*processRuns\":2,\"*profileRuns\":0},\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -478,7 +482,9 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProcessRunsCfg: 2,
+				utils.MetaAttributeIDsCfg: []string(nil),
+				utils.MetaProcessRunsCfg:  2,
+				utils.MetaProfileRunsCfg:  0,
 			},
 		},
 	}
@@ -572,7 +578,9 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaProcessRunsCfg: 2,
+				utils.MetaAttributeIDsCfg: []string(nil),
+				utils.MetaProcessRunsCfg:  2,
+				utils.MetaProfileRunsCfg:  0,
 			},
 		},
 	}

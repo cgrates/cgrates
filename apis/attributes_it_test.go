@@ -387,7 +387,7 @@ func testAttributeSetAttributeProfileBrokenReference(t *testing.T) {
 func testAttributeSGetAttributeForEventMissingEvent(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
-		&utils.CGREvent{}, &rplyEv); err == nil ||
+		nil, &rplyEv); err == nil ||
 		err.Error() != "MANDATORY_IE_MISSING: [CGREvent]" {
 		t.Error(err)
 	}
