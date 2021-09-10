@@ -48,7 +48,7 @@ var (
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
 		testGetAttributeProfileBeforeSet,
-		//testAttributeSLoadFromFolder,
+		testAttributeSLoadFromFolder,
 		testAttributeSetAttributeProfile,
 		testAttributeGetAttributeIDs,
 		testAttributeGetAttributeCount,
@@ -388,7 +388,7 @@ func testAttributeSGetAttributeForEventMissingEvent(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		nil, &rplyEv); err == nil ||
-		err.Error() != "MANDATORY_IE_MISSING: [CGREvent]" {
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

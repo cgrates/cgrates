@@ -230,9 +230,6 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 // V1ProcessEvent proccess the event and returns the result
 func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *AttrSProcessEventReply) (err error) {
-	if args == nil {
-		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
-	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
