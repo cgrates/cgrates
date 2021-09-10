@@ -222,3 +222,43 @@ func TestGetNatsOptsJWT(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetNatsOptsClientCert(t *testing.T) {
+	opts := map[string]interface{}{
+		utils.NatsClientCertificate: "client_cert",
+		utils.NatsClientKey:         "client_key",
+	}
+	nodeID := "node_id1"
+	connTimeout := 2 * time.Second
+
+	_, err := GetNatsOpts(opts, nodeID, connTimeout)
+	if err != nil {
+		t.Error(err)
+	}
+	// exp := make([]nats.Option, 0, 7)
+	// exp = append(exp, nats.Name(utils.CGRateSLwr+nodeID),
+	// 	nats.Timeout(connTimeout),
+	// 	nats.DrainTimeout(time.Second))
+	// exp = append(exp, nats.ClientCert("client_cert", "client_key"))
+	// if !reflect.DeepEqual(exp[3], rcv[3]) {
+	// 	t.Errorf("Expected %+v \n but received \n %+v", exp, rcv)
+	// }
+
+	// no key error
+	opts = map[string]interface{}{
+		utils.NatsClientCertificate: "client_cert",
+	}
+	_, err = GetNatsOpts(opts, nodeID, connTimeout)
+	if err.Error() != "has certificate but no key" {
+		t.Error("There was supposedly no key")
+	}
+
+	// no certificate error
+	opts = map[string]interface{}{
+		utils.NatsClientKey: "client_key",
+	}
+	_, err = GetNatsOpts(opts, nodeID, connTimeout)
+	if err.Error() != "has key but no certificate" {
+		t.Error("There was supposedly no certificate")
+	}
+}
