@@ -62,6 +62,8 @@ func TestCoreSCoverage(t *testing.T) {
 	//populates connChan with something in order to call the shutdown function
 	srv.connChan <- &testMockClients{}
 	srv.stopChan = make(chan struct{})
+	// srv.csCh = make(chan *cores.CoreService, 1)
+	srv.csCh <- nil
 	getShut := srv.Shutdown()
 	if getShut != nil {
 		t.Errorf("\nExpecting not <nil>,\n Received <%+v>", getShut)
