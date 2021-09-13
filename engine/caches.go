@@ -189,6 +189,10 @@ func (chS *CacheS) Clear(chIDs []string) {
 	chS.tCache.Clear(chIDs)
 }
 
+func (chS *CacheS) RemoveGroup(cacheID, groupID string) {
+	chS.tCache.RemoveGroup(cacheID, groupID, true, utils.NonTransactional)
+}
+
 // BeginTransaction is an exported method from TransCache
 func (chS *CacheS) BeginTransaction() string {
 	return chS.tCache.BeginTransaction()
