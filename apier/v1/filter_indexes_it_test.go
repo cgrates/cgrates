@@ -48,7 +48,6 @@ var (
 		testV1FIdxStartEngine,
 		testV1FIdxRpcConn,
 
-		/*
 		testV1FIdxSetThresholdProfile,
 		testV1FIdxComputeThresholdsIndexes,
 		testV1FIdxSetSecondThresholdProfile,
@@ -94,7 +93,6 @@ var (
 		testV1FIdxSetDispatcherProfile2,
 		testV1FIdxComputeDispatcherProfileIndexes2,
 
-		 */
 		testV1FIdxComputeIndexesMultipleProfilesAndFilters,
 
 		testV1FIdxStopEngine,
@@ -1925,7 +1923,6 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 	}
 }
 
-
 func testV1FIdxComputeIndexesMultipleProfilesAndFilters(t *testing.T) {
 	fltr := &FilterWithCache{
 		Filter: &engine.Filter{
@@ -2003,9 +2000,9 @@ func testV1FIdxComputeIndexesMultipleProfilesAndFilters(t *testing.T) {
 			FilterIDs: []string{"fltr_for_attr",
 				"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
-			Weight:           10,
-			MaxHits:          -1,
-			MinHits:          0,
+			Weight:  10,
+			MaxHits: -1,
+			MinHits: 0,
 		},
 	}
 	thPrf1 := &engine.ThresholdWithCache{
@@ -2014,9 +2011,9 @@ func testV1FIdxComputeIndexesMultipleProfilesAndFilters(t *testing.T) {
 			ID:     "THD_ACNT_1002",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
-			Weight:           20,
-			MaxHits:          4,
-			MinHits:          0,
+			Weight:  20,
+			MaxHits: 4,
+			MinHits: 0,
 		},
 	}
 	thPrf2 := &engine.ThresholdWithCache{
@@ -2025,9 +2022,9 @@ func testV1FIdxComputeIndexesMultipleProfilesAndFilters(t *testing.T) {
 			ID:     "THD_ACNT_1003",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
-			Weight:           150,
-			MaxHits:          4,
-			MinHits:          2,
+			Weight:  150,
+			MaxHits: 4,
+			MinHits: 2,
 		},
 	}
 	if err := tFIdxRpc.Call(utils.APIerSv1SetThresholdProfile,
@@ -2118,7 +2115,8 @@ func testV1FIdxComputeIndexesMultipleProfilesAndFilters(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned")
 	}
-	expectedIDx = []string{"*string:~*req.Account:1001:THD_ACNT_1002",
+	expectedIDx = []string{
+		"*string:~*req.Account:1001:THD_ACNT_1002",
 		"*string:~*req.Account:1001:THD_ACNT_1001",
 		"*prefix:~*req.AnswerTime:12:THD_ACNT_1002",
 		"*prefix:~*req.AnswerTime:33:THD_ACNT_1002",
@@ -2144,47 +2142,47 @@ func testV1FIdxComputeIndexesMultipleProfilesAndFilters(t *testing.T) {
 	}
 
 	/*
-	//now we will ComputeFilterIndexes of the remain profile
-	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
-		&utils.ArgsComputeFilterIndexIDs{Tenant: "cgrates.org",
-			ThresholdIDs: []string{"THD_ACNT_1003"}},
-		&reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned")
-	}
-	expectedIDx = []string{"*string:~*req.Account:1001:THD_ACNT_1002",
-		"*string:~*req.Account:1001:THD_ACNT_1003",
-		"*string:~*req.Account:1001:THD_ACNT_1001",
-		"*prefix:~*req.AnswerTime:12:THD_ACNT_1002",
-		"*prefix:~*req.AnswerTime:33:THD_ACNT_1002",
-		"*prefix:~*req.AnswerTime:12:THD_ACNT_1001",
-		"*prefix:~*req.AnswerTime:33:THD_ACNT_1001",
-		"*string:~*req.Usage:123s:THD_ACNT_1002",
-		"*string:~*req.Usage:123s:THD_ACNT_1001",
-		"*string:~*req.Subject:1004:THD_ACNT_1001",
-		"*string:~*req.Subject:6774:THD_ACNT_1001",
-		"*string:~*req.Subject:22312:THD_ACNT_1001",
-		"*string:~*opts.Subsystems:*attributes:THD_ACNT_1001",
-		"*prefix:~*req.Destinations:+0775:THD_ACNT_1001",
-		"*prefix:~*req.Destinations:+442:THD_ACNT_1001",
-		"*string:~*req.Subject:1004:THD_ACNT_1003",
-		"*string:~*req.Subject:6774:THD_ACNT_1003",
-		"*string:~*req.Subject:22312:THD_ACNT_1003",
-		"*string:~*opts.Subsystems:*attributes:THD_ACNT_1003",
-		"*prefix:~*req.Destinations:+0775:THD_ACNT_1003",
-		"*prefix:~*req.Destinations:+442:THD_ACNT_1003"}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: "cgrates.org", ItemType: utils.MetaThresholds}, &replyIdx); err != nil {
-		t.Error(err)
-	} else {
-		sort.Strings(expectedIDx)
-		sort.Strings(replyIdx)
-		if !reflect.DeepEqual(expectedIDx, replyIdx) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		//now we will ComputeFilterIndexes of the remain profile
+		if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
+			&utils.ArgsComputeFilterIndexIDs{Tenant: "cgrates.org",
+				ThresholdIDs: []string{"THD_ACNT_1003"}},
+			&reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply returned")
 		}
-	}
-	 */
+		expectedIDx = []string{"*string:~*req.Account:1001:THD_ACNT_1002",
+			"*string:~*req.Account:1001:THD_ACNT_1003",
+			"*string:~*req.Account:1001:THD_ACNT_1001",
+			"*prefix:~*req.AnswerTime:12:THD_ACNT_1002",
+			"*prefix:~*req.AnswerTime:33:THD_ACNT_1002",
+			"*prefix:~*req.AnswerTime:12:THD_ACNT_1001",
+			"*prefix:~*req.AnswerTime:33:THD_ACNT_1001",
+			"*string:~*req.Usage:123s:THD_ACNT_1002",
+			"*string:~*req.Usage:123s:THD_ACNT_1001",
+			"*string:~*req.Subject:1004:THD_ACNT_1001",
+			"*string:~*req.Subject:6774:THD_ACNT_1001",
+			"*string:~*req.Subject:22312:THD_ACNT_1001",
+			"*string:~*opts.Subsystems:*attributes:THD_ACNT_1001",
+			"*prefix:~*req.Destinations:+0775:THD_ACNT_1001",
+			"*prefix:~*req.Destinations:+442:THD_ACNT_1001",
+			"*string:~*req.Subject:1004:THD_ACNT_1003",
+			"*string:~*req.Subject:6774:THD_ACNT_1003",
+			"*string:~*req.Subject:22312:THD_ACNT_1003",
+			"*string:~*opts.Subsystems:*attributes:THD_ACNT_1003",
+			"*prefix:~*req.Destinations:+0775:THD_ACNT_1003",
+			"*prefix:~*req.Destinations:+442:THD_ACNT_1003"}
+		if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
+			&AttrGetFilterIndexes{Tenant: "cgrates.org", ItemType: utils.MetaThresholds}, &replyIdx); err != nil {
+			t.Error(err)
+		} else {
+			sort.Strings(expectedIDx)
+			sort.Strings(replyIdx)
+			if !reflect.DeepEqual(expectedIDx, replyIdx) {
+				t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+			}
+		}
+	*/
 }
 
 func testV1FIdxStopEngine(t *testing.T) {
