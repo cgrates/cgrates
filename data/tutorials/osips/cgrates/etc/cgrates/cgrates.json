@@ -26,35 +26,35 @@
 	"enabled": true,
 	"thresholds_conns": ["*localhost"],
 	"stats_conns": ["*localhost"],
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*localhost"],
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"stats_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"stats_conns": ["*localhost"],
+	"chargers_conns": ["*localhost"],
 	"sessions_cost_retries": 5,
 },
 
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*localhost"],
 },
 
 
 "sessions": {
 	"enabled": true,
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"resources_conns": ["*internal"],
-	"routes_conns": ["*internal"],
-	"attributes_conns": ["*internal"],
-	"stats_conns": ["*internal"],
-	"thresholds_conns": ["*internal"],
+	"chargers_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"routes_conns": ["*localhost"],
+	"attributes_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"],
 	"debit_interval": "10s",
 	"channel_sync_interval":"30s",
 },
@@ -69,7 +69,7 @@
 
 "resources": {
 	"enabled": true,
-	"thresholds_conns": ["*internal"],
+	"thresholds_conns": ["*localhost"],
 	"string_indexed_fields": ["*req.Account"],
 	"prefix_indexed_fields": ["*req.Destination"],
 },
@@ -77,7 +77,7 @@
 
 "stats": {
 	"enabled": true,
-	"thresholds_conns": ["*internal"],
+	"thresholds_conns": ["*localhost"],
 	"string_indexed_fields": ["*req.Account"],
 },
 
@@ -90,8 +90,8 @@
 
 "routes": {
 	"enabled": true,
-	"resources_conns": ["*internal"],
-	"stats_conns": ["*internal"],
+	"resources_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
 	"string_indexed_fields": ["*req.Account"],
 	"prefix_indexed_fields": ["*req.Destination"],
 },
@@ -99,7 +99,7 @@
 
 "apiers": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
+	"scheduler_conns": ["*localhost"],
 },
 
 
