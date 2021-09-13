@@ -1685,16 +1685,14 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		})
 	} else {
 		var lastErr error
-		utils.Logger.Debug(fmt.Sprintf("indexes %v", utils.ToJSON(indexes)))
 		for key, itmMp := range indexes {
 			if err = ms.query(func(sctx mongo.SessionContext) (err error) {
 				idxDbkey := utils.ConcatenatedKey(dbKey, key)
-				utils.Logger.Debug(fmt.Sprintf("itmMp %v", itmMp))
 				if len(itmMp) == 0 { // remove from DB if we set it with empty indexes
 					_, err = ms.getCol(ColRFI).DeleteOne(sctx,
 						bson.M{"key": idxDbkey})
 				} else {
-					utils.Logger.Debug(fmt.Sprintf("concatenare dbKey + key %v", idxDbkey))
+
 					_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": idxDbkey},
 						bson.M{"$set": bson.M{"key": idxDbkey, "value": itmMp.Slice()}},
 						options.Update().SetUpsert(true),
@@ -1704,26 +1702,6 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 			}); err != nil {
 				lastErr = err
 			}
-			/*
-				if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-					//	var action bson.M
-					utils.Logger.Debug(fmt.Sprintf("itmMp %v", itmMp))
-					if len(itmMp) == 0 {
-						_, err = ms.getCol(ColRFI).DeleteOne(sctx,
-							bson.M{"key": utils.ConcatenatedKey(dbKey, key)})
-						//action = bson.M{"$unset": bson.M{"value": 1}}
-					} else {
-						utils.Logger.Debug(fmt.Sprintf("concatenare dbKey + key %v,  %v", itmMp))
-						_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": utils.ConcatenatedKey(dbKey, key)},
-							bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(dbKey, key), "value": itmMp.Slice()}},
-							options.Update().SetUpsert(true),
-						)
-					}
-					return err
-				}); err != nil {
-					lastErr = err
-				}
-			*/
 		}
 		return lastErr
 	}
