@@ -19,54 +19,53 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdPassiveSessions{
-		name:      "passive_sessions",
-		rpcMethod: utils.SessionSv1GetPassiveSessions,
+	c := &CmdSessionsForceDisconnect{
+		name:      "session_force_disconnect",
+		rpcMethod: utils.SessionSv1ForceDisconnect,
+		rpcParams: &utils.SessionFilter{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdPassiveSessions struct {
+type CmdSessionsForceDisconnect struct {
 	name      string
 	rpcMethod string
-	rpcParams interface{}
+	rpcParams *utils.SessionFilter
 	*CommandExecuter
 }
 
-func (cmd *CmdPassiveSessions) Name() string {
+func (cmd *CmdSessionsForceDisconnect) Name() string {
 	return cmd.name
 }
 
-func (cmd *CmdPassiveSessions) RpcMethod() string {
+func (cmd *CmdSessionsForceDisconnect) RpcMethod() string {
 	return cmd.rpcMethod
 }
 
-func (cmd *CmdPassiveSessions) RpcParams(reset bool) interface{} {
+func (cmd *CmdSessionsForceDisconnect) RpcParams(reset bool) interface{} {
 	if reset || cmd.rpcParams == nil {
 		cmd.rpcParams = &utils.SessionFilter{APIOpts: make(map[string]interface{})}
 	}
 	return cmd.rpcParams
 }
 
-func (cmd *CmdPassiveSessions) PostprocessRpcParams() error {
-	param := cmd.rpcParams.(*utils.SessionFilter)
+func (cmd *CmdSessionsForceDisconnect) PostprocessRpcParams() error {
+	param := cmd.rpcParams
 	cmd.rpcParams = param
 	return nil
 }
 
-func (cmd *CmdPassiveSessions) RpcResult() interface{} {
-	var sessions []*sessions.ExternalSession
+func (cmd *CmdSessionsForceDisconnect) RpcResult() interface{} {
+	var sessions string
 	return &sessions
 }
 
-func (cmd *CmdPassiveSessions) GetFormatedResult(result interface{}) string {
+func (cmd *CmdSessionsForceDisconnect) GetFormatedResult(result interface{}) string {
 	return GetFormatedSliceResult(result, utils.StringSet{
 		utils.Usage:         {},
 		utils.DurationIndex: {},
