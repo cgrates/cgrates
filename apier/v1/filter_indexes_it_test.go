@@ -79,7 +79,13 @@ var (
 		testV1FIdxSecondComputeAttributeProfileIndexes,
 		testV1FIdxComputeWithAnotherContext,
 		testV1FIdxRemoveAttributeProfile,
+		// special case for multiple attributes and filters
 		testV1FIdxSetMultipleAttributesMultipleFilters,
+		// special case for multiple context and compute filters by different contexts of the same ID
+		testV1FIdxdxInitDataDb,
+		testV1FIdxResetStorDb,
+		testV1FIdxClearCache,
+		testV1FIdxSetAttributeProfileMultipleContextsAndComputes,
 
 		testV1FIdxdxInitDataDb,
 		testV1FIdxPopulateDatabase,
@@ -1497,10 +1503,6 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 			ID:        "ApierTest2",
 			Contexts:  []string{utils.MetaSessionS},
 			FilterIDs: []string{"FLTR_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			Attributes: []*engine.Attribute{{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
 				Path:      "FL1",
@@ -1890,6 +1892,321 @@ func testV1FIdxSetMultipleAttributesMultipleFilters(t *testing.T) {
 		sort.Strings(replyIdx)
 		if !reflect.DeepEqual(expIdx, replyIdx) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxSetAttributeProfileMultipleContextsAndComputes(t *testing.T) {
+	// set multiple filters for usage
+	fltr1 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "fltr_for_attr2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Usage",
+					Values:  []string{"123s"},
+				},
+			},
+		},
+	}
+	fltr2 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "fltr_for_attr3",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"12", "33"},
+				},
+			},
+		},
+	}
+	fltr := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, fltr1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, fltr2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	// set an attributeProfile with multiple contexts
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_ATTRIBUTE_CONTEXTS",
+			Contexts:  []string{utils.MetaChargers, utils.MetaSessionS, utils.MetaThresholds},
+			FilterIDs: []string{"fltr_for_attr3", "fltr_for_attr", "fltr_for_attr2"},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  "*req.Usage",
+					Type:  utils.MetaConstant,
+					Value: config.NewRSRParsersMustCompile("10m", utils.InfieldSep),
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetAttributeProfile,
+		attrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	// check indexes for our attributeProfile
+	expIdx := []string{
+		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*req.Subject:6774:TEST_ATTRIBUTE_CONTEXTS",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE_CONTEXTS",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE_CONTEXTS",
+		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*req.Subject:1004:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*req.Subject:22312:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTE_CONTEXTS",
+	}
+	sort.Strings(expIdx)
+	var result []string
+	// same expecteded indexes for *sessions, *chargers and *thresholds
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaSessionS,
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
+		}
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaChargers,
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
+		}
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaThresholds,
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
+		}
+	}
+
+	// remove indexes for all contexts
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaSessionS,
+		ItemType: utils.MetaAttributes,
+	}, &reply); err != nil {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaChargers,
+		ItemType: utils.MetaAttributes,
+	}, &reply); err != nil {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaThresholds,
+		ItemType: utils.MetaAttributes,
+	}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	// compute indexes by with different contexts and check them
+	// firstly for *sessions context
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{
+			Tenant:     "cgrates.org",
+			Context:    utils.MetaSessionS,
+			AttributeS: true,
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	// check the indexes after computing with *sessions context, the rest will not be computed
+
+	expIdx = []string{
+		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*req.Subject:6774:TEST_ATTRIBUTE_CONTEXTS",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE_CONTEXTS",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE_CONTEXTS",
+		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*req.Subject:1004:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*req.Subject:22312:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTE_CONTEXTS",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTE_CONTEXTS",
+	}
+	sort.Strings(expIdx)
+	// same expected indexes for *sessions, *chargers and *thresholds
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaSessionS,
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
+		}
+	}
+
+	// as for *sessions was computed, for *chargers and *thresaholds should not be computed, so NOT FOUND will be returned
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaChargers,
+		ItemType: utils.MetaAttributes,
+	}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaThresholds,
+		ItemType: utils.MetaAttributes,
+	}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	// noe we will compute for *chargers, and the remain context for compute indexes will remain *thresholds
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{
+			Tenant:     "cgrates.org",
+			Context:    utils.MetaChargers,
+			AttributeS: true,
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	// check for *sesssions and for *chargers, and for *threshold will be NOT FOUND
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaSessionS,
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
+		}
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaChargers,
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
+		}
+	}
+
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaThresholds,
+		ItemType: utils.MetaAttributes,
+	}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	// compute with the remain context *thresholds, so in the end, all indexes will be computed for all contexts
+	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{
+			Tenant:     "cgrates.org",
+			Context:    utils.MetaThresholds,
+			AttributeS: true,
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	// check again all the indexes for all contexts
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaSessionS, // *sesssions
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
+		}
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaChargers, // *chargers
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
+		}
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		Context:  utils.MetaThresholds, // *thresholds
+		ItemType: utils.MetaAttributes,
+	}, &result); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(result)
+		if !reflect.DeepEqual(result, expIdx) {
+			t.Errorf("Expected %+v received %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
 		}
 	}
 }
