@@ -398,8 +398,16 @@ func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error), newFltr *Filter) (indexes utils.StringSet, err error) {
 	indexes = make(utils.StringSet)
 	var profilesIDs []string
+	tntCtx := tnt
+	if ctx != utils.EmptyString {
+		tntCtx = utils.ConcatenatedKey(tnt, ctx)
+	}
 	if IDs == nil { // get all items
-		Cache.Clear([]string{idxItmType})
+		if ctx != utils.EmptyString {
+			Cache.RemoveGroup(idxItmType, tntCtx)
+		} else {
+			Cache.Clear([]string{idxItmType})
+		}
 		var ids []string
 		if ids, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[idxItmType]); err != nil {
 			return
@@ -410,10 +418,7 @@ func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 	} else {
 		profilesIDs = *IDs
 	}
-	tntCtx := tnt
-	if ctx != utils.EmptyString {
-		tntCtx = utils.ConcatenatedKey(tnt, ctx)
-	}
+
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
