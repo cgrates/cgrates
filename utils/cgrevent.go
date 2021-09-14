@@ -30,8 +30,6 @@ type CGREvent struct {
 	Time    *time.Time // event time
 	Event   map[string]interface{}
 	APIOpts map[string]interface{}
-
-	cache map[string]interface{}
 }
 
 func (ev *CGREvent) HasField(fldName string) (has bool) {
@@ -127,34 +125,6 @@ func (ev *CGREvent) TenantID() string {
 	return ConcatenatedKey(ev.Tenant, ev.ID)
 }
 
-// CacheInit will initialize the cache if not already done
-func (ev *CGREvent) CacheInit() {
-	if ev.cache == nil {
-		ev.cache = make(map[string]interface{})
-	}
-}
-
-// CacheClear will reset the cache
-func (ev *CGREvent) CacheClear() {
-	ev.cache = make(map[string]interface{})
-}
-
-// CacheGet will return a key from the cache
-func (ev *CGREvent) CacheGet(key string) (itm interface{}, has bool) {
-	itm, has = ev.cache[key]
-	return
-}
-
-// CacheSet will set data into the event's cache
-func (ev *CGREvent) CacheSet(key string, val interface{}) {
-	ev.cache[key] = val
-}
-
-// CacheRemove will remove data from cache
-func (ev *CGREvent) CacheRemove(key string) {
-	delete(ev.cache, key)
-}
-
 func (ev *CGREvent) Clone() (clned *CGREvent) {
 	clned = &CGREvent{
 		Tenant:  ev.Tenant,
@@ -168,10 +138,8 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	for k, v := range ev.Event {
 		clned.Event[k] = v
 	}
-	if ev.APIOpts != nil {
-		for opt, val := range ev.APIOpts {
-			clned.APIOpts[opt] = val
-		}
+	for opt, val := range ev.APIOpts {
+		clned.APIOpts[opt] = val
 	}
 	return
 }
@@ -182,15 +150,6 @@ func (cgrEv *CGREvent) AsDataProvider() (ev DataProvider) {
 		MetaOpts: cgrEv.APIOpts,
 		MetaReq:  cgrEv.Event,
 	}
-}
-
-// CGREvents is a group of generic events processed by CGR services
-// ie: derived CDRs
-type CGREvents struct {
-	Tenant string
-	ID     string
-	Time   *time.Time // event time
-	Events []map[string]interface{}
 }
 
 // EventWithFlags is used where flags are needed to mark processing
