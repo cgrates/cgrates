@@ -1692,7 +1692,6 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 					_, err = ms.getCol(ColRFI).DeleteOne(sctx,
 						bson.M{"key": idxDbkey})
 				} else {
-
 					_, err = ms.getCol(ColRFI).UpdateOne(sctx, bson.M{"key": idxDbkey},
 						bson.M{"$set": bson.M{"key": idxDbkey, "value": itmMp.Slice()}},
 						options.Update().SetUpsert(true),

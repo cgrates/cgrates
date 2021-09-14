@@ -26,9 +26,18 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// NewFilterIndexer creates the FilterIndexes without any indexes in it
 func NewFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) *FilterIndexer {
 	return &FilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
 		indexes:       make(map[string]utils.StringMap),
+		chngdIndxKeys: make(utils.StringMap)}
+}
+
+// NewFilterIndexerWithIndexes creates the FilterIndexes that contains already the old indexes
+func NewFilterIndexerWithIndexes(dm *DataManager, itemType, dbKeySuffix string,
+	oldIdx map[string]utils.StringMap) *FilterIndexer {
+	return &FilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
+		indexes:       oldIdx,
 		chngdIndxKeys: make(utils.StringMap)}
 }
 
