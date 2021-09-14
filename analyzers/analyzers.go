@@ -59,6 +59,10 @@ func (aS *AnalyzerService) SetFilterS(fS *engine.FilterS) {
 }
 
 func (aS *AnalyzerService) initDB() (err error) {
+	if aS.cfg.AnalyzerSCfg().DBPath == utils.EmptyString {
+		aS.db, err = bleve.NewMemOnly(bleve.NewIndexMapping())
+		return
+	}
 	dbPath := path.Join(aS.cfg.AnalyzerSCfg().DBPath, utils.AnzDBDir)
 	if _, err = os.Stat(dbPath); err == nil {
 		aS.db, err = bleve.Open(dbPath)
