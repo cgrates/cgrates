@@ -1004,9 +1004,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 
 	if cfg.analyzerSCfg.Enabled {
-		if _, err := os.Stat(cfg.analyzerSCfg.DBPath); err != nil && os.IsNotExist(err) {
-			return fmt.Errorf("<%s> nonexistent DB folder: %q", utils.AnalyzerS, cfg.analyzerSCfg.DBPath)
-		}
 		if !utils.AnzIndexType.Has(cfg.analyzerSCfg.IndexType) {
 			return fmt.Errorf("<%s> unsuported index type: %q", utils.AnalyzerS, cfg.analyzerSCfg.IndexType)
 		}
