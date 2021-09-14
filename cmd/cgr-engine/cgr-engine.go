@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/utils"
@@ -55,7 +56,9 @@ func RunCGREngine(fs []string) (err error) {
 	if cfg, err = services.InitConfigFromPath(*flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
 		return
 	}
-	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup))
+	cps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
+	server := cores.NewServer(cps)
+	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup), server, cps)
 	defer cgr.Stop(*flags.MemPrfDir, *flags.PidFile)
 	ctx, cancel := context.WithCancel(context.Background())
 

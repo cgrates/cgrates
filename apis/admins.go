@@ -35,4 +35,5 @@ type AdminSv1 struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
 	connMgr *engine.ConnManager
+	ping
 }
