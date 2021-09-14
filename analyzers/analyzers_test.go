@@ -440,3 +440,48 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestAnalyzerSLogTrafficInternalDB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	cfg.AnalyzerSCfg().DBPath = utils.EmptyString
+	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
+	anz, err := NewAnalyzerService(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t1 := time.Now().Add(-time.Hour)
+	if err = anz.logTrafic(0, utils.AnalyzerSv1Ping, "status", "result", "error",
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012", t1, t1.Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if err = anz.logTrafic(0, utils.CoreSv1Status, "status", "result", "error",
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012", t1, t1.Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	t1 = time.Now().Add(-10 * time.Minute)
+	if err = anz.logTrafic(0, utils.CoreSv1Status, "status", "result", "error",
+		utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012", t1, t1.Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if cnt, err := anz.db.DocCount(); err != nil {
+		t.Fatal(err)
+	} else if cnt != 2 {
+		t.Errorf("Expected only 2 documents received:%v", cnt)
+	}
+	if err = anz.clenaUp(); err != nil {
+		t.Fatal(err)
+	}
+	if cnt, err := anz.db.DocCount(); err != nil {
+		t.Fatal(err)
+	} else if cnt != 1 {
+		t.Errorf("Expected only one document received:%v", cnt)
+	}
+
+	if err = anz.db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err = anz.clenaUp(); err != bleve.ErrorIndexClosed {
+		t.Errorf("Expected error: %v,received: %+v", bleve.ErrorIndexClosed, err)
+	}
+}

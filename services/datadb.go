@@ -141,8 +141,8 @@ func (db *DataDBService) ServiceName() string {
 }
 
 // ShouldRun returns if the service should be running
-func (db *DataDBService) ShouldRun() bool {
-	return db.mandatoryDB() || db.cfg.SessionSCfg().Enabled
+func (db *DataDBService) ShouldRun() bool { // db should allways run
+	return true // ||db.mandatoryDB() || db.cfg.SessionSCfg().Enabled
 }
 
 // mandatoryDB returns if the current configuration needs the DB

@@ -131,7 +131,7 @@ func TestDataDBCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DataDB, serviceName)
 	}
 	shouldRun := db.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
-		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+	if !reflect.DeepEqual(shouldRun, true) {
+		t.Errorf("\nExpecting <true>,\n Received <%+v>", shouldRun)
 	}
 }
