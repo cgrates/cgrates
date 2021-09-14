@@ -39,15 +39,14 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.WaitGroup) *CGREngine {
-	cps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
+func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.WaitGroup, server *cores.Server, caps *engine.Caps) *CGREngine {
 	return &CGREngine{
 		cfg:        cfg,
 		cM:         cM,
-		caps:       cps,
+		caps:       caps,
 		shdWg:      shdWg,
 		srvManager: servmanager.NewServiceManager(cfg, shdWg, cM),
-		server:     cores.NewServer(cps), // Rpc/http server
+		server:     server, // Rpc/http server
 		srvDep: map[string]*sync.WaitGroup{
 			utils.AnalyzerS:       new(sync.WaitGroup),
 			utils.AdminS:          new(sync.WaitGroup),
@@ -114,6 +113,10 @@ type CGREngine struct {
 	iServeManagerCh chan birpc.ClientConnector
 
 	iDispatcherSCh chan birpc.ClientConnector
+}
+
+func (cgr *CGREngine) GetServDeps() map[string]*sync.WaitGroup {
+	return cgr.srvDep
 }
 
 func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefix string,
