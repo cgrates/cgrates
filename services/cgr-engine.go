@@ -39,12 +39,15 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewCGREngine(cfg *config.CGRConfig) (cgr *CGREngine) {
-	cgr = &CGREngine{
-		cfg:   cfg,
-		cM:    engine.NewConnManager(cfg),
-		caps:  engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy),
-		shdWg: new(sync.WaitGroup),
+func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.WaitGroup) *CGREngine {
+	cps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
+	return &CGREngine{
+		cfg:        cfg,
+		cM:         cM,
+		caps:       cps,
+		shdWg:      shdWg,
+		srvManager: servmanager.NewServiceManager(cfg, shdWg, cM),
+		server:     cores.NewServer(cps), // Rpc/http server
 		srvDep: map[string]*sync.WaitGroup{
 			utils.AnalyzerS:       new(sync.WaitGroup),
 			utils.AdminS:          new(sync.WaitGroup),
@@ -80,9 +83,6 @@ func NewCGREngine(cfg *config.CGRConfig) (cgr *CGREngine) {
 		},
 		iFilterSCh: make(chan *engine.FilterS, 1),
 	}
-	cgr.srvManager = servmanager.NewServiceManager(cgr.cfg, cgr.shdWg, cgr.cM)
-	cgr.server = cores.NewServer(cgr.caps) // Rpc/http server
-	return
 }
 
 type CGREngine struct {
@@ -380,49 +380,4 @@ func (cgr *CGREngine) Stop(memPrfDir, pidFile string) {
 		cgr.cpuPrfF.Close()
 	}
 	utils.Logger.Info("<CoreS> stopped all components. CGRateS shutdown!")
-}
-
-func RunCGREngine(fs []string) (err error) {
-	flags := NewCGREngineFlags()
-	if err = flags.Parse(fs); err != nil {
-		return
-	}
-	var vers string
-	if vers, err = utils.GetCGRVersion(); err != nil {
-		return
-	}
-	if *flags.Version {
-		return
-	}
-	if *flags.PidFile != utils.EmptyString {
-		cgrWritePid(*flags.PidFile)
-	}
-	if *flags.Singlecpu {
-		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
-	}
-
-	// Init config
-	var cfg *config.CGRConfig
-	if cfg, err = InitConfigFromPath(*flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
-		return
-	}
-	cgr := NewCGREngine(cfg)
-	defer cgr.Stop(*flags.MemPrfDir, *flags.PidFile)
-	ctx, cancel := context.WithCancel(context.Background())
-
-	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {
-		return
-	}
-
-	// cgr-manager
-	// iConn := make(chan birpc.ClientConnector)
-	// cgrM := NewCGRManager(cfg, cgr.cM, iConn, cgr.srvDep)
-	// cgr.AddService(cgrM, utils.ConcatenatedKey(utils.MetaInternal, "CgrManager"), "CgrmanagerSv1", iConn)
-	//
-
-	if err = cgr.StartServices(ctx, cancel, *flags.Preload); err != nil {
-		return
-	}
-	<-ctx.Done()
-	return
 }

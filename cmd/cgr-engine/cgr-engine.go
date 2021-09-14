@@ -19,25 +19,59 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
+	"runtime"
+	"sync"
 
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/utils"
 )
 
+func RunCGREngine(fs []string) (err error) {
+	flags := services.NewCGREngineFlags()
+	if err = flags.Parse(fs); err != nil {
+		return
+	}
+	var vers string
+	if vers, err = utils.GetCGRVersion(); err != nil {
+		return
+	}
+	if *flags.Version {
+		return
+	}
+	if *flags.PidFile != utils.EmptyString {
+		services.CgrWritePid(*flags.PidFile)
+	}
+	if *flags.Singlecpu {
+		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
+	}
+
+	// Init config
+	var cfg *config.CGRConfig
+	if cfg, err = services.InitConfigFromPath(*flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
+		return
+	}
+	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup))
+	defer cgr.Stop(*flags.MemPrfDir, *flags.PidFile)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {
+		return
+	}
+
+	if err = cgr.StartServices(ctx, cancel, *flags.Preload); err != nil {
+		return
+	}
+	<-ctx.Done()
+	return
+}
+
 func main() {
-	defer func() {
-		val := recover()
-		if val == nil {
-			return
-		}
-		utils.Logger.Crit(fmt.Sprintf("%s", val))
-		panic(val)
-	}()
-	if err := services.RunCGREngine(os.Args[1:]); err != nil {
+	if err := RunCGREngine(os.Args[1:]); err != nil {
 		log.Fatal(err)
-		utils.Logger.Crit(fmt.Sprintf("%s", err))
 	}
 }

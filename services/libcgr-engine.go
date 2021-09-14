@@ -112,7 +112,7 @@ func cgrSingnalHandler(ctx *context.Context, shutdown context.CancelFunc,
 	}
 }
 
-func cgrWritePid(pidFile string) (err error) {
+func CgrWritePid(pidFile string) (err error) {
 	var f *os.File
 	if f, err = os.Create(pidFile); err != nil {
 		err = fmt.Errorf("could not create pid file: %s", err)
