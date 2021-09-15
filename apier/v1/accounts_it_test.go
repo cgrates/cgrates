@@ -76,6 +76,7 @@ var (
 		testAccITMultipleBalanceWithoutTenant,
 		testAccITRemoveBalances,
 		testAccITAddVoiceBalanceWithDestinations,
+		testAccITSetBalanceWithTimeSuffix,
 		testAccITStopCgrEngine,
 	}
 )
@@ -1348,5 +1349,46 @@ func testAccITAddVoiceBalanceWithDestinations(t *testing.T) {
 		t.Error("Got error on Responder.Debit: ", err.Error())
 	} else if rply != 0 {
 		t.Errorf("Expecting %+v, received: %+v", 0, rply)
+	}
+}
+
+func testAccITSetBalanceWithTimeSuffix(t *testing.T) {
+	var reply string
+	args := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccSetBalanceTimeSuffix",
+		BalanceType: "*voice",
+		Balance: map[string]interface{}{
+			utils.ID:     "testAccSetBalanceTimeSuffix",
+			utils.Weight: 10,
+			utils.Value:  "120ms",
+		},
+	}
+	if err := accRPC.Call(utils.APIerSv1SetBalance, args, &reply); err != nil {
+		t.Error("Got error on SetBalance: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling SetBalance received: %s", reply)
+	}
+
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  accTenant,
+		Account: "testAccSetBalanceTimeSuffix",
+	}
+	if err := accRPC.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, value := range acnt.BalanceMap[utils.MetaVoice] {
+		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
+		if value.ID == "testAccSetBalanceTimeSuffix" {
+			if value.GetValue() != 120000000. {
+				t.Errorf("Expecting %+v, received: %+v", 120000000., value.GetValue())
+			}
+			if value.Weight != 10 {
+				t.Errorf("Expecting %+v, received: %+v", 10, value.Weight)
+			}
+			break
+		}
 	}
 }

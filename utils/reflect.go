@@ -277,6 +277,30 @@ func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 	}
 	return
 }
+func IfaceAsTFloat64(itm interface{}) (f float64, err error) {
+	switch it := itm.(type) {
+	case float64:
+		return it, nil
+	case time.Duration:
+		return float64(it.Nanoseconds()), nil
+	case int:
+		return float64(it), nil
+	case int64:
+		return float64(it), nil
+	case string:
+		if strings.HasSuffix(it, SSuffix) || strings.HasSuffix(it, MSuffix) || strings.HasSuffix(it, HSuffix) {
+			var tm time.Duration
+			if tm, err = time.ParseDuration(it); err != nil {
+				return
+			}
+			return float64(tm), nil
+		}
+		return strconv.ParseFloat(it, 64)
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to float64", it)
+	}
+	return
+}
 
 func IfaceAsBool(itm interface{}) (b bool, err error) {
 	switch v := itm.(type) {

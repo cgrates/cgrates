@@ -1833,3 +1833,58 @@ func TestIfaceAsBigDefault(t *testing.T) {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
+
+func TestIfaceAsTFloat64(t *testing.T) {
+	eFloat := 6.0
+	val := interface{}(6.0)
+	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(6)
+	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("6")
+	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(int64(6))
+	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not a float")
+	if _, err := IfaceAsTFloat64(val); err == nil {
+		t.Error("expecting error")
+	}
+	val = interface{}(time.Duration(6))
+	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	eFloat = 6000000.
+	val = interface{}("6ms")
+	if itmConvert, err := IfaceAsTFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("6sss")
+	experr := `time: unknown unit "sss" in duration "6sss"`
+	if _, err := IfaceAsTFloat64(val); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+	val = false
+	experr = `cannot convert field: false to float64`
+	if _, err := IfaceAsTFloat64(val); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
