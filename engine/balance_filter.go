@@ -58,7 +58,7 @@ func NewBalanceFilter(filter map[string]interface{}, defaultTimezone string) (bf
 	// }
 	if val, has := filter[utils.Value]; has {
 		var value float64
-		if value, err = utils.IfaceAsFloat64(val); err != nil {
+		if value, err = utils.IfaceAsTFloat64(val); err != nil {
 			return
 		}
 		bf.Value = &utils.ValueFormula{Static: math.Abs(value)}
