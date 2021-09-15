@@ -563,8 +563,10 @@ func TestThresholdsAPIs(t *testing.T) {
 				utils.AccountField: "1001",
 			},
 			ID: "EventTest",
+			APIOpts: map[string]interface{}{
+				utils.OptsThresholdsThresholdIDs: []string{"thd1", "thd2"},
+			},
 		},
-		ThresholdIDs: []string{"thd1", "thd2"},
 	}
 
 	expThresholds := engine.Thresholds{

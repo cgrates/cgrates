@@ -2822,7 +2822,7 @@ func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent
 	}
 	// check if we have thresholdIDs
 	if len(thIDs) != 0 {
-		thEv.ThresholdIDs = thIDs
+		cgrEv.APIOpts[utils.OptsThresholdsThresholdIDs] = thIDs
 	}
 	thEv.SetCloneable(clnb)
 	//initialize the returned variable
