@@ -24,6 +24,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type ThresholdsOpts struct {
+	ThresholdIDs []string
+}
+
 // ThresholdSCfg the threshold config section
 type ThresholdSCfg struct {
 	Enabled             bool
@@ -34,6 +38,18 @@ type ThresholdSCfg struct {
 	SuffixIndexedFields *[]string
 	NestedFields        bool
 	ActionSConns        []string // connections towards ActionS
+	Opts                *ThresholdsOpts
+}
+
+func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.ThresholdIDs != nil {
+		thdOpts.ThresholdIDs = *jsnCfg.ThresholdIDs
+	}
+
+	return nil
 }
 
 func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
@@ -66,16 +82,23 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg.Actions_conns != nil {
 		t.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
 	}
+	if jsnCfg.Opts != nil {
+		t.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.MetaThresholdIDsCfg: t.Opts.ThresholdIDs,
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        t.Enabled,
 		utils.IndexedSelectsCfg: t.IndexedSelects,
 		utils.NestedFieldsCfg:   t.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
+		utils.OptsCfg:           opts,
 	}
 	if t.StoreInterval != 0 {
 		initialMP[utils.StoreIntervalCfg] = t.StoreInterval.String()
@@ -96,6 +119,16 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
+	var thdIDs []string
+	if thdOpts.ThresholdIDs != nil {
+		thdIDs = utils.CloneStringSlice(thdOpts.ThresholdIDs)
+	}
+	return &ThresholdsOpts{
+		ThresholdIDs: thdIDs,
+	}
+}
+
 // Clone returns a deep copy of ThresholdSCfg
 func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	cln = &ThresholdSCfg{
@@ -105,6 +138,9 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 		NestedFields:   t.NestedFields,
 	}
 
+	if t.Opts != nil {
+		cln.Opts = t.Opts.Clone()
+	}
 	if t.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.StringIndexedFields))
 	}
@@ -120,6 +156,10 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	return
 }
 
+type ThresholdsOptsJson struct {
+	ThresholdIDs *[]string `json:"*thresholdIDs"`
+}
+
 // Threshold service config section
 type ThresholdSJsonCfg struct {
 	Enabled               *bool
@@ -130,6 +170,17 @@ type ThresholdSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Actions_conns         *[]string
+	Opts                  *ThresholdsOptsJson
+}
+
+func diffThresholdsOptsJsonCfg(d *ThresholdsOptsJson, v1, v2 *ThresholdsOpts) *ThresholdsOptsJson {
+	if d == nil {
+		d = new(ThresholdsOptsJson)
+	}
+	if !utils.SliceStringEqual(v1.ThresholdIDs, v2.ThresholdIDs) {
+		d.ThresholdIDs = utils.SliceStringPointer(v2.ThresholdIDs)
+	}
+	return d
 }
 
 func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *ThresholdSJsonCfg {
@@ -154,5 +205,6 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
 		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
 	}
+	d.Opts = diffThresholdsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }

@@ -473,7 +473,6 @@ func TestStatsAPIs(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 
 	expThEv := &engine.ThresholdsArgsProcessEvent{
-		ThresholdIDs: []string{"thdID"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -484,7 +483,8 @@ func TestStatsAPIs(t *testing.T) {
 				utils.StatID:    "sq2",
 			},
 			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.StatUpdate,
+				utils.MetaEventType:              utils.StatUpdate,
+				utils.OptsThresholdsThresholdIDs: []string{"thdID"},
 			},
 		},
 	}

@@ -328,7 +328,10 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	tIDs := utils.NewStringSet(args.ThresholdIDs)
+	var tIDs utils.StringSet
+	if args.APIOpts[utils.OptsThresholdsThresholdIDs] != nil {
+		tIDs = utils.NewStringSet(args.APIOpts[utils.OptsThresholdsThresholdIDs].([]string))
+	}
 	if len(tIDs) == 0 {
 		tIDs, err = MatchingItemIDsForEvent(ctx, evNm,
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
@@ -406,7 +409,6 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 
 // ThresholdsArgsProcessEvent are the arguments to proccess the event with thresholds
 type ThresholdsArgsProcessEvent struct {
-	ThresholdIDs []string
 	*utils.CGREvent
 	clnb bool //rpcclonable
 }
@@ -426,13 +428,8 @@ func (attr *ThresholdsArgsProcessEvent) RPCClone() (interface{}, error) {
 
 // Clone creates a clone of the object
 func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
-	var thIDs []string
-	if attr.ThresholdIDs != nil {
-		thIDs = utils.CloneStringSlice(attr.ThresholdIDs)
-	}
 	return &ThresholdsArgsProcessEvent{
-		ThresholdIDs: thIDs,
-		CGREvent:     attr.CGREvent.Clone(),
+		CGREvent: attr.CGREvent.Clone(),
 	}
 }
 
@@ -453,6 +450,7 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
 					t.TenantID(), utils.ConcatenatedKey(tnt, args.CGREvent.ID), err.Error()))
 			withErrors = true
+			fmt.Println("sal1")
 			continue
 		}
 		if t.dirty == nil || t.Hits == t.tPrfl.MaxHits { // one time threshold

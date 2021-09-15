@@ -3085,7 +3085,6 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				exp := &ThresholdsArgsProcessEvent{
-					ThresholdIDs: []string{"THD_1"},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
@@ -3095,7 +3094,8 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 							utils.Usage:      0.,
 						},
 						APIOpts: map[string]interface{}{
-							utils.MetaEventType: utils.ResourceUpdate,
+							utils.MetaEventType:              utils.ResourceUpdate,
+							utils.OptsThresholdsThresholdIDs: []string{"THD_1"},
 						},
 					},
 				}
@@ -3158,7 +3158,6 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				exp := &ThresholdsArgsProcessEvent{
-					ThresholdIDs: []string{"THD_1"},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
@@ -3168,7 +3167,8 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 							utils.Usage:      0.,
 						},
 						APIOpts: map[string]interface{}{
-							utils.MetaEventType: utils.ResourceUpdate,
+							utils.MetaEventType:              utils.ResourceUpdate,
+							utils.OptsThresholdsThresholdIDs: []string{"THD_1"},
 						},
 					},
 				}

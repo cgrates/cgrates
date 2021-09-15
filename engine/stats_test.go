@@ -2962,7 +2962,6 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				exp := &ThresholdsArgsProcessEvent{
-					ThresholdIDs: []string{"TH1"},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
@@ -2972,7 +2971,8 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 							"testMetricType": time.Duration(time.Hour),
 						},
 						APIOpts: map[string]interface{}{
-							utils.MetaEventType: utils.StatUpdate,
+							utils.MetaEventType:              utils.StatUpdate,
+							utils.OptsThresholdsThresholdIDs: []string{"TH1"},
 						},
 					},
 				}

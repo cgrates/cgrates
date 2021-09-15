@@ -522,31 +522,29 @@ func (rS *ResourceService) processThresholds(ctx *context.Context, rs Resources,
 
 	var withErrs bool
 	for _, r := range rs {
-		var thIDs []string
 		if len(r.rPrf.ThresholdIDs) != 0 {
 			if len(r.rPrf.ThresholdIDs) == 1 &&
 				r.rPrf.ThresholdIDs[0] == utils.MetaNone {
 				continue
 			}
-			thIDs = r.rPrf.ThresholdIDs
+			opts[utils.OptsThresholdsThresholdIDs] = r.rPrf.ThresholdIDs
 		}
 
-		thEv := &ThresholdsArgsProcessEvent{ThresholdIDs: thIDs,
-			CGREvent: &utils.CGREvent{
-				Tenant: r.Tenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					utils.EventType:  utils.ResourceUpdate,
-					utils.ResourceID: r.ID,
-					utils.Usage:      r.TotalUsage(),
-				},
-				APIOpts: opts,
+		thEv := &ThresholdsArgsProcessEvent{CGREvent: &utils.CGREvent{
+			Tenant: r.Tenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				utils.EventType:  utils.ResourceUpdate,
+				utils.ResourceID: r.ID,
+				utils.Usage:      r.TotalUsage(),
 			},
+			APIOpts: opts,
+		},
 		}
 		var tIDs []string
 		if err := rS.connMgr.Call(ctx, rS.cgrcfg.ResourceSCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-			(len(thIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
+			(len(opts[utils.OptsThresholdsThresholdIDs].([]string)) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with %s.",
 					utils.ResourceS, err.Error(), thEv, utils.ThresholdS))

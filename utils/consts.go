@@ -1882,6 +1882,9 @@ const (
 	// StatSCfg
 	StoreUncompressedLimitCfg = "store_uncompressed_limit"
 
+	//ThresholdSCfg
+	MetaThresholdIDsCfg = "*thresholdIDs"
+
 	// Cache
 	PartitionsCfg = "partitions"
 	PrecacheCfg   = "precache"
@@ -2167,6 +2170,9 @@ const (
 	OptsRatesStartTime     = "*ratesStartTime"
 	OptsRatesUsage         = "*ratesUsage"
 	OptsRatesIntervalStart = "*ratesIntervalStart"
+
+	OptsThresholdsThresholdIDs = "*thresholdIDs"
+
 	// STIR
 	OptsStirATest              = "*stirATest"
 	OptsStirPayloadMaxDuration = "*stirPayloadMaxDuration"

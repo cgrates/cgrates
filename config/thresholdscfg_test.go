@@ -35,6 +35,7 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
 		Actions_conns:         &[]string{utils.MetaInternal},
+		Opts:                  &ThresholdsOptsJson{},
 	}
 	expected := &ThresholdSCfg{
 		Enabled:             true,
@@ -45,6 +46,7 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
+		Opts:                &ThresholdsOpts{},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.thresholdSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -77,11 +79,14 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.ActionSConnsCfg:        []string{},
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaThresholdIDsCfg: []string(nil),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expextec %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -107,11 +112,14 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"},
 		utils.NestedFieldsCfg:        true,
 		utils.ActionSConnsCfg:        []string{utils.MetaInternal},
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaThresholdIDsCfg: []string(nil),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expexted %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 func TestThresholdSCfgClone(t *testing.T) {
@@ -151,6 +159,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"req.index3"},
 		ActionSConns:        []string{},
 		NestedFields:        false,
+		Opts:                &ThresholdsOpts{},
 	}
 
 	v2 := &ThresholdSCfg{
@@ -162,6 +171,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"req.index33"},
 		ActionSConns:        []string{"*internal"},
 		NestedFields:        true,
+		Opts:                &ThresholdsOpts{},
 	}
 
 	expected := &ThresholdSJsonCfg{
@@ -173,6 +183,9 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"req.index33"},
 		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
+		Opts: &ThresholdsOptsJson{
+			ThresholdIDs: nil,
+		},
 	}
 
 	rcv := diffThresholdSJsonCfg(d, v1, v2)
@@ -181,7 +194,11 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	expected = &ThresholdSJsonCfg{}
+	expected = &ThresholdSJsonCfg{
+		Opts: &ThresholdsOptsJson{
+			ThresholdIDs: nil,
+		},
+	}
 	rcv = diffThresholdSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
