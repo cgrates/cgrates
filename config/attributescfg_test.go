@@ -167,6 +167,7 @@ func TestAttributeSCfgClone(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		Opts:                &AttributesOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
