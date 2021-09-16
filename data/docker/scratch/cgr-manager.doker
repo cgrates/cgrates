@@ -1,0 +1,4 @@
+FROM scratch
+ADD ./cgr-manager /usr/bin
+COPY ./ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+ENTRYPOINT ["/usr/bin/cgr-manager"]
