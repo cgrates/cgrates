@@ -617,26 +617,24 @@ func TestV1AccountsForEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestMatchingAccountsForEvent",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
 		},
 	}
 	rply := make([]*utils.Account, 0)
 
 	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter_format"
-	if err := accnts.V1AccountsForEvent(context.Background(), args, &rply); err == nil || err.Error() != expected {
+	if err := accnts.V1AccountsForEvent(context.Background(), ev, &rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	accPrf.Weights[0].FilterIDs = []string{}
 	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
 		t.Error(err)
-	} else if err := accnts.V1AccountsForEvent(context.Background(), args, &rply); err != nil {
+	} else if err := accnts.V1AccountsForEvent(context.Background(), ev, &rply); err != nil {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	} else if !reflect.DeepEqual(rply[0], accPrf) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rply[0]), utils.ToJSON(accPrf))
@@ -697,27 +695,25 @@ func TestV1MaxAbstracts(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestMatchingAccountsForEvent",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaUsage: "210ns",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "210ns",
 		},
 	}
 	reply := utils.ExtEventCharges{}
 	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter"
-	if err := accnts.V1MaxAbstracts(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Weights[0].FilterIDs = []string{}
 
 	expected = "NOT_FOUND:invalid_filter"
-	if err := accnts.V1MaxAbstracts(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	delete(accPrf.Balances, "ConcreteBalance2")
@@ -761,7 +757,7 @@ func TestV1MaxAbstracts(t *testing.T) {
 			"TestV1MaxAbstracts": extAccPrf,
 		},
 	}
-	if err := accnts.V1MaxAbstracts(context.Background(), args, &reply); err != nil {
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else {
 		exEvCh.Charges = reply.Charges
@@ -817,26 +813,24 @@ func TestV1DebitAbstracts(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestV1DebitID",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Usage:        "27s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Usage:        "27s",
 		},
 	}
 	reply := utils.ExtEventCharges{}
 
 	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter"
-	if err := accnts.V1DebitAbstracts(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Weights[0].FilterIDs = []string{}
 
 	expected = "NOT_FOUND:invalid_filter"
-	if err := accnts.V1DebitAbstracts(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
@@ -938,25 +932,23 @@ func TestV1MaxConcretes(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestV1DebitID",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Usage:        "3m",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Usage:        "3m",
 		},
 	}
 	reply := utils.ExtEventCharges{}
 	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter"
-	if err := accnts.V1MaxConcretes(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Weights[0].FilterIDs = []string{}
 
 	expected = "NOT_FOUND:invalid_filter"
-	if err := accnts.V1MaxConcretes(context.Background(), args, &reply); err == nil || err.Error() != expected {
+	if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
@@ -1001,7 +993,7 @@ func TestV1MaxConcretes(t *testing.T) {
 			"TestV1DebitAbstracts": extAccPrf,
 		},
 	}
-	if err := accnts.V1MaxConcretes(context.Background(), args, &reply); err != nil {
+	if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else {
 		exEvCh.Charges = reply.Charges
@@ -1090,14 +1082,12 @@ func TestV1DebitConcretes(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestV1DebitID",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Usage:        "3m",
-			},
+	args := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Usage:        "3m",
 		},
 	}
 	reply := utils.ExtEventCharges{}
@@ -1832,13 +1822,11 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		Rates:    map[string]*utils.ExtIntervalRate{},
 		Accounts: make(map[string]*utils.ExtAccount),
 	}
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestV1DebitAbstractsEventCharges",
-			Tenant: utils.CGRateSorg,
-			APIOpts: map[string]interface{}{
-				utils.MetaUsage: "7m26s",
-			},
+	args := &utils.CGREvent{
+		ID:     "TestV1DebitAbstractsEventCharges",
+		Tenant: utils.CGRateSorg,
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "7m26s",
 		},
 	}
 	var rcvEC utils.ExtEventCharges

@@ -20,6 +20,10 @@ package config
 
 import "github.com/cgrates/cgrates/utils"
 
+type AccountsOpts struct {
+	AccountIDs []string
+}
+
 // AccountSCfg is the configuration of ActionS
 type AccountSCfg struct {
 	Enabled             bool
@@ -33,6 +37,18 @@ type AccountSCfg struct {
 	NestedFields        bool
 	MaxIterations       int
 	MaxUsage            *utils.Decimal
+	Opts                *AccountsOpts
+}
+
+func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.AccountIDs != nil {
+		accOpts.AccountIDs = *jsnCfg.AccountIDs
+	}
+
+	return nil
 }
 
 func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
@@ -74,16 +90,23 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 			return err
 		}
 	}
+	if jsnCfg.Opts != nil {
+		acS.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.MetaAccountIDsCfg: acS.Opts.AccountIDs,
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        acS.Enabled,
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 		utils.MaxIterations:     acS.MaxIterations,
+		utils.OptsCfg:           opts,
 	}
 	if acS.AttributeSConns != nil {
 		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(acS.AttributeSConns)
@@ -109,6 +132,16 @@ func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+func (accOpts *AccountsOpts) Clone() *AccountsOpts {
+	var accIDs []string
+	if accOpts.AccountIDs != nil {
+		accIDs = utils.CloneStringSlice(accOpts.AccountIDs)
+	}
+	return &AccountsOpts{
+		AccountIDs: accIDs,
+	}
+}
+
 // Clone returns a deep copy of AccountSCfg
 func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 	cln = &AccountSCfg{
@@ -117,6 +150,7 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 		NestedFields:   acS.NestedFields,
 		MaxIterations:  acS.MaxIterations,
 		MaxUsage:       acS.MaxUsage,
+		Opts:           acS.Opts.Clone(),
 	}
 	if acS.AttributeSConns != nil {
 		cln.AttributeSConns = utils.CloneStringSlice(acS.AttributeSConns)
@@ -139,6 +173,10 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 	return
 }
 
+type AccountsOptsJson struct {
+	AccountIDs *[]string `json:"*accountIDs"`
+}
+
 // Account service config section
 type AccountSJsonCfg struct {
 	Enabled               *bool
@@ -152,6 +190,17 @@ type AccountSJsonCfg struct {
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Max_iterations        *int
 	Max_usage             *string
+	Opts                  *AccountsOptsJson
+}
+
+func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *AccountsOptsJson {
+	if d == nil {
+		d = new(AccountsOptsJson)
+	}
+	if !utils.SliceStringEqual(v1.AccountIDs, v2.AccountIDs) {
+		d.AccountIDs = utils.SliceStringPointer(v2.AccountIDs)
+	}
+	return d
 }
 
 func diffAccountSJsonCfg(d *AccountSJsonCfg, v1, v2 *AccountSCfg) *AccountSJsonCfg {
@@ -190,5 +239,6 @@ func diffAccountSJsonCfg(d *AccountSJsonCfg, v1, v2 *AccountSCfg) *AccountSJsonC
 	} else {
 		d.Max_usage = nil
 	}
+	d.Opts = diffAccountsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }

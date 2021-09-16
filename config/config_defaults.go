@@ -668,6 +668,7 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								// 
+		// "*attributeIDs": [],				//
 		"*processRuns": 1,					// number of run loops when processing event
 		"*profileRuns": 0,					// number of runs a profile will process during the event
 	},
@@ -719,7 +720,9 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"actions_conns": [],					// connections to ActionS to execute the actions
-	"opts":{},								//
+	"opts":{								//
+		// "*thresholdIDs: [],				//
+	},								
 },
 
 
@@ -736,13 +739,13 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"default_ratio":1,						// default ratio used in case of *load strategy
-	"opts":{
-		"*context": "*routes",
-		"*profileCount": 1,
-		"*ignoreErrors": false,
-		"*maxCost": "",
-		// "*limit": 1,
-		// "*offset": 1,
+	"opts":{								//	
+		"*context": "*routes",				//
+		"*profileCount": 1,					//			
+		"*ignoreErrors": false,				//
+		"*maxCost": "",						//
+		// "*limit": 1,						//			
+		// "*offset": 1,					//
 	},
 },
 
@@ -1104,6 +1107,9 @@ const CGRATES_CFG_JSON = `
 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "verbosity": 1000,                      // number of increment iterations allowed
+	"opts":{								//	
+		// "*rateProfileIDs": [],				//
+	},
 },
 
 
@@ -1251,6 +1257,9 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "max_iterations": 1000,                 // maximum number of iterations
     "max_usage": "72h",                     // maximum time of usage
+	"opts":{								//	
+		// "*accountIDs": [],				//
+	},
 },
 
 

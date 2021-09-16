@@ -37,18 +37,16 @@ func (dS *DispatcherService) RateSv1Ping(args *utils.CGREvent, rpl *string) (err
 	return dS.Dispatch(context.TODO(), args, utils.RateS, utils.RateSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) RateSv1CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) (err error) {
+func (dS *DispatcherService) RateSv1CostForEvent(args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	if args == nil {
-		args = &utils.ArgsCostForEvent{
-			CGREvent: &utils.CGREvent{},
-		}
+		args = &utils.CGREvent{}
 	}
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.RateSv1CostForEvent, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.RateSv1CostForEvent, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.RateS, utils.RateSv1CostForEvent, args, rpCost)
+	return dS.Dispatch(context.TODO(), args, utils.RateS, utils.RateSv1CostForEvent, args, rpCost)
 }

@@ -328,10 +328,14 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	var tIDs utils.StringSet
+	var thIDs []string
+	thIDs = tS.cgrcfg.ThresholdSCfg().Opts.ThresholdIDs
 	if args.APIOpts[utils.OptsThresholdsThresholdIDs] != nil {
-		tIDs = utils.NewStringSet(args.APIOpts[utils.OptsThresholdsThresholdIDs].([]string))
+		if thIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsThresholdsThresholdIDs]); err != nil {
+			return
+		}
 	}
+	tIDs := utils.NewStringSet(thIDs)
 	if len(tIDs) == 0 {
 		tIDs, err = MatchingItemIDsForEvent(ctx, evNm,
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
@@ -450,7 +454,6 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
 					t.TenantID(), utils.ConcatenatedKey(tnt, args.CGREvent.ID), err.Error()))
 			withErrors = true
-			fmt.Println("sal1")
 			continue
 		}
 		if t.dirty == nil || t.Hits == t.tPrfl.MaxHits { // one time threshold

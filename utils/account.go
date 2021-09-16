@@ -838,12 +838,6 @@ type AccountWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-// ArgsAccountForEvent arguments used for process event
-type ArgsAccountsForEvent struct {
-	*CGREvent
-	AccountIDs []string
-}
-
 // APIAccount represents one APIAccount on a Tenant
 type APIAccount struct {
 	Tenant       string

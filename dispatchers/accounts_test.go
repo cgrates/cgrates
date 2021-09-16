@@ -68,10 +68,8 @@ func TestDspAccountSv1PingErrorNil(t *testing.T) {
 func TestDspAAccountsForEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]*utils.Account
 	result := dspSrv.AccountsForEvent(CGREvent, reply)
@@ -85,10 +83,8 @@ func TestDspAccountsForEventErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]*utils.Account
 	result := dspSrv.AccountsForEvent(CGREvent, reply)
@@ -101,10 +97,8 @@ func TestDspAccountsForEventErrorNil(t *testing.T) {
 func TestDspMaxAbstractsNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.MaxAbstracts(CGREvent, reply)
@@ -118,10 +112,8 @@ func TestDspMaxAbstractsErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.MaxAbstracts(CGREvent, reply)
@@ -134,10 +126,8 @@ func TestDspMaxAbstractsErrorNil(t *testing.T) {
 func TestDspDebitAbstractsNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.DebitAbstracts(CGREvent, reply)
@@ -151,10 +141,8 @@ func TestDspDebitAbstractsErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.DebitAbstracts(CGREvent, reply)
@@ -167,10 +155,8 @@ func TestDspDebitAbstractsErrorNil(t *testing.T) {
 func TestDspMaxConcretesNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.MaxConcretes(CGREvent, reply)
@@ -184,10 +170,8 @@ func TestDspMaxConcretesErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.MaxConcretes(CGREvent, reply)
@@ -200,10 +184,8 @@ func TestDspMaxConcretesErrorNil(t *testing.T) {
 func TestDspDebitConcretesNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.DebitConcretes(CGREvent, reply)
@@ -217,10 +199,8 @@ func TestDspDebitConcretesErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.DebitConcretes(CGREvent, reply)

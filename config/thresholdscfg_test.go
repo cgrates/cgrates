@@ -131,6 +131,7 @@ func TestThresholdSCfgClone(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		Opts:                &ThresholdsOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

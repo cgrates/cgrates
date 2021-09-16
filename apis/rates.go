@@ -202,6 +202,6 @@ type RateSv1 struct {
 }
 
 // CostForEvent returs the costs for the event and all the rate profile information
-func (rSv1 *RateSv1) CostForEvent(ctx *context.Context, args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) (err error) {
+func (rSv1 *RateSv1) CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	return rSv1.rS.V1CostForEvent(ctx, args, rpCost)
 }

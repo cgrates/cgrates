@@ -250,10 +250,17 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 }
 
 // V1AccountsForEvent returns the matching Accounts for Event
-func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) (err error) {
+func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) (err error) {
+	var accIDs []string
+	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
+	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
+		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
+			return
+		}
+	}
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
-		args.CGREvent, args.AccountIDs, false); err != nil {
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, false); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -264,10 +271,17 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.ArgsAcc
 }
 
 // V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
-func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
+	var accIDs []string
+	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
+	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
+		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
+			return
+		}
+	}
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
-		args.CGREvent, args.AccountIDs, true); err != nil {
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -276,7 +290,7 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.ArgsAccount
 	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebit(ctx, acnts, args.CGREvent, false, false); err != nil {
+	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, false); err != nil {
 		return
 	}
 	var rcvEec *utils.ExtEventCharges
@@ -288,10 +302,17 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.ArgsAccount
 }
 
 // V1DebitAbstracts performs debit for the provided event
-func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
+	var accIDs []string
+	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
+	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
+		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
+			return
+		}
+	}
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
-		args.CGREvent, args.AccountIDs, true); err != nil {
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -300,7 +321,7 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.ArgsAccou
 	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebit(ctx, acnts, args.CGREvent, false, true); err != nil {
+	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, true); err != nil {
 		return
 	}
 
@@ -314,10 +335,17 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.ArgsAccou
 }
 
 // V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
-func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
+	var accIDs []string
+	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
+	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
+		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
+			return
+		}
+	}
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
-		args.CGREvent, args.AccountIDs, true); err != nil {
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -326,7 +354,7 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.ArgsAccount
 	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebit(ctx, acnts, args.CGREvent, true, false); err != nil {
+	if procEC, err = aS.accountsDebit(ctx, acnts, args, true, false); err != nil {
 		return
 	}
 	var rcvEec *utils.ExtEventCharges
@@ -338,10 +366,17 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.ArgsAccount
 }
 
 // V1DebitConcretes performs debit of concrete units for the provided event
-func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
+	var accIDs []string
+	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
+	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
+		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
+			return
+		}
+	}
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
-		args.CGREvent, args.AccountIDs, true); err != nil {
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -350,7 +385,7 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.ArgsAccou
 	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebit(ctx, acnts, args.CGREvent, true, true); err != nil {
+	if procEC, err = aS.accountsDebit(ctx, acnts, args, true, true); err != nil {
 		return
 	}
 
