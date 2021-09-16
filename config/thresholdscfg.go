@@ -136,11 +136,9 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 		IndexedSelects: t.IndexedSelects,
 		StoreInterval:  t.StoreInterval,
 		NestedFields:   t.NestedFields,
+		Opts:           t.Opts.Clone(),
 	}
 
-	if t.Opts != nil {
-		cln.Opts = t.Opts.Clone()
-	}
 	if t.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.StringIndexedFields))
 	}

@@ -407,19 +407,18 @@ func testAccGetAccountsForEvent(t *testing.T) {
 			},
 		},
 	}
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: utils.CGRateSorg,
-			ID:     "testIDEvent",
-			Event: map[string]interface{}{
-				utils.Usage: 20 * time.Second,
-			},
-			APIOpts: nil,
+	ev := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]interface{}{
+			utils.Usage: 20 * time.Second,
 		},
-		AccountIDs: []string{"TEST_ACC_IT_TEST"},
+		APIOpts: map[string]interface{}{
+			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST",
+		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1AccountsForEvent,
-		args, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -475,21 +474,19 @@ func testAccMaxAbstracts(t *testing.T) {
 	}
 
 	var reply3 utils.ExtEventCharges
-	args2 := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: utils.CGRateSorg,
-			ID:     "testIDEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaUsage: "27s",
-			},
+	ev2 := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
 		},
-		AccountIDs: []string{"TEST_ACC_IT_TEST4"},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:              "27s",
+			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST4",
+		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxAbstracts,
-		args2, &reply3); err != nil {
+		ev2, &reply3); err != nil {
 		t.Error(err)
 	}
 
@@ -632,21 +629,19 @@ func testAccDebitAbstracts(t *testing.T) {
 	}
 
 	var reply3 utils.ExtEventCharges
-	args2 := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: utils.CGRateSorg,
-			ID:     "testIDEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaUsage: "27s",
-			},
+	ev2 := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
 		},
-		AccountIDs: []string{"TEST_ACC_IT_TEST5"},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:              "27s",
+			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST5",
+		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitAbstracts,
-		args2, &reply3); err != nil {
+		ev2, &reply3); err != nil {
 		t.Error(err)
 	}
 
@@ -789,21 +784,19 @@ func testAccMaxConcretes(t *testing.T) {
 	}
 
 	var reply3 utils.ExtEventCharges
-	args2 := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: utils.CGRateSorg,
-			ID:     "testIDEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsRatesIntervalStart: "27s",
-			},
+	ev2 := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
 		},
-		AccountIDs: []string{"TEST_ACC_IT_TEST6"},
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesIntervalStart: "27s",
+			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST6",
+		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxConcretes,
-		args2, &reply3); err != nil {
+		ev2, &reply3); err != nil {
 		t.Error(err)
 	}
 
@@ -942,21 +935,19 @@ func testAccDebitConcretes(t *testing.T) {
 	}
 
 	var reply3 utils.ExtEventCharges
-	args2 := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: utils.CGRateSorg,
-			ID:     "testIDEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsRatesUsage: "27s",
-			},
+	ev2 := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
 		},
-		AccountIDs: []string{"TEST_ACC_IT_TEST7"},
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesUsage:         "27s",
+			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST7",
+		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitConcretes,
-		args2, &reply3); err != nil {
+		ev2, &reply3); err != nil {
 		t.Error(err)
 	}
 

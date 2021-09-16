@@ -1005,16 +1005,14 @@ func TestAccountAccountsForEvent(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
 	}
 	rpEv := make([]*utils.Account, 0)
-	accArg := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestMatchingAccountsForEvent",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 	}
-	err = accSv1.AccountsForEvent(context.Background(), accArg, &rpEv)
+	err = accSv1.AccountsForEvent(context.Background(), ev, &rpEv)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -1153,16 +1151,14 @@ func TestAccountMaxAbstracts(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
 	}
 	var rpEv utils.ExtEventCharges
-	accArg := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestMatchingAccountsForEvent",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 	}
-	err = accSv1.MaxAbstracts(context.Background(), accArg, &rpEv)
+	err = accSv1.MaxAbstracts(context.Background(), ev, &rpEv)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -1359,16 +1355,14 @@ func TestAccountDebitAbstracts(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
 	}
 	var rpEv utils.ExtEventCharges
-	accArg := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestMatchingAccountsForEvent",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 	}
-	err = accSv1.DebitAbstracts(context.Background(), accArg, &rpEv)
+	err = accSv1.DebitAbstracts(context.Background(), ev, &rpEv)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -1565,16 +1559,14 @@ func TestAccountActionSetBalance(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
 	}
 	var rpEv utils.ExtEventCharges
-	accArg := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestMatchingAccountsForEvent",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 	}
-	err = accSv1.DebitAbstracts(context.Background(), accArg, &rpEv)
+	err = accSv1.DebitAbstracts(context.Background(), ev, &rpEv)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -1783,22 +1775,20 @@ func TestAccountMaxConcretes(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestV1DebitID",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Usage:        "3m",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Usage:        "3m",
 		},
 	}
 	reply := utils.ExtEventCharges{}
-	if err := accSv1.MaxConcretes(context.Background(), args, &reply); err != nil {
+	if err := accSv1.MaxConcretes(context.Background(), ev, &reply); err != nil {
 		t.Errorf("Expected %+v, received %+v", nil, err)
 	}
 
-	if err := accSv1.MaxConcretes(context.Background(), args, &reply); err != nil {
+	if err := accSv1.MaxConcretes(context.Background(), ev, &reply); err != nil {
 		t.Errorf("Expected %+v, received %+v", nil, err)
 	}
 	accPrf.Balances["AbstractBalance1"].Weights = ""
@@ -1897,7 +1887,7 @@ func TestAccountMaxConcretes(t *testing.T) {
 			"TestV1DebitAbstracts": extAccPrf,
 		},
 	}
-	if err := accSv1.MaxConcretes(context.Background(), args, &reply); err != nil {
+	if err := accSv1.MaxConcretes(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else {
 		exEvCh.Charges = reply.Charges
@@ -1973,18 +1963,16 @@ func TestAccountDebitConcretes(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestV1DebitID",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Usage:        "3m",
-			},
+	ev := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Usage:        "3m",
 		},
 	}
 	reply := utils.ExtEventCharges{}
-	if err := accSv1.DebitConcretes(context.Background(), args, &reply); err != nil {
+	if err := accSv1.DebitConcretes(context.Background(), ev, &reply); err != nil {
 		t.Errorf("Expected %+v, received %+v", nil, err)
 	}
 

@@ -982,14 +982,8 @@ type ArgExportCDRs struct {
 	RPCCDRsFilter
 }
 
-// ArgsCostForEvent arguments used for process event
-type ArgsCostForEvent struct {
-	RateProfileIDs []string
-	*CGREvent
-}
-
 // StartTime returns the event time used to check active rate profiles
-func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error) {
+func (args *CGREvent) StartTime(tmz string) (sTime time.Time, err error) {
 	if tIface, has := args.APIOpts[OptsRatesStartTime]; has {
 		return IfaceAsTime(tIface, tmz)
 	}
@@ -1000,7 +994,7 @@ func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error)
 }
 
 // usage returns the event time used to check active rate profiles
-func (args *ArgsCostForEvent) Usage() (usage *decimal.Big, err error) {
+func (args *CGREvent) Usage() (usage *decimal.Big, err error) {
 	// first search for the rateUsage in opts
 	if uIface, has := args.APIOpts[OptsRatesUsage]; has {
 		return IfaceAsBig(uIface)
@@ -1014,7 +1008,7 @@ func (args *ArgsCostForEvent) Usage() (usage *decimal.Big, err error) {
 }
 
 // IntervalStart returns the inerval start out of APIOpts received for the event
-func (args *ArgsCostForEvent) IntervalStart() (ivlStart *decimal.Big, err error) {
+func (args *CGREvent) IntervalStart() (ivlStart *decimal.Big, err error) {
 	if iface, has := args.APIOpts[OptsRatesIntervalStart]; has {
 		return IfaceAsBig(iface)
 	}

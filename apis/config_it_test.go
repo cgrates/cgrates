@@ -283,6 +283,9 @@ func testCfgSetEmptyReload(t *testing.T) {
 			"rate_suffix_indexed_fields": []string{},
 			"suffix_indexed_fields":      []string{},
 			"verbosity":                  1000,
+			utils.OptsCfg: map[string]interface{}{
+				utils.MetaRateProfileIDsCfg: []string(nil),
+			},
 		},
 	}
 	var replyGet map[string]interface{}

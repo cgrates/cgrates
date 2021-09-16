@@ -554,17 +554,16 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 }
 
 func TestStartTimeNow(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
+	ev := &CGREvent{
+		Tenant: "*req.CGRID",
+		ID:     "",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
 	timpulet1 := time.Now()
-	result, err := testCostEventStruct.StartTime("")
+	result, err := ev.StartTime("")
 	timpulet2 := time.Now()
 	if err != nil {
 		t.Errorf("Expected <nil> , received <%+v>", err)
@@ -575,16 +574,16 @@ func TestStartTimeNow(t *testing.T) {
 }
 
 func TestStartTime(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{"*ratesStartTime": "2018-01-07T17:00:10Z"},
+	ev := &CGREvent{
+		Tenant: "*req.CGRID",
+		ID:     "",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			"*ratesStartTime":       "2018-01-07T17:00:10Z",
+			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	if result, err := testCostEventStruct.StartTime(""); err != nil {
+	if result, err := ev.StartTime(""); err != nil {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
 		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
@@ -592,32 +591,31 @@ func TestStartTime(t *testing.T) {
 }
 
 func TestStartTimeError(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{"*ratesStartTime": "start"},
+	ev := &CGREvent{
+		Tenant: "*req.CGRID",
+		ID:     "",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			"*ratesStartTime":       "start",
+			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	_, err := testCostEventStruct.StartTime("")
+	_, err := ev.StartTime("")
 	if err == nil && err.Error() != "received <Unsupported time format" {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	}
 }
 
 func TestUsageMinute(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
+	ev := &CGREvent{
+		Tenant: "*req.CGRID",
+		ID:     "",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	if rcv, err := testCostEventStruct.Usage(); err != nil {
+	if rcv, err := ev.Usage(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(decimal.New(int64(time.Minute), 0), rcv) {
 		t.Errorf("Expected %+v, received %+v", decimal.New(int64(time.Minute), 0), rcv)
@@ -625,33 +623,33 @@ func TestUsageMinute(t *testing.T) {
 }
 
 func TestUsageError(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{"*ratesUsage": "start"},
+	ev := &CGREvent{
+		Tenant: "*req.CGRID",
+		ID:     "",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			"*ratesUsage":           "start",
+			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	_, err := testCostEventStruct.Usage()
+	_, err := ev.Usage()
 	if err == nil && err.Error() != "received <Unsupported time format" {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	}
 }
 
 func TestUsage(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{"*ratesUsage": "2m10s"},
+	ev := &CGREvent{
+		Tenant: "*req.CGRID",
+		ID:     "",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			"*ratesUsage":           "2m10s",
+			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
 
-	if result, err := testCostEventStruct.Usage(); err != nil {
+	if result, err := ev.Usage(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result.String(), "130000000000") {
 		t.Errorf("Expected <130000000000> , received <%+v>", result.String())
@@ -737,16 +735,14 @@ func TestBalanceUnitFactor(t *testing.T) {
 }
 
 func TestATDUsage(t *testing.T) {
-	args := &ArgsCostForEvent{
-		CGREvent: &CGREvent{
-			ID: "testID",
-			APIOpts: map[string]interface{}{
-				OptsRatesUsage: true,
-			},
+	ev := &CGREvent{
+		ID: "testID",
+		APIOpts: map[string]interface{}{
+			OptsRatesUsage: true,
 		},
 	}
 
-	_, err := args.Usage()
+	_, err := ev.Usage()
 	expected := "cannot convert field: bool to decimal.Big"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
@@ -770,12 +766,10 @@ func TestActivationIntervalEquals(t *testing.T) {
 }
 
 func TestIntervalStart(t *testing.T) {
-	args := &ArgsCostForEvent{
-		[]string{"RP_1001"},
-		&CGREvent{
-			APIOpts: map[string]interface{}{
-				OptsRatesIntervalStart: "1ns",
-			},
+	args := &CGREvent{
+		APIOpts: map[string]interface{}{
+			OptsRatesIntervalStart:  "1ns",
+			OptsRatesRateProfileIDs: []string{"RP_1001"},
 		},
 	}
 	rcv, err := args.IntervalStart()
@@ -788,10 +782,9 @@ func TestIntervalStart(t *testing.T) {
 }
 
 func TestIntervalStartDefault(t *testing.T) {
-	args := &ArgsCostForEvent{
-		[]string{"RP_1001"},
-		&CGREvent{
-			APIOpts: map[string]interface{}{},
+	args := &CGREvent{
+		APIOpts: map[string]interface{}{
+			OptsRatesRateProfileIDs: []string{"RP_1001"},
 		},
 	}
 	rcv, err := args.IntervalStart()

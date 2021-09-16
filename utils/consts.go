@@ -1922,6 +1922,7 @@ const (
 	MetaOffsetCfg       = "*offset"
 
 	// RateSCfg
+	MetaRateProfileIDsCfg      = "*rateProfileIDs"
 	RateIndexedSelectsCfg      = "rate_indexed_selects"
 	RateNestedFieldsCfg        = "rate_nested_fields"
 	RateStringIndexedFieldsCfg = "rate_string_indexed_fields"
@@ -1941,8 +1942,9 @@ const (
 	ShutdownTimeoutCfg   = "shutdown_timeout"
 
 	// AccountSCfg
-	MaxIterations = "max_iterations"
-	MaxUsage      = "max_usage"
+	MetaAccountIDsCfg = "*accountIDs"
+	MaxIterations     = "max_iterations"
+	MaxUsage          = "max_usage"
 )
 
 // FC Template
@@ -2091,13 +2093,13 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSesTTL,
+var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStartTime, OptsRatesUsage, OptsSesTTL,
 	OptsSesTTLMaxDelay, OptsSesTTLLastUsed, OptsSesTTLLastUsage, OptsSesTTLUsage,
 	OptsSesDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesAttributeIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
-	RemoteHostOpt, CacheOpt, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
+	RemoteHostOpt, CacheOpt, OptsThresholdsThresholdIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
 	OptsSesAttributeS, OptsSesAttributeIDs, OptsSesAttributeSDerivedReply, OptsSesBlockerError,
 	OptsSesCDRs, OptsSesCDRsDerivedReply, OptsSesChargerS, OptsSesResourceS, OptsSesResourceSAuthorize,
 	OptsSesResourceSAlocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsSesRouteS,
@@ -2167,11 +2169,10 @@ const (
 	OptsRoutesIgnoreErrors = "*rouIgnoreErrors"
 	OptsRoutesMaxCost      = "*rouMaxCost"
 
-	OptsRatesStartTime     = "*ratesStartTime"
-	OptsRatesUsage         = "*ratesUsage"
-	OptsRatesIntervalStart = "*ratesIntervalStart"
-
-	OptsThresholdsThresholdIDs = "*thresholdIDs"
+	OptsRatesRateProfileIDs = "*rateProfileIDs"
+	OptsRatesStartTime      = "*ratesStartTime"
+	OptsRatesUsage          = "*ratesUsage"
+	OptsRatesIntervalStart  = "*ratesIntervalStart"
 
 	// STIR
 	OptsStirATest              = "*stirATest"
@@ -2193,9 +2194,11 @@ const (
 	OptsContext                = "*context"
 	Subsys                     = "*subsys"
 	MetaMethod                 = "*reqMethod"
+	OptsAccountsAccountIDs     = "*accountIDs"
 	OptsAttributesAttributeIDs = "*attributeIDs"
 	OptsAttributesProfileRuns  = "*attrProfileRuns"
 	OptsAttributesProcessRuns  = "*attrProcessRuns"
+	OptsThresholdsThresholdIDs = "*thresholdIDs"
 	MetaEventType              = "*eventType"
 	EventType                  = "EventType"
 	SchedulerInit              = "SchedulerInit"

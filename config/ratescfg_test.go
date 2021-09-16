@@ -53,6 +53,7 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		RateSuffixIndexedFields: &[]string{"*req.index1"},
 		RateNestedFields:        true,
 		Verbosity:               20,
+		Opts:                    &RatesOpts{},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -77,6 +78,9 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.RateSuffixIndexedFieldsCfg: []string{},
 		utils.RateNestedFieldsCfg:        false,
 		utils.Verbosity:                  1000,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaRateProfileIDsCfg: []string(nil),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -114,6 +118,9 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.RateSuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2", "*req.index3"},
 		utils.RateNestedFieldsCfg:        true,
 		utils.Verbosity:                  1000,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaRateProfileIDsCfg: []string(nil),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -136,6 +143,7 @@ func TestRateSCfgClone(t *testing.T) {
 		RateSuffixIndexedFields: &[]string{"*req.index1"},
 		RateNestedFields:        true,
 		Verbosity:               20,
+		Opts:                    &RatesOpts{},
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {
@@ -184,6 +192,9 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateSuffixIndexedFields: &[]string{"*req.rateIndex3"},
 		RateNestedFields:        false,
 		Verbosity:               2,
+		Opts: &RatesOpts{
+			RateProfileIDs: []string{"RP1"},
+		},
 	}
 
 	v2 := &RateSCfg{
@@ -199,6 +210,9 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateSuffixIndexedFields: &[]string{"*req.rateIndex33"},
 		RateNestedFields:        true,
 		Verbosity:               3,
+		Opts: &RatesOpts{
+			RateProfileIDs: []string{"RP2"},
+		},
 	}
 
 	expected := &RateSJsonCfg{
@@ -214,6 +228,9 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Rate_suffix_indexed_fields: &[]string{"*req.rateIndex33"},
 		Rate_nested_fields:         utils.BoolPointer(true),
 		Verbosity:                  utils.IntPointer(3),
+		Opts: &RatesOptsJson{
+			RateProfileIDs: &[]string{"RP2"},
+		},
 	}
 
 	rcv := diffRateSJsonCfg(d, v1, v2)
@@ -222,7 +239,9 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	expected = &RateSJsonCfg{}
+	expected = &RateSJsonCfg{
+		Opts: &RatesOptsJson{},
+	}
 	rcv = diffRateSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))

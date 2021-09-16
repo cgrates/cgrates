@@ -589,18 +589,17 @@ func TestRatesCostForEvent(t *testing.T) {
 	if !reflect.DeepEqual(rateSv1, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rateSv1)
 	}
-	args := &utils.ArgsCostForEvent{
-		RateProfileIDs: []string{"rtID"},
-		CGREvent: &utils.CGREvent{
-			Tenant:  "tenant",
-			ID:      "ID",
-			Event:   nil,
-			APIOpts: nil,
+	ev := &utils.CGREvent{
+		Tenant: "tenant",
+		ID:     "ID",
+		Event:  nil,
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesRateProfileIDs: []string{"rtID"},
 		},
 	}
 
 	rpCost := &utils.RateProfileCost{}
-	err := rateSv1.CostForEvent(context.Background(), args, rpCost)
+	err := rateSv1.CostForEvent(context.Background(), ev, rpCost)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -1793,17 +1792,15 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 	}
 
 	//math the rates with true rates index selects from config
-	args := &utils.ArgsCostForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.RequestType:  "*postpaid",
-				utils.Destination:  "+332145",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsRatesUsage: "1m24s",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.RequestType:  "*postpaid",
+			utils.Destination:  "+332145",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesUsage: "1m24s",
 		},
 	}
 	usg, err := utils.NewDecimalFromUsage("1m24s")
@@ -1838,7 +1835,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 		},
 	}
 
-	if err := rts.V1CostForEvent(context.Background(), args,
+	if err := rts.V1CostForEvent(context.Background(), ev,
 		&rpCost); err != nil {
 		t.Error(err)
 	} else if !rpCost.Equals(expRpCost) {
@@ -1847,7 +1844,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 
 	cfg.RateSCfg().RateIndexedSelects = false
 	rts = rates.NewRateS(cfg, fltrs, dm)
-	if err := rts.V1CostForEvent(context.Background(), args,
+	if err := rts.V1CostForEvent(context.Background(), ev,
 		&rpCost); err != nil {
 		t.Error(err)
 	} else if !rpCost.Equals(expRpCost) {

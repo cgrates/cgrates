@@ -122,11 +122,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 // rateSProcessEvent will send the event to rateS and return the result
 func (cdrS *CDRServer) rateSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (rpCost utils.RateProfileCost, err error) {
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().RateSConns,
-		utils.RateSv1CostForEvent,
-		&utils.ArgsCostForEvent{
-			//RateProfileIDs: route.RateProfileIDs,
-			CGREvent: cgrEv,
-		}, &rpCost); err != nil {
+		utils.RateSv1CostForEvent, cgrEv, &rpCost); err != nil {
 		return
 	}
 	return

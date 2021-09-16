@@ -68,10 +68,8 @@ func TestDspRateSv1CostForEventCaseNil(t *testing.T) {
 func TestDspRateSv1CostForEventCase2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgsCostForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.RateProfileCost
 	result := dspSrv.RateSv1CostForEvent(CGREvent, reply)
@@ -96,10 +94,8 @@ func TestDspRateSv1CostForEventErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgsCostForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *utils.RateProfileCost
 	result := dspSrv.RateSv1CostForEvent(CGREvent, reply)

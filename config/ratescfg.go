@@ -22,6 +22,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type RatesOpts struct {
+	RateProfileIDs []string
+}
+
 // RateSCfg the rates config section
 type RateSCfg struct {
 	Enabled                 bool
@@ -36,6 +40,18 @@ type RateSCfg struct {
 	RateSuffixIndexedFields *[]string
 	RateNestedFields        bool
 	Verbosity               int
+	Opts                    *RatesOpts
+}
+
+func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.RateProfileIDs != nil {
+		rateOpts.RateProfileIDs = *jsnCfg.RateProfileIDs
+	}
+
+	return nil
 }
 
 func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
@@ -79,11 +95,17 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 	if jsnCfg.Verbosity != nil {
 		rCfg.Verbosity = *jsnCfg.Verbosity
 	}
+	if jsnCfg.Opts != nil {
+		rCfg.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.MetaRateProfileIDsCfg: rCfg.Opts.RateProfileIDs,
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:            rCfg.Enabled,
 		utils.IndexedSelectsCfg:     rCfg.IndexedSelects,
@@ -91,6 +113,7 @@ func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.RateIndexedSelectsCfg: rCfg.RateIndexedSelects,
 		utils.RateNestedFieldsCfg:   rCfg.RateNestedFields,
 		utils.Verbosity:             rCfg.Verbosity,
+		utils.OptsCfg:               opts,
 	}
 	if rCfg.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.StringIndexedFields)
@@ -113,6 +136,16 @@ func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+func (rateOpts *RatesOpts) Clone() *RatesOpts {
+	var rtIDs []string
+	if rateOpts.RateProfileIDs != nil {
+		rtIDs = utils.CloneStringSlice(rateOpts.RateProfileIDs)
+	}
+	return &RatesOpts{
+		RateProfileIDs: rtIDs,
+	}
+}
+
 // Clone returns a deep copy of RateSCfg
 func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 	cln = &RateSCfg{
@@ -122,6 +155,7 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 		RateIndexedSelects: rCfg.RateIndexedSelects,
 		RateNestedFields:   rCfg.RateNestedFields,
 		Verbosity:          rCfg.Verbosity,
+		Opts:               rCfg.Opts.Clone(),
 	}
 	if rCfg.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.StringIndexedFields))
@@ -145,6 +179,10 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 	return
 }
 
+type RatesOptsJson struct {
+	RateProfileIDs *[]string `json:"*rateProfileIDs"`
+}
+
 type RateSJsonCfg struct {
 	Enabled                    *bool
 	Indexed_selects            *bool
@@ -158,6 +196,17 @@ type RateSJsonCfg struct {
 	Rate_suffix_indexed_fields *[]string
 	Rate_nested_fields         *bool // applies when indexed fields is not defined
 	Verbosity                  *int
+	Opts                       *RatesOptsJson
+}
+
+func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
+	if d == nil {
+		d = new(RatesOptsJson)
+	}
+	if !utils.SliceStringEqual(v1.RateProfileIDs, v2.RateProfileIDs) {
+		d.RateProfileIDs = utils.SliceStringPointer(v2.RateProfileIDs)
+	}
+	return d
 }
 
 func diffRateSJsonCfg(d *RateSJsonCfg, v1, v2 *RateSCfg) *RateSJsonCfg {
@@ -188,5 +237,6 @@ func diffRateSJsonCfg(d *RateSJsonCfg, v1, v2 *RateSCfg) *RateSJsonCfg {
 	if v1.Verbosity != v2.Verbosity {
 		d.Verbosity = utils.IntPointer(v2.Verbosity)
 	}
+	d.Opts = diffRatesOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }

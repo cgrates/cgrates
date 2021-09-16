@@ -51,13 +51,10 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			},
 			RouteParameters: route.RouteParameters,
 		}
+		ev.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(route.RateProfileIDs)
 		var rpCost utils.RateProfileCost
 		if err = connMgr.Call(ctx, cfg.RouteSCfg().RateSConns,
-			utils.RateSv1CostForEvent,
-			&utils.ArgsCostForEvent{
-				RateProfileIDs: route.RateProfileIDs,
-				CGREvent:       ev,
-			}, &rpCost); err != nil {
+			utils.RateSv1CostForEvent, ev, &rpCost); err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",

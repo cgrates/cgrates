@@ -115,9 +115,12 @@ func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
+	if cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] != nil {
+		cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(rpIDs)
+	}
 	var tmpReply utils.RateProfileCost
 	if err = connMgr.Call(ctx, rateSConns, utils.RateSv1CostForEvent,
-		&utils.ArgsCostForEvent{CGREvent: cgrEv, RateProfileIDs: rpIDs}, &tmpReply); err != nil {
+		cgrEv, &tmpReply); err != nil {
 		return
 	}
 	return &tmpReply, nil
