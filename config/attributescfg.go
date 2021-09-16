@@ -149,9 +149,7 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 		Enabled:        alS.Enabled,
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
-	}
-	if alS.Opts != nil {
-		cln.Opts = alS.Opts.Clone()
+		Opts:           alS.Opts.Clone(),
 	}
 	if alS.ResourceSConns != nil {
 		cln.ResourceSConns = utils.CloneStringSlice(alS.ResourceSConns)
