@@ -164,6 +164,7 @@ func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS
 	var cacheS *engine.CacheS
 	select {
 	case cacheS = <-cacheSCh:
+		cacheSCh <- cacheS
 	case <-ctx.Done():
 		return
 	}
