@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -77,7 +78,7 @@ func TestXMLReadFile(t *testing.T) {
 func testXMLITInitConfig(t *testing.T) {
 	var err error
 	xmlCfgPath = path.Join(*dataDir, "conf", "samples", xmlCfgDIR)
-	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
+	if xmlCfg, err = config.NewCGRConfigFromPath(context.Background(), xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

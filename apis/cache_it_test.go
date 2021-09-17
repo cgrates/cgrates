@@ -86,7 +86,7 @@ func TestCacheSv1IT(t *testing.T) {
 func testCacheSLoadConfig(t *testing.T) {
 	var err error
 	chcCfgPath = path.Join(*dataDir, "conf", "samples", "precache", cacheConfigDIR)
-	if chcCfg, err = config.NewCGRConfigFromPath(chcCfgPath); err != nil {
+	if chcCfg, err = config.NewCGRConfigFromPath(context.Background(), chcCfgPath); err != nil {
 		t.Error(err)
 	}
 }

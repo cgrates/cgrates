@@ -60,7 +60,7 @@ func TestDMitinitDB(t *testing.T) {
 		}
 	case utils.MetaMongo:
 		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
+		mgoITCfg, err := config.NewCGRConfigFromPath(context.Background(), cdrsMongoCfgPath)
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -35,6 +35,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -116,7 +117,7 @@ func TestHAitTls(t *testing.T) {
 func testHAitInitCfg(t *testing.T) {
 	var err error
 	haCfgPath = path.Join(*dataDir, "conf", "samples", haCfgDIR)
-	haCfg, err = config.NewCGRConfigFromPath(haCfgPath)
+	haCfg, err = config.NewCGRConfigFromPath(context.Background(), haCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

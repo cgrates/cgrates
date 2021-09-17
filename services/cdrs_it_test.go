@@ -53,7 +53,7 @@ func TestCdrsReload(t *testing.T) {
 
 	cfg.ChargerSCfg().Enabled = true
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
@@ -111,7 +111,7 @@ func TestCdrsReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.CdrsCfg().Enabled = false
-	cfg.GetReloadChan(config.CDRsJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.CDRsJSON]
 	time.Sleep(10 * time.Millisecond)
 	if cdrS.IsRunning() {
 		t.Errorf("Expected service to be down")

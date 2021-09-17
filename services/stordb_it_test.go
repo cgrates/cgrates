@@ -44,7 +44,7 @@ func TestStorDBReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	cfg.ChargerSCfg().Enabled = true
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Password = "CGRateS.org"
@@ -135,7 +135,7 @@ func TestStorDBReload(t *testing.T) {
 	}
 
 	cfg.CdrsCfg().Enabled = false
-	cfg.GetReloadChan(config.CDRsJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.CDRsJSON]
 	time.Sleep(10 * time.Millisecond)
 	if cdrS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -145,7 +145,7 @@ func TestStorDBReload(t *testing.T) {
 }
 
 func TestStorDBReloadVersion1(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"))
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,7 +212,7 @@ func TestStorDBReloadVersion1(t *testing.T) {
 }
 
 func TestStorDBReloadVersion2(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql"))
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmysql"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -277,7 +277,7 @@ func TestStorDBReloadVersion2(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 func TestStorDBReloadVersion3(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutinternal"))
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join("/usr", "share", "cgrates", "conf", "samples", "tutinternal"))
 	if err != nil {
 		t.Fatal(err)
 	}

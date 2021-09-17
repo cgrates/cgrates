@@ -108,7 +108,7 @@ func TestResourceSIT(t *testing.T) {
 func testResourceSInitCfg(t *testing.T) {
 	var err error
 	rsCfgPath = path.Join(*dataDir, "conf", "samples", rsConfigDIR)
-	rsCfg, err = config.NewCGRConfigFromPath(rsCfgPath)
+	rsCfg, err = config.NewCGRConfigFromPath(context.Background(), rsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

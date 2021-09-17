@@ -31,6 +31,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -119,7 +120,7 @@ func TestConsoleItTests(t *testing.T) {
 func testConsoleItLoadConfig(t *testing.T) {
 	var err error
 	cnslItCfgPath = path.Join(*dataDir, "conf", "samples", cnslItDirPath)
-	if cnslItCfg, err = config.NewCGRConfigFromPath(cnslItCfgPath); err != nil {
+	if cnslItCfg, err = config.NewCGRConfigFromPath(context.Background(), cnslItCfgPath); err != nil {
 		t.Fatal(err)
 	}
 }

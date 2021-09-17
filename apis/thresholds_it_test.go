@@ -90,7 +90,7 @@ func TestThresholdsIT(t *testing.T) {
 func testThresholdsInitCfg(t *testing.T) {
 	var err error
 	thCfgPath = path.Join(*dataDir, "conf", "samples", thConfigDIR)
-	thCfg, err = config.NewCGRConfigFromPath(thCfgPath)
+	thCfg, err = config.NewCGRConfigFromPath(context.Background(), thCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

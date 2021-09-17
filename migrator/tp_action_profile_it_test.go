@@ -25,6 +25,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -58,12 +59,12 @@ func TestTpActPrfMove(t *testing.T) {
 func testTpActPrfConnect(t *testing.T) {
 	var err error
 	tpActPrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpActPrfCfgIn, err = config.NewCGRConfigFromPath(tpActPrfPathIn)
+	tpActPrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), tpActPrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpActPrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpActPrfCfgOut, err = config.NewCGRConfigFromPath(tpActPrfPathOut)
+	tpActPrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), tpActPrfPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

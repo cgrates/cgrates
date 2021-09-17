@@ -86,7 +86,7 @@ func TestAccSIT(t *testing.T) {
 func testAccSInitCfg(t *testing.T) {
 	var err error
 	accPrfCfgPath = path.Join(*dataDir, "conf", "samples", accPrfConfigDIR)
-	accPrfCfg, err = config.NewCGRConfigFromPath(accPrfCfgPath)
+	accPrfCfg, err = config.NewCGRConfigFromPath(context.Background(), accPrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

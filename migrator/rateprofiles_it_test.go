@@ -51,12 +51,12 @@ var sTestsRatePrfIT = []func(t *testing.T){
 func TestRatePrfITMove1(t *testing.T) {
 	var err error
 	ratePrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	ratePrfCfgIn, err = config.NewCGRConfigFromPath(ratePrfPathIn)
+	ratePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ratePrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	ratePrfCfgOut, err = config.NewCGRConfigFromPath(ratePrfPathOut)
+	ratePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,12 +70,12 @@ func TestRatePrfITMove1(t *testing.T) {
 func TestRatePrfITMove2(t *testing.T) {
 	var err error
 	ratePrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	ratePrfCfgIn, err = config.NewCGRConfigFromPath(ratePrfPathIn)
+	ratePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ratePrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	ratePrfCfgOut, err = config.NewCGRConfigFromPath(ratePrfPathOut)
+	ratePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,12 +89,12 @@ func TestRatePrfITMove2(t *testing.T) {
 func TestRatePrfITMoveEncoding(t *testing.T) {
 	var err error
 	ratePrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	ratePrfCfgIn, err = config.NewCGRConfigFromPath(ratePrfPathIn)
+	ratePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ratePrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	ratePrfCfgOut, err = config.NewCGRConfigFromPath(ratePrfPathOut)
+	ratePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,12 +108,12 @@ func TestRatePrfITMoveEncoding(t *testing.T) {
 func TestRatePrfITMoveEncoding2(t *testing.T) {
 	var err error
 	ratePrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	ratePrfCfgIn, err = config.NewCGRConfigFromPath(ratePrfPathIn)
+	ratePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ratePrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	ratePrfCfgOut, err = config.NewCGRConfigFromPath(ratePrfPathOut)
+	ratePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), ratePrfPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

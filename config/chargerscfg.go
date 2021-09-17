@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,6 +32,15 @@ type ChargerSCfg struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+}
+
+// loadChargerSCfg loads the ChargerS section of the configuration
+func (cS *ChargerSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnChargerSCfg := new(ChargerSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, ChargerSJSON, jsnChargerSCfg); err != nil {
+		return
+	}
+	return cS.loadFromJSONCfg(jsnChargerSCfg)
 }
 
 func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
@@ -62,26 +72,29 @@ func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (cS ChargerSCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:        cS.Enabled,
 		utils.IndexedSelectsCfg: cS.IndexedSelects,
 		utils.NestedFieldsCfg:   cS.NestedFields,
 	}
 	if cS.AttributeSConns != nil {
-		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(cS.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(cS.AttributeSConns)
 	}
 	if cS.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*cS.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*cS.StringIndexedFields)
 	}
 	if cS.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.PrefixIndexedFields)
 	}
 	if cS.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.SuffixIndexedFields)
 	}
-	return
+	return mp
 }
+
+func (ChargerSCfg) SName() string            { return ChargerSJSON }
+func (cS ChargerSCfg) CloneSection() Section { return cS.Clone() }
 
 // Clone returns a deep copy of ChargerSCfg
 func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {

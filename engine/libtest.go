@@ -228,7 +228,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}
-	cfg, err := config.NewCGRConfigFromPath(cfgPath)
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
 	if err != nil {
 		return nil, err
 	}
@@ -258,7 +258,7 @@ func StartEngineWithContext(ctx context.Context, cfgPath string, waitEngine int)
 		return nil, err
 	}
 	var cfg *config.CGRConfig
-	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(context.Background(), cfgPath); err != nil {
 		return
 	}
 	fib := utils.Fib()

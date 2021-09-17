@@ -114,7 +114,7 @@ func TestLoadersIT(t *testing.T) {
 func testLoadersInitCfg(t *testing.T) {
 	var err error
 	ldrCfgPath = path.Join(*dataDir, "conf", "samples", ldrConfigDIR)
-	ldrCfg, err = config.NewCGRConfigFromPath(ldrCfgPath)
+	ldrCfg, err = config.NewCGRConfigFromPath(context.Background(), ldrCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

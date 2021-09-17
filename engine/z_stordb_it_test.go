@@ -31,6 +31,7 @@ import (
 
 	"gorm.io/gorm/logger"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -68,7 +69,7 @@ func TestStorDBit(t *testing.T) {
 		config.SetCgrConfig(cfg)
 		storDB = NewInternalDB(nil, nil, false)
 	case utils.MetaMySQL:
-		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
+		if cfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewMySQLStorage(cfg.StorDbCfg().Host,
@@ -79,7 +80,7 @@ func TestStorDBit(t *testing.T) {
 		}
 		storDB.(*SQLStorage).db.Config.Logger = logger.Default.LogMode(logger.Silent)
 	case utils.MetaMongo:
-		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
+		if cfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewMongoStorage(cfg.StorDbCfg().Host,
@@ -90,7 +91,7 @@ func TestStorDBit(t *testing.T) {
 			t.Fatal(err)
 		}
 	case utils.MetaPostgres:
-		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
+		if cfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 			t.Fatal(err)
 		}
 		if storDB, err = NewPostgresStorage(cfg.StorDbCfg().Host,

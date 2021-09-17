@@ -488,13 +488,13 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 		},
 	}
 	rcv := ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	if !reflect.DeepEqual(ban, *rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(*rcv))
 	}
-	if rcv[0].SessionSConns[1] = ""; ban[0].SessionSConns[1] != "*conn1" {
+	if (*rcv)[0].SessionSConns[1] = ""; ban[0].SessionSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv[0].RequestProcessors[0].ID = ""; ban[0].RequestProcessors[0].ID != "OutboundAUTHDryRun" {
+	if (*rcv)[0].RequestProcessors[0].ID = ""; ban[0].RequestProcessors[0].ID != "OutboundAUTHDryRun" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

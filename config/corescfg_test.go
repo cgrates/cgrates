@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,9 +53,7 @@ func TestCoreSloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnalS, err := jsnCfg.CoreSJSON(); err != nil {
-		t.Error(err)
-	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
+	} else if err = alS.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, alS) {
 		t.Errorf("Expected: %+v , received: %+v", expected, alS)
@@ -93,11 +92,9 @@ func TestCoreSAsMapInterface(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnalS, err := jsnCfg.CoreSJSON(); err != nil {
+	} else if err = alS.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
-	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
-		t.Error(err)
-	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := alS.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 	eMap[utils.CapsStatsIntervalCfg] = "1s"
@@ -108,7 +105,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 		ShutdownTimeout:   time.Second,
 		CapsStrategy:      utils.MetaBusy,
 	}
-	if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	if rcv := alS.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

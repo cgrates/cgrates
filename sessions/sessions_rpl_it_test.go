@@ -25,6 +25,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -79,11 +80,11 @@ func TestSessionSRpl(t *testing.T) {
 
 func testSessionSRplInitCfg(t *testing.T) {
 	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", smgRplcMasterCfgDIR)
-	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
+	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(context.Background(), smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
 	}
 	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", smgRplcSlaveCfgDIR)
-	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
+	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(context.Background(), smgRplcSlaveCfgPath); err != nil {
 		t.Fatal(err)
 	}
 }

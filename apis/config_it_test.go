@@ -94,7 +94,7 @@ func TestCfgSIT(t *testing.T) {
 func testCfgInitCfg(t *testing.T) {
 	var err error
 	cfgPath = path.Join(*dataDir, "conf", "samples", cfgDIR)
-	cfgCfg, err = config.NewCGRConfigFromPath(cfgPath)
+	cfgCfg, err = config.NewCGRConfigFromPath(context.Background(), cfgPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -338,7 +338,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 func testCfgInitCfgStore(t *testing.T) {
 	var err error
 	cfgPath = path.Join(*dataDir, "conf", "samples", cfgDIR)
-	cfgCfg, err = config.NewCGRConfigFromPath(cfgPath)
+	cfgCfg, err = config.NewCGRConfigFromPath(context.Background(), cfgPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -396,11 +396,11 @@ func testCfgDataDBConnStore(t *testing.T) {
 }
 
 func testCfgGetConfigStoreNil(t *testing.T) {
-	attr, err := connDb.AttributeServJsonCfg()
-	if err != nil {
+	attr := new(config.AttributeSJsonCfg)
+	if err := connDb.GetSection(context.Background(), config.AttributeSJSON, attr); err != nil {
 		t.Fatal(err)
 	}
-	var expected *config.AttributeSJsonCfg
+	expected := new(config.AttributeSJsonCfg)
 	if !reflect.DeepEqual(attr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, attr)
 	}
@@ -424,8 +424,8 @@ func testCfgStoreConfigStore(t *testing.T) {
 }
 
 func testCfgGetConfigStore(t *testing.T) {
-	attr, err := connDb.AttributeServJsonCfg()
-	if err != nil {
+	attr := new(config.AttributeSJsonCfg)
+	if err := connDb.GetSection(context.Background(), config.AttributeSJSON, attr); err != nil {
 		t.Fatal(err)
 	}
 	expected := &config.AttributeSJsonCfg{
@@ -509,8 +509,8 @@ func testCfgSetGetConfigStore(t *testing.T) {
 }
 
 func testCfgGetConfigStoreAgain(t *testing.T) {
-	attr, err := connDb.AttributeServJsonCfg()
-	if err != nil {
+	attr := new(config.AttributeSJsonCfg)
+	if err := connDb.GetSection(context.Background(), config.AttributeSJSON, attr); err != nil {
 		t.Fatal(err)
 	}
 	expected := &config.AttributeSJsonCfg{

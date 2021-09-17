@@ -51,7 +51,7 @@ func TestActionSReload(t *testing.T) {
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	actRPC := make(chan birpc.ClientConnector, 1)
@@ -99,7 +99,7 @@ func TestActionSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ActionSCfg().Enabled = false
-	cfg.GetReloadChan(config.ActionSJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.ActionSJSON]
 	time.Sleep(10 * time.Millisecond)
 
 	if actS.IsRunning() {

@@ -118,7 +118,7 @@ func testSqlEeCreateTable(t *testing.T) {
 func testSqlEeLoadConfig(t *testing.T) {
 	var err error
 	sqlEeCfgPath = path.Join(*dataDir, "conf", "samples", sqlEeConfigDir)
-	if sqlEeCfg, err = config.NewCGRConfigFromPath(sqlEeCfgPath); err != nil {
+	if sqlEeCfg, err = config.NewCGRConfigFromPath(context.Background(), sqlEeCfgPath); err != nil {
 		t.Error(err)
 	}
 }

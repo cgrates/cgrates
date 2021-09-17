@@ -62,11 +62,11 @@ func TestLoadIDsITMigrateMongo2Redis(t *testing.T) {
 
 func testLoadIdsStart(testName string, t *testing.T) {
 	var err error
-	if loadCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
+	if loadCfgIn, err = config.NewCGRConfigFromPath(context.Background(), inPath); err != nil {
 		t.Fatal(err)
 	}
 	config.SetCgrConfig(loadCfgIn)
-	if loadCfgOut, err = config.NewCGRConfigFromPath(outPath); err != nil {
+	if loadCfgOut, err = config.NewCGRConfigFromPath(context.Background(), outPath); err != nil {
 		t.Fatal(err)
 	}
 	for _, stest := range sTestsLoadIdsIT {

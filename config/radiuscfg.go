@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,6 +33,15 @@ type RadiusAgentCfg struct {
 	ClientDictionaries map[string]string
 	SessionSConns      []string
 	RequestProcessors  []*RequestProcessor
+}
+
+// loadRadiusAgentCfg loads the RadiusAgent section of the configuration
+func (ra *RadiusAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnRACfg := new(RadiusAgentJsonCfg)
+	if err = jsnCfg.GetSection(ctx, RadiusAgentJSON, jsnRACfg); err != nil {
+		return
+	}
+	return ra.loadFromJSONCfg(jsnRACfg, cfg.generalCfg.RSRSep)
 }
 
 func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator string) (err error) {
@@ -68,8 +78,8 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (ra RadiusAgentCfg) AsMapInterface(separator string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:    ra.Enabled,
 		utils.ListenNetCfg:  ra.ListenNet,
 		utils.ListenAuthCfg: ra.ListenAuth,
@@ -80,23 +90,26 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 	for i, item := range ra.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+	mp[utils.RequestProcessorsCfg] = requestProcessors
 
 	if ra.SessionSConns != nil {
-		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(ra.SessionSConns)
+		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(ra.SessionSConns)
 	}
 	clientSecrets := make(map[string]string)
 	for k, v := range ra.ClientSecrets {
 		clientSecrets[k] = v
 	}
-	initialMP[utils.ClientSecretsCfg] = clientSecrets
+	mp[utils.ClientSecretsCfg] = clientSecrets
 	clientDictionaries := make(map[string]string)
 	for k, v := range ra.ClientDictionaries {
 		clientDictionaries[k] = v
 	}
-	initialMP[utils.ClientDictionariesCfg] = clientDictionaries
-	return
+	mp[utils.ClientDictionariesCfg] = clientDictionaries
+	return mp
 }
+
+func (RadiusAgentCfg) SName() string            { return RadiusAgentJSON }
+func (ra RadiusAgentCfg) CloneSection() Section { return ra.Clone() }
 
 // Clone returns a deep copy of RadiusAgentCfg
 func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {

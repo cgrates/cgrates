@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -131,9 +132,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(StorDBJSON); err != nil {
-		t.Error(err)
-	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -151,9 +150,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(StorDBJSON); err != nil {
-		t.Error(err)
-	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -171,9 +168,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(StorDBJSON); err != nil {
-		t.Error(err)
-	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -235,7 +230,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cfgCgr.storDbCfg.AsMapInterface()
+		rcv := cfgCgr.storDbCfg.AsMapInterface("").(map[string]interface{})
 		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg],
 			rcv[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg],

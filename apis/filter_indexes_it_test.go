@@ -229,7 +229,7 @@ func TestFltrIdxV1IT(t *testing.T) {
 func testV1FIdxLoadConfig(t *testing.T) {
 	tFltrIdxCfgPath = path.Join(*dataDir, "conf", "samples", tFltrIdxConfDIR)
 	var err error
-	if tFltrIdxCfg, err = config.NewCGRConfigFromPath(tFltrIdxCfgPath); err != nil {
+	if tFltrIdxCfg, err = config.NewCGRConfigFromPath(context.Background(), tFltrIdxCfgPath); err != nil {
 		t.Error(err)
 	}
 }

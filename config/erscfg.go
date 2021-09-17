@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,7 +33,16 @@ type ERsCfg struct {
 	PartialCacheTTL time.Duration
 }
 
-func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
+// loadErsCfg loads the Ers section of the configuration
+func (erS *ERsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnERsCfg := new(ERsJsonCfg)
+	if err = jsnCfg.GetSection(ctx, ERsJSON, jsnERsCfg); err != nil {
+		return
+	}
+	return erS.loadFromJSONCfg(jsnERsCfg, cfg.templates, cfg.generalCfg.RSRSep)
+}
+
+func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -47,11 +57,10 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 			return
 		}
 	}
-	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep, dfltRdrCfg)
+	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep)
 }
 
-func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string,
-	dfltRdrCfg *EventReaderCfg) (err error) {
+func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
 	if jsnReaders == nil {
 		return
 	}
@@ -66,12 +75,7 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 			}
 		}
 		if rdr == nil {
-			if dfltRdrCfg != nil {
-				rdr = dfltRdrCfg.Clone()
-			} else {
-				rdr = new(EventReaderCfg)
-				rdr.Opts = make(map[string]interface{})
-			}
+			rdr = getDftEvRdrCfg()
 			erS.Readers = append(erS.Readers, rdr)
 		}
 		if err := rdr.loadFromJSONCfg(jsnReader, msgTemplates, sep); err != nil {
@@ -81,9 +85,11 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 	}
 	return nil
 }
+func (ERsCfg) SName() string             { return ERsJSON }
+func (erS ERsCfg) CloneSection() Section { return erS.Clone() }
 
 // Clone returns a deep copy of ERsCfg
-func (erS *ERsCfg) Clone() (cln *ERsCfg) {
+func (erS ERsCfg) Clone() (cln *ERsCfg) {
 	cln = &ERsCfg{
 		Enabled:         erS.Enabled,
 		SessionSConns:   make([]string, len(erS.SessionSConns)),
@@ -100,25 +106,25 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (erS ERsCfg) AsMapInterface(separator string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:         erS.Enabled,
 		utils.PartialCacheTTLCfg: "0",
 	}
 	if erS.PartialCacheTTL != 0 {
-		initialMP[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()
+		mp[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()
 	}
 	if erS.SessionSConns != nil {
-		initialMP[utils.SessionSConnsCfg] = getInternalJSONConns(erS.SessionSConns)
+		mp[utils.SessionSConnsCfg] = getInternalJSONConns(erS.SessionSConns)
 	}
 	if erS.Readers != nil {
 		readers := make([]map[string]interface{}, len(erS.Readers))
 		for i, item := range erS.Readers {
 			readers[i] = item.AsMapInterface(separator)
 		}
-		initialMP[utils.ReadersCfg] = readers
+		mp[utils.ReadersCfg] = readers
 	}
-	return
+	return mp
 }
 
 // EventReaderCfg the event for the Event Reader

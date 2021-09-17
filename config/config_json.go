@@ -72,58 +72,44 @@ const (
 )
 
 var (
-	sortedCfgSections = []string{GeneralJSON, RPCConnsJSON, DataDBJSON, StorDBJSON, ListenJSON, TlsJSON, HTTPJSON,
-		CacheJSON, FilterSJSON, CDRsJSON, ERsJSON, SessionSJSON, AsteriskAgentJSON, FreeSWITCHAgentJSON,
-		KamailioAgentJSON, DiameterAgentJSON, RadiusAgentJSON, HTTPAgentJSON, DNSAgentJSON, AttributeSJSON,
-		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON, RouteSJSON, LoaderSJSON, SureTaxJSON,
-		LoaderJSON, MigratorJSON, DispatcherSJSON, AnalyzerSJSON, AdminSJSON, EEsJSON, RateSJSON, SIPAgentJSON,
-		RegistrarCJSON, TemplatesJSON, ConfigSJSON, APIBanJSON, CoreSJSON, ActionSJSON, AccountSJSON, ConfigDBJSON}
-	sortedSectionsSet = utils.NewStringSet(sortedCfgSections)
+	SectionToService = map[string]string{
+		AttributeSJSON:      utils.AttributeS,
+		ChargerSJSON:        utils.ChargerS,
+		ThresholdSJSON:      utils.ThresholdS,
+		StatSJSON:           utils.StatS,
+		ResourceSJSON:       utils.ResourceS,
+		RouteSJSON:          utils.RouteS,
+		AdminSJSON:          utils.AdminS,
+		CDRsJSON:            utils.CDRServer,
+		SessionSJSON:        utils.SessionS,
+		ERsJSON:             utils.ERs,
+		DNSAgentJSON:        utils.DNSAgent,
+		FreeSWITCHAgentJSON: utils.FreeSWITCHAgent,
+		KamailioAgentJSON:   utils.KamailioAgent,
+		AsteriskAgentJSON:   utils.AsteriskAgent,
+		RadiusAgentJSON:     utils.RadiusAgent,
+		DiameterAgentJSON:   utils.DiameterAgent,
+		HTTPAgentJSON:       utils.HTTPAgent,
+		LoaderSJSON:         utils.LoaderS,
+		AnalyzerSJSON:       utils.AnalyzerS,
+		DispatcherSJSON:     utils.DispatcherS,
+		DataDBJSON:          utils.DataDB,
+		StorDBJSON:          utils.StorDB,
+		EEsJSON:             utils.EEs,
+		RateSJSON:           utils.RateS,
+		SIPAgentJSON:        utils.SIPAgent,
+		RegistrarCJSON:      utils.RegistrarC,
+		HTTPJSON:            utils.GlobalVarS,
+		AccountSJSON:        utils.AccountS,
+		ActionSJSON:         utils.ActionS,
+		CoreSJSON:           utils.CoreS,
+		RPCConnsJSON:        RPCConnsJSON,
+	}
 )
 
 type ConfigDB interface {
-	GeneralJsonCfg() (*GeneralJsonCfg, error)
-	RPCConnJsonCfg() (RPCConnsJson, error)
-	CacheJsonCfg() (*CacheJsonCfg, error)
-	ListenJsonCfg() (*ListenJsonCfg, error)
-	HttpJsonCfg() (*HTTPJsonCfg, error)
-	DbJsonCfg(section string) (*DbJsonCfg, error)
-	FilterSJsonCfg() (*FilterSJsonCfg, error)
-	CdrsJsonCfg() (*CdrsJsonCfg, error)
-	ERsJsonCfg() (*ERsJsonCfg, error)
-	EEsJsonCfg() (*EEsJsonCfg, error)
-	SessionSJsonCfg() (*SessionSJsonCfg, error)
-	FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error)
-	KamAgentJsonCfg() (*KamAgentJsonCfg, error)
-	AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error)
-	DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error)
-	RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error)
-	HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error)
-	DNSAgentJsonCfg() (*DNSAgentJsonCfg, error)
-	AttributeServJsonCfg() (*AttributeSJsonCfg, error)
-	ChargerServJsonCfg() (*ChargerSJsonCfg, error)
-	ResourceSJsonCfg() (*ResourceSJsonCfg, error)
-	StatSJsonCfg() (*StatServJsonCfg, error)
-	ThresholdSJsonCfg() (*ThresholdSJsonCfg, error)
-	RouteSJsonCfg() (*RouteSJsonCfg, error)
-	LoaderJsonCfg() ([]*LoaderJsonCfg, error)
-	SureTaxJsonCfg() (*SureTaxJsonCfg, error)
-	DispatcherSJsonCfg() (*DispatcherSJsonCfg, error)
-	RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error)
-	LoaderCfgJson() (*LoaderCfgJson, error)
-	MigratorCfgJson() (*MigratorCfgJson, error)
-	TlsCfgJson() (*TlsJsonCfg, error)
-	AnalyzerCfgJson() (*AnalyzerSJsonCfg, error)
-	AdminSCfgJson() (*AdminSJsonCfg, error)
-	RateCfgJson() (*RateSJsonCfg, error)
-	SIPAgentJsonCfg() (*SIPAgentJsonCfg, error)
-	TemplateSJsonCfg() (FcTemplatesJsonCfg, error)
-	ConfigSJsonCfg() (*ConfigSCfgJson, error)
-	ApiBanCfgJson() (*APIBanJsonCfg, error)
-	CoreSJSON() (*CoreSJsonCfg, error)
-	ActionSCfgJson() (*ActionSJsonCfg, error)
-	AccountSCfgJson() (*AccountSJsonCfg, error)
-	SetSection(*context.Context, string, interface{}) error
+	GetSection(ctx *context.Context, section string, val interface{}) error // in this case value must be a not nil pointer
+	SetSection(ctx *context.Context, section string, val interface{}) error
 }
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -134,500 +120,123 @@ func NewCgrJsonCfgFromBytes(buf []byte) (cgrJsonCfg *CgrJsonCfg, err error) {
 }
 
 // Main object holding the loaded config as section raw messages
-type CgrJsonCfg map[string]*json.RawMessage
+type CgrJsonCfg map[string]json.RawMessage
 
-func (jsnCfg CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[GeneralJSON]
-	if !hasKey {
-		return nil, nil
+func (jsnCfg CgrJsonCfg) GetSection(ctx *context.Context, section string, val interface{}) (err error) {
+	if rawCfg, hasKey := jsnCfg[section]; hasKey {
+		err = json.Unmarshal(rawCfg, val)
 	}
-	cfg := new(GeneralJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) RPCConnJsonCfg() (RPCConnsJson, error) {
-	rawCfg, hasKey := jsnCfg[RPCConnsJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := make(RPCConnsJson)
-	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) CacheJsonCfg() (*CacheJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[CacheJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(CacheJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) ListenJsonCfg() (*ListenJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ListenJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(ListenJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) HttpJsonCfg() (*HTTPJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[HTTPJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(HTTPJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) DbJsonCfg(section string) (*DbJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[section]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(DbJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) FilterSJsonCfg() (*FilterSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[FilterSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(FilterSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) CdrsJsonCfg() (*CdrsJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[CDRsJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(CdrsJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) ERsJsonCfg() (erSCfg *ERsJsonCfg, err error) {
-	rawCfg, hasKey := jsnCfg[ERsJSON]
-	if !hasKey {
-		return
-	}
-	erSCfg = new(ERsJsonCfg)
-	err = json.Unmarshal(*rawCfg, &erSCfg)
 	return
 }
 
-func (jsnCfg CgrJsonCfg) EEsJsonCfg() (erSCfg *EEsJsonCfg, err error) {
-	rawCfg, hasKey := jsnCfg[EEsJSON]
-	if !hasKey {
-		return
-	}
-	erSCfg = new(EEsJsonCfg)
-	err = json.Unmarshal(*rawCfg, &erSCfg)
-	return
-}
-
-func (jsnCfg CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[SessionSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(SessionSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[FreeSWITCHAgentJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(FreeswitchAgentJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[KamailioAgentJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(KamAgentJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AsteriskAgentJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(AsteriskAgentJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[DiameterAgentJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(DiameterAgentJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[RadiusAgentJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(RadiusAgentJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[HTTPAgentJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	httpAgnt := make([]*HttpAgentJsonCfg, 0)
-	if err := json.Unmarshal(*rawCfg, &httpAgnt); err != nil {
-		return nil, err
-	}
-	return &httpAgnt, nil
-}
-
-func (jsnCfg CgrJsonCfg) DNSAgentJsonCfg() (da *DNSAgentJsonCfg, err error) {
-	rawCfg, hasKey := jsnCfg[DNSAgentJSON]
-	if !hasKey {
-		return
-	}
-	da = new(DNSAgentJsonCfg)
-	err = json.Unmarshal(*rawCfg, da)
-	return
-}
-
-func (jsnCfg CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AttributeSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(AttributeSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ChargerSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(ChargerSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ResourceSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(ResourceSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[StatSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(StatServJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ThresholdSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(ThresholdSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) RouteSJsonCfg() (*RouteSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[RouteSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(RouteSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[LoaderSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := make([]*LoaderJsonCfg, 0)
-	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[SureTaxJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(SureTaxJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[DispatcherSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(DispatcherSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
-	rawCfg, hasKey := jsnCfg[RegistrarCJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(RegistrarCJsonCfgs)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
-	rawCfg, hasKey := jsnCfg[LoaderJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(LoaderCfgJson)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) MigratorCfgJson() (*MigratorCfgJson, error) {
-	rawCfg, hasKey := jsnCfg[MigratorJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(MigratorCfgJson)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) TlsCfgJson() (*TlsJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[TlsJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(TlsJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AnalyzerSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(AnalyzerSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) AdminSCfgJson() (*AdminSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AdminSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(AdminSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[RateSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(RateSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[SIPAgentJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	sipAgnt := new(SIPAgentJsonCfg)
-	if err := json.Unmarshal(*rawCfg, sipAgnt); err != nil {
-		return nil, err
-	}
-	return sipAgnt, nil
-}
-
-func (jsnCfg CgrJsonCfg) TemplateSJsonCfg() (FcTemplatesJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[TemplatesJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := make(FcTemplatesJsonCfg)
-	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) ConfigSJsonCfg() (*ConfigSCfgJson, error) {
-	rawCfg, hasKey := jsnCfg[ConfigSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(ConfigSCfgJson)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) ApiBanCfgJson() (*APIBanJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[APIBanJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(APIBanJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) CoreSJSON() (*CoreSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[CoreSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(CoreSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) ActionSCfgJson() (*ActionSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ActionSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(ActionSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) AccountSCfgJson() (*AccountSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AccountSJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(AccountSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn interface{}) error {
+func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn interface{}) (_ error) {
 	data, err := json.Marshal(jsn)
 	if err != nil {
 		return err
 	}
-	d := json.RawMessage(data)
-	jsnCfg[section] = &d
-	return nil
+	jsnCfg[section] = json.RawMessage(data)
+	return
+}
+
+type Section interface {
+	SName() string
+	Load(*context.Context, ConfigDB, *CGRConfig) error
+	AsMapInterface(string) interface{}
+	CloneSection() Section
+	// UpdateDB(*context.Context) // not know
+}
+
+func newSections(cfg *CGRConfig) Sections {
+	return Sections{
+		cfg.generalCfg,
+		cfg.rpcConns,
+		cfg.dataDbCfg,
+		cfg.storDbCfg,
+		cfg.listenCfg,
+		cfg.tlsCfg,
+		cfg.httpCfg,
+		cfg.cacheCfg,
+		cfg.filterSCfg,
+		cfg.templates,
+		cfg.attributeSCfg,
+		cfg.chargerSCfg,
+		cfg.resourceSCfg,
+		cfg.statsCfg,
+		cfg.thresholdSCfg,
+		cfg.routeSCfg,
+		cfg.rateSCfg,
+		cfg.accountSCfg,
+		cfg.actionSCfg,
+		cfg.sessionSCfg,
+		cfg.cdrsCfg,
+		&cfg.loaderCfg,
+		cfg.loaderCgrCfg,
+		cfg.ersCfg,
+		cfg.eesCfg,
+		cfg.asteriskAgentCfg,
+		cfg.fsAgentCfg,
+		cfg.kamAgentCfg,
+		cfg.diameterAgentCfg,
+		cfg.radiusAgentCfg,
+		&cfg.httpAgentCfg,
+		cfg.dnsAgentCfg,
+		cfg.sipAgentCfg,
+		cfg.migratorCgrCfg,
+		cfg.dispatcherSCfg,
+		cfg.registrarCCfg,
+		cfg.analyzerSCfg,
+		cfg.admS,
+		cfg.coreSCfg,
+		cfg.configSCfg,
+		cfg.apiBanCfg,
+		cfg.configDBCfg,
+		cfg.sureTaxCfg,
+	}
+}
+
+type Sections []Section
+
+func (r Sections) Get(name string) (sec Section, has bool) {
+	for _, sec = range r {
+		if has = sec.SName() == name; has {
+			return
+		}
+	}
+	return
+}
+
+func (r Sections) Load(ctx *context.Context, db ConfigDB, cfg *CGRConfig) (err error) {
+	for _, f := range r {
+		if err = f.Load(ctx, db, cfg); err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (r Sections) LoadWithout(ctx *context.Context, db ConfigDB, cfg *CGRConfig, sections ...string) (err error) {
+	eSec := utils.NewStringSet(sections)
+	for _, sec := range r {
+		if !eSec.Has(sec.SName()) {
+			if err = sec.Load(ctx, db, cfg); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+func (r Sections) AsMapInterface(sep string) (m map[string]interface{}) {
+	m = make(map[string]interface{})
+	for _, sec := range r {
+		m[sec.SName()] = sec.AsMapInterface(sep)
+	}
+	return
+}
+
+func (r Sections) Clone() (c Sections) {
+	c = make(Sections, len(r))
+	for s, f := range r {
+		c[s] = f.CloneSection()
+	}
+	return
 }

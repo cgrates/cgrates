@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"github.com/cgrates/birpc/context"
 	"log"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -51,12 +52,12 @@ var sTestsChrgIT = []func(t *testing.T){
 func TestChargersITMove1(t *testing.T) {
 	var err error
 	chrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	chrgCfgIn, err = config.NewCGRConfigFromPath(chrgPathIn)
+	chrgCfgIn, err = config.NewCGRConfigFromPath(context.Background(), chrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	chrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	chrgCfgOut, err = config.NewCGRConfigFromPath(chrgPathOut)
+	chrgCfgOut, err = config.NewCGRConfigFromPath(context.Background(), chrgPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,12 +71,12 @@ func TestChargersITMove1(t *testing.T) {
 func TestChargersITMove2(t *testing.T) {
 	var err error
 	chrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	chrgCfgIn, err = config.NewCGRConfigFromPath(chrgPathIn)
+	chrgCfgIn, err = config.NewCGRConfigFromPath(context.Background(), chrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	chrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	chrgCfgOut, err = config.NewCGRConfigFromPath(chrgPathOut)
+	chrgCfgOut, err = config.NewCGRConfigFromPath(context.Background(), chrgPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,12 +90,12 @@ func TestChargersITMove2(t *testing.T) {
 func TestChargersITMoveEncoding(t *testing.T) {
 	var err error
 	chrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	chrgCfgIn, err = config.NewCGRConfigFromPath(chrgPathIn)
+	chrgCfgIn, err = config.NewCGRConfigFromPath(context.Background(), chrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	chrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	chrgCfgOut, err = config.NewCGRConfigFromPath(chrgPathOut)
+	chrgCfgOut, err = config.NewCGRConfigFromPath(context.Background(), chrgPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,12 +109,12 @@ func TestChargersITMoveEncoding(t *testing.T) {
 func TestChargersITMoveEncoding2(t *testing.T) {
 	var err error
 	chrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	chrgCfgIn, err = config.NewCGRConfigFromPath(chrgPathIn)
+	chrgCfgIn, err = config.NewCGRConfigFromPath(context.Background(), chrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	chrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	chrgCfgOut, err = config.NewCGRConfigFromPath(chrgPathOut)
+	chrgCfgOut, err = config.NewCGRConfigFromPath(context.Background(), chrgPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

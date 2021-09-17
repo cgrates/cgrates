@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -76,7 +77,7 @@ func TestDNSitSimple(t *testing.T) {
 func testDNSitInitCfg(t *testing.T) {
 	var err error
 	dnsCfgPath = path.Join(*dataDir, "conf", "samples", dnsCfgDIR)
-	dnsCfg, err = config.NewCGRConfigFromPath(dnsCfgPath)
+	dnsCfg, err = config.NewCGRConfigFromPath(context.Background(), dnsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

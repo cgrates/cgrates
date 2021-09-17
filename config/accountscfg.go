@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/utils"
+)
 
 type AccountsOpts struct {
 	AccountIDs []string
@@ -49,6 +52,15 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 	}
 
 	return nil
+}
+
+// loadAccountSCfg loads the AccountS section of the configuration
+func (acS *AccountSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnActionCfg := new(AccountSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, AccountSJSON, jsnActionCfg); err != nil {
+		return
+	}
+	return acS.loadFromJSONCfg(jsnActionCfg)
 }
 
 func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
@@ -97,11 +109,11 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+func (acS AccountSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.MetaAccountIDsCfg: acS.Opts.AccountIDs,
 	}
-	initialMP = map[string]interface{}{
+	mp := map[string]interface{}{
 		utils.EnabledCfg:        acS.Enabled,
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
@@ -109,27 +121,27 @@ func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.OptsCfg:           opts,
 	}
 	if acS.AttributeSConns != nil {
-		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(acS.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(acS.AttributeSConns)
 	}
 	if acS.RateSConns != nil {
-		initialMP[utils.RateSConnsCfg] = getInternalJSONConns(acS.RateSConns)
+		mp[utils.RateSConnsCfg] = getInternalJSONConns(acS.RateSConns)
 	}
 	if acS.ThresholdSConns != nil {
-		initialMP[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
 	}
 	if acS.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*acS.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*acS.StringIndexedFields)
 	}
 	if acS.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.PrefixIndexedFields)
 	}
 	if acS.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
 	}
 	if acS.MaxUsage != nil {
-		initialMP[utils.MaxUsage] = acS.MaxUsage.String()
+		mp[utils.MaxUsage] = acS.MaxUsage.String()
 	}
-	return
+	return mp
 }
 
 func (accOpts *AccountsOpts) Clone() *AccountsOpts {
@@ -141,6 +153,8 @@ func (accOpts *AccountsOpts) Clone() *AccountsOpts {
 		AccountIDs: accIDs,
 	}
 }
+func (AccountSCfg) SName() string             { return AccountSJSON }
+func (acS AccountSCfg) CloneSection() Section { return acS.Clone() }
 
 // Clone returns a deep copy of AccountSCfg
 func (acS AccountSCfg) Clone() (cln *AccountSCfg) {

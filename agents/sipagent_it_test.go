@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -80,7 +81,7 @@ func testSAitInitCfg(t *testing.T) {
 	saCfgPath = path.Join(*dataDir, "conf", "samples", saonfigDIR)
 	// Init config first
 	var err error
-	saCfg, err = config.NewCGRConfigFromPath(saCfgPath)
+	saCfg, err = config.NewCGRConfigFromPath(context.Background(), saCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

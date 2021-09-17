@@ -21,27 +21,50 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
-
-// NewDfltLoaderSCfg returns the first cached default value for a LoaderSCfg connection
-func NewDfltLoaderSCfg() *LoaderSCfg {
-	if dfltLoaderConfig == nil {
-		return new(LoaderSCfg)
-	}
-	return dfltLoaderConfig.Clone()
-}
 
 // LoaderSCfgs to export some methods for LoaderS profiles
 type LoaderSCfgs []*LoaderSCfg
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (ldrs LoaderSCfgs) AsMapInterface(separator string) (loaderCfg []map[string]interface{}) {
-	loaderCfg = make([]map[string]interface{}, len(ldrs))
-	for i, item := range ldrs {
-		loaderCfg[i] = item.AsMapInterface(separator)
+// loadLoaderSCfg loads the LoaderS section of the configuration
+func (ldrs *LoaderSCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnLoaderCfg := make([]*LoaderJsonCfg, 0)
+	if err = jsnCfg.GetSection(ctx, LoaderSJSON, &jsnLoaderCfg); err != nil {
+		return
+	}
+	// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
+	for _, profile := range jsnLoaderCfg {
+		var ldr *LoaderSCfg
+		if profile.ID != nil {
+			for _, loader := range cfg.loaderCfg {
+				if loader.ID == *profile.ID {
+					ldr = loader
+					break
+				}
+			}
+		}
+		if ldr == nil {
+			ldr = getDftLoaderCfg()
+			ldr.Data = nil
+			*ldrs = append(*ldrs, ldr) // use append so the loaderS profile to be loaded from multiple files
+		}
+
+		if err = ldr.loadFromJSONCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
+			return
+		}
 	}
 	return
+}
+
+// AsMapInterface returns the config as a map[string]interface{}
+func (ldrs LoaderSCfgs) AsMapInterface(separator string) interface{} {
+	mp := make([]map[string]interface{}, len(ldrs))
+	for i, item := range ldrs {
+		mp[i] = item.AsMapInterface(separator)
+	}
+	return mp
 }
 
 // Enabled returns true if Loader Service is enabled
@@ -54,13 +77,16 @@ func (ldrs LoaderSCfgs) Enabled() bool {
 	return false
 }
 
+func (LoaderSCfgs) SName() string              { return LoaderSJSON }
+func (ldrs LoaderSCfgs) CloneSection() Section { return ldrs.Clone() }
+
 // Clone itself into a new LoaderSCfgs
-func (ldrs LoaderSCfgs) Clone() (cln LoaderSCfgs) {
-	cln = make(LoaderSCfgs, len(ldrs))
+func (ldrs LoaderSCfgs) Clone() *LoaderSCfgs {
+	cln := make(LoaderSCfgs, len(ldrs))
 	for i, ldr := range ldrs {
 		cln[i] = ldr.Clone()
 	}
-	return
+	return &cln
 }
 
 // LoaderSCfg the config for a loader
@@ -211,7 +237,7 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+func (lData LoaderDataType) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.TypeCf:      lData.Type,
 		utils.FilenameCfg: lData.Filename,
@@ -227,7 +253,7 @@ func (lData *LoaderDataType) AsMapInterface(separator string) (initialMP map[str
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+func (l LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.IDCfg:           l.ID,
 		utils.TenantCfg:       l.Tenant,
@@ -368,7 +394,7 @@ func diffLoadersJsonCfg(d []*LoaderJsonCfg, v1, v2 LoaderSCfgs, separator string
 		return d
 	}
 	d = make([]*LoaderJsonCfg, len(v2))
-	dft := NewDfltLoaderSCfg()
+	dft := getDftLoaderCfg()
 	for i, val2 := range v2 {
 		d[i] = diffLoaderJsonCfg(dft, val2, separator)
 	}

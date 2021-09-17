@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -76,7 +77,7 @@ func TestA1It(t *testing.T) {
 
 func testA1itLoadConfig(t *testing.T) {
 	a1CfgPath = path.Join(*dataDir, "conf", "samples", a1ConfigDir)
-	if a1Cfg, err = config.NewCGRConfigFromPath(a1CfgPath); err != nil {
+	if a1Cfg, err = config.NewCGRConfigFromPath(context.Background(), a1CfgPath); err != nil {
 		t.Error(err)
 	}
 }

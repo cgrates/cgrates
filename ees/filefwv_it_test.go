@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -65,7 +66,7 @@ func TestFwvExport(t *testing.T) {
 func testFwvLoadConfig(t *testing.T) {
 	var err error
 	fwvCfgPath = path.Join(*dataDir, "conf", "samples", fwvConfigDir)
-	if fwvCfg, err = config.NewCGRConfigFromPath(fwvCfgPath); err != nil {
+	if fwvCfg, err = config.NewCGRConfigFromPath(context.Background(), fwvCfgPath); err != nil {
 		t.Error(err)
 	}
 }

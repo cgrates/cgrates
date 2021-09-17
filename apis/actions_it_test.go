@@ -107,7 +107,7 @@ func TestActionsIT(t *testing.T) {
 func testActionsInitCfg(t *testing.T) {
 	var err error
 	actCfgPath = path.Join(*dataDir, "conf", "samples", actConfigDIR)
-	actCfg, err = config.NewCGRConfigFromPath(actCfgPath)
+	actCfg, err = config.NewCGRConfigFromPath(context.Background(), actCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

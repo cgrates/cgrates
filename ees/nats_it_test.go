@@ -43,7 +43,7 @@ func TestNatsEE(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 	defer cmd.Process.Kill()
-	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
+	cgrCfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +133,7 @@ func TestNatsEE2(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	defer cmd.Process.Kill()
 
-	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "ees"))
+	cgrCfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "ees"))
 	if err != nil {
 		t.Fatal(err)
 	}

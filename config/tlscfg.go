@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/utils"
+)
 
 // TLSCfg is the configuration for tls
 type TLSCfg struct {
@@ -29,6 +32,15 @@ type TLSCfg struct {
 	ClientCerificate string
 	ClientKey        string
 	CaCertificate    string
+}
+
+// loadTLSCgrCfg loads the Tls section of the configuration
+func (tls *TLSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnTLSCgrCfg := new(TlsJsonCfg)
+	if err = jsnCfg.GetSection(ctx, TlsJSON, jsnTLSCgrCfg); err != nil {
+		return
+	}
+	return tls.loadFromJSONCfg(jsnTLSCgrCfg)
 }
 
 func (tls *TLSCfg) loadFromJSONCfg(jsnCfg *TlsJsonCfg) (err error) {
@@ -60,7 +72,7 @@ func (tls *TLSCfg) loadFromJSONCfg(jsnCfg *TlsJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (tls *TLSCfg) AsMapInterface() map[string]interface{} {
+func (tls TLSCfg) AsMapInterface(string) interface{} {
 	return map[string]interface{}{
 		utils.ServerCerificateCfg: tls.ServerCerificate,
 		utils.ServerKeyCfg:        tls.ServerKey,
@@ -72,6 +84,9 @@ func (tls *TLSCfg) AsMapInterface() map[string]interface{} {
 	}
 
 }
+
+func (TLSCfg) SName() string             { return TlsJSON }
+func (tls TLSCfg) CloneSection() Section { return tls.Clone() }
 
 // Clone returns a deep copy of TLSCfg
 func (tls TLSCfg) Clone() *TLSCfg {

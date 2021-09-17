@@ -58,7 +58,8 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if gCfg, err := dfCgrJSONCfg.GeneralJsonCfg(); err != nil {
+	gCfg := new(GeneralJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), GeneralJSON, gCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(gCfg))
@@ -76,7 +77,8 @@ func TestDfCoreSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if gCfg, err := dfCgrJSONCfg.CoreSJSON(); err != nil {
+	gCfg := new(CoreSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), CoreSJSON, gCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(gCfg))
@@ -269,7 +271,8 @@ func TestCacheJsonCfg(t *testing.T) {
 		t.Error(err)
 	}
 
-	if gCfg, err := dfCgrJSONCfg.CacheJsonCfg(); err != nil {
+	gCfg := new(CacheJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), CacheJSON, gCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("expected: %s\n, received: %s", utils.ToJSON(eCfg), utils.ToJSON(gCfg))
@@ -289,7 +292,8 @@ func TestDfListenJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.ListenJsonCfg(); err != nil {
+	cfg := new(ListenJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), ListenJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -399,7 +403,8 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.DbJsonCfg(DataDBJSON); err != nil {
+	cfg := new(DbJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), DataDBJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -491,7 +496,8 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.DbJsonCfg(StorDBJSON); err != nil {
+	cfg := new(DbJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), StorDBJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected : %+v,\n Received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -518,7 +524,8 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.CdrsJsonCfg(); err != nil {
+	cfg := new(CdrsJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), CDRsJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Received: %+v", cfg)
@@ -565,7 +572,8 @@ func TestSmgJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.SessionSJsonCfg(); err != nil {
+	cfg := new(SessionSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), SessionSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -595,7 +603,8 @@ func TestFsAgentJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.FreeswitchAgentJsonCfg(); err != nil {
+	cfg := new(FreeswitchAgentJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), FreeSWITCHAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -619,7 +628,8 @@ func TestKamAgentJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.KamAgentJsonCfg(); err != nil {
+	cfg := new(KamAgentJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), KamailioAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s \n, received: %s: ",
@@ -646,7 +656,8 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.AsteriskAgentJsonCfg(); err != nil {
+	cfg := new(AsteriskAgentJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), AsteriskAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s, received: %s ", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -675,7 +686,8 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.DiameterAgentJsonCfg(); err != nil {
+	cfg := new(DiameterAgentJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), DiameterAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %s, \n\nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -701,7 +713,8 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.RadiusAgentJsonCfg(); err != nil {
+	cfg := new(RadiusAgentJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), RadiusAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		rcv := *cfg.Request_processors
@@ -715,7 +728,8 @@ func TestHttpAgentJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.HttpAgentJsonCfg(); err != nil {
+	cfg := new([]*HttpAgentJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), HTTPAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -735,7 +749,8 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.DNSAgentJsonCfg(); err != nil {
+	cfg := new(DNSAgentJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), DNSAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -762,7 +777,8 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.AttributeServJsonCfg(); err != nil {
+	cfg := new(AttributeSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), AttributeSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -783,7 +799,8 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.ChargerServJsonCfg(); err != nil {
+	cfg := new(ChargerSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), ChargerSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", utils.ToJSON(cfg))
@@ -800,7 +817,8 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.FilterSJsonCfg(); err != nil {
+	cfg := new(FilterSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), FilterSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -822,7 +840,8 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.ResourceSJsonCfg(); err != nil {
+	cfg := new(ResourceSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), ResourceSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -845,7 +864,8 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.StatSJsonCfg(); err != nil {
+	cfg := new(StatServJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), StatSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", utils.ToJSON(cfg))
@@ -868,7 +888,8 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.ThresholdSJsonCfg(); err != nil {
+	cfg := new(ThresholdSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), ThresholdSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -902,7 +923,8 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.RouteSJsonCfg(); err != nil {
+	cfg := new(RouteSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), RouteSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1586,9 +1608,10 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.LoaderJsonCfg(); err != nil {
+	cfg := new([]*LoaderJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), LoaderSJSON, cfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
+	} else if !reflect.DeepEqual(eCfg, *cfg) {
 		t.Errorf("Expecting: %s,\nreceived: %s ",
 			utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
@@ -1627,7 +1650,8 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.SureTaxJsonCfg(); err != nil {
+	cfg := new(SureTaxJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), SureTaxJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -1664,7 +1688,8 @@ func TestDfHttpJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.HttpJsonCfg(); err != nil {
+	cfg := new(HTTPJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), HTTPJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1685,7 +1710,8 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.DispatcherSJsonCfg(); err != nil {
+	cfg := new(DispatcherSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), DispatcherSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1709,7 +1735,8 @@ func TestDfLoaderCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.LoaderCfgJson(); err != nil {
+	cfg := new(LoaderCfgJson)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), LoaderJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %s, received: %+v", utils.ToJSON(*eCfg), utils.ToJSON(cfg))
@@ -1749,7 +1776,8 @@ func TestDfMigratorCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.MigratorCfgJson(); err != nil {
+	cfg := new(MigratorCfgJson)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), MigratorJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1770,7 +1798,8 @@ func TestDfTlsCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.TlsCfgJson(); err != nil {
+	cfg := new(TlsJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), TlsJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1789,7 +1818,8 @@ func TestDfAnalyzerCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.AnalyzerCfgJson(); err != nil {
+	cfg := new(AnalyzerSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), AnalyzerSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1808,7 +1838,8 @@ func TestDfApierCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.AdminSCfgJson(); err != nil {
+	cfg := new(AdminSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), AdminSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1875,7 +1906,8 @@ func TestDfEventReaderCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.ERsJsonCfg(); err != nil {
+	cfg := new(ERsJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), ERsJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, \nreceived: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1916,7 +1948,8 @@ func TestDfEventExporterCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.EEsJsonCfg(); err != nil {
+	cfg := new(EEsJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), EEsJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, \nreceived: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1943,7 +1976,8 @@ func TestDfRateSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.RateCfgJson(); err != nil {
+	cfg := new(RateSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), RateSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", utils.ToJSON(cfg))
@@ -2203,7 +2237,8 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.TemplateSJsonCfg(); err != nil {
+	cfg := make(FcTemplatesJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), TemplatesJSON, &cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v \n,received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -2230,7 +2265,8 @@ func TestDfActionSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.ActionSCfgJson(); err != nil {
+	cfg := new(ActionSJsonCfg)
+	if err := dfCgrJSONCfg.GetSection(context.Background(), ActionSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("\n Expected <%+v>,\nReceived:<%+v>", utils.ToJSON(eCfg), utils.ToJSON(cfg))

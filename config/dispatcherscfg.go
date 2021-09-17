@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,6 +32,15 @@ type DispatcherSCfg struct {
 	SuffixIndexedFields *[]string
 	NestedFields        bool
 	AttributeSConns     []string
+}
+
+// loadDispatcherSCfg loads the DispatcherS section of the configuration
+func (dps *DispatcherSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnDispatcherSCfg := new(DispatcherSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, DispatcherSJSON, jsnDispatcherSCfg); err != nil {
+		return
+	}
+	return dps.loadFromJSONCfg(jsnDispatcherSCfg)
 }
 
 func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
@@ -62,26 +72,29 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (dps DispatcherSCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:        dps.Enabled,
 		utils.IndexedSelectsCfg: dps.IndexedSelects,
 		utils.NestedFieldsCfg:   dps.NestedFields,
 	}
 	if dps.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*dps.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*dps.StringIndexedFields)
 	}
 	if dps.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*dps.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*dps.PrefixIndexedFields)
 	}
 	if dps.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*dps.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*dps.SuffixIndexedFields)
 	}
 	if dps.AttributeSConns != nil {
-		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(dps.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(dps.AttributeSConns)
 	}
-	return
+	return mp
 }
+
+func (DispatcherSCfg) SName() string             { return DispatcherSJSON }
+func (dps DispatcherSCfg) CloneSection() Section { return dps.Clone() }
 
 // Clone returns a deep copy of DispatcherSCfg
 func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {

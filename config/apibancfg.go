@@ -18,12 +18,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/utils"
+)
 
 // APIBanCfg the config for the APIBan Keys
 type APIBanCfg struct {
 	Enabled bool
 	Keys    []string
+}
+
+// loadAPIBanCgrCfg loads the Analyzer section of the configuration
+func (ban *APIBanCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnAPIBanCfg := new(APIBanJsonCfg)
+	if err = jsnCfg.GetSection(ctx, APIBanJSON, jsnAPIBanCfg); err != nil {
+		return
+	}
+	return ban.loadFromJSONCfg(jsnAPIBanCfg)
 }
 
 func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
@@ -40,12 +52,15 @@ func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (ban *APIBanCfg) AsMapInterface() map[string]interface{} {
+func (ban APIBanCfg) AsMapInterface(string) interface{} {
 	return map[string]interface{}{
 		utils.EnabledCfg: ban.Enabled,
 		utils.KeysCfg:    ban.Keys,
 	}
 }
+
+func (APIBanCfg) SName() string             { return APIBanJSON }
+func (ban APIBanCfg) CloneSection() Section { return ban.Clone() }
 
 // Clone returns a deep copy of APIBanCfg
 func (ban APIBanCfg) Clone() (cln *APIBanCfg) {

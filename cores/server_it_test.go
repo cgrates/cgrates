@@ -159,7 +159,7 @@ func testServeHHTPFail(t *testing.T) {
 
 	select {
 	case <-ch:
-		if closed {
+		if !closed {
 			t.Errorf("Expected to be close")
 		}
 	case <-time.After(50 * time.Millisecond):

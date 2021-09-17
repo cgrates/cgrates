@@ -22,6 +22,7 @@ package services
 
 import (
 	"path"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -51,7 +52,7 @@ func TestRouteSReload(t *testing.T) {
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
@@ -76,6 +77,8 @@ func TestRouteSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+	runtime.Gosched()
+	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !routeS.IsRunning() {
 		t.Fatalf("Expected service to be running")
@@ -93,7 +96,7 @@ func TestRouteSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RouteSCfg().Enabled = false
-	cfg.GetReloadChan(config.RouteSJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.RouteSJSON]
 	time.Sleep(10 * time.Millisecond)
 	if routeS.IsRunning() {
 		t.Errorf("Expected service to be down")

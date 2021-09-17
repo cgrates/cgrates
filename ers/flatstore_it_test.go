@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -120,7 +121,7 @@ func TestFlatstoreFile(t *testing.T) {
 func testFlatstoreITInitConfig(t *testing.T) {
 	var err error
 	flatstoreCfgPath = path.Join(*dataDir, "conf", "samples", flatstoreCfgDIR)
-	if flatstoreCfg, err = config.NewCGRConfigFromPath(flatstoreCfgPath); err != nil {
+	if flatstoreCfg, err = config.NewCGRConfigFromPath(context.Background(), flatstoreCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

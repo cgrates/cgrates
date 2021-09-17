@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -89,7 +90,7 @@ func TestPartReadFile(t *testing.T) {
 func testPartITInitConfig(t *testing.T) {
 	var err error
 	partCfgPath = path.Join(*dataDir, "conf", "samples", partCfgDIR)
-	if partCfg, err = config.NewCGRConfigFromPath(partCfgPath); err != nil {
+	if partCfg, err = config.NewCGRConfigFromPath(context.Background(), partCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

@@ -123,7 +123,11 @@ func TestSessionSReload1(t *testing.T) {
 	}
 
 	rply := new(sessions.V1InitSessionReply)
-	srv.(*SessionService).sm.BiRPCv1InitiateSession(nil, args, rply)
+	ss := srv.(*SessionService)
+	if ss.sm == nil {
+		t.Fatal("sessions is nil")
+	}
+	ss.sm.BiRPCv1InitiateSession(context.Background(), args, rply)
 	err = srv.Shutdown()
 	if err == nil || err != utils.ErrPartiallyExecuted {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrPartiallyExecuted, err)

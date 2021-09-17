@@ -86,7 +86,7 @@ func TestChgrsSIT(t *testing.T) {
 func testChgrsSInitCfg(t *testing.T) {
 	var err error
 	chgrsPrfCfgPath = path.Join(*dataDir, "conf", "samples", chgrsPrfConfigDIR)
-	chgrsPrfCfg, err = config.NewCGRConfigFromPath(chgrsPrfCfgPath)
+	chgrsPrfCfg, err = config.NewCGRConfigFromPath(context.Background(), chgrsPrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

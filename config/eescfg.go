@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -40,7 +41,16 @@ func (eeS *EEsCfg) GetDefaultExporter() *EventExporterCfg {
 	return nil
 }
 
-func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltExpCfg *EventExporterCfg) (err error) {
+// loadEesCfg loads the Ees section of the configuration
+func (eeS *EEsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnEEsCfg := new(EEsJsonCfg)
+	if err = jsnCfg.GetSection(ctx, EEsJSON, jsnEEsCfg); err != nil {
+		return
+	}
+	return eeS.loadFromJSONCfg(jsnEEsCfg, cfg.templates, cfg.generalCfg.RSRSep)
+}
+
+func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -57,10 +67,10 @@ func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][
 	if jsnCfg.Attributes_conns != nil {
 		eeS.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
-	return eeS.appendEEsExporters(jsnCfg.Exporters, msgTemplates, sep, dfltExpCfg)
+	return eeS.appendEEsExporters(jsnCfg.Exporters, msgTemplates, sep)
 }
 
-func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string, dfltExpCfg *EventExporterCfg) (err error) {
+func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
 	if exporters == nil {
 		return
 	}
@@ -75,12 +85,7 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTem
 			}
 		}
 		if exp == nil {
-			if dfltExpCfg != nil {
-				exp = dfltExpCfg.Clone()
-			} else {
-				exp = new(EventExporterCfg)
-				exp.Opts = make(map[string]interface{})
-			}
+			exp = getDftEvExpCfg()
 			eeS.Exporters = append(eeS.Exporters, exp)
 		}
 		if err = exp.loadFromJSONCfg(jsnExp, msgTemplates, separator); err != nil {
@@ -90,8 +95,11 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTem
 	return
 }
 
+func (EEsCfg) SName() string             { return EEsJSON }
+func (eeS EEsCfg) CloneSection() Section { return eeS.Clone() }
+
 // Clone returns a deep copy of EEsCfg
-func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
+func (eeS EEsCfg) Clone() (cln *EEsCfg) {
 	cln = &EEsCfg{
 		Enabled:   eeS.Enabled,
 		Cache:     make(map[string]*CacheParamCfg),
@@ -110,28 +118,28 @@ func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (eeS EEsCfg) AsMapInterface(separator string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg: eeS.Enabled,
 	}
 	if eeS.AttributeSConns != nil {
-		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(eeS.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(eeS.AttributeSConns)
 	}
 	if eeS.Cache != nil {
 		cache := make(map[string]interface{}, len(eeS.Cache))
 		for key, value := range eeS.Cache {
 			cache[key] = value.AsMapInterface()
 		}
-		initialMP[utils.CacheCfg] = cache
+		mp[utils.CacheCfg] = cache
 	}
 	if eeS.Exporters != nil {
 		exporters := make([]map[string]interface{}, len(eeS.Exporters))
 		for i, item := range eeS.Exporters {
 			exporters[i] = item.AsMapInterface(separator)
 		}
-		initialMP[utils.ExportersCfg] = exporters
+		mp[utils.ExportersCfg] = exporters
 	}
-	return
+	return mp
 }
 
 // EventExporterCfg the config for a Event Exporter

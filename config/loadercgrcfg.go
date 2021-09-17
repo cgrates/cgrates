@@ -21,6 +21,7 @@ package config
 import (
 	"encoding/json"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -34,6 +35,15 @@ type LoaderCgrCfg struct {
 	ActionSConns    []string
 	GapiCredentials json.RawMessage
 	GapiToken       json.RawMessage
+}
+
+// loadLoaderCgrCfg loads the Loader section of the configuration
+func (ld *LoaderCgrCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnLoaderCgrCfg := new(LoaderCfgJson)
+	if err = jsnCfg.GetSection(ctx, LoaderJSON, jsnLoaderCgrCfg); err != nil {
+		return
+	}
+	return ld.loadFromJSONCfg(jsnLoaderCgrCfg)
 }
 
 func (ld *LoaderCgrCfg) loadFromJSONCfg(jsnCfg *LoaderCfgJson) (err error) {
@@ -69,27 +79,30 @@ func (ld *LoaderCgrCfg) loadFromJSONCfg(jsnCfg *LoaderCfgJson) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (ld *LoaderCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (ld LoaderCgrCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.TpIDCfg:           ld.TpID,
 		utils.DataPathCfg:       ld.DataPath,
 		utils.DisableReverseCfg: ld.DisableReverse,
 		utils.FieldSepCfg:       string(ld.FieldSeparator),
 	}
 	if ld.CachesConns != nil {
-		initialMP[utils.CachesConnsCfg] = getInternalJSONConns(ld.CachesConns)
+		mp[utils.CachesConnsCfg] = getInternalJSONConns(ld.CachesConns)
 	}
 	if ld.ActionSConns != nil {
-		initialMP[utils.ActionSConnsCfg] = getInternalJSONConns(ld.ActionSConns)
+		mp[utils.ActionSConnsCfg] = getInternalJSONConns(ld.ActionSConns)
 	}
 	if ld.GapiCredentials != nil {
-		initialMP[utils.GapiCredentialsCfg] = ld.GapiCredentials
+		mp[utils.GapiCredentialsCfg] = ld.GapiCredentials
 	}
 	if ld.GapiToken != nil {
-		initialMP[utils.GapiTokenCfg] = ld.GapiToken
+		mp[utils.GapiTokenCfg] = ld.GapiToken
 	}
-	return
+	return mp
 }
+
+func (LoaderCgrCfg) SName() string            { return LoaderJSON }
+func (ld LoaderCgrCfg) CloneSection() Section { return ld.Clone() }
 
 // Clone returns a deep copy of LoaderCgrCfg
 func (ld LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {

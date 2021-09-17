@@ -100,7 +100,7 @@ func testPreloadITCreateDirectories(t *testing.T) {
 func testPreloadITInitCfg(t *testing.T) {
 	var err error
 	preloadCfgPath = path.Join(*dataDir, "conf", "samples", preloadCfgDir)
-	if preloadCFG, err = config.NewCGRConfigFromPath(preloadCfgPath); err != nil {
+	if preloadCFG, err = config.NewCGRConfigFromPath(context.Background(), preloadCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

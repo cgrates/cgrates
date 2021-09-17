@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,6 +38,15 @@ type CdrsCfg struct {
 	EEsConns         []string
 	RateSConns       []string
 	AccountSConns    []string
+}
+
+// loadCdrsCfg loads the Cdrs section of the configuration
+func (cdrscfg *CdrsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnCdrsCfg := new(CdrsJsonCfg)
+	if err = jsnCfg.GetSection(ctx, CDRsJSON, jsnCdrsCfg); err != nil {
+		return
+	}
+	return cdrscfg.loadFromJSONCfg(jsnCdrsCfg)
 }
 
 // loadFromJSONCfg loads Cdrs config from JsonCfg
@@ -89,8 +99,8 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (cdrscfg CdrsCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:          cdrscfg.Enabled,
 		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
 		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
@@ -99,31 +109,34 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	}
 
 	if cdrscfg.ChargerSConns != nil {
-		initialMP[utils.ChargerSConnsCfg] = getInternalJSONConns(cdrscfg.ChargerSConns)
+		mp[utils.ChargerSConnsCfg] = getInternalJSONConns(cdrscfg.ChargerSConns)
 	}
 	if cdrscfg.AttributeSConns != nil {
-		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(cdrscfg.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(cdrscfg.AttributeSConns)
 	}
 	if cdrscfg.ThresholdSConns != nil {
-		initialMP[utils.ThresholdSConnsCfg] = getInternalJSONConns(cdrscfg.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(cdrscfg.ThresholdSConns)
 	}
 	if cdrscfg.StatSConns != nil {
-		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(cdrscfg.StatSConns)
+		mp[utils.StatSConnsCfg] = getInternalJSONConns(cdrscfg.StatSConns)
 	}
 	if cdrscfg.ActionSConns != nil {
-		initialMP[utils.ActionSConnsCfg] = getInternalJSONConns(cdrscfg.ActionSConns)
+		mp[utils.ActionSConnsCfg] = getInternalJSONConns(cdrscfg.ActionSConns)
 	}
 	if cdrscfg.EEsConns != nil {
-		initialMP[utils.EEsConnsCfg] = getInternalJSONConns(cdrscfg.EEsConns)
+		mp[utils.EEsConnsCfg] = getInternalJSONConns(cdrscfg.EEsConns)
 	}
 	if cdrscfg.RateSConns != nil {
-		initialMP[utils.RateSConnsCfg] = getInternalJSONConns(cdrscfg.RateSConns)
+		mp[utils.RateSConnsCfg] = getInternalJSONConns(cdrscfg.RateSConns)
 	}
 	if cdrscfg.AccountSConns != nil {
-		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(cdrscfg.AccountSConns)
+		mp[utils.AccountSConnsCfg] = getInternalJSONConns(cdrscfg.AccountSConns)
 	}
-	return
+	return mp
 }
+
+func (CdrsCfg) SName() string                 { return CDRsJSON }
+func (cdrscfg CdrsCfg) CloneSection() Section { return cdrscfg.Clone() }
 
 // Clone returns a deep copy of CdrsCfg
 func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {

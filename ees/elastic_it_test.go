@@ -23,7 +23,6 @@ package ees
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"flag"
 	"net/rpc"
@@ -33,6 +32,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	elasticsearch "github.com/elastic/go-elasticsearch"
 
@@ -79,7 +79,7 @@ func TestElasticExport(t *testing.T) {
 func testElasticLoadConfig(t *testing.T) {
 	var err error
 	elasticCfgPath = path.Join(*dataDir, "conf", "samples", elasticConfigDir)
-	if elasticCfg, err = config.NewCGRConfigFromPath(elasticCfgPath); err != nil {
+	if elasticCfg, err = config.NewCGRConfigFromPath(context.Background(), elasticCfgPath); err != nil {
 		t.Error(err)
 	}
 }

@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -67,7 +68,7 @@ func TestVirtualExport(t *testing.T) {
 func testVirtLoadConfig(t *testing.T) {
 	var err error
 	virtCfgPath = path.Join(*dataDir, "conf", "samples", virtConfigDir)
-	if virtCfg, err = config.NewCGRConfigFromPath(virtCfgPath); err != nil {
+	if virtCfg, err = config.NewCGRConfigFromPath(context.Background(), virtCfgPath); err != nil {
 		t.Error(err)
 	}
 }

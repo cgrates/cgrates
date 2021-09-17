@@ -100,6 +100,7 @@ func (anz *AnalyzerService) start() {
 	// anz.server.RpcRegister(anz.rpc)
 	// }
 	// anz.connChan <- anz.rpc
+	anz.connChan <- nil // temporary
 }
 
 // Reload handles the change of config
@@ -114,7 +115,7 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.server.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
-	// <-anz.connChan
+	<-anz.connChan
 	anz.Unlock()
 	return
 }

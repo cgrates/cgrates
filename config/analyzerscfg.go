@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,6 +32,15 @@ type AnalyzerSCfg struct {
 	IndexType       string
 	TTL             time.Duration
 	CleanupInterval time.Duration
+}
+
+// loadAnalyzerCgrCfg loads the Analyzer section of the configuration
+func (alS *AnalyzerSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnAnalyzerCgrCfg := new(AnalyzerSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, AnalyzerSJSON, jsnAnalyzerCgrCfg); err != nil {
+		return
+	}
+	return alS.loadFromJSONCfg(jsnAnalyzerCgrCfg)
 }
 
 func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
@@ -60,7 +70,7 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (alS *AnalyzerSCfg) AsMapInterface() map[string]interface{} {
+func (alS AnalyzerSCfg) AsMapInterface(string) interface{} {
 	return map[string]interface{}{
 		utils.EnabledCfg:         alS.Enabled,
 		utils.DBPathCfg:          alS.DBPath,
@@ -69,6 +79,9 @@ func (alS *AnalyzerSCfg) AsMapInterface() map[string]interface{} {
 		utils.CleanupIntervalCfg: alS.CleanupInterval.String(),
 	}
 }
+
+func (AnalyzerSCfg) SName() string             { return AnalyzerSJSON }
+func (alS AnalyzerSCfg) CloneSection() Section { return alS.Clone() }
 
 // Clone returns a deep copy of AnalyzerSCfg
 func (alS AnalyzerSCfg) Clone() *AnalyzerSCfg {

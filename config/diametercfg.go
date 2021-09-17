@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,6 +40,15 @@ type DiameterAgentCfg struct {
 	RARTemplate       string
 	ForcedDisconnect  string
 	RequestProcessors []*RequestProcessor
+}
+
+// loadDiameterAgentCfg loads the DiameterAgent section of the configuration
+func (da *DiameterAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnDACfg := new(DiameterAgentJsonCfg)
+	if err = jsnCfg.GetSection(ctx, DiameterAgentJSON, jsnDACfg); err != nil {
+		return
+	}
+	return da.loadFromJSONCfg(jsnDACfg, cfg.generalCfg.RSRSep)
 }
 
 func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separator string) (err error) {
@@ -92,8 +102,8 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (da DiameterAgentCfg) AsMapInterface(separator string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:            da.Enabled,
 		utils.ListenNetCfg:          da.ListenNet,
 		utils.ListenCfg:             da.Listen,
@@ -113,13 +123,16 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+	mp[utils.RequestProcessorsCfg] = requestProcessors
 
 	if da.SessionSConns != nil {
-		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(da.SessionSConns)
+		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(da.SessionSConns)
 	}
-	return
+	return mp
 }
+
+func (DiameterAgentCfg) SName() string            { return DiameterAgentJSON }
+func (da DiameterAgentCfg) CloneSection() Section { return da.Clone() }
 
 // Clone returns a deep copy of DiameterAgentCfg
 func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {

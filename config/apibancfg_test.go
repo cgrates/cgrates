@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -49,9 +50,7 @@ func TestAPIBanCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnalS, err := jsnCfg.ApiBanCfgJson(); err != nil {
-		t.Error(err)
-	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
+	} else if err = alS.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, alS) {
 		t.Errorf("Expected: %+v , received: %+v", expected, alS)
@@ -73,11 +72,9 @@ func TestAPIBanCfgAsMapInterface(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnalS, err := jsnCfg.ApiBanCfgJson(); err != nil {
+	} else if err = alS.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
-	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
-		t.Error(err)
-	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := alS.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

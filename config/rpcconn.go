@@ -21,17 +21,10 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
-
-// NewDfltRemoteHost returns the first cached default value for a RemoteHost connection
-func NewDfltRemoteHost() *RemoteHost {
-	if dfltRemoteHost == nil {
-		return new(RemoteHost) // No defaults, most probably we are building the defaults now
-	}
-	return dfltRemoteHost.Clone()
-}
 
 // NewDfltRPCConn returns the default value for a RPCConn
 func NewDfltRPCConn() *RPCConn {
@@ -40,6 +33,16 @@ func NewDfltRPCConn() *RPCConn {
 
 // RPCConns the config for all rpc pools
 type RPCConns map[string]*RPCConn
+
+// loadRPCConns loads the RPCConns section of the configuration
+func (rC RPCConns) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnRPCConns := make(RPCConnsJson)
+	if err = jsnCfg.GetSection(ctx, RPCConnsJSON, &jsnRPCConns); err != nil {
+		return
+	}
+	rC.loadFromJSONCfg(jsnRPCConns)
+	return
+}
 
 func (rC RPCConns) loadFromJSONCfg(jsn RPCConnsJson) {
 	// hardoded the *internal connection
@@ -80,13 +83,16 @@ func (rC RPCConns) loadFromJSONCfg(jsn RPCConnsJson) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (rC RPCConns) AsMapInterface() (rpcConns map[string]interface{}) {
-	rpcConns = make(map[string]interface{})
+func (rC RPCConns) AsMapInterface(string) interface{} {
+	rpcConns := make(map[string]interface{})
 	for key, value := range rC {
 		rpcConns[key] = value.AsMapInterface()
 	}
-	return
+	return rpcConns
 }
+
+func (RPCConns) SName() string            { return RPCConnsJSON }
+func (rC RPCConns) CloneSection() Section { return rC.Clone() }
 
 // Clone returns a deep copy of RPCConns
 func (rC RPCConns) Clone() (cln RPCConns) {
@@ -117,7 +123,7 @@ func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnJson) {
 	if jsnCfg.Conns != nil {
 		rC.Conns = make([]*RemoteHost, len(*jsnCfg.Conns))
 		for idx, jsnHaCfg := range *jsnCfg.Conns {
-			rC.Conns[idx] = NewDfltRemoteHost()
+			rC.Conns[idx] = getDftRemHstCfg()
 			rC.Conns[idx].loadFromJSONCfg(jsnHaCfg) //To review if the function signature changes
 		}
 	}
@@ -391,7 +397,7 @@ func diffRPCConnJson(d *RPCConnJson, v1, v2 *RPCConn) *RPCConnJson {
 	}
 	if v2.Conns != nil {
 		conns := make([]*RemoteHostJson, len(v2.Conns))
-		dft := NewDfltRemoteHost()
+		dft := getDftRemHstCfg()
 		for i, conn := range v2.Conns {
 			conns[i] = diffRemoteHostJson(dft, conn)
 		}

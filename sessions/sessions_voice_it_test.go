@@ -25,6 +25,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -81,7 +82,7 @@ func testSessionsVoiceInitCfg(t *testing.T) {
 	voiceCfgPath = path.Join(*dataDir, "conf", "samples", voiceCfgDIR)
 	// Init config first
 	var err error
-	voiceCfg, err = config.NewCGRConfigFromPath(voiceCfgPath)
+	voiceCfg, err = config.NewCGRConfigFromPath(context.Background(), voiceCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

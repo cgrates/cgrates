@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -198,11 +199,10 @@ func testDiamItInitCfg(t *testing.T) {
 	daCfgPath = path.Join(*dataDir, "conf", "samples", diamConfigDIR)
 	// Init config first
 	var err error
-	daCfg, err = config.NewCGRConfigFromPath(daCfgPath)
+	daCfg, err = config.NewCGRConfigFromPath(context.Background(), daCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	daCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	rplyTimeout, _ = utils.ParseDurationWithSecs(*replyTimeout)
 	if isDispatcherActive {
 		daCfg.ListenCfg().RPCJSONListen = ":6012"
@@ -211,7 +211,7 @@ func testDiamItInitCfg(t *testing.T) {
 
 func testDiamItResetAllDB(t *testing.T) {
 	cfgPath1 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all")
-	allCfg, err := config.NewCGRConfigFromPath(cfgPath1)
+	allCfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath1)
 	if err != nil {
 		t.Fatal(err)
 	}

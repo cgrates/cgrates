@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/utils"
+)
 
 // ActionSCfg is the configuration of ActionS
 type ActionSCfg struct {
@@ -35,6 +38,15 @@ type ActionSCfg struct {
 	SuffixIndexedFields      *[]string
 	NestedFields             bool
 	DynaprepaidActionProfile []string
+}
+
+// loadActionSCfg loads the ActionS section of the configuration
+func (acS *ActionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnActionCfg := new(ActionSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, ActionSJSON, jsnActionCfg); err != nil {
+		return
+	}
+	return acS.loadFromJSONCfg(jsnActionCfg)
 }
 
 func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
@@ -87,42 +99,45 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (acS ActionSCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:                acS.Enabled,
 		utils.IndexedSelectsCfg:         acS.IndexedSelects,
 		utils.NestedFieldsCfg:           acS.NestedFields,
 		utils.DynaprepaidActionplansCfg: acS.DynaprepaidActionProfile,
 	}
 	if acS.CDRsConns != nil {
-		initialMP[utils.CDRsConnsCfg] = getInternalJSONConns(acS.CDRsConns)
+		mp[utils.CDRsConnsCfg] = getInternalJSONConns(acS.CDRsConns)
 	}
 	if acS.ThresholdSConns != nil {
-		initialMP[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
 	}
 	if acS.StatSConns != nil {
-		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(acS.StatSConns)
+		mp[utils.StatSConnsCfg] = getInternalJSONConns(acS.StatSConns)
 	}
 	if acS.AccountSConns != nil {
-		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(acS.AccountSConns)
+		mp[utils.AccountSConnsCfg] = getInternalJSONConns(acS.AccountSConns)
 	}
 	if acS.EEsConns != nil {
-		initialMP[utils.EEsConnsCfg] = getInternalJSONConns(acS.EEsConns)
+		mp[utils.EEsConnsCfg] = getInternalJSONConns(acS.EEsConns)
 	}
 	if acS.Tenants != nil {
-		initialMP[utils.Tenants] = utils.CloneStringSlice(*acS.Tenants)
+		mp[utils.Tenants] = utils.CloneStringSlice(*acS.Tenants)
 	}
 	if acS.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*acS.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*acS.StringIndexedFields)
 	}
 	if acS.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.PrefixIndexedFields)
 	}
 	if acS.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
 	}
-	return
+	return mp
 }
+
+func (ActionSCfg) SName() string             { return ActionSJSON }
+func (acS ActionSCfg) CloneSection() Section { return acS.Clone() }
 
 // Clone returns a deep copy of ActionSCfg
 func (acS ActionSCfg) Clone() (cln *ActionSCfg) {

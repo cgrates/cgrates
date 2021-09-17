@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -67,7 +68,7 @@ func TestHTTPJsonMapExport(t *testing.T) {
 func testHTTPJsonMapLoadConfig(t *testing.T) {
 	var err error
 	httpJSONMapCfgPath = path.Join(*dataDir, "conf", "samples", httpJSONMapConfigDir)
-	if httpJSONMapCfg, err = config.NewCGRConfigFromPath(httpJSONMapCfgPath); err != nil {
+	if httpJSONMapCfg, err = config.NewCGRConfigFromPath(context.Background(), httpJSONMapCfgPath); err != nil {
 		t.Error(err)
 	}
 }

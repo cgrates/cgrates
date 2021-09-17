@@ -92,7 +92,7 @@ func TestCGRLoaderRemove(t *testing.T) {
 func testCgrLdrInitCfg(t *testing.T) {
 	var err error
 	cgrLdrCfgPath = path.Join(*dataDir, "conf", "samples", cgrLdrCfgDir)
-	cgrLdrCfg, err = config.NewCGRConfigFromPath(cgrLdrCfgPath)
+	cgrLdrCfg, err = config.NewCGRConfigFromPath(context.Background(), cgrLdrCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

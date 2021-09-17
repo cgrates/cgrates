@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -59,11 +60,11 @@ func TestTPRateProfileIT(t *testing.T) {
 func testTPRateProfileConnect(t *testing.T) {
 	var err error
 	tpRatePrfPathIn := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	if tpRatePrfCfgIn, err = config.NewCGRConfigFromPath(tpRatePrfPathIn); err != nil {
+	if tpRatePrfCfgIn, err = config.NewCGRConfigFromPath(context.Background(), tpRatePrfPathIn); err != nil {
 		t.Error(err)
 	}
 	tpRatePrfPathOut := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	if tpRatePrfCfgOut, err = config.NewCGRConfigFromPath(tpRatePrfPathOut); err != nil {
+	if tpRatePrfCfgOut, err = config.NewCGRConfigFromPath(context.Background(), tpRatePrfPathOut); err != nil {
 		t.Error(err)
 	}
 	storDBIn, err := NewMigratorStorDB(tpRatePrfCfgIn.StorDbCfg().Type,

@@ -28,6 +28,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -60,12 +61,12 @@ func TestTpResMove(t *testing.T) {
 func testTpResITConnect(t *testing.T) {
 	var err error
 	tpResPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpResCfgIn, err = config.NewCGRConfigFromPath(tpResPathIn)
+	tpResCfgIn, err = config.NewCGRConfigFromPath(context.Background(), tpResPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpResPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpResCfgOut, err = config.NewCGRConfigFromPath(tpResPathOut)
+	tpResCfgOut, err = config.NewCGRConfigFromPath(context.Background(), tpResPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

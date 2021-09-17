@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -26,6 +27,14 @@ import (
 // HTTPAgentCfgs the config section for HTTP Agent
 type HTTPAgentCfgs []*HTTPAgentCfg
 
+// loadHTTPAgentCfg loads the HttpAgent section of the configuration
+func (hcfgs *HTTPAgentCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnHTTPAgntCfg := new([]*HttpAgentJsonCfg)
+	if err = jsnCfg.GetSection(ctx, HTTPAgentJSON, jsnHTTPAgntCfg); err != nil {
+		return
+	}
+	return hcfgs.loadFromJSONCfg(jsnHTTPAgntCfg, cfg.generalCfg.RSRSep)
+}
 func (hcfgs *HTTPAgentCfgs) loadFromJSONCfg(jsnHTTPAgntCfg *[]*HttpAgentJsonCfg, separator string) (err error) {
 	if jsnHTTPAgntCfg == nil {
 		return nil
@@ -54,24 +63,24 @@ func (hcfgs *HTTPAgentCfgs) loadFromJSONCfg(jsnHTTPAgntCfg *[]*HttpAgentJsonCfg,
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (hcfgs HTTPAgentCfgs) AsMapInterface(separator string) (mp []map[string]interface{}) {
-	mp = make([]map[string]interface{}, len(hcfgs))
+func (hcfgs HTTPAgentCfgs) AsMapInterface(separator string) interface{} {
+	mp := make([]map[string]interface{}, len(hcfgs))
 	for i, item := range hcfgs {
 		mp[i] = item.AsMapInterface(separator)
 	}
-	return
+	return mp
 }
 
+func (HTTPAgentCfgs) SName() string               { return HTTPAgentJSON }
+func (hcfgs HTTPAgentCfgs) CloneSection() Section { return hcfgs.Clone() }
+
 // Clone returns a deep copy of HTTPAgentCfgs
-func (hcfgs HTTPAgentCfgs) Clone() (cln HTTPAgentCfgs) {
-	if hcfgs == nil {
-		return
-	}
-	cln = make(HTTPAgentCfgs, len(hcfgs))
+func (hcfgs HTTPAgentCfgs) Clone() *HTTPAgentCfgs {
+	cln := make(HTTPAgentCfgs, len(hcfgs))
 	for i, h := range hcfgs {
 		cln[i] = h.Clone()
 	}
-	return
+	return &cln
 }
 
 // HTTPAgentCfg the config for a HTTP Agent

@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -30,6 +31,15 @@ type CoreSCfg struct {
 	CapsStrategy      string
 	CapsStatsInterval time.Duration
 	ShutdownTimeout   time.Duration
+}
+
+// loadCoreSCfg loads the CoreS section of the configuration
+func (cS *CoreSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnCoreCfg := new(CoreSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, CoreSJSON, jsnCoreCfg); err != nil {
+		return
+	}
+	return cS.loadFromJSONCfg(jsnCoreCfg)
 }
 
 func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
@@ -56,7 +66,7 @@ func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (cS *CoreSCfg) AsMapInterface() map[string]interface{} {
+func (cS CoreSCfg) AsMapInterface(string) interface{} {
 	mp := map[string]interface{}{
 		utils.CapsCfg:              cS.Caps,
 		utils.CapsStrategyCfg:      cS.CapsStrategy,
@@ -71,6 +81,9 @@ func (cS *CoreSCfg) AsMapInterface() map[string]interface{} {
 	}
 	return mp
 }
+
+func (CoreSCfg) SName() string            { return CoreSJSON }
+func (cS CoreSCfg) CloneSection() Section { return cS.Clone() }
 
 // Clone returns a deep copy of CoreSCfg
 func (cS CoreSCfg) Clone() *CoreSCfg {

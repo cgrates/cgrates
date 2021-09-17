@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,7 +39,7 @@ func TestMfInitConfig(t *testing.T) {
 		os.Setenv(key, val)
 	}
 	var err error
-	if mfCgrCfg, err = NewCGRConfigFromPath("/usr/share/cgrates/conf/samples/multifiles"); err != nil {
+	if mfCgrCfg, err = NewCGRConfigFromPath(context.Background(), "/usr/share/cgrates/conf/samples/multifiles"); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

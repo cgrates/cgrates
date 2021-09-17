@@ -123,7 +123,6 @@ func (cS *CacheService) WaitToPrecache(ctx *context.Context, cacheIDs ...string)
 	case cacheS = <-cS.cacheCh:
 		cS.cacheCh <- cacheS
 	}
-
 	for _, cacheID := range cacheIDs {
 		select {
 		case <-ctx.Done():

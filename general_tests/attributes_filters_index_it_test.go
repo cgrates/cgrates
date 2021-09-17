@@ -78,7 +78,6 @@ func testAttributeFltrSInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	attrFltrCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 }
 
 func testAttributeFltrSInitDataDb(t *testing.T) {

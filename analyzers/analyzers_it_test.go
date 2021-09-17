@@ -36,6 +36,7 @@ import (
 
 	"github.com/cenkalti/rpc2"
 	jsonrpc2 "github.com/cenkalti/rpc2/jsonrpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -97,7 +98,7 @@ func testAnalyzerSInitCfg(t *testing.T) {
 		t.Fatal(err)
 	}
 	anzCfgPath = path.Join(*dataDir, "conf", "samples", "analyzers")
-	anzCfg, err = config.NewCGRConfigFromPath(anzCfgPath)
+	anzCfg, err = config.NewCGRConfigFromPath(context.Background(), anzCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

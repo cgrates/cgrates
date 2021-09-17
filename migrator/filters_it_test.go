@@ -89,10 +89,10 @@ func TestFiltersITMoveEncoding2(t *testing.T) {
 func testFltrStart(testName, action string, t *testing.T) {
 	var err error
 	fltrAction = action
-	if fltrCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
+	if fltrCfgIn, err = config.NewCGRConfigFromPath(context.Background(), inPath); err != nil {
 		t.Fatal(err)
 	}
-	if fltrCfgOut, err = config.NewCGRConfigFromPath(outPath); err != nil {
+	if fltrCfgOut, err = config.NewCGRConfigFromPath(context.Background(), outPath); err != nil {
 		t.Fatal(err)
 	}
 	for _, stest := range sTestsFltrIT {

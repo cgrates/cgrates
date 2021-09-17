@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,9 +53,18 @@ func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) (err 
 	return nil
 }
 
+// loadThresholdSCfg loads the ThresholdS section of the configuration
+func (t *ThresholdSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnThresholdSCfg := new(ThresholdSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, ThresholdSJSON, jsnThresholdSCfg); err != nil {
+		return
+	}
+	return t.loadFromJSONCfg(jsnThresholdSCfg)
+}
+
 func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Enabled != nil {
 		t.Enabled = *jsnCfg.Enabled
@@ -89,11 +99,11 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+func (t ThresholdSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.MetaThresholdIDsCfg: t.Opts.ThresholdIDs,
 	}
-	initialMP = map[string]interface{}{
+	mp := map[string]interface{}{
 		utils.EnabledCfg:        t.Enabled,
 		utils.IndexedSelectsCfg: t.IndexedSelects,
 		utils.NestedFieldsCfg:   t.NestedFields,
@@ -101,22 +111,22 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.OptsCfg:           opts,
 	}
 	if t.StoreInterval != 0 {
-		initialMP[utils.StoreIntervalCfg] = t.StoreInterval.String()
+		mp[utils.StoreIntervalCfg] = t.StoreInterval.String()
 	}
 
 	if t.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*t.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*t.StringIndexedFields)
 	}
 	if t.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*t.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*t.PrefixIndexedFields)
 	}
 	if t.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*t.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*t.SuffixIndexedFields)
 	}
 	if t.ActionSConns != nil {
-		initialMP[utils.ActionSConnsCfg] = getInternalJSONConns(t.ActionSConns)
+		mp[utils.ActionSConnsCfg] = getInternalJSONConns(t.ActionSConns)
 	}
-	return
+	return mp
 }
 
 func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
@@ -128,6 +138,8 @@ func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
 		ThresholdIDs: thdIDs,
 	}
 }
+func (ThresholdSCfg) SName() string           { return ThresholdSJSON }
+func (t ThresholdSCfg) CloneSection() Section { return t.Clone() }
 
 // Clone returns a deep copy of ThresholdSCfg
 func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {

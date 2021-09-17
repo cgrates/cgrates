@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -55,6 +56,15 @@ type SessionSCfg struct {
 	ActionSConns        []string
 	STIRCfg             *STIRcfg
 	DefaultUsage        map[string]time.Duration
+}
+
+// loadSessionSCfg loads the SessionS section of the configuration
+func (scfg *SessionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnSessionSCfg := new(SessionSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, SessionSJSON, jsnSessionSCfg); err != nil {
+		return
+	}
+	return scfg.loadFromJSONCfg(jsnSessionSCfg)
 }
 
 func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -177,7 +187,7 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
 }
 
-func (scfg *SessionSCfg) GetDefaultUsage(tor string) time.Duration {
+func (scfg SessionSCfg) GetDefaultUsage(tor string) time.Duration {
 	if tor == utils.EmptyString {
 		tor = utils.MetaAny
 	}
@@ -185,7 +195,7 @@ func (scfg *SessionSCfg) GetDefaultUsage(tor string) time.Duration {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 	maxComputed := make(map[string]string)
 	for key, item := range scfg.DefaultUsage {
 		if key == utils.MetaAny || key == utils.MetaVoice {
@@ -194,7 +204,7 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 			maxComputed[key] = strconv.Itoa(int(item))
 		}
 	}
-	initialMP = map[string]interface{}{
+	mp := map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
 		utils.ListenBigobCfg:         scfg.ListenBigob,
@@ -212,55 +222,58 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.DefaultUsageCfg:        maxComputed,
 	}
 	if scfg.DebitInterval != 0 {
-		initialMP[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
+		mp[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
 	}
 	if scfg.SessionTTL != 0 {
-		initialMP[utils.SessionTTLCfg] = scfg.SessionTTL.String()
+		mp[utils.SessionTTLCfg] = scfg.SessionTTL.String()
 	}
 	if scfg.SessionTTLMaxDelay != nil {
-		initialMP[utils.SessionTTLMaxDelayCfg] = scfg.SessionTTLMaxDelay.String()
+		mp[utils.SessionTTLMaxDelayCfg] = scfg.SessionTTLMaxDelay.String()
 	}
 	if scfg.SessionTTLLastUsed != nil {
-		initialMP[utils.SessionTTLLastUsedCfg] = scfg.SessionTTLLastUsed.String()
+		mp[utils.SessionTTLLastUsedCfg] = scfg.SessionTTLLastUsed.String()
 	}
 	if scfg.SessionTTLUsage != nil {
-		initialMP[utils.SessionTTLUsageCfg] = scfg.SessionTTLUsage.String()
+		mp[utils.SessionTTLUsageCfg] = scfg.SessionTTLUsage.String()
 	}
 	if scfg.SessionTTLLastUsage != nil {
-		initialMP[utils.SessionTTLLastUsageCfg] = scfg.SessionTTLLastUsage.String()
+		mp[utils.SessionTTLLastUsageCfg] = scfg.SessionTTLLastUsage.String()
 	}
 	if scfg.ChannelSyncInterval != 0 {
-		initialMP[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
+		mp[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
 	}
 	if scfg.MinDurLowBalance != 0 {
-		initialMP[utils.MinDurLowBalanceCfg] = scfg.MinDurLowBalance.String()
+		mp[utils.MinDurLowBalanceCfg] = scfg.MinDurLowBalance.String()
 	}
 	if scfg.ChargerSConns != nil {
-		initialMP[utils.ChargerSConnsCfg] = getInternalJSONConns(scfg.ChargerSConns)
+		mp[utils.ChargerSConnsCfg] = getInternalJSONConns(scfg.ChargerSConns)
 	}
 	if scfg.ResSConns != nil {
-		initialMP[utils.ResourceSConnsCfg] = getInternalJSONConns(scfg.ResSConns)
+		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(scfg.ResSConns)
 	}
 	if scfg.ThreshSConns != nil {
-		initialMP[utils.ThresholdSConnsCfg] = getInternalJSONConns(scfg.ThreshSConns)
+		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(scfg.ThreshSConns)
 	}
 	if scfg.StatSConns != nil {
-		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(scfg.StatSConns)
+		mp[utils.StatSConnsCfg] = getInternalJSONConns(scfg.StatSConns)
 	}
 	if scfg.RouteSConns != nil {
-		initialMP[utils.RouteSConnsCfg] = getInternalJSONConns(scfg.RouteSConns)
+		mp[utils.RouteSConnsCfg] = getInternalJSONConns(scfg.RouteSConns)
 	}
 	if scfg.AttrSConns != nil {
-		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(scfg.AttrSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(scfg.AttrSConns)
 	}
 	if scfg.CDRsConns != nil {
-		initialMP[utils.CDRsConnsCfg] = getInternalJSONConns(scfg.CDRsConns)
+		mp[utils.CDRsConnsCfg] = getInternalJSONConns(scfg.CDRsConns)
 	}
 	if scfg.ActionSConns != nil {
-		initialMP[utils.ActionSConnsCfg] = getInternalJSONConns(scfg.ActionSConns)
+		mp[utils.ActionSConnsCfg] = getInternalJSONConns(scfg.ActionSConns)
 	}
-	return
+	return mp
 }
+
+func (SessionSCfg) SName() string              { return SessionSJSON }
+func (scfg SessionSCfg) CloneSection() Section { return scfg.Clone() }
 
 // Clone returns a deep copy of SessionSCfg
 func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {

@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,6 +53,15 @@ type SureTaxCfg struct {
 	TransTypeCode        RSRParsers
 	SalesTypeCode        RSRParsers
 	TaxExemptionCodeList RSRParsers
+}
+
+// loadSureTaxCfg loads the SureTax section of the configuration
+func (st *SureTaxCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnSureTaxCfg := new(SureTaxJsonCfg)
+	if err = jsnCfg.GetSection(ctx, SureTaxJSON, jsnSureTaxCfg); err != nil {
+		return
+	}
+	return st.loadFromJSONCfg(jsnSureTaxCfg)
 }
 
 // Loads/re-loads data from json config object
@@ -175,7 +185,7 @@ func (st *SureTaxCfg) loadFromJSONCfg(jsnCfg *SureTaxJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (st *SureTaxCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+func (st SureTaxCfg) AsMapInterface(separator string) interface{} {
 	return map[string]interface{}{
 		utils.URLCfg:              st.URL,
 		utils.ClientNumberCfg:     st.ClientNumber,
@@ -207,8 +217,11 @@ func (st *SureTaxCfg) AsMapInterface(separator string) (initialMP map[string]int
 	}
 }
 
+func (SureTaxCfg) SName() string            { return SureTaxJSON }
+func (st SureTaxCfg) CloneSection() Section { return st.Clone() }
+
 // Clone returns a deep copy of SureTaxCfg
-func (st SureTaxCfg) Clone() (cln *SureTaxCfg) {
+func (st SureTaxCfg) Clone() *SureTaxCfg {
 	loc := *time.UTC
 	if st.Timezone != nil {
 		loc = *st.Timezone

@@ -480,14 +480,17 @@ func TestThresholdsAPIs(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsThresholdsThresholdIDs: []string{"thd1", "thd2"},
+			},
 		},
 		ActionProfileIDs: []string{"actPrfID"},
 	}
 	mCC := &mockClientConn{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.ActionSv1ExecuteActions: func(ctx *context.Context, args, reply interface{}) error {
-				if !reflect.DeepEqual(args.(*utils.ArgActionSv1ScheduleActions), expActArgs) {
-					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>", expActArgs, args)
+				if !reflect.DeepEqual(args, expActArgs) {
+					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expActArgs), utils.ToJSON(args))
 				}
 				return nil
 			},

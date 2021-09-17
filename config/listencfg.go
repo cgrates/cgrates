@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/utils"
+)
 
 // ListenCfg is the listen config section
 type ListenCfg struct {
@@ -28,6 +31,15 @@ type ListenCfg struct {
 	RPCJSONTLSListen string // RPC JSON TLS listening address
 	RPCGOBTLSListen  string // RPC GOB TLS listening address
 	HTTPTLSListen    string // HTTP TLS listening address
+}
+
+// loadListenCfg loads the Listen section of the configuration
+func (lstcfg *ListenCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnListenCfg := new(ListenJsonCfg)
+	if err = jsnCfg.GetSection(ctx, ListenJSON, jsnListenCfg); err != nil {
+		return
+	}
+	return lstcfg.loadFromJSONCfg(jsnListenCfg)
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
@@ -57,7 +69,7 @@ func (lstcfg *ListenCfg) loadFromJSONCfg(jsnListenCfg *ListenJsonCfg) (err error
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (lstcfg *ListenCfg) AsMapInterface() map[string]interface{} {
+func (lstcfg ListenCfg) AsMapInterface(string) interface{} {
 	return map[string]interface{}{
 		utils.RPCJSONListenCfg:    lstcfg.RPCJSONListen,
 		utils.RPCGOBListenCfg:     lstcfg.RPCGOBListen,
@@ -67,6 +79,9 @@ func (lstcfg *ListenCfg) AsMapInterface() map[string]interface{} {
 		utils.HTTPTLSListenCfg:    lstcfg.HTTPTLSListen,
 	}
 }
+
+func (ListenCfg) SName() string                { return ListenJSON }
+func (lstcfg ListenCfg) CloneSection() Section { return lstcfg.Clone() }
 
 // Clone returns a deep copy of ListenCfg
 func (lstcfg ListenCfg) Clone() *ListenCfg {

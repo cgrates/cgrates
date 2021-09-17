@@ -96,7 +96,7 @@ func TestStatsIT(t *testing.T) {
 func testStatsInitCfg(t *testing.T) {
 	var err error
 	sqCfgPath = path.Join(*dataDir, "conf", "samples", sqConfigDIR)
-	sqCfg, err = config.NewCGRConfigFromPath(sqCfgPath)
+	sqCfg, err = config.NewCGRConfigFromPath(context.Background(), sqCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

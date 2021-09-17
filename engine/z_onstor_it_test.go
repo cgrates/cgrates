@@ -88,7 +88,7 @@ func TestOnStorIT(t *testing.T) {
 		onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMongo:
 		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
-		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
+		mgoITCfg, err := config.NewCGRConfigFromPath(context.Background(), cdrsMongoCfgPath)
 		if err != nil {
 			t.Fatal(err)
 		}
