@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -87,7 +88,7 @@ func testDsphInitCfg(t *testing.T) {
 	allCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", allDir)
 	all2CfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", all2Dir)
 	var err error
-	if dspCfg, err = config.NewCGRConfigFromPath(dspCfgPath); err != nil {
+	if dspCfg, err = config.NewCGRConfigFromPath(context.Background(), dspCfgPath); err != nil {
 		t.Error(err)
 	}
 }

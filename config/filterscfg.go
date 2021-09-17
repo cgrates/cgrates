@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,6 +28,15 @@ type FilterSCfg struct {
 	StatSConns     []string
 	ResourceSConns []string
 	AccountSConns  []string
+}
+
+// loadFilterSCfg loads the FilterS section of the configuration
+func (fSCfg *FilterSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnFilterSCfg := new(FilterSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, FilterSJSON, jsnFilterSCfg); err != nil {
+		return
+	}
+	return fSCfg.loadFromJSONCfg(jsnFilterSCfg)
 }
 
 func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -46,19 +56,22 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = make(map[string]interface{})
+func (fSCfg FilterSCfg) AsMapInterface(string) interface{} {
+	mp := make(map[string]interface{})
 	if fSCfg.StatSConns != nil {
-		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(fSCfg.StatSConns)
+		mp[utils.StatSConnsCfg] = getInternalJSONConns(fSCfg.StatSConns)
 	}
 	if fSCfg.ResourceSConns != nil {
-		initialMP[utils.ResourceSConnsCfg] = getInternalJSONConns(fSCfg.ResourceSConns)
+		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(fSCfg.ResourceSConns)
 	}
 	if fSCfg.AccountSConns != nil {
-		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(fSCfg.AccountSConns)
+		mp[utils.AccountSConnsCfg] = getInternalJSONConns(fSCfg.AccountSConns)
 	}
-	return
+	return mp
 }
+
+func (FilterSCfg) SName() string               { return FilterSJSON }
+func (fSCfg FilterSCfg) CloneSection() Section { return fSCfg.Clone() }
 
 // Clone returns a deep copy of FilterSCfg
 func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {

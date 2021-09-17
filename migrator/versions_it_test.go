@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -47,7 +48,7 @@ var sTestsVrsIT = []func(t *testing.T){
 func TestVersionITRedis(t *testing.T) {
 	var err error
 	vrsPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	vrsCfg, err = config.NewCGRConfigFromPath(vrsPath)
+	vrsCfg, err = config.NewCGRConfigFromPath(context.Background(), vrsPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +62,7 @@ func TestVersionITRedis(t *testing.T) {
 func TestVersionITMongo(t *testing.T) {
 	var err error
 	vrsPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	vrsCfg, err = config.NewCGRConfigFromPath(vrsPath)
+	vrsCfg, err = config.NewCGRConfigFromPath(context.Background(), vrsPath)
 	if err != nil {
 		t.Fatal(err)
 	}

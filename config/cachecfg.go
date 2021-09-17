@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
@@ -92,6 +93,15 @@ type CacheCfg struct {
 	ReplicationConns []string
 }
 
+// loadCacheCfg loads the Cache section of the configuration
+func (cCfg *CacheCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnCacheCfg := new(CacheJsonCfg)
+	if err = jsnCfg.GetSection(ctx, CacheJSON, jsnCacheCfg); err != nil {
+		return
+	}
+	return cCfg.loadFromJSONCfg(jsnCacheCfg)
+}
+
 func (cCfg *CacheCfg) loadFromJSONCfg(jsnCfg *CacheJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
@@ -129,18 +139,20 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (cCfg *CacheCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = make(map[string]interface{})
+func (cCfg CacheCfg) AsMapInterface(string) interface{} {
 	partitions := make(map[string]interface{}, len(cCfg.Partitions))
 	for key, value := range cCfg.Partitions {
 		partitions[key] = value.AsMapInterface()
 	}
-	initialMP[utils.PartitionsCfg] = partitions
+	mp := map[string]interface{}{utils.PartitionsCfg: partitions}
 	if cCfg.ReplicationConns != nil {
-		initialMP[utils.ReplicationConnsCfg] = cCfg.ReplicationConns
+		mp[utils.ReplicationConnsCfg] = cCfg.ReplicationConns
 	}
-	return
+	return mp
 }
+
+func (CacheCfg) SName() string              { return CacheJSON }
+func (cCfg CacheCfg) CloneSection() Section { return cCfg.Clone() }
 
 // Clone returns a deep copy of CacheCfg
 func (cCfg CacheCfg) Clone() (cln *CacheCfg) {

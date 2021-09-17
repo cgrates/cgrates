@@ -22,6 +22,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -30,6 +31,14 @@ type ConfigSCfg struct {
 	Enabled bool
 	URL     string
 	RootDir string
+}
+
+func (cScfg *ConfigSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnConfigSCfg := new(ConfigSCfgJson)
+	if err = jsnCfg.GetSection(ctx, ConfigSJSON, jsnConfigSCfg); err != nil {
+		return
+	}
+	return cScfg.loadFromJSONCfg(jsnConfigSCfg)
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
@@ -68,15 +77,15 @@ func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
 	}
 	switch mode := fi.Mode(); {
 	case mode.IsDir():
-		handleConfigSFolder(pth, w)
+		handleConfigSFolder(&context.Context{Context: r.Context()}, pth, w)
 	case mode.IsRegular():
 		handleConfigSFile(pth, w)
 	}
 }
 
-func handleConfigSFolder(path string, w http.ResponseWriter) {
+func handleConfigSFolder(ctx *context.Context, path string, w http.ResponseWriter) {
 	// if the path is a directory, read the directory, construct the config and load it in memory
-	cfg, err := newCGRConfigFromPathWithoutEnv(path)
+	cfg, err := newCGRConfigFromPathWithoutEnv(ctx, path)
 	if err != nil {
 		w.WriteHeader(500)
 		w.Write([]byte(err.Error()))
@@ -105,17 +114,19 @@ func handleConfigSFile(path string, w http.ResponseWriter) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (cScfg *ConfigSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (cScfg ConfigSCfg) AsMapInterface(string) interface{} {
+	return map[string]interface{}{
 		utils.EnabledCfg: cScfg.Enabled,
 		utils.URLCfg:     cScfg.URL,
 		utils.RootDirCfg: cScfg.RootDir,
 	}
-	return
 }
 
+func (ConfigSCfg) SName() string               { return ConfigSJSON }
+func (cScfg ConfigSCfg) CloneSection() Section { return cScfg.Clone() }
+
 // Clone returns a deep copy of ConfigSCfg
-func (cScfg *ConfigSCfg) Clone() *ConfigSCfg {
+func (cScfg ConfigSCfg) Clone() *ConfigSCfg {
 	return &ConfigSCfg{
 		Enabled: cScfg.Enabled,
 		URL:     cScfg.URL,

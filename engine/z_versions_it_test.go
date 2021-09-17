@@ -28,6 +28,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -66,7 +67,7 @@ func TestVersionsIT(t *testing.T) {
 }
 
 func testInitConfig(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
 		t.Fatal(err)
 	}
 }

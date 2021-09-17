@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -50,7 +51,7 @@ type RouteSCfg struct {
 
 func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 
 	if jsnCfg.Context != nil {
@@ -72,12 +73,21 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 		rtsOpts.ProfileCount = *jsnCfg.ProfileCount
 	}
 
-	return nil
+	return
+}
+
+// loadRouteSCfg loads the RouteS section of the configuration
+func (rts *RouteSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnRouteSCfg := new(RouteSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, RouteSJSON, jsnRouteSCfg); err != nil {
+		return
+	}
+	return rts.loadFromJSONCfg(jsnRouteSCfg)
 }
 
 func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Enabled != nil {
 		rts.Enabled = *jsnCfg.Enabled
@@ -118,11 +128,26 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		rts.NestedFields = *jsnCfg.Nested_fields
 	}
-	return nil
+	return
+}
+func (rts RoutesOpts) Clone() (cln *RoutesOpts) {
+	cln = &RoutesOpts{
+		Context:      rts.Context,
+		ProfileCount: rts.ProfileCount,
+		IgnoreErrors: rts.IgnoreErrors,
+		MaxCost:      rts.MaxCost,
+	}
+	if rts.Limit != nil {
+		cln.Limit = utils.IntPointer(*rts.Limit)
+	}
+	if rts.Offset != nil {
+		cln.Offset = utils.IntPointer(*rts.Offset)
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+func (rts RouteSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.OptsContext:         rts.Opts.Context,
 		utils.MetaProfileCountCfg: rts.Opts.ProfileCount,
@@ -136,7 +161,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		opts[utils.MetaOffsetCfg] = *rts.Opts.Offset
 	}
 
-	initialMP = map[string]interface{}{
+	mp := map[string]interface{}{
 		utils.EnabledCfg:        rts.Enabled,
 		utils.IndexedSelectsCfg: rts.IndexedSelects,
 		utils.DefaultRatioCfg:   rts.DefaultRatio,
@@ -144,31 +169,34 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.OptsCfg:           opts,
 	}
 	if rts.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rts.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rts.StringIndexedFields)
 	}
 	if rts.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.PrefixIndexedFields)
 	}
 	if rts.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.SuffixIndexedFields)
 	}
 	if rts.AttributeSConns != nil {
-		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(rts.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(rts.AttributeSConns)
 	}
 	if rts.ResourceSConns != nil {
-		initialMP[utils.ResourceSConnsCfg] = getInternalJSONConns(rts.ResourceSConns)
+		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(rts.ResourceSConns)
 	}
 	if rts.StatSConns != nil {
-		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(rts.StatSConns)
+		mp[utils.StatSConnsCfg] = getInternalJSONConns(rts.StatSConns)
 	}
 	if rts.RateSConns != nil {
-		initialMP[utils.RateSConnsCfg] = getInternalJSONConns(rts.RateSConns)
+		mp[utils.RateSConnsCfg] = getInternalJSONConns(rts.RateSConns)
 	}
 	if rts.AccountSConns != nil {
-		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(rts.AccountSConns)
+		mp[utils.AccountSConnsCfg] = getInternalJSONConns(rts.AccountSConns)
 	}
-	return
+	return mp
 }
+
+func (RouteSCfg) SName() string             { return RouteSJSON }
+func (rts RouteSCfg) CloneSection() Section { return rts.Clone() }
 
 // Clone returns a deep copy of RouteSCfg
 func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
@@ -177,7 +205,7 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		IndexedSelects: rts.IndexedSelects,
 		DefaultRatio:   rts.DefaultRatio,
 		NestedFields:   rts.NestedFields,
-		Opts:           rts.Opts,
+		Opts:           rts.Opts.Clone(),
 	}
 	if rts.AttributeSConns != nil {
 		cln.AttributeSConns = utils.CloneStringSlice(rts.AttributeSConns)

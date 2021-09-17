@@ -45,7 +45,7 @@ func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.Wai
 		cM:         cM,
 		caps:       caps,
 		shdWg:      shdWg,
-		srvManager: servmanager.NewServiceManager(cfg, shdWg, cM),
+		srvManager: servmanager.NewServiceManager(shdWg, cM, cfg.GetReloadChan()),
 		server:     server, // Rpc/http server
 		srvDep: map[string]*sync.WaitGroup{
 			utils.AnalyzerS:       new(sync.WaitGroup),

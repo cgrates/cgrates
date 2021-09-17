@@ -25,6 +25,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/migrator"
@@ -142,7 +143,7 @@ func main() {
 
 	mgrCfg := dfltCfg
 	if *cfgPath != utils.EmptyString {
-		if mgrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
+		if mgrCfg, err = config.NewCGRConfigFromPath(context.Background(), *cfgPath); err != nil {
 			log.Fatalf("error loading config file %s", err.Error())
 		}
 		if mgrCfg.ConfigDBCfg().Type != utils.MetaInternal {
@@ -155,7 +156,7 @@ func main() {
 				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
 				return
 			}
-			if err = mgrCfg.LoadFromDB(d); err != nil {
+			if err = mgrCfg.LoadFromDB(context.Background(), d); err != nil {
 				log.Fatalf("Could not parse config: <%s>", err.Error())
 				return
 			}

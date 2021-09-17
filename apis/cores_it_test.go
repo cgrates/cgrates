@@ -105,7 +105,7 @@ func TestITCoreIt(t *testing.T) {
 func testCoreItLoadCofig(t *testing.T) {
 	coreSCfgPath = path.Join(*dataDir, "conf", "samples", coreSConfDIR)
 	var err error
-	if coreSCfg, err = config.NewCGRConfigFromPath(coreSCfgPath); err != nil {
+	if coreSCfg, err = config.NewCGRConfigFromPath(context.Background(), coreSCfgPath); err != nil {
 		t.Error(err)
 	}
 }

@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -34,6 +35,15 @@ type ResourceSConfig struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+}
+
+// loadResourceSCfg loads the ResourceS section of the configuration
+func (rlcfg *ResourceSConfig) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnRLSCfg := new(ResourceSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, ResourceSJSON, jsnRLSCfg); err != nil {
+		return
+	}
+	return rlcfg.loadFromJSONCfg(jsnRLSCfg)
 }
 
 func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
@@ -70,30 +80,33 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (rlcfg ResourceSConfig) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:        rlcfg.Enabled,
 		utils.IndexedSelectsCfg: rlcfg.IndexedSelects,
 		utils.NestedFieldsCfg:   rlcfg.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
 	}
 	if rlcfg.ThresholdSConns != nil {
-		initialMP[utils.ThresholdSConnsCfg] = getInternalJSONConns(rlcfg.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(rlcfg.ThresholdSConns)
 	}
 	if rlcfg.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.StringIndexedFields)
 	}
 	if rlcfg.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.PrefixIndexedFields)
 	}
 	if rlcfg.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.SuffixIndexedFields)
 	}
 	if rlcfg.StoreInterval != 0 {
-		initialMP[utils.StoreIntervalCfg] = rlcfg.StoreInterval.String()
+		mp[utils.StoreIntervalCfg] = rlcfg.StoreInterval.String()
 	}
-	return
+	return mp
 }
+
+func (ResourceSConfig) SName() string               { return ResourceSJSON }
+func (rlcfg ResourceSConfig) CloneSection() Section { return rlcfg.Clone() }
 
 // Clone returns a deep copy of ResourceSConfig
 func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {

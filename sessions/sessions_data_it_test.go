@@ -25,6 +25,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -80,7 +81,7 @@ func TestSessionsData(t *testing.T) {
 func testSessionsDataInitCfg(t *testing.T) {
 	dataCfgPath = path.Join(*dataDir, "conf", "samples", dataCfgDIR)
 	var err error
-	dataCfg, err = config.NewCGRConfigFromPath(dataCfgPath)
+	dataCfg, err = config.NewCGRConfigFromPath(context.Background(), dataCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

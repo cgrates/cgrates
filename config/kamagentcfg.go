@@ -19,16 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
-
-// NewDfltKamConnConfig returns the first cached default value for a KamConnCfg connection
-func NewDfltKamConnConfig() *KamConnCfg {
-	if dfltKamConnConfig == nil {
-		return new(KamConnCfg) // No defaults, most probably we are building the defaults now
-	}
-	return dfltKamConnConfig.Clone()
-}
 
 // KamConnCfg represents one connection instance towards Kamailio
 type KamConnCfg struct {
@@ -54,7 +47,7 @@ func (kamCfg *KamConnCfg) loadFromJSONCfg(jsnCfg *KamConnJsonCfg) error {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (kamCfg *KamConnCfg) AsMapInterface() map[string]interface{} {
+func (kamCfg KamConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.AliasCfg:      kamCfg.Alias,
 		utils.AddressCfg:    kamCfg.Address,
@@ -80,6 +73,15 @@ type KamAgentCfg struct {
 	Timezone      string
 }
 
+// loadKamAgentCfg loads the KamAgent section of the configuration
+func (ka *KamAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnKamAgentCfg := new(KamAgentJsonCfg)
+	if err = jsnCfg.GetSection(ctx, KamailioAgentJSON, jsnKamAgentCfg); err != nil {
+		return
+	}
+	return ka.loadFromJSONCfg(jsnKamAgentCfg)
+}
+
 func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
@@ -96,7 +98,7 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 	if jsnCfg.Evapi_conns != nil {
 		ka.EvapiConns = make([]*KamConnCfg, len(*jsnCfg.Evapi_conns))
 		for idx, jsnConnCfg := range *jsnCfg.Evapi_conns {
-			ka.EvapiConns[idx] = NewDfltKamConnConfig()
+			ka.EvapiConns[idx] = getDftKamConnCfg()
 			ka.EvapiConns[idx].loadFromJSONCfg(jsnConnCfg)
 		}
 	}
@@ -107,8 +109,8 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (ka KamAgentCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:   ka.Enabled,
 		utils.CreateCdrCfg: ka.CreateCdr,
 		utils.TimezoneCfg:  ka.Timezone,
@@ -118,13 +120,16 @@ func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		for i, item := range ka.EvapiConns {
 			evapiConns[i] = item.AsMapInterface()
 		}
-		initialMP[utils.EvapiConnsCfg] = evapiConns
+		mp[utils.EvapiConnsCfg] = evapiConns
 	}
 	if ka.SessionSConns != nil {
-		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(ka.SessionSConns)
+		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(ka.SessionSConns)
 	}
-	return
+	return mp
 }
+
+func (KamAgentCfg) SName() string            { return KamailioAgentJSON }
+func (ka KamAgentCfg) CloneSection() Section { return ka.Clone() }
 
 // Clone returns a deep copy of KamAgentCfg
 func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
@@ -203,7 +208,7 @@ func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonC
 		d.Create_cdr = utils.BoolPointer(v2.CreateCdr)
 	}
 	if !equalsKamConnsCfg(v1.EvapiConns, v2.EvapiConns) {
-		dft := NewDfltKamConnConfig()
+		dft := getDftKamConnCfg()
 		conns := make([]*KamConnJsonCfg, len(v2.EvapiConns))
 		for i, conn := range v2.EvapiConns {
 			conns[i] = diffKamConnJsonCfg(dft, conn)

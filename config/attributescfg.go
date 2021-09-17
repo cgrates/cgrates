@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,7 +45,7 @@ type AttributeSCfg struct {
 
 func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.AttributeIDs != nil {
 		attrOpts.AttributeIDs = *jsnCfg.AttributeIDs
@@ -55,8 +56,16 @@ func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) (err
 	if jsnCfg.ProfileRuns != nil {
 		attrOpts.ProfileRuns = *jsnCfg.ProfileRuns
 	}
+	return
+}
 
-	return nil
+// loadAttributeSCfg loads the AttributeS section of the configuration
+func (alS *AttributeSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnAttributeSCfg := new(AttributeSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, AttributeSJSON, jsnAttributeSCfg); err != nil {
+		return
+	}
+	return alS.loadFromJSONCfg(jsnAttributeSCfg)
 }
 
 func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -97,41 +106,40 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{
-		utils.MetaAttributeIDsCfg: alS.Opts.AttributeIDs,
-		utils.MetaProcessRunsCfg:  alS.Opts.ProcessRuns,
-		utils.MetaProfileRunsCfg:  alS.Opts.ProfileRuns,
-	}
-	initialMP = map[string]interface{}{
+func (alS AttributeSCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.NestedFieldsCfg:   alS.NestedFields,
-		utils.OptsCfg:           opts,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaAttributeIDsCfg: alS.Opts.AttributeIDs,
+			utils.MetaProcessRunsCfg:  alS.Opts.ProcessRuns,
+			utils.MetaProfileRunsCfg:  alS.Opts.ProfileRuns,
+		},
 	}
 	if alS.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*alS.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*alS.StringIndexedFields)
 	}
 	if alS.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*alS.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*alS.PrefixIndexedFields)
 	}
 	if alS.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*alS.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*alS.SuffixIndexedFields)
 	}
 	if alS.StatSConns != nil {
-		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(alS.StatSConns)
+		mp[utils.StatSConnsCfg] = getInternalJSONConns(alS.StatSConns)
 	}
 
 	if alS.ResourceSConns != nil {
-		initialMP[utils.ResourceSConnsCfg] = getInternalJSONConns(alS.ResourceSConns)
+		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(alS.ResourceSConns)
 	}
 	if alS.AccountSConns != nil {
-		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(alS.AccountSConns)
+		mp[utils.AccountSConnsCfg] = getInternalJSONConns(alS.AccountSConns)
 	}
-	return
+	return mp
 }
 
-func (attrOpts *AttributesOpts) Clone() *AttributesOpts {
+func (attrOpts AttributesOpts) Clone() *AttributesOpts {
 	var attrIDs []string
 	if attrOpts.AttributeIDs != nil {
 		attrIDs = utils.CloneStringSlice(attrOpts.AttributeIDs)
@@ -142,6 +150,9 @@ func (attrOpts *AttributesOpts) Clone() *AttributesOpts {
 		ProfileRuns:  attrOpts.ProfileRuns,
 	}
 }
+
+func (AttributeSCfg) SName() string             { return AttributeSJSON }
+func (alS AttributeSCfg) CloneSection() Section { return alS.Clone() }
 
 // Clone returns a deep copy of AttributeSCfg
 func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {

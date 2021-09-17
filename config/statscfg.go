@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,6 +36,15 @@ type StatSCfg struct {
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string
 	NestedFields           bool
+}
+
+// loadStatSCfg loads the StatS section of the configuration
+func (st *StatSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnStatSCfg := new(StatServJsonCfg)
+	if err = jsnCfg.GetSection(ctx, StatSJSON, jsnStatSCfg); err != nil {
+		return
+	}
+	return st.loadFromJSONCfg(jsnStatSCfg)
 }
 
 func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -74,8 +84,8 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (st StatSCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
 		utils.IndexedSelectsCfg:         st.IndexedSelects,
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
@@ -83,23 +93,26 @@ func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.StoreIntervalCfg:          utils.EmptyString,
 	}
 	if st.StoreInterval != 0 {
-		initialMP[utils.StoreIntervalCfg] = st.StoreInterval.String()
+		mp[utils.StoreIntervalCfg] = st.StoreInterval.String()
 	}
 	if st.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*st.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*st.StringIndexedFields)
 	}
 	if st.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*st.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*st.PrefixIndexedFields)
 	}
 	if st.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*st.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*st.SuffixIndexedFields)
 
 	}
 	if st.ThresholdSConns != nil {
-		initialMP[utils.ThresholdSConnsCfg] = getInternalJSONConns(st.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(st.ThresholdSConns)
 	}
-	return
+	return mp
 }
+
+func (StatSCfg) SName() string            { return StatSJSON }
+func (st StatSCfg) CloneSection() Section { return st.Clone() }
 
 // Clone returns a deep copy of StatSCfg
 func (st StatSCfg) Clone() (cln *StatSCfg) {

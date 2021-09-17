@@ -138,5 +138,5 @@
     "db_type": "redis",
     "db_port": 6379,
     "db_name": "12"
-  },
-},
+  }
+}

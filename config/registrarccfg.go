@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -28,6 +29,15 @@ import (
 type RegistrarCCfgs struct {
 	RPC         *RegistrarCCfg
 	Dispatchers *RegistrarCCfg
+}
+
+// loadRegistrarCCfg loads the RegistrarC section of the configuration
+func (dps *RegistrarCCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnRegistrarCCfg := new(RegistrarCJsonCfgs)
+	if err = jsnCfg.GetSection(ctx, RegistrarCJSON, jsnRegistrarCCfg); err != nil {
+		return
+	}
+	return dps.loadFromJSONCfg(jsnRegistrarCCfg)
 }
 
 func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err error) {
@@ -41,12 +51,15 @@ func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err erro
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (dps *RegistrarCCfgs) AsMapInterface() (initialMP map[string]interface{}) {
+func (dps RegistrarCCfgs) AsMapInterface(string) interface{} {
 	return map[string]interface{}{
 		utils.RPCCfg:        dps.RPC.AsMapInterface(),
 		utils.DispatcherCfg: dps.Dispatchers.AsMapInterface(),
 	}
 }
+
+func (RegistrarCCfgs) SName() string             { return RegistrarCJSON }
+func (dps RegistrarCCfgs) CloneSection() Section { return dps.Clone() }
 
 // Clone returns a deep copy of DispatcherHCfg
 func (dps RegistrarCCfgs) Clone() (cln *RegistrarCCfgs) {

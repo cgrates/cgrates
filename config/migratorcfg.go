@@ -21,6 +21,7 @@ package config
 import (
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -42,6 +43,15 @@ type MigratorCgrCfg struct {
 	UsersFilters      []string
 	OutDataDBOpts     map[string]interface{}
 	OutStorDBOpts     map[string]interface{}
+}
+
+// loadMigratorCgrCfg loads the Migrator section of the configuration
+func (mg *MigratorCgrCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnMigratorCgrCfg := new(MigratorCfgJson)
+	if err = jsnCfg.GetSection(ctx, MigratorJSON, jsnMigratorCgrCfg); err != nil {
+		return
+	}
+	return mg.loadFromJSONCfg(jsnMigratorCgrCfg)
 }
 
 func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
@@ -105,7 +115,7 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
+func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
 	outDataDBOpts := make(map[string]interface{})
 	for k, v := range mg.OutDataDBOpts {
 		outDataDBOpts[k] = v
@@ -133,6 +143,9 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.UsersFiltersCfg:      utils.CloneStringSlice(mg.UsersFilters),
 	}
 }
+
+func (MigratorCgrCfg) SName() string            { return MigratorJSON }
+func (mg MigratorCgrCfg) CloneSection() Section { return mg.Clone() }
 
 // Clone returns a deep copy of MigratorCgrCfg
 func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {

@@ -30,96 +30,11 @@ import (
 
 // getSectionAsMap returns a section from config as a map[string]interface
 func (cfg *CGRConfig) getSectionAsMap(section string) (mp interface{}, err error) {
-	switch section {
-	case GeneralJSON:
-		mp = cfg.GeneralCfg().AsMapInterface()
-	case DataDBJSON:
-		mp = cfg.DataDbCfg().AsMapInterface()
-	case StorDBJSON:
-		mp = cfg.StorDbCfg().AsMapInterface()
-	case TlsJSON:
-		mp = cfg.TLSCfg().AsMapInterface()
-	case CacheJSON:
-		mp = cfg.CacheCfg().AsMapInterface()
-	case ListenJSON:
-		mp = cfg.ListenCfg().AsMapInterface()
-	case HTTPJSON:
-		mp = cfg.HTTPCfg().AsMapInterface()
-	case FilterSJSON:
-		mp = cfg.FilterSCfg().AsMapInterface()
-	case CDRsJSON:
-		mp = cfg.CdrsCfg().AsMapInterface()
-	case SessionSJSON:
-		mp = cfg.SessionSCfg().AsMapInterface()
-	case FreeSWITCHAgentJSON:
-		mp = cfg.FsAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case KamailioAgentJSON:
-		mp = cfg.KamAgentCfg().AsMapInterface()
-	case AsteriskAgentJSON:
-		mp = cfg.AsteriskAgentCfg().AsMapInterface()
-	case DiameterAgentJSON:
-		mp = cfg.DiameterAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case RadiusAgentJSON:
-		mp = cfg.RadiusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case DNSAgentJSON:
-		mp = cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case AttributeSJSON:
-		mp = cfg.AttributeSCfg().AsMapInterface()
-	case ChargerSJSON:
-		mp = cfg.ChargerSCfg().AsMapInterface()
-	case ResourceSJSON:
-		mp = cfg.ResourceSCfg().AsMapInterface()
-	case StatSJSON:
-		mp = cfg.StatSCfg().AsMapInterface()
-	case ThresholdSJSON:
-		mp = cfg.ThresholdSCfg().AsMapInterface()
-	case RouteSJSON:
-		mp = cfg.RouteSCfg().AsMapInterface()
-	case SureTaxJSON:
-		mp = cfg.SureTaxCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case DispatcherSJSON:
-		mp = cfg.DispatcherSCfg().AsMapInterface()
-	case RegistrarCJSON:
-		mp = cfg.RegistrarCCfg().AsMapInterface()
-	case LoaderSJSON:
-		mp = cfg.LoaderCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case LoaderJSON:
-		mp = cfg.LoaderCgrCfg().AsMapInterface()
-	case MigratorJSON:
-		mp = cfg.MigratorCgrCfg().AsMapInterface()
-	case AdminSJSON:
-		mp = cfg.AdminSCfg().AsMapInterface()
-	case EEsJSON:
-		mp = cfg.EEsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case ERsJSON:
-		mp = cfg.ERsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case RPCConnsJSON:
-		mp = cfg.RPCConns().AsMapInterface()
-	case SIPAgentJSON:
-		mp = cfg.SIPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case TemplatesJSON:
-		mp = cfg.TemplatesCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case ConfigSJSON:
-		mp = cfg.ConfigSCfg().AsMapInterface()
-	case APIBanJSON:
-		mp = cfg.APIBanCfg().AsMapInterface()
-	case HTTPAgentJSON:
-		mp = cfg.HTTPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case AnalyzerSJSON:
-		mp = cfg.AnalyzerSCfg().AsMapInterface()
-	case RateSJSON:
-		mp = cfg.RateSCfg().AsMapInterface()
-	case CoreSJSON:
-		mp = cfg.CoreSCfg().AsMapInterface()
-	case ActionSJSON:
-		mp = cfg.ActionSCfg().AsMapInterface()
-	case AccountSJSON:
-		mp = cfg.AccountSCfg().AsMapInterface()
-	case ConfigDBJSON:
-		mp = cfg.ConfigDBCfg().AsMapInterface()
-	default:
-		err = errors.New("Invalid section ")
+	if sec, has := cfg.sections.Get(section); has {
+		mp = sec.AsMapInterface(cfg.GeneralCfg().RSRSep)
+		return
 	}
+	err = errors.New("Invalid section ")
 	return
 }
 
@@ -138,17 +53,17 @@ func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, rep
 		cfgV = cfg.Clone()
 	}
 	cfgV.reloadDPCache(args.Section)
-	if err = cfgV.loadCfgWithLocks(cfg.ConfigPath, args.Section); err != nil {
+	if err = cfgV.loadCfgWithLocks(ctx, cfg.ConfigPath, args.Section); err != nil {
 		return
 	}
+	sections := []string{args.Section}
+	allSections := args.Section == utils.MetaEmpty ||
+		args.Section == utils.MetaAll
+	if allSections {
+		sections = cfgV.GetAllSectionIDs()
+	}
 	if cfg.db != nil {
-		sections := []string{args.Section}
-		allSections := args.Section == utils.MetaEmpty ||
-			args.Section == utils.MetaAll
-		if allSections {
-			sections = sortedCfgSections
-		}
-		if err = cfgV.loadCfgFromDB(cfg.db, sections, allSections); err != nil {
+		if err = cfgV.loadCfgFromDB(ctx, cfg.db, sections, allSections); err != nil {
 			return
 		}
 	}
@@ -164,11 +79,7 @@ func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, rep
 		return
 	}
 	if !args.DryRun {
-		if args.Section == utils.EmptyString || args.Section == utils.MetaAll {
-			cfgV.reloadSections(sortedCfgSections...)
-		} else {
-			cfgV.reloadSections(args.Section)
-		}
+		cfgV.reloadSections(sections...)
 	}
 	*reply = utils.OK
 	return
@@ -185,7 +96,7 @@ type SectionWithAPIOpts struct {
 func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
 	if len(args.Sections) == 0 ||
 		args.Sections[0] == utils.MetaAll {
-		args.Sections = sortedCfgSections
+		args.Sections = cfg.GetAllSectionIDs()
 	}
 	mp := make(map[string]interface{})
 	sections := utils.StringSet{}
@@ -202,7 +113,7 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 		*reply = mp
 		return
 	}
-	if sections.Size() == len(sortedCfgSections) {
+	if sections.Size() == len(cfg.sections) {
 		mp = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 	} else {
 		for section := range sections {
@@ -234,31 +145,36 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 		*reply = utils.OK
 		return
 	}
-	sections := make([]string, 0, len(args.Config))
-	for section := range args.Config {
-		if !sortedSectionsSet.Has(section) {
-			return fmt.Errorf("Invalid section <%s> ", section)
+
+	cfgV := cfg
+	if args.DryRun {
+		cfgV = cfg.Clone()
+	}
+	var oldCfg *CGRConfig
+	updateDB := cfg.db != nil
+	if !args.DryRun && updateDB { // need to update the DB but only parts
+		oldCfg = cfg.Clone()
+	}
+	sectionNms := make([]string, 0, len(args.Config))
+	sections := make(Sections, 0, len(args.Config))
+	for secNm := range args.Config {
+		sec, has := cfgV.sections.Get(secNm)
+		if !has {
+			return fmt.Errorf("Invalid section <%s> ", secNm)
 		}
-		sections = append(sections, section)
+		sections = append(sections, sec)
+		sectionNms = append(sectionNms, secNm)
 	}
 	var b []byte
 	if b, err = json.Marshal(args.Config); err != nil {
 		return
 	}
 
-	var oldCfg *CGRConfig
-	updateDB := cfg.db != nil
-	if !args.DryRun && updateDB { // need to update the DB but only parts
-		oldCfg = cfg.Clone()
-	}
-
-	cfgV := cfg
-	if args.DryRun {
-		cfgV = cfg.Clone()
-	}
-
-	cfgV.reloadDPCache(sections...)
-	if err = cfgV.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
+	cfgV.reloadDPCache(sectionNms...)
+	cfgV.LockSections(sectionNms...)
+	err = loadConfigFromReader(ctx, bytes.NewBuffer(b), sections, false, cfgV)
+	cfgV.UnlockSections(sectionNms...)
+	if err != nil {
 		return
 	}
 
@@ -272,9 +188,9 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 		return
 	}
 	if !args.DryRun {
-		cfgV.reloadSections(sections...)
+		cfgV.reloadSections(sectionNms...)
 		if updateDB { // need to update the DB but only parts
-			if err = storeDiffSections(ctx, sections, cfgV.db, oldCfg, cfgV); err != nil {
+			if err = storeDiffSections(ctx, sectionNms, cfgV.db, oldCfg, cfgV); err != nil {
 				return
 			}
 		}
@@ -317,8 +233,12 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(ctx *context.Context, args *SetConfigF
 		cfgV = cfg.Clone()
 	}
 
-	cfgV.reloadDPCache(sortedCfgSections...)
-	if err = cfgV.loadCfgFromJSONWithLocks(bytes.NewBufferString(args.Config), sortedCfgSections); err != nil {
+	sections := cfg.GetAllSectionIDs()
+	cfgV.reloadDPCache(sections...)
+	cfg.LockSections(sections...)
+	err = loadConfigFromReader(ctx, bytes.NewBufferString(args.Config), cfgV.sections, false, cfgV)
+	cfg.UnlockSections(sections...)
+	if err != nil {
 		return
 	}
 
@@ -330,9 +250,9 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(ctx *context.Context, args *SetConfigF
 		return
 	}
 	if !args.DryRun {
-		cfgV.reloadSections(sortedCfgSections...)
+		cfgV.reloadSections(sections...)
 		if updateDB { // need to update the DB but only parts
-			if err = storeDiffSections(ctx, sortedCfgSections, cfg.db, oldCfg, cfg); err != nil {
+			if err = storeDiffSections(ctx, sections, cfg.db, oldCfg, cfg); err != nil {
 				return
 			}
 		}
@@ -352,37 +272,27 @@ func (cfg *CGRConfig) reloadDPCache(sections ...string) {
 
 // loadFromJSONDB Loads from json configuration object, will be used for defaults, config from file and reload
 // this function ignores the config_db section
-func (cfg *CGRConfig) LoadFromDB(jsnCfg ConfigDB) (err error) {
+func (cfg *CGRConfig) LoadFromDB(ctx *context.Context, jsnCfg ConfigDB) (err error) {
 	// Load sections out of JSON config, stop on error
 	cfg.lockSections()
 	defer cfg.unlockSections()
 	cfg.db = jsnCfg
-	for _, loadFunc := range []func(ConfigDB) error{
-		cfg.loadRPCConns,
-		cfg.loadGeneralCfg, cfg.loadTemplateSCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
-		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
-		cfg.loadFilterSCfg,
-		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
-		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
-		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
-		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadAttributeSCfg,
-		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg,
-		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
-		cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
-		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
-		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
-		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
-		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg, cfg.loadActionSCfg,
-		cfg.loadAccountSCfg} {
-		if err = loadFunc(jsnCfg); err != nil {
-			return
-		}
+	if err = cfg.sections.LoadWithout(ctx, jsnCfg, cfg, ConfigDBJSON); err != nil {
+		return
 	}
 	return cfg.checkConfigSanity()
 }
 
-func (cfg *CGRConfig) loadCfgFromDB(db ConfigDB, sections []string, ignoreConfigDB bool) (err error) {
-	loadMap := cfg.getLoadFunctions()
+// LoadFromPath reads all json files out of a folder/subfolders and loads them up in lexical order
+func (cfg *CGRConfig) LoadFromPath(ctx *context.Context, path string) (err error) {
+	cfg.ConfigPath = path
+	if err = loadConfigFromPath(ctx, path, cfg.sections, false, cfg); err != nil {
+		return
+	}
+	return cfg.checkConfigSanity()
+}
+
+func (cfg *CGRConfig) loadCfgFromDB(ctx *context.Context, db ConfigDB, sections []string, ignoreConfigDB bool) (err error) {
 	for _, section := range sections {
 		if section == ConfigDBJSON {
 			if ignoreConfigDB {
@@ -390,12 +300,12 @@ func (cfg *CGRConfig) loadCfgFromDB(db ConfigDB, sections []string, ignoreConfig
 			}
 			return fmt.Errorf("Invalid section: <%s> ", section)
 		}
-		fnct, has := loadMap[section]
+		sec, has := cfg.sections.Get(section)
 		if !has {
 			return fmt.Errorf("Invalid section: <%s> ", section)
 		}
 		cfg.lks[section].Lock()
-		err = fnct(db)
+		err = sec.Load(ctx, db, cfg)
 		cfg.lks[section].Unlock()
 		if err != nil {
 			return
@@ -409,11 +319,11 @@ func (cfg *CGRConfig) V1StoreCfgInDB(ctx *context.Context, args *SectionWithAPIO
 		return errors.New("no DB connection for config")
 	}
 	v1 := NewDefaultCGRConfig()
-	if err = v1.loadFromJSONCfg(cfg.db); err != nil { // load the config from DB
+	if err = v1.sections.Load(ctx, cfg.db, cfg); err != nil { // load the config from DB
 		return
 	}
 	if len(args.Sections) != 0 && args.Sections[0] == utils.MetaAll {
-		args.Sections = sortedCfgSections
+		args.Sections = cfg.GetAllSectionIDs()
 	}
 	err = storeDiffSections(ctx, args.Sections, cfg.db, v1, cfg)
 	if err != nil {
@@ -435,254 +345,254 @@ func storeDiffSections(ctx *context.Context, sections []string, db ConfigDB, v1,
 func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 *CGRConfig) (err error) {
 	switch section {
 	case GeneralJSON:
-		var jsn *GeneralJsonCfg
-		if jsn, err = db.GeneralJsonCfg(); err != nil {
+		jsn := new(GeneralJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffGeneralJsonCfg(jsn, v1.GeneralCfg(), v2.GeneralCfg()))
 	case RPCConnsJSON:
-		var jsn RPCConnsJson
-		if jsn, err = db.RPCConnJsonCfg(); err != nil {
+		jsn := make(RPCConnsJson)
+		if err = db.GetSection(ctx, section, &jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffRPCConnsJson(jsn, v1.RPCConns(), v2.RPCConns()))
 	case CacheJSON:
-		var jsn *CacheJsonCfg
-		if jsn, err = db.CacheJsonCfg(); err != nil {
+		jsn := new(CacheJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffCacheJsonCfg(jsn, v1.CacheCfg(), v2.CacheCfg()))
 	case ListenJSON:
-		var jsn *ListenJsonCfg
-		if jsn, err = db.ListenJsonCfg(); err != nil {
+		jsn := new(ListenJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffListenJsonCfg(jsn, v1.ListenCfg(), v2.ListenCfg()))
 	case HTTPJSON:
-		var jsn *HTTPJsonCfg
-		if jsn, err = db.HttpJsonCfg(); err != nil {
+		jsn := new(HTTPJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffHTTPJsonCfg(jsn, v1.HTTPCfg(), v2.HTTPCfg()))
 	case StorDBJSON:
-		var jsn *DbJsonCfg
-		if jsn, err = db.DbJsonCfg(StorDBJSON); err != nil {
+		jsn := new(DbJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffStorDBDbJsonCfg(jsn, v1.StorDbCfg(), v2.StorDbCfg()))
 	case DataDBJSON:
-		var jsn *DbJsonCfg
-		if jsn, err = db.DbJsonCfg(DataDBJSON); err != nil {
+		jsn := new(DbJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffDataDbJsonCfg(jsn, v1.DataDbCfg(), v2.DataDbCfg()))
 	case FilterSJSON:
-		var jsn *FilterSJsonCfg
-		if jsn, err = db.FilterSJsonCfg(); err != nil {
+		jsn := new(FilterSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffFilterSJsonCfg(jsn, v1.FilterSCfg(), v2.FilterSCfg()))
 	case CDRsJSON:
-		var jsn *CdrsJsonCfg
-		if jsn, err = db.CdrsJsonCfg(); err != nil {
+		jsn := new(CdrsJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffCdrsJsonCfg(jsn, v1.CdrsCfg(), v2.CdrsCfg()))
 	case ERsJSON:
-		var jsn *ERsJsonCfg
-		if jsn, err = db.ERsJsonCfg(); err != nil {
+		jsn := new(ERsJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffERsJsonCfg(jsn, v1.ERsCfg(), v2.ERsCfg(), v2.GeneralCfg().RSRSep))
 	case EEsJSON:
-		var jsn *EEsJsonCfg
-		if jsn, err = db.EEsJsonCfg(); err != nil {
+		jsn := new(EEsJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffEEsJsonCfg(jsn, v1.EEsCfg(), v2.EEsCfg(), v2.GeneralCfg().RSRSep))
 	case SessionSJSON:
-		var jsn *SessionSJsonCfg
-		if jsn, err = db.SessionSJsonCfg(); err != nil {
+		jsn := new(SessionSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffSessionSJsonCfg(jsn, v1.SessionSCfg(), v2.SessionSCfg()))
 	case FreeSWITCHAgentJSON:
-		var jsn *FreeswitchAgentJsonCfg
-		if jsn, err = db.FreeswitchAgentJsonCfg(); err != nil {
+		jsn := new(FreeswitchAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffFreeswitchAgentJsonCfg(jsn, v1.FsAgentCfg(), v2.FsAgentCfg()))
 	case KamailioAgentJSON:
-		var jsn *KamAgentJsonCfg
-		if jsn, err = db.KamAgentJsonCfg(); err != nil {
+		jsn := new(KamAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffKamAgentJsonCfg(jsn, v1.KamAgentCfg(), v2.KamAgentCfg()))
 	case AsteriskAgentJSON:
-		var jsn *AsteriskAgentJsonCfg
-		if jsn, err = db.AsteriskAgentJsonCfg(); err != nil {
+		jsn := new(AsteriskAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffAsteriskAgentJsonCfg(jsn, v1.AsteriskAgentCfg(), v2.AsteriskAgentCfg()))
 	case DiameterAgentJSON:
-		var jsn *DiameterAgentJsonCfg
-		if jsn, err = db.DiameterAgentJsonCfg(); err != nil {
+		jsn := new(DiameterAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffDiameterAgentJsonCfg(jsn, v1.DiameterAgentCfg(), v2.DiameterAgentCfg(), v2.GeneralCfg().RSRSep))
 	case RadiusAgentJSON:
-		var jsn *RadiusAgentJsonCfg
-		if jsn, err = db.RadiusAgentJsonCfg(); err != nil {
+		jsn := new(RadiusAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, v1.RadiusAgentCfg(), v2.RadiusAgentCfg(), v2.GeneralCfg().RSRSep))
 	case HTTPAgentJSON:
-		var jsn *[]*HttpAgentJsonCfg
-		if jsn, err = db.HttpAgentJsonCfg(); err != nil {
+		jsn := new([]*HttpAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffHttpAgentsJsonCfg(jsn, v1.HTTPAgentCfg(), v2.HTTPAgentCfg(), v2.GeneralCfg().RSRSep))
 	case DNSAgentJSON:
-		var jsn *DNSAgentJsonCfg
-		if jsn, err = db.DNSAgentJsonCfg(); err != nil {
+		jsn := new(DNSAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffDNSAgentJsonCfg(jsn, v1.DNSAgentCfg(), v2.DNSAgentCfg(), v2.GeneralCfg().RSRSep))
 	case AttributeSJSON:
-		var jsn *AttributeSJsonCfg
-		if jsn, err = db.AttributeServJsonCfg(); err != nil {
+		jsn := new(AttributeSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffAttributeSJsonCfg(jsn, v1.AttributeSCfg(), v2.AttributeSCfg()))
 	case ChargerSJSON:
-		var jsn *ChargerSJsonCfg
-		if jsn, err = db.ChargerServJsonCfg(); err != nil {
+		jsn := new(ChargerSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffChargerSJsonCfg(jsn, v1.ChargerSCfg(), v2.ChargerSCfg()))
 	case ResourceSJSON:
-		var jsn *ResourceSJsonCfg
-		if jsn, err = db.ResourceSJsonCfg(); err != nil {
+		jsn := new(ResourceSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffResourceSJsonCfg(jsn, v1.ResourceSCfg(), v2.ResourceSCfg()))
 	case StatSJSON:
-		var jsn *StatServJsonCfg
-		if jsn, err = db.StatSJsonCfg(); err != nil {
+		jsn := new(StatServJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffStatServJsonCfg(jsn, v1.StatSCfg(), v2.StatSCfg()))
 	case ThresholdSJSON:
-		var jsn *ThresholdSJsonCfg
-		if jsn, err = db.ThresholdSJsonCfg(); err != nil {
+		jsn := new(ThresholdSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffThresholdSJsonCfg(jsn, v1.ThresholdSCfg(), v2.ThresholdSCfg()))
 	case RouteSJSON:
-		var jsn *RouteSJsonCfg
-		if jsn, err = db.RouteSJsonCfg(); err != nil {
+		jsn := new(RouteSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffRouteSJsonCfg(jsn, v1.RouteSCfg(), v2.RouteSCfg()))
 	case LoaderSJSON:
-		var jsn []*LoaderJsonCfg
-		if jsn, err = db.LoaderJsonCfg(); err != nil {
+		jsn := make([]*LoaderJsonCfg, 0)
+		if err = db.GetSection(ctx, section, &jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffLoadersJsonCfg(jsn, v1.LoaderCfg(), v2.LoaderCfg(), v2.GeneralCfg().RSRSep))
 	case SureTaxJSON:
-		var jsn *SureTaxJsonCfg
-		if jsn, err = db.SureTaxJsonCfg(); err != nil {
+		jsn := new(SureTaxJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffSureTaxJsonCfg(jsn, v1.SureTaxCfg(), v2.SureTaxCfg(), v2.GeneralCfg().RSRSep))
 	case DispatcherSJSON:
-		var jsn *DispatcherSJsonCfg
-		if jsn, err = db.DispatcherSJsonCfg(); err != nil {
+		jsn := new(DispatcherSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffDispatcherSJsonCfg(jsn, v1.DispatcherSCfg(), v2.DispatcherSCfg()))
 	case RegistrarCJSON:
-		var jsn *RegistrarCJsonCfgs
-		if jsn, err = db.RegistrarCJsonCfgs(); err != nil {
+		jsn := new(RegistrarCJsonCfgs)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffRegistrarCJsonCfgs(jsn, v1.RegistrarCCfg(), v2.RegistrarCCfg()))
 	case LoaderJSON:
-		var jsn *LoaderCfgJson
-		if jsn, err = db.LoaderCfgJson(); err != nil {
+		jsn := new(LoaderCfgJson)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffLoaderCfgJson(jsn, v1.LoaderCgrCfg(), v2.LoaderCgrCfg()))
 	case MigratorJSON:
-		var jsn *MigratorCfgJson
-		if jsn, err = db.MigratorCfgJson(); err != nil {
+		jsn := new(MigratorCfgJson)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffMigratorCfgJson(jsn, v1.MigratorCgrCfg(), v2.MigratorCgrCfg()))
 	case TlsJSON:
-		var jsn *TlsJsonCfg
-		if jsn, err = db.TlsCfgJson(); err != nil {
+		jsn := new(TlsJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffTlsJsonCfg(jsn, v1.TLSCfg(), v2.TLSCfg()))
 	case AnalyzerSJSON:
-		var jsn *AnalyzerSJsonCfg
-		if jsn, err = db.AnalyzerCfgJson(); err != nil {
+		jsn := new(AnalyzerSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffAnalyzerSJsonCfg(jsn, v1.AnalyzerSCfg(), v2.AnalyzerSCfg()))
 	case AdminSJSON:
-		var jsn *AdminSJsonCfg
-		if jsn, err = db.AdminSCfgJson(); err != nil {
+		jsn := new(AdminSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffAdminSJsonCfg(jsn, v1.AdminSCfg(), v2.AdminSCfg()))
 	case RateSJSON:
-		var jsn *RateSJsonCfg
-		if jsn, err = db.RateCfgJson(); err != nil {
+		jsn := new(RateSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffRateSJsonCfg(jsn, v1.RateSCfg(), v2.RateSCfg()))
 	case SIPAgentJSON:
-		var jsn *SIPAgentJsonCfg
-		if jsn, err = db.SIPAgentJsonCfg(); err != nil {
+		jsn := new(SIPAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffSIPAgentJsonCfg(jsn, v1.SIPAgentCfg(), v2.SIPAgentCfg(), v2.GeneralCfg().RSRSep))
 	case TemplatesJSON:
-		var jsn FcTemplatesJsonCfg
-		if jsn, err = db.TemplateSJsonCfg(); err != nil {
+		jsn := make(FcTemplatesJsonCfg)
+		if err = db.GetSection(ctx, section, &jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffFcTemplatesJsonCfg(jsn, v1.TemplatesCfg(), v2.TemplatesCfg(), v2.GeneralCfg().RSRSep))
 	case ConfigSJSON:
-		var jsn *ConfigSCfgJson
-		if jsn, err = db.ConfigSJsonCfg(); err != nil {
+		jsn := new(ConfigSCfgJson)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffConfigSCfgJson(jsn, v1.ConfigSCfg(), v2.ConfigSCfg()))
 	case APIBanJSON:
-		var jsn *APIBanJsonCfg
-		if jsn, err = db.ApiBanCfgJson(); err != nil {
+		jsn := new(APIBanJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffAPIBanJsonCfg(jsn, v1.APIBanCfg(), v2.APIBanCfg()))
 	case CoreSJSON:
-		var jsn *CoreSJsonCfg
-		if jsn, err = db.CoreSJSON(); err != nil {
+		jsn := new(CoreSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffCoreSJsonCfg(jsn, v1.CoreSCfg(), v2.CoreSCfg()))
 	case ActionSJSON:
-		var jsn *ActionSJsonCfg
-		if jsn, err = db.ActionSCfgJson(); err != nil {
+		jsn := new(ActionSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffActionSJsonCfg(jsn, v1.ActionSCfg(), v2.ActionSCfg()))
 	case AccountSJSON:
-		var jsn *AccountSJsonCfg
-		if jsn, err = db.AccountSCfgJson(); err != nil {
+		jsn := new(AccountSJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
 		return db.SetSection(ctx, section, diffAccountSJsonCfg(jsn, v1.AccountSCfg(), v2.AccountSCfg()))

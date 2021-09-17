@@ -51,7 +51,7 @@ func TestAsteriskAgentReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
@@ -87,7 +87,7 @@ func TestAsteriskAgentReload(t *testing.T) {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	cfg.AsteriskAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.AsteriskAgentJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.AsteriskAgentJSON]
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -111,7 +111,7 @@ func TestAsteriskAgentReload2(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
@@ -160,7 +160,7 @@ func TestAsteriskAgentReload2(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", srvReload)
 	}
 	cfg.AsteriskAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.AsteriskAgentJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.AsteriskAgentJSON]
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")

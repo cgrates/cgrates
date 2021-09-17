@@ -19,16 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
-
-// NewDefaultAsteriskConnCfg is uses stored defaults so we can pre-populate by loading from JSON config
-func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
-	if dfltAstConnCfg == nil {
-		return new(AsteriskConnCfg) // No defaults, most probably we are building the defaults now
-	}
-	return dfltAstConnCfg.Clone()
-}
 
 // AsteriskConnCfg the config for a Asterisk connection
 type AsteriskConnCfg struct {
@@ -66,7 +59,7 @@ func (aConnCfg *AsteriskConnCfg) loadFromJSONCfg(jsnCfg *AstConnJsonCfg) error {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]interface{} {
+func (aConnCfg AsteriskConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.AliasCfg:           aConnCfg.Alias,
 		utils.AddressCfg:         aConnCfg.Address,
@@ -97,6 +90,15 @@ type AsteriskAgentCfg struct {
 	AsteriskConns []*AsteriskConnCfg
 }
 
+// loadAsteriskAgentCfg loads the AsteriskAgent section of the configuration
+func (aCfg *AsteriskAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnSMAstCfg := new(AsteriskAgentJsonCfg)
+	if err = jsnCfg.GetSection(ctx, AsteriskAgentJSON, jsnSMAstCfg); err != nil {
+		return
+	}
+	return aCfg.loadFromJSONCfg(jsnSMAstCfg)
+}
+
 func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
@@ -114,7 +116,7 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	if jsnCfg.Asterisk_conns != nil {
 		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))
 		for i, jsnAConn := range *jsnCfg.Asterisk_conns {
-			aCfg.AsteriskConns[i] = NewDefaultAsteriskConnCfg()
+			aCfg.AsteriskConns[i] = getDftAstConnCfg()
 			aCfg.AsteriskConns[i].loadFromJSONCfg(jsnAConn)
 		}
 	}
@@ -122,8 +124,8 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (aCfg AsteriskAgentCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:   aCfg.Enabled,
 		utils.CreateCDRCfg: aCfg.CreateCDR,
 	}
@@ -132,13 +134,16 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]interface{}
 		for i, item := range aCfg.AsteriskConns {
 			conns[i] = item.AsMapInterface()
 		}
-		initialMP[utils.AsteriskConnsCfg] = conns
+		mp[utils.AsteriskConnsCfg] = conns
 	}
 	if aCfg.SessionSConns != nil {
-		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(aCfg.SessionSConns)
+		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(aCfg.SessionSConns)
 	}
-	return
+	return mp
 }
+
+func (AsteriskAgentCfg) SName() string              { return AsteriskAgentJSON }
+func (aCfg AsteriskAgentCfg) CloneSection() Section { return aCfg.Clone() }
 
 // Clone returns a deep copy of AsteriskAgentCfg
 func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
@@ -230,7 +235,7 @@ func diffAsteriskAgentJsonCfg(d *AsteriskAgentJsonCfg, v1, v2 *AsteriskAgentCfg)
 
 	if !equalsAstConnJsonCfg(v1.AsteriskConns, v2.AsteriskConns) {
 		v := make([]*AstConnJsonCfg, len(v2.AsteriskConns))
-		dflt := NewDefaultAsteriskConnCfg()
+		dflt := getDftAstConnCfg()
 		for i, val := range v2.AsteriskConns {
 			v[i] = diffAstConnJsonCfg(dflt, val)
 		}

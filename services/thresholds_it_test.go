@@ -53,7 +53,7 @@ func TestThresholdSReload(t *testing.T) {
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
@@ -77,8 +77,9 @@ func TestThresholdSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	runtime.Gosched()
+	runtime.Gosched()
+	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !tS.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
@@ -96,7 +97,7 @@ func TestThresholdSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ThresholdSCfg().Enabled = false
-	cfg.GetReloadChan(config.ThresholdSJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.ThresholdSJSON]
 	time.Sleep(10 * time.Millisecond)
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -123,7 +124,7 @@ func TestThresholdSReload2(t *testing.T) {
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
@@ -163,7 +164,7 @@ func TestThresholdSReload2(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ThresholdSCfg().Enabled = false
-	cfg.GetReloadChan(config.ThresholdSJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.ThresholdSJSON]
 	time.Sleep(10 * time.Millisecond)
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")

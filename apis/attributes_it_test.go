@@ -98,7 +98,7 @@ func TestAttributeSIT(t *testing.T) {
 func testAttributeSInitCfg(t *testing.T) {
 	var err error
 	alsPrfCfgPath = path.Join(*dataDir, "conf", "samples", alsPrfConfigDIR)
-	alsPrfCfg, err = config.NewCGRConfigFromPath(alsPrfCfgPath)
+	alsPrfCfg, err = config.NewCGRConfigFromPath(context.Background(), alsPrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

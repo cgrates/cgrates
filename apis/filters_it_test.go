@@ -81,7 +81,7 @@ func TestFilterSIT(t *testing.T) {
 func testFilterSInitCfg(t *testing.T) {
 	var err error
 	fltrPrfCfgPath = path.Join(*dataDir, "conf", "samples", fltrPrfConfigDIR)
-	fltrPrfCfg, err = config.NewCGRConfigFromPath(fltrPrfCfgPath)
+	fltrPrfCfg, err = config.NewCGRConfigFromPath(context.Background(), fltrPrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

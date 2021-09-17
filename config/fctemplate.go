@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -193,14 +194,44 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 // FCTemplates the config for the templates
 type FCTemplates map[string][]*FCTemplate
 
-// AsMapInterface returns the config as a map[string]interface{}
-func (sCft FCTemplates) AsMapInterface(separator string) (initialMP map[string][]map[string]interface{}) {
-	initialMP = make(map[string][]map[string]interface{})
-	for key, value := range sCft {
-		initialMP[key] = make([]map[string]interface{}, len(value))
-		for i, item := range value {
-			initialMP[key][i] = item.AsMapInterface(separator)
+// loadTemplateSCfg loads the Template section of the configuration
+func (sCft FCTemplates) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnTemplateCfg := make(map[string][]*FcTemplateJsonCfg)
+	if err = jsnCfg.GetSection(ctx, TemplatesJSON, &jsnTemplateCfg); err != nil {
+		return
+	}
+	for k, val := range jsnTemplateCfg {
+		if sCft[k], err = FCTemplatesFromFCTemplatesJSONCfg(val, cfg.generalCfg.RSRSep); err != nil {
+			return
 		}
+	}
+	return
+}
+
+// AsMapInterface returns the config as a map[string]interface{}
+func (sCft FCTemplates) AsMapInterface(separator string) interface{} {
+	mp := make(map[string][]map[string]interface{})
+	for key, value := range sCft {
+		mp[key] = make([]map[string]interface{}, len(value))
+		for i, item := range value {
+			mp[key][i] = item.AsMapInterface(separator)
+		}
+	}
+	return mp
+}
+
+func (FCTemplates) SName() string              { return TemplatesJSON }
+func (sCft FCTemplates) CloneSection() Section { return sCft.Clone() }
+
+// Clone returns a deep copy of FcTemplates
+func (sCft FCTemplates) Clone() (cln FCTemplates) {
+	cln = make(FCTemplates)
+	for k, fcs := range sCft {
+		fcln := make([]*FCTemplate, len(fcs))
+		for i, fc := range fcs {
+			fcln[i] = fc.Clone()
+		}
+		cln[k] = fcln
 	}
 	return
 }
@@ -273,19 +304,6 @@ func (fc *FCTemplate) GetPathSlice() []string {
 // ComputePath used in test to populate private fields used to store the path
 func (fc *FCTemplate) ComputePath() {
 	fc.pathSlice = utils.CompilePath(fc.Path)
-}
-
-// Clone returns a deep copy of FcTemplates
-func (sCft FCTemplates) Clone() (cln FCTemplates) {
-	cln = make(FCTemplates)
-	for k, fcs := range sCft {
-		fcln := make([]*FCTemplate, len(fcs))
-		for i, fc := range fcs {
-			fcln[i] = fc.Clone()
-		}
-		cln[k] = fcln
-	}
-	return
 }
 
 func (fc *FCTemplate) Equals(fc2 *FCTemplate) bool {

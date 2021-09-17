@@ -88,8 +88,8 @@ func testNewCgrJsonCfgFromHttp(t *testing.T) {
 	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/tutmongo/cgrates.json"
 	expVal := NewDefaultCGRConfig()
 
-	err = expVal.loadConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		[]func(ConfigDB) error{expVal.loadFromJSONCfg}, false)
+	err = loadConfigFromPath(context.Background(), path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		expVal.sections, false, expVal)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func testNewCgrJsonCfgFromHttp(t *testing.T) {
 	}
 
 	rply := NewDefaultCGRConfig()
-	if err = rply.loadConfigFromPath(addr, []func(ConfigDB) error{rply.loadFromJSONCfg}, false); err != nil {
+	if err = loadConfigFromPath(context.Background(), addr, rply.sections, false, rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expVal, rply) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expVal), utils.ToJSON(rply))
@@ -116,7 +116,7 @@ func testNewCGRConfigFromPath(t *testing.T) {
 		}
 	}
 	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/b/b.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/c.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/d.json"
-	expVal, err := NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "multifiles"))
+	expVal, err := NewCGRConfigFromPath(context.Background(), path.Join("/usr", "share", "cgrates", "conf", "samples", "multifiles"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func testNewCGRConfigFromPath(t *testing.T) {
 		return
 	}
 
-	if rply, err := NewCGRConfigFromPath(addr); err != nil {
+	if rply, err := NewCGRConfigFromPath(context.Background(), addr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expVal, rply) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expVal), utils.ToJSON(rply))
@@ -134,9 +134,7 @@ func testNewCGRConfigFromPath(t *testing.T) {
 }
 func testCGRConfigReloadAttributeS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
 	if err = cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
@@ -166,9 +164,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 
 func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	cfg.db = make(CgrJsonCfg)
 	if err := cfg.db.SetSection(context.Background(), AttributeSJSON, &AttributeSJsonCfg{
 		Stats_conns: &[]string{utils.MetaLocalHost},
@@ -204,9 +200,7 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 
 func testCGRConfigReloadChargerSDryRun(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
 	if err = cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
@@ -226,9 +220,7 @@ func testCGRConfigReloadChargerSDryRun(t *testing.T) {
 
 func testCGRConfigReloadChargerS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
 	if err = cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
@@ -253,9 +245,7 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 
 func testCGRConfigReloadThresholdS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
 	if err = cfg.V1ReloadConfig(context.Background(), &ReloadArgs{Section: ThresholdSJSON}, &reply); err != nil {
@@ -279,9 +269,7 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 
 func testCGRConfigReloadStatS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
 	if err = cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
@@ -306,9 +294,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 
 func testCGRConfigReloadResourceS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
 	if err = cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
@@ -333,9 +319,7 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 
 func testCGRConfigReloadSupplierS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
 	if err = cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
@@ -371,9 +355,7 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 
 func testCGRConfigV1ReloadConfigFromPathInvalidSection(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	expectedErr := "Invalid section: <InvalidSection> "
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
@@ -388,9 +370,7 @@ func testV1ReloadConfigFromPathConfigSanity(t *testing.T) {
 	expectedErr := "<AttributeS> not enabled but requested by <ChargerS> component"
 	var reply string
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutinternal")
 	if err := cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
 		Section: ChargerSJSON}, &reply); err == nil || err.Error() != expectedErr {
@@ -402,7 +382,7 @@ func testLoadConfigFromHTTPValidURL(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json"
-	if err := cfg.loadConfigFromHTTP(url, nil); err != nil {
+	if err := loadConfigFromHTTP(context.Background(), url, cfg.sections, cfg); err != nil {
 		t.Error(err)
 	}
 }
@@ -418,9 +398,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 	}
 
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_example")
@@ -507,9 +485,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 
 func testCGRConfigReloadDNSAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload")
@@ -535,9 +511,7 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 
 func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	cfg.SessionSCfg().Enabled = true
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "freeswitch_reload")
@@ -715,9 +689,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 	}
 
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	var reply string
 	var rcv map[string]interface{}
 
@@ -748,9 +720,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 
 func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
@@ -806,9 +776,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 
 func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
@@ -869,9 +837,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 
 func testCGRConfigReloadAll(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
+	cfg.rldCh = make(chan string, 100)
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
@@ -938,7 +904,7 @@ func testHttpHandlerConfigSForNotExistFile(t *testing.T) {
 func testHandleConfigSFolderError(t *testing.T) {
 	flPath := "/usr/share/cgrates/conf/samples/NotExists/cgrates.json"
 	w := httptest.NewRecorder()
-	handleConfigSFolder(flPath, w)
+	handleConfigSFolder(context.Background(), flPath, w)
 
 	resp := w.Result()
 	body, _ := io.ReadAll(resp.Body)
@@ -1016,7 +982,7 @@ func testHttpHandlerConfigSForFolder(t *testing.T) {
 	if resp.Status != "200 OK" {
 		t.Errorf("Expected %+v , received: %+v ", "200 OK", resp.Status)
 	}
-	cfg, err := NewCGRConfigFromPath("/usr/share/cgrates/conf/samples/diamagent_internal/")
+	cfg, err := NewCGRConfigFromPath(context.Background(), "/usr/share/cgrates/conf/samples/diamagent_internal/")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1033,9 +999,8 @@ func testLoadConfigFromFolderFileNotFound(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	expected := "file </usr/share/cgrates/conf/samples/docker/cgrates.json>:NOT_FOUND:ENV_VAR:DOCKER_IP"
-	if err = cfg.loadConfigFromFolder("/usr/share/cgrates/conf/samples/",
-		[]func(jsonCfg ConfigDB) error{cfg.loadFromJSONCfg},
-		false); err == nil || err.Error() != expected {
+	if err = loadConfigFromFolder(context.Background(), "/usr/share/cgrates/conf/samples/",
+		cfg.sections, false, cfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1048,9 +1013,8 @@ func testLoadConfigFromFolderOpenError(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	expected := "open /tmp/testLoadConfigFromFolderOpenError/notes.json: no such file or directory"
-	if err = cfg.loadConfigFromFile(path.Join(newDir, "notes.json"),
-		[]func(jsonCfg ConfigDB) error{cfg.loadFromJSONCfg},
-		false); err == nil || err.Error() != expected {
+	if err = loadConfigFromFile(context.Background(), path.Join(newDir, "notes.json"),
+		cfg.sections, false, cfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	if err = os.RemoveAll(newDir); err != nil {
@@ -1065,9 +1029,8 @@ func testLoadConfigFromFolderNoConfigFound(t *testing.T) {
 	}
 	cfg := NewDefaultCGRConfig()
 
-	if err = cfg.loadConfigFromFolder(newDir,
-		[]func(jsonCfg ConfigDB) error{cfg.loadFromJSONCfg},
-		false); err == nil || err != filepath.ErrBadPattern {
+	if err = loadConfigFromFolder(context.Background(), newDir,
+		cfg.sections, false, cfg); err == nil || err != filepath.ErrBadPattern {
 		t.Errorf("Expected %+v, received %+v", filepath.ErrBadPattern, err)
 	}
 	if err = os.RemoveAll(newDir); err != nil {
@@ -1079,9 +1042,8 @@ func testLoadConfigFromPathInvalidArgument(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	expected := "stat /\x00: invalid argument"
-	if err = cfg.loadConfigFromPath("/\x00",
-		[]func(jsonCfg ConfigDB) error{cfg.loadFromJSONCfg},
-		false); err == nil || err.Error() != expected {
+	if err = loadConfigFromPath(context.Background(), "/\x00",
+		cfg.sections, false, cfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1094,9 +1056,8 @@ func testLoadConfigFromPathValidPath(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	expected := "No config file found on path /tmp/testLoadConfigFromPathValidPath "
-	if err = cfg.loadConfigFromPath(newDir,
-		[]func(jsonCfg ConfigDB) error{cfg.loadFromJSONCfg},
-		false); err == nil || err.Error() != expected {
+	if err = loadConfigFromPath(context.Background(), newDir,
+		cfg.sections, false, cfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	if err = os.RemoveAll(newDir); err != nil {
@@ -1112,9 +1073,8 @@ func testLoadConfigFromPathFile(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	expected := "No config file found on path /tmp/testLoadConfigFromPathFile "
-	if err = cfg.loadConfigFromPath(newDir,
-		[]func(jsonCfg ConfigDB) error{cfg.loadFromJSONCfg},
-		false); err == nil || err.Error() != expected {
+	if err = loadConfigFromPath(context.Background(), newDir,
+		cfg.sections, false, cfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	if err = os.RemoveAll(newDir); err != nil {
@@ -1173,7 +1133,7 @@ func testHandleConfigSFolderErrorWrite(t *testing.T) {
 	newFile.Close()
 
 	w := new(responseTest)
-	handleConfigSFolder(flPath, w)
+	handleConfigSFolder(context.Background(), flPath, w)
 
 	if err = os.Remove(path.Join(flPath, "random.json")); err != nil {
 		t.Fatal(err)

@@ -240,7 +240,7 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.rpcConns.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.rpcConns.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -300,7 +300,7 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.rpcConns.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.rpcConns.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -747,13 +747,5 @@ func TestDiffRPCConnsJson(t *testing.T) {
 	rcv = diffRPCConnsJson(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
-	}
-}
-
-func TestNewDfltRemoteHost(t *testing.T) {
-	dfltRemoteHost = nil
-	rcv := NewDfltRemoteHost()
-	if !reflect.DeepEqual(rcv, new(RemoteHost)) {
-		t.Errorf("Expected %v \n but received \n %v", new(RemoteHost), rcv)
 	}
 }

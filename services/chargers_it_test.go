@@ -22,6 +22,7 @@ package services
 
 import (
 	"path"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -54,7 +55,7 @@ func TestChargerSReload(t *testing.T) {
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	attrS := NewAttributeService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep)
@@ -80,9 +81,11 @@ func TestChargerSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+	runtime.Gosched()
+	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !chrS.IsRunning() {
-		t.Errorf("Expected service to be running")
+		t.Fatalf("Expected service to be running")
 	}
 	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
@@ -96,7 +99,7 @@ func TestChargerSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ChargerSCfg().Enabled = false
-	cfg.GetReloadChan(config.ChargerSJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.ChargerSJSON]
 	time.Sleep(10 * time.Millisecond)
 	if chrS.IsRunning() {
 		t.Errorf("Expected service to be down")

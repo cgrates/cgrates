@@ -271,7 +271,7 @@ func TestLoadIt(t *testing.T) {
 func testLoadItLoadConfig(t *testing.T) {
 	var err error
 	ldrItCfgPath = path.Join(*dataDir, "conf", "samples", ldrItCfgDir)
-	if ldrItCfg, err = config.NewCGRConfigFromPath(ldrItCfgPath); err != nil {
+	if ldrItCfg, err = config.NewCGRConfigFromPath(context.Background(), ldrItCfgPath); err != nil {
 		t.Error(err)
 	}
 }

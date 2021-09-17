@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -80,7 +81,7 @@ func handleDisconnectSession(clnt *rpc2.Client,
 func testSessionsBiRPCInitCfg(t *testing.T) {
 	sessionsBiRPCCfgPath = path.Join(*dataDir, "conf", "samples", sessionsBiRPCCfgDIR)
 	// Init config first
-	sessionsBiRPCCfg, err = config.NewCGRConfigFromPath(sessionsBiRPCCfgPath)
+	sessionsBiRPCCfg, err = config.NewCGRConfigFromPath(context.Background(), sessionsBiRPCCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

@@ -29,30 +29,23 @@ import (
 )
 
 // NewServiceManager returns a service manager
-func NewServiceManager(cfg *config.CGRConfig, shdWg *sync.WaitGroup, connMgr *engine.ConnManager) *ServiceManager {
+func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager, rldChan <-chan string) *ServiceManager {
 	return &ServiceManager{
-		cfg:        cfg,
 		subsystems: make(map[string]Service),
 		shdWg:      shdWg,
 		connMgr:    connMgr,
+		rldChan:    rldChan,
 	}
 }
 
 // ServiceManager handles service management ran by the engine
 type ServiceManager struct {
 	sync.RWMutex // lock access to any shared data
-	cfg          *config.CGRConfig
 	subsystems   map[string]Service
 
 	shdWg   *sync.WaitGroup
 	connMgr *engine.ConnManager
-}
-
-// GetConfig returns the Configuration
-func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	return srvMngr.cfg
+	rldChan <-chan string
 }
 
 // StartServices starts all enabled services
@@ -85,80 +78,26 @@ func (srvMngr *ServiceManager) AddServices(services ...Service) {
 }
 
 func (srvMngr *ServiceManager) handleReload(ctx *context.Context, shtDwn context.CancelFunc) {
+	var srvName string
 	for {
 		select {
 		case <-ctx.Done():
 			srvMngr.ShutdownServices()
 			return
-		case <-srvMngr.GetConfig().GetReloadChan(config.AttributeSJSON):
-			go srvMngr.reloadService(utils.AttributeS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.ChargerSJSON):
-			go srvMngr.reloadService(utils.ChargerS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.ThresholdSJSON):
-			go srvMngr.reloadService(utils.ThresholdS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.StatSJSON):
-			go srvMngr.reloadService(utils.StatS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.ResourceSJSON):
-			go srvMngr.reloadService(utils.ResourceS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.RouteSJSON):
-			go srvMngr.reloadService(utils.RouteS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.AdminSJSON):
-			go srvMngr.reloadService(utils.AdminS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.CDRsJSON):
-			go srvMngr.reloadService(utils.CDRServer, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJSON):
-			go srvMngr.reloadService(utils.SessionS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.ERsJSON):
-			go srvMngr.reloadService(utils.ERs, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.DNSAgentJSON):
-			go srvMngr.reloadService(utils.DNSAgent, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.FreeSWITCHAgentJSON):
-			go srvMngr.reloadService(utils.FreeSWITCHAgent, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.KamailioAgentJSON):
-			go srvMngr.reloadService(utils.KamailioAgent, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSON):
-			go srvMngr.reloadService(utils.AsteriskAgent, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.RadiusAgentJSON):
-			go srvMngr.reloadService(utils.RadiusAgent, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.DiameterAgentJSON):
-			go srvMngr.reloadService(utils.DiameterAgent, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.HTTPAgentJSON):
-			go srvMngr.reloadService(utils.HTTPAgent, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.LoaderSJSON):
-			go srvMngr.reloadService(utils.LoaderS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.AnalyzerSJSON):
-			go srvMngr.reloadService(utils.AnalyzerS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.DispatcherSJSON):
-			go srvMngr.reloadService(utils.DispatcherS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.DataDBJSON):
-			go srvMngr.reloadService(utils.DataDB, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.StorDBJSON):
-			go srvMngr.reloadService(utils.StorDB, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.EEsJSON):
-			go srvMngr.reloadService(utils.EEs, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJSON):
-			go srvMngr.reloadService(utils.RateS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJSON):
+		case srvName = <-srvMngr.rldChan:
+		}
+		if srvName == config.RPCConnsJSON {
 			go srvMngr.connMgr.Reload()
-		case <-srvMngr.GetConfig().GetReloadChan(config.SIPAgentJSON):
-			go srvMngr.reloadService(utils.SIPAgent, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.RegistrarCJSON):
-			go srvMngr.reloadService(utils.RegistrarC, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.HTTPJSON):
-			go srvMngr.reloadService(utils.GlobalVarS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.AccountSJSON):
-			go srvMngr.reloadService(utils.AccountS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.ActionSJSON):
-			go srvMngr.reloadService(utils.ActionS, ctx, shtDwn)
-		case <-srvMngr.GetConfig().GetReloadChan(config.CoreSJSON):
-			go srvMngr.reloadService(utils.CoreS, ctx, shtDwn)
+		} else {
+			go srvMngr.reloadService(srvName, ctx, shtDwn)
+
 		}
 		// handle RPC server
 	}
 }
 
-func (srvMngr *ServiceManager) reloadService(srviceName string, ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	srv := srvMngr.GetService(srviceName)
+func (srvMngr *ServiceManager) reloadService(srvName string, ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+	srv := srvMngr.GetService(srvName)
 	if srv.ShouldRun() {
 		if srv.IsRunning() {
 			if err = srv.Reload(ctx, shtDwn); err != nil {

@@ -53,12 +53,12 @@ var sTestsStsIT = []func(t *testing.T){
 func TestStatsQueueITRedis(t *testing.T) {
 	var err error
 	stsPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	stsCfgIn, err = config.NewCGRConfigFromPath(stsPathIn)
+	stsCfgIn, err = config.NewCGRConfigFromPath(context.Background(), stsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	stsPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	stsCfgOut, err = config.NewCGRConfigFromPath(stsPathOut)
+	stsCfgOut, err = config.NewCGRConfigFromPath(context.Background(), stsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,12 +72,12 @@ func TestStatsQueueITRedis(t *testing.T) {
 func TestStatsQueueITMongo(t *testing.T) {
 	var err error
 	stsPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	stsCfgIn, err = config.NewCGRConfigFromPath(stsPathIn)
+	stsCfgIn, err = config.NewCGRConfigFromPath(context.Background(), stsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	stsPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	stsCfgOut, err = config.NewCGRConfigFromPath(stsPathOut)
+	stsCfgOut, err = config.NewCGRConfigFromPath(context.Background(), stsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,12 +91,12 @@ func TestStatsQueueITMongo(t *testing.T) {
 func TestStatsQueueITMove(t *testing.T) {
 	var err error
 	stsPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	stsCfgIn, err = config.NewCGRConfigFromPath(stsPathIn)
+	stsCfgIn, err = config.NewCGRConfigFromPath(context.Background(), stsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	stsPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	stsCfgOut, err = config.NewCGRConfigFromPath(stsPathOut)
+	stsCfgOut, err = config.NewCGRConfigFromPath(context.Background(), stsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

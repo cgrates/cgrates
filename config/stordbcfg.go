@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -42,6 +43,15 @@ type StorDbCfg struct {
 	Opts                map[string]interface{}
 }
 
+// loadStorDBCfg loads the StorDB section of the configuration
+func (dbcfg *StorDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnDataDbCfg := new(DbJsonCfg)
+	if err = jsnCfg.GetSection(ctx, StorDBJSON, jsnDataDbCfg); err != nil {
+		return
+	}
+	return dbcfg.loadFromJSONCfg(jsnDataDbCfg)
+}
+
 // loadFromJSONCfg loads StoreDb config from JsonCfg
 func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
@@ -58,7 +68,7 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		if port == "-1" {
 			port = utils.MetaDynamic
 		}
-		dbcfg.Port = dbDefaultsCfg.dbPort(dbcfg.Type, port)
+		dbcfg.Port = defaultDBPort(dbcfg.Type, port)
 	}
 	if jsnDbCfg.Db_name != nil {
 		dbcfg.Name = *jsnDbCfg.Db_name
@@ -108,8 +118,11 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	return nil
 }
 
+func (StorDbCfg) SName() string               { return StorDBJSON }
+func (dbcfg StorDbCfg) CloneSection() Section { return dbcfg.Clone() }
+
 // Clone returns the cloned object
-func (dbcfg *StorDbCfg) Clone() (cln *StorDbCfg) {
+func (dbcfg StorDbCfg) Clone() (cln *StorDbCfg) {
 	cln = &StorDbCfg{
 		Type:     dbcfg.Type,
 		Host:     dbcfg.Host,
@@ -143,8 +156,8 @@ func (dbcfg *StorDbCfg) Clone() (cln *StorDbCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (dbcfg *StorDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (dbcfg StorDbCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
 		utils.DataDbNameCfg:          dbcfg.Name,
@@ -159,19 +172,19 @@ func (dbcfg *StorDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	for k, v := range dbcfg.Opts {
 		opts[k] = v
 	}
-	initialMP[utils.OptsCfg] = opts
+	mp[utils.OptsCfg] = opts
 	if dbcfg.Items != nil {
 		items := make(map[string]interface{})
 		for key, item := range dbcfg.Items {
 			items[key] = item.AsMapInterface()
 		}
-		initialMP[utils.ItemsCfg] = items
+		mp[utils.ItemsCfg] = items
 	}
 	if dbcfg.Port != utils.EmptyString {
 		dbPort, _ := strconv.Atoi(dbcfg.Port)
-		initialMP[utils.DataDbPortCfg] = dbPort
+		mp[utils.DataDbPortCfg] = dbPort
 	}
-	return
+	return mp
 }
 
 func diffStorDBDbJsonCfg(d *DbJsonCfg, v1, v2 *StorDbCfg) *DbJsonCfg {

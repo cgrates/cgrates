@@ -55,7 +55,7 @@ func TestEventExporterSReload(t *testing.T) {
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	chS := engine.NewCacheS(cfg, nil, nil)
@@ -108,7 +108,7 @@ func TestEventExporterSReload(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.EEsCfg().Enabled = false
-	cfg.GetReloadChan(config.EEsJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.EEsJSON]
 	time.Sleep(10 * time.Millisecond)
 	if ees.IsRunning() {
 		t.Fatalf("Expected service to be down")

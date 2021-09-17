@@ -23,6 +23,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -60,7 +61,7 @@ func TestConfigsAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgsJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.configSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.configSCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
@@ -76,7 +77,7 @@ func TestConfigsAsMapInterface2(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgsJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.configSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.configSCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
@@ -89,7 +90,7 @@ func TestNewCGRConfigFromPathWithoutEnv(t *testing.T) {
   }`
 	cfg := NewDefaultCGRConfig()
 
-	if err = cfg.loadConfigFromReader(strings.NewReader(cfgsJSONStr), []func(ConfigDB) error{cfg.loadFromJSONCfg}, true); err != nil {
+	if err = loadConfigFromReader(context.Background(), strings.NewReader(cfgsJSONStr), cfg.sections, true, cfg); err != nil {
 		t.Fatal(err)
 	}
 	exp := "*env:NODE_ID"

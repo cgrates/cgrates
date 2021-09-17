@@ -54,7 +54,7 @@ func TestRadiusAgentReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
@@ -92,7 +92,7 @@ func TestRadiusAgentReload(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RadiusAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.RadiusAgentJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.RadiusAgentJSON]
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -116,7 +116,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
@@ -170,7 +170,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RadiusAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.RadiusAgentJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.RadiusAgentJSON]
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")

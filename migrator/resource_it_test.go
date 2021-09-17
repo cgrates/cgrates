@@ -52,12 +52,12 @@ var sTestsResIT = []func(t *testing.T){
 func TestResourceITMove1(t *testing.T) {
 	var err error
 	resPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	resCfgIn, err = config.NewCGRConfigFromPath(resPathIn)
+	resCfgIn, err = config.NewCGRConfigFromPath(context.Background(), resPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	resPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	resCfgOut, err = config.NewCGRConfigFromPath(resPathOut)
+	resCfgOut, err = config.NewCGRConfigFromPath(context.Background(), resPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,12 +71,12 @@ func TestResourceITMove1(t *testing.T) {
 func TestResourceITMove2(t *testing.T) {
 	var err error
 	resPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	resCfgIn, err = config.NewCGRConfigFromPath(resPathIn)
+	resCfgIn, err = config.NewCGRConfigFromPath(context.Background(), resPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	resPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	resCfgOut, err = config.NewCGRConfigFromPath(resPathOut)
+	resCfgOut, err = config.NewCGRConfigFromPath(context.Background(), resPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,12 +90,12 @@ func TestResourceITMove2(t *testing.T) {
 func TestResourceITMoveEncoding(t *testing.T) {
 	var err error
 	resPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	resCfgIn, err = config.NewCGRConfigFromPath(resPathIn)
+	resCfgIn, err = config.NewCGRConfigFromPath(context.Background(), resPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	resPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	resCfgOut, err = config.NewCGRConfigFromPath(resPathOut)
+	resCfgOut, err = config.NewCGRConfigFromPath(context.Background(), resPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,12 +109,12 @@ func TestResourceITMoveEncoding(t *testing.T) {
 func TestResourceITMoveEncoding2(t *testing.T) {
 	var err error
 	resPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	resCfgIn, err = config.NewCGRConfigFromPath(resPathIn)
+	resCfgIn, err = config.NewCGRConfigFromPath(context.Background(), resPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	resPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	resCfgOut, err = config.NewCGRConfigFromPath(resPathOut)
+	resCfgOut, err = config.NewCGRConfigFromPath(context.Background(), resPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -122,7 +122,7 @@ func TestLoaderIT(t *testing.T) {
 func testLoaderInitCfg(t *testing.T) {
 	var err error
 	loaderCfgPath = path.Join(*dataDir, "conf", "samples", "loaders", loaderCfgDIR)
-	loaderCfg, err = config.NewCGRConfigFromPath(loaderCfgPath)
+	loaderCfg, err = config.NewCGRConfigFromPath(context.Background(), loaderCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}

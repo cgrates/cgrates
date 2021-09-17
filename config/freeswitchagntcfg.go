@@ -21,16 +21,9 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
-
-// NewDfltFsConnConfig returns the first cached default value for a FreeSWITCHAgent connection
-func NewDfltFsConnConfig() *FsConnCfg {
-	if dfltFsConnConfig == nil {
-		return new(FsConnCfg) // No defaults, most probably we are building the defaults now
-	}
-	return dfltFsConnConfig.Clone()
-}
 
 // FsConnCfg one connection to FreeSWITCH server
 type FsConnCfg struct {
@@ -62,7 +55,7 @@ func (fs *FsConnCfg) loadFromJSONCfg(jsnCfg *FsConnJsonCfg) error {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (fs *FsConnCfg) AsMapInterface() map[string]interface{} {
+func (fs FsConnCfg) AsMapInterface() map[string]interface{} {
 	return map[string]interface{}{
 		utils.AddressCfg:    fs.Address,
 		utils.Password:      fs.Password,
@@ -93,6 +86,15 @@ type FsAgentCfg struct {
 	EmptyBalanceAnnFile string
 	MaxWaitConnection   time.Duration
 	EventSocketConns    []*FsConnCfg
+}
+
+// loadFreeswitchAgentCfg loads the FreeswitchAgent section of the configuration
+func (fscfg *FsAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnSmFsCfg := new(FreeswitchAgentJsonCfg)
+	if err = jsnCfg.GetSection(ctx, FreeSWITCHAgentJSON, jsnSmFsCfg); err != nil {
+		return
+	}
+	return fscfg.loadFromJSONCfg(jsnSmFsCfg)
 }
 
 func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
@@ -135,7 +137,7 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	if jsnCfg.Event_socket_conns != nil {
 		fscfg.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.Event_socket_conns))
 		for idx, jsnConnCfg := range *jsnCfg.Event_socket_conns {
-			fscfg.EventSocketConns[idx] = NewDfltFsConnConfig()
+			fscfg.EventSocketConns[idx] = getDftFsConnCfg()
 			fscfg.EventSocketConns[idx].loadFromJSONCfg(jsnConnCfg)
 		}
 	}
@@ -143,8 +145,8 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (fscfg FsAgentCfg) AsMapInterface(separator string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:             fscfg.Enabled,
 		utils.SubscribeParkCfg:       fscfg.SubscribePark,
 		utils.CreateCdrCfg:           fscfg.CreateCdr,
@@ -154,24 +156,27 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 		utils.MaxWaitConnectionCfg:   utils.EmptyString,
 	}
 	if fscfg.SessionSConns != nil {
-		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(fscfg.SessionSConns)
+		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(fscfg.SessionSConns)
 	}
 	if fscfg.ExtraFields != nil {
-		initialMP[utils.ExtraFieldsCfg] = fscfg.ExtraFields.AsStringSlice()
+		mp[utils.ExtraFieldsCfg] = fscfg.ExtraFields.AsStringSlice()
 	}
 
 	if fscfg.MaxWaitConnection != 0 {
-		initialMP[utils.MaxWaitConnectionCfg] = fscfg.MaxWaitConnection.String()
+		mp[utils.MaxWaitConnectionCfg] = fscfg.MaxWaitConnection.String()
 	}
 	if fscfg.EventSocketConns != nil {
 		eventSocketConns := make([]map[string]interface{}, len(fscfg.EventSocketConns))
 		for key, item := range fscfg.EventSocketConns {
 			eventSocketConns[key] = item.AsMapInterface()
 		}
-		initialMP[utils.EventSocketConnsCfg] = eventSocketConns
+		mp[utils.EventSocketConnsCfg] = eventSocketConns
 	}
-	return
+	return mp
 }
+
+func (FsAgentCfg) SName() string               { return FreeSWITCHAgentJSON }
+func (fscfg FsAgentCfg) CloneSection() Section { return fscfg.Clone() }
 
 // Clone returns a deep copy of FsAgentCfg
 func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
@@ -285,7 +290,7 @@ func diffFreeswitchAgentJsonCfg(d *FreeswitchAgentJsonCfg, v1, v2 *FsAgentCfg) *
 
 	if !equalsFsConnsJsonCfg(v1.EventSocketConns, v2.EventSocketConns) {
 		v := make([]*FsConnJsonCfg, len(v2.EventSocketConns))
-		dflt := NewDfltFsConnConfig()
+		dflt := getDftFsConnCfg()
 		for i, val := range v2.EventSocketConns {
 			v[i] = diffFsConnJsonCfg(dflt, val)
 		}

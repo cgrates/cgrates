@@ -46,7 +46,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
@@ -83,7 +83,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	}
 
 	cfg.DiameterAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.DiameterAgentJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[ config.DiameterAgentJSON]
 	srv.(*DiameterAgent).lnet = "bad_lnet_test"
 	err2 := srv.Reload(ctx, cancel)
 	if err != nil {

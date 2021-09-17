@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -46,7 +47,7 @@ func TestITCDRs(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", cdrsConfigDIR))
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", cdrsConfigDIR))
 	if err != nil {
 		t.Error(err)
 	}

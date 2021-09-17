@@ -26,6 +26,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -73,7 +74,7 @@ func TestERsReload(t *testing.T) {
 func testReloadITInitConfig(t *testing.T) {
 	var err error
 	reloadCfgPath = path.Join(*dataDir, "conf", "samples", "ers_reload", ersReloadConfigDIR)
-	if reloadCfg, err = config.NewCGRConfigFromPath(reloadCfgPath); err != nil {
+	if reloadCfg, err = config.NewCGRConfigFromPath(context.Background(), reloadCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

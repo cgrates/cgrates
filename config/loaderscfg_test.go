@@ -2495,7 +2495,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := jsonCfg.loaderCfg.AsMapInterface(jsonCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv[0][utils.Tenant], eMap[0][utils.Tenant]) {
+	} else if rcv := jsonCfg.loaderCfg.AsMapInterface(jsonCfg.generalCfg.RSRSep).([]map[string]interface{}); !reflect.DeepEqual(rcv[0][utils.Tenant], eMap[0][utils.Tenant]) {
 		t.Errorf("Expected %+v, received %+v", rcv[0][utils.Tenant], eMap[0][utils.Tenant])
 	}
 }
@@ -2528,13 +2528,13 @@ func TestLoaderSCfgsClone(t *testing.T) {
 		},
 	}}
 	rcv := ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	if !reflect.DeepEqual(ban, *rcv) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(*rcv))
 	}
-	if rcv[0].CacheSConns[1] = ""; ban[0].CacheSConns[1] != "*conn1" {
+	if (*rcv)[0].CacheSConns[1] = ""; ban[0].CacheSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv[0].Data[0].Type = ""; ban[0].Data[0].Type != "*attributes" {
+	if (*rcv)[0].Data[0].Type = ""; ban[0].Data[0].Type != "*attributes" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

@@ -92,7 +92,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -137,7 +137,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.routeSCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -154,6 +154,7 @@ func TestRouteSCfgClone(t *testing.T) {
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
+		Opts:                &RoutesOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

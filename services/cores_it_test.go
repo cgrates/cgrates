@@ -45,7 +45,7 @@ func TestCoreSReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	coreRPC := make(chan birpc.ClientConnector, 1)
@@ -91,7 +91,7 @@ func TestCoreSReload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	cfg.GetReloadChan(config.CoreSJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.CoreSJSON]
 	time.Sleep(10 * time.Millisecond)
 	if !coreS.IsRunning() {
 		t.Fatalf("Expected service to be running")

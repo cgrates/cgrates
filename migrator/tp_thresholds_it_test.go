@@ -28,6 +28,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -60,12 +61,12 @@ func TestTpTresMove(t *testing.T) {
 func testTpTresITConnect(t *testing.T) {
 	var err error
 	tpTresPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpTresCfgIn, err = config.NewCGRConfigFromPath(tpTresPathIn)
+	tpTresCfgIn, err = config.NewCGRConfigFromPath(context.Background(), tpTresPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpTresPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpTresCfgOut, err = config.NewCGRConfigFromPath(tpTresPathOut)
+	tpTresCfgOut, err = config.NewCGRConfigFromPath(context.Background(), tpTresPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

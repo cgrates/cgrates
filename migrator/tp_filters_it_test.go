@@ -27,6 +27,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -59,12 +60,12 @@ func TestTpFltrMove(t *testing.T) {
 func testTpFltrITConnect(t *testing.T) {
 	var err error
 	tpFltrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpFltrCfgIn, err = config.NewCGRConfigFromPath(tpFltrPathIn)
+	tpFltrCfgIn, err = config.NewCGRConfigFromPath(context.Background(), tpFltrPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpFltrPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpFltrCfgOut, err = config.NewCGRConfigFromPath(tpFltrPathOut)
+	tpFltrCfgOut, err = config.NewCGRConfigFromPath(context.Background(), tpFltrPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

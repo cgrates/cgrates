@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -68,7 +69,7 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 	d = new(testDispatcher)
 	d.CfgPath = cfgPath
 	var err error
-	d.Cfg, err = config.NewCGRConfigFromPath(d.CfgPath)
+	d.Cfg, err = config.NewCGRConfigFromPath(context.Background(), d.CfgPath)
 	if err != nil {
 		t.Fatalf("Error at config init :%v\n", err)
 	}

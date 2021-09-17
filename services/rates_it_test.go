@@ -22,6 +22,7 @@ package services
 
 import (
 	"path"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -44,7 +45,7 @@ func TestRateSReload(t *testing.T) {
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	chS := engine.NewCacheS(cfg, nil, nil)
@@ -72,6 +73,9 @@ func TestRateSReload(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
+	runtime.Gosched()
+	runtime.Gosched()
+	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !rS.IsRunning() {
 		t.Errorf("Expected service to be running")
@@ -85,7 +89,7 @@ func TestRateSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RateSCfg().Enabled = false
-	cfg.GetReloadChan(config.RateSJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.RateSJSON]
 	time.Sleep(10 * time.Millisecond)
 	if rS.IsRunning() {
 		t.Errorf("Expected service to be down")

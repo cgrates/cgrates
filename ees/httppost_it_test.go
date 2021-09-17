@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -67,7 +68,7 @@ func TestHTTPPostExport(t *testing.T) {
 func testHTTPPostLoadConfig(t *testing.T) {
 	var err error
 	httpPostCfgPath = path.Join(*dataDir, "conf", "samples", httpPostConfigDir)
-	if httpPostCfg, err = config.NewCGRConfigFromPath(httpPostCfgPath); err != nil {
+	if httpPostCfg, err = config.NewCGRConfigFromPath(context.Background(), httpPostCfgPath); err != nil {
 		t.Error(err)
 	}
 }

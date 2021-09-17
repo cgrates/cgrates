@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -50,6 +51,15 @@ type GeneralCfg struct {
 	DigestEqual      string        //
 	RSRSep           string        // separator used to split RSRParser (by default is used ";")
 	MaxParallelConns int           // the maximum number of connections used by the *parallel strategy
+}
+
+// loadGeneralCfg loads the General section of the configuration
+func (gencfg *GeneralCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnGeneralCfg := new(GeneralJsonCfg)
+	if err = jsnCfg.GetSection(ctx, GeneralJSON, jsnGeneralCfg); err != nil {
+		return
+	}
+	return gencfg.loadFromJSONCfg(jsnGeneralCfg)
 }
 
 // loadFromJSONCfg loads General config from JsonCfg
@@ -140,8 +150,8 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.NodeIDCfg:           gencfg.NodeID,
 		utils.LoggerCfg:           gencfg.Logger,
 		utils.LogLevelCfg:         gencfg.LogLevel,
@@ -168,23 +178,26 @@ func (gencfg *GeneralCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	}
 
 	if gencfg.LockingTimeout != 0 {
-		initialMP[utils.LockingTimeoutCfg] = gencfg.LockingTimeout.String()
+		mp[utils.LockingTimeoutCfg] = gencfg.LockingTimeout.String()
 	}
 
 	if gencfg.FailedPostsTTL != 0 {
-		initialMP[utils.FailedPostsTTLCfg] = gencfg.FailedPostsTTL.String()
+		mp[utils.FailedPostsTTLCfg] = gencfg.FailedPostsTTL.String()
 	}
 
 	if gencfg.ConnectTimeout != 0 {
-		initialMP[utils.ConnectTimeoutCfg] = gencfg.ConnectTimeout.String()
+		mp[utils.ConnectTimeoutCfg] = gencfg.ConnectTimeout.String()
 	}
 
 	if gencfg.ReplyTimeout != 0 {
-		initialMP[utils.ReplyTimeoutCfg] = gencfg.ReplyTimeout.String()
+		mp[utils.ReplyTimeoutCfg] = gencfg.ReplyTimeout.String()
 	}
 
-	return
+	return mp
 }
+
+func (GeneralCfg) SName() string                { return GeneralJSON }
+func (gencfg GeneralCfg) CloneSection() Section { return gencfg.Clone() }
 
 // Clone returns a deep copy of GeneralCfg
 func (gencfg GeneralCfg) Clone() *GeneralCfg {

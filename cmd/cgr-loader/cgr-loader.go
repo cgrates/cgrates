@@ -120,7 +120,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	ldrCfg = config.CgrConfig()
 	if *cfgPath != utils.EmptyString {
 		var err error
-		if ldrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
+		if ldrCfg, err = config.NewCGRConfigFromPath(context.Background(), *cfgPath); err != nil {
 			log.Fatalf("Error loading config file %s", err)
 		}
 		if ldrCfg.ConfigDBCfg().Type != utils.MetaInternal {
@@ -133,7 +133,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
 				return
 			}
-			if err = ldrCfg.LoadFromDB(d); err != nil {
+			if err = ldrCfg.LoadFromDB(context.Background(), d); err != nil {
 				log.Fatalf("Could not parse config: <%s>", err.Error())
 				return
 			}

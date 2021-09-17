@@ -87,7 +87,7 @@ func TestRateSIT(t *testing.T) {
 func testRateSInitCfg(t *testing.T) {
 	var err error
 	ratePrfCfgPath = path.Join(*dataDir, "conf", "samples", ratePrfConfigDIR)
-	ratePrfCfg, err = config.NewCGRConfigFromPath(ratePrfCfgPath)
+	ratePrfCfg, err = config.NewCGRConfigFromPath(context.Background(), ratePrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

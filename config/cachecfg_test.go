@@ -150,7 +150,7 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		newMap := cgrCfg.cacheCfg.AsMapInterface()
+		newMap := cgrCfg.cacheCfg.AsMapInterface("").(map[string]interface{})
 		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers],
 			eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers],

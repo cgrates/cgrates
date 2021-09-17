@@ -85,8 +85,8 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expextec %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -118,8 +118,8 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	} else if rcv := cgrCfg.thresholdSCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
+		t.Errorf("Expexted %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 func TestThresholdSCfgClone(t *testing.T) {

@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -49,7 +50,7 @@ var sTestsCdrIT = []func(t *testing.T){
 func TestCdrITMongo(t *testing.T) {
 	var err error
 	cdrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	cdrCfgIn, err = config.NewCGRConfigFromPath(cdrPathIn)
+	cdrCfgIn, err = config.NewCGRConfigFromPath(context.Background(), cdrPathIn)
 	if err != nil {
 		t.Error(err)
 	}
@@ -62,7 +63,7 @@ func TestCdrITMongo(t *testing.T) {
 func TestCdrITMySql(t *testing.T) {
 	var err error
 	cdrPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	cdrCfgIn, err = config.NewCGRConfigFromPath(cdrPathIn)
+	cdrCfgIn, err = config.NewCGRConfigFromPath(context.Background(), cdrPathIn)
 	if err != nil {
 		t.Error(err)
 	}

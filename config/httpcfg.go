@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,6 +33,15 @@ type HTTPCfg struct {
 	UseBasicAuth      bool              // Use basic auth for HTTP API
 	AuthUsers         map[string]string // Basic auth user:password map (base64 passwords)
 	ClientOpts        map[string]interface{}
+}
+
+// loadHTTPCfg loads the Http section of the configuration
+func (httpcfg *HTTPCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnHTTPCfg := new(HTTPJsonCfg)
+	if err = jsnCfg.GetSection(ctx, HTTPJSON, jsnHTTPCfg); err != nil {
+		return
+	}
+	return httpcfg.loadFromJSONCfg(jsnHTTPCfg)
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
@@ -69,7 +79,7 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
+func (httpcfg HTTPCfg) AsMapInterface(string) interface{} {
 	clientOpts := make(map[string]interface{})
 	for k, v := range httpcfg.ClientOpts {
 		clientOpts[k] = v
@@ -85,6 +95,9 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
 		utils.HTTPClientOptsCfg:        clientOpts,
 	}
 }
+
+func (HTTPCfg) SName() string                 { return HTTPJSON }
+func (httpcfg HTTPCfg) CloneSection() Section { return httpcfg.Clone() }
 
 // Clone returns a deep copy of HTTPCfg
 func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {

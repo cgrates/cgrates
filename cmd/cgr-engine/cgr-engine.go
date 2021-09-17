@@ -52,15 +52,15 @@ func RunCGREngine(fs []string) (err error) {
 	}
 
 	// Init config
+	ctx, cancel := context.WithCancel(context.Background())
 	var cfg *config.CGRConfig
-	if cfg, err = services.InitConfigFromPath(*flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
+	if cfg, err = services.InitConfigFromPath(ctx, *flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
 		return
 	}
 	cps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
 	server := cores.NewServer(cps)
 	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup), server, cps)
 	defer cgr.Stop(*flags.MemPrfDir, *flags.PidFile)
-	ctx, cancel := context.WithCancel(context.Background())
 
 	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {
 		return

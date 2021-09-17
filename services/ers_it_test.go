@@ -62,7 +62,7 @@ func TestEventReaderSReload(t *testing.T) {
 	}()
 	shdWg := new(sync.WaitGroup)
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
@@ -101,7 +101,7 @@ func TestEventReaderSReload(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ERsCfg().Enabled = false
-	cfg.GetReloadChan(config.ERsJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.ERsJSON]
 	time.Sleep(10 * time.Millisecond)
 	if erS.IsRunning() {
 		t.Fatal("Expected service to be down")

@@ -379,7 +379,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -454,7 +454,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rcv := cgrCfg.sessionSCfg.AsMapInterface()
+	rcv := cgrCfg.sessionSCfg.AsMapInterface("").(map[string]interface{})
 	sort.Strings(rcv[utils.STIRCfg].(map[string]interface{})[utils.AllowedAtestCfg].([]string))
 	if !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
@@ -481,7 +481,7 @@ func TestSessionSCfgAsMapInterfaceCase3(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface(); !reflect.DeepEqual(eMap[utils.STIRCfg], rcv[utils.STIRCfg]) {
+	} else if rcv := cgrCfg.sessionSCfg.AsMapInterface("").(map[string]interface{}); !reflect.DeepEqual(eMap[utils.STIRCfg], rcv[utils.STIRCfg]) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.STIRCfg]), utils.ToJSON(rcv[utils.STIRCfg]))
 	}
 }
@@ -749,7 +749,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.asteriskAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.asteriskAgentCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -775,7 +775,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.asteriskAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.asteriskAgentCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

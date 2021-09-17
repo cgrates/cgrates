@@ -21,6 +21,7 @@ package config
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,6 +34,15 @@ type SIPAgentCfg struct {
 	Timezone            string
 	RetransmissionTimer time.Duration // timeout replies if not reaching back
 	RequestProcessors   []*RequestProcessor
+}
+
+// loadSIPAgentCfg loads the sip_agent section of the configuration
+func (sa *SIPAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnSIPAgentCfg := new(SIPAgentJsonCfg)
+	if err = jsnCfg.GetSection(ctx, SIPAgentJSON, jsnSIPAgentCfg); err != nil {
+		return
+	}
+	return sa.loadFromJSONCfg(jsnSIPAgentCfg, cfg.generalCfg.RSRSep)
 }
 
 func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err error) {
@@ -64,8 +74,8 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (sa SIPAgentCfg) AsMapInterface(separator string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:             sa.Enabled,
 		utils.ListenCfg:              sa.Listen,
 		utils.ListenNetCfg:           sa.ListenNet,
@@ -77,13 +87,16 @@ func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 	for i, item := range sa.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+	mp[utils.RequestProcessorsCfg] = requestProcessors
 
 	if sa.SessionSConns != nil {
-		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(sa.SessionSConns)
+		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(sa.SessionSConns)
 	}
-	return
+	return mp
 }
+
+func (SIPAgentCfg) SName() string            { return SIPAgentJSON }
+func (sa SIPAgentCfg) CloneSection() Section { return sa.Clone() }
 
 // Clone returns a deep copy of SIPAgentCfg
 func (sa SIPAgentCfg) Clone() (cln *SIPAgentCfg) {

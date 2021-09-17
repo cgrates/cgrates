@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/engine"
@@ -72,7 +73,7 @@ func TestCsvExport(t *testing.T) {
 func testCsvLoadConfig(t *testing.T) {
 	var err error
 	csvCfgPath = path.Join(*dataDir, "conf", "samples", csvConfigDir)
-	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
+	if csvCfg, err = config.NewCGRConfigFromPath(context.Background(), csvCfgPath); err != nil {
 		t.Error(err)
 	}
 }

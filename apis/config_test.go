@@ -43,7 +43,7 @@ func TestConfigNewConfigSv1(t *testing.T) {
 func TestConfigSetGetConfig(t *testing.T) {
 	//for coverage purposes only
 	cfgTestPath := path.Join(*dataDir, "conf", "samples", "tutinternal")
-	cfg, err := config.NewCGRConfigFromPath(cfgTestPath)
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgTestPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -92,7 +92,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	//for coverage purposes only
 	var err error
 	cfgTestPath := path.Join(*dataDir, "conf", "samples", "tutinternal")
-	cfg, err := config.NewCGRConfigFromPath(cfgTestPath)
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgTestPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -202,7 +202,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	//for coverage purposes only
 	var err error
 	cfgTestPath := path.Join(*dataDir, "conf", "samples", "tutinternal")
-	cfg, err := config.NewCGRConfigFromPath(cfgTestPath)
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgTestPath)
 	if err != nil {
 		t.Error(err)
 	}

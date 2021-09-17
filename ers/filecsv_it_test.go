@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -103,7 +104,7 @@ func TestCsvReadFile(t *testing.T) {
 func testCsvITInitConfig(t *testing.T) {
 	var err error
 	csvCfgPath = path.Join(*dataDir, "conf", "samples", csvCfgDIR)
-	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
+	if csvCfg, err = config.NewCGRConfigFromPath(context.Background(), csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

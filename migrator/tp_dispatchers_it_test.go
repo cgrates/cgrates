@@ -28,6 +28,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -60,12 +61,12 @@ func TestTpDispMove(t *testing.T) {
 func testTpDispITConnect(t *testing.T) {
 	var err error
 	tpDispPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpDispCfgIn, err = config.NewCGRConfigFromPath(tpDispPathIn)
+	tpDispCfgIn, err = config.NewCGRConfigFromPath(context.Background(), tpDispPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpDispPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpDispCfgOut, err = config.NewCGRConfigFromPath(tpDispPathOut)
+	tpDispCfgOut, err = config.NewCGRConfigFromPath(context.Background(), tpDispPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

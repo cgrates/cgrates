@@ -229,9 +229,9 @@ func waitForFilterS(ctx *context.Context, fsCh chan *engine.FilterS) (filterS *e
 	return
 }
 
-func InitConfigFromPath(path, nodeID string, lgLevel int) (cfg *config.CGRConfig, err error) {
+func InitConfigFromPath(ctx *context.Context, path, nodeID string, lgLevel int) (cfg *config.CGRConfig, err error) {
 	// Init config
-	if cfg, err = config.NewCGRConfigFromPath(path); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(ctx, path); err != nil {
 		err = fmt.Errorf("could not parse config: <%s>", err)
 		return
 	}
@@ -245,7 +245,7 @@ func InitConfigFromPath(path, nodeID string, lgLevel int) (cfg *config.CGRConfig
 			err = fmt.Errorf("could not configure configDB: <%s>", err)
 			return
 		}
-		if err = cfg.LoadFromDB(d); err != nil {
+		if err = cfg.LoadFromDB(ctx, d); err != nil {
 			err = fmt.Errorf("could not parse config from DB: <%s>", err)
 			return
 		}

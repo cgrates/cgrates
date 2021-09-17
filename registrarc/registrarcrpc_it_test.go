@@ -31,6 +31,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -83,7 +84,7 @@ func testRPCInitCfg(t *testing.T) {
 	rpcCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", rpcDir)
 	rpcsCfgPath = path.Join(*dataDir, "conf", "samples", "registrarc", rpcsDir)
 	var err error
-	if rpcsCfg, err = config.NewCGRConfigFromPath(rpcsCfgPath); err != nil {
+	if rpcsCfg, err = config.NewCGRConfigFromPath(context.Background(), rpcsCfgPath); err != nil {
 		t.Error(err)
 	}
 }

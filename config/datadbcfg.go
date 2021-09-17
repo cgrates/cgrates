@@ -23,8 +23,27 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
+
+func defaultDBPort(dbType, port string) string {
+	if port == utils.MetaDynamic {
+		switch dbType {
+		case utils.MySQL:
+			port = "3306"
+		case utils.Postgres:
+			port = "5432"
+		case utils.Mongo:
+			port = "27017"
+		case utils.Redis:
+			port = "6379"
+		case utils.Internal:
+			port = "internal"
+		}
+	}
+	return port
+}
 
 // DataDbCfg Database config
 type DataDbCfg struct {
@@ -43,6 +62,18 @@ type DataDbCfg struct {
 	Opts        map[string]interface{}
 }
 
+// loadDataDBCfg loads the DataDB section of the configuration
+func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnDataDbCfg := new(DbJsonCfg)
+	if err = jsnCfg.GetSection(ctx, DataDBJSON, jsnDataDbCfg); err != nil {
+		return
+	}
+	if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
+		return
+	}
+	return
+}
+
 // loadFromJSONCfg loads Database config from JsonCfg
 func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
@@ -59,7 +90,7 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		if port == "-1" {
 			port = utils.MetaDynamic
 		}
-		dbcfg.Port = dbDefaultsCfg.dbPort(dbcfg.Type, port)
+		dbcfg.Port = defaultDBPort(dbcfg.Type, port)
 	}
 	if jsnDbCfg.Db_name != nil {
 		dbcfg.Name = *jsnDbCfg.Db_name
@@ -115,8 +146,11 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	return
 }
 
+func (DataDbCfg) SName() string               { return DataDBJSON }
+func (dbcfg DataDbCfg) CloneSection() Section { return dbcfg.Clone() }
+
 // Clone returns the cloned object
-func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
+func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 	cln = &DataDbCfg{
 		Type:        dbcfg.Type,
 		Host:        dbcfg.Host,
@@ -147,8 +181,8 @@ func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
 		utils.DataDbNameCfg:          dbcfg.Name,
@@ -164,18 +198,18 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	for k, v := range dbcfg.Opts {
 		opts[k] = v
 	}
-	initialMP[utils.OptsCfg] = opts
+	mp[utils.OptsCfg] = opts
 	if dbcfg.Items != nil {
 		items := make(map[string]interface{})
 		for key, item := range dbcfg.Items {
 			items[key] = item.AsMapInterface()
 		}
-		initialMP[utils.ItemsCfg] = items
+		mp[utils.ItemsCfg] = items
 	}
 	if dbcfg.Port != "" {
-		initialMP[utils.DataDbPortCfg], _ = strconv.Atoi(dbcfg.Port)
+		mp[utils.DataDbPortCfg], _ = strconv.Atoi(dbcfg.Port)
 	}
-	return
+	return mp
 }
 
 // ItemOpt the options for the stored items

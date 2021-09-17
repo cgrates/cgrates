@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -79,7 +80,7 @@ func TestFWVReadFile(t *testing.T) {
 func testFWVITInitConfig(t *testing.T) {
 	var err error
 	fwvCfgPath = path.Join(*dataDir, "conf", "samples", fwvCfgDIR)
-	if fwvCfg, err = config.NewCGRConfigFromPath(fwvCfgPath); err != nil {
+	if fwvCfg, err = config.NewCGRConfigFromPath(context.Background(), fwvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

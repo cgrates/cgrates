@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -30,6 +31,15 @@ type DNSAgentCfg struct {
 	SessionSConns     []string
 	Timezone          string
 	RequestProcessors []*RequestProcessor
+}
+
+// loadDNSAgentCfg loads the DNSAgent section of the configuration
+func (da *DNSAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnDNSCfg := new(DNSAgentJsonCfg)
+	if err = jsnCfg.GetSection(ctx, DNSAgentJSON, jsnDNSCfg); err != nil {
+		return
+	}
+	return da.loadFromJSONCfg(jsnDNSCfg, cfg.generalCfg.RSRSep)
 }
 
 func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err error) {
@@ -56,8 +66,8 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (da DNSAgentCfg) AsMapInterface(separator string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg:   da.Enabled,
 		utils.ListenCfg:    da.Listen,
 		utils.ListenNetCfg: da.ListenNet,
@@ -68,13 +78,16 @@ func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+	mp[utils.RequestProcessorsCfg] = requestProcessors
 
 	if da.SessionSConns != nil {
-		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(da.SessionSConns)
+		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(da.SessionSConns)
 	}
-	return
+	return mp
 }
+
+func (DNSAgentCfg) SName() string            { return DNSAgentJSON }
+func (da DNSAgentCfg) CloneSection() Section { return da.Clone() }
 
 // Clone returns a deep copy of DNSAgentCfg
 func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {

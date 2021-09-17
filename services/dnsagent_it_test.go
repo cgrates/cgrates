@@ -53,7 +53,7 @@ func TestDNSAgentReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 
 	server := cores.NewServer(nil)
-	srvMngr := servmanager.NewServiceManager(cfg, shdWg, nil)
+	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg.GetReloadChan())
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
@@ -96,7 +96,7 @@ func TestDNSAgentReload(t *testing.T) {
 	}
 
 	cfg.DNSAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.DNSAgentJSON) <- struct{}{}
+	cfg.GetReloadChan() <- config.SectionToService[config.DNSAgentJSON]
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")

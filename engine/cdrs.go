@@ -107,7 +107,6 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaCDRs)
-
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {

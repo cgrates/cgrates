@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,6 +53,15 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	}
 
 	return nil
+}
+
+// loadRateSCfg loads the rates section of the configuration
+func (rCfg *RateSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnRateCfg := new(RateSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, RateSJSON, jsnRateCfg); err != nil {
+		return
+	}
+	return rCfg.loadFromJSONCfg(jsnRateCfg)
 }
 
 func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
@@ -102,11 +112,11 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.MetaRateProfileIDsCfg: rCfg.Opts.RateProfileIDs,
 	}
-	initialMP = map[string]interface{}{
+	mp := map[string]interface{}{
 		utils.EnabledCfg:            rCfg.Enabled,
 		utils.IndexedSelectsCfg:     rCfg.IndexedSelects,
 		utils.NestedFieldsCfg:       rCfg.NestedFields,
@@ -116,24 +126,24 @@ func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.OptsCfg:               opts,
 	}
 	if rCfg.StringIndexedFields != nil {
-		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.StringIndexedFields)
+		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.StringIndexedFields)
 	}
 	if rCfg.PrefixIndexedFields != nil {
-		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.PrefixIndexedFields)
+		mp[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.PrefixIndexedFields)
 	}
 	if rCfg.SuffixIndexedFields != nil {
-		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.SuffixIndexedFields)
+		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.SuffixIndexedFields)
 	}
 	if rCfg.RateStringIndexedFields != nil {
-		initialMP[utils.RateStringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateStringIndexedFields)
+		mp[utils.RateStringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateStringIndexedFields)
 	}
 	if rCfg.RatePrefixIndexedFields != nil {
-		initialMP[utils.RatePrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RatePrefixIndexedFields)
+		mp[utils.RatePrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RatePrefixIndexedFields)
 	}
 	if rCfg.RateSuffixIndexedFields != nil {
-		initialMP[utils.RateSuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateSuffixIndexedFields)
+		mp[utils.RateSuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateSuffixIndexedFields)
 	}
-	return
+	return mp
 }
 
 func (rateOpts *RatesOpts) Clone() *RatesOpts {
@@ -145,6 +155,8 @@ func (rateOpts *RatesOpts) Clone() *RatesOpts {
 		RateProfileIDs: rtIDs,
 	}
 }
+func (RateSCfg) SName() string              { return RateSJSON }
+func (rCfg RateSCfg) CloneSection() Section { return rCfg.Clone() }
 
 // Clone returns a deep copy of RateSCfg
 func (rCfg RateSCfg) Clone() (cln *RateSCfg) {

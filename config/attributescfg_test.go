@@ -90,7 +90,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.attributeSCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\n Received: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -123,7 +123,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if newMap := cgrCfg.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
+	} else if newMap := cgrCfg.attributeSCfg.AsMapInterface(""); !reflect.DeepEqual(expectedMap, newMap) {
 		t.Errorf("Expected %+v \n, receieved %+v", utils.ToJSON(expectedMap), utils.ToJSON(newMap))
 	}
 }
@@ -151,7 +151,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
-	} else if newMap := conv.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
+	} else if newMap := conv.attributeSCfg.AsMapInterface(""); !reflect.DeepEqual(expectedMap, newMap) {
 		t.Errorf("Expected %+v, receieved %+v", expectedMap, newMap)
 	}
 }

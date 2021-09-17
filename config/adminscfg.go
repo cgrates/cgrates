@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -29,6 +30,15 @@ type AdminSCfg struct {
 	ActionSConns    []string // connections towards Scheduler
 	AttributeSConns []string // connections towards AttributeS
 	EEsConns        []string // connections towards EEs
+}
+
+// loadApierCfg loads the Apier section of the configuration
+func (aCfg *AdminSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnApierCfg := new(AdminSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, AdminSJSON, jsnApierCfg); err != nil {
+		return
+	}
+	return aCfg.loadFromJSONCfg(jsnApierCfg)
 }
 
 func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
@@ -50,28 +60,31 @@ func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 	if jsnCfg.Ees_conns != nil {
 		aCfg.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (aCfg *AdminSCfg) AsMapInterface() (initialMap map[string]interface{}) {
-	initialMap = map[string]interface{}{
+func (aCfg AdminSCfg) AsMapInterface(string) interface{} {
+	mp := map[string]interface{}{
 		utils.EnabledCfg: aCfg.Enabled,
 	}
 	if aCfg.CachesConns != nil {
-		initialMap[utils.CachesConnsCfg] = getInternalJSONConns(aCfg.CachesConns)
+		mp[utils.CachesConnsCfg] = getInternalJSONConns(aCfg.CachesConns)
 	}
 	if aCfg.ActionSConns != nil {
-		initialMap[utils.ActionSConnsCfg] = getInternalJSONConns(aCfg.ActionSConns)
+		mp[utils.ActionSConnsCfg] = getInternalJSONConns(aCfg.ActionSConns)
 	}
 	if aCfg.AttributeSConns != nil {
-		initialMap[utils.AttributeSConnsCfg] = getInternalJSONConns(aCfg.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(aCfg.AttributeSConns)
 	}
 	if aCfg.EEsConns != nil {
-		initialMap[utils.EEsConnsCfg] = getInternalJSONConns(aCfg.EEsConns)
+		mp[utils.EEsConnsCfg] = getInternalJSONConns(aCfg.EEsConns)
 	}
-	return
+	return mp
 }
+
+func (AdminSCfg) SName() string              { return AdminSJSON }
+func (aCfg AdminSCfg) CloneSection() Section { return aCfg.Clone() }
 
 // Clone returns a deep copy of ApierCfg
 func (aCfg AdminSCfg) Clone() (cln *AdminSCfg) {
