@@ -119,12 +119,26 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 	return
 }
 
-// rateSProcessEvent will send the event to rateS and return the result
-func (cdrS *CDRServer) rateSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (rpCost utils.RateProfileCost, err error) {
+// rateSProcessEvent will send the event to rateS and attach the cost received back to event
+func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
+	var rpCost *utils.RateProfileCost
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().RateSConns,
-		utils.RateSv1CostForEvent, cgrEv, &rpCost); err != nil {
+		utils.RateSv1CostForEvent,
+		cgrEv, &rpCost); err != nil {
 		return
 	}
+	cgrEv.Event[utils.MetaRateSCost] = rpCost
+	return
+}
+
+// accountSDebitEvent will send the event to accountS and attach the cost received back to event
+func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
+	var acntCost *utils.ExtEventCharges
+	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().AccountSConns,
+		utils.AccountSv1DebitAbstracts, cgrEv, acntCost); err != nil {
+		return
+	}
+	cgrEv.Event[utils.MetaAccountSCost] = acntCost
 	return
 }
 
@@ -178,7 +192,8 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 // processEvent processes a CGREvent based on arguments
 // in case of partially executed, both error and evs will be returned
 func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
-	chrgS, attrS, rateS, eeS, thdS, stS bool) (evs []*utils.EventWithFlags, err error) {
+	chrgS, attrS, rateS, acntS, eeS, thdS, stS bool) (evs []*utils.EventWithFlags, err error) {
+
 	if attrS {
 		if err = cdrS.attrSProcessEvent(ctx, ev); err != nil {
 			utils.Logger.Warning(
@@ -188,6 +203,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 			return
 		}
 	}
+
 	var cgrEvs []*utils.CGREvent
 	if chrgS {
 		if cgrEvs, err = cdrS.chrgrSProcessEvent(ctx, ev); err != nil {
@@ -205,13 +221,22 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 
 	if rateS {
 		for _, cgrEv := range cgrEvs {
-			if rtsEvCost, err := cdrS.rateSProcessEvent(ctx, ev); err != nil {
+			if err := cdrS.rateSCostForEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), utils.ToJSON(ev), utils.RateS))
+						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.RateS))
 				partiallyExecuted = true
-			} else {
-				cgrEv.Event[utils.MetaRateSCost] = rtsEvCost
+			}
+		}
+	}
+
+	if acntS {
+		for _, cgrEv := range cgrEvs {
+			if err := cdrS.accountSDebitEvent(ctx, cgrEv); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.AccountS))
+				partiallyExecuted = true
 			}
 		}
 	}
@@ -223,7 +248,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 					CGREvent: cgrEv,
 					EeIDs:    cdrS.cfg.CdrsCfg().OnlineCDRExports,
 				}
-				if err = cdrS.eeSProcessEvent(ctx, evWithOpts); err != nil {
+				if err := cdrS.eeSProcessEvent(ctx, evWithOpts); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> exporting cdr %+v",
 							utils.CDRs, err.Error(), utils.ToJSON(evWithOpts)))
@@ -232,9 +257,10 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 			}
 		}
 	}
+
 	if thdS {
 		for _, cgrEv := range cgrEvs {
-			if err = cdrS.thdSProcessEvent(ctx, cgrEv); err != nil {
+			if err := cdrS.thdSProcessEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.ThresholdS))
@@ -242,9 +268,10 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 			}
 		}
 	}
+
 	if stS {
 		for _, cgrEv := range cgrEvs {
-			if err = cdrS.statSProcessEvent(ctx, cgrEv); err != nil {
+			if err := cdrS.statSProcessEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.StatS))
@@ -252,9 +279,11 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 			}
 		}
 	}
+
 	if partiallyExecuted {
 		err = utils.ErrPartiallyExecuted
 	}
+
 	return
 }
 
@@ -320,11 +349,12 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
 	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
 	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
+	acntS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAccountS, len(cdrS.cfg.CdrsCfg().AccountSConns) != 0)
 
 	// end of processing options
 
 	if _, err = cdrS.processEvent(ctx, &arg.CGREvent,
-		chrgS, attrS, rateS, export, thdS, stS); err != nil {
+		chrgS, attrS, rateS, acntS, export, thdS, stS); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -364,11 +394,12 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *ArgV1Pro
 	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
 	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
 	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
+	acntS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAccountS, len(cdrS.cfg.CdrsCfg().AccountSConns) != 0)
 	// end of processing options
 
 	var procEvs []*utils.EventWithFlags
 	if procEvs, err = cdrS.processEvent(ctx, &arg.CGREvent,
-		chrgS, attrS, rateS, export, thdS, stS); err != nil {
+		chrgS, attrS, rateS, acntS, export, thdS, stS); err != nil {
 		return
 	}
 	*evs = procEvs

@@ -2108,7 +2108,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsSesSTIRInitiate, OptsSesThresholdS, OptsSesThresholdSDerivedReply, OptsSesThresholdIDs,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, OptsCDRsAttributeS, OptsCDRsChargerS, OptsCDRsExport, OptsCDRsRefund,
-	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS, OptsCDRsRateS})
+	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS, OptsCDRsRateS, OptsAccountS})
 
 // Event Opts
 const (
@@ -2194,6 +2194,7 @@ const (
 	OptsContext                = "*context"
 	Subsys                     = "*subsys"
 	MetaMethod                 = "*reqMethod"
+	OptsAccountS               = "*accountS"
 	OptsAccountsAccountIDs     = "*accountIDs"
 	OptsAttributesAttributeIDs = "*attributeIDs"
 	OptsAttributesProfileRuns  = "*attrProfileRuns"
