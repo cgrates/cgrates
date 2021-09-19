@@ -16,7 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
-	"fmt"
+	"os"
+	"reflect"
 	"testing"
 	"time"
 
@@ -28,16 +29,21 @@ import (
 )
 
 func TestEeSProcessEvent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	filterS := new(engine.FilterS)
-	connMgr := engine.NewConnManager(cfg, nil)
-	eeS := ees.NewEventExporterS(cfg, filterS, connMgr)
+	filePath := "/tmp/TestV1ProcessEvent"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = "*fileCSV"
+	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cgrCfg.EEsCfg().Exporters[0].ExportPath = filePath
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := ees.NewEventExporterS(cgrCfg, filterS, nil)
 	cS := NewEeSv1(eeS)
-
-	///create logger and see the event in log
-	//define non default cgrconfig, define exporters
 	cgrEv := &utils.CGREventWithEeIDs{
-		EeIDs: []string{"*default"},
+		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
@@ -63,8 +69,16 @@ func TestEeSProcessEvent(t *testing.T) {
 		},
 	}
 	var reply map[string]map[string]interface{}
+	replyExpect := map[string]map[string]interface{}{
+		"SQLExporterFull": {},
+	}
 	if err := cS.ProcessEvent(context.Background(), cgrEv, &reply); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(reply, replyExpect) {
+		t.Errorf("Expected %v \n but received \n %v", replyExpect, reply)
 	}
-	fmt.Println(utils.IfaceAsString(reply))
+
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
 }
