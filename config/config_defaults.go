@@ -281,7 +281,7 @@ const CGRATES_CFG_JSON = `
 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "replicate": false},						// diameter messages caching
 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "replicate": false},							// RPC responses caching
 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "replicate": false},						// closed sessions cached for CDRs
-		"*event_charges": {"limit": -1, "ttl": "10s", "static_ttl": false, "replicate": false},							// events proccessed by ChargerS
+		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "replicate": false},							// events proccessed by ChargerS
 		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "replicate": false},								// protects CDRs against double-charging
 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control the load_ids for items
 		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// RPC connections caching
