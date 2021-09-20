@@ -169,7 +169,7 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 		t.Fatal(err)
 	}
 	go func() {
-		time.Sleep(1)
+		time.Sleep(time.Nanosecond)
 		runtime.Gosched()
 		anz.db.Close()
 	}()
@@ -445,6 +445,7 @@ func TestAnalyzerSLogTrafficInternalDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.AnalyzerSCfg().DBPath = utils.EmptyString
+	cfg.AnalyzerSCfg().IndexType = utils.MetaInternal
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
 	anz, err := NewAnalyzerService(cfg)
 	if err != nil {
