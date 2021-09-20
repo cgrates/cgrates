@@ -2416,10 +2416,11 @@ const (
 )
 
 var AnzIndexType = StringSet{ // AnzIndexType are the analyzers possible index types
-	MetaScorch:  {},
-	MetaBoltdb:  {},
-	MetaLeveldb: {},
-	MetaMoss:    {},
+	MetaScorch:   {},
+	MetaBoltdb:   {},
+	MetaLeveldb:  {},
+	MetaMoss:     {},
+	MetaInternal: {},
 }
 
 // ActionSv1
