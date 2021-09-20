@@ -1,0 +1,10 @@
+#Tenant,ID,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
+cgrates.org,ATTR_ACNT_1001,*string:~*opts.*context:*sessions;FLTR_ACCOUNT_1001,10,,*req.OfficeGroup,*constant,Marketing,false
+cgrates.org,ATTR_SUPPLIER1,*string:~*opts.*context:*chargers,10,,*req.Subject,*constant,SUPPLIER1,false
+cgrates.org,ATTR_PAYPAL,*string:~*opts.*context:*cdrs;*string:~*req.Subject:ANY2CNT,10,,*req.PayPalAccount,*constant,paypal@cgrates.org,false
+cgrates.org,ATTR_SUBJECT_CASE1,*string:~*opts.*context:*sessions;*string:~*req.OriginID:testSSv1ItProcessEventWithGetCost,10,,*req.Subject,*constant,ANY2CNT,false
+cgrates.org,ATTR_SUBJECT_CASE2,*string:~*opts.*context:*sessions;*string:~*req.OriginID:testSSv1ItProcessEventWithGetCost2,10,,*req.Subject,*constant,SPECIAL_1002,false
+cgrates.org,ATTR_SUBJECT_CASE3,*string:~*opts.*context:*sessions;*string:~*req.OriginID:testSSv1ItProcessEventWithGetCost3,10,,*req.Subject,*constant,RP_RETAIL,false
+cgrates.org,ATTR_SUBJECT_CASE4,*string:~*opts.*context:*sessions;*string:~*req.OriginID:testSSv1ItProcessEventWithGetCost4,10,,*req.Subject,*constant,InvalidSubject,false
+cgrates.org,ATTR_SUBJECT_CASE4,,10,,*req.Category,*constant,Standard,false
+cgrates.org,ATTR_VARIABLE,*string:~*req.EventName:VariableTest,20,,*req.Category,*variable,~*req.ToR,false

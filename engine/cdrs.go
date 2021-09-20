@@ -120,7 +120,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 
 // rateSProcessEvent will send the event to rateS and attach the cost received back to event
 func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
-	var rpCost *utils.RateProfileCost
+	rpCost := new(utils.RateProfileCost)
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().RateSConns,
 		utils.RateSv1CostForEvent,
 		cgrEv, &rpCost); err != nil {
@@ -132,7 +132,7 @@ func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGRE
 
 // accountSDebitEvent will send the event to accountS and attach the cost received back to event
 func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
-	var acntCost *utils.ExtEventCharges
+	acntCost := new(utils.ExtEventCharges)
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().AccountSConns,
 		utils.AccountSv1DebitAbstracts, cgrEv, acntCost); err != nil {
 		return
