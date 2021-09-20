@@ -168,11 +168,11 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		}
 	}
 	var sTime time.Time
-	if sTime, err = args.StartTime(rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
+	if sTime, err = args.StartTime(rS.cfg.RateSCfg().Opts.StartTime, rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
 	}
 	var usage *decimal.Big
-	if usage, err = args.Usage(); err != nil {
+	if usage, err = args.Usage(rS.cfg.RateSCfg().Opts.Usage); err != nil {
 		return
 	}
 	var ordRts []*orderedRate
@@ -190,7 +190,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		rpCost.MaxCost = rtPfl.MaxCost
 	}
 	var ivalStart *decimal.Big
-	if ivalStart, err = args.IntervalStart(); err != nil {
+	if ivalStart, err = args.IntervalStart(rS.cfg.RateSCfg().Opts.IntervalStart); err != nil {
 		return
 	}
 	var costIntervals []*utils.RateSInterval

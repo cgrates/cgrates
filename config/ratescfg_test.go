@@ -53,7 +53,11 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		RateSuffixIndexedFields: &[]string{"*req.index1"},
 		RateNestedFields:        true,
 		Verbosity:               20,
-		Opts:                    &RatesOpts{},
+		Opts: &RatesOpts{
+			StartTime:     utils.MetaNow,
+			Usage:         "1m",
+			IntervalStart: "0",
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -80,6 +84,9 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.Verbosity:                  1000,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaRateProfileIDsCfg: []string(nil),
+			utils.MetaStartTime:         utils.MetaNow,
+			utils.MetaUsage:             "1m",
+			utils.MetaIntervalStartCfg:  "0",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -120,6 +127,9 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.Verbosity:                  1000,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaRateProfileIDsCfg: []string(nil),
+			utils.MetaStartTime:         utils.MetaNow,
+			utils.MetaUsage:             "1m",
+			utils.MetaIntervalStartCfg:  "0",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

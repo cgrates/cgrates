@@ -72,6 +72,29 @@ func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
 	return
 }
 
+func StringAsBig(itm string) (b *decimal.Big, err error) {
+	if strings.HasSuffix(itm, NsSuffix) ||
+		strings.HasSuffix(itm, UsSuffix) ||
+		strings.HasSuffix(itm, µSuffix) ||
+		strings.HasSuffix(itm, MsSuffix) ||
+		strings.HasSuffix(itm, SSuffix) ||
+		strings.HasSuffix(itm, MSuffix) ||
+		strings.HasSuffix(itm, HSuffix) {
+		var tm time.Duration
+		if tm, err = time.ParseDuration(itm); err != nil {
+			return
+		}
+		return decimal.New(int64(tm), 0), nil
+	}
+	z, ok := new(decimal.Big).SetString(itm)
+	// verify ok and check if the value was converted successfuly
+	// and the big is a valid number
+	if !ok || z.IsNaN(0) {
+		return nil, fmt.Errorf("can't convert <%+v> to decimal", itm)
+	}
+	return z, nil
+}
+
 func IfaceAsBig(itm interface{}) (b *decimal.Big, err error) {
 	switch it := itm.(type) {
 	case time.Duration:
@@ -101,26 +124,7 @@ func IfaceAsBig(itm interface{}) (b *decimal.Big, err error) {
 	case float64: // automatically hitting here also ints
 		return new(decimal.Big).SetFloat64(it), nil
 	case string:
-		if strings.HasSuffix(it, NsSuffix) ||
-			strings.HasSuffix(it, UsSuffix) ||
-			strings.HasSuffix(it, µSuffix) ||
-			strings.HasSuffix(it, MsSuffix) ||
-			strings.HasSuffix(it, SSuffix) ||
-			strings.HasSuffix(it, MSuffix) ||
-			strings.HasSuffix(it, HSuffix) {
-			var tm time.Duration
-			if tm, err = time.ParseDuration(it); err != nil {
-				return
-			}
-			return decimal.New(int64(tm), 0), nil
-		}
-		z, ok := new(decimal.Big).SetString(it)
-		// verify ok and check if the value was converted successfuly
-		// and the big is a valid number
-		if !ok || z.IsNaN(0) {
-			return nil, fmt.Errorf("can't convert <%+v> to decimal", it)
-		}
-		return z, nil
+		return StringAsBig(it)
 	case *Decimal:
 		return it.Big, nil
 	case *decimal.Big:

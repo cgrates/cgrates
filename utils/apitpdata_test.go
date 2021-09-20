@@ -563,7 +563,7 @@ func TestStartTimeNow(t *testing.T) {
 		},
 	}
 	timpulet1 := time.Now()
-	result, err := ev.StartTime("")
+	result, err := ev.StartTime(MetaNow, "")
 	timpulet2 := time.Now()
 	if err != nil {
 		t.Errorf("Expected <nil> , received <%+v>", err)
@@ -583,7 +583,21 @@ func TestStartTime(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	if result, err := ev.StartTime(""); err != nil {
+	if result, err := ev.StartTime(MetaNow, ""); err != nil {
+		t.Errorf("Expected <nil> , received <%+v>", err)
+	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
+		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
+	}
+}
+
+func TestStartTime2(t *testing.T) {
+	ev := &CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "TestEvent",
+		Event:   map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
+	}
+	if result, err := ev.StartTime("2018-01-07T17:00:10Z", ""); err != nil {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
 		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
@@ -600,7 +614,7 @@ func TestStartTimeError(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	_, err := ev.StartTime("")
+	_, err := ev.StartTime(MetaNow, "")
 	if err == nil && err.Error() != "received <Unsupported time format" {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	}
@@ -615,7 +629,7 @@ func TestUsageMinute(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	if rcv, err := ev.Usage(); err != nil {
+	if rcv, err := ev.Usage("60s"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(decimal.New(int64(time.Minute), 0), rcv) {
 		t.Errorf("Expected %+v, received %+v", decimal.New(int64(time.Minute), 0), rcv)
@@ -632,7 +646,7 @@ func TestUsageError(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	_, err := ev.Usage()
+	_, err := ev.Usage("1m")
 	if err == nil && err.Error() != "received <Unsupported time format" {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	}
@@ -649,7 +663,7 @@ func TestUsage(t *testing.T) {
 		},
 	}
 
-	if result, err := ev.Usage(); err != nil {
+	if result, err := ev.Usage("1m"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result.String(), "130000000000") {
 		t.Errorf("Expected <130000000000> , received <%+v>", result.String())
@@ -742,7 +756,7 @@ func TestATDUsage(t *testing.T) {
 		},
 	}
 
-	_, err := ev.Usage()
+	_, err := ev.Usage("1m")
 	expected := "cannot convert field: bool to decimal.Big"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
@@ -772,7 +786,7 @@ func TestIntervalStart(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"RP_1001"},
 		},
 	}
-	rcv, err := args.IntervalStart()
+	rcv, err := args.IntervalStart("0")
 	exp := new(decimal.Big).SetUint64(1)
 	if err != nil {
 		t.Error(err)
@@ -787,7 +801,7 @@ func TestIntervalStartDefault(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"RP_1001"},
 		},
 	}
-	rcv, err := args.IntervalStart()
+	rcv, err := args.IntervalStart("0")
 	exp := new(decimal.Big).SetUint64(0)
 	if err != nil {
 		t.Error(err)
