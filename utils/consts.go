@@ -1923,6 +1923,7 @@ const (
 
 	// RateSCfg
 	MetaRateProfileIDsCfg      = "*rateProfileIDs"
+	MetaIntervalStartCfg       = "*intervalStart"
 	RateIndexedSelectsCfg      = "rate_indexed_selects"
 	RateNestedFieldsCfg        = "rate_nested_fields"
 	RateStringIndexedFieldsCfg = "rate_string_indexed_fields"

@@ -25,6 +25,9 @@ import (
 
 type RatesOpts struct {
 	RateProfileIDs []string
+	StartTime      string
+	Usage          string
+	IntervalStart  string
 }
 
 // RateSCfg the rates config section
@@ -50,6 +53,15 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	}
 	if jsnCfg.RateProfileIDs != nil {
 		rateOpts.RateProfileIDs = *jsnCfg.RateProfileIDs
+	}
+	if jsnCfg.StartTime != nil {
+		rateOpts.StartTime = *jsnCfg.StartTime
+	}
+	if jsnCfg.Usage != nil {
+		rateOpts.Usage = *jsnCfg.Usage
+	}
+	if jsnCfg.IntervalStart != nil {
+		rateOpts.IntervalStart = *jsnCfg.IntervalStart
 	}
 
 	return nil
@@ -115,6 +127,9 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.MetaRateProfileIDsCfg: rCfg.Opts.RateProfileIDs,
+		utils.MetaStartTime:         rCfg.Opts.StartTime,
+		utils.MetaUsage:             rCfg.Opts.Usage,
+		utils.MetaIntervalStartCfg:  rCfg.Opts.IntervalStart,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:            rCfg.Enabled,
@@ -153,6 +168,9 @@ func (rateOpts *RatesOpts) Clone() *RatesOpts {
 	}
 	return &RatesOpts{
 		RateProfileIDs: rtIDs,
+		StartTime:      rateOpts.StartTime,
+		Usage:          rateOpts.Usage,
+		IntervalStart:  rateOpts.IntervalStart,
 	}
 }
 func (RateSCfg) SName() string              { return RateSJSON }
@@ -193,6 +211,9 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 
 type RatesOptsJson struct {
 	RateProfileIDs *[]string `json:"*rateProfileIDs"`
+	StartTime      *string   `json:"*startTime"`
+	Usage          *string   `json:"*usage"`
+	IntervalStart  *string   `json:"*intervalStart"`
 }
 
 type RateSJsonCfg struct {
@@ -217,6 +238,15 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 	}
 	if !utils.SliceStringEqual(v1.RateProfileIDs, v2.RateProfileIDs) {
 		d.RateProfileIDs = utils.SliceStringPointer(v2.RateProfileIDs)
+	}
+	if v1.StartTime != v2.StartTime {
+		d.StartTime = utils.StringPointer(v2.StartTime)
+	}
+	if v1.Usage != v2.Usage {
+		d.Usage = utils.StringPointer(v2.Usage)
+	}
+	if v1.IntervalStart != v2.IntervalStart {
+		d.IntervalStart = utils.StringPointer(v2.IntervalStart)
 	}
 	return d
 }

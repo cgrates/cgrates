@@ -983,18 +983,18 @@ type ArgExportCDRs struct {
 }
 
 // StartTime returns the event time used to check active rate profiles
-func (args *CGREvent) StartTime(tmz string) (sTime time.Time, err error) {
+func (args *CGREvent) StartTime(configSTime, tmz string) (time.Time, error) {
 	if tIface, has := args.APIOpts[OptsRatesStartTime]; has {
 		return IfaceAsTime(tIface, tmz)
 	}
 	if tIface, has := args.APIOpts[MetaStartTime]; has {
 		return IfaceAsTime(tIface, tmz)
 	}
-	return time.Now(), nil
+	return ParseTimeDetectLayout(configSTime, tmz)
 }
 
 // usage returns the event time used to check active rate profiles
-func (args *CGREvent) Usage() (usage *decimal.Big, err error) {
+func (args *CGREvent) Usage(configUsage string) (usage *decimal.Big, err error) {
 	// first search for the rateUsage in opts
 	if uIface, has := args.APIOpts[OptsRatesUsage]; has {
 		return IfaceAsBig(uIface)
@@ -1004,15 +1004,15 @@ func (args *CGREvent) Usage() (usage *decimal.Big, err error) {
 		return IfaceAsBig(uIface)
 	}
 	// if the usage is not found in the event populate with default value and overwrite the NOT_FOUND error with nil
-	return decimal.New(int64(time.Minute), 0), nil
+	return StringAsBig(configUsage)
 }
 
 // IntervalStart returns the inerval start out of APIOpts received for the event
-func (args *CGREvent) IntervalStart() (ivlStart *decimal.Big, err error) {
+func (args *CGREvent) IntervalStart(configIvlStart string) (ivlStart *decimal.Big, err error) {
 	if iface, has := args.APIOpts[OptsRatesIntervalStart]; has {
 		return IfaceAsBig(iface)
 	}
-	return decimal.New(0, 0), nil
+	return StringAsBig(configIvlStart)
 }
 
 type TPActionProfile struct {
