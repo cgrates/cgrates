@@ -23,8 +23,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 type PaginatorWithSearch struct {
@@ -980,39 +978,6 @@ type ArgExportCDRs struct {
 	ExporterIDs []string // exporterIDs is used to said which exporter are using to export the cdrs
 	Verbose     bool     // verbose is used to inform the user about the positive and negative exported cdrs
 	RPCCDRsFilter
-}
-
-// StartTime returns the event time used to check active rate profiles
-func (args *CGREvent) StartTime(configSTime, tmz string) (time.Time, error) {
-	if tIface, has := args.APIOpts[OptsRatesStartTime]; has {
-		return IfaceAsTime(tIface, tmz)
-	}
-	if tIface, has := args.APIOpts[MetaStartTime]; has {
-		return IfaceAsTime(tIface, tmz)
-	}
-	return ParseTimeDetectLayout(configSTime, tmz)
-}
-
-// usage returns the event time used to check active rate profiles
-func (args *CGREvent) Usage(configUsage string) (usage *decimal.Big, err error) {
-	// first search for the rateUsage in opts
-	if uIface, has := args.APIOpts[OptsRatesUsage]; has {
-		return IfaceAsBig(uIface)
-	}
-	// second search for the usage in opts
-	if uIface, has := args.APIOpts[MetaUsage]; has {
-		return IfaceAsBig(uIface)
-	}
-	// if the usage is not found in the event populate with default value and overwrite the NOT_FOUND error with nil
-	return StringAsBig(configUsage)
-}
-
-// IntervalStart returns the inerval start out of APIOpts received for the event
-func (args *CGREvent) IntervalStart(configIvlStart string) (ivlStart *decimal.Big, err error) {
-	if iface, has := args.APIOpts[OptsRatesIntervalStart]; has {
-		return IfaceAsBig(iface)
-	}
-	return StringAsBig(configIvlStart)
 }
 
 type TPActionProfile struct {

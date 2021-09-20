@@ -285,6 +285,9 @@ func testCfgSetEmptyReload(t *testing.T) {
 			"verbosity":                  1000,
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaRateProfileIDsCfg: []string(nil),
+				utils.MetaStartTime:         utils.MetaNow,
+				utils.MetaUsage:             "1m",
+				utils.MetaIntervalStartCfg:  "0",
 			},
 		},
 	}
