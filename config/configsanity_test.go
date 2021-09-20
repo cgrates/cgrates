@@ -1692,9 +1692,14 @@ func TestConfigSanityAnalyzer(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
+	cfg.analyzerSCfg.IndexType = utils.MetaScorch
+	cfg.analyzerSCfg.DBPath = "/inexistent/Path"
+	expected = "<AnalyzerS> nonexistent DB folder: \"/inexistent/Path\""
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 	cfg.analyzerSCfg.DBPath = "/"
 
-	cfg.analyzerSCfg.IndexType = utils.MetaScorch
 	expected = "<AnalyzerS> the TTL needs to be bigger than 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)

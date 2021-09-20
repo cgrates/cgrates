@@ -2604,15 +2604,13 @@ const (
 	ExecCgr     = "exec"
 )
 
-var (
-	// AnzIndexType are the analyzers possible index types
-	AnzIndexType = StringSet{
-		MetaScorch:  {},
-		MetaBoltdb:  {},
-		MetaLeveldb: {},
-		MetaMoss:    {},
-	}
-)
+var AnzIndexType = StringSet{ // AnzIndexType are the analyzers possible index types
+	MetaScorch:   {},
+	MetaBoltdb:   {},
+	MetaLeveldb:  {},
+	MetaMoss:     {},
+	MetaInternal: {},
+}
 
 // StringTmplType a string set used, by agentRequest and eventRequest to determine if the returned template type is string
 var StringTmplType = StringSet{

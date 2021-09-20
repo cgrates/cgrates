@@ -1078,7 +1078,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !utils.AnzIndexType.Has(cfg.analyzerSCfg.IndexType) {
 			return fmt.Errorf("<%s> unsuported index type: %q", utils.AnalyzerS, cfg.analyzerSCfg.IndexType)
 		}
-		// TTL and CleanupInterval should always be bigger than zero in order to not keep unnecessary logs in index
+		if cfg.analyzerSCfg.IndexType != utils.MetaInternal {
+			if _, err := os.Stat(cfg.analyzerSCfg.DBPath); err != nil && os.IsNotExist(err) {
+				return fmt.Errorf("<%s> nonexistent DB folder: %q", utils.AnalyzerS, cfg.analyzerSCfg.DBPath)
+			}
+		}
+		// TTL and CleanupInterval should always be biger than zero in order to not keep unecesary logs in index
 		if cfg.analyzerSCfg.TTL <= 0 {
 			return fmt.Errorf("<%s> the TTL needs to be bigger than 0", utils.AnalyzerS)
 		}
