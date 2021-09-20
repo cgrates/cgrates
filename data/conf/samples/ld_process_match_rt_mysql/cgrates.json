@@ -1,0 +1,65 @@
+{
+	// CGRateS Configuration file
+	//
+	
+	
+	"general": {
+		"log_level": 7,
+		"reply_timeout": "50s",
+	},
+	
+	
+	"listen": {
+		"rpc_json": ":2012",
+		"rpc_gob": ":2013",
+		"http": ":2080",
+	},
+	
+	"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+		"db_type": "redis",						// data_db type: <redis|mongo>
+		"db_port": 6379, 						// data_db port to reach the database
+		"db_name": "10", 						// data_db database name to connect to
+	},
+	
+	"stor_db": {
+		"db_password": "CGRateS.org",
+	},
+	
+	"loaders": [
+		{
+			"id": "*default",
+			"enabled": true,
+			"tenant": "cgrates.org",
+			"tp_in_dir": "/usr/share/cgrates/tariffplans/loadRateTest",
+			"tp_out_dir": "",
+		},
+	],
+	
+	"rates": {
+		"enabled": true
+	},
+
+
+	"cdrs": {
+		"enabled": true,
+		//"chargers_conns":["*internal"],
+		//"accounts_conns": ["*localhost"]
+		"rates_conns": ["*localhost"]
+	},
+	
+	"chargers": {
+		"enabled": true,
+		"attributes_conns": ["*internal"],
+	},
+	
+	"attributes": {
+		"enabled": true,
+		"stats_conns": ["*localhost"],
+		"resources_conns": ["*localhost"],
+		"accounts_conns": ["*localhost"]
+	},
+
+	"accounts": {
+		"enabled": true,
+	}
+	}
