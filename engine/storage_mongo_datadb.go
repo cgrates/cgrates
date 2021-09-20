@@ -101,7 +101,17 @@ var (
 
 	tTime       = reflect.TypeOf(time.Time{})
 	decimalType = reflect.TypeOf(utils.Decimal{})
+
+	mongoReg *bsoncodec.Registry
 )
+
+func init() {
+	reg := bson.NewRegistryBuilder()
+	reg.RegisterTypeDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1))
+	reg.RegisterTypeEncoder(decimalType, bsoncodec.ValueEncoderFunc(DecimalEncoder))
+	reg.RegisterTypeDecoder(decimalType, bsoncodec.ValueDecoderFunc(DecimalDecoder))
+	mongoReg = reg.Build()
+}
 
 func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
 	if vr.Type() != bsontype.DateTime {
@@ -168,13 +178,9 @@ func NewMongoStorage(host, port, db, user, pass, mrshlerStr, storageType string,
 	}
 	ctx := context.TODO()
 	url = "mongodb://" + url
-	reg := bson.NewRegistryBuilder()
-	reg.RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1))
-	reg.RegisterTypeEncoder(decimalType, bsoncodec.ValueEncoderFunc(DecimalEncoder))
-	reg.RegisterTypeDecoder(decimalType, bsoncodec.ValueDecoderFunc(DecimalDecoder))
 	opt := options.Client().
 		ApplyURI(url).
-		SetRegistry(reg.Build()).
+		SetRegistry(mongoReg).
 		SetServerSelectionTimeout(ttl).
 		SetRetryWrites(false) // set this option to false because as default it is on true
 
