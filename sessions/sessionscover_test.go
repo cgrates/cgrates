@@ -1429,6 +1429,13 @@ func TestProcessChargerS(t *testing.T) {
 	log.SetOutput(io.Discard)
 	tmpCache := engine.Cache
 
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheEventCharges].Limit = -1
+	sMock := make(chan rpcclient.ClientConnector, 1)
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): sMock})
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), connMgr)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -1440,13 +1447,7 @@ func TestProcessChargerS(t *testing.T) {
 			},
 		},
 	}
-	sMock := make(chan rpcclient.ClientConnector, 1)
 	sMock <- testMock1
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): sMock})
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 
 	sessions := NewSessionS(cfg, dm, connMgr)
 
@@ -4040,6 +4041,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 	chanInternal := make(chan rpcclient.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheEventCharges].Limit = -1
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	data := engine.NewInternalDB(nil, nil, true)
@@ -4048,6 +4050,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	args := &V1ProcessEventArgs{
@@ -4149,6 +4152,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	chanInternal := make(chan rpcclient.ClientConnector, 1)
 	chanInternal <- clnt
 	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheEventCharges].Limit = -1
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 	cfg.SessionSCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
@@ -4159,6 +4163,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal,
 	})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
 	args := &V1ProcessEventArgs{
