@@ -107,6 +107,7 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.MaxUsage:               "259200000000000", // 72h in ns
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaAccountIDsCfg: []string(nil),
+			utils.MetaUsage:         utils.EmptyString,
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

@@ -25,6 +25,7 @@ import (
 
 type AccountsOpts struct {
 	AccountIDs []string
+	Usage      string
 }
 
 // AccountSCfg is the configuration of ActionS
@@ -50,7 +51,9 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 	if jsnCfg.AccountIDs != nil {
 		accOpts.AccountIDs = *jsnCfg.AccountIDs
 	}
-
+	if jsnCfg.Usage != nil {
+		accOpts.Usage = *jsnCfg.Usage
+	}
 	return nil
 }
 
@@ -112,6 +115,7 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 func (acS AccountSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.MetaAccountIDsCfg: acS.Opts.AccountIDs,
+		utils.MetaUsage:         acS.Opts.Usage,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        acS.Enabled,
@@ -151,6 +155,7 @@ func (accOpts *AccountsOpts) Clone() *AccountsOpts {
 	}
 	return &AccountsOpts{
 		AccountIDs: accIDs,
+		Usage:      accOpts.Usage,
 	}
 }
 func (AccountSCfg) SName() string             { return AccountSJSON }
@@ -189,6 +194,7 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 
 type AccountsOptsJson struct {
 	AccountIDs *[]string `json:"*accountIDs"`
+	Usage      *string   `json:"*usage"`
 }
 
 // Account service config section
@@ -213,6 +219,9 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 	}
 	if !utils.SliceStringEqual(v1.AccountIDs, v2.AccountIDs) {
 		d.AccountIDs = utils.SliceStringPointer(v2.AccountIDs)
+	}
+	if v1.Usage != v2.Usage {
+		d.Usage = utils.StringPointer(v2.Usage)
 	}
 	return d
 }

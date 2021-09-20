@@ -1262,6 +1262,7 @@ const CGRATES_CFG_JSON = `
     "max_usage": "72h",                     // maximum time of usage
 	"opts":{								//	
 		// "*accountIDs": [],				//
+		// "*usage": "",					//
 	},
 },
 
