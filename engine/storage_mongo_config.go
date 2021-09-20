@@ -32,21 +32,24 @@ const (
 func (ms *MongoStorage) GetSection(ctx *context.Context, section string, val interface{}) error {
 	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColCfg).FindOne(sctx, bson.M{"section": section},
-			options.FindOne().SetProjection(bson.M{"cfg": 1 /*"section": 0, "_id": 0*/}))
-		if err = cur.Decode(val); err != nil && err == mongo.ErrNoDocuments {
-			return nil
+			options.FindOne().SetProjection(bson.M{"cfg": 1, "_id": 0 /*"section": 0, */}))
+		tmp := map[string]bson.Raw{}
+		if err = cur.Decode(&tmp); err != nil {
+			if err == mongo.ErrNoDocuments {
+				return nil
+			}
+			return
 		}
-		return
+		return bson.UnmarshalWithRegistry(mongoReg, tmp["cfg"], val)
 	})
 }
 
 func (ms *MongoStorage) SetSection(ctx *context.Context, section string, jsn interface{}) (err error) {
 	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColCfg).UpdateOne(sctx, bson.M{"section": section},
-			bson.M{"$set": &struct {
-				Section string
-				Cfg     interface{}
-			}{Section: section, Cfg: jsn}},
+			bson.M{"$set": bson.M{
+				"section": section,
+				"cfg":     jsn}},
 			options.Update().SetUpsert(true),
 		)
 		return err
