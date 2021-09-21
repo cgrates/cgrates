@@ -235,7 +235,6 @@ func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt stri
 
 // StatsArgsProcessEvent the arguments for processing the event with stats
 type StatsArgsProcessEvent struct {
-	StatIDs []string
 	*utils.CGREvent
 	clnb bool //rpcclonable
 }
@@ -255,12 +254,7 @@ func (attr *StatsArgsProcessEvent) RPCClone() (interface{}, error) {
 
 // Clone creates a clone of the object
 func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
-	var statsIDs []string
-	if attr.StatIDs != nil {
-		statsIDs = utils.CloneStringSlice(attr.StatIDs)
-	}
 	return &StatsArgsProcessEvent{
-		StatIDs:  statsIDs,
 		CGREvent: attr.CGREvent.Clone(),
 	}
 }
@@ -345,7 +339,11 @@ func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *Stat
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	matchSQs, err := sS.matchingStatQueuesForEvent(ctx, tnt, args.StatIDs, evNm)
+	var sqIDs []string
+	if sqIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsStatsStatIDs); err != nil {
+		return
+	}
+	matchSQs, err := sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, evNm)
 	if err != nil {
 		return nil, err
 	}
@@ -406,8 +404,12 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *Stats
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
+	var sqIDs []string
+	if sqIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsStatsStatIDs); err != nil {
+		return
+	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(ctx, tnt, args.StatIDs, utils.MapStorage{
+	if sQs, err = sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}); err != nil {

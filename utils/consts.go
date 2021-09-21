@@ -1880,6 +1880,7 @@ const (
 	StoreIntervalCfg = "store_interval"
 
 	// StatSCfg
+	MetaStatIDsCfg            = "*statIDs"
 	StoreUncompressedLimitCfg = "store_uncompressed_limit"
 
 	//ThresholdSCfg
@@ -2109,7 +2110,8 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsSesSTIRInitiate, OptsSesThresholdS, OptsSesThresholdSDerivedReply, OptsSesThresholdIDs,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, OptsCDRsAttributeS, OptsCDRsChargerS, OptsCDRsExport, OptsCDRsRefund,
-	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS, OptsCDRsRateS, OptsAccountS, OptsAccountsUsage})
+	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS, OptsCDRsRateS, OptsAccountS,
+	OptsAccountsUsage, OptsStatsStatIDs})
 
 // Event Opts
 const (
@@ -2201,6 +2203,7 @@ const (
 	OptsAttributesAttributeIDs = "*attributeIDs"
 	OptsAttributesProfileRuns  = "*attrProfileRuns"
 	OptsAttributesProcessRuns  = "*attrProcessRuns"
+	OptsStatsStatIDs           = "*statIDs"
 	OptsThresholdsThresholdIDs = "*thresholdIDs"
 	MetaEventType              = "*eventType"
 	EventType                  = "EventType"

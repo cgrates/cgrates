@@ -25,6 +25,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type StatsOpts struct {
+	StatIDs []string
+}
+
 // StatSCfg the stats config section
 type StatSCfg struct {
 	Enabled                bool
@@ -36,6 +40,7 @@ type StatSCfg struct {
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string
 	NestedFields           bool
+	Opts                   *StatsOpts
 }
 
 // loadStatSCfg loads the StatS section of the configuration
@@ -45,6 +50,16 @@ func (st *StatSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (e
 		return
 	}
 	return st.loadFromJSONCfg(jsnStatSCfg)
+}
+
+func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.StatIDs != nil {
+		sqOpts.StatIDs = *jsnCfg.StatIDs
+	}
+	return nil
 }
 
 func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -80,17 +95,24 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		st.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Opts != nil {
+		st.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (st StatSCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaStatIDsCfg: st.Opts.StatIDs,
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
 		utils.IndexedSelectsCfg:         st.IndexedSelects,
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
 		utils.NestedFieldsCfg:           st.NestedFields,
 		utils.StoreIntervalCfg:          utils.EmptyString,
+		utils.OptsCfg:                   opts,
 	}
 	if st.StoreInterval != 0 {
 		mp[utils.StoreIntervalCfg] = st.StoreInterval.String()
@@ -114,6 +136,16 @@ func (st StatSCfg) AsMapInterface(string) interface{} {
 func (StatSCfg) SName() string            { return StatSJSON }
 func (st StatSCfg) CloneSection() Section { return st.Clone() }
 
+func (sqOpts *StatsOpts) Clone() *StatsOpts {
+	var sqIDs []string
+	if sqOpts.StatIDs != nil {
+		sqIDs = utils.CloneStringSlice(sqOpts.StatIDs)
+	}
+	return &StatsOpts{
+		StatIDs: sqIDs,
+	}
+}
+
 // Clone returns a deep copy of StatSCfg
 func (st StatSCfg) Clone() (cln *StatSCfg) {
 	cln = &StatSCfg{
@@ -122,6 +154,7 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 		StoreInterval:          st.StoreInterval,
 		StoreUncompressedLimit: st.StoreUncompressedLimit,
 		NestedFields:           st.NestedFields,
+		Opts:                   st.Opts.Clone(),
 	}
 	if st.ThresholdSConns != nil {
 		cln.ThresholdSConns = utils.CloneStringSlice(st.ThresholdSConns)
@@ -139,6 +172,10 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 	return
 }
 
+type StatsOptsJson struct {
+	StatIDs *[]string `json:"*statIDs"`
+}
+
 // Stat service config section
 type StatServJsonCfg struct {
 	Enabled                  *bool
@@ -150,6 +187,17 @@ type StatServJsonCfg struct {
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
 	Nested_fields            *bool // applies when indexed fields is not defined
+	Opts                     *StatsOptsJson
+}
+
+func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
+	if d == nil {
+		d = new(StatsOptsJson)
+	}
+	if !utils.SliceStringEqual(v1.StatIDs, v2.StatIDs) {
+		d.StatIDs = utils.SliceStringPointer(v2.StatIDs)
+	}
+	return d
 }
 
 func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg {
@@ -177,5 +225,6 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
+	d.Opts = diffStatsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
