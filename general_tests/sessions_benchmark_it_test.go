@@ -35,36 +35,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// InitConfig
-// ResetDb / DataDb & StorDb
-// Start / Stop engine
-// NewRPC
-
-// 2 x Chargers
-// func myFunc(id_account string) error {
-//set voice balance
-//value : 24h
-//RatingSubject: "*zero1s"
-//check if balance is set
-// }
-
-//func myFunc2(id_account string) error {
-//init session
-// }
-
-//func myFunc3(id_account string) error {
-//update session
-//}
-
-//func myFunc4(id_account string) error {
-//terminate session
-// }
-
-//decide number of accounts i.e 1000
-//call myFunc for all accounts
-//calls happening using init / update / terminate
-//check memmory (htop etc)
-
 var (
 	sesPCfgDir  string
 	sesPCfgPath string
@@ -100,11 +70,6 @@ func TestSesPIt(t *testing.T) {
 		t.Run(sesPCfgDir, stest)
 	}
 }
-
-// func setAccBalance(id string) error {
-// 	var reply string
-
-// }
 
 func testSesPItLoadConfig(t *testing.T) {
 	sesPCfgPath = path.Join(*dataDir, "conf", "samples", sesPCfgDir)
@@ -258,14 +223,7 @@ func testSesPItBenchmark(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// fmt.Println()
 }
-
-// if can't reproduce memory leak
-// change cache partition in config
-// cache partition : *EventCharges
-// Limit: -1
-// TTL: 10s assure TTL is 24hr
 
 func testSesPItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
