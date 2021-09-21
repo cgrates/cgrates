@@ -570,29 +570,29 @@ func TestCDRLogActionExecute(t *testing.T) {
 	sMock := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
 			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
-				argConv, can := arg.(*engine.ArgV1ProcessEvent)
+				argConv, can := arg.(*utils.CGREvent)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
 				if argConv.APIOpts[utils.OptsCDRsChargerS].(bool) {
 					return fmt.Errorf("Expected false, received %+v", argConv.APIOpts[utils.OptsCDRsChargerS])
 				}
-				if val, has := argConv.CGREvent.Event[utils.Subject]; !has {
+				if val, has := argConv.Event[utils.Subject]; !has {
 					return fmt.Errorf("missing Subject")
 				} else if strVal := utils.IfaceAsString(val); strVal != "10" {
 					return fmt.Errorf("Expected %+v, received %+v", "10", strVal)
 				}
-				if val, has := argConv.CGREvent.Event[utils.Cost]; !has {
+				if val, has := argConv.Event[utils.Cost]; !has {
 					return fmt.Errorf("missing Cost")
 				} else if strVal := utils.IfaceAsString(val); strVal != "0.15" {
 					return fmt.Errorf("Expected %+v, received %+v", "0.15", strVal)
 				}
-				if val, has := argConv.CGREvent.Event[utils.RequestType]; !has {
+				if val, has := argConv.Event[utils.RequestType]; !has {
 					return fmt.Errorf("missing RequestType")
 				} else if strVal := utils.IfaceAsString(val); strVal != utils.MetaNone {
 					return fmt.Errorf("Expected %+v, received %+v", utils.MetaNone, strVal)
 				}
-				if val, has := argConv.CGREvent.Event[utils.RunID]; !has {
+				if val, has := argConv.Event[utils.RunID]; !has {
 					return fmt.Errorf("missing RunID")
 				} else if strVal := utils.IfaceAsString(val); strVal != utils.MetaTopUp {
 					return fmt.Errorf("Expected %+v, received %+v", utils.MetaNone, strVal)
@@ -641,29 +641,29 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	sMock2 := &testMockCDRsConn{
 		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
 			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
-				argConv, can := arg.(*engine.ArgV1ProcessEvent)
+				argConv, can := arg.(*utils.CGREvent)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
 				if argConv.APIOpts[utils.OptsCDRsChargerS].(bool) {
 					return fmt.Errorf("Expected false, received %+v", argConv.APIOpts[utils.OptsCDRsChargerS])
 				}
-				if val, has := argConv.CGREvent.Event[utils.Tenant]; !has {
+				if val, has := argConv.Event[utils.Tenant]; !has {
 					return fmt.Errorf("missing Tenant")
 				} else if strVal := utils.IfaceAsString(val); strVal != "cgrates.org" {
 					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", strVal)
 				}
-				if val, has := argConv.CGREvent.APIOpts["EventFieldOpt"]; !has {
+				if val, has := argConv.APIOpts["EventFieldOpt"]; !has {
 					return fmt.Errorf("missing EventFieldOpt from Opts")
 				} else if strVal := utils.IfaceAsString(val); strVal != "eventValue" {
 					return fmt.Errorf("Expected %+v, received %+v", "eventValue", strVal)
 				}
-				if val, has := argConv.CGREvent.APIOpts["Option1"]; !has {
+				if val, has := argConv.APIOpts["Option1"]; !has {
 					return fmt.Errorf("missing Option1 from Opts")
 				} else if strVal := utils.IfaceAsString(val); strVal != "Value1" {
 					return fmt.Errorf("Expected %+v, received %+v", "Value1", strVal)
 				}
-				if val, has := argConv.CGREvent.APIOpts["Option3"]; !has {
+				if val, has := argConv.APIOpts["Option3"]; !has {
 					return fmt.Errorf("missing Option3 from Opts")
 				} else if strVal := utils.IfaceAsString(val); strVal != "eventValue" {
 					return fmt.Errorf("Expected %+v, received %+v", "eventValue", strVal)
@@ -755,8 +755,8 @@ func TestExportAction(t *testing.T) {
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
-				if argConv.CGREvent.Tenant != "cgrates.org" {
-					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.CGREvent.Tenant)
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
 				}
 				return nil
 			},
@@ -806,8 +806,8 @@ func TestExportActionWithEeIDs(t *testing.T) {
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
-				if argConv.CGREvent.Tenant != "cgrates.org" {
-					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.CGREvent.Tenant)
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
 				}
 				if !reflect.DeepEqual(argConv.EeIDs, []string{"Exporter1", "Exporter2", "Exporter3"}) {
 					return fmt.Errorf("Expected %+v, received %+v", []string{"Exporter1", "Exporter2", "Exporter3"}, argConv.EeIDs)

@@ -530,7 +530,7 @@ func (rS *ResourceService) processThresholds(ctx *context.Context, rs Resources,
 			opts[utils.OptsThresholdsThresholdIDs] = r.rPrf.ThresholdIDs
 		}
 
-		thEv := &ThresholdsArgsProcessEvent{CGREvent: &utils.CGREvent{
+		thEv := &utils.CGREvent{
 			Tenant: r.Tenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -539,7 +539,6 @@ func (rS *ResourceService) processThresholds(ctx *context.Context, rs Resources,
 				utils.Usage:      r.TotalUsage(),
 			},
 			APIOpts: opts,
-		},
 		}
 		var tIDs []string
 		if err := rS.connMgr.Call(ctx, rS.cgrcfg.ResourceSCfg().ThresholdSConns,

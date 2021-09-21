@@ -118,27 +118,25 @@ func testDspCDRsPing(t *testing.T) {
 
 func testDspCDRsProcessEvent(t *testing.T) {
 	var reply string
-	args := &engine.ArgV1ProcessEvent{
-		// Flags: []string{utils.MetaStore},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:     "testDspCDRsProcessEvent",
-				utils.OriginHost:   "192.168.1.1",
-				utils.Source:       "testDspCDRsProcessEvent",
-				utils.RequestType:  utils.MetaRated,
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-				utils.Usage:        time.Minute,
-				"field_extr1":      "val_extr1",
-				"fieldextr2":       "valextr2",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testDspCDRsProcessEvent",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testDspCDRsProcessEvent",
+			utils.RequestType:  utils.MetaRated,
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+			"field_extr1":      "val_extr1",
+			"fieldextr2":       "valextr2",
+		},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "cdrs12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:    "cdrs12345",
+			utils.OptsCDRsStore: true,
 		},
 	}
 
@@ -316,24 +314,22 @@ func testDspCDRsGetCDR3(t *testing.T) {
 
 func testDspCDRsV2ProcessEvent(t *testing.T) {
 	var reply []*utils.EventWithFlags
-	args := &engine.ArgV1ProcessEvent{
-		// Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:     "testDspCDRsV2ProcessEvent",
-				utils.OriginHost:   "192.168.1.1",
-				utils.Source:       "testDspCDRsV2ProcessEvent",
-				utils.RequestType:  utils.MetaRated,
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-				utils.Usage:        time.Minute,
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "cdrsv212345",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testDspCDRsV2ProcessEvent",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testDspCDRsV2ProcessEvent",
+			utils.RequestType:  utils.MetaRated,
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "cdrsv212345",
+			// utils.MetaRALs:true,
 		},
 	}
 
@@ -405,22 +401,20 @@ func testDspCDRsPingNoAuth(t *testing.T) {
 
 func testDspCDRsProcessEventNoAuth(t *testing.T) {
 	var reply string
-	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:     "testDspCDRsProcessEvent",
-				utils.OriginHost:   "192.168.1.1",
-				utils.Source:       "testDspCDRsProcessEvent",
-				utils.RequestType:  utils.MetaRated,
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-				utils.Usage:        time.Minute,
-				"field_extr1":      "val_extr1",
-				"fieldextr2":       "valextr2",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testDspCDRsProcessEvent",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testDspCDRsProcessEvent",
+			utils.RequestType:  utils.MetaRated,
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+			"field_extr1":      "val_extr1",
+			"fieldextr2":       "valextr2",
 		},
 	}
 
@@ -577,21 +571,21 @@ func testDspCDRsGetCDR3NoAuth(t *testing.T) {
 
 func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
 	var reply []*utils.EventWithFlags
-	args := &engine.ArgV1ProcessEvent{
-		// Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:     "testDspCDRsV2ProcessEventNoAuth",
-				utils.OriginHost:   "192.168.1.1",
-				utils.Source:       "testDspCDRsV2ProcessEventNoAuth",
-				utils.RequestType:  utils.MetaRated,
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-				utils.Usage:        time.Minute,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testDspCDRsV2ProcessEventNoAuth",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testDspCDRsV2ProcessEventNoAuth",
+			utils.RequestType:  utils.MetaRated,
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+		},
+		APIOpts: map[string]interface{}{
+			// utils.MetaRALs:true,
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CDRsV2ProcessEvent, args, &reply); err != nil {

@@ -145,23 +145,21 @@ func testLdPrMatchRtLoadTP(t *testing.T) {
 }
 
 func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
-	ev := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestEv1",
-			Event: map[string]interface{}{
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "TestEv1",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.Usage:        time.Minute,
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsRateS:      true,
-				utils.OptsCDRsExport: true,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEv1",
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "TestEv1",
+			utils.RequestType:  utils.MetaPrepaid,
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.Usage:        time.Minute,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRateS:      true,
+			utils.OptsCDRsExport: true,
 		},
 	}
 	var rply string

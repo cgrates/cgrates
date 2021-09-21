@@ -22,23 +22,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc"
 	"path"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/utils"
-
-	"github.com/cgrates/cgrates/engine"
-
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	cdrsIntCfgPath string
 	cdrsIntCfgDIR  string
 	cdrsIntCfg     *config.CGRConfig
-	cdrsIntRPC     *rpc.Client
+	cdrsIntRPC     *birpc.Client
 
 	sTestsCdrsInt = []func(t *testing.T){
 		testCdrsIntInitCfg,
@@ -72,7 +71,7 @@ func TestCdrsIntIT(t *testing.T) {
 func testCdrsIntInitCfg(t *testing.T) {
 	var err error
 	cdrsIntCfgPath = path.Join(*dataDir, "conf", "samples", cdrsIntCfgDIR)
-	cdrsIntCfg, err = config.NewCGRConfigFromPath(cdrsIntCfgPath)
+	cdrsIntCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsIntCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -93,27 +92,25 @@ func testCdrsIntRpcConn(t *testing.T) {
 }
 
 func testCdrsIntTestTTL(t *testing.T) {
-	args := &engine.ArgV1ProcessEvent{
-		Flags: []string{"*store:true"},
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:     "testCdrsIntTestTTL",
-				utils.OriginHost:   "192.168.1.1",
-				utils.Source:       "testCdrsIntTestTTL",
-				utils.RequestType:  utils.MetaNone,
-				utils.Category:     "call",
-				utils.AccountField: "testCdrsIntTestTTL",
-				utils.Subject:      "ANY2CNT2",
-				utils.Destination:  "+4986517174963",
-				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-				utils.Usage:        time.Minute,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testCdrsIntTestTTL",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testCdrsIntTestTTL",
+			utils.RequestType:  utils.MetaNone,
+			utils.Category:     "call",
+			utils.AccountField: "testCdrsIntTestTTL",
+			utils.Subject:      "ANY2CNT2",
+			utils.Destination:  "+4986517174963",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
 		},
+		APIOpts: map[string]interface{}{utils.OptsCDRsStore: true},
 	}
 
 	var reply string
-	if err := cdrsIntRPC.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	if err := cdrsIntRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

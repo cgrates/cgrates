@@ -201,19 +201,17 @@ func testChargerSCdrsAuthProcessEventAuth(t *testing.T) {
 		t.Errorf("Received: %s", reply2)
 	}
 
-	ev := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestEv1",
-			Event: map[string]interface{}{
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "TestEv1",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.Usage:        time.Minute,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEv1",
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "TestEv1",
+			utils.RequestType:  utils.MetaPrepaid,
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.Usage:        time.Minute,
 		},
 	}
 	var rply sessions.V1AuthorizeReply

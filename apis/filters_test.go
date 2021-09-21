@@ -800,15 +800,14 @@ func TestFiltersRemoveFilterRemoveFilterError(t *testing.T) {
 }
 
 type mockClientConn struct {
-	calls map[string]func(ctx *context.Context, args interface{}, reply interface{}) error
+	calls map[string]func(*context.Context, interface{}, interface{}) error
 }
 
 func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
-	if call, has := mCC.calls[serviceMethod]; !has {
-		return utils.ErrUnsupporteServiceMethod
-	} else {
+	if call, has := mCC.calls[serviceMethod]; has {
 		return call(ctx, args, reply)
 	}
+	return utils.ErrUnsupporteServiceMethod
 }
 
 func TestFiltersSetFilterReloadCache(t *testing.T) {

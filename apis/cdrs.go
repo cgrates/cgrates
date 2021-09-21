@@ -19,6 +19,7 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // NewCDRsV1 constructs the RPC Object for CDRsV1
@@ -33,7 +34,7 @@ type CDRsV1 struct {
 }
 
 // ProcessEvent
-func (cdrSv1 *CDRsV1) ProcessEvent(ctx *context.Context, args *engine.ArgV1ProcessEvent,
+func (cdrSv1 *CDRsV1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
 	return cdrSv1.cdrS.V1ProcessEvent(ctx, args, reply)
 }

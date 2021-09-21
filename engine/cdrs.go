@@ -145,16 +145,14 @@ func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGR
 func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var tIDs []string
 	// we clone the CGREvent so we can add EventType without being propagated
-	thArgs := &ThresholdsArgsProcessEvent{
-		CGREvent: cgrEv.Clone(),
+	cgrEv = cgrEv.Clone()
+	if cgrEv.APIOpts == nil {
+		cgrEv.APIOpts = make(map[string]interface{})
 	}
-	if thArgs.APIOpts == nil {
-		thArgs.APIOpts = make(map[string]interface{})
-	}
-	thArgs.APIOpts[utils.MetaEventType] = utils.CDR
+	cgrEv.APIOpts[utils.MetaEventType] = utils.CDR
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().ThresholdSConns,
 		utils.ThresholdSv1ProcessEvent,
-		thArgs, &tIDs); err != nil &&
+		cgrEv, &tIDs); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // NotFound is not considered error
 	}
@@ -286,43 +284,17 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	return
 }
 
-// ArgV1ProcessEvent is the CGREvent with proccesing Flags
-type ArgV1ProcessEvent struct {
-	utils.CGREvent
-	clnb bool //rpcclonable
-}
-
-// SetCloneable sets if the args should be clonned on internal connections
-func (attr *ArgV1ProcessEvent) SetCloneable(rpcCloneable bool) {
-	attr.clnb = rpcCloneable
-}
-
-// RPCClone implements rpcclient.RPCCloner interface
-func (attr *ArgV1ProcessEvent) RPCClone() (interface{}, error) {
-	if !attr.clnb {
-		return attr, nil
-	}
-	return attr.Clone(), nil
-}
-
-// Clone creates a clone of the object
-func (attr *ArgV1ProcessEvent) Clone() *ArgV1ProcessEvent {
-	return &ArgV1ProcessEvent{
-		CGREvent: *attr.CGREvent.Clone(),
-	}
-}
-
 // V1ProcessEvent will process the CGREvent
-func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEvent, reply *string) (err error) {
-	if arg.CGREvent.ID == utils.EmptyString {
-		arg.CGREvent.ID = utils.GenUUID()
+func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent, reply *string) (err error) {
+	if arg.ID == utils.EmptyString {
+		arg.ID = utils.GenUUID()
 	}
-	if arg.CGREvent.Tenant == utils.EmptyString {
-		arg.CGREvent.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -352,7 +324,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 
 	// end of processing options
 
-	if _, err = cdrS.processEvent(ctx, &arg.CGREvent,
+	if _, err = cdrS.processEvent(ctx, arg,
 		chrgS, attrS, rateS, acntS, export, thdS, stS); err != nil {
 		return
 	}
@@ -361,13 +333,13 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 }
 
 // V1ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
-func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *ArgV1ProcessEvent, evs *[]*utils.EventWithFlags) (err error) {
+func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CGREvent, evs *[]*utils.EventWithFlags) (err error) {
 	if arg.ID == "" {
 		arg.ID = utils.GenUUID()
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -397,7 +369,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *ArgV1Pro
 	// end of processing options
 
 	var procEvs []*utils.EventWithFlags
-	if procEvs, err = cdrS.processEvent(ctx, &arg.CGREvent,
+	if procEvs, err = cdrS.processEvent(ctx, arg,
 		chrgS, attrS, rateS, acntS, export, thdS, stS); err != nil {
 		return
 	}

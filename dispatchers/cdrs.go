@@ -20,7 +20,6 @@ package dispatchers
 
 import (
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,10 +43,10 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREvent,
 		utils.CDRsV1Ping, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessEvent(args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1ProcessEvent, tnt,
@@ -55,11 +54,11 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), &args.CGREvent, utils.MetaCDRs,
+	return dS.Dispatch(context.TODO(), args, utils.MetaCDRs,
 		utils.CDRsV1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) (err error) {
+func (dS *DispatcherService) CDRsV2ProcessEvent(args *utils.CGREvent, reply *[]*utils.EventWithFlags) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
@@ -70,6 +69,6 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, 
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), &args.CGREvent, utils.MetaCDRs,
+	return dS.Dispatch(context.TODO(), args, utils.MetaCDRs,
 		utils.CDRsV2ProcessEvent, args, reply)
 }

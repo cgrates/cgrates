@@ -303,16 +303,14 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 			}
 			opts[utils.OptsThresholdsThresholdIDs] = sq.sqPrfl.ThresholdIDs
 		}
-		thEv := &ThresholdsArgsProcessEvent{
-			CGREvent: &utils.CGREvent{
-				Tenant: sq.Tenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					utils.EventType: utils.StatUpdate,
-					utils.StatID:    sq.ID,
-				},
-				APIOpts: opts,
+		thEv := &utils.CGREvent{
+			Tenant: sq.Tenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				utils.EventType: utils.StatUpdate,
+				utils.StatID:    sq.ID,
 			},
+			APIOpts: opts,
 		}
 		for metricID, metric := range sq.SQMetrics {
 			thEv.Event[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)

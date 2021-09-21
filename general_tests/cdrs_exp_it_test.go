@@ -23,11 +23,9 @@ package general_tests
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/rpc"
 	"net/url"
 	"os"
 	"os/exec"
@@ -37,6 +35,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -49,7 +50,7 @@ var (
 	cdrsExpCfgPath string
 	cdrsExpCfgDir  string
 	cdrsExpCfg     *config.CGRConfig
-	cdrsExpRPC     *rpc.Client
+	cdrsExpRPC     *birpc.Client
 
 	cdrsExpHTTPEv     = make(chan map[string]interface{}, 1)
 	cdrsExpHTTPServer *http.Server
@@ -134,7 +135,7 @@ func TestCDRsExp(t *testing.T) {
 func testCDRsExpInitConfig(t *testing.T) {
 	var err error
 	cdrsExpCfgPath = path.Join(*dataDir, "conf", "samples", cdrsExpCfgDir)
-	if cdrsExpCfg, err = config.NewCGRConfigFromPath(cdrsExpCfgPath); err != nil {
+	if cdrsExpCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsExpCfgPath); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -222,7 +223,7 @@ func testCDRsExpInitRPC(t *testing.T) {
 
 func testCDRsExpLoadAddCharger(t *testing.T) {
 	// //add a default charger
-	chargerProfile := &v1.ChargerWithAPIOpts{
+	chargerProfile := &apis.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "*raw",
@@ -232,7 +233,7 @@ func testCDRsExpLoadAddCharger(t *testing.T) {
 		},
 	}
 	var result string
-	if err := cdrsExpRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
+	if err := cdrsExpRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -245,11 +246,10 @@ func testCDRsExpExportEvent(t *testing.T) {
 		t.Error(err)
 	}
 	var reply string
-	if err := cdrsExpRPC.Call(utils.CDRsV1ProcessEvent,
-		&engine.ArgV1ProcessEvent{
-			Flags:    []string{"*export:true", utils.MetaRALs},
-			CGREvent: *cdrsExpEv,
-		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() { // some exporters will fail
+	// cdrsExpEv.APIOpts[utils.MetaRALs]=true
+	cdrsExpEv.APIOpts[utils.OptsCDRsExport] = true
+	if err := cdrsExpRPC.Call(context.Background(), utils.CDRsV1ProcessEvent,
+		cdrsExpEv, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() { // some exporters will fail
 		t.Error("Unexpected error: ", err)
 	}
 	time.Sleep(100 * time.Millisecond)

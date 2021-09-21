@@ -3084,19 +3084,17 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &ThresholdsArgsProcessEvent{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
-						Event: map[string]interface{}{
-							utils.EventType:  utils.ResourceUpdate,
-							utils.ResourceID: "RES_1",
-							utils.Usage:      0.,
-						},
-						APIOpts: map[string]interface{}{
-							utils.MetaEventType:              utils.ResourceUpdate,
-							utils.OptsThresholdsThresholdIDs: []string{"THD_1"},
-						},
+				exp := &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     args.(*utils.CGREvent).ID,
+					Event: map[string]interface{}{
+						utils.EventType:  utils.ResourceUpdate,
+						utils.ResourceID: "RES_1",
+						utils.Usage:      0.,
+					},
+					APIOpts: map[string]interface{}{
+						utils.MetaEventType:              utils.ResourceUpdate,
+						utils.OptsThresholdsThresholdIDs: []string{"THD_1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -3157,19 +3155,17 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &ThresholdsArgsProcessEvent{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
-						Event: map[string]interface{}{
-							utils.EventType:  utils.ResourceUpdate,
-							utils.ResourceID: "RES_1",
-							utils.Usage:      0.,
-						},
-						APIOpts: map[string]interface{}{
-							utils.MetaEventType:              utils.ResourceUpdate,
-							utils.OptsThresholdsThresholdIDs: []string{"THD_1"},
-						},
+				exp := &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     args.(*utils.CGREvent).ID,
+					Event: map[string]interface{}{
+						utils.EventType:  utils.ResourceUpdate,
+						utils.ResourceID: "RES_1",
+						utils.Usage:      0.,
+					},
+					APIOpts: map[string]interface{}{
+						utils.MetaEventType:              utils.ResourceUpdate,
+						utils.OptsThresholdsThresholdIDs: []string{"THD_1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {

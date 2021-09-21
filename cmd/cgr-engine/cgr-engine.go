@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -42,6 +43,7 @@ func RunCGREngine(fs []string) (err error) {
 		return
 	}
 	if *flags.Version {
+		fmt.Println(vers)
 		return
 	}
 	if *flags.PidFile != utils.EmptyString {

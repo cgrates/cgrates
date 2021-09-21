@@ -321,13 +321,11 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 
 func testV1FltrGetThresholdForEvent(t *testing.T) {
 	// check the event
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1010"},
-		},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1010"},
 	}
 	var ids []string
 	eIDs := []string{"TH_Stats1"}
@@ -380,13 +378,11 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1010"},
-		},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1010"},
 	}
 	var ids []string
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil ||
@@ -488,13 +484,11 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	// check the event
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "2020"},
-		},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "2020"},
 	}
 
 	var ids []string
@@ -759,13 +753,11 @@ func testV1FltrAccounts(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001"},
-		},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001"},
 	}
 	var ids []string
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err != nil {
@@ -847,13 +839,11 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001"},
-		},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001"},
 	}
 	var ids []string
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err != nil {
@@ -862,13 +852,11 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 		t.Error("Unexpected reply returned", ids)
 	}
 
-	tEv = &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.AccountField: "non"},
-		},
+	tEv = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.AccountField: "non"},
 	}
 	ids = nil
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil || err.Error() != utils.ErrNotFound.Error() {
