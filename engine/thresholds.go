@@ -324,7 +324,7 @@ func (tS *ThresholdService) StoreThreshold(ctx *context.Context, t *Threshold) (
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt string, args *ThresholdsArgsProcessEvent) (ts Thresholds, err error) {
+func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (ts Thresholds, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
@@ -412,34 +412,8 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 	return
 }
 
-// ThresholdsArgsProcessEvent are the arguments to proccess the event with thresholds
-type ThresholdsArgsProcessEvent struct {
-	*utils.CGREvent
-	clnb bool //rpcclonable
-}
-
-// SetCloneable sets if the args should be clonned on internal connections
-func (attr *ThresholdsArgsProcessEvent) SetCloneable(rpcCloneable bool) {
-	attr.clnb = rpcCloneable
-}
-
-// RPCClone implements rpcclient.RPCCloner interface
-func (attr *ThresholdsArgsProcessEvent) RPCClone() (interface{}, error) {
-	if !attr.clnb {
-		return attr, nil
-	}
-	return attr.Clone(), nil
-}
-
-// Clone creates a clone of the object
-func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
-	return &ThresholdsArgsProcessEvent{
-		CGREvent: attr.CGREvent.Clone(),
-	}
-}
-
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args *ThresholdsArgsProcessEvent) (thresholdsIDs []string, err error) {
+func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (thresholdsIDs []string, err error) {
 	var matchTs Thresholds
 	if matchTs, err = tS.matchingThresholdsForEvent(ctx, tnt, args); err != nil {
 		return nil, err
@@ -450,10 +424,10 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 		thresholdsIDs = append(thresholdsIDs, t.ID)
 		t.Hits++
 		if err = processEventWithThreshold(ctx, tS.connMgr,
-			tS.cgrcfg.ThresholdSCfg().ActionSConns, args.CGREvent, t); err != nil {
+			tS.cgrcfg.ThresholdSCfg().ActionSConns, args, t); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
-					t.TenantID(), utils.ConcatenatedKey(tnt, args.CGREvent.ID), err.Error()))
+					t.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
 			withErrors = true
 			continue
 		}
@@ -495,13 +469,13 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *ThresholdsArgsProcessEvent, reply *[]string) (err error) {
-	if args.CGREvent == nil {
+func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent.Event == nil {
+	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant
@@ -517,13 +491,13 @@ func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *Threshold
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *ThresholdsArgsProcessEvent, reply *Thresholds) (err error) {
-	if args.CGREvent == nil {
+func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *Thresholds) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent.Event == nil {
+	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant

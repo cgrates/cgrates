@@ -472,28 +472,26 @@ func TestStatsAPIs(t *testing.T) {
 	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	data := engine.NewInternalDB(nil, nil, true)
 
-	expThEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.MetaACD:   time.Duration(0),
-				utils.MetaASR:   float64(0),
-				utils.MetaTCD:   time.Duration(0),
-				utils.EventType: utils.StatUpdate,
-				utils.StatID:    "sq2",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType:              utils.StatUpdate,
-				utils.OptsThresholdsThresholdIDs: []string{"thdID"},
-				utils.OptsStatsStatIDs:           []string{"sq1", "sq2"},
-			},
+	expThEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.MetaACD:   time.Duration(0),
+			utils.MetaASR:   float64(0),
+			utils.MetaTCD:   time.Duration(0),
+			utils.EventType: utils.StatUpdate,
+			utils.StatID:    "sq2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType:              utils.StatUpdate,
+			utils.OptsThresholdsThresholdIDs: []string{"thdID"},
+			utils.OptsStatsStatIDs:           []string{"sq1", "sq2"},
 		},
 	}
 	mCC := &mockClientConn{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				expThEv.ID = args.(*engine.ThresholdsArgsProcessEvent).ID
-				if !reflect.DeepEqual(args.(*engine.ThresholdsArgsProcessEvent), expThEv) {
+				expThEv.ID = args.(*utils.CGREvent).ID
+				if !reflect.DeepEqual(args.(*utils.CGREvent), expThEv) {
 					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>",
 						utils.ToJSON(expThEv), utils.ToJSON(args))
 				}

@@ -475,6 +475,8 @@ type V1AuthorizeArgs struct {
 	*utils.CGREvent
 }
 
+func (V1AuthorizeArgs) RPCClone() {} // disable rpcClonable from CGREvent
+
 // ParseFlags will populate the V1AuthorizeArgs flags
 func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
 	for _, subsystem := range strings.Split(flags, sep) {

@@ -368,16 +368,13 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 			}
 			cgrEv.APIOpts[utils.OptsCDRsAttributeS] = false
 			cgrEv.APIOpts[utils.OptsCDRsChargerS] = false
-			argsProc := &engine.ArgV1ProcessEvent{
-				CGREvent: *cgrEv,
-			}
 			if unratedReqs.HasField( // order additional rating for unrated request types
 				engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
 				// argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
 			}
-			argsProc.SetCloneable(true)
+			cgrEv.SetCloneable(true)
 			if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().CDRsConns,
-				utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
+				utils.CDRsV1ProcessEvent, cgrEv, &reply); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> could not post CDR for event %s, err: %s",
@@ -2140,7 +2137,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(ctx *context.Context,
 		cgrEv.Event[utils.Source] = utils.MetaSessionS
 	}
 
-	return sS.processCDR(ctx, cgrEv, rply, false)
+	return sS.processCDR(ctx, cgrEv, rply)
 }
 
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
@@ -2634,7 +2631,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		}
 		var cdrRply string
 		for _, cgrEv := range getDerivedEvents(events, utils.OptAsBool(args.APIOpts, utils.OptsSesCDRsDerivedReply)) {
-			if err := sS.processCDR(ctx, cgrEv, &cdrRply, false); err != nil {
+			if err := sS.processCDR(ctx, cgrEv, &cdrRply); err != nil {
 				if blockError {
 					return utils.NewErrCDRS(err)
 				}
@@ -2755,7 +2752,7 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
 	return
 }
 
-func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string, clnb bool) (err error) {
+func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string) (err error) {
 	ev := engine.MapEvent(cgrEv.Event)
 	cgrID := GetSetCGRID(ev)
 	s := sS.getRelocateSession(ctx, cgrID,
@@ -2772,12 +2769,8 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 		// found in cache
 		s = sIface.(*Session)
 	} else { // no cached session, CDR will be handled by CDRs
-		argsProc := &engine.ArgV1ProcessEvent{
-			CGREvent: *cgrEv,
-		}
-		argsProc.SetCloneable(clnb)
 		return sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().CDRsConns, utils.CDRsV1ProcessEvent,
-			argsProc, rply)
+			cgrEv, rply)
 	}
 
 	// Use previously stored Session to generate CDRs
@@ -2790,15 +2783,11 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 		}
 		cgrEv.APIOpts[utils.OptsCDRsAttributeS] = false
 		cgrEv.APIOpts[utils.OptsCDRsChargerS] = false
-		argsProc := &engine.ArgV1ProcessEvent{
-			CGREvent: *cgrEv,
-		}
-		argsProc.SetCloneable(clnb)
 		if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
 			// argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
 		}
 		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().CDRsConns, utils.CDRsV1ProcessEvent,
-			argsProc, rply); err != nil {
+			cgrEv, rply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
 					utils.SessionS, err.Error(), cgrID))
@@ -2817,16 +2806,13 @@ func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent
 	if len(sS.cgrCfg.SessionSCfg().ThreshSConns) == 0 {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
 	}
-	thEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: cgrEv,
-	}
 	// check if we have thresholdIDs
 	if len(thIDs) != 0 {
 		cgrEv.APIOpts[utils.OptsThresholdsThresholdIDs] = thIDs
 	}
-	thEv.SetCloneable(clnb)
+	cgrEv.SetCloneable(clnb)
 	//initialize the returned variable
-	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ThreshSConns, utils.ThresholdSv1ProcessEvent, thEv, &tIDs)
+	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ThreshSConns, utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs)
 	return
 }
 

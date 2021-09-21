@@ -485,7 +485,7 @@ func TestThresholdsAPIs(t *testing.T) {
 		},
 	}
 	mCC := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+		calls: map[string]func(*context.Context, interface{}, interface{}) error{
 			utils.ActionSv1ExecuteActions: func(ctx *context.Context, args, reply interface{}) error {
 				if !reflect.DeepEqual(args, expEv) {
 					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expEv), utils.ToJSON(args))
@@ -557,16 +557,14 @@ func TestThresholdsAPIs(t *testing.T) {
 	}
 
 	tSv1 := NewThresholdSv1(tS)
-	args := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
-			APIOpts: map[string]interface{}{
-				utils.OptsThresholdsThresholdIDs: []string{"thd1", "thd2"},
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsThresholdsThresholdIDs: []string{"thd1", "thd2"},
 		},
 	}
 

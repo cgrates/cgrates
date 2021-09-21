@@ -103,17 +103,15 @@ func testDspThPingFailover(t *testing.T) {
 func testDspThProcessEventFailover(t *testing.T) {
 	var ids []string
 	eIDs := []string{"THD_ACNT_1001"}
-	args := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.EventName:    "Event1",
-				utils.AccountField: "1001"},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.EventName:    "Event1",
+			utils.AccountField: "1001"},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "thr12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "thr12345",
 		},
 	}
 
@@ -152,16 +150,14 @@ func testDspThPing(t *testing.T) {
 
 func testDspThTestAuthKey(t *testing.T) {
 	var ids []string
-	args := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002"},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1002"},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "12345",
 		},
 	}
 
@@ -179,16 +175,14 @@ func testDspThTestAuthKey(t *testing.T) {
 func testDspThTestAuthKey2(t *testing.T) {
 	var ids []string
 	eIDs := []string{"THD_ACNT_1002"}
-	args := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002"},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1002"},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "thr12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "thr12345",
 		},
 	}
 

@@ -50,6 +50,7 @@ require (
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/segmentio/kafka-go v0.4.8
+	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc
 	github.com/streadway/amqp v1.0.0
 	github.com/tinylib/msgp v1.1.5 // indirect
 	github.com/willf/bitset v1.1.11 // indirect

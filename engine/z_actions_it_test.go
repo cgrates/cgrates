@@ -354,8 +354,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
-	ev := &ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
+	ev := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "cdrev1",
 			Event: map[string]interface{}{
@@ -385,7 +384,6 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
 			},
-		},
 	}
 	var ids []string
 	eIDs := []string{"THD_Test"}
@@ -581,8 +579,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 	}
 	var ids []string
 	eIDs := []string{"TH_CGRRPC"}
-	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-		CGREvent: ev}, &ids); err != nil {
+	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
@@ -664,8 +661,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 	}
 	var ids []string
 	eIDs := []string{"THD_PostEvent"}
-	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-		CGREvent: ev}, &ids); err != nil {
+	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)

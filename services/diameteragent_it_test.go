@@ -83,7 +83,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	}
 
 	cfg.DiameterAgentCfg().Enabled = false
-	cfg.GetReloadChan() <- config.SectionToService[ config.DiameterAgentJSON]
+	cfg.GetReloadChan() <- config.SectionToService[config.DiameterAgentJSON]
 	srv.(*DiameterAgent).lnet = "bad_lnet_test"
 	err2 := srv.Reload(ctx, cancel)
 	if err != nil {

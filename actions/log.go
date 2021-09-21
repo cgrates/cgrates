@@ -95,8 +95,7 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 	var rply string
 	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().CDRsConns,
 		utils.CDRsV1ProcessEvent,
-		&engine.ArgV1ProcessEvent{
-			CGREvent: *utils.NMAsCGREvent(cdrLogReq.ExpData[utils.MetaCDR], aL.config.GeneralCfg().DefaultTenant,
-				utils.NestingSep, optsMS),
-		}, &rply)
+		utils.NMAsCGREvent(cdrLogReq.ExpData[utils.MetaCDR], aL.config.GeneralCfg().DefaultTenant,
+			utils.NestingSep, optsMS),
+		&rply)
 }

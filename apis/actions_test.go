@@ -800,7 +800,7 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
-	// expArgs := &engine.ArgV1ProcessEvent{
+	// expArgs := &utils.CGREvent{
 	// 	Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog
 	// 	CGREvent: *utils.NMAsCGREvent(utils.NewOrderedNavigableMap(), "cgrates.org",
 	// 		utils.NestingSep, utils.MapStorage{}),

@@ -31,6 +31,7 @@ type CGREvent struct {
 	ID      string
 	Event   map[string]interface{}
 	APIOpts map[string]interface{}
+	clnb    bool //rpcclonable
 }
 
 func (ev *CGREvent) HasField(fldName string) (has bool) {
@@ -170,6 +171,8 @@ type CGREventWithEeIDs struct {
 	*CGREvent
 }
 
+func (CGREventWithEeIDs) RPCClone() {} // disable rpcClonable from CGREvent
+
 // NMAsCGREvent builds a CGREvent considering Time as time.Now()
 // and Event as linear map[string]interface{} with joined paths
 // treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
@@ -211,4 +214,17 @@ func (args *CGREvent) StartTime(configSTime, tmz string) (time.Time, error) {
 		return IfaceAsTime(tIface, tmz)
 	}
 	return ParseTimeDetectLayout(configSTime, tmz)
+}
+
+// SetCloneable sets if the args should be clonned on internal connections
+func (attr *CGREvent) SetCloneable(rpcCloneable bool) {
+	attr.clnb = rpcCloneable
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *CGREvent) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
 }
