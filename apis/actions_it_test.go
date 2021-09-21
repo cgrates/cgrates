@@ -445,13 +445,15 @@ func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 
 func testActionsStatProcessEvent(t *testing.T) {
 	args := &engine.StatsArgsProcessEvent{
-		StatIDs: []string{"SQ_ID"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "StatsEventTest",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 				utils.Usage:        30 * time.Second,
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsStatsStatIDs: []string{"SQ_ID"},
 			},
 		},
 	}

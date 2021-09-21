@@ -129,6 +129,9 @@ func (t ThresholdSCfg) AsMapInterface(string) interface{} {
 	return mp
 }
 
+func (ThresholdSCfg) SName() string           { return ThresholdSJSON }
+func (t ThresholdSCfg) CloneSection() Section { return t.Clone() }
+
 func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
 	var thdIDs []string
 	if thdOpts.ThresholdIDs != nil {
@@ -138,8 +141,6 @@ func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
 		ThresholdIDs: thdIDs,
 	}
 }
-func (ThresholdSCfg) SName() string           { return ThresholdSJSON }
-func (t ThresholdSCfg) CloneSection() Section { return t.Clone() }
 
 // Clone returns a deep copy of ThresholdSCfg
 func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {

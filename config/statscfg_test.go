@@ -130,6 +130,7 @@ func TestStatSCfgClone(t *testing.T) {
 		PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
+		Opts:                   &StatsOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -162,6 +163,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		PrefixIndexedFields:    &[]string{"*req.index2"},
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
+		Opts:                   &StatsOpts{},
 	}
 
 	v2 := &StatSCfg{
@@ -174,6 +176,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		PrefixIndexedFields:    &[]string{"*req.index22"},
 		SuffixIndexedFields:    &[]string{"*req.index33"},
 		NestedFields:           true,
+		Opts:                   &StatsOpts{},
 	}
 
 	expected := &StatServJsonCfg{
@@ -186,6 +189,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		Prefix_indexed_fields:    &[]string{"*req.index22"},
 		Suffix_indexed_fields:    &[]string{"*req.index33"},
 		Nested_fields:            utils.BoolPointer(true),
+		Opts:                     &StatsOptsJson{},
 	}
 
 	rcv := diffStatServJsonCfg(d, v1, v2)
