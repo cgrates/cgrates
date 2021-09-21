@@ -20,7 +20,6 @@ package accounts
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -132,25 +131,11 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 // accountsDebit will debit an usage out of multiple accounts
 func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
-	usage := decimal.New(int64(72*time.Hour), 0)
 
-	var usgEve *decimal.Big
-	// first we try from opts to search in *usage
-	if usgEve, err = cgrEv.OptsAsDecimal(utils.MetaUsage); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		// not found/ will try in *ratesUsage
-		if usgEve, err = cgrEv.OptsAsDecimal(utils.OptsRatesUsage); err != nil {
-			if err != utils.ErrNotFound {
-				return
-			}
-			err = nil
-		} else { // found, overwrite usage
-			usage = usgEve
-		}
-	} else { // not found either in *usage or *ratesUsage, use default
-		usage = usgEve
+	var usage *decimal.Big
+	if usage, err = cgrEv.OptsAsDecimal(aS.cfg.AccountSCfg().Opts.Usage, utils.OptsAccountsUsage,
+		utils.MetaUsage); err != nil {
+		return
 	}
 	dbted := decimal.New(0, 0)
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))

@@ -21,8 +21,10 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
@@ -55,7 +57,9 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		NestedFields:        true,
 		MaxIterations:       1000,
 		MaxUsage:            usage,
-		Opts:                &AccountsOpts{},
+		Opts: &AccountsOpts{
+			Usage: decimal.New(int64(72*time.Hour), 0),
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.accountSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -107,7 +111,7 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.MaxUsage:               "259200000000000", // 72h in ns
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaAccountIDsCfg: []string(nil),
-			utils.MetaUsage:         utils.EmptyString,
+			utils.MetaUsage:         decimal.New(int64(72*time.Hour), 0),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

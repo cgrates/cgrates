@@ -427,7 +427,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 			utils.Destination: "+445643",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsRatesUsage: "2s",
+			utils.OptsAccountsUsage: "2s",
 		},
 	}
 	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
@@ -513,7 +513,7 @@ func TestAccountsDebit(t *testing.T) {
 			utils.AccountField: "1004",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsRatesUsage: "not_time_format",
+			utils.OptsAccountsUsage: "not_time_format",
 		},
 	}
 

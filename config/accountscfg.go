@@ -21,11 +21,12 @@ package config
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 type AccountsOpts struct {
 	AccountIDs []string
-	Usage      string
+	Usage      *decimal.Big
 }
 
 // AccountSCfg is the configuration of ActionS
@@ -52,7 +53,9 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 		accOpts.AccountIDs = *jsnCfg.AccountIDs
 	}
 	if jsnCfg.Usage != nil {
-		accOpts.Usage = *jsnCfg.Usage
+		if accOpts.Usage, err = utils.StringAsBig(*jsnCfg.Usage); err != nil {
+			return
+		}
 	}
 	return nil
 }
@@ -220,8 +223,8 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 	if !utils.SliceStringEqual(v1.AccountIDs, v2.AccountIDs) {
 		d.AccountIDs = utils.SliceStringPointer(v2.AccountIDs)
 	}
-	if v1.Usage != v2.Usage {
-		d.Usage = utils.StringPointer(v2.Usage)
+	if v1.Usage.Cmp(v2.Usage) != 0 {
+		d.Usage = utils.StringPointer(v2.Usage.String())
 	}
 	return d
 }

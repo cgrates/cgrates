@@ -942,7 +942,7 @@ func testAccDebitConcretes(t *testing.T) {
 			utils.AccountField: "1004",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsRatesUsage:         "27s",
+			utils.OptsAccountsUsage:      "27s",
 			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST7",
 		},
 	}

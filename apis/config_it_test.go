@@ -25,12 +25,14 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/shopspring/decimal"
 )
 
 var (
@@ -286,8 +288,8 @@ func testCfgSetEmptyReload(t *testing.T) {
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaRateProfileIDsCfg: []string(nil),
 				utils.MetaStartTime:         utils.MetaNow,
-				utils.MetaUsage:             "1m",
-				utils.MetaIntervalStartCfg:  "0",
+				utils.MetaUsage:             decimal.New(int64(time.Minute), 0),
+				utils.MetaIntervalStartCfg:  decimal.New(0, 0),
 			},
 		},
 	}

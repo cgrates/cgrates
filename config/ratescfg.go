@@ -21,13 +21,14 @@ package config
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 type RatesOpts struct {
 	RateProfileIDs []string
 	StartTime      string
-	Usage          string
-	IntervalStart  string
+	Usage          *decimal.Big
+	IntervalStart  *decimal.Big
 }
 
 // RateSCfg the rates config section
@@ -58,10 +59,14 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 		rateOpts.StartTime = *jsnCfg.StartTime
 	}
 	if jsnCfg.Usage != nil {
-		rateOpts.Usage = *jsnCfg.Usage
+		if rateOpts.Usage, err = utils.StringAsBig(*jsnCfg.Usage); err != nil {
+			return
+		}
 	}
 	if jsnCfg.IntervalStart != nil {
-		rateOpts.IntervalStart = *jsnCfg.IntervalStart
+		if rateOpts.IntervalStart, err = utils.StringAsBig(*jsnCfg.IntervalStart); err != nil {
+			return
+		}
 	}
 
 	return nil
@@ -242,11 +247,11 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 	if v1.StartTime != v2.StartTime {
 		d.StartTime = utils.StringPointer(v2.StartTime)
 	}
-	if v1.Usage != v2.Usage {
-		d.Usage = utils.StringPointer(v2.Usage)
+	if v1.Usage.Cmp(v2.Usage) != 0 {
+		d.Usage = utils.StringPointer(v2.Usage.String())
 	}
-	if v1.IntervalStart != v2.IntervalStart {
-		d.IntervalStart = utils.StringPointer(v2.IntervalStart)
+	if v1.IntervalStart.Cmp(v2.IntervalStart) != 0 {
+		d.IntervalStart = utils.StringPointer(v2.IntervalStart.String())
 	}
 	return d
 }
