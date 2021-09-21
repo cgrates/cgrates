@@ -21,8 +21,10 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestRateSConfigloadFromJsonCfg(t *testing.T) {
@@ -55,8 +57,8 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		Verbosity:               20,
 		Opts: &RatesOpts{
 			StartTime:     utils.MetaNow,
-			Usage:         "1m",
-			IntervalStart: "0",
+			Usage:         decimal.New(int64(time.Minute), 0),
+			IntervalStart: decimal.New(0, 0),
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -85,8 +87,8 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaRateProfileIDsCfg: []string(nil),
 			utils.MetaStartTime:         utils.MetaNow,
-			utils.MetaUsage:             "1m",
-			utils.MetaIntervalStartCfg:  "0",
+			utils.MetaUsage:             decimal.New(int64(time.Minute), 0),
+			utils.MetaIntervalStartCfg:  decimal.New(0, 0),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -128,8 +130,8 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaRateProfileIDsCfg: []string(nil),
 			utils.MetaStartTime:         utils.MetaNow,
-			utils.MetaUsage:             "1m",
-			utils.MetaIntervalStartCfg:  "0",
+			utils.MetaUsage:             decimal.New(int64(time.Minute), 0),
+			utils.MetaIntervalStartCfg:  decimal.New(0, 0),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

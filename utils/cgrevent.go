@@ -86,13 +86,13 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 }
 
 // OptsAsDecimal OptAsDecimal returns an option as decimal.Big instance
-func (ev *CGREvent) OptsAsDecimal(optName string) (d *decimal.Big, err error) {
-	iface, has := ev.APIOpts[optName]
-	if !has {
-		err = ErrNotFound
-		return
+func (ev *CGREvent) OptsAsDecimal(configUsage *decimal.Big, optNames ...string) (d *decimal.Big, err error) {
+	for _, optName := range optNames {
+		if iface, has := ev.APIOpts[optName]; has {
+			return IfaceAsBig(iface)
+		}
 	}
-	return IfaceAsBig(iface)
+	return configUsage, nil
 }
 
 func (ev *CGREvent) Clone() (clned *CGREvent) {
@@ -211,26 +211,4 @@ func (args *CGREvent) StartTime(configSTime, tmz string) (time.Time, error) {
 		return IfaceAsTime(tIface, tmz)
 	}
 	return ParseTimeDetectLayout(configSTime, tmz)
-}
-
-// usage returns the event time used to check active rate profiles
-func (args *CGREvent) Usage(configUsage string) (usage *decimal.Big, err error) {
-	// first search for the rateUsage in opts
-	if uIface, has := args.APIOpts[OptsRatesUsage]; has {
-		return IfaceAsBig(uIface)
-	}
-	// second search for the usage in opts
-	if uIface, has := args.APIOpts[MetaUsage]; has {
-		return IfaceAsBig(uIface)
-	}
-	// if the usage is not found in the event populate with default value and overwrite the NOT_FOUND error with nil
-	return StringAsBig(configUsage)
-}
-
-// IntervalStart returns the inerval start out of APIOpts received for the event
-func (args *CGREvent) IntervalStart(configIvlStart string) (ivlStart *decimal.Big, err error) {
-	if iface, has := args.APIOpts[OptsRatesIntervalStart]; has {
-		return IfaceAsBig(iface)
-	}
-	return StringAsBig(configIvlStart)
 }

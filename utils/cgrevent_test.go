@@ -335,18 +335,16 @@ func TestCGREventOptAsInt64(t *testing.T) {
 	}
 }
 
-func TestCGREventOptAsDurationEmpty(t *testing.T) {
+func TestCGREventOptAsDurationNoOpts(t *testing.T) {
 	ev := &CGREvent{}
 
-	var expdur *decimal.Big
-	experr := ErrNotFound
-	received, err := ev.OptsAsDecimal("testString")
+	expdur := decimal.New(int64(time.Minute), 0)
+	received, err := ev.OptsAsDecimal(decimal.New(int64(time.Minute), 0), "testString")
 
-	if !reflect.DeepEqual(received, expdur) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expdur, received)
-	}
-	if err == nil || err != experr {
-		t.Errorf("\nExpected: %q, \nReceived: %q", experr, err)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expdur, received) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expdur, received)
 	}
 }
 
@@ -357,7 +355,7 @@ func TestCGREventOptAsDuration(t *testing.T) {
 		},
 	}
 
-	received, err := ev.OptsAsDecimal("*usage")
+	received, err := ev.OptsAsDecimal(decimal.New(int64(72*time.Hour), 0), "*usage")
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, err)
 	}

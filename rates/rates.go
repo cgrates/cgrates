@@ -172,7 +172,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		return
 	}
 	var usage *decimal.Big
-	if usage, err = args.Usage(rS.cfg.RateSCfg().Opts.Usage); err != nil {
+	if usage, err = args.OptsAsDecimal(rS.cfg.RateSCfg().Opts.Usage, utils.OptsRatesUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	var ordRts []*orderedRate
@@ -190,7 +190,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		rpCost.MaxCost = rtPfl.MaxCost
 	}
 	var ivalStart *decimal.Big
-	if ivalStart, err = args.IntervalStart(rS.cfg.RateSCfg().Opts.IntervalStart); err != nil {
+	if ivalStart, err = args.OptsAsDecimal(rS.cfg.RateSCfg().Opts.IntervalStart, utils.OptsRatesIntervalStart); err != nil {
 		return
 	}
 	var costIntervals []*utils.RateSInterval

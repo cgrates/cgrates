@@ -629,7 +629,7 @@ func TestUsageMinute(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	if rcv, err := ev.Usage("60s"); err != nil {
+	if rcv, err := ev.OptsAsDecimal(decimal.New(int64(60*time.Second), 0), OptsRatesUsage, MetaUsage); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(decimal.New(int64(time.Minute), 0), rcv) {
 		t.Errorf("Expected %+v, received %+v", decimal.New(int64(time.Minute), 0), rcv)
@@ -646,7 +646,7 @@ func TestUsageError(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	_, err := ev.Usage("1m")
+	_, err := ev.OptsAsDecimal(decimal.New(int64(time.Minute), 0), OptsRatesUsage, MetaUsage)
 	if err == nil && err.Error() != "received <Unsupported time format" {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	}
@@ -663,7 +663,7 @@ func TestUsage(t *testing.T) {
 		},
 	}
 
-	if result, err := ev.Usage("1m"); err != nil {
+	if result, err := ev.OptsAsDecimal(decimal.New(int64(time.Minute), 0), OptsRatesUsage, MetaUsage); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result.String(), "130000000000") {
 		t.Errorf("Expected <130000000000> , received <%+v>", result.String())
@@ -756,7 +756,7 @@ func TestATDUsage(t *testing.T) {
 		},
 	}
 
-	_, err := ev.Usage("1m")
+	_, err := ev.OptsAsDecimal(decimal.New(int64(time.Minute), 0), OptsRatesUsage, MetaUsage)
 	expected := "cannot convert field: bool to decimal.Big"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
@@ -786,7 +786,7 @@ func TestIntervalStart(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"RP_1001"},
 		},
 	}
-	rcv, err := args.IntervalStart("0")
+	rcv, err := args.OptsAsDecimal(decimal.New(0, 0), OptsRatesIntervalStart)
 	exp := new(decimal.Big).SetUint64(1)
 	if err != nil {
 		t.Error(err)
@@ -801,7 +801,7 @@ func TestIntervalStartDefault(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"RP_1001"},
 		},
 	}
-	rcv, err := args.IntervalStart("0")
+	rcv, err := args.OptsAsDecimal(decimal.New(0, 0), OptsRatesIntervalStart)
 	exp := new(decimal.Big).SetUint64(0)
 	if err != nil {
 		t.Error(err)
