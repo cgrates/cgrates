@@ -52,16 +52,19 @@ var (
 	}
 )
 
-type testRPC struct {
+type TestRPC struct {
+	Event *utils.CGREventWithEeIDs
 }
 
-func (testRPC) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+var testRPC1 TestRPC
 
+func (rpc *TestRPC) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+	rpc.Event = cgrEv
 	return nil
 }
 
 func TestLdPrMatchRtChange(t *testing.T) {
-	birpc.RegisterName(utils.EeSv1, new(testRPC))
+	birpc.RegisterName(utils.EeSv1, &testRPC1)
 	l, err := net.Listen(utils.TCP, ":22012")
 	if err != nil {
 		t.Fatal(err)
@@ -71,7 +74,6 @@ func TestLdPrMatchRtChange(t *testing.T) {
 		for {
 			c, err := l.Accept()
 			if err != nil {
-				t.Log(err)
 				return
 			}
 			go jsonrpc.ServeConn(c)
@@ -157,7 +159,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 				utils.Usage:        time.Minute,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsRateS:      false,
+				utils.OptsRateS:      true,
 				utils.OptsCDRsExport: true,
 			},
 		},
@@ -170,6 +172,23 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
 	}
+	// expected2 := utils.CGREvent{
+	// 	Tenant: "cgrates.org",
+	// 	ID:     "TestEv1",
+	// 	Event: map[string]interface{}{
+	// 		"Altered":         nil,
+	// 		utils.Cost:        0.4,
+	// 		"CostIntervals":   []map[string]interface{}{},
+	// 		"ID":              "RT_RETAIL1",
+	// 		"MaxCost":         0,
+	// 		"MaxCostStrategy": "",
+	// 		"MinCost":         0,
+	// 		"Rates":           map[string]interface{}{},
+	// 	},
+	// }
+	// if !reflect.DeepEqual(utils.ToJSON(expected2.Event), utils.ToJSON(testRPC1.Event.Event["*rateSCost"])) {
+	// 	t.Errorf("\nExpecting : %+v \n,received: %+v", utils.ToJSON(expected2.Event), utils.ToJSON(testRPC1.Event.Event["*rateSCost"]))
+	// }
 
 }
 
