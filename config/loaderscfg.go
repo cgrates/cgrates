@@ -71,7 +71,7 @@ type LoaderSCfg struct {
 	Tenant         string
 	DryRun         bool
 	RunDelay       time.Duration
-	LockFileName   string
+	LockFilePath   string
 	CacheSConns    []string
 	FieldSeparator string
 	TpInDir        string
@@ -134,8 +134,8 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 			return
 		}
 	}
-	if jsnCfg.Lock_filename != nil {
-		l.LockFileName = *jsnCfg.Lock_filename
+	if jsnCfg.Lock_filepath != nil {
+		l.LockFilePath = *jsnCfg.Lock_filepath
 	}
 	if jsnCfg.Caches_conns != nil {
 		l.CacheSConns = make([]string, len(*jsnCfg.Caches_conns))
@@ -193,7 +193,7 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		Tenant:         l.Tenant,
 		DryRun:         l.DryRun,
 		RunDelay:       l.RunDelay,
-		LockFileName:   l.LockFileName,
+		LockFilePath:   l.LockFilePath,
 		CacheSConns:    make([]string, len(l.CacheSConns)),
 		FieldSeparator: l.FieldSeparator,
 		TpInDir:        l.TpInDir,
@@ -232,7 +232,7 @@ func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]inte
 		utils.TenantCfg:       l.Tenant,
 		utils.EnabledCfg:      l.Enabled,
 		utils.DryRunCfg:       l.DryRun,
-		utils.LockFileNameCfg: l.LockFileName,
+		utils.LockFilePathCfg: l.LockFilePath,
 		utils.FieldSepCfg:     l.FieldSeparator,
 		utils.TpInDirCfg:      l.TpInDir,
 		utils.TpOutDirCfg:     l.TpOutDir,

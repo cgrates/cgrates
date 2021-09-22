@@ -32,7 +32,7 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 		"id": "*default",
 		"enabled": true,
 		"tenant": "cgrates.org",
-		"lock_filename": ".cgr.lck",
+		"lock_filepath": ".cgr.lck",
 		"caches_conns": ["*internal","*conn1"],
 		"field_separator": ",",
 		"tp_in_dir": "/var/spool/cgrates/loader/in",
@@ -61,7 +61,7 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 			Enabled:        true,
 			ID:             utils.MetaDefault,
 			Tenant:         ten,
-			LockFileName:   ".cgr.lck",
+			LockFilePath:   ".cgr.lck",
 			CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 			FieldSeparator: ",",
 			TpInDir:        "/var/spool/cgrates/loader/in",
@@ -256,7 +256,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 		"tenant": "~*req.Destination1",										
 		"dry_run": false,									
 		"run_delay": "0",										
-		"lock_filename": ".cgr.lck",						
+		"lock_filepath": ".cgr.lck",						
 		"caches_conns": ["*internal:*caches"],
 		"field_separator": ",",								
 		"tp_in_dir": "/var/spool/cgrates/loader/in",		
@@ -281,7 +281,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.TenantCfg:       "~*req.Destination1",
 			utils.DryRunCfg:       false,
 			utils.RunDelayCfg:     "0",
-			utils.LockFileNameCfg: ".cgr.lck",
+			utils.LockFilePathCfg: ".cgr.lck",
 			utils.CachesConnsCfg:  []string{utils.MetaInternal},
 			utils.FieldSepCfg:     ",",
 			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
@@ -325,8 +325,8 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 			t.Errorf("Expected %+v, received %+v", eMap[0][utils.CachesConnsCfg], rcv[0][utils.CachesConnsCfg])
 		} else if !reflect.DeepEqual(eMap[0][utils.TpInDirCfg], rcv[0][utils.TpInDirCfg]) {
 			t.Errorf("Expected %+v, received %+v", eMap[0][utils.TpInDirCfg], rcv[0][utils.TpInDirCfg])
-		} else if !reflect.DeepEqual(eMap[0][utils.LockFileNameCfg], rcv[0][utils.LockFileNameCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[0][utils.LockFileNameCfg], rcv[0][utils.LockFileNameCfg])
+		} else if !reflect.DeepEqual(eMap[0][utils.LockFilePathCfg], rcv[0][utils.LockFilePathCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[0][utils.LockFilePathCfg], rcv[0][utils.LockFilePathCfg])
 		}
 	}
 }
@@ -340,7 +340,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 		"tenant": "~*req.Destination1",										
 		"dry_run": false,									
 		"run_delay": "1",										
-		"lock_filename": ".cgr.lck",						
+		"lock_filepath": ".cgr.lck",						
 		"caches_conns": ["*conn1"],
 		"field_separator": ",",								
 		"tp_in_dir": "/var/spool/cgrates/loader/in",		
@@ -365,7 +365,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.TenantCfg:       "~*req.Destination1",
 			utils.DryRunCfg:       false,
 			utils.RunDelayCfg:     "0",
-			utils.LockFileNameCfg: ".cgr.lck",
+			utils.LockFilePathCfg: ".cgr.lck",
 			utils.CachesConnsCfg:  []string{"*conn1"},
 			utils.FieldSepCfg:     ",",
 			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
@@ -405,7 +405,7 @@ func TestLoaderSCfgsClone(t *testing.T) {
 		Enabled:        true,
 		ID:             utils.MetaDefault,
 		Tenant:         "cgrate.org",
-		LockFileName:   ".cgr.lck",
+		LockFilePath:   ".cgr.lck",
 		CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		FieldSeparator: ",",
 		TpInDir:        "/var/spool/cgrates/loader/in",

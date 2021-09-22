@@ -485,7 +485,7 @@ type LoaderJsonCfg struct {
 	Tenant          *string
 	Dry_run         *bool
 	Run_delay       *string
-	Lock_filename   *string
+	Lock_filepath   *string
 	Caches_conns    *[]string
 	Field_separator *string
 	Tp_in_dir       *string
