@@ -1111,9 +1111,3 @@ func (unitFactor *TPBalanceUnitFactor) AsString() (s string) {
 	s = s + InfieldSep + strconv.FormatFloat(unitFactor.Factor, 'f', -1, 64)
 	return
 }
-
-// ArgActionSv1ScheduleActions is used in ActionSv1 methods
-type ArgActionSv1ScheduleActions struct {
-	*CGREvent
-	ActionProfileIDs []string
-}

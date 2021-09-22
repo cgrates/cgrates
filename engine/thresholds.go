@@ -152,6 +152,12 @@ func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actio
 		return
 	}
 
+	if args.APIOpts == nil {
+		args.APIOpts = make(map[string]interface{})
+	}
+
+	args.APIOpts[utils.OptsActionsActionProfileIDs] = t.tPrfl.ActionProfileIDs
+
 	// var tntAcnt string
 	// var acnt string
 	// if utils.IfaceAsString(args.APIOpts[utils.MetaEventType]) == utils.AccountUpdate {
@@ -165,16 +171,11 @@ func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actio
 
 	var reply string
 	if !t.tPrfl.Async {
-		return connMgr.Call(ctx, actionsConns, utils.ActionSv1ExecuteActions, &utils.ArgActionSv1ScheduleActions{
-			CGREvent:         args,
-			ActionProfileIDs: t.tPrfl.ActionProfileIDs,
-		}, &reply)
+		return connMgr.Call(ctx, actionsConns, utils.ActionSv1ExecuteActions, args, &reply)
 	}
 	go func() {
-		if errExec := connMgr.Call(context.Background(), actionsConns, utils.ActionSv1ExecuteActions, &utils.ArgActionSv1ScheduleActions{
-			CGREvent:         args,
-			ActionProfileIDs: t.tPrfl.ActionProfileIDs,
-		}, &reply); errExec != nil {
+		if errExec := connMgr.Call(context.Background(), actionsConns, utils.ActionSv1ExecuteActions,
+			args, &reply); errExec != nil {
 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.TenantID(), errExec.Error()))
 		}
 	}()

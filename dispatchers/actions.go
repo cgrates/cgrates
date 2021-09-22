@@ -37,15 +37,13 @@ func (dS *DispatcherService) ActionSv1Ping(args *utils.CGREvent, rpl *string) (e
 	return dS.Dispatch(context.TODO(), args, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
+func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.CGREvent, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.ArgActionSv1ScheduleActions{
-			CGREvent: &utils.CGREvent{},
-		}
+		args = &utils.CGREvent{}
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ActionSv1ScheduleActions, tnt,
@@ -53,18 +51,16 @@ func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.ArgActionSv1Sc
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaActions, utils.ActionSv1ScheduleActions, args, rpl)
+	return dS.Dispatch(context.TODO(), args, utils.MetaActions, utils.ActionSv1ScheduleActions, args, rpl)
 }
 
-func (dS *DispatcherService) ActionSv1ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
+func (dS *DispatcherService) ActionSv1ExecuteActions(args *utils.CGREvent, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.ArgActionSv1ScheduleActions{
-			CGREvent: &utils.CGREvent{},
-		}
+		args = &utils.CGREvent{}
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ActionSv1Ping, tnt,
@@ -72,5 +68,5 @@ func (dS *DispatcherService) ActionSv1ExecuteActions(args *utils.ArgActionSv1Sch
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
+	return dS.Dispatch(context.TODO(), args, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
 }

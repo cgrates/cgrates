@@ -68,10 +68,8 @@ func TestDspActionSv1PingErrorNil(t *testing.T) {
 func TestDspActionSv1ScheduleActionsNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *string
 	result := dspSrv.ActionSv1ScheduleActions(CGREvent, reply)
@@ -85,10 +83,8 @@ func TestDspActionSv1ScheduleActionsErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *string
 	result := dspSrv.ActionSv1ScheduleActions(CGREvent, reply)
@@ -113,10 +109,8 @@ func TestDspActionSv1ScheduleActionsNilArgs(t *testing.T) {
 func TestDspActionSv1ExecuteActionsNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *string
 	result := dspSrv.ActionSv1ExecuteActions(CGREvent, reply)
@@ -130,10 +124,8 @@ func TestDspActionSv1ExecuteActionsErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *string
 	result := dspSrv.ActionSv1ExecuteActions(CGREvent, reply)

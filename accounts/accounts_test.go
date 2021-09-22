@@ -522,7 +522,7 @@ func TestAccountsDebit(t *testing.T) {
 		cgrEvent, false, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	delete(cgrEvent.APIOpts, utils.OptsRatesUsage)
+	delete(cgrEvent.APIOpts, utils.OptsAccountsUsage)
 
 	cgrEvent.APIOpts[utils.MetaUsage] = "not_time_format"
 	if _, err := accnts.accountsDebit(context.Background(), accntsPrf,

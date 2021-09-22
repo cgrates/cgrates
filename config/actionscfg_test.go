@@ -55,6 +55,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		SuffixIndexedFields:      &[]string{"*req.index1"},
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1", "val2"},
+		Opts:                     &ActionsOpts{},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -97,6 +98,9 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.index1"},
 		utils.NestedFieldsCfg:           true,
 		utils.DynaprepaidActionplansCfg: []string{},
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaActionProfileIDsCfg: []string(nil),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -120,6 +124,7 @@ func TestActionSCfgClone(t *testing.T) {
 		SuffixIndexedFields:      &[]string{"*req.index1"},
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1"},
+		Opts:                     &ActionsOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -174,6 +179,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		SuffixIndexedFields:      &[]string{},
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{},
+		Opts:                     &ActionsOpts{},
 	}
 
 	v2 := &ActionSCfg{
@@ -190,6 +196,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		SuffixIndexedFields:      nil,
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
+		Opts:                     &ActionsOpts{},
 	}
 
 	expected := &ActionSJsonCfg{
@@ -206,6 +213,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:     nil,
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{"dynaprepaid"},
+		Opts:                      &ActionsOptsJson{},
 	}
 
 	rcv := diffActionSJsonCfg(d, v1, v2)
@@ -215,7 +223,9 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 
 	//The output "d" should be nil when there isn't any difference between v1 and v2_2
 	v2_2 := v1
-	expected2 := &ActionSJsonCfg{}
+	expected2 := &ActionSJsonCfg{
+		Opts: &ActionsOptsJson{},
+	}
 	rcv = diffActionSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))

@@ -130,17 +130,16 @@ func testDspRPrfCostForEvent(t *testing.T) {
 	}
 
 	var rpCost *utils.RateProfileCost
-	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.ArgsCostForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "DefaultRate",
-			Event: map[string]interface{}{
-				utils.Subject: "1001",
-			},
+	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "DefaultRate",
+		Event: map[string]interface{}{
+			utils.Subject: "1001",
+		},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "rPrf12345",
-			}}}, &rpCost); err != nil {
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "rPrf12345",
+		}}, &rpCost); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpCost, exp) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rpCost))
@@ -195,18 +194,15 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 	}
 
 	var rpCost *utils.RateProfileCost
-	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.ArgsCostForEvent{
-		CGREvent: &utils.CGREvent{
-
-			Tenant: "cgrates.org",
-			ID:     "EVENT_RATE",
-			Event: map[string]interface{}{
-				utils.Subject: "1002",
-			},
-
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "rPrf12345",
-			}}}, &rpCost); err != nil {
+	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EVENT_RATE",
+		Event: map[string]interface{}{
+			utils.Subject: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "rPrf12345",
+		}}, &rpCost); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpCost, exp) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rpCost))
