@@ -48,7 +48,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		ldrID:         cfg.ID,
 		tpInDir:       cfg.TpInDir,
 		tpOutDir:      cfg.TpOutDir,
-		lockFilename:  cfg.LockFileName,
+		lockFilepath:  cfg.LockFilePath,
 		fieldSep:      cfg.FieldSeparator,
 		runDelay:      cfg.RunDelay,
 		dataTpls:      make(map[string][]*config.FCTemplate),
@@ -91,7 +91,7 @@ type Loader struct {
 	ldrID         string
 	tpInDir       string
 	tpOutDir      string
-	lockFilename  string
+	lockFilepath  string
 	fieldSep      string
 	runDelay      time.Duration
 	dataTpls      map[string][]*config.FCTemplate      // map[loaderType]*config.FCTemplate
@@ -131,19 +131,23 @@ func (ldr *Loader) ProcessFolder(caching, loadOption string, stopOnError bool) (
 
 // lockFolder will attempt to lock the folder by creating the lock file
 func (ldr *Loader) lockFolder() (err error) {
-	_, err = os.OpenFile(path.Join(ldr.tpInDir, ldr.lockFilename),
+	if _, err = os.Stat(ldr.lockFilepath); err != nil && os.IsNotExist(err) {
+		return fmt.Errorf("file: %v not found", ldr.lockFilepath)
+	}
+	_, err = os.OpenFile(ldr.lockFilepath,
 		os.O_RDONLY|os.O_CREATE, 0644)
 	return
 }
 
 func (ldr *Loader) unlockFolder() (err error) {
-	return os.Remove(path.Join(ldr.tpInDir,
-		ldr.lockFilename))
+	if _, err = os.Stat(ldr.lockFilepath); err == nil {
+		return os.Remove(ldr.lockFilepath)
+	}
+	return
 }
 
 func (ldr *Loader) isFolderLocked() (locked bool, err error) {
-	if _, err = os.Stat(path.Join(ldr.tpInDir,
-		ldr.lockFilename)); err == nil {
+	if _, err = os.Stat(ldr.lockFilepath); err == nil {
 		return true, nil
 	}
 	if os.IsNotExist(err) {
@@ -166,7 +170,7 @@ func (ldr *Loader) moveFiles() (err error) {
 	filesInDir, _ := os.ReadDir(ldr.tpInDir)
 	for _, file := range filesInDir {
 		fName := file.Name()
-		if fName == ldr.lockFilename {
+		if fName == ldr.lockFilepath {
 			continue
 		}
 		oldPath := path.Join(ldr.tpInDir, fName)

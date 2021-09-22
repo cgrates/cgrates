@@ -2150,7 +2150,7 @@ const (
 
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"
-	LockFileNameCfg = "lock_filename"
+	LockFilePathCfg = "lock_filepath"
 	TpInDirCfg      = "tp_in_dir"
 	TpOutDirCfg     = "tp_out_dir"
 	DataCfg         = "data"
