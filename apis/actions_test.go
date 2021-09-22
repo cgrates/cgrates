@@ -502,24 +502,24 @@ func TestActionsAPIs(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		ActionProfileIDs: []string{"actPrfID"},
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+		},
 	}
 
-	if err := aSv1.ScheduleActions(context.Background(), args, &reply); err != nil {
+	if err := aSv1.ScheduleActions(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), args, &reply); err != nil {
+	if err := aSv1.ExecuteActions(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
@@ -538,6 +538,9 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "THD_ID",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
 		},
 	}
 	var executed bool
@@ -593,18 +596,18 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	}
 
 	// ExecuteActions with ResetThreshold
-	argsAct := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventExecuteActions",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		ActionProfileIDs: []string{"actPrfID"},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+	if err := aSv1.ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -630,6 +633,9 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "SQ_ID",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
 		},
 	}
 	var executed bool
@@ -685,18 +691,18 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	}
 
 	// ExecuteActions with ResetStatQueue
-	argsAct := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventExecuteActions",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		ActionProfileIDs: []string{"actPrfID"},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+	if err := aSv1.ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -758,18 +764,18 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	}
 
 	// ExecuteActions with Log
-	argsAct := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventExecuteActions",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		ActionProfileIDs: []string{"actPrfID"},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+	if err := aSv1.ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -777,9 +783,9 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	}
 
 	// Check if the log action was executed
-	expected := `CGRateS <> [INFO] LOG Event: {"*opts":null,"*req":{"Account":"1001"}}`
+	expected := `{"*opts":{"*actionProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
 	if rcv := buf.String(); !strings.Contains(rcv, expected) {
-		t.Errorf("Expected log: %q", expected)
+		t.Errorf("Expected log: %s to be included in %s", expected, rcv)
 	}
 
 	utils.Logger.SetLogLevel(0)
@@ -847,22 +853,22 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	}
 
 	// ExecuteActions with CDRLog
-	argsAct := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventExecuteActions",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Tenant:       "cgrates.org",
-				utils.BalanceType:  utils.MetaConcrete,
-				utils.Cost:         0.15,
-				utils.ActionType:   utils.MetaTopUp,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Tenant:       "cgrates.org",
+			utils.BalanceType:  utils.MetaConcrete,
+			utils.Cost:         0.15,
+			utils.ActionType:   utils.MetaTopUp,
 		},
-		ActionProfileIDs: []string{"actPrfID"},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+	if err := aSv1.ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -944,18 +950,18 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	}
 
 	// ExecuteActions with SetBalance
-	argsAct := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventExecuteActions",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		ActionProfileIDs: []string{"actPrfID"},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+	if err := aSv1.ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1036,18 +1042,18 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	}
 
 	// ExecuteActions with RemBalance
-	argsAct := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventExecuteActions",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		ActionProfileIDs: []string{"actPrfID"},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+	if err := aSv1.ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1129,18 +1135,18 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	}
 
 	// ExecuteActions with AddBalance
-	argsAct := &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventExecuteActions",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventExecuteActions",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		ActionProfileIDs: []string{"actPrfID"},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+		},
 	}
 
-	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+	if err := aSv1.ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

@@ -147,7 +147,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		ersCfg:       new(ERsCfg),
 		eesCfg:       &EEsCfg{Cache: make(map[string]*CacheParamCfg)},
 		rateSCfg:     &RateSCfg{Opts: &RatesOpts{}},
-		actionSCfg:   new(ActionSCfg),
+		actionSCfg:   &ActionSCfg{Opts: &ActionsOpts{}},
 		sipAgentCfg:  new(SIPAgentCfg),
 		configSCfg:   new(ConfigSCfg),
 		apiBanCfg:    new(APIBanCfg),

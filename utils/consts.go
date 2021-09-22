@@ -1868,6 +1868,9 @@ const (
 	ClientSecretsCfg      = "client_secrets"
 	ClientDictionariesCfg = "client_dictionaries"
 
+	// ActionSCfg
+	MetaActionProfileIDsCfg = "*actionProfileIDs"
+
 	// AttributeSCfg
 	IndexedSelectsCfg   = "indexed_selects"
 	ProfileRunsCfg      = "profile_runs"
@@ -2111,7 +2114,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, OptsCDRsAttributeS, OptsCDRsChargerS, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS, OptsCDRsRateS, OptsAccountS,
-	OptsAccountsUsage, OptsStatsStatIDs})
+	OptsAccountsUsage, OptsStatsStatIDs, OptsActionsActionProfileIDs})
 
 // Event Opts
 const (
@@ -2156,6 +2159,20 @@ const (
 	OptsSesTerminate              = "*sesTerminate"
 	OptsSesMessage                = "*sesMessage"
 
+	// Accounts
+	OptsAccountsUsage      = "*accountsUsage"
+	OptsAccountS           = "*accountS"
+	OptsAccountsAccountIDs = "*accountIDs"
+
+	// Actions
+	OptsActionsActionProfileIDs = "*actionProfileIDs"
+
+	// Attributes
+	OptsAttributesAttributeIDs = "*attributeIDs"
+	OptsAttributesProfileRuns  = "*attrProfileRuns"
+	OptsAttributesProcessRuns  = "*attrProcessRuns"
+
+	// CDRs
 	OptsCDRsAttributeS = "*cdrsAttributeS"
 	OptsCDRsChargerS   = "*cdrsChargerS"
 	OptsCDRsExport     = "*cdrsExport"
@@ -2166,16 +2183,32 @@ const (
 	OptsCDRsThresholdS = "*cdrsThresholdS"
 	OptsCDRsRateS      = "*cdrsRateS"
 
+	// DispatcherS
+	OptsAPIKey                   = "*apiKey"
+	OptsRouteID                  = "*routeID"
+	OptsDispatchersProfilesCount = "*dispatchersProfilesCount"
+
+	// EEs
+	OptsEEsVerbose = "*eesVerbose"
+
+	// Rates
+	OptsRatesRateProfileIDs = "*rateProfileIDs"
+	OptsRatesStartTime      = "*ratesStartTime"
+	OptsRatesUsage          = "*ratesUsage"
+	OptsRatesIntervalStart  = "*ratesIntervalStart"
+
+	// Routes
 	OptsRoutesProfileCount = "*rouProfileCount"
 	OptsRoutesLimit        = "*rouLimit"
 	OptsRoutesOffset       = "*rouOffset"
 	OptsRoutesIgnoreErrors = "*rouIgnoreErrors"
 	OptsRoutesMaxCost      = "*rouMaxCost"
 
-	OptsRatesRateProfileIDs = "*rateProfileIDs"
-	OptsRatesStartTime      = "*ratesStartTime"
-	OptsRatesUsage          = "*ratesUsage"
-	OptsRatesIntervalStart  = "*ratesIntervalStart"
+	// Stats
+	OptsStatsStatIDs = "*statIDs"
+
+	// Thresholds
+	OptsThresholdsThresholdIDs = "*thresholdIDs"
 
 	// STIR
 	OptsStirATest              = "*stirATest"
@@ -2187,27 +2220,14 @@ const (
 	OptsStirDestinationURI     = "*stirDestinationURI"
 	OptsStirPublicKeyPath      = "*stirPublicKeyPath"
 	OptsStirPrivateKeyPath     = "*stirPrivateKeyPath"
-	// DispatcherS
-	OptsAPIKey                   = "*apiKey"
-	OptsRouteID                  = "*routeID"
-	OptsDispatchersProfilesCount = "*dispatchersProfilesCount"
-	// EEs
-	OptsEEsVerbose = "*eesVerbose"
+
 	// Others
-	OptsContext                = "*context"
-	Subsys                     = "*subsys"
-	MetaMethod                 = "*reqMethod"
-	OptsAccountsUsage          = "*accountsUsage"
-	OptsAccountS               = "*accountS"
-	OptsAccountsAccountIDs     = "*accountIDs"
-	OptsAttributesAttributeIDs = "*attributeIDs"
-	OptsAttributesProfileRuns  = "*attrProfileRuns"
-	OptsAttributesProcessRuns  = "*attrProcessRuns"
-	OptsStatsStatIDs           = "*statIDs"
-	OptsThresholdsThresholdIDs = "*thresholdIDs"
-	MetaEventType              = "*eventType"
-	EventType                  = "EventType"
-	SchedulerInit              = "SchedulerInit"
+	OptsContext   = "*context"
+	Subsys        = "*subsys"
+	MetaMethod    = "*reqMethod"
+	MetaEventType = "*eventType"
+	EventType     = "EventType"
+	SchedulerInit = "SchedulerInit"
 
 	RemoteHostOpt = "*rmtHost"
 	CacheOpt      = "*cache"

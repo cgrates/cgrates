@@ -149,11 +149,11 @@ type ActionSv1 struct {
 }
 
 // ScheduleActions will be called to schedule actions matching the arguments
-func (aSv1 *ActionSv1) ScheduleActions(ctx *context.Context, args *utils.ArgActionSv1ScheduleActions, rpl *string) error {
+func (aSv1 *ActionSv1) ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) error {
 	return aSv1.aS.V1ScheduleActions(ctx, args, rpl)
 }
 
 // ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
-func (aSv1 *ActionSv1) ExecuteActions(ctx *context.Context, args *utils.ArgActionSv1ScheduleActions, rpl *string) error {
+func (aSv1 *ActionSv1) ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) error {
 	return aSv1.aS.V1ExecuteActions(ctx, args, rpl)
 }

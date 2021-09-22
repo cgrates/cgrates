@@ -262,9 +262,13 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 }
 
 // V1ScheduleActions will be called to schedule actions matching the arguments
-func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
-	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args.CGREvent},
-		args.ActionProfileIDs, false); err != nil {
+func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+	var actPrfIDs []string
+	if actPrfIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsActionsActionProfileIDs); err != nil {
+		return
+	}
+	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args},
+		actPrfIDs, false); err != nil {
 		return
 	}
 	*rpl = utils.OK
@@ -272,10 +276,14 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.ArgAction
 }
 
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
-func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
+func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+	var actPrfIDs []string
+	if actPrfIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsActionsActionProfileIDs); err != nil {
+		return
+	}
 	var schedActSet []*scheduledActs
-	if schedActSet, err = aS.scheduledActions(ctx, args.CGREvent.Tenant,
-		args.CGREvent, args.ActionProfileIDs, true); err != nil {
+	if schedActSet, err = aS.scheduledActions(ctx, args.Tenant,
+		args, actPrfIDs, true); err != nil {
 		return
 	}
 	var partExec bool

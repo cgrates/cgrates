@@ -286,6 +286,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
+		Opts:                &StatsOpts{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.StatSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.StatSCfg()))

@@ -199,16 +199,14 @@ func testAccActionsSetActionProfile(t *testing.T) {
 
 func testAccActionsExecuteAction(t *testing.T) {
 	var reply string
-	if err := accSRPC.Call(utils.ActionSv1ExecuteActions, &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				"Account": 1001,
-			},
-			APIOpts: map[string]interface{}{
-				"BAL_NEW": true,
-				"BAL_ADD": true,
-			},
+	if err := accSRPC.Call(utils.ActionSv1ExecuteActions, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"Account": 1001,
+		},
+		APIOpts: map[string]interface{}{
+			"BAL_NEW": true,
+			"BAL_ADD": true,
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -219,18 +217,16 @@ func testAccActionsExecuteAction(t *testing.T) {
 
 func testAccActionsExecuteAction2(t *testing.T) {
 	var reply string
-	if err := accSRPC.Call(utils.ActionSv1ExecuteActions, &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				"Account": 1001,
-			},
-			APIOpts: map[string]interface{}{
-				"BAL_NEW": true,
-				"BAL_ADD": true,
-			},
+	if err := accSRPC.Call(utils.ActionSv1ExecuteActions, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"Account": 1001,
 		},
-		ActionProfileIDs: []string{"CREATE_ACC"},
+		APIOpts: map[string]interface{}{
+			"BAL_NEW":                         true,
+			"BAL_ADD":                         true,
+			utils.OptsActionsActionProfileIDs: []string{"CREATE_ACC"},
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -323,14 +319,14 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 
 func testAccActionsExecuteAction3(t *testing.T) {
 	var reply string
-	if err := accSRPC.Call(utils.ActionSv1ExecuteActions, &utils.ArgActionSv1ScheduleActions{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				"Account": 1001,
-			},
+	if err := accSRPC.Call(utils.ActionSv1ExecuteActions, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"Account": 1001,
 		},
-		ActionProfileIDs: []string{"REM_ACC"},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsActionProfileIDs: []string{"REM_ACC"},
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

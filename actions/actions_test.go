@@ -354,16 +354,14 @@ func TestV1ScheduleActions(t *testing.T) {
 	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	var reply string
-	newArgs := &utils.ArgActionSv1ScheduleActions{
-		ActionProfileIDs: []string{},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "test_id1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Destination:  1002,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "test_id1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  1002,
 		},
+		APIOpts: map[string]interface{}{},
 	}
 
 	actPrf := &engine.ActionProfile{
@@ -388,14 +386,14 @@ func TestV1ScheduleActions(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := acts.V1ScheduleActions(context.Background(), newArgs, &reply); err != nil {
+	if err := acts.V1ScheduleActions(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply %+v", reply)
 	}
 
-	newArgs.ActionProfileIDs = []string{"invalid_id"}
-	if err := acts.V1ScheduleActions(context.Background(), newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+	ev.APIOpts[utils.OptsActionsActionProfileIDs] = []string{"invalid_id"}
+	if err := acts.V1ScheduleActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
@@ -412,16 +410,14 @@ func TestV1ExecuteActions(t *testing.T) {
 	acts := NewActionS(defaultCfg, filters, dm, nil)
 
 	var reply string
-	newArgs := &utils.ArgActionSv1ScheduleActions{
-		ActionProfileIDs: []string{},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "test_id1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Destination:  1002,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "test_id1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  1002,
 		},
+		APIOpts: map[string]interface{}{},
 	}
 
 	actPrf := &engine.ActionProfile{
@@ -445,22 +441,22 @@ func TestV1ExecuteActions(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := acts.V1ExecuteActions(context.Background(), newArgs, &reply); err != nil {
+	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply %+v", reply)
 	}
 
-	newArgs.ActionProfileIDs = []string{"invalid_id"}
-	if err := acts.V1ExecuteActions(context.Background(), newArgs, &reply); err == nil || err != utils.ErrNotFound {
+	ev.APIOpts[utils.OptsActionsActionProfileIDs] = []string{"invalid_id"}
+	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
 	newData := &dataDBMockError{}
 	newDm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	newActs := NewActionS(defaultCfg, filters, newDm, nil)
-	newArgs.ActionProfileIDs = []string{}
-	if err := newActs.V1ExecuteActions(context.Background(), newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+	ev.APIOpts[utils.OptsActionsActionProfileIDs] = []string{}
+	if err := newActs.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 

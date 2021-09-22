@@ -47,6 +47,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
+		Opts:                   &StatsOpts{},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.statsCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -80,6 +81,9 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg:    []string{},
 		utils.SuffixIndexedFieldsCfg:    []string{},
 		utils.NestedFieldsCfg:           false,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaStatIDsCfg: []string(nil),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -112,6 +116,9 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg:    []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.suffix_indexed_fields"},
 		utils.NestedFieldsCfg:           true,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaStatIDsCfg: []string(nil),
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -198,7 +205,9 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	expected = &StatServJsonCfg{}
+	expected = &StatServJsonCfg{
+		Opts: &StatsOptsJson{},
+	}
 	rcv = diffStatServJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))

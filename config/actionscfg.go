@@ -23,6 +23,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type ActionsOpts struct {
+	ActionProfileIDs []string
+}
+
 // ActionSCfg is the configuration of ActionS
 type ActionSCfg struct {
 	Enabled                  bool
@@ -38,6 +42,7 @@ type ActionSCfg struct {
 	SuffixIndexedFields      *[]string
 	NestedFields             bool
 	DynaprepaidActionProfile []string
+	Opts                     *ActionsOpts
 }
 
 // loadActionSCfg loads the ActionS section of the configuration
@@ -47,6 +52,17 @@ func (acS *ActionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig)
 		return
 	}
 	return acS.loadFromJSONCfg(jsnActionCfg)
+}
+
+func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.ActionProfileIDs != nil {
+		actOpts.ActionProfileIDs = *jsnCfg.ActionProfileIDs
+	}
+
+	return nil
 }
 
 func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
@@ -95,16 +111,23 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 			acS.DynaprepaidActionProfile[i] = val
 		}
 	}
+	if jsnCfg.Opts != nil {
+		acS.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS ActionSCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaActionProfileIDsCfg: acS.Opts.ActionProfileIDs,
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                acS.Enabled,
 		utils.IndexedSelectsCfg:         acS.IndexedSelects,
 		utils.NestedFieldsCfg:           acS.NestedFields,
 		utils.DynaprepaidActionplansCfg: acS.DynaprepaidActionProfile,
+		utils.OptsCfg:                   opts,
 	}
 	if acS.CDRsConns != nil {
 		mp[utils.CDRsConnsCfg] = getInternalJSONConns(acS.CDRsConns)
@@ -139,12 +162,23 @@ func (acS ActionSCfg) AsMapInterface(string) interface{} {
 func (ActionSCfg) SName() string             { return ActionSJSON }
 func (acS ActionSCfg) CloneSection() Section { return acS.Clone() }
 
+func (actOpts *ActionsOpts) Clone() *ActionsOpts {
+	var actPrfIDs []string
+	if actOpts.ActionProfileIDs != nil {
+		actPrfIDs = utils.CloneStringSlice(actOpts.ActionProfileIDs)
+	}
+	return &ActionsOpts{
+		ActionProfileIDs: actPrfIDs,
+	}
+}
+
 // Clone returns a deep copy of ActionSCfg
 func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 	cln = &ActionSCfg{
 		Enabled:        acS.Enabled,
 		IndexedSelects: acS.IndexedSelects,
 		NestedFields:   acS.NestedFields,
+		Opts:           acS.Opts.Clone(),
 	}
 	if acS.CDRsConns != nil {
 		cln.CDRsConns = utils.CloneStringSlice(acS.CDRsConns)
@@ -182,6 +216,10 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 	return
 }
 
+type ActionsOptsJson struct {
+	ActionProfileIDs *[]string `json:"*actionProfileIDs"`
+}
+
 // Action service config section
 type ActionSJsonCfg struct {
 	Enabled                   *bool
@@ -197,6 +235,17 @@ type ActionSJsonCfg struct {
 	Suffix_indexed_fields     *[]string
 	Nested_fields             *bool // applies when indexed fields is not defined
 	Dynaprepaid_actionprofile *[]string
+	Opts                      *ActionsOptsJson
+}
+
+func diffActionsOptsJsonCfg(d *ActionsOptsJson, v1, v2 *ActionsOpts) *ActionsOptsJson {
+	if d == nil {
+		d = new(ActionsOptsJson)
+	}
+	if !utils.SliceStringEqual(v1.ActionProfileIDs, v2.ActionProfileIDs) {
+		d.ActionProfileIDs = utils.SliceStringPointer(v2.ActionProfileIDs)
+	}
+	return d
 }
 
 func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
@@ -243,5 +292,6 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 	if !utils.SliceStringEqual(v1.DynaprepaidActionProfile, v2.DynaprepaidActionProfile) {
 		d.Dynaprepaid_actionprofile = utils.SliceStringPointer(getInternalJSONConns(v2.DynaprepaidActionProfile))
 	}
+	d.Opts = diffActionsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }

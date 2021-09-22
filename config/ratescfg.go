@@ -48,6 +48,15 @@ type RateSCfg struct {
 	Opts                    *RatesOpts
 }
 
+// loadRateSCfg loads the rates section of the configuration
+func (rCfg *RateSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+	jsnRateCfg := new(RateSJsonCfg)
+	if err = jsnCfg.GetSection(ctx, RateSJSON, jsnRateCfg); err != nil {
+		return
+	}
+	return rCfg.loadFromJSONCfg(jsnRateCfg)
+}
+
 func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	if jsnCfg == nil {
 		return nil
@@ -70,15 +79,6 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	}
 
 	return nil
-}
-
-// loadRateSCfg loads the rates section of the configuration
-func (rCfg *RateSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
-	jsnRateCfg := new(RateSJsonCfg)
-	if err = jsnCfg.GetSection(ctx, RateSJSON, jsnRateCfg); err != nil {
-		return
-	}
-	return rCfg.loadFromJSONCfg(jsnRateCfg)
 }
 
 func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
@@ -166,6 +166,9 @@ func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	return mp
 }
 
+func (RateSCfg) SName() string              { return RateSJSON }
+func (rCfg RateSCfg) CloneSection() Section { return rCfg.Clone() }
+
 func (rateOpts *RatesOpts) Clone() *RatesOpts {
 	var rtIDs []string
 	if rateOpts.RateProfileIDs != nil {
@@ -178,8 +181,6 @@ func (rateOpts *RatesOpts) Clone() *RatesOpts {
 		IntervalStart:  rateOpts.IntervalStart,
 	}
 }
-func (RateSCfg) SName() string              { return RateSJSON }
-func (rCfg RateSCfg) CloneSection() Section { return rCfg.Clone() }
 
 // Clone returns a deep copy of RateSCfg
 func (rCfg RateSCfg) Clone() (cln *RateSCfg) {

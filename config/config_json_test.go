@@ -859,6 +859,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Prefix_indexed_fields:    &[]string{},
 		Suffix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
+		Opts:                     &StatsOptsJson{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -2264,6 +2265,7 @@ func TestDfActionSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:     &[]string{},
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{},
+		Opts:                      &ActionsOptsJson{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

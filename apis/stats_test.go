@@ -485,6 +485,7 @@ func TestStatsAPIs(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.MetaEventType:              utils.StatUpdate,
 				utils.OptsThresholdsThresholdIDs: []string{"thdID"},
+				utils.OptsStatsStatIDs:           []string{"sq1", "sq2"},
 			},
 		},
 	}
