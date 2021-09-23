@@ -39,11 +39,10 @@
 		"enabled": true
 	},
 
-
 	"cdrs": {
 		"enabled": true,
 		"chargers_conns":["*internal"],
-		//"accounts_conns": ["*localhost"]
+		"accounts_conns": ["*localhost"],
 		"rates_conns": ["*localhost"],
 		"ees_conns": ["conn1"]
 	},

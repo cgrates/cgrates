@@ -27,6 +27,50 @@
 		"db_name": "cgrates",
 		"db_port": 27017,
 	},
+	"loaders": [
+		{
+			"id": "*default",
+			"enabled": true,
+			"tenant": "cgrates.org",
+			"tp_in_dir": "/usr/share/cgrates/tariffplans/loadRateTest",
+			"tp_out_dir": "",
+		},
+	],
+	
+	"rates": {
+		"enabled": true
+	},
+
+	"cdrs": {
+		"enabled": true,
+		"chargers_conns":["*internal"],
+		"accounts_conns": ["*localhost"],
+		"rates_conns": ["*localhost"],
+		"ees_conns": ["conn1"]
+	},
+	
+	"chargers": {
+		"enabled": true,
+		"attributes_conns": ["*internal"],
+	},
+	
+	"attributes": {
+		"enabled": true,
+		"stats_conns": ["*localhost"],
+		"resources_conns": ["*localhost"],
+		"accounts_conns": ["*localhost"]
+	},
+
+	"accounts": {
+		"enabled": true,
+	},
+
+	"rpc_conns": {
+		"conn1": {
+			"strategy": "*first",
+			"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],
+		},
+	},
 	
 	
 	}
