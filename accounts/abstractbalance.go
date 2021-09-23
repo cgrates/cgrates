@@ -155,28 +155,22 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		ec.UnitFactors[ufID] = uF
 	}
 	// RatingID
-	var ratingID string
+	var ratingID, rateID string
 	if costIcrm != nil {
 		ratingID = utils.UUIDSha1Prefix()
+		rateID = utils.UUIDSha1Prefix()
 		ec.Rating[ratingID] = &utils.RateSInterval{
 			Increments: []*utils.RateSIncrement{
 				{
-					/*
-						Rate: &utils.Rate{
-							ID: utils.MetaCostIncrement,
-							IntervalRates: []*utils.IntervalRate{
-								{
-									FixedFee:     costIcrm.FixedFee,
-									RecurrentFee: costIcrm.RecurrentFee,
-								},
-							},
-						},
-						CompressFactor: 1,
-
-					*/
+					RateID:         rateID,
+					CompressFactor: 1,
 				},
 			},
 			CompressFactor: 1,
+		}
+		ec.Rates[rateID] = &utils.IntervalRate{
+			FixedFee:     costIcrm.FixedFee,
+			RecurrentFee: costIcrm.RecurrentFee,
 		}
 	} else { // take it from first increment, not copying since it will be done bellow
 		ratingID = ecCost.Accounting[ecCost.Charges[0].ChargingID].RatingID
