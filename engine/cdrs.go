@@ -972,6 +972,10 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 	}
 	// end of RPC caching
 	cc := args.Cost.CostDetails.AsCallCost(utils.EmptyString)
+	if args.Cost.CostDetails.AccountSummary != nil {
+		cc.Tenant = args.Cost.CostDetails.AccountSummary.Tenant
+		cc.Account = args.Cost.CostDetails.AccountSummary.ID
+	}
 	cc.Round()
 	roundIncrements := cc.GetRoundIncrements()
 	if len(roundIncrements) != 0 {
@@ -979,14 +983,19 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 		cd.CgrID = args.Cost.CGRID
 		cd.RunID = args.Cost.RunID
 		cd.Increments = roundIncrements
-		var response float64
+		response := new(Account)
 		if err := cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 			utils.ResponderRefundRounding,
 			&CallDescriptorWithAPIOpts{CallDescriptor: cd},
-			&response); err != nil {
+			response); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<CDRS> RefundRounding for cc: %+v, got error: %s",
 					cc, err.Error()))
+		}
+		if response != nil {
+			accSum := response.AsAccountSummary()
+			accSum.UpdateInitialValue(cc.AccountSummary)
+			cc.AccountSummary = accSum
 		}
 	}
 	if err = cdrS.storeSMCost(

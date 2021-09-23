@@ -291,7 +291,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptorWithAPIOpts, reply *Acc
 	return
 }
 
-func (rs *Responder) RefundRounding(arg *CallDescriptorWithAPIOpts, reply *float64) (err error) {
+func (rs *Responder) RefundRounding(arg *CallDescriptorWithAPIOpts, reply *Account) (err error) {
 	// RPC caching
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
@@ -305,7 +305,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptorWithAPIOpts, reply *float
 		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*float64)
+				*reply = *cachedResp.Result.(*Account)
 			}
 			return cachedResp.Error
 		}
@@ -321,7 +321,11 @@ func (rs *Responder) RefundRounding(arg *CallDescriptorWithAPIOpts, reply *float
 		err = utils.ErrMaxUsageExceeded
 		return
 	}
-	err = arg.RefundRounding()
+	var acc *Account
+	if acc, err = arg.RefundRounding(); err != nil || acc == nil {
+		return
+	}
+	*reply = *acc
 	return
 }
 

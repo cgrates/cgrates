@@ -354,7 +354,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				RatingPlanId:   "RPL_RETAIL1",
 				CompressFactor: 1,
 				RoundIncrement: &Increment{
-					Cost: 0.1,
+					Cost: -0.1,
 					BalanceInfo: &DebitInfo{
 						Monetary: &MonetaryInfo{UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 							ID:    utils.MetaDefault,
@@ -586,7 +586,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				AccountID:     "cgrates.org:dan",
 				BalanceUUID:   "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				RatingID:      "*rounding",
-				Units:         0.1,
+				Units:         -0.1,
 				ExtraChargeID: "",
 			},
 		},
@@ -4167,119 +4167,6 @@ func TestECratingIDForRateIntervalPause(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expEC, ec)
 	}
 
-}
-
-func TestECAsCallCost4(t *testing.T) {
-	ec := &EventCost{
-		Charges: []*ChargingInterval{
-			{
-				Increments: []*ChargingIncrement{
-					{
-						Usage:          100,
-						Cost:           10,
-						AccountingID:   "accID1",
-						CompressFactor: 1,
-					},
-					{
-						Usage:          150,
-						Cost:           15,
-						AccountingID:   "accID2",
-						CompressFactor: 1,
-					},
-				},
-			},
-		},
-		Accounting: Accounting{
-			"accID1": &BalanceCharge{
-				RatingID:    utils.MetaRounding,
-				BalanceUUID: "asdfgh1",
-			},
-			"accID2": &BalanceCharge{
-				RatingID:    utils.MetaRounding,
-				BalanceUUID: "asdfgh2",
-			},
-		},
-		Rating: Rating{
-			utils.MetaRounding: &RatingUnit{
-				ConnectFee:       0.4,
-				RoundingMethod:   "*up",
-				RoundingDecimals: 4,
-				MaxCost:          100,
-				MaxCostStrategy:  "*disconnect",
-				RatesID:          "RT_ID",
-				TimingID:         "TM_NOON",
-			},
-		},
-		Timings: ChargedTimings{
-			"TM_NOON": &ChargedTiming{
-				StartTime: "00:00:00",
-			},
-		},
-	}
-	tor := utils.MetaVoice
-
-	exp := &CallCost{
-		ToR: utils.MetaVoice,
-		Timespans: TimeSpans{
-			{
-				Cost:          25,
-				DurationIndex: 250,
-				Increments: Increments{
-					{
-						Cost:     10,
-						Duration: 100,
-						BalanceInfo: &DebitInfo{
-							Monetary: &MonetaryInfo{
-								UUID: "asdfgh1",
-								RateInterval: &RateInterval{
-									Timing: &RITiming{
-										ID:        "TM_NOON",
-										StartTime: "00:00:00",
-									},
-									Rating: &RIRate{
-										ConnectFee:       0.4,
-										RoundingMethod:   "*up",
-										RoundingDecimals: 4,
-										MaxCost:          100,
-										MaxCostStrategy:  "*disconnect",
-									},
-								},
-							},
-						},
-						CompressFactor: 1,
-					},
-				},
-				RoundIncrement: &Increment{
-					BalanceInfo: &DebitInfo{
-						Monetary: &MonetaryInfo{
-							UUID: "asdfgh1",
-							RateInterval: &RateInterval{
-								Timing: &RITiming{
-									ID:        "TM_NOON",
-									StartTime: "00:00:00",
-								},
-								Rating: &RIRate{
-									ConnectFee:       0.4,
-									RoundingMethod:   "*up",
-									RoundingDecimals: 4,
-									MaxCost:          100,
-									MaxCostStrategy:  "*disconnect",
-								},
-							},
-						},
-					},
-					Cost:           -10,
-					Duration:       100,
-					CompressFactor: 1,
-				},
-			},
-		},
-	}
-	rcv := ec.AsCallCost(tor)
-
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
-	}
 }
 
 func TestECnewIntervalFromCharge(t *testing.T) {

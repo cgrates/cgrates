@@ -929,8 +929,8 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 		if cdrs[0].Usage != "2m30.05s" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		}
-		if cdrs[0].Cost != 1.5332 {
-			t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
+		if cdrs[0].Cost != 1.5334 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, utils.ToJSON(cdrs[0]))
 		}
 	}
 }

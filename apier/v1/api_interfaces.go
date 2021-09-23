@@ -107,7 +107,7 @@ type ResponderInterface interface {
 	Debit(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
 	MaxDebit(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
 	RefundIncrements(arg *engine.CallDescriptorWithAPIOpts, reply *engine.Account) (err error)
-	RefundRounding(arg *engine.CallDescriptorWithAPIOpts, reply *float64) (err error)
+	RefundRounding(arg *engine.CallDescriptorWithAPIOpts, reply *engine.Account) (err error)
 	GetMaxSessionTime(arg *engine.CallDescriptorWithAPIOpts, reply *time.Duration) (err error)
 	GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error)
 	GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error)

@@ -564,7 +564,7 @@ func (dS *DispatcherResponder) RefundIncrements(args *engine.CallDescriptorWithA
 	return dS.dS.ResponderRefundIncrements(args, reply)
 }
 
-func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptorWithAPIOpts, reply *float64) error {
+func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptorWithAPIOpts, reply *engine.Account) error {
 	return dS.dS.ResponderRefundRounding(args, reply)
 }
 
