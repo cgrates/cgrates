@@ -800,6 +800,67 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 	}
 }
 
+func TestTPFilterAsTPFilter3(t *testing.T) {
+	tps := []*FilterMdl{
+		{
+			Tpid:    "TEST_TPID",
+			Tenant:  "cgrates.org",
+			ID:      "Filter1",
+			Type:    utils.MetaPrefix,
+			Element: "Account",
+			Values:  "1001",
+		},
+		{
+			Tpid:    "TEST_TPID",
+			Tenant:  "cgrates.org",
+			ID:      "Filter1",
+			Type:    utils.MetaPrefix,
+			Element: "Account",
+			Values:  "1001",
+		},
+		{
+			Tpid:    "TEST_TPID",
+			Tenant:  "anotherTenant",
+			ID:      "Filter1",
+			Type:    utils.MetaPrefix,
+			Element: "Account",
+			Values:  "1010",
+		},
+	}
+	eTPs := []*utils.TPFilterProfile{
+		{
+			TPid:   tps[0].Tpid,
+			Tenant: "cgrates.org",
+			ID:     tps[0].ID,
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "Account",
+					Values:  []string{"1001", "1002"},
+				},
+			},
+		},
+		{
+			TPid:   tps[1].Tpid,
+			Tenant: "anotherTenant",
+			ID:     tps[1].ID,
+			Filters: []*utils.TPFilter{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "Account",
+					Values:  []string{"1010"},
+				},
+			},
+		},
+	}
+
+	rcvTPs := FilterMdls(tps).AsTPFilter()
+	sort.Strings(rcvTPs[0].Filters[0].Values)
+	if len(eTPs) != len(rcvTPs) {
+		t.Errorf("Expecting: %+v ,Received: %+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	}
+}
+
 func TestAPItoModelTPFilter(t *testing.T) {
 	var th *utils.TPFilterProfile
 	if rcv := APItoModelTPFilter(th); rcv != nil {
