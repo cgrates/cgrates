@@ -20,7 +20,6 @@ package accounts
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"reflect"
