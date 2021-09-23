@@ -387,7 +387,7 @@ func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
 			TimeEnd:       tEnd,
 		},
 	}
-	var reply float64
+	var reply Account
 	if err := rsponder.RefundRounding(cd, &reply); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
@@ -414,7 +414,7 @@ func TestResponderRefundRoundingMaxUsageVOICE(t *testing.T) {
 			TimeEnd:       tEnd,
 		},
 	}
-	var reply float64
+	var reply Account
 	if err := rsponder.RefundRounding(cd, &reply); err == nil ||
 		err.Error() != utils.ErrMaxUsageExceeded.Error() {
 		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
