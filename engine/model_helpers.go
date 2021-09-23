@@ -701,6 +701,7 @@ func (tps FilterMdls) CSVHeader() (result []string) {
 
 func (tps FilterMdls) AsTPFilter() (result []*utils.TPFilterProfile) {
 	mst := make(map[string]*utils.TPFilterProfile)
+	filterRules := make(map[string]*utils.TPFilter)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		th, found := mst[tenID]
@@ -716,11 +717,18 @@ func (tps FilterMdls) AsTPFilter() (result []*utils.TPFilterProfile) {
 			if tp.Values != utils.EmptyString {
 				vals = splitDynFltrValues(tp.Values, utils.InfieldSep)
 			}
-			th.Filters = append(th.Filters, &utils.TPFilter{
-				Type:    tp.Type,
-				Element: tp.Element,
-				Values:  vals,
-			})
+			key := utils.ConcatenatedKey(tenID, tp.Type, tp.Element)
+			if f, has := filterRules[key]; has {
+				f.Values = append(f.Values, vals...)
+			} else {
+				f = &utils.TPFilter{
+					Type:    tp.Type,
+					Element: tp.Element,
+					Values:  vals,
+				}
+				th.Filters = append(th.Filters, f)
+				filterRules[key] = f
+			}
 		}
 		mst[tenID] = th
 	}
