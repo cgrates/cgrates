@@ -90,7 +90,7 @@
         "enabled": true,									
         "dry_run": false,									
         "run_delay": "0",										
-        "lock_filepath": ".cgr.lock",						
+        "lockfile_path": ".cgr.lock",						
         "caches_conns": ["*internal"],
         "field_separator": ",",								
         "tp_in_dir": "/tmp/In",		

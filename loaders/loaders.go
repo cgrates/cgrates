@@ -86,7 +86,6 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 			return errors.New("ANOTHER_LOADER_RUNNING")
 		}
 		if err := ldr.unlockFolder(); err != nil {
-			fmt.Println("aici")
 			return utils.NewErrServerError(err)
 		}
 	}
