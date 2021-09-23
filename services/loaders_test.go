@@ -57,7 +57,7 @@ func TestLoaderSCoverage(t *testing.T) {
 			Tenant:         "",
 			DryRun:         false,
 			RunDelay:       0,
-			LockFileName:   "",
+			LockFilePath:   "",
 			CacheSConns:    nil,
 			FieldSeparator: "",
 			TpInDir:        "",

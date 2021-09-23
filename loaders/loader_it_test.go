@@ -68,6 +68,10 @@ var (
 		testProcessFileRenameError,
 		testAllFilesPresentEmptyCSV,
 		testIsFolderLocked,
+		testNewLockFolder,
+		testNewLockFolderNotFound,
+		testNewIsFolderLock,
+		testNewIsFolderUnlock,
 		testLoaderLoadAttributes,
 		testLoaderVerifyOutDir,
 		testLoaderCheckAttributes,
@@ -434,7 +438,7 @@ cgrates.org,SET_ACTPROFILE_3
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		tpInDir:       flPath,
 		tpOutDir:      utils.EmptyString,
-		lockFilename:  "ActionProfiles.lks",
+		lockFilepath:  "ActionProfiles.lks",
 		rdrTypes:      []string{utils.MetaActionProfiles},
 		fieldSep:      ",",
 		timezone:      "UTC",
@@ -556,7 +560,7 @@ cgrates.org,SET_ACTPROFILE_3
 		tpInDir:       flPath,
 		tpOutDir:      utils.EmptyString,
 		rdrTypes:      []string{utils.MetaActionProfiles},
-		lockFilename:  "ActionProfiles.csv",
+		lockFilepath:  "ActionProfiles.csv",
 		fieldSep:      ",",
 		timezone:      "UTC",
 	}
@@ -680,7 +684,7 @@ func testLoaderMoveFilesMatchingFiles(t *testing.T) {
 	ldr := &Loader{
 		tpInDir:      flPath,
 		tpOutDir:     "/tmp",
-		lockFilename: "ActionProfiles.csv",
+		lockFilepath: "ActionProfiles.csv",
 	}
 	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
@@ -710,7 +714,7 @@ func testLoaderMoveFilesRenameError(t *testing.T) {
 	ldr := &Loader{
 		tpInDir:      flPath,
 		tpOutDir:     flPath,
-		lockFilename: "ActionProfiles.lks",
+		lockFilepath: "ActionProfiles.lks",
 	}
 	filepath := path.Join(flPath, "ActionProfiles")
 	if err := os.MkdirAll(filepath, 0777); err != nil {
@@ -749,7 +753,7 @@ cgrates.org,NewRes1
 		fieldSep:      utils.FieldsSep,
 		tpInDir:       flPath,
 		tpOutDir:      "/tmp",
-		lockFilename:  utils.ResourcesCsv,
+		lockFilepath:  utils.ResourcesCsv,
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
@@ -847,7 +851,7 @@ cgrates.org,NewRes1
 		fieldSep:      utils.FieldsSep,
 		tpInDir:       flPath,
 		tpOutDir:      "/tmp",
-		lockFilename:  utils.ResourcesCsv,
+		lockFilepath:  utils.ResourcesCsv,
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
@@ -931,7 +935,7 @@ func testProcessFileUnableToOpen(t *testing.T) {
 		ldrID:        "testProcessFile",
 		tpInDir:      flPath,
 		fieldSep:     ",",
-		lockFilename: utils.MetaResources,
+		lockFilepath: utils.MetaResources,
 	}
 	resCsv := `
 #Tenant[0],ID[1]
@@ -971,7 +975,7 @@ func testProcessFileRenameError(t *testing.T) {
 		fieldSep:      utils.FieldsSep,
 		tpInDir:       flPath1,
 		tpOutDir:      "INEXISTING_FILE",
-		lockFilename:  utils.ResourcesCsv,
+		lockFilepath:  utils.ResourcesCsv,
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
@@ -1018,7 +1022,7 @@ cgrates.org,NewRes1
 func testAllFilesPresentEmptyCSV(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "testProcessFileRenameError",
-		lockFilename:  utils.ResourcesCsv,
+		lockFilepath:  utils.ResourcesCsv,
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
@@ -1037,12 +1041,110 @@ func testIsFolderLocked(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoadAndRemoveResources",
 		tpInDir:       flPath,
-		lockFilename:  utils.EmptyString,
+		lockFilepath:  utils.EmptyString,
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
 	expected := "stat /\x00: invalid argument"
 	if _, err := ldr.isFolderLocked(); err != nil {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func testNewLockFolder(t *testing.T) {
+	pathL := "/tmp/testNewLockFolder/"
+	if err := os.MkdirAll(pathL, 0777); err != nil {
+		t.Error(err)
+	}
+
+	_, err := os.Create(path.Join(pathL, utils.ResourcesCsv))
+	if err != nil {
+		t.Error(err)
+	}
+
+	ldr := &Loader{
+		ldrID:         "testNewLockFolder",
+		tpInDir:       "",
+		lockFilepath:  pathL + utils.ResourcesCsv,
+		bufLoaderData: make(map[string][]LoaderData),
+		timezone:      "UTC",
+	}
+
+	if err := ldr.lockFolder(); err != nil {
+		t.Error(err)
+	}
+	if err := os.RemoveAll(pathL); err != nil {
+		t.Error(err)
+	}
+}
+
+func testNewLockFolderNotFound(t *testing.T) {
+	pathL := "/tmp/testNewLockFolder/"
+	ldr := &Loader{
+		ldrID:         "testNewLockFolder",
+		tpInDir:       "",
+		lockFilepath:  pathL + utils.ResourcesCsv,
+		bufLoaderData: make(map[string][]LoaderData),
+		timezone:      "UTC",
+	}
+
+	errExpect := "file: /tmp/testNewLockFolder/Resources.csv not found"
+	if err := ldr.lockFolder(); err == nil || err.Error() != errExpect {
+		t.Error(err)
+	}
+}
+
+func testNewIsFolderLock(t *testing.T) {
+	pathL := "/tmp/testNewLockFolder/"
+	if err := os.MkdirAll(pathL, 0777); err != nil {
+		t.Error(err)
+	}
+
+	_, err := os.Create(path.Join(pathL, utils.ResourcesCsv))
+	if err != nil {
+		t.Error(err)
+	}
+
+	ldr := &Loader{
+		ldrID:         "testNewLockFolder",
+		tpInDir:       "",
+		lockFilepath:  pathL + utils.ResourcesCsv,
+		bufLoaderData: make(map[string][]LoaderData),
+		timezone:      "UTC",
+	}
+
+	if err := ldr.lockFolder(); err != nil {
+		t.Error(err)
+	}
+
+	isLocked, err := ldr.isFolderLocked()
+	if !isLocked {
+		t.Error("Expected the file to be locked")
+	}
+
+	if err := os.RemoveAll(pathL); err != nil {
+		t.Error(err)
+	}
+}
+
+func testNewIsFolderUnlock(t *testing.T) {
+	pathL := "/tmp/testNewLockFolder/"
+
+	ldr := &Loader{
+		ldrID:         "testNewLockFolder",
+		tpInDir:       "",
+		lockFilepath:  pathL + utils.ResourcesCsv,
+		bufLoaderData: make(map[string][]LoaderData),
+		timezone:      "UTC",
+	}
+
+	errExpect := "file: /tmp/testNewLockFolder/Resources.csv not found"
+	if err := ldr.lockFolder(); err == nil || err.Error() != errExpect {
+		t.Error(err)
+	}
+
+	isUnlocked, _ := ldr.isFolderLocked()
+	if isUnlocked == true {
+		t.Error("Expected the file to be unlocked")
 	}
 }
