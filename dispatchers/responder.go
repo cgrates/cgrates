@@ -128,7 +128,7 @@ func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescript
 }
 
 func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptorWithArgDispatcher,
-	reply *float64) (err error) {
+	reply *engine.Account) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)

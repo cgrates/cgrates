@@ -98,7 +98,7 @@ type ResponderInterface interface {
 	Debit(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) (err error)
 	MaxDebit(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) (err error)
 	RefundIncrements(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.Account) (err error)
-	RefundRounding(arg *engine.CallDescriptorWithArgDispatcher, reply *float64) (err error)
+	RefundRounding(arg *engine.CallDescriptorWithArgDispatcher, reply *engine.Account) (err error)
 	GetMaxSessionTime(arg *engine.CallDescriptorWithArgDispatcher, reply *time.Duration) (err error)
 	Shutdown(arg *utils.TenantWithArgDispatcher, reply *string) (err error)
 	GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error)

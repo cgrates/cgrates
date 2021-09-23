@@ -651,18 +651,29 @@ func (sS *SessionS) roundCost(s *Session, sRunIdx int) (err error) {
 	sr := s.SRuns[sRunIdx]
 	runID := sr.Event.GetStringIgnoreErrors(utils.RunID)
 	cc := sr.EventCost.AsCallCost(utils.EmptyString)
+	if sr.CD != nil {
+		cc.Category = sr.CD.Category
+		cc.Subject = sr.CD.Subject
+		cc.Tenant = sr.CD.Tenant
+		cc.Account = sr.CD.Account
+		cc.Destination = sr.CD.Destination
+		cc.ToR = sr.CD.ToR
+	}
 	cc.Round()
 	if roundIncrements := cc.GetRoundIncrements(); len(roundIncrements) != 0 {
 		cd := cc.CreateCallDescriptor()
 		cd.CgrID = s.CGRID
 		cd.RunID = runID
 		cd.Increments = roundIncrements
-		var response float64
+		response := new(engine.Account)
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 			utils.ResponderRefundRounding,
 			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd},
-			&response); err != nil {
+			response); err != nil {
 			return
+		}
+		if response != nil {
+			cc.AccountSummary = response.AsAccountSummary()
 		}
 	}
 	sr.EventCost = engine.NewEventCostFromCallCost(cc, s.CGRID, runID)

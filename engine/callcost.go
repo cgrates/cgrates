@@ -157,10 +157,6 @@ func (cc *CallCost) GetLongestRounding() (roundingDecimals int, roundingMethod s
 	return
 }
 
-func (cc *CallCost) AsJSON() string {
-	return utils.ToJSON(cc)
-}
-
 // public function to update final (merged) callcost
 func (cc *CallCost) UpdateCost() {
 	cc.deductConnectFee = true

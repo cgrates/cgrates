@@ -354,7 +354,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				RatingPlanId:   "RPL_RETAIL1",
 				CompressFactor: 1,
 				RoundIncrement: &Increment{
-					Cost: 0.1,
+					Cost: -0.1,
 					BalanceInfo: &DebitInfo{
 						Monetary: &MonetaryInfo{UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 							ID:    utils.MetaDefault,
@@ -586,7 +586,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 				AccountID:     "cgrates.org:dan",
 				BalanceUUID:   "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				RatingID:      "*rounding",
-				Units:         0.1,
+				Units:         -0.1,
 				ExtraChargeID: "",
 			},
 		},
