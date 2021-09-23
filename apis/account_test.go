@@ -1177,16 +1177,17 @@ func TestAccountMaxAbstracts(t *testing.T) {
 			{
 				IncrementStart:    nil,
 				IntervalRateIndex: 0,
-				RateID:            "",
-				CompressFactor:    0,
+				RateID:            "id_for_Test",
+				CompressFactor:    1,
 				Usage:             nil,
 			},
 		},
 		CompressFactor: 1,
 	}
 	for _, val := range rpEv.Rating {
-		if !reflect.DeepEqual(val, expRating) {
-			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+		val.Increments[0].RateID = "id_for_Test"
+		if !reflect.DeepEqual(expRating, val) {
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
 		}
 	}
 	rpEv.Rating = map[string]*utils.ExtRateSInterval{}
@@ -1381,16 +1382,17 @@ func TestAccountDebitAbstracts(t *testing.T) {
 			{
 				IncrementStart:    nil,
 				IntervalRateIndex: 0,
-				RateID:            "",
-				CompressFactor:    0,
+				RateID:            "id_for_test",
+				CompressFactor:    1,
 				Usage:             nil,
 			},
 		},
 		CompressFactor: 1,
 	}
 	for _, val := range rpEv.Rating {
+		val.Increments[0].RateID = "id_for_test"
 		if !reflect.DeepEqual(val, expRating) {
-			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
 		}
 	}
 	rpEv.Rating = map[string]*utils.ExtRateSInterval{}
@@ -1585,14 +1587,15 @@ func TestAccountActionSetBalance(t *testing.T) {
 			{
 				IncrementStart:    nil,
 				IntervalRateIndex: 0,
-				RateID:            "",
-				CompressFactor:    0,
+				RateID:            "id_for_test",
+				CompressFactor:    1,
 				Usage:             nil,
 			},
 		},
 		CompressFactor: 1,
 	}
 	for _, val := range rpEv.Rating {
+		val.Increments[0].RateID = "id_for_test"
 		if !reflect.DeepEqual(val, expRating) {
 			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
 		}
