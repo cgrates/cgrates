@@ -468,7 +468,7 @@ func TestGetLoadedIdsRatingPlans(t *testing.T) {
 				Ratings: map[string]*RIRate{
 					"RATING_1001": {
 						ConnectFee:       0.4,
-						RoundingMethod:   utils.MetaUp,
+						RoundingMethod:   utils.MetaRoundingUp,
 						RoundingDecimals: 4,
 						MaxCost:          0.60,
 						MaxCostStrategy:  utils.MetaMaxCostDisconnect,

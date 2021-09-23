@@ -209,8 +209,8 @@ func TestDspResponderRefundRoundingNil(t *testing.T) {
 			Tenant: "tenant",
 		},
 	}
-	var reply *float64
-	result := dspSrv.ResponderRefundRounding(CGREvent, reply)
+	var reply engine.Account
+	result := dspSrv.ResponderRefundRounding(CGREvent, &reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -225,8 +225,8 @@ func TestDspResponderRefundRoundingErrorNil(t *testing.T) {
 			Tenant: "tenant",
 		},
 	}
-	var reply *float64
-	result := dspSrv.ResponderRefundRounding(CGREvent, reply)
+	var reply engine.Account
+	result := dspSrv.ResponderRefundRounding(CGREvent, &reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

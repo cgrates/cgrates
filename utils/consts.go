@@ -407,7 +407,6 @@ const (
 	MetaGuardian             = "*guardians"
 	MetaEEs                  = "*ees"
 	MetaContinue             = "*continue"
-	MetaUp                   = "*up"
 	Migrator                 = "migrator"
 	UnsupportedMigrationTask = "unsupported migration task"
 	NoStorDBConnection       = "not connected to StorDB"

@@ -106,7 +106,7 @@ func testSesPItRPCConn(t *testing.T) {
 
 func setAccounts(t *testing.T, n int) (err error) {
 	for i := 0; i < n; i++ {
-		fmt.Println(fmt.Sprintf("acc%d", i))
+		// fmt.Println(fmt.Sprintf("acc%d", i))
 		if err := setAccBalance(fmt.Sprintf("acc%d", i)); err != nil {
 			t.Error(err)
 		}

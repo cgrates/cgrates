@@ -66,9 +66,7 @@ func NewEventCostFromCallCost(cc *CallCost, cgrID, runID string) (ec *EventCost)
 			cIl.Increments = append(cIl.Increments, ec.newChargingIncrement(incr, rf, false, isPause))
 		}
 		if ts.RoundIncrement != nil {
-			rIncr := ec.newChargingIncrement(ts.RoundIncrement, rf, true, false)
-			rIncr.Cost = -rIncr.Cost
-			cIl.Increments = append(cIl.Increments, rIncr)
+			cIl.Increments = append(cIl.Increments, ec.newChargingIncrement(ts.RoundIncrement, rf, true, false))
 		}
 		ec.Charges[i] = cIl
 	}
@@ -437,7 +435,6 @@ func (ec *EventCost) AsCallCost(tor string) *CallCost {
 				l--
 				incrs = incrs[:l]
 				ts.RoundIncrement = ec.newIntervalFromCharge(cIl.Increments[l-1])
-				ts.RoundIncrement.Cost = -ts.RoundIncrement.Cost
 			}
 			ts.Increments = make(Increments, l)
 		}

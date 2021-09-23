@@ -743,7 +743,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		if len(roundIncrements) != 0 {
 			rcd := cc.CreateCallDescriptor()
 			rcd.Increments = roundIncrements
-			rcd.refundRounding()
+			rcd.refundRounding(cd.account)
 		}
 	}
 	//log.Printf("OUT CC: ", cc)
@@ -916,10 +916,14 @@ func (cd *CallDescriptor) RefundIncrements() (acnt *Account, err error) {
 	return
 }
 
-func (cd *CallDescriptor) refundRounding() (err error) {
+func (cd *CallDescriptor) refundRounding(old *Account) (accountsCache map[string]*Account, err error) {
 	// get account list for locking
 	// all must be locked in order to use cache
-	accountsCache := make(map[string]*Account)
+	accountsCache = make(map[string]*Account)
+	if old != nil {
+		accountsCache[old.ID] = old
+		defer dm.SetAccount(old)
+	}
 	for _, increment := range cd.Increments {
 		account, found := accountsCache[increment.BalanceInfo.AccountID]
 		if !found {
@@ -947,14 +951,20 @@ func (cd *CallDescriptor) refundRounding() (err error) {
 	return
 }
 
-func (cd *CallDescriptor) RefundRounding() (err error) {
+func (cd *CallDescriptor) RefundRounding() (acc *Account, err error) {
 	accMap := make(utils.StringMap)
 	for _, inc := range cd.Increments {
 		accMap[utils.AccountPrefix+inc.BalanceInfo.AccountID] = true
 	}
-	return guardian.Guardian.Guard(func() error {
-		return cd.refundRounding()
+	guardian.Guardian.Guard(func() (_ error) {
+		var accCache map[string]*Account
+		if accCache, err = cd.refundRounding(nil); err != nil {
+			return
+		}
+		acc = accCache[utils.ConcatenatedKey(cd.Tenant, cd.Account)]
+		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, accMap.Slice()...)
+	return
 }
 
 // Creates a CallCost structure copying related data from CallDescriptor

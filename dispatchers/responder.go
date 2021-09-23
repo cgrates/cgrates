@@ -86,7 +86,7 @@ func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescript
 }
 
 func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptorWithAPIOpts,
-	reply *float64) (err error) {
+	reply *engine.Account) (err error) {
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderRefundRounding, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
