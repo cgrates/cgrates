@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package apis
+package general_tests
 
 import (
 	"net"
@@ -43,12 +43,11 @@ var (
 		testLdPrMatchRtLoadConfig,
 		testLdPrMatchRtResetDataDB,
 		testLdPrMatchRtResetStorDb,
-		testLdPrMatchRtStartEngine,
+		// testLdPrMatchRtStartEngine,
 		testLdPrMatchRtRPCConn,
 		testLdPrMatchRtLoadTP,
 		testLdPrMatchRtCDRSProcessEvent,
-
-		testLdPrMatchRtStopCgrEngine,
+		// testLdPrMatchRtStopCgrEngine,
 	}
 )
 
@@ -160,6 +159,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.OptsRateS:      true,
 			utils.OptsCDRsExport: true,
+			utils.OptsAccountS:   false,
 		},
 	}
 	var rply string
@@ -170,22 +170,24 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
 	}
+	// costInterval := testRPC1.Event.Event["*rateSCost"].(map[string]interface{})["CostIntervals"]
+	// ratesField := testRPC1.Event.Event["*rateSCost"].(map[string]interface{})["Rates"]
 	// expected2 := utils.CGREvent{
 	// 	Tenant: "cgrates.org",
 	// 	ID:     "TestEv1",
 	// 	Event: map[string]interface{}{
 	// 		"Altered":         nil,
 	// 		utils.Cost:        0.4,
-	// 		"CostIntervals":   []map[string]interface{}{},
+	// 		"CostIntervals":   costInterval,
 	// 		"ID":              "RT_RETAIL1",
 	// 		"MaxCost":         0,
 	// 		"MaxCostStrategy": "",
 	// 		"MinCost":         0,
-	// 		"Rates":           map[string]interface{}{},
+	// 		"Rates":           ratesField,
 	// 	},
 	// }
-	// if !reflect.DeepEqual(utils.ToJSON(expected2.Event), utils.ToJSON(testRPC1.Event.Event["*rateSCost"])) {
-	// 	t.Errorf("\nExpecting : %+v \n,received: %+v", utils.ToJSON(expected2.Event), utils.ToJSON(testRPC1.Event.Event["*rateSCost"]))
+	// if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(testRPC1.Event)) {
+	// 	t.Errorf("\nExpecting : %+v \n,received: %+v", utils.ToJSON(expected2), utils.ToJSON(testRPC1.Event))
 	// }
 
 }
