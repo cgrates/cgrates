@@ -800,7 +800,7 @@ const CGRATES_CFG_JSON = `
 		"tenant": "",										// tenant used in filterS.Pass
 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 		"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-		"lock_filepath": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
+		"lockfile_path": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
 		"caches_conns": ["*internal"],
 		"field_separator": ",",								// separator used in case of csv files
 		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the TPs are stored

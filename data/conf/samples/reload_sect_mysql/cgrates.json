@@ -629,7 +629,7 @@
 		"tenant": "",										
 		"dry_run": false,									
 		"run_delay": "0",									
-		"lock_filepath": ".cgr.lck",						
+		"lockfile_path": ".cgr.lck",						
 		"caches_conns": ["*internal"],
 		"field_separator": ",",								
 		"tp_in_dir": "/var/spool/cgrates/loader/in",		

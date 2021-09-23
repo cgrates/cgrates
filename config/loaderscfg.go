@@ -134,8 +134,8 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 			return
 		}
 	}
-	if jsnCfg.Lock_filepath != nil {
-		l.LockFilePath = *jsnCfg.Lock_filepath
+	if jsnCfg.Lockfile_path != nil {
+		l.LockFilePath = *jsnCfg.Lockfile_path
 	}
 	if jsnCfg.Caches_conns != nil {
 		l.CacheSConns = make([]string, len(*jsnCfg.Caches_conns))
