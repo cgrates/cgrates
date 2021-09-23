@@ -48,7 +48,7 @@ var (
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
 		testGetAttributeProfileBeforeSet,
-		testAttributeSLoadFromFolder,
+		// testAttributeSLoadFromFolder,
 		testAttributeSetAttributeProfile,
 		testAttributeGetAttributeIDs,
 		testAttributeGetAttributeCount,
@@ -770,7 +770,8 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			"InitialField": "InitialValue",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsContext: utils.MetaSessionS,
+			utils.OptsContext:               utils.MetaSessionS,
+			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
@@ -872,7 +873,8 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			"InitialField": "InitialValue",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsContext: utils.MetaSessionS,
+			utils.OptsContext:               utils.MetaSessionS,
+			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
