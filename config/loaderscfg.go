@@ -96,7 +96,7 @@ type LoaderSCfg struct {
 	Tenant         string
 	DryRun         bool
 	RunDelay       time.Duration
-	LockFileName   string
+	LockFilePath   string
 	CacheSConns    []string
 	FieldSeparator string
 	TpInDir        string
@@ -159,8 +159,8 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 			return
 		}
 	}
-	if jsnCfg.Lock_filename != nil {
-		l.LockFileName = *jsnCfg.Lock_filename
+	if jsnCfg.Lockfile_path != nil {
+		l.LockFilePath = *jsnCfg.Lockfile_path
 	}
 	if jsnCfg.Caches_conns != nil {
 		l.CacheSConns = updateInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
@@ -223,7 +223,7 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		Tenant:         l.Tenant,
 		DryRun:         l.DryRun,
 		RunDelay:       l.RunDelay,
-		LockFileName:   l.LockFileName,
+		LockFilePath:   l.LockFilePath,
 		CacheSConns:    utils.CloneStringSlice(l.CacheSConns),
 		FieldSeparator: l.FieldSeparator,
 		TpInDir:        l.TpInDir,
@@ -259,7 +259,7 @@ func (l LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]inter
 		utils.TenantCfg:       l.Tenant,
 		utils.EnabledCfg:      l.Enabled,
 		utils.DryRunCfg:       l.DryRun,
-		utils.LockFileNameCfg: l.LockFileName,
+		utils.LockFilePathCfg: l.LockFilePath,
 		utils.FieldSepCfg:     l.FieldSeparator,
 		utils.TpInDirCfg:      l.TpInDir,
 		utils.TpOutDirCfg:     l.TpOutDir,
@@ -294,7 +294,7 @@ type LoaderJsonCfg struct {
 	Tenant          *string
 	Dry_run         *bool
 	Run_delay       *string
-	Lock_filename   *string
+	Lockfile_path   *string
 	Caches_conns    *[]string
 	Field_separator *string
 	Tp_in_dir       *string
@@ -336,8 +336,8 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) 
 	if v1.RunDelay != v2.RunDelay {
 		d.Run_delay = utils.StringPointer(v2.RunDelay.String())
 	}
-	if v1.LockFileName != v2.LockFileName {
-		d.Lock_filename = utils.StringPointer(v2.LockFileName)
+	if v1.LockFilePath != v2.LockFilePath {
+		d.Lockfile_path = utils.StringPointer(v2.LockFilePath)
 	}
 	if !utils.SliceStringEqual(v1.CacheSConns, v2.CacheSConns) {
 		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CacheSConns))
@@ -378,7 +378,7 @@ func equalsLoadersJsonCfg(v1, v2 LoaderSCfgs) bool {
 			v1[i].Tenant != v2[i].Tenant ||
 			v1[i].DryRun != v2[i].DryRun ||
 			v1[i].RunDelay != v2[i].RunDelay ||
-			v1[i].LockFileName != v2[i].LockFileName ||
+			v1[i].LockFilePath != v2[i].LockFilePath ||
 			!utils.SliceStringEqual(v1[i].CacheSConns, v2[i].CacheSConns) ||
 			v1[i].FieldSeparator != v2[i].FieldSeparator ||
 			v1[i].TpInDir != v2[i].TpInDir ||

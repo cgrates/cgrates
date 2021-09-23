@@ -1206,7 +1206,7 @@ func TestLoadersLoad(t *testing.T) {
 		Enabled:        true,
 		Tenant:         "cgrates.org",
 		RunDelay:       1 * time.Millisecond,
-		LockFileName:   "lockFileName",
+		LockFilePath:   "lockFileName",
 		FieldSeparator: ";",
 		TpInDir:        dirPathIn,
 		TpOutDir:       dirPathOut,

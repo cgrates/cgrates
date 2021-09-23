@@ -95,7 +95,7 @@ cgrates.org,NewRes1
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFileName:   "res.lck",
+		LockFilePath:   "res.lck",
 		Data:           nil,
 	}
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
@@ -189,7 +189,7 @@ cgrates.org,NewRes1
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFileName:   utils.ResourcesCsv,
+		LockFilePath:   utils.ResourcesCsv,
 		Data:           nil,
 	}
 
@@ -226,7 +226,7 @@ func testV1LoadUnableToDeleteFile(t *testing.T) {
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        "/\x00",
 		TpOutDir:       "/tmp",
-		LockFileName:   utils.ResourcesCsv,
+		LockFilePath:   utils.ResourcesCsv,
 		Data:           nil,
 	}
 	var reply string
@@ -269,7 +269,7 @@ NOT_UINT
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFileName:   utils.ResourcesCsv,
+		LockFilePath:   utils.ResourcesCsv,
 		Data:           nil,
 	}
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
@@ -339,7 +339,7 @@ cgrates.org,NewRes1
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFileName:   utils.ResourcesCsv,
+		LockFilePath:   utils.ResourcesCsv,
 		Data:           nil,
 	}
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
@@ -394,7 +394,7 @@ cgrates.org,NewRes1
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", expected, utils.EmptyString, err, reply)
 	}
 
-	ldrs.ldrs["testV1RemoveResource"].lockFilename = "invalidFile"
+	ldrs.ldrs["testV1RemoveResource"].lockFilepath = "invalidFile"
 	if err := ldrs.V1Remove(context.TODO(), &ArgsProcessFolder{
 		LoaderID:  "testV1RemoveResource",
 		ForceLock: true}, &reply); err != nil && reply != utils.OK {
@@ -437,7 +437,7 @@ cgrates.org,NewRes1
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFileName:   utils.ResourcesCsv,
+		LockFilePath:   utils.ResourcesCsv,
 		Data:           nil,
 	}
 
@@ -475,7 +475,7 @@ func testV1RemoveUnableToDeleteFile(t *testing.T) {
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        "/\x00",
 		TpOutDir:       "/tmp",
-		LockFileName:   utils.ResourcesCsv,
+		LockFilePath:   utils.ResourcesCsv,
 		Data:           nil,
 	}
 	var reply string
@@ -571,7 +571,7 @@ func testV1RemoveProcessFolderError(t *testing.T) {
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFileName:   "notResource.csv",
+		LockFilePath:   "notResource.csv",
 		Data:           nil,
 	}
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
@@ -636,7 +636,7 @@ func testLoaderServiceReload(t *testing.T) {
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFileName:   utils.ResourcesCsv,
+		LockFilePath:   utils.ResourcesCsv,
 		Data:           nil,
 	}
 	ldrs := &LoaderService{}
