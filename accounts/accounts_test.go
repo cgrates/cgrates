@@ -20,6 +20,7 @@ package accounts
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -1555,14 +1556,17 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						Weight: 40,
 					},
 				},
+				// RecurrentFee/Increment
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment:    utils.NewDecimal(int64(time.Minute), 0),
-						FixedFee:     utils.NewDecimal(4, 1),  // 0.4
-						RecurrentFee: utils.NewDecimal(2, 1)}, // 0.2 per minute
+						FixedFee:     utils.NewDecimal(4, 1), // 0.4
+						RecurrentFee: utils.NewDecimal(2, 1), // 0.2 per minute
+					},
 				},
 				Units: utils.NewDecimal(int64(130*time.Second), 0), // 2 Minute 10s, rest 10s
 			},
+			// total 0.8 needs to be debited from CB1, with UnitFactor will be 0.8 * 100
 			cb1ID: { // paying the AB1 plus own debit of 0.1 per second, limit of -200 cents
 				ID:   cb1ID,
 				Type: utils.MetaConcrete,
@@ -1577,7 +1581,8 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment:    utils.NewDecimal(int64(time.Second), 0),
-						RecurrentFee: utils.NewDecimal(1, 1)}, // 0.1 per second
+						RecurrentFee: utils.NewDecimal(1, 1), // 0.1 per second
+					},
 				},
 				UnitFactors: []*utils.UnitFactor{
 					{
@@ -1620,7 +1625,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			},
 			//3m20s ABSTR 2.8 CONCR
-			cb2ID: &utils.Balance{ //125s with rating from RateS
+			cb2ID: &utils.Balance{ //125s with rating from RateS (1.25/0.01 from rates)
 				ID:   cb2ID,
 				Type: utils.MetaConcrete,
 				CostIncrements: []*utils.CostIncrement{
@@ -1701,6 +1706,33 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		t.Error(err)
 	}
 
+	args := &utils.CGREvent{
+		ID:     "TestV1DebitAbstractsEventCharges",
+		Tenant: utils.CGRateSorg,
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "7m26s",
+		},
+	}
+	var rcvEC utils.ExtEventCharges
+	if err := accnts.V1DebitAbstracts(context.Background(), args, &rcvEC); err != nil {
+		t.Error(err)
+	}
+
+	// convert both Accounts into ExtAccounts for usage in ExtEventCharger after charging (we will get the accoutns from db after debit)
+	var extAcc1 *utils.ExtAccount
+	var extAcc2 *utils.ExtAccount
+	if getAcc1AftCharge, err := dm.GetAccount(context.Background(), "cgrates.org", "TestV1DebitAbstractsEventCharges1"); err != nil {
+		t.Error(err)
+	} else if extAcc1, err = getAcc1AftCharge.AsExtAccount(); err != nil {
+		t.Error(err)
+	}
+	if getAcc2AftCharge, err := dm.GetAccount(context.Background(), "cgrates.org", "TestV1DebitAbstractsEventCharges2"); err != nil {
+		t.Error(err)
+	} else if extAcc2, err = getAcc2AftCharge.AsExtAccount(); err != nil {
+		t.Error(err)
+	}
+
+	// expected ExtEventCharges
 	eEvChgs := &utils.ExtEventCharges{
 		Abstracts: utils.Float64Pointer(446000000000),
 		Concretes: utils.Float64Pointer(4.95),
@@ -1819,21 +1851,14 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				CompressFactor: 1,
 			},
 		},
-		Rates:    map[string]*utils.ExtIntervalRate{},
-		Accounts: make(map[string]*utils.ExtAccount),
-	}
-	args := &utils.CGREvent{
-		ID:     "TestV1DebitAbstractsEventCharges",
-		Tenant: utils.CGRateSorg,
-		APIOpts: map[string]interface{}{
-			utils.MetaUsage: "7m26s",
+		Rates: map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"TestV1DebitAbstractsEventCharges1": extAcc1,
+			"TestV1DebitAbstractsEventCharges2": extAcc2,
 		},
 	}
-	var rcvEC utils.ExtEventCharges
-	if err := accnts.V1DebitAbstracts(context.Background(), args, &rcvEC); err != nil {
-		t.Error(err)
-		//} else if eEvChgs.Equals(&rcvEC) {
-	} else if !reflect.DeepEqual(eEvChgs, rcvEC) {
+
+	if !eEvChgs.Equals(&rcvEC) {
 		t.Errorf("expecting: %s, \nreceived: %s\n", utils.ToJSON(eEvChgs), utils.ToJSON(rcvEC))
 	}
 
@@ -1957,5 +1982,4 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 		t.Errorf("Expected %+v,received %+v", utils.ToJSON(acnt), utils.ToJSON(rcv))
 	}
 }
-
 */
