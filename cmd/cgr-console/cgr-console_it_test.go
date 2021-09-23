@@ -215,7 +215,6 @@ func testConsoleItResourcesProfileIds(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
 	}
-	// fmt.Println(output.String())
 }
 
 func testConsoleItRatesProfileSet(t *testing.T) {
