@@ -448,41 +448,6 @@ type TPResourceProfile struct {
 	ThresholdIDs      []string // Thresholds to check after changing Limit
 }
 
-type ArgRSv1ResourceUsage struct {
-	*CGREvent
-	UsageID  string // ResourceUsage Identifier
-	UsageTTL *time.Duration
-	Units    float64
-	clnb     bool //rpcclonable
-}
-
-// SetCloneable sets if the args should be clonned on internal connections
-func (attr *ArgRSv1ResourceUsage) SetCloneable(rpcCloneable bool) {
-	attr.clnb = rpcCloneable
-}
-
-// RPCClone implements rpcclient.RPCCloner interface
-func (attr *ArgRSv1ResourceUsage) RPCClone() (interface{}, error) {
-	if !attr.clnb {
-		return attr, nil
-	}
-	return attr.Clone(), nil
-}
-
-// Clone creates a clone of the object
-func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
-	var usageTTL *time.Duration
-	if attr.UsageTTL != nil {
-		usageTTL = DurationPointer(*attr.UsageTTL)
-	}
-	return &ArgRSv1ResourceUsage{
-		UsageID:  attr.UsageID,
-		UsageTTL: usageTTL,
-		Units:    attr.Units,
-		CGREvent: attr.CGREvent.Clone(),
-	}
-}
-
 type ArgsComputeFilterIndexIDs struct {
 	Tenant           string
 	APIOpts          map[string]interface{}

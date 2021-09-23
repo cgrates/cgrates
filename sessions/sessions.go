@@ -385,20 +385,20 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 	// release the resources for the session
 	if len(sS.cgrCfg.SessionSCfg().ResSConns) != 0 && s.ResourceID != "" {
 		var reply string
-		argsRU := &utils.ArgRSv1ResourceUsage{
-			CGREvent: &utils.CGREvent{
-				Tenant:  s.Tenant,
-				ID:      utils.GenUUID(),
-				Event:   s.EventStart,
-				APIOpts: s.OptsStart,
-			},
-			UsageID: s.ResourceID,
-			Units:   1,
+		if s.OptsStart == nil {
+			s.OptsStart = make(engine.MapEvent)
 		}
-		argsRU.SetCloneable(true)
+		args := &utils.CGREvent{
+			Tenant:  s.Tenant,
+			ID:      utils.GenUUID(),
+			Event:   s.EventStart,
+			APIOpts: s.OptsStart,
+		}
+		args.APIOpts[utils.OptsResourcesUsageID] = s.ResourceID
+		args.APIOpts[utils.OptsResourcesUnits] = 1
 		if err := sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns,
 			utils.ResourceSv1ReleaseResources,
-			argsRU, &reply); err != nil {
+			args, &reply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s could not release resource with resourceID: %s",
 					utils.SessionS, err.Error(), s.ResourceID))
@@ -1601,14 +1601,11 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		if originID == "" {
 			originID = utils.UUIDSha1Prefix()
 		}
+		args.APIOpts[utils.OptsResourcesUsageID] = originID
+		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMsg string
-		attrRU := &utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
-			UsageID:  originID,
-			Units:    1,
-		}
 		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AuthorizeResources,
-			attrRU, &allocMsg); err != nil {
+			args, &allocMsg); err != nil {
 			return utils.NewErrResourceS(err)
 		}
 		authReply.ResourceAllocation = &allocMsg
@@ -1763,14 +1760,11 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		attrRU := &utils.ArgRSv1ResourceUsage{
-			CGREvent: args,
-			UsageID:  originID,
-			Units:    1,
-		}
+		args.APIOpts[utils.OptsResourcesUsageID] = originID
+		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMessage string
 		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns,
-			utils.ResourceSv1AllocateResources, attrRU, &allocMessage); err != nil {
+			utils.ResourceSv1AllocateResources, args, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
 		rply.ResourceAllocation = &allocMessage
@@ -2057,14 +2051,11 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
+		args.APIOpts[utils.OptsResourcesUsageID] = originID
+		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var reply string
-		argsRU := &utils.ArgRSv1ResourceUsage{
-			CGREvent: args,
-			UsageID:  originID, // same ID should be accepted by first group since the previous resource should be expired
-			Units:    1,
-		}
 		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1ReleaseResources,
-			argsRU, &reply); err != nil {
+			args, &reply); err != nil {
 			return utils.NewErrResourceS(err)
 		}
 	}
@@ -2193,14 +2184,11 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		attrRU := &utils.ArgRSv1ResourceUsage{
-			CGREvent: args,
-			UsageID:  originID,
-			Units:    1,
-		}
+		args.APIOpts[utils.OptsResourcesUsageID] = originID
+		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMessage string
 		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AllocateResources,
-			attrRU, &allocMessage); err != nil {
+			args, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
 		rply.ResourceAllocation = &allocMessage
@@ -2464,15 +2452,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				return utils.NewErrMandatoryIeMissing(utils.OriginID)
 			}
 
-			attrRU := &utils.ArgRSv1ResourceUsage{
-				CGREvent: cgrEv,
-				UsageID:  originID,
-				Units:    1,
-			}
-			attrRU.SetCloneable(true)
+			cgrEv.APIOpts[utils.OptsResourcesUsageID] = originID
+			cgrEv.APIOpts[utils.OptsResourcesUnits] = 1
 			var resMessage string
 			if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns, method,
-				attrRU, &resMessage); err != nil {
+				cgrEv, &resMessage); err != nil {
 				if blockError {
 					return utils.NewErrResourceS(err)
 				}

@@ -107,6 +107,7 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
+		utils.OptsCfg:                map[string]interface{}{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -125,6 +126,7 @@ func TestResourceSConfigClone(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		Opts:                &ResourcesOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -156,6 +158,11 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index3"},
 		NestedFields:        false,
+		Opts: &ResourcesOpts{
+			UsageID:  "usg1",
+			UsageTTL: utils.DurationPointer(time.Second),
+			Units:    1,
+		},
 	}
 
 	v2 := &ResourceSConfig{
@@ -167,6 +174,11 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index22"},
 		SuffixIndexedFields: &[]string{"*req.index33"},
 		NestedFields:        true,
+		Opts: &ResourcesOpts{
+			UsageID:  "usg2",
+			UsageTTL: utils.DurationPointer(time.Minute),
+			Units:    2,
+		},
 	}
 
 	expected := &ResourceSJsonCfg{
@@ -178,6 +190,11 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{"*req.index22"},
 		Suffix_indexed_fields: &[]string{"*req.index33"},
 		Nested_fields:         utils.BoolPointer(true),
+		Opts: &ResourcesOptsJson{
+			UsageID:  utils.StringPointer("usg2"),
+			UsageTTL: utils.StringPointer("1m0s"),
+			Units:    utils.Float64Pointer(2),
+		},
 	}
 
 	rcv := diffResourceSJsonCfg(d, v1, v2)
@@ -186,7 +203,9 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	expected = &ResourceSJsonCfg{}
+	expected = &ResourceSJsonCfg{
+		Opts: &ResourcesOptsJson{},
+	}
 	rcv = diffResourceSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))

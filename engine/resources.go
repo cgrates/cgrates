@@ -665,13 +665,22 @@ func (rS *ResourceService) matchingResourcesForEvent(ctx *context.Context, tnt s
 }
 
 // V1ResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
-	if args.CGREvent == nil {
+func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *Resources) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.UsageID == "" {
+	}
+
+	usageID := args.OptsAsString(rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	var ttl time.Duration
+	if ttl, err = args.OptsAsDuration(*rS.cgrcfg.ResourceSCfg().Opts.UsageTTL, utils.OptsResourcesUsageTTL); err != nil {
+		return
+	}
+	usageTTL := utils.DurationPointer(ttl)
+
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 	tnt := args.Tenant
@@ -699,7 +708,7 @@ func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args utils.
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(ctx, tnt, args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(ctx, tnt, args, usageID, usageTTL); err != nil {
 		return err
 	}
 	*reply = mtcRLs
@@ -708,15 +717,29 @@ func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args utils.
 }
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
-func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if args.CGREvent == nil {
+func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.UsageID == "" {
+	}
+
+	usageID := args.OptsAsString(rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	var units float64
+	if units, err = args.OptsAsFloat64(rS.cgrcfg.ResourceSCfg().Opts.Units, utils.OptsResourcesUnits); err != nil {
+		return
+	}
+	var ttl time.Duration
+	if ttl, err = args.OptsAsDuration(*rS.cgrcfg.ResourceSCfg().Opts.UsageTTL, utils.OptsResourcesUsageTTL); err != nil {
+		return
+	}
+	usageTTL := utils.DurationPointer(ttl)
+
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
+
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
@@ -742,7 +765,7 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args utils
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(ctx, tnt, args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(ctx, tnt, args, usageID, usageTTL); err != nil {
 		return err
 	}
 	defer mtcRLs.unlock()
@@ -750,8 +773,8 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args utils
 	var alcMessage string
 	if alcMessage, err = mtcRLs.allocateResource(&ResourceUsage{
 		Tenant: tnt,
-		ID:     args.UsageID,
-		Units:  args.Units}, true); err != nil {
+		ID:     usageID,
+		Units:  units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			err = utils.ErrResourceUnauthorized
 		}
@@ -762,15 +785,29 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args utils
 }
 
 // V1AllocateResources is called when a resource requires allocation
-func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if args.CGREvent == nil {
+func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.UsageID == "" {
+	}
+
+	usageID := args.OptsAsString(rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	var units float64
+	if units, err = args.OptsAsFloat64(rS.cgrcfg.ResourceSCfg().Opts.Units, utils.OptsResourcesUnits); err != nil {
+		return
+	}
+	var ttl time.Duration
+	if ttl, err = args.OptsAsDuration(*rS.cgrcfg.ResourceSCfg().Opts.UsageTTL, utils.OptsResourcesUsageTTL); err != nil {
+		return
+	}
+	usageTTL := utils.DurationPointer(ttl)
+
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
+
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
@@ -796,15 +833,15 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args utils.
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(ctx, tnt, args.CGREvent, args.UsageID,
-		args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(ctx, tnt, args, usageID,
+		usageTTL); err != nil {
 		return err
 	}
 	defer mtcRLs.unlock()
 
 	var alcMsg string
-	if alcMsg, err = mtcRLs.allocateResource(&ResourceUsage{Tenant: tnt, ID: args.UsageID,
-		Units: args.Units}, false); err != nil {
+	if alcMsg, err = mtcRLs.allocateResource(&ResourceUsage{Tenant: tnt, ID: usageID,
+		Units: units}, false); err != nil {
 		return
 	}
 
@@ -820,15 +857,25 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args utils.
 }
 
 // V1ReleaseResources is called when we need to clear an allocation
-func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if args.CGREvent == nil {
+func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.UsageID == "" {
+	}
+
+	usageID := args.OptsAsString(rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	var ttl time.Duration
+	if ttl, err = args.OptsAsDuration(*rS.cgrcfg.ResourceSCfg().Opts.UsageTTL, utils.OptsResourcesUsageTTL); err != nil {
+		return
+	}
+	usageTTL := utils.DurationPointer(ttl)
+
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
+
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
@@ -854,13 +901,13 @@ func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args utils.A
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(ctx, tnt, args.CGREvent, args.UsageID,
-		args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(ctx, tnt, args, usageID,
+		usageTTL); err != nil {
 		return
 	}
 	defer mtcRLs.unlock()
 
-	if err = mtcRLs.clearUsage(args.UsageID); err != nil {
+	if err = mtcRLs.clearUsage(usageID); err != nil {
 		return
 	}
 

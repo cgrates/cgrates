@@ -86,14 +86,44 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 	return IfaceAsDuration(iface)
 }
 
-// OptsAsDecimal OptAsDecimal returns an option as decimal.Big instance
-func (ev *CGREvent) OptsAsDecimal(configUsage *decimal.Big, optNames ...string) (d *decimal.Big, err error) {
+// OptsAsDecimal returns an option as decimal.Big instance
+func (ev *CGREvent) OptsAsDecimal(defaultValue *decimal.Big, optNames ...string) (*decimal.Big, error) {
 	for _, optName := range optNames {
 		if iface, has := ev.APIOpts[optName]; has {
 			return IfaceAsBig(iface)
 		}
 	}
-	return configUsage, nil
+	return defaultValue, nil
+}
+
+// OptsAsString returns an option as string
+func (ev *CGREvent) OptsAsString(defaultValue string, optNames ...string) string {
+	for _, optName := range optNames {
+		if iface, has := ev.APIOpts[optName]; has {
+			return IfaceAsString(iface)
+		}
+	}
+	return defaultValue
+}
+
+// OptsAsDuration returns an option as time.Duration
+func (ev *CGREvent) OptsAsDuration(defaultValue time.Duration, optNames ...string) (time.Duration, error) {
+	for _, optName := range optNames {
+		if iface, has := ev.APIOpts[optName]; has {
+			return IfaceAsDuration(iface)
+		}
+	}
+	return defaultValue, nil
+}
+
+// OptsAsFloat64 returns an option as float64
+func (ev *CGREvent) OptsAsFloat64(defaultValue float64, optNames ...string) (float64, error) {
+	for _, optName := range optNames {
+		if iface, has := ev.APIOpts[optName]; has {
+			return IfaceAsFloat64(iface)
+		}
+	}
+	return defaultValue, nil
 }
 
 func (ev *CGREvent) Clone() (clned *CGREvent) {

@@ -322,19 +322,18 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 
 func testV1SplSPopulateResUsage(t *testing.T) {
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		UsageID: "RandomID",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event1",
-			Event: map[string]interface{}{
-				"Account":  "1002",
-				"Supplier": "route1",
-				"ResID":    "ResourceSupplier1",
-			},
+	argsRU := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event1",
+		Event: map[string]interface{}{
+			"Account":  "1002",
+			"Supplier": "route1",
+			"ResID":    "ResourceSupplier1",
 		},
-
-		Units: 4,
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomID",
+			utils.OptsResourcesUnits:   4,
+		},
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
@@ -345,20 +344,18 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	argsRU = utils.ArgRSv1ResourceUsage{
-		UsageID: "RandomID2",
-
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event2",
-			Event: map[string]interface{}{
-				"Account":  "1002",
-				"Supplier": "route1",
-				"ResID":    "Resource2Supplier1",
-			},
+	argsRU = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event2",
+		Event: map[string]interface{}{
+			"Account":  "1002",
+			"Supplier": "route1",
+			"ResID":    "Resource2Supplier1",
 		},
-
-		Units: 7,
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomID2",
+			utils.OptsResourcesUnits:   7,
+		},
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
@@ -369,19 +366,18 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	argsRU = utils.ArgRSv1ResourceUsage{
-		UsageID: "RandomID3",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event3",
-			Event: map[string]interface{}{
-				"Account":  "1002",
-				"Supplier": "route2",
-				"ResID":    "ResourceSupplier2",
-			},
+	argsRU = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event3",
+		Event: map[string]interface{}{
+			"Account":  "1002",
+			"Supplier": "route2",
+			"ResID":    "ResourceSupplier2",
 		},
-
-		Units: 7,
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomID3",
+			utils.OptsResourcesUnits:   7,
+		},
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
@@ -392,18 +388,18 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	argsRU = utils.ArgRSv1ResourceUsage{
-		UsageID: "RandomID4",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event4",
-			Event: map[string]interface{}{
-				"Account":  "1002",
-				"Supplier": "route3",
-				"ResID":    "ResourceSupplier3",
-			},
+	argsRU = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event4",
+		Event: map[string]interface{}{
+			"Account":  "1002",
+			"Supplier": "route3",
+			"ResID":    "ResourceSupplier3",
 		},
-		Units: 7,
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomID4",
+			utils.OptsResourcesUnits:   7,
+		},
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {

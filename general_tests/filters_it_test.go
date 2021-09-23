@@ -426,10 +426,13 @@ func testV1FltrPopulateResources(t *testing.T) {
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				"Account":     "3001",
-				"Destination": "3002"},
+				"Destination": "3002"
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
+				utils.OptsResourcesUnits:   3,
+			},
 		},
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-		Units:   3,
 	}
 	if err := fltrRpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &result); err != nil {
@@ -570,9 +573,11 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 			Event: map[string]interface{}{
 				"Account":     "3001",
 				"Destination": "3002"},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
+				utils.OptsResourcesUnits:   9,
+			},
 		},
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-		Units:   9,
 	}
 	if err := fltrRpc.Call(utils.ResourceSv1AllocateResources, argsRU, &result); err != nil {
 		t.Error(err)

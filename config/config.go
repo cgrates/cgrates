@@ -126,7 +126,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		dnsAgentCfg:    new(DNSAgentCfg),
 		attributeSCfg:  &AttributeSCfg{Opts: &AttributesOpts{}},
 		chargerSCfg:    new(ChargerSCfg),
-		resourceSCfg:   new(ResourceSConfig),
+		resourceSCfg:   &ResourceSConfig{Opts: &ResourcesOpts{}},
 		statsCfg:       &StatSCfg{Opts: &StatsOpts{}},
 		thresholdSCfg:  &ThresholdSCfg{Opts: &ThresholdsOpts{}},
 		routeSCfg:      &RouteSCfg{Opts: &RoutesOpts{}},
