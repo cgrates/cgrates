@@ -5152,3 +5152,40 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestLockFolderEmptyString(t *testing.T) {
+	ldr := &Loader{
+		enabled:      true,
+		tenant:       "cgrates.org",
+		dryRun:       false,
+		ldrID:        "ldrid",
+		tpInDir:      "/var/spool/cgrates/loader/in",
+		tpOutDir:     "/var/spool/cgrates/loader/out",
+		lockFilepath: utils.EmptyString,
+		fieldSep:     utils.InfieldSep,
+	}
+
+	if err := ldr.lockFolder(); err != nil {
+		t.Error(err)
+	}
+}
+
+// func TestLockFolderIsDir(t *testing.T) {
+// 	ldr := &Loader{
+// 		enabled:      true,
+// 		tenant:       "cgrates.org",
+// 		dryRun:       false,
+// 		ldrID:        "ldrid",
+// 		tpInDir:      "/var/spool/cgrates/loader/in",
+// 		tpOutDir:     "/var/spool/cgrates/loader/out",
+// 		lockFilepath: "/tmp",
+// 		fieldSep:     utils.InfieldSep,
+// 	}
+
+// 	expPath := path.Join(ldr.lockFilepath, ldr.ldrID+".lck")
+// 	ldr.lockFolder()
+
+// 	if ldr.lockFilepath != expPath {
+// 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.lockFilepath)
+// 	}
+// }
