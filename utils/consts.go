@@ -2113,7 +2113,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsSesSTIRInitiate, OptsSesThresholdS, OptsSesThresholdSDerivedReply, OptsSesThresholdIDs,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, OptsCDRsAttributeS, OptsCDRsChargerS, OptsCDRsExport, OptsCDRsRefund,
-	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS, OptsCDRsRateS, OptsAccountS,
+	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS, OptsRateS, OptsAccountS,
 	OptsAccountsUsage, OptsStatsStatIDs, OptsActionsActionProfileIDs})
 
 // Event Opts
@@ -2181,7 +2181,7 @@ const (
 	OptsCDRsStatS      = "*cdrsStatS"
 	OptsCDRsStore      = "*cdrsStore"
 	OptsCDRsThresholdS = "*cdrsThresholdS"
-	OptsCDRsRateS      = "*cdrsRateS"
+	OptsRateS          = "*rateS"
 
 	// DispatcherS
 	OptsAPIKey                   = "*apiKey"

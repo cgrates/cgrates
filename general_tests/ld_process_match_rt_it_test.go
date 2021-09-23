@@ -15,9 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package general_tests
+package apis
 
 import (
+	"net"
 	"path"
 	"reflect"
 	"testing"
@@ -25,10 +26,10 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -42,16 +43,41 @@ var (
 		testLdPrMatchRtLoadConfig,
 		testLdPrMatchRtResetDataDB,
 		testLdPrMatchRtResetStorDb,
-		//testLdPrMatchRtStartEngine,
+		testLdPrMatchRtStartEngine,
 		testLdPrMatchRtRPCConn,
 		testLdPrMatchRtLoadTP,
 		testLdPrMatchRtCDRSProcessEvent,
 
-		//testLdPrMatchRtStopCgrEngine,
+		testLdPrMatchRtStopCgrEngine,
 	}
 )
 
+type testRPC struct {
+}
+
+func (testRPC) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+
+	return nil
+}
+
 func TestLdPrMatchRtChange(t *testing.T) {
+	birpc.RegisterName(utils.EeSv1, new(testRPC))
+	l, err := net.Listen(utils.TCP, ":22012")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+	go func() {
+		for {
+			c, err := l.Accept()
+			if err != nil {
+				t.Log(err)
+				return
+			}
+			go jsonrpc.ServeConn(c)
+		}
+	}()
+
 	switch *dbType {
 	case utils.MetaInternal:
 		testLdPrMatchRtCfgDir = "ld_process_match_rt_internal"
@@ -72,7 +98,7 @@ func TestLdPrMatchRtChange(t *testing.T) {
 func testLdPrMatchRtLoadConfig(t *testing.T) {
 	var err error
 	testLdPrMatchRtCfgPath = path.Join(*dataDir, "conf", "samples", testLdPrMatchRtCfgDir)
-	if testLdPrMatchRtCfg, err = config.NewCGRConfigFromPath(testLdPrMatchRtCfgPath); err != nil {
+	if testLdPrMatchRtCfg, err = config.NewCGRConfigFromPath(context.Background(), testLdPrMatchRtCfgPath); err != nil {
 		t.Error(err)
 	}
 }
@@ -131,7 +157,8 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 				utils.Usage:        time.Minute,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsCDRsRateS: false,
+				utils.OptsRateS:      false,
+				utils.OptsCDRsExport: true,
 			},
 		},
 	}
@@ -139,12 +166,11 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 	if err := testLdPrMatchRtRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, ev, &rply); err != nil {
 		t.Fatal(err)
 	}
-	expected := &sessions.V1AuthorizeReply{
-		MaxUsage: (*time.Duration)(utils.Int64Pointer(60000000000)),
-	}
+	expected := "OK"
 	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
 	}
+
 }
 
 func testLdPrMatchRtStopCgrEngine(t *testing.T) {
