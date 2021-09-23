@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"os"
+	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -159,9 +162,6 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 			return
 		}
 	}
-	if jsnCfg.Lockfile_path != nil {
-		l.LockFilePath = *jsnCfg.Lockfile_path
-	}
 	if jsnCfg.Caches_conns != nil {
 		l.CacheSConns = updateInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
 	}
@@ -173,6 +173,19 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	}
 	if jsnCfg.Tp_out_dir != nil {
 		l.TpOutDir = *jsnCfg.Tp_out_dir
+	}
+	if jsnCfg.Lockfile_path != nil {
+		// Check if path is relative, case in which "tpIn" folder should be prepended
+		l.LockFilePath = *jsnCfg.Lockfile_path
+
+		if !filepath.IsAbs(l.LockFilePath) {
+			l.LockFilePath = path.Join(l.TpInDir, l.LockFilePath)
+		}
+
+		file, err := os.Stat(l.LockFilePath)
+		if err == nil && file.IsDir() {
+			l.LockFilePath = path.Join(l.LockFilePath, l.ID+".lck")
+		}
 	}
 	if jsnCfg.Data != nil {
 		for _, jsnLoCfg := range *jsnCfg.Data {

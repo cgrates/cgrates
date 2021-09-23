@@ -2097,7 +2097,7 @@ func TestLoaderConfig(t *testing.T) {
 			Enabled:        false,
 			ID:             utils.MetaDefault,
 			Tenant:         ten,
-			LockFilePath:   ".cgr.lck",
+			LockFilePath:   "/var/spool/cgrates/loader/in/.cgr.lck",
 			CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
 			FieldSeparator: ",",
 			TpInDir:        "/var/spool/cgrates/loader/in",
