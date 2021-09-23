@@ -347,7 +347,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsThresholdS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
 	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
 	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
-	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
+	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
 	acntS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAccountS, len(cdrS.cfg.CdrsCfg().AccountSConns) != 0)
 
 	// end of processing options
@@ -392,7 +392,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *ArgV1Pro
 	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsThresholdS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
 	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsStatS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
 	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsChargerS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
-	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
+	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
 	acntS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAccountS, len(cdrS.cfg.CdrsCfg().AccountSConns) != 0)
 	// end of processing options
 

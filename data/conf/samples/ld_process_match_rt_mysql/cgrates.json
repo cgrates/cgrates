@@ -42,9 +42,10 @@
 
 	"cdrs": {
 		"enabled": true,
-		//"chargers_conns":["*internal"],
+		"chargers_conns":["*internal"],
 		//"accounts_conns": ["*localhost"]
-		"rates_conns": ["*localhost"]
+		"rates_conns": ["*localhost"],
+		"ees_conns": ["conn1"]
 	},
 	
 	"chargers": {
@@ -61,5 +62,13 @@
 
 	"accounts": {
 		"enabled": true,
-	}
+	},
+
+	"rpc_conns": {
+		"conn1": {
+			"strategy": "*first",
+			"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],
+		},
+	},
+	
 	}

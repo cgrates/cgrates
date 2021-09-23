@@ -66,7 +66,7 @@ func TestRateChange(t *testing.T) {
 func testRateLoadConfig(t *testing.T) {
 	var err error
 	testRateCfgPath = path.Join(*dataDir, "conf", "samples", testRateCfgDir)
-	if testRateCfg, err = config.NewCGRConfigFromPath(testRateCfgPath); err != nil {
+	if testRateCfg, err = config.NewCGRConfigFromPath(context.Background(), testRateCfgPath); err != nil {
 		t.Error(err)
 	}
 }
