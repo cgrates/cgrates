@@ -25,6 +25,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type ResourcesOpts struct {
+	UsageID  string
+	UsageTTL *time.Duration
+	Units    float64
+}
+
 // ResourceSConfig is resorces section config
 type ResourceSConfig struct {
 	Enabled             bool
@@ -35,6 +41,7 @@ type ResourceSConfig struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+	Opts                *ResourcesOpts
 }
 
 // loadResourceSCfg loads the ResourceS section of the configuration
@@ -44,6 +51,27 @@ func (rlcfg *ResourceSConfig) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGR
 		return
 	}
 	return rlcfg.loadFromJSONCfg(jsnRLSCfg)
+}
+
+func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.UsageID != nil {
+		rsOpts.UsageID = *jsnCfg.UsageID
+	}
+	if jsnCfg.UsageTTL != nil {
+		var usageTTL time.Duration
+		if usageTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.UsageTTL); err != nil {
+			return
+		}
+		rsOpts.UsageTTL = utils.DurationPointer(usageTTL)
+	}
+	if jsnCfg.Units != nil {
+		rsOpts.Units = *jsnCfg.Units
+	}
+
+	return nil
 }
 
 func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
@@ -76,16 +104,25 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 	if jsnCfg.Nested_fields != nil {
 		rlcfg.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Opts != nil {
+		rlcfg.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (rlcfg ResourceSConfig) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaUsageIDCfg:  rlcfg.Opts.UsageID,
+		utils.MetaUsageTTLCfg: rlcfg.Opts.UsageTTL,
+		utils.MetaUnitsCfg:    rlcfg.Opts.Units,
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        rlcfg.Enabled,
 		utils.IndexedSelectsCfg: rlcfg.IndexedSelects,
 		utils.NestedFieldsCfg:   rlcfg.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
+		utils.OptsCfg:           opts,
 	}
 	if rlcfg.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(rlcfg.ThresholdSConns)
@@ -108,6 +145,14 @@ func (rlcfg ResourceSConfig) AsMapInterface(string) interface{} {
 func (ResourceSConfig) SName() string               { return ResourceSJSON }
 func (rlcfg ResourceSConfig) CloneSection() Section { return rlcfg.Clone() }
 
+func (rsOpts *ResourcesOpts) Clone() *ResourcesOpts {
+	return &ResourcesOpts{
+		UsageID:  rsOpts.UsageID,
+		UsageTTL: rsOpts.UsageTTL,
+		Units:    rsOpts.Units,
+	}
+}
+
 // Clone returns a deep copy of ResourceSConfig
 func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 	cln = &ResourceSConfig{
@@ -115,6 +160,7 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 		IndexedSelects: rlcfg.IndexedSelects,
 		StoreInterval:  rlcfg.StoreInterval,
 		NestedFields:   rlcfg.NestedFields,
+		Opts:           rlcfg.Opts.Clone(),
 	}
 	if rlcfg.ThresholdSConns != nil {
 		cln.ThresholdSConns = utils.CloneStringSlice(rlcfg.ThresholdSConns)
@@ -132,6 +178,12 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 	return
 }
 
+type ResourcesOptsJson struct {
+	UsageID  *string  `json:"*usageID"`
+	UsageTTL *string  `json:"*usageTTL"`
+	Units    *float64 `json:"*units"`
+}
+
 // ResourceLimiter service config section
 type ResourceSJsonCfg struct {
 	Enabled               *bool
@@ -142,6 +194,23 @@ type ResourceSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
+	Opts                  *ResourcesOptsJson
+}
+
+func diffResourcesOptsJsonCfg(d *ResourcesOptsJson, v1, v2 *ResourcesOpts) *ResourcesOptsJson {
+	if d == nil {
+		d = new(ResourcesOptsJson)
+	}
+	if v1.UsageID != v2.UsageID {
+		d.UsageID = utils.StringPointer(v2.UsageID)
+	}
+	if v1.UsageTTL != v2.UsageTTL {
+		d.UsageTTL = utils.StringPointer((*v2.UsageTTL).String())
+	}
+	if v1.Units != v2.Units {
+		d.Units = utils.Float64Pointer(v2.Units)
+	}
+	return d
 }
 
 func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *ResourceSJsonCfg {
@@ -166,5 +235,6 @@ func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *Resourc
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
+	d.Opts = diffResourcesOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }

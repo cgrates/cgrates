@@ -147,23 +147,23 @@ type ResourceSv1 struct {
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.ArgRSv1ResourceUsage, reply *engine.Resources) error {
-	return rsv1.rls.V1ResourcesForEvent(ctx, *args, reply)
+func (rsv1 *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Resources) error {
+	return rsv1.rls.V1ResourcesForEvent(ctx, args, reply)
 }
 
 // AuthorizeResources checks if there are limits imposed for event
-func (rsv1 *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.ArgRSv1ResourceUsage, reply *string) error {
-	return rsv1.rls.V1AuthorizeResources(ctx, *args, reply)
+func (rsv1 *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1AuthorizeResources(ctx, args, reply)
 }
 
 // AllocateResources records usage for an event
-func (rsv1 *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.ArgRSv1ResourceUsage, reply *string) error {
-	return rsv1.rls.V1AllocateResources(ctx, *args, reply)
+func (rsv1 *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1AllocateResources(ctx, args, reply)
 }
 
 // ReleaseResources releases usage for an event
-func (rsv1 *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.ArgRSv1ResourceUsage, reply *string) error {
-	return rsv1.rls.V1ReleaseResources(ctx, *args, reply)
+func (rsv1 *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1ReleaseResources(ctx, args, reply)
 }
 
 // GetResource returns a resource configuration

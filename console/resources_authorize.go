@@ -26,7 +26,7 @@ func init() {
 	c := &CmdResourceAuthorize{
 		name:      "resources_authorize",
 		rpcMethod: utils.ResourceSv1AuthorizeResources,
-		rpcParams: &utils.ArgRSv1ResourceUsage{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdResourceAuthorize struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ArgRSv1ResourceUsage
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,9 +50,7 @@ func (self *CmdResourceAuthorize) RpcMethod() string {
 
 func (self *CmdResourceAuthorize) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ArgRSv1ResourceUsage{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = &utils.CGREvent{}
 	}
 	return self.rpcParams
 }

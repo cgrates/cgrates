@@ -499,14 +499,14 @@ func TestResourcesGetResource(t *testing.T) {
 	}
 
 	rsv1 := NewResourceSv1(rls)
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		UsageID: "RU_Test",
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_Test",
+		},
 	}
 
 	expResources := engine.Resources{
@@ -603,14 +603,14 @@ func TestResourcesAuthorizeAllocateReleaseResource(t *testing.T) {
 	}
 
 	rsv1 := NewResourceSv1(rls)
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		UsageID: "RU_Test",
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_Test",
+		},
 	}
 
 	if err := rsv1.AuthorizeResources(context.Background(), args, &reply); err != nil {

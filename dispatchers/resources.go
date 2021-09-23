@@ -38,11 +38,11 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREvent, rpl *string) 
 	return dS.Dispatch(context.TODO(), args, utils.MetaResources, utils.ResourceSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,
+func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *utils.CGREvent,
 	reply *engine.Resources) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent, tnt,
@@ -50,14 +50,14 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
+func (dS *DispatcherService) ResourceSv1AuthorizeResources(args *utils.CGREvent,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1AuthorizeResources, tnt,
@@ -65,14 +65,14 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaResources, utils.ResourceSv1AuthorizeResources, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaResources, utils.ResourceSv1AuthorizeResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1ResourceUsage,
+func (dS *DispatcherService) ResourceSv1AllocateResources(args *utils.CGREvent,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1AllocateResources, tnt,
@@ -80,14 +80,14 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaResources, utils.ResourceSv1AllocateResources, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaResources, utils.ResourceSv1AllocateResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1ResourceUsage,
+func (dS *DispatcherService) ResourceSv1ReleaseResources(args *utils.CGREvent,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1ReleaseResources, tnt,
@@ -95,7 +95,7 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaResources, utils.ResourceSv1ReleaseResources, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaResources, utils.ResourceSv1ReleaseResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) (err error) {

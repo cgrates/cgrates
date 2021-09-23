@@ -860,16 +860,16 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	rEv := utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "dan",
-			},
+	rEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "dan",
 		},
-		Units: 6,
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
+		},
 	}
 	var rsIDs string
 	//Testing ProcessEvent on set thresholdprofile using apier
@@ -882,15 +882,15 @@ func testFltrRplResourceProfile(t *testing.T) {
 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.ResourceSv1GetResource, argsRs, &replyRs); err != nil {
 		t.Fatal(err)
 	}
-	rs.TTLIdx = []string{rEv.UsageID}
+	rs.TTLIdx = []string{rEv.APIOpts[utils.OptsResourcesUsageID].(string)}
 	rs.Usages = map[string]*engine.ResourceUsage{
-		rEv.UsageID: {
+		rEv.APIOpts[utils.OptsResourcesUsageID].(string): {
 			Tenant: "cgrates.org",
-			ID:     rEv.UsageID,
+			ID:     rEv.APIOpts[utils.OptsResourcesUsageID].(string),
 			Units:  6,
 		},
 	}
-	replyRs.Usages[rEv.UsageID].ExpiryTime = time.Time{}
+	replyRs.Usages[rEv.APIOpts[utils.OptsResourcesUsageID].(string)].ExpiryTime = time.Time{}
 	if !reflect.DeepEqual(rs, replyRs) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(rs), utils.ToJSON(replyRs))
 	}

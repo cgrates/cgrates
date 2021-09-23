@@ -338,53 +338,6 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 	}
 }
 
-func TestArgRSv1ResourceUsageCloneCase1(t *testing.T) {
-	expectedArgRSv1 := &ArgRSv1ResourceUsage{
-		clnb: true,
-	}
-	newArgRSv1 := new(ArgRSv1ResourceUsage)
-	newArgRSv1.SetCloneable(true)
-	if !reflect.DeepEqual(expectedArgRSv1, newArgRSv1) {
-		t.Errorf("Expected %+v, received %+v", expectedArgRSv1, newArgRSv1)
-	}
-}
-
-func TestArgRSv1ResourceUsageCloneCase2(t *testing.T) {
-	newArgRSv1 := &ArgRSv1ResourceUsage{
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			APIOpts: map[string]interface{}{},
-		},
-		UsageID:  "randomID",
-		UsageTTL: DurationPointer(2),
-		Units:    1.0,
-	}
-	if replyArgRsv1, err := newArgRSv1.RPCClone(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(newArgRSv1, replyArgRsv1) {
-		t.Errorf("Expected %+v \n, received %+v", ToJSON(newArgRSv1), ToJSON(replyArgRsv1))
-	}
-}
-
-func TestArgRSv1ResourceUsageCloneCase3(t *testing.T) {
-	newArgRSv1 := &ArgRSv1ResourceUsage{
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
-		},
-		UsageID:  "randomID",
-		UsageTTL: DurationPointer(2),
-		Units:    1.0,
-		clnb:     true,
-	}
-	if replyArgRsv1, err := newArgRSv1.RPCClone(); err != nil {
-		t.Error(err)
-	} else if newArgRSv1.clnb = false; !reflect.DeepEqual(newArgRSv1, replyArgRsv1) {
-		t.Errorf("Expected %+v \n, received %+v", ToJSON(newArgRSv1), ToJSON(replyArgRsv1))
-	}
-}
-
 func TestTPActivationIntervalAsActivationInterval(t *testing.T) {
 	tPActivationInterval := &TPActivationInterval{
 		ActivationTime: "2019-04-04T11:45:26.371Z",

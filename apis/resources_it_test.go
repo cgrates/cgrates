@@ -336,15 +336,15 @@ func testResourceSGetResourceProfileCount(t *testing.T) {
 }
 
 func testResourceSGetResourcesForEvent(t *testing.T) {
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		UsageID: "RU_Test",
-		Units:   2,
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_Test",
+			utils.OptsResourcesUnits:   2,
+		},
 	}
 
 	exp := engine.Resources{
@@ -370,16 +370,16 @@ func testResourceSGetResourcesForEvent(t *testing.T) {
 }
 
 func testResourceSAllocateResources(t *testing.T) {
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		UsageTTL: utils.DurationPointer(time.Minute),
-		UsageID:  "RU_Test",
-		Units:    6,
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUnits:    6,
+			utils.OptsResourcesUsageTTL: time.Minute,
+		},
 	}
 
 	var reply string
@@ -392,16 +392,16 @@ func testResourceSAllocateResources(t *testing.T) {
 }
 
 func testResourceSAuthorizeResourcesBeforeRelease(t *testing.T) {
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    7,
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUnits:    7,
+			utils.OptsResourcesUsageTTL: time.Minute,
+		},
 	}
 
 	var reply string
@@ -412,16 +412,16 @@ func testResourceSAuthorizeResourcesBeforeRelease(t *testing.T) {
 }
 
 func testResourceSReleaseResources(t *testing.T) {
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		UsageTTL: utils.DurationPointer(time.Minute),
-		UsageID:  "RU_Test",
-		Units:    4,
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUnits:    4,
+			utils.OptsResourcesUsageTTL: time.Minute,
+		},
 	}
 	var reply string
 
@@ -434,16 +434,16 @@ func testResourceSReleaseResources(t *testing.T) {
 }
 
 func testResourceSAuthorizeResourcesAfterRelease(t *testing.T) {
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			ID: "EventTest",
+	args := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    7,
+		ID: "EventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUnits:    7,
+			utils.OptsResourcesUsageTTL: time.Minute,
+		},
 	}
 
 	var reply string
@@ -612,17 +612,16 @@ func testResourceSSetResourceProfile(t *testing.T) {
 
 func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		UsageID: "RU_1",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EV_1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	argsRU := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EV_1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
-
-		Units: 1,
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_1",
+			utils.OptsResourcesUnits:   1,
+		},
 	}
 
 	expBody := `{"*opts":{"*actionProfileIDs":["actPrfID"],"*eventType":"ResourceUpdate","*thresholdIDs":["THD_1"]},"*req":{"EventType":"ResourceUpdate","ResourceID":"RES_1","Usage":0}}`
@@ -651,14 +650,14 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 }
 
 func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
-	argsRU := &utils.ArgRSv1ResourceUsage{
-		UsageID: "RU_1",
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EV_1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	argsRU := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EV_1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_1",
 		},
 	}
 	var reply string

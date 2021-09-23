@@ -1935,6 +1935,11 @@ const (
 	RateSuffixIndexedFieldsCfg = "rate_suffix_indexed_fields"
 	Verbosity                  = "verbosity"
 
+	// ResourceSCfg
+	MetaUsageIDCfg  = "*usageID"
+	MetaUsageTTLCfg = "*usageTTL"
+	MetaUnitsCfg    = "*units"
+
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"
 	IndexTypeCfg       = "index_type"
@@ -2196,6 +2201,11 @@ const (
 	OptsRatesStartTime      = "*ratesStartTime"
 	OptsRatesUsage          = "*ratesUsage"
 	OptsRatesIntervalStart  = "*ratesIntervalStart"
+
+	// Resources
+	OptsResourcesUnits    = "*rsUnits"
+	OptsResourcesUsageID  = "*rsUsageID"
+	OptsResourcesUsageTTL = "*rsUsageTTL"
 
 	// Routes
 	OptsRoutesProfileCount = "*rouProfileCount"
