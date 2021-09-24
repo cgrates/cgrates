@@ -506,6 +506,14 @@ cgrates.org,SET_ACTPROFILE_3
 }
 
 func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
+	pathL := "/tmp/testLoadFromFilesCsvActionProfileOpenError/"
+	if err := os.MkdirAll(pathL, 0777); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := os.Create(path.Join(pathL, "WrongFileName")); err != nil {
+		t.Error(err)
+	}
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
@@ -514,6 +522,7 @@ func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
 		tpInDir:       "/tmp/testLoadFromFilesCsvActionProfileOpenError",
 		rdrTypes:      []string{utils.MetaActionProfiles},
 		timezone:      "UTC",
+		fieldSep:      utils.InfieldSep,
 	}
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
@@ -522,13 +531,17 @@ func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
 			},
 		},
 	}
-	expectedErr := "open /tmp/testLoadFromFilesCsvActionProfileOpenError/ActionProfiles.csv: not a directory"
+	expectedErr := "open /tmp/testLoadFromFilesCsvActionProfileOpenError/ActionProfiles.csv: no such file or directory"
 	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
 	//if stopOnError is on true, the error is avoided,but instead will get a logger.warning message
 	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.RemoveAll(pathL); err != nil {
 		t.Error(err)
 	}
 }
@@ -578,6 +591,7 @@ cgrates.org,SET_ACTPROFILE_3
 				Mandatory: true},
 		},
 	}
+	ldr.connMgr = engine.NewConnManager(config.NewDefaultCGRConfig())
 
 	rdr := io.NopCloser(strings.NewReader(string(content)))
 	csvRdr := csv.NewReader(rdr)
