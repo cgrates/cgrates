@@ -318,8 +318,8 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	}
 	kamEv = KamEvent{"event": "CGR_PROFILE_REQUEST",
 		"Tenant": "cgrates.org", "Account": "1001",
-		KamReplyRoute:           "CGR_PROFILE_REPLY",
-		utils.OptsSesAttributeS: "true",
+		KamReplyRoute:        "CGR_PROFILE_REPLY",
+		utils.OptsAttributeS: "true",
 	}
 	procEvArgs = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],

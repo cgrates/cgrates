@@ -117,8 +117,8 @@ func TestSessionSReload1(t *testing.T) {
 			utils.Usage:            0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsSesInitiate:   true,
-			utils.OptsSesThresholdS: true,
+			utils.OptsSesInitiate: true,
+			utils.OptsThresholdS:  true,
 		},
 	}
 

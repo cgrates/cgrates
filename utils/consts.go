@@ -2110,20 +2110,22 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesAttributeIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
 	RemoteHostOpt, CacheOpt, OptsThresholdsThresholdIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
-	OptsSesAttributeS, OptsSesAttributeIDs, OptsSesAttributeSDerivedReply, OptsSesBlockerError,
-	OptsSesCDRs, OptsSesCDRsDerivedReply, OptsSesChargerS, OptsSesResourceS, OptsSesResourceSAuthorize,
-	OptsSesResourceSAlocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsSesRouteS,
-	OptsSesRouteSDerivedReply, OptsSesRouteSIgnoreErrors, OptsSesRouteSMaxCost, OptsSesStatS,
+	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError,
+	OptsCDRs, OptsSesCDRsDerivedReply, OptsChargerS, OptsResourceS, OptsSesResourceSAuthorize,
+	OptsSesResourceSAlocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
+	OptsSesRouteSDerivedReply, OptsSesRouteSIgnoreErrors, OptsSesRouteSMaxCost, OptsStatS,
 	OptsSesStatSDerivedReply, OptsSesStatIDs, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
-	OptsSesSTIRInitiate, OptsSesThresholdS, OptsSesThresholdSDerivedReply, OptsSesThresholdIDs,
+	OptsSesSTIRInitiate, OptsThresholdS, OptsSesThresholdSDerivedReply, OptsSesThresholdIDs,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
-	OptsSesMessage, OptsCDRsAttributeS, OptsCDRsChargerS, OptsCDRsExport, OptsCDRsRefund,
-	OptsCDRsRerate, OptsCDRsStatS, OptsCDRsStore, OptsCDRsThresholdS, OptsRateS, OptsAccountS,
+	OptsSesMessage, OptsAttributeS, OptsChargerS, OptsCDRsExport, OptsCDRsRefund,
+	OptsCDRsRerate, OptsStatS, OptsCDRsStore, OptsThresholdS, OptsRateS, OptsAccountS,
 	OptsAccountsUsage, OptsStatsStatIDs, OptsActionsActionProfileIDs})
 
 // Event Opts
 const (
 	// SessionS
+	OptsCDRs = "*cdrS"
+
 	OptsSesTTL           = "*sesTTL"
 	OptsSesChargeable    = "*sesChargeable"
 	OptsSesDebitInterval = "*sesDebitInterval"
@@ -2132,29 +2134,23 @@ const (
 	OptsSesTTLMaxDelay   = "*sesTTLMaxDelay"
 	OptsSesTTLUsage      = "*sesTTLUsage"
 
-	OptsSesAttributeS             = "*sesAttributeS"
-	OptsSesAttributeIDs           = "*sesAttributeIDs"
 	OptsSesAttributeSDerivedReply = "*sesAttributeSDerivedReply"
 	OptsSesBlockerError           = "*sesBlockerError"
-	OptsSesCDRs                   = "*sesCDRs"
 	OptsSesCDRsDerivedReply       = "*sesCDRsDerivedReply"
-	OptsSesChargerS               = "*sesChargerS"
-	OptsSesResourceS              = "*sesResourceS"
+	OptsResourceS                 = "*resourceS"
 	OptsSesResourceSAuthorize     = "*sesResourceSAuthorize"
 	OptsSesResourceSAlocate       = "*sesResourceSAlocate"
 	OptsSesResourceSRelease       = "*sesResourceSRelease"
 	OptsSesResourceSDerivedReply  = "*sesResourceSDerivedReply"
-	OptsSesRouteS                 = "*sesRouteS"
+	OptsRouteS                    = "*routeS"
 	OptsSesRouteSDerivedReply     = "*sesRouteSDerivedReply"
 	OptsSesRouteSIgnoreErrors     = "*sesRouteSIgnoreErrors"
 	OptsSesRouteSMaxCost          = "*sesRouteSMaxCost"
-	OptsSesStatS                  = "*sesStatS"
 	OptsSesStatSDerivedReply      = "*sesStatSDerivedReply"
 	OptsSesStatIDs                = "*sesStatIDs"
 	OptsSesSTIRAuthenticate       = "*sesSTIRAuthenticate"
 	OptsSesSTIRDerivedReply       = "*sesSTIRDerivedReply"
 	OptsSesSTIRInitiate           = "*sesSTIRInitiate"
-	OptsSesThresholdS             = "*sesThresholdS"
 	OptsSesThresholdSDerivedReply = "*sesThresholdSDerivedReply"
 	OptsSesThresholdIDs           = "*sesThresholdIDs"
 	OptsSesMaxUsage               = "*sesMaxUsage"
@@ -2178,15 +2174,16 @@ const (
 	OptsAttributesProcessRuns  = "*attrProcessRuns"
 
 	// CDRs
-	OptsCDRsAttributeS = "*cdrsAttributeS"
-	OptsCDRsChargerS   = "*cdrsChargerS"
-	OptsCDRsExport     = "*cdrsExport"
-	OptsCDRsRefund     = "*cdrsRefund"
-	OptsCDRsRerate     = "*cdrsRerate"
-	OptsCDRsStatS      = "*cdrsStatS"
-	OptsCDRsStore      = "*cdrsStore"
-	OptsCDRsThresholdS = "*cdrsThresholdS"
-	OptsRateS          = "*rateS"
+	OptsAttributeS = "*attributeS"
+	OptsChargerS   = "*chargerS"
+	OptsStatS      = "*statS"
+	OptsThresholdS = "*thresholdS"
+	OptsRateS      = "*rateS"
+
+	OptsCDRsExport = "*cdrsExport"
+	OptsCDRsRefund = "*cdrsRefund"
+	OptsCDRsRerate = "*cdrsRerate"
+	OptsCDRsStore  = "*cdrsStore"
 
 	// DispatcherS
 	OptsAPIKey                   = "*apiKey"

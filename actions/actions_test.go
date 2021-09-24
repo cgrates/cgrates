@@ -574,8 +574,8 @@ func TestCDRLogActionExecute(t *testing.T) {
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
-				if argConv.APIOpts[utils.OptsCDRsChargerS].(bool) {
-					return fmt.Errorf("Expected false, received %+v", argConv.APIOpts[utils.OptsCDRsChargerS])
+				if argConv.APIOpts[utils.OptsChargerS].(bool) {
+					return fmt.Errorf("Expected false, received %+v", argConv.APIOpts[utils.OptsChargerS])
 				}
 				if val, has := argConv.Event[utils.Subject]; !has {
 					return fmt.Errorf("missing Subject")
@@ -645,8 +645,8 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
 				}
-				if argConv.APIOpts[utils.OptsCDRsChargerS].(bool) {
-					return fmt.Errorf("Expected false, received %+v", argConv.APIOpts[utils.OptsCDRsChargerS])
+				if argConv.APIOpts[utils.OptsChargerS].(bool) {
+					return fmt.Errorf("Expected false, received %+v", argConv.APIOpts[utils.OptsChargerS])
 				}
 				if val, has := argConv.Event[utils.Tenant]; !has {
 					return fmt.Errorf("missing Tenant")

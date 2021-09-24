@@ -236,7 +236,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 	}
 	testEv := testCdr.AsCGREvent()
 	testEv.APIOpts[utils.OptsCDRsExport] = false
-	testEv.APIOpts[utils.OptsCDRsChargerS] = false
+	testEv.APIOpts[utils.OptsChargerS] = false
 	var reply string
 	if err := cdrsMasterRpc.Call(context.Background(), utils.CDRsV1ProcessEvent,
 		testEv, &reply); err != nil {

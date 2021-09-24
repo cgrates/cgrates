@@ -77,7 +77,7 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 	if optsMS == nil {
 		optsMS = utils.MapStorage{}
 	}
-	optsMS[utils.OptsCDRsChargerS] = false // do not try to get the chargers for cdrlog
+	optsMS[utils.OptsChargerS] = false // do not try to get the chargers for cdrlog
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaCDR: utils.NewOrderedNavigableMap(),
 	}

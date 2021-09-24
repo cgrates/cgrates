@@ -145,7 +145,7 @@ func testSes4CDRsProcessCDR(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			// utils.MetaRALs:true,
 			utils.OptsCDRsStore:  true,
-			utils.OptsSesRouteS:  false,
+			utils.OptsRouteS:     false,
 			utils.OptsCDRsRerate: true,
 		},
 		// Flags: []string{utils.MetaRALs, utils.MetaStore, "*routes:false", utils.MetaRerate},
