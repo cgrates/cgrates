@@ -748,24 +748,24 @@ func TestParseZeroRatingSubject(t *testing.T) {
 		MetaVoice: "*zero1s",
 	}
 	for i, s := range subj {
-		if d, err := ParseZeroRatingSubject(MetaVoice, s, dfltRatingSubject); err != nil || d != dur[i] {
+		if d, err := ParseZeroRatingSubject(MetaVoice, s, dfltRatingSubject, true); err != nil || d != dur[i] {
 			t.Error("Error parsing rating subject: ", s, d, err)
 		}
 	}
-	if d, err := ParseZeroRatingSubject(MetaData, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+	if d, err := ParseZeroRatingSubject(MetaData, EmptyString, dfltRatingSubject, true); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
-	if d, err := ParseZeroRatingSubject(MetaSMS, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+	if d, err := ParseZeroRatingSubject(MetaSMS, EmptyString, dfltRatingSubject, true); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
-	if d, err := ParseZeroRatingSubject(MetaMMS, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+	if d, err := ParseZeroRatingSubject(MetaMMS, EmptyString, dfltRatingSubject, true); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
-	if d, err := ParseZeroRatingSubject(MetaMonetary, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
+	if d, err := ParseZeroRatingSubject(MetaMonetary, EmptyString, dfltRatingSubject, true); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
 	expecting := "malformed rating subject: test"
-	if _, err := ParseZeroRatingSubject(MetaMonetary, "test", dfltRatingSubject); err == nil || err.Error() != expecting {
+	if _, err := ParseZeroRatingSubject(MetaMonetary, "test", dfltRatingSubject, true); err == nil || err.Error() != expecting {
 		t.Errorf("Expecting: %+v, received: %+v ", expecting, err)
 	}
 }

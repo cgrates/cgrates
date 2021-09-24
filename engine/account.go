@@ -392,8 +392,8 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			// try every balance multiple times in case one becomes active or ratig changes
 			unitBalanceChecker = false
 			for _, balance := range usefulUnitBalances {
-				partCC, debitErr := balance.debitUnits(cd, balance.account,
-					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
+				partCC, debitErr := balance.debit(cd, balance.account,
+					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0, true)
 				if debitErr != nil {
 					return nil, debitErr
 				}
@@ -429,8 +429,8 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			// try every balance multiple times in case one becomes active or ratig changes
 			moneyBalanceChecker = false
 			for _, balance := range usefulMoneyBalances {
-				partCC, debitErr := balance.debitMoney(cd, balance.account,
-					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
+				partCC, debitErr := balance.debit(cd, balance.account,
+					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0,false)
 				if debitErr != nil {
 					return nil, debitErr
 				}
@@ -533,7 +533,6 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 					Value: defaultBalance.Value,
 				}
 				increment.BalanceInfo.AccountID = acc.ID
-				increment.paid = true
 				if count {
 					acc.countUnits(
 						cost,
@@ -859,39 +858,39 @@ func (acc *Account) Clone() *Account {
 }
 
 // DebitConnectionFee debits the connection fee
-func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool, block bool) (bool, Balance) {
+func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, count bool, block bool) (bool, Balance) {
 	var debitedBalance Balance
-
-	if cc.deductConnectFee {
-		connectFee := cc.GetConnectFee()
-		//log.Print("CONNECT FEE: %f", connectFee)
-		connectFeePaid := false
-		for _, b := range usefulMoneyBalances {
-			if b.GetValue() >= connectFee {
-				b.SubstractValue(connectFee)
-				// the conect fee is not refundable!
-				if count {
-					acc.countUnits(connectFee, utils.MetaMonetary, cc, b)
-				}
-				connectFeePaid = true
-				debitedBalance = *b
-				break
-			}
-			if b.Blocker && block { // stop here
-				return false, debitedBalance
-			}
-		}
-		// debit connect fee
-		if connectFee > 0 && !connectFeePaid {
-			cc.negativeConnectFee = true
-			// there are no money for the connect fee; go negative
-			b := acc.GetDefaultMoneyBalance()
+	if !cc.deductConnectFee {
+		return true, debitedBalance
+	}
+	connectFee := cc.GetConnectFee()
+	//log.Print("CONNECT FEE: %f", connectFee)
+	var connectFeePaid bool
+	for _, b := range ufMoneyBalances {
+		if b.GetValue() >= connectFee {
 			b.SubstractValue(connectFee)
-			debitedBalance = *b
 			// the conect fee is not refundable!
 			if count {
 				acc.countUnits(connectFee, utils.MetaMonetary, cc, b)
 			}
+			connectFeePaid = true
+			debitedBalance = *b
+			break
+		}
+		if b.Blocker && block { // stop here
+			return false, debitedBalance
+		}
+	}
+	// debit connect fee
+	if connectFee > 0 && !connectFeePaid {
+		cc.negativeConnectFee = true
+		// there are no money for the connect fee; go negative
+		b := acc.GetDefaultMoneyBalance()
+		b.SubstractValue(connectFee)
+		debitedBalance = *b
+		// the conect fee is not refundable!
+		if count {
+			acc.countUnits(connectFee, utils.MetaMonetary, cc, b)
 		}
 	}
 	return true, debitedBalance

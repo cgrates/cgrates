@@ -302,7 +302,6 @@ func TestCallcostCallCostToDataCost(t *testing.T) {
 							},
 						},
 					},
-					paid:           false,
 					Duration:       12 * time.Second,
 					CompressFactor: 2,
 				},
@@ -324,7 +323,6 @@ func TestCallcostCallCostToDataCost(t *testing.T) {
 								},
 							},
 						},
-						paid:           true,
 						Duration:       24 * time.Second,
 						CompressFactor: 2,
 					},
@@ -429,55 +427,6 @@ func TestCallcostUpdateRatedUsage(t *testing.T) {
 	}
 }
 
-func TestCallcostIsPaidFalse(t *testing.T) {
-	cc := &CallCost{
-		Timespans: TimeSpans{
-			{
-				Increments: Increments{
-					&Increment{
-						paid: false,
-					},
-				},
-			},
-		},
-	}
-
-	rcv := cc.IsPaid()
-
-	if rcv != false {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
-	}
-}
-
-func TestCallcostIsPaidTrue(t *testing.T) {
-	cc := &CallCost{
-		Timespans: TimeSpans{
-			{
-				MatchedSubject: "1001",
-				Increments: Increments{
-					&Increment{
-						paid: true,
-					},
-				},
-			},
-			{
-				MatchedSubject: "1002",
-				Increments: Increments{
-					&Increment{
-						paid: true,
-					},
-				},
-			},
-		},
-	}
-
-	rcv := cc.IsPaid()
-
-	if rcv != true {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
-	}
-}
-
 func TestCallcostUpdateCost(t *testing.T) {
 	cc := &CallCost{
 		deductConnectFee: false,
@@ -573,7 +522,6 @@ func TestCallcostUpdateCost(t *testing.T) {
 							},
 						},
 					},
-					paid:           false,
 					Duration:       12 * time.Second,
 					CompressFactor: 2,
 				},
@@ -595,7 +543,6 @@ func TestCallcostUpdateCost(t *testing.T) {
 								},
 							},
 						},
-						paid:           true,
 						Duration:       24 * time.Second,
 						CompressFactor: 2,
 					},
@@ -720,7 +667,6 @@ func TestCallcostGetStartTime(t *testing.T) {
 							},
 						},
 					},
-					paid:           false,
 					Duration:       12 * time.Second,
 					CompressFactor: 2,
 				},
@@ -742,7 +688,6 @@ func TestCallcostGetStartTime(t *testing.T) {
 								},
 							},
 						},
-						paid:           true,
 						Duration:       24 * time.Second,
 						CompressFactor: 2,
 					},
