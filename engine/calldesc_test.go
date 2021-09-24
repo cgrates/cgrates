@@ -1957,7 +1957,6 @@ func TestCalldescRefundIncrementsNoBalanceInfo(t *testing.T) {
 		Increments: Increments{
 			{
 				Duration: time.Second,
-				paid:     true,
 				Cost:     5,
 			},
 		},

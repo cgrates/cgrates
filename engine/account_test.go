@@ -533,7 +533,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 	}
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{
 		utils.MetaVoice:    {b1},
-		utils.MetaMonetary: {&Balance{Uuid: "moneya", Value: 110}},
+		utils.MetaMonetary: {{Uuid: "moneya", Value: 110}},
 	}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)

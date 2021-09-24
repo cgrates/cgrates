@@ -42,5 +42,4 @@ type DataIncrement struct {
 	Cost           float64
 	BalanceInfo    *DebitInfo // need more than one for units with cost
 	CompressFactor int
-	paid           bool
 }

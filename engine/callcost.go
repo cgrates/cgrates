@@ -99,15 +99,6 @@ func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
 	}
 }
 
-func (cc *CallCost) IsPaid() bool {
-	for _, ts := range cc.Timespans {
-		if paid, _ := ts.IsPaid(); !paid {
-			return false
-		}
-	}
-	return true
-}
-
 func (cc *CallCost) ToDataCost() (*DataCost, error) {
 	if cc.ToR == utils.MetaVoice {
 		return nil, errors.New("Not a data call!")
@@ -145,7 +136,6 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 				Cost:           incr.Cost,
 				BalanceInfo:    incr.BalanceInfo,
 				CompressFactor: incr.CompressFactor,
-				paid:           incr.paid,
 			}
 		}
 	}

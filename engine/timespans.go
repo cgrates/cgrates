@@ -51,7 +51,6 @@ type Increment struct {
 	Cost           float64
 	BalanceInfo    *DebitInfo // need more than one for units with cost
 	CompressFactor int
-	paid           bool
 }
 
 // Holds information about the balance that made a specific payment
@@ -466,7 +465,6 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	if ts.RateInterval == nil {
 		return
 	}
-	ts.Increments = make([]*Increment, 0)
 	// create rated units series
 	_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 	// we will use the calculated cost and devide by nb of increments
@@ -475,34 +473,21 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
 	if nbIncrements > config.CgrConfig().RalsCfg().MaxIncrements {
 		utils.Logger.Warning(fmt.Sprintf("error: <%s with %+v>, when creating increments slice, TimeSpan: %s", utils.ErrMaxIncrementsExceeded, nbIncrements, utils.ToJSON(ts)))
+		ts.Increments = make([]*Increment, 0)
 		return
 	}
 	incrementCost := ts.CalculateCost() / float64(nbIncrements)
 	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.MetaRoundingMiddle)
-	for s := 0; s < nbIncrements; s++ {
-		inc := &Increment{
+	ts.Increments = make([]*Increment, nbIncrements)
+	for i := range ts.Increments {
+		ts.Increments[i] = &Increment{
 			Duration:    rateIncrement,
 			Cost:        incrementCost,
 			BalanceInfo: &DebitInfo{},
 		}
-		ts.Increments = append(ts.Increments, inc)
 	}
 	// put the rounded cost back in timespan
 	ts.Cost = incrementCost * float64(nbIncrements)
-}
-
-// returns whether the timespan has all increments marked as paid and if not
-// it also returns the first unpaied increment
-func (ts *TimeSpan) IsPaid() (bool, int) {
-	if ts.Increments.Length() == 0 {
-		return false, 0
-	}
-	for incrementIndex, increment := range ts.Increments {
-		if !increment.paid {
-			return false, incrementIndex
-		}
-	}
-	return true, len(ts.Increments)
 }
 
 /*
@@ -592,12 +577,12 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 }
 
 // Split the timespan at the given increment start
-func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
+func (ts *TimeSpan) SplitByIncrement(index int) (newTs *TimeSpan) {
 	if index <= 0 || index >= len(ts.Increments) {
-		return nil
+		return
 	}
 	timeStart := ts.GetTimeStartForIncrement(index)
-	newTs := &TimeSpan{
+	newTs = &TimeSpan{
 		RateInterval: ts.RateInterval,
 		TimeStart:    timeStart,
 		TimeEnd:      ts.TimeEnd,
@@ -608,7 +593,7 @@ func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
 	newTs.Increments = ts.Increments[index:]
 	ts.Increments = ts.Increments[:index]
 	ts.SetNewDurationIndex(newTs)
-	return newTs
+	return
 }
 
 // Split the timespan at the given second
@@ -725,11 +710,12 @@ func (ts *TimeSpan) GetTimeStartForIncrement(index int) time.Time {
 }
 
 func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
-	if duration < ts.GetDuration() {
-		duration = utils.RoundDuration(duration, ts.GetDuration())
+	tsDur := ts.GetDuration()
+	if duration < tsDur {
+		duration = utils.RoundDuration(duration, tsDur)
 	}
-	if duration > ts.GetDuration() {
-		initialDuration := ts.GetDuration()
+	if duration > tsDur {
+		initialDuration := tsDur
 		ts.TimeEnd = ts.TimeStart.Add(duration)
 		ts.DurationIndex = ts.DurationIndex + (duration - initialDuration)
 	}

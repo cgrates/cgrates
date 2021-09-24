@@ -267,11 +267,10 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCos
 	if getStandardIfEmpty {
 		cd.RatingInfos = nil
 		return cd.getCost()
-	} else {
-		cc := cd.CreateCallCost()
-		cc.Cost = 0
-		return cc, nil
 	}
+	cc := cd.CreateCallCost()
+	cc.Cost = 0
+	return cc, nil
 }
 
 func (b *Balance) GetValue() float64 {
@@ -302,7 +301,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
-	if duration, err := utils.ParseZeroRatingSubject(cd.ToR, b.RatingSubject, config.CgrConfig().RalsCfg().BalanceRatingSubject); err == nil {
+	if duration, err := utils.ParseZeroRatingSubject(cd.ToR, b.RatingSubject, config.CgrConfig().RalsCfg().BalanceRatingSubject, true); err == nil {
 		// we have *zero based units
 		cc = cd.CreateCallCost()
 		cc.Timespans = append(cc.Timespans, &TimeSpan{
@@ -359,12 +358,10 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 				inc.BalanceInfo.AccountID = ub.ID
 				inc.Cost = 0
-				inc.paid = true
 				if count {
 					ub.countUnits(amount, cc.ToR, cc, b)
 				}
 			} else {
-				inc.paid = false
 				// delete the rest of the unpiad increments/timespans
 				if incIndex == 0 {
 					// cut the entire current timespan
@@ -438,7 +435,6 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					amount = utils.Round(amount/b.Factor.GetValue(cd.ToR), globalRoundingDecimals, utils.MetaRoundingUp)
 				}
 				cost := inc.Cost
-				inc.paid = false
 				if strategy == utils.MetaMaxCostDisconnect && cd.MaxCostSoFar >= maxCost {
 					// cut the entire current timespan
 					cc.maxCostDisconect = true
@@ -462,7 +458,6 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						RateInterval: ts.RateInterval,
 					}
 					inc.BalanceInfo.AccountID = ub.ID
-					inc.paid = true
 					if count {
 						ub.countUnits(cost, utils.MetaMonetary, cc, b)
 					}
@@ -501,7 +496,6 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						}
 						cd.MaxCostSoFar += cost
 					}
-					inc.paid = true
 					if count {
 						ub.countUnits(amount, cc.ToR, cc, b)
 						if cost != 0 {
@@ -509,7 +503,6 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						}
 					}
 				} else {
-					inc.paid = false
 					// delete the rest of the unpaid increments/timespans
 					if incIndex == 0 {
 						// cut the entire current timespan
@@ -544,7 +537,6 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	var ok bool
 	//log.Print("cc: " + utils.ToJSON(cc))
 	if debitConnectFee {
-
 		// this is the first add, debit the connect fee
 		if ok, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); !ok {
 			// balance is blocker
@@ -567,7 +559,11 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			return nil, errors.New("timespan with no rate interval assigned")
 		}
 
-		if tsIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && debitConnectFee && cc.deductConnectFee && ok {
+		if tsIndex == 0 &&
+			ts.RateInterval.Rating.ConnectFee > 0 &&
+			debitConnectFee &&
+			cc.deductConnectFee &&
+			ok {
 
 			inc := &Increment{
 				Duration: 0,
@@ -593,13 +589,16 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			// check standard subject tags
 			//log.Printf("INC: %+v", inc)
 
-			if tsIndex == 0 && incIndex == 0 && ts.RateInterval.Rating.ConnectFee > 0 && cc.deductConnectFee && ok {
+			if tsIndex == 0 &&
+				incIndex == 0 &&
+				ts.RateInterval.Rating.ConnectFee > 0 &&
+				cc.deductConnectFee &&
+				ok {
 				// go to nextincrement
 				continue
 			}
 
 			amount := inc.Cost
-			inc.paid = false
 			if strategy == utils.MetaMaxCostDisconnect && cd.MaxCostSoFar >= maxCost {
 				// cut the entire current timespan
 				cc.maxCostDisconect = true
@@ -625,7 +624,6 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				if b.RatingSubject != "" {
 					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
 				}
-				inc.paid = true
 				if count {
 					ub.countUnits(amount, utils.MetaMonetary, cc, b)
 				}
@@ -647,12 +645,10 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				if b.RatingSubject != "" {
 					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
 				}
-				inc.paid = true
 				if count {
 					ub.countUnits(amount, utils.MetaMonetary, cc, b)
 				}
 			} else {
-				inc.paid = false
 				// delete the rest of the unpiad increments/timespans
 				if incIndex == 0 {
 					// cut the entire current timespan
@@ -825,4 +821,279 @@ func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 	case utils.Initial:
 		return bl.Initial, nil
 	}
+}
+
+// debitUnits will debit units for call descriptor.
+// returns the amount debited within cc
+func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
+	count, dryRun, debitConnectFee, isUnitBal bool) (cc *CallCost, err error) {
+	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
+		return
+	}
+	tor := cd.ToR
+	if !isUnitBal {
+		tor = utils.MetaMonetary
+	}
+	if duration, err_ := utils.ParseZeroRatingSubject(tor, b.RatingSubject,
+		config.CgrConfig().RalsCfg().BalanceRatingSubject, isUnitBal); err_ == nil {
+		// we have *zero based units
+		cc = cd.CreateCallCost()
+		ts := &TimeSpan{
+			TimeStart: cd.TimeStart,
+			TimeEnd:   cd.TimeEnd,
+		}
+		cc.Timespans = TimeSpans{ts}
+		ts.RoundToDuration(duration)
+		ts.RateInterval = &RateInterval{
+			Rating: &RIRate{
+				Rates: RateGroups{
+					&RGRate{
+						GroupIntervalStart: 0,
+						Value:              0,
+						RateIncrement:      duration,
+						RateUnit:           duration,
+					},
+				},
+			},
+		}
+		prefix, destid := b.getMatchingPrefixAndDestID(cd.Destination)
+		if prefix == utils.EmptyString {
+			prefix = cd.Destination
+		}
+		if destid == utils.EmptyString {
+			destid = utils.MetaAny
+		}
+		ts.setRatingInfo(&RatingInfo{
+			MatchedSubject: b.Uuid,
+			MatchedPrefix:  prefix,
+			MatchedDestId:  destid,
+			RatingPlanId:   utils.MetaNone,
+		})
+		ts.createIncrementsSlice()
+		//log.Printf("CC: %+v", ts)
+		for incIndex, inc := range ts.Increments {
+			//log.Printf("INCREMENET: %+v", inc)
+			amount := float64(inc.Duration)
+			if b.Factor != nil {
+				amount = utils.Round(amount/b.Factor.GetValue(tor),
+					globalRoundingDecimals, utils.MetaRoundingUp)
+			}
+			if b.GetValue() >= amount {
+				b.SubstractValue(amount)
+				inc.BalanceInfo.Unit = &UnitInfo{
+					UUID:          b.Uuid,
+					ID:            b.ID,
+					Value:         b.Value,
+					DestinationID: cc.Destination,
+					Consumed:      amount,
+					ToR:           tor, //aici
+					RateInterval:  nil,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
+				inc.Cost = 0
+				if count {
+					ub.countUnits(amount, tor, cc, b)
+				}
+				continue
+			}
+			// delete the rest of the unpiad increments/timespans
+			if incIndex == 0 {
+				// cut the entire current timespan
+				return nil, nil
+			}
+			ts.SplitByIncrement(incIndex)
+			if len(cc.Timespans) == 0 {
+				cc = nil
+			}
+			return
+		}
+		return
+	}
+	// no rating subject
+	//log.Print("B: ", utils.ToJSON(b))
+	//log.Printf("}}}}}}} %+v", cd.testCallcost)
+	cc, err = b.GetCost(cd, true)
+	if err != nil {
+		return nil, err
+	}
+
+	var debitedConnectFeeBalance Balance
+	var connectFeeDebited bool
+	//log.Print("cc: " + utils.ToJSON(cc))
+	if debitConnectFee {
+		// this is the first add, debit the connect fee
+		if connectFeeDebited, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); !connectFeeDebited {
+			// balance is blocker
+			return nil, nil
+		}
+	}
+
+	cc.Timespans.Decompress()
+	//log.Printf("CallCost In Debit: %+v", cc)
+	//for _, ts := range cc.Timespans {
+	//	log.Printf("CC_TS: %+v", ts.RateInterval.Rating.Rates[0])
+	//}
+	for tsIndex, ts := range cc.Timespans {
+		if ts.RateInterval == nil {
+			utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
+			return nil, errors.New("timespan with no rate interval assigned")
+		}
+		if ts.Increments == nil {
+			ts.createIncrementsSlice()
+		}
+		//log.Printf("TS: %+v", ts)
+
+		if tsIndex == 0 &&
+			ts.RateInterval.Rating.ConnectFee > 0 &&
+			debitConnectFee &&
+			cc.deductConnectFee &&
+			connectFeeDebited {
+
+			ts.Increments = append([]*Increment{{
+				Duration: 0,
+				Cost:     ts.RateInterval.Rating.ConnectFee,
+				BalanceInfo: &DebitInfo{
+					Monetary: &MonetaryInfo{
+						UUID:  debitedConnectFeeBalance.Uuid,
+						ID:    debitedConnectFeeBalance.ID,
+						Value: debitedConnectFeeBalance.Value,
+					},
+					AccountID: ub.ID,
+				},
+			}}, ts.Increments...)
+		}
+
+		maxCost, strategy := ts.RateInterval.GetMaxCost()
+		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
+		//log.Printf("RGRate: %+v", ts.RateInterval.Rating)
+		for incIndex, inc := range ts.Increments {
+			// check standard subject tags
+			//log.Printf("INC: %+v", inc)
+
+			if tsIndex == 0 &&
+				incIndex == 0 &&
+				ts.RateInterval.Rating.ConnectFee > 0 &&
+				cc.deductConnectFee &&
+				connectFeeDebited {
+				// go to nextincrement
+				continue
+			}
+			if cd.MaxCostSoFar >= maxCost {
+				if strategy == utils.MetaMaxCostFree {
+					inc.Cost = 0.0
+					inc.BalanceInfo.Monetary = &MonetaryInfo{
+						UUID:  b.Uuid,
+						ID:    b.ID,
+						Value: b.Value,
+					}
+					inc.BalanceInfo.AccountID = ub.ID
+					if b.RatingSubject != utils.EmptyString || isUnitBal {
+						inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
+					}
+					if count {
+						ub.countUnits(inc.Cost, utils.MetaMonetary, cc, b)
+					}
+
+					//log.Printf("TS: %+v", cc.Cost)
+					// go to nextincrement
+					continue
+				} else if cc.maxCostDisconect = strategy == utils.MetaMaxCostDisconnect; cc.maxCostDisconect && dryRun {
+					// cut the entire current timespan
+					if incIndex == 0 {
+						// cut the entire current timespan
+						cc.Timespans = cc.Timespans[:tsIndex]
+					} else {
+						ts.SplitByIncrement(incIndex)
+						cc.Timespans = cc.Timespans[:tsIndex+1]
+					}
+					return
+				}
+			}
+
+			// debit minutes and money
+			amount := float64(inc.Duration)
+			cost := inc.Cost
+
+			canDebitCost := b.GetValue() >= cost
+			var moneyBal *Balance
+			if isUnitBal {
+				if b.Factor != nil {
+					amount = utils.Round(amount/b.Factor.GetValue(cd.ToR), globalRoundingDecimals, utils.MetaRoundingUp)
+				}
+				for _, mb := range moneyBalances {
+					if mb.GetValue() >= cost {
+						moneyBal = mb
+						break
+					}
+				}
+				if cost != 0 && moneyBal == nil && (!dryRun || ub.AllowNegative) { // Fix for issue #685
+					utils.Logger.Warning(fmt.Sprintf("<RALs> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
+					moneyBal = ub.GetDefaultMoneyBalance()
+				}
+				canDebitCost = b.GetValue() >= amount && (moneyBal != nil || cost == 0)
+			}
+			if !canDebitCost {
+				// delete the rest of the unpaid increments/timespans
+				if incIndex == 0 {
+					// cut the entire current timespan
+					cc.Timespans = cc.Timespans[:tsIndex]
+				} else {
+					ts.SplitByIncrement(incIndex)
+					cc.Timespans = cc.Timespans[:tsIndex+1]
+				}
+				if len(cc.Timespans) == 0 {
+					cc = nil
+				}
+				return
+			}
+
+			if isUnitBal { // unit balance
+				b.SubstractValue(amount)
+				inc.BalanceInfo.Unit = &UnitInfo{
+					UUID:          b.Uuid,
+					ID:            b.ID,
+					Value:         b.Value,
+					DestinationID: cc.Destination,
+					Consumed:      amount,
+					ToR:           cc.ToR,
+					RateInterval:  ts.RateInterval,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
+				if cost != 0 {
+					moneyBal.SubstractValue(cost)
+					inc.BalanceInfo.Monetary = &MonetaryInfo{
+						UUID:  moneyBal.Uuid,
+						ID:    moneyBal.ID,
+						Value: moneyBal.Value,
+					}
+					cd.MaxCostSoFar += cost
+				}
+				if count {
+					ub.countUnits(amount, cc.ToR, cc, b)
+					if cost != 0 {
+						ub.countUnits(cost, utils.MetaMonetary, cc, moneyBal)
+					}
+				}
+			} else { // monetary balance
+				b.SubstractValue(cost)
+				cd.MaxCostSoFar += cost
+				inc.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  b.Uuid,
+					ID:    b.ID,
+					Value: b.Value,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
+				if b.RatingSubject != "" {
+					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
+				}
+				if count {
+					ub.countUnits(cost, utils.MetaMonetary, cc, b)
+				}
+			}
+		}
+	}
+	if !isUnitBal && len(cc.Timespans) == 0 {
+		cc = nil
+	}
+	return
 }

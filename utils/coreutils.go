@@ -391,9 +391,13 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 // ParseZeroRatingSubject will parse the subject in the balance
 // returns duration if able to extract it from subject
 // returns error if not able to parse duration (ie: if ratingSubject is standard one)
-func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]string) (time.Duration, error) {
+func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]string, isUnitBal bool) (time.Duration, error) {
 	rateSubj = strings.TrimSpace(rateSubj)
-	if rateSubj == "" || rateSubj == MetaAny {
+	if !isUnitBal && rateSubj == EmptyString {
+		return 0, errors.New("no rating subject for monetary")
+	}
+	if rateSubj == EmptyString ||
+		rateSubj == MetaAny {
 		var hasToR bool
 		if rateSubj, hasToR = defaultRateSubj[tor]; !hasToR {
 			rateSubj = defaultRateSubj[MetaAny]
@@ -403,8 +407,8 @@ func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]str
 		return 0, errors.New("malformed rating subject: " + rateSubj)
 	}
 	durStr := rateSubj[len(MetaRatingSubjectPrefix):]
-	if _, err := strconv.ParseFloat(durStr, 64); err == nil { // No time unit, postpend
-		durStr += "ns"
+	if val, err := strconv.ParseFloat(durStr, 64); err == nil { // No time unit, postpend
+		return time.Duration(val), nil // just return the float value converted(this should be faster than reparsing the string)
 	}
 	return time.ParseDuration(durStr)
 }
