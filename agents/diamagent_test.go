@@ -185,8 +185,8 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsSesAttributeS: "true",
-					utils.OptsSesInitiate:   "true",
+					utils.OptsAttributeS:  "true",
+					utils.OptsSesInitiate: "true",
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -246,8 +246,8 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsSesAttributeS: "true",
-					utils.OptsSesUpdate:     "true",
+					utils.OptsAttributeS: "true",
+					utils.OptsSesUpdate:  "true",
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -379,8 +379,8 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsSesAttributeS: "true",
-					utils.OptsSesMessage:    "true",
+					utils.OptsAttributeS: "true",
+					utils.OptsSesMessage: "true",
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -450,7 +450,7 @@ func TestProcessRequest(t *testing.T) {
 	tmpls := []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesInitiate,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesAttributeS,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsAttributeS,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
@@ -479,7 +479,7 @@ func TestProcessRequest(t *testing.T) {
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesUpdate,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesAttributeS,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsAttributeS,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
@@ -539,7 +539,7 @@ func TestProcessRequest(t *testing.T) {
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesMessage,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesAttributeS,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsAttributeS,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
