@@ -21,253 +21,253 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-import (
-	"net/rpc"
-	"path"
-	"reflect"
-	"testing"
-	"time"
+// import (
+// 	"net/rpc"
+// 	"path"
+// 	"reflect"
+// 	"testing"
+// 	"time"
 
-	"github.com/cgrates/cgrates/utils"
+// 	"github.com/cgrates/cgrates/utils"
 
-	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/engine"
 
-	"github.com/cgrates/cgrates/config"
-)
+// 	"github.com/cgrates/cgrates/config"
+// )
 
-var (
-	engineOneCfgPath string
-	engineOneCfg     *config.CGRConfig
-	engineOneRpc     *rpc.Client
+// var (
+// 	engineOneCfgPath string
+// 	engineOneCfg     *config.CGRConfig
+// 	engineOneRpc     *rpc.Client
 
-	engineTwoCfgPath string
-	engineTwoCfg     *config.CGRConfig
-	engineTwoRpc     *rpc.Client
-)
+// 	engineTwoCfgPath string
+// 	engineTwoCfg     *config.CGRConfig
+// 	engineTwoRpc     *rpc.Client
+// )
 
-var sTestsTwoEnginesIT = []func(t *testing.T){
-	testTwoEnginesInitConfig,
-	testTwoEnginesInitDataDB,
-	testTwoEnginesInitStorDB,
-	testTwoEnginesStartEngine,
-	testTwoEnginesRPC,
-	testTwoEnginesCheckCacheBeforeSet,
-	testTwoEnginesSetThreshold,
-	testTwoEnginesCheckCacheAfterSet,
-	testTwoEnginesUpdateThreshold,
-	testTwoEnginesKillEngines,
-}
+// var sTestsTwoEnginesIT = []func(t *testing.T){
+// 	testTwoEnginesInitConfig,
+// 	testTwoEnginesInitDataDB,
+// 	testTwoEnginesInitStorDB,
+// 	testTwoEnginesStartEngine,
+// 	testTwoEnginesRPC,
+// 	testTwoEnginesCheckCacheBeforeSet,
+// 	testTwoEnginesSetThreshold,
+// 	testTwoEnginesCheckCacheAfterSet,
+// 	testTwoEnginesUpdateThreshold,
+// 	testTwoEnginesKillEngines,
+// }
 
-func TestTwoEngines(t *testing.T) {
-	for _, test := range sTestsTwoEnginesIT {
-		t.Run("TestTwoEngines", test)
-	}
-}
+// func TestTwoEngines(t *testing.T) {
+// 	for _, test := range sTestsTwoEnginesIT {
+// 		t.Run("TestTwoEngines", test)
+// 	}
+// }
 
-func testTwoEnginesInitConfig(t *testing.T) {
-	engineOneCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine1")
-	if engineOneCfg, err = config.NewCGRConfigFromPath(engineOneCfgPath); err != nil {
-		t.Fatal(err)
-	}
-	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine2")
-	if engineTwoCfg, err = config.NewCGRConfigFromPath(engineTwoCfgPath); err != nil {
-		t.Fatal(err)
-	}
+// func testTwoEnginesInitConfig(t *testing.T) {
+// 	engineOneCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine1")
+// 	if engineOneCfg, err = config.NewCGRConfigFromPath(engineOneCfgPath); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples", "twoengines", "engine2")
+// 	if engineTwoCfg, err = config.NewCGRConfigFromPath(engineTwoCfgPath); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-}
-func testTwoEnginesInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(engineOneCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-func testTwoEnginesInitStorDB(t *testing.T) {
-	if err := engine.InitStorDB(engineOneCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-func testTwoEnginesStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(engineOneCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := engine.StartEngine(engineTwoCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-}
+// }
+// func testTwoEnginesInitDataDB(t *testing.T) {
+// 	if err := engine.InitDataDB(engineOneCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
+// func testTwoEnginesInitStorDB(t *testing.T) {
+// 	if err := engine.InitStorDB(engineOneCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
+// func testTwoEnginesStartEngine(t *testing.T) {
+// 	if _, err := engine.StopStartEngine(engineOneCfgPath, *waitRater); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if _, err := engine.StartEngine(engineTwoCfgPath, *waitRater); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testTwoEnginesRPC(t *testing.T) {
-	var err error
-	engineOneRpc, err = newRPCClient(engineOneCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-	engineTwoRpc, err = newRPCClient(engineTwoCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-}
+// func testTwoEnginesRPC(t *testing.T) {
+// 	var err error
+// 	engineOneRpc, err = newRPCClient(engineOneCfg.ListenCfg())
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	engineTwoRpc, err = newRPCClient(engineTwoCfg.ListenCfg())
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
-	var reply bool
-	argHasItem := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheThresholdProfiles,
-		ItemID:  "cgrates.org:THD_TwoEnginesTest",
-	}
-	if err := engineOneRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
-		t.Error(err)
-	} else if reply {
-		t.Errorf("Expected: false , received: %v ", reply)
-	}
-	var rcvKeys []string
-	argGetItemIDs := utils.ArgsGetCacheItemIDs{
-		CacheID: utils.CacheThresholdProfiles,
-	}
-	if err := engineOneRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
-	}
+// func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {
+// 	var reply bool
+// 	argHasItem := utils.ArgsGetCacheItem{
+// 		CacheID: utils.CacheThresholdProfiles,
+// 		ItemID:  "cgrates.org:THD_TwoEnginesTest",
+// 	}
+// 	if err := engineOneRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply {
+// 		t.Errorf("Expected: false , received: %v ", reply)
+// 	}
+// 	var rcvKeys []string
+// 	argGetItemIDs := utils.ArgsGetCacheItemIDs{
+// 		CacheID: utils.CacheThresholdProfiles,
+// 	}
+// 	if err := engineOneRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
+// 		err.Error() != utils.ErrNotFound.Error() {
+// 		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
+// 	}
 
-	if err := engineTwoRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
-		t.Error(err)
-	} else if reply {
-		t.Errorf("Expected: false , received: %v ", reply)
-	}
-	if err := engineTwoRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
-	}
-}
+// 	if err := engineTwoRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply {
+// 		t.Errorf("Expected: false , received: %v ", reply)
+// 	}
+// 	if err := engineTwoRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err == nil ||
+// 		err.Error() != utils.ErrNotFound.Error() {
+// 		t.Fatalf("Expected error: %s received error: %s and reply: %v ", utils.ErrNotFound, err.Error(), rcvKeys)
+// 	}
+// }
 
-func testTwoEnginesSetThreshold(t *testing.T) {
-	var reply *engine.ThresholdProfile
-	// enforce caching with nil on engine2 so CacheSv1.ReloadCache load correctly the threshold
-	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	var result string
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "THD_TwoEnginesTest",
-			FilterIDs:        []string{"*string:~*req.Account:1001"},
-			MaxHits:          -1,
-			MinSleep:         5 * time.Minute,
-			Blocker:          false,
-			Weight:           20.0,
-			ActionProfileIDs: []string{"ACT_1"},
-			Async:            true,
-		},
-	}
-	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
-	}
-}
+// func testTwoEnginesSetThreshold(t *testing.T) {
+// 	var reply *engine.ThresholdProfile
+// 	// enforce caching with nil on engine2 so CacheSv1.ReloadCache load correctly the threshold
+// 	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err == nil ||
+// 		err.Error() != utils.ErrNotFound.Error() {
+// 		t.Error(err)
+// 	}
+// 	var result string
+// 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
+// 		ThresholdProfile: &engine.ThresholdProfile{
+// 			Tenant:           "cgrates.org",
+// 			ID:               "THD_TwoEnginesTest",
+// 			FilterIDs:        []string{"*string:~*req.Account:1001"},
+// 			MaxHits:          -1,
+// 			MinSleep:         5 * time.Minute,
+// 			Blocker:          false,
+// 			Weight:           20.0,
+// 			ActionProfileIDs: []string{"ACT_1"},
+// 			Async:            true,
+// 		},
+// 	}
+// 	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+// 		t.Error(err)
+// 	} else if result != utils.OK {
+// 		t.Error("Unexpected reply returned", result)
+// 	}
+// 	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+// 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+// 	}
+// }
 
-func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
-	var reply bool
-	expected := true
-	argHasItem := utils.ArgsGetCacheItem{
-		CacheID: utils.CacheThresholdProfiles,
-		ItemID:  "cgrates.org:THD_TwoEnginesTest",
-	}
-	if err := engineOneRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
-		t.Error(err)
-	} else if !reply {
-		t.Errorf("Expected: %v , received:%v", expected, reply)
-	}
-	var rcvKeys []string
-	expKeys := []string{"cgrates.org:THD_TwoEnginesTest"}
-	argGetItemIDs := utils.ArgsGetCacheItemIDs{
-		CacheID: utils.CacheThresholdProfiles,
-	}
-	if err := engineOneRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
-		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
-	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
-		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
-	}
+// func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
+// 	var reply bool
+// 	expected := true
+// 	argHasItem := utils.ArgsGetCacheItem{
+// 		CacheID: utils.CacheThresholdProfiles,
+// 		ItemID:  "cgrates.org:THD_TwoEnginesTest",
+// 	}
+// 	if err := engineOneRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if !reply {
+// 		t.Errorf("Expected: %v , received:%v", expected, reply)
+// 	}
+// 	var rcvKeys []string
+// 	expKeys := []string{"cgrates.org:THD_TwoEnginesTest"}
+// 	argGetItemIDs := utils.ArgsGetCacheItemIDs{
+// 		CacheID: utils.CacheThresholdProfiles,
+// 	}
+// 	if err := engineOneRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
+// 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
+// 	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
+// 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
+// 	}
 
-	if err := engineTwoRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
-		t.Error(err)
-	} else if !reply {
-		t.Errorf("Expected: %v , received:%v", expected, reply)
-	}
-	if err := engineTwoRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
-		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
-	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
-		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
-	}
-	// after we verify the cache make sure it was set correctly there
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "THD_TwoEnginesTest",
-			FilterIDs:        []string{"*string:~*req.Account:1001"},
-			MaxHits:          -1,
-			MinSleep:         5 * time.Minute,
-			Blocker:          false,
-			Weight:           20.0,
-			ActionProfileIDs: []string{"ACT_1"},
-			Async:            true,
-		},
-	}
-	var rplTh *engine.ThresholdProfile
-	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
-	}
-}
+// 	if err := engineTwoRpc.Call(utils.CacheSv1HasItem, argHasItem, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if !reply {
+// 		t.Errorf("Expected: %v , received:%v", expected, reply)
+// 	}
+// 	if err := engineTwoRpc.Call(utils.CacheSv1GetItemIDs, argGetItemIDs, &rcvKeys); err != nil {
+// 		t.Fatalf("Got error on APIerSv1.GetCacheStats: %s ", err.Error())
+// 	} else if !reflect.DeepEqual(expKeys, rcvKeys) {
+// 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
+// 	}
+// 	// after we verify the cache make sure it was set correctly there
+// 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
+// 		ThresholdProfile: &engine.ThresholdProfile{
+// 			Tenant:           "cgrates.org",
+// 			ID:               "THD_TwoEnginesTest",
+// 			FilterIDs:        []string{"*string:~*req.Account:1001"},
+// 			MaxHits:          -1,
+// 			MinSleep:         5 * time.Minute,
+// 			Blocker:          false,
+// 			Weight:           20.0,
+// 			ActionProfileIDs: []string{"ACT_1"},
+// 			Async:            true,
+// 		},
+// 	}
+// 	var rplTh *engine.ThresholdProfile
+// 	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
+// 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
+// 	}
+// }
 
-func testTwoEnginesUpdateThreshold(t *testing.T) {
-	var rplTh *engine.ThresholdProfile
-	var result string
-	tPrfl := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "THD_TwoEnginesTest",
-			FilterIDs:        []string{"*string:~*req.Account:10"},
-			MaxHits:          -1,
-			MinSleep:         time.Minute,
-			Blocker:          false,
-			Weight:           50.0,
-			ActionProfileIDs: []string{"ACT_1.1"},
-			Async:            true,
-		},
-		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaReload,
-		},
-	}
-	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
-	}
-	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
-	}
-}
+// func testTwoEnginesUpdateThreshold(t *testing.T) {
+// 	var rplTh *engine.ThresholdProfile
+// 	var result string
+// 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
+// 		ThresholdProfile: &engine.ThresholdProfile{
+// 			Tenant:           "cgrates.org",
+// 			ID:               "THD_TwoEnginesTest",
+// 			FilterIDs:        []string{"*string:~*req.Account:10"},
+// 			MaxHits:          -1,
+// 			MinSleep:         time.Minute,
+// 			Blocker:          false,
+// 			Weight:           50.0,
+// 			ActionProfileIDs: []string{"ACT_1.1"},
+// 			Async:            true,
+// 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.CacheOpt: utils.MetaReload,
+// 		},
+// 	}
+// 	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+// 		t.Error(err)
+// 	} else if result != utils.OK {
+// 		t.Error("Unexpected reply returned", result)
+// 	}
+// 	if err := engineOneRpc.Call(utils.APIerSv1GetThresholdProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
+// 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
+// 	}
+// 	if err := engineTwoRpc.Call(utils.APIerSv1GetThresholdProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_TwoEnginesTest"}, &rplTh); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rplTh) {
+// 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rplTh)
+// 	}
+// }
 
-func testTwoEnginesKillEngines(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
-		t.Error(err)
-	}
-}
+// func testTwoEnginesKillEngines(t *testing.T) {
+// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 		t.Error(err)
+// 	}
+// }

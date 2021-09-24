@@ -21,131 +21,131 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-import (
-	"flag"
-	"net/rpc"
-	"path"
-	"testing"
-	"time"
+// import (
+// 	"flag"
+// 	"net/rpc"
+// 	"path"
+// 	"testing"
+// 	"time"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
 
-var (
-	itTestMongoAtalas = flag.Bool("mongo_atlas", false, "Run the test with mongo atalas connection")
-	tutorialCfgPath   string
-	tutorialCfg       *config.CGRConfig
-	tutorialRpc       *rpc.Client
-	tutorialConfDIR   string //run tests for specific configuration
-	tutorialDelay     int
+// var (
+// 	itTestMongoAtalas = flag.Bool("mongo_atlas", false, "Run the test with mongo atalas connection")
+// 	tutorialCfgPath   string
+// 	tutorialCfg       *config.CGRConfig
+// 	tutorialRpc       *rpc.Client
+// 	tutorialConfDIR   string //run tests for specific configuration
+// 	tutorialDelay     int
 
-	sTestsTutorials = []func(t *testing.T){
-		testTutorialLoadConfig,
-		testTutorialResetDB,
-		testTutorialStartEngine,
-		testTutorialRpcConn,
-		testTutorialFromFolder,
-		testTutorialGetCost,
-		testTutorialStopEngine,
-	}
-)
+// 	sTestsTutorials = []func(t *testing.T){
+// 		testTutorialLoadConfig,
+// 		testTutorialResetDB,
+// 		testTutorialStartEngine,
+// 		testTutorialRpcConn,
+// 		testTutorialFromFolder,
+// 		testTutorialGetCost,
+// 		testTutorialStopEngine,
+// 	}
+// )
 
-//Test start here
-func TestTutorialMongoAtlas(t *testing.T) {
-	if !*itTestMongoAtalas {
-		return
-	}
-	tutorialConfDIR = "mongoatlas"
-	for _, stest := range sTestsTutorials {
-		t.Run(tutorialConfDIR, stest)
-	}
-}
+// //Test start here
+// func TestTutorialMongoAtlas(t *testing.T) {
+// 	if !*itTestMongoAtalas {
+// 		return
+// 	}
+// 	tutorialConfDIR = "mongoatlas"
+// 	for _, stest := range sTestsTutorials {
+// 		t.Run(tutorialConfDIR, stest)
+// 	}
+// }
 
-func TestTutorial(t *testing.T) {
-	switch *dbType {
-	case utils.MetaInternal:
-		tutorialConfDIR = "tutinternal"
-	case utils.MetaMySQL:
-		tutorialConfDIR = "tutmysql"
-	case utils.MetaMongo:
-		tutorialConfDIR = "tutmongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, stest := range sTestsTutorials {
-		t.Run(tutorialConfDIR, stest)
-	}
-}
+// func TestTutorial(t *testing.T) {
+// 	switch *dbType {
+// 	case utils.MetaInternal:
+// 		tutorialConfDIR = "tutinternal"
+// 	case utils.MetaMySQL:
+// 		tutorialConfDIR = "tutmysql"
+// 	case utils.MetaMongo:
+// 		tutorialConfDIR = "tutmongo"
+// 	case utils.MetaPostgres:
+// 		t.SkipNow()
+// 	default:
+// 		t.Fatal("Unknown Database type")
+// 	}
+// 	for _, stest := range sTestsTutorials {
+// 		t.Run(tutorialConfDIR, stest)
+// 	}
+// }
 
-func testTutorialLoadConfig(t *testing.T) {
-	var err error
-	tutorialCfgPath = path.Join(*dataDir, "conf", "samples", tutorialConfDIR)
-	if tutorialCfg, err = config.NewCGRConfigFromPath(tutorialCfgPath); err != nil {
-		t.Error(err)
-	}
-	switch tutorialConfDIR {
-	case "mongoatlas": // Mongo needs more time to reset db
-		tutorialDelay = 4000
-	default:
-		tutorialDelay = 2000
-	}
-}
+// func testTutorialLoadConfig(t *testing.T) {
+// 	var err error
+// 	tutorialCfgPath = path.Join(*dataDir, "conf", "samples", tutorialConfDIR)
+// 	if tutorialCfg, err = config.NewCGRConfigFromPath(tutorialCfgPath); err != nil {
+// 		t.Error(err)
+// 	}
+// 	switch tutorialConfDIR {
+// 	case "mongoatlas": // Mongo needs more time to reset db
+// 		tutorialDelay = 4000
+// 	default:
+// 		tutorialDelay = 2000
+// 	}
+// }
 
-func testTutorialResetDB(t *testing.T) {
-	if err := engine.InitDataDB(tutorialCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(tutorialCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testTutorialResetDB(t *testing.T) {
+// 	if err := engine.InitDataDB(tutorialCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if err := engine.InitStorDB(tutorialCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testTutorialStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tutorialCfgPath, tutorialDelay); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testTutorialStartEngine(t *testing.T) {
+// 	if _, err := engine.StopStartEngine(tutorialCfgPath, tutorialDelay); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testTutorialRpcConn(t *testing.T) {
-	var err error
-	tutorialRpc, err = newRPCClient(tutorialCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
-}
+// func testTutorialRpcConn(t *testing.T) {
+// 	var err error
+// 	tutorialRpc, err = newRPCClient(tutorialCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	if err != nil {
+// 		t.Fatal("Could not connect to rater: ", err.Error())
+// 	}
+// }
 
-func testTutorialFromFolder(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tutorialRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(100 * time.Millisecond)
-}
+// func testTutorialFromFolder(t *testing.T) {
+// 	var reply string
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+// 	if err := tutorialRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+// 		t.Error(err)
+// 	}
+// 	time.Sleep(100 * time.Millisecond)
+// }
 
-func testTutorialGetCost(t *testing.T) {
-	attrs := v1.AttrGetCost{
-		Tenant:      "cgrates.org",
-		Category:    "call",
-		Subject:     "1001",
-		Destination: "1002",
-		AnswerTime:  "*now",
-		Usage:       "2m10s",
-	}
-	var rply *engine.EventCost
-	if err := tutorialRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
-		t.Error("Unexpected nil error received: ", err.Error())
-	} else if *rply.Cost != 0.716900 {
-		t.Errorf("Unexpected cost received: %f", *rply.Cost)
-	}
-}
+// func testTutorialGetCost(t *testing.T) {
+// 	attrs := v1.AttrGetCost{
+// 		Tenant:      "cgrates.org",
+// 		Category:    "call",
+// 		Subject:     "1001",
+// 		Destination: "1002",
+// 		AnswerTime:  "*now",
+// 		Usage:       "2m10s",
+// 	}
+// 	var rply *engine.EventCost
+// 	if err := tutorialRpc.Call(utils.APIerSv1GetCost, &attrs, &rply); err != nil {
+// 		t.Error("Unexpected nil error received: ", err.Error())
+// 	} else if *rply.Cost != 0.716900 {
+// 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
+// 	}
+// }
 
-func testTutorialStopEngine(t *testing.T) {
-	if err := engine.KillEngine(tutorialDelay); err != nil {
-		t.Error(err)
-	}
-}
+// func testTutorialStopEngine(t *testing.T) {
+// 	if err := engine.KillEngine(tutorialDelay); err != nil {
+// 		t.Error(err)
+// 	}
+// }

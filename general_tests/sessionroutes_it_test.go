@@ -21,510 +21,510 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-import (
-	"net/rpc"
-	"path"
-	"reflect"
-	"testing"
-	"time"
+// import (
+// 	"net/rpc"
+// 	"path"
+// 	"reflect"
+// 	"testing"
+// 	"time"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
-	"github.com/cgrates/cgrates/utils"
-)
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/sessions"
+// 	"github.com/cgrates/cgrates/utils"
+// )
 
-var (
-	sesRoutesCfgDir  string
-	sesRoutesCfgPath string
-	sesRoutesCfg     *config.CGRConfig
-	sesRoutesRPC     *rpc.Client
+// var (
+// 	sesRoutesCfgDir  string
+// 	sesRoutesCfgPath string
+// 	sesRoutesCfg     *config.CGRConfig
+// 	sesRoutesRPC     *rpc.Client
 
-	sesRoutesTests = []func(t *testing.T){
-		testSesRoutesItLoadConfig,
-		testSesRoutesItResetDataDB,
-		testSesRoutesItResetStorDb,
-		testSesRoutesItStartEngine,
-		testSesRoutesItRPCConn,
-		testSesRoutesItLoadFromFolder,
+// 	sesRoutesTests = []func(t *testing.T){
+// 		testSesRoutesItLoadConfig,
+// 		testSesRoutesItResetDataDB,
+// 		testSesRoutesItResetStorDb,
+// 		testSesRoutesItStartEngine,
+// 		testSesRoutesItRPCConn,
+// 		testSesRoutesItLoadFromFolder,
 
-		testSesRoutesAuthorizeEvent,
-		testSesRoutesProcessMessage,
-		testSesRoutesProcessEvent,
+// 		testSesRoutesAuthorizeEvent,
+// 		testSesRoutesProcessMessage,
+// 		testSesRoutesProcessEvent,
 
-		testSesRoutesItStopCgrEngine,
-	}
-)
+// 		testSesRoutesItStopCgrEngine,
+// 	}
+// )
 
-func TestSesRoutesItSessions(t *testing.T) {
-	switch *dbType {
-	case utils.MetaInternal:
-		sesRoutesCfgDir = "tutinternal"
-	case utils.MetaMySQL:
-		sesRoutesCfgDir = "tutmysql"
-	case utils.MetaMongo:
-		sesRoutesCfgDir = "tutmongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, stest := range sesRoutesTests {
-		t.Run(sesRoutesCfgDir, stest)
-	}
-}
+// func TestSesRoutesItSessions(t *testing.T) {
+// 	switch *dbType {
+// 	case utils.MetaInternal:
+// 		sesRoutesCfgDir = "tutinternal"
+// 	case utils.MetaMySQL:
+// 		sesRoutesCfgDir = "tutmysql"
+// 	case utils.MetaMongo:
+// 		sesRoutesCfgDir = "tutmongo"
+// 	case utils.MetaPostgres:
+// 		t.SkipNow()
+// 	default:
+// 		t.Fatal("Unknown Database type")
+// 	}
+// 	for _, stest := range sesRoutesTests {
+// 		t.Run(sesRoutesCfgDir, stest)
+// 	}
+// }
 
-func testSesRoutesItLoadConfig(t *testing.T) {
-	sesRoutesCfgPath = path.Join(*dataDir, "conf", "samples", sesRoutesCfgDir)
-	if sesRoutesCfg, err = config.NewCGRConfigFromPath(sesRoutesCfgPath); err != nil {
-		t.Error(err)
-	}
-}
+// func testSesRoutesItLoadConfig(t *testing.T) {
+// 	sesRoutesCfgPath = path.Join(*dataDir, "conf", "samples", sesRoutesCfgDir)
+// 	if sesRoutesCfg, err = config.NewCGRConfigFromPath(sesRoutesCfgPath); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
-func testSesRoutesItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDB(sesRoutesCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesRoutesItResetDataDB(t *testing.T) {
+// 	if err := engine.InitDataDB(sesRoutesCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesRoutesItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(sesRoutesCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesRoutesItResetStorDb(t *testing.T) {
+// 	if err := engine.InitStorDB(sesRoutesCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesRoutesItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesRoutesCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesRoutesItStartEngine(t *testing.T) {
+// 	if _, err := engine.StopStartEngine(sesRoutesCfgPath, *waitRater); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesRoutesItRPCConn(t *testing.T) {
-	var err error
-	sesRoutesRPC, err = newRPCClient(sesRoutesCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesRoutesItRPCConn(t *testing.T) {
+// 	var err error
+// 	sesRoutesRPC, err = newRPCClient(sesRoutesCfg.ListenCfg())
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesRoutesItLoadFromFolder(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := sesRoutesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(100 * time.Millisecond)
-}
+// func testSesRoutesItLoadFromFolder(t *testing.T) {
+// 	var reply string
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+// 	if err := sesRoutesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+// 		t.Error(err)
+// 	}
+// 	time.Sleep(100 * time.Millisecond)
+// }
 
-func testSesRoutesAuthorizeEvent(t *testing.T) {
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
-			utils.Source:       "testV4CDRsProcessCDR",
-			utils.OriginID:     "testV4CDRsProcessCDR",
-			utils.OriginHost:   "192.168.1.1",
-			utils.RequestType:  utils.MetaPostpaid,
-			utils.Category:     utils.Call,
-			utils.AccountField: "1003",
-			utils.Subject:      "1003",
-			utils.Destination:  "1002",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
-			utils.Usage:        time.Minute,
-		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
-	}
-	args := sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
-		true, false, false, cgrEv, utils.Paginator{}, false, "")
+// func testSesRoutesAuthorizeEvent(t *testing.T) {
+// 	cgrEv := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		Event: map[string]interface{}{
+// 			utils.Source:       "testV4CDRsProcessCDR",
+// 			utils.OriginID:     "testV4CDRsProcessCDR",
+// 			utils.OriginHost:   "192.168.1.1",
+// 			utils.RequestType:  utils.MetaPostpaid,
+// 			utils.Category:     utils.Call,
+// 			utils.AccountField: "1003",
+// 			utils.Subject:      "1003",
+// 			utils.Destination:  "1002",
+// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+// 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
+// 			utils.Usage:        time.Minute,
+// 		},
+// 		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+// 	}
+// 	args := sessions.NewV1AuthorizeArgs(false, []string{},
+// 		false, []string{}, false, []string{}, false, false,
+// 		true, false, false, cgrEv, utils.Paginator{}, false, "")
 
-	var rply sessions.V1AuthorizeReply
-	if err := sesRoutesRPC.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
-		t.Fatal(err)
-	}
-	expected := sessions.V1AuthorizeReply{
-		RouteProfiles: engine.SortedRoutesList{{
-			ProfileID: "ROUTE_LEASTCOST_1",
-			Sorting:   "*lc",
-			Routes: []*engine.SortedRoute{
-				{
-					RouteID:         "route3",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         0.0102,
-						"RatingPlanID": "RP_SPECIAL_1002",
-						"Weight":       15.,
-					},
-				}, {
-					RouteID:         "route1",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         0.0102,
-						"RatingPlanID": "RP_SPECIAL_1002",
-						"Weight":       10.,
-					},
-				}, {
-					RouteID:         "route2",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         1.2,
-						"RatingPlanID": "RP_RETAIL1",
-						"Weight":       20.,
-					},
-				},
-			},
-		},
-		}}
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
-	args = sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
-		true, false, false, cgrEv, utils.Paginator{}, false, "2")
+// 	var rply sessions.V1AuthorizeReply
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	expected := sessions.V1AuthorizeReply{
+// 		RouteProfiles: engine.SortedRoutesList{{
+// 			ProfileID: "ROUTE_LEASTCOST_1",
+// 			Sorting:   "*lc",
+// 			Routes: []*engine.SortedRoute{
+// 				{
+// 					RouteID:         "route3",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         0.0102,
+// 						"RatingPlanID": "RP_SPECIAL_1002",
+// 						"Weight":       15.,
+// 					},
+// 				}, {
+// 					RouteID:         "route1",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         0.0102,
+// 						"RatingPlanID": "RP_SPECIAL_1002",
+// 						"Weight":       10.,
+// 					},
+// 				}, {
+// 					RouteID:         "route2",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         1.2,
+// 						"RatingPlanID": "RP_RETAIL1",
+// 						"Weight":       20.,
+// 					},
+// 				},
+// 			},
+// 		},
+// 		}}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
+// 	args = sessions.NewV1AuthorizeArgs(false, []string{},
+// 		false, []string{}, false, []string{}, false, false,
+// 		true, false, false, cgrEv, utils.Paginator{}, false, "2")
 
-	rply = sessions.V1AuthorizeReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	rply = sessions.V1AuthorizeReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
 
-	expected = sessions.V1AuthorizeReply{
-		RouteProfiles: engine.SortedRoutesList{{
-			ProfileID: "ROUTE_LEASTCOST_1",
-			Sorting:   "*lc",
-			Routes: []*engine.SortedRoute{
-				{
-					RouteID:         "route3",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         0.0102,
-						"RatingPlanID": "RP_SPECIAL_1002",
-						"Weight":       15.,
-					},
-				}, {
-					RouteID:         "route1",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         0.0102,
-						"RatingPlanID": "RP_SPECIAL_1002",
-						"Weight":       10.,
-					},
-				},
-			},
-		},
-		}}
+// 	expected = sessions.V1AuthorizeReply{
+// 		RouteProfiles: engine.SortedRoutesList{{
+// 			ProfileID: "ROUTE_LEASTCOST_1",
+// 			Sorting:   "*lc",
+// 			Routes: []*engine.SortedRoute{
+// 				{
+// 					RouteID:         "route3",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         0.0102,
+// 						"RatingPlanID": "RP_SPECIAL_1002",
+// 						"Weight":       15.,
+// 					},
+// 				}, {
+// 					RouteID:         "route1",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         0.0102,
+// 						"RatingPlanID": "RP_SPECIAL_1002",
+// 						"Weight":       10.,
+// 					},
+// 				},
+// 			},
+// 		},
+// 		}}
 
-	args = sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
-		true, false, false, cgrEv, utils.Paginator{}, false, "1")
+// 	args = sessions.NewV1AuthorizeArgs(false, []string{},
+// 		false, []string{}, false, []string{}, false, false,
+// 		true, false, false, cgrEv, utils.Paginator{}, false, "1")
 
-	rply = sessions.V1AuthorizeReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	rply = sessions.V1AuthorizeReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
 
-	args = sessions.NewV1AuthorizeArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
-		true, false, true, cgrEv, utils.Paginator{}, false, "")
+// 	args = sessions.NewV1AuthorizeArgs(false, []string{},
+// 		false, []string{}, false, []string{}, false, false,
+// 		true, false, true, cgrEv, utils.Paginator{}, false, "")
 
-	rply = sessions.V1AuthorizeReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	rply = sessions.V1AuthorizeReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
-}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
+// }
 
-func testSesRoutesProcessMessage(t *testing.T) {
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
-			utils.Source:       "testV4CDRsProcessCDR",
-			utils.OriginID:     "testV4CDRsProcessCDR",
-			utils.OriginHost:   "192.168.1.1",
-			utils.RequestType:  utils.MetaPostpaid,
-			utils.Category:     utils.Call,
-			utils.AccountField: "1003",
-			utils.Subject:      "1003",
-			utils.Destination:  "1002",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
-			utils.Usage:        time.Minute,
-		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
-	}
-	args := sessions.NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
-		true, false, false, cgrEv, utils.Paginator{}, false, "")
+// func testSesRoutesProcessMessage(t *testing.T) {
+// 	cgrEv := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		Event: map[string]interface{}{
+// 			utils.Source:       "testV4CDRsProcessCDR",
+// 			utils.OriginID:     "testV4CDRsProcessCDR",
+// 			utils.OriginHost:   "192.168.1.1",
+// 			utils.RequestType:  utils.MetaPostpaid,
+// 			utils.Category:     utils.Call,
+// 			utils.AccountField: "1003",
+// 			utils.Subject:      "1003",
+// 			utils.Destination:  "1002",
+// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+// 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
+// 			utils.Usage:        time.Minute,
+// 		},
+// 		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+// 	}
+// 	args := sessions.NewV1ProcessMessageArgs(false, []string{},
+// 		false, []string{}, false, []string{}, false, false,
+// 		true, false, false, cgrEv, utils.Paginator{}, false, "")
 
-	var rply sessions.V1ProcessMessageReply
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
-	expected := sessions.V1ProcessMessageReply{
-		RouteProfiles: engine.SortedRoutesList{{
-			ProfileID: "ROUTE_LEASTCOST_1",
-			Sorting:   "*lc",
-			Routes: []*engine.SortedRoute{
-				{
-					RouteID:         "route3",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         0.0102,
-						"RatingPlanID": "RP_SPECIAL_1002",
-						"Weight":       15.,
-					},
-				}, {
-					RouteID:         "route1",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         0.0102,
-						"RatingPlanID": "RP_SPECIAL_1002",
-						"Weight":       10.,
-					},
-				}, {
-					RouteID:         "route2",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         1.2,
-						"RatingPlanID": "RP_RETAIL1",
-						"Weight":       20.,
-					},
-				},
-			},
-		},
-		}}
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
+// 	var rply sessions.V1ProcessMessageReply
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	expected := sessions.V1ProcessMessageReply{
+// 		RouteProfiles: engine.SortedRoutesList{{
+// 			ProfileID: "ROUTE_LEASTCOST_1",
+// 			Sorting:   "*lc",
+// 			Routes: []*engine.SortedRoute{
+// 				{
+// 					RouteID:         "route3",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         0.0102,
+// 						"RatingPlanID": "RP_SPECIAL_1002",
+// 						"Weight":       15.,
+// 					},
+// 				}, {
+// 					RouteID:         "route1",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         0.0102,
+// 						"RatingPlanID": "RP_SPECIAL_1002",
+// 						"Weight":       10.,
+// 					},
+// 				}, {
+// 					RouteID:         "route2",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         1.2,
+// 						"RatingPlanID": "RP_RETAIL1",
+// 						"Weight":       20.,
+// 					},
+// 				},
+// 			},
+// 		},
+// 		}}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
 
-	args = sessions.NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
-		true, false, false, cgrEv, utils.Paginator{}, false, "2")
+// 	args = sessions.NewV1ProcessMessageArgs(false, []string{},
+// 		false, []string{}, false, []string{}, false, false,
+// 		true, false, false, cgrEv, utils.Paginator{}, false, "2")
 
-	rply = sessions.V1ProcessMessageReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	rply = sessions.V1ProcessMessageReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
 
-	expected = sessions.V1ProcessMessageReply{
-		RouteProfiles: engine.SortedRoutesList{{
-			ProfileID: "ROUTE_LEASTCOST_1",
-			Sorting:   "*lc",
-			Routes: []*engine.SortedRoute{
-				{
-					RouteID:         "route3",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         0.0102,
-						"RatingPlanID": "RP_SPECIAL_1002",
-						"Weight":       15.,
-					},
-				}, {
-					RouteID:         "route1",
-					RouteParameters: "",
-					SortingData: map[string]interface{}{
-						"Cost":         0.0102,
-						"RatingPlanID": "RP_SPECIAL_1002",
-						"Weight":       10.,
-					},
-				},
-			},
-		},
-		}}
+// 	expected = sessions.V1ProcessMessageReply{
+// 		RouteProfiles: engine.SortedRoutesList{{
+// 			ProfileID: "ROUTE_LEASTCOST_1",
+// 			Sorting:   "*lc",
+// 			Routes: []*engine.SortedRoute{
+// 				{
+// 					RouteID:         "route3",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         0.0102,
+// 						"RatingPlanID": "RP_SPECIAL_1002",
+// 						"Weight":       15.,
+// 					},
+// 				}, {
+// 					RouteID:         "route1",
+// 					RouteParameters: "",
+// 					SortingData: map[string]interface{}{
+// 						"Cost":         0.0102,
+// 						"RatingPlanID": "RP_SPECIAL_1002",
+// 						"Weight":       10.,
+// 					},
+// 				},
+// 			},
+// 		},
+// 		}}
 
-	args = sessions.NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
-		true, false, false, cgrEv, utils.Paginator{}, false, "1")
+// 	args = sessions.NewV1ProcessMessageArgs(false, []string{},
+// 		false, []string{}, false, []string{}, false, false,
+// 		true, false, false, cgrEv, utils.Paginator{}, false, "1")
 
-	rply = sessions.V1ProcessMessageReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	rply = sessions.V1ProcessMessageReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
 
-	args = sessions.NewV1ProcessMessageArgs(false, []string{},
-		false, []string{}, false, []string{}, false, false,
-		true, false, true, cgrEv, utils.Paginator{}, false, "")
+// 	args = sessions.NewV1ProcessMessageArgs(false, []string{},
+// 		false, []string{}, false, []string{}, false, false,
+// 		true, false, true, cgrEv, utils.Paginator{}, false, "")
 
-	rply = sessions.V1ProcessMessageReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	rply = sessions.V1ProcessMessageReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessMessage,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
-}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
+// }
 
-func testSesRoutesProcessEvent(t *testing.T) {
-	cgrEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
-			utils.Source:       "testV4CDRsProcessCDR",
-			utils.OriginID:     "testV4CDRsProcessCDR",
-			utils.OriginHost:   "192.168.1.1",
-			utils.RequestType:  utils.MetaPostpaid,
-			utils.Category:     utils.Call,
-			utils.AccountField: "1003",
-			utils.Subject:      "1003",
-			utils.Destination:  "1002",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
-			utils.Usage:        time.Minute,
-		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
-	}
-	args := sessions.V1ProcessEventArgs{
-		Flags:     []string{"*routes"},
-		CGREvent:  cgrEv,
-		Paginator: utils.Paginator{},
-	}
+// func testSesRoutesProcessEvent(t *testing.T) {
+// 	cgrEv := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		Event: map[string]interface{}{
+// 			utils.Source:       "testV4CDRsProcessCDR",
+// 			utils.OriginID:     "testV4CDRsProcessCDR",
+// 			utils.OriginHost:   "192.168.1.1",
+// 			utils.RequestType:  utils.MetaPostpaid,
+// 			utils.Category:     utils.Call,
+// 			utils.AccountField: "1003",
+// 			utils.Subject:      "1003",
+// 			utils.Destination:  "1002",
+// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+// 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
+// 			utils.Usage:        time.Minute,
+// 		},
+// 		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
+// 	}
+// 	args := sessions.V1ProcessEventArgs{
+// 		Flags:     []string{"*routes"},
+// 		CGREvent:  cgrEv,
+// 		Paginator: utils.Paginator{},
+// 	}
 
-	var rply sessions.V1ProcessEventReply
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent, args, &rply); err != nil {
-		t.Fatal(err)
-	}
-	expected := sessions.V1ProcessEventReply{
-		RouteProfiles: map[string]engine.SortedRoutesList{
-			utils.MetaRaw: {{
-				ProfileID: "ROUTE_LEASTCOST_1",
-				Sorting:   "*lc",
-				Routes: []*engine.SortedRoute{
-					{
-						RouteID:         "route3",
-						RouteParameters: "",
-						SortingData: map[string]interface{}{
-							"Cost":         0.0102,
-							"RatingPlanID": "RP_SPECIAL_1002",
-							"Weight":       15.,
-						},
-					}, {
-						RouteID:         "route1",
-						RouteParameters: "",
-						SortingData: map[string]interface{}{
-							"Cost":         0.0102,
-							"RatingPlanID": "RP_SPECIAL_1002",
-							"Weight":       10.,
-						},
-					}, {
-						RouteID:         "route2",
-						RouteParameters: "",
-						SortingData: map[string]interface{}{
-							"Cost":         1.2,
-							"RatingPlanID": "RP_RETAIL1",
-							"Weight":       20.,
-						},
-					},
-				},
-			},
-			},
-		}}
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
+// 	var rply sessions.V1ProcessEventReply
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent, args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	expected := sessions.V1ProcessEventReply{
+// 		RouteProfiles: map[string]engine.SortedRoutesList{
+// 			utils.MetaRaw: {{
+// 				ProfileID: "ROUTE_LEASTCOST_1",
+// 				Sorting:   "*lc",
+// 				Routes: []*engine.SortedRoute{
+// 					{
+// 						RouteID:         "route3",
+// 						RouteParameters: "",
+// 						SortingData: map[string]interface{}{
+// 							"Cost":         0.0102,
+// 							"RatingPlanID": "RP_SPECIAL_1002",
+// 							"Weight":       15.,
+// 						},
+// 					}, {
+// 						RouteID:         "route1",
+// 						RouteParameters: "",
+// 						SortingData: map[string]interface{}{
+// 							"Cost":         0.0102,
+// 							"RatingPlanID": "RP_SPECIAL_1002",
+// 							"Weight":       10.,
+// 						},
+// 					}, {
+// 						RouteID:         "route2",
+// 						RouteParameters: "",
+// 						SortingData: map[string]interface{}{
+// 							"Cost":         1.2,
+// 							"RatingPlanID": "RP_RETAIL1",
+// 							"Weight":       20.,
+// 						},
+// 					},
+// 				},
+// 			},
+// 			},
+// 		}}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
 
-	args = sessions.V1ProcessEventArgs{
-		Flags:     []string{"*routes:*maxcost:2"},
-		CGREvent:  cgrEv,
-		Paginator: utils.Paginator{},
-	}
+// 	args = sessions.V1ProcessEventArgs{
+// 		Flags:     []string{"*routes:*maxcost:2"},
+// 		CGREvent:  cgrEv,
+// 		Paginator: utils.Paginator{},
+// 	}
 
-	rply = sessions.V1ProcessEventReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	rply = sessions.V1ProcessEventReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
 
-	expected = sessions.V1ProcessEventReply{
-		RouteProfiles: map[string]engine.SortedRoutesList{
-			utils.MetaRaw: {{
-				ProfileID: "ROUTE_LEASTCOST_1",
-				Sorting:   "*lc",
-				Routes: []*engine.SortedRoute{
-					{
-						RouteID:         "route3",
-						RouteParameters: "",
-						SortingData: map[string]interface{}{
-							"Cost":         0.0102,
-							"RatingPlanID": "RP_SPECIAL_1002",
-							"Weight":       15.,
-						},
-					}, {
-						RouteID:         "route1",
-						RouteParameters: "",
-						SortingData: map[string]interface{}{
-							"Cost":         0.0102,
-							"RatingPlanID": "RP_SPECIAL_1002",
-							"Weight":       10.,
-						},
-					},
-				},
-			},
-			},
-		}}
+// 	expected = sessions.V1ProcessEventReply{
+// 		RouteProfiles: map[string]engine.SortedRoutesList{
+// 			utils.MetaRaw: {{
+// 				ProfileID: "ROUTE_LEASTCOST_1",
+// 				Sorting:   "*lc",
+// 				Routes: []*engine.SortedRoute{
+// 					{
+// 						RouteID:         "route3",
+// 						RouteParameters: "",
+// 						SortingData: map[string]interface{}{
+// 							"Cost":         0.0102,
+// 							"RatingPlanID": "RP_SPECIAL_1002",
+// 							"Weight":       15.,
+// 						},
+// 					}, {
+// 						RouteID:         "route1",
+// 						RouteParameters: "",
+// 						SortingData: map[string]interface{}{
+// 							"Cost":         0.0102,
+// 							"RatingPlanID": "RP_SPECIAL_1002",
+// 							"Weight":       10.,
+// 						},
+// 					},
+// 				},
+// 			},
+// 			},
+// 		}}
 
-	args = sessions.V1ProcessEventArgs{
-		Flags:     []string{"*routes:*maxcost:1"},
-		CGREvent:  cgrEv,
-		Paginator: utils.Paginator{},
-	}
-	rply = sessions.V1ProcessEventReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	args = sessions.V1ProcessEventArgs{
+// 		Flags:     []string{"*routes:*maxcost:1"},
+// 		CGREvent:  cgrEv,
+// 		Paginator: utils.Paginator{},
+// 	}
+// 	rply = sessions.V1ProcessEventReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
 
-	args = sessions.V1ProcessEventArgs{
-		Flags:     []string{"*routes:*event_cost"},
-		CGREvent:  cgrEv,
-		Paginator: utils.Paginator{},
-	}
+// 	args = sessions.V1ProcessEventArgs{
+// 		Flags:     []string{"*routes:*event_cost"},
+// 		CGREvent:  cgrEv,
+// 		Paginator: utils.Paginator{},
+// 	}
 
-	rply = sessions.V1ProcessEventReply{}
-	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
+// 	rply = sessions.V1ProcessEventReply{}
+// 	if err := sesRoutesRPC.Call(utils.SessionSv1ProcessEvent,
+// 		args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if !reflect.DeepEqual(rply, expected) {
-		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
-}
+// 	if !reflect.DeepEqual(rply, expected) {
+// 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expected), utils.ToJSON(rply))
+// 	}
+// }
 
-func testSesRoutesItStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
-	}
-}
+// func testSesRoutesItStopCgrEngine(t *testing.T) {
+// 	if err := engine.KillEngine(100); err != nil {
+// 		t.Error(err)
+// 	}
+// }
