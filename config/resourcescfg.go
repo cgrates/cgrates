@@ -26,9 +26,9 @@ import (
 )
 
 type ResourcesOpts struct {
-	UsageID  string
-	UsageTTL *time.Duration
-	Units    float64
+	UsageID  map[string]string
+	UsageTTL map[string]time.Duration
+	Units    map[string]float64
 }
 
 // ResourceSConfig is resorces section config
@@ -58,17 +58,19 @@ func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err err
 		return nil
 	}
 	if jsnCfg.UsageID != nil {
-		rsOpts.UsageID = *jsnCfg.UsageID
+		rsOpts.UsageID = jsnCfg.UsageID
 	}
 	if jsnCfg.UsageTTL != nil {
-		var usageTTL time.Duration
-		if usageTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.UsageTTL); err != nil {
-			return
+		for key, durStr := range jsnCfg.UsageTTL {
+			var usageTTL time.Duration
+			if usageTTL, err = utils.ParseDurationWithNanosecs(durStr); err != nil {
+				return
+			}
+			rsOpts.UsageTTL[key] = usageTTL
 		}
-		rsOpts.UsageTTL = utils.DurationPointer(usageTTL)
 	}
 	if jsnCfg.Units != nil {
-		rsOpts.Units = *jsnCfg.Units
+		rsOpts.Units = jsnCfg.Units
 	}
 
 	return nil
@@ -113,11 +115,9 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 // AsMapInterface returns the config as a map[string]interface{}
 func (rlcfg ResourceSConfig) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaUsageIDCfg: rlcfg.Opts.UsageID,
-		utils.MetaUnitsCfg:   rlcfg.Opts.Units,
-	}
-	if rlcfg.Opts.UsageTTL != nil {
-		opts[utils.MetaUsageTTLCfg] = (*rlcfg.Opts.UsageTTL).String()
+		utils.MetaUsageIDCfg:  rlcfg.Opts.UsageID,
+		utils.MetaUsageTTLCfg: rlcfg.Opts.UsageTTL,
+		utils.MetaUnitsCfg:    rlcfg.Opts.Units,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        rlcfg.Enabled,
@@ -149,11 +149,9 @@ func (rlcfg ResourceSConfig) CloneSection() Section { return rlcfg.Clone() }
 
 func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 	cln = &ResourcesOpts{
-		UsageID: rsOpts.UsageID,
-		Units:   rsOpts.Units,
-	}
-	if rsOpts.UsageTTL != nil {
-		cln.UsageTTL = utils.DurationPointer(*rsOpts.UsageTTL)
+		UsageID:  rsOpts.UsageID,
+		UsageTTL: rsOpts.UsageTTL,
+		Units:    rsOpts.Units,
 	}
 	return
 }
@@ -184,9 +182,9 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 }
 
 type ResourcesOptsJson struct {
-	UsageID  *string  `json:"*usageID"`
-	UsageTTL *string  `json:"*usageTTL"`
-	Units    *float64 `json:"*units"`
+	UsageID  map[string]string  `json:"*usageID"`
+	UsageTTL map[string]string  `json:"*usageTTL"`
+	Units    map[string]float64 `json:"*units"`
 }
 
 // ResourceLimiter service config section
@@ -206,15 +204,9 @@ func diffResourcesOptsJsonCfg(d *ResourcesOptsJson, v1, v2 *ResourcesOpts) *Reso
 	if d == nil {
 		d = new(ResourcesOptsJson)
 	}
-	if v1.UsageID != v2.UsageID {
-		d.UsageID = utils.StringPointer(v2.UsageID)
-	}
-	if v1.UsageTTL != v2.UsageTTL {
-		d.UsageTTL = utils.StringPointer((*v2.UsageTTL).String())
-	}
-	if v1.Units != v2.Units {
-		d.Units = utils.Float64Pointer(v2.Units)
-	}
+	d.UsageID = diffMapStringString(d.UsageID, v1.UsageID, v2.UsageID)
+	d.UsageTTL = diffMapStringDuration(d.UsageTTL, v1.UsageTTL, v2.UsageTTL)
+	d.Units = diffMapStringFloat64(d.Units, v1.Units, v2.Units)
 	return d
 }
 
@@ -241,5 +233,41 @@ func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *Resourc
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
 	d.Opts = diffResourcesOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
+	return d
+}
+
+func diffMapStringString(d, v1, v2 map[string]string) map[string]string {
+	if d == nil {
+		d = make(map[string]string)
+	}
+	for k, v := range v2 {
+		if val, has := v1[k]; !has || val != v {
+			d[k] = v
+		}
+	}
+	return d
+}
+
+func diffMapStringFloat64(d, v1, v2 map[string]float64) map[string]float64 {
+	if d == nil {
+		d = make(map[string]float64)
+	}
+	for k, v := range v2 {
+		if val, has := v1[k]; !has || val != v {
+			d[k] = v
+		}
+	}
+	return d
+}
+
+func diffMapStringDuration(d map[string]string, v1, v2 map[string]time.Duration) map[string]string {
+	if d == nil {
+		d = make(map[string]string)
+	}
+	for k, v := range v2 {
+		if val, has := v1[k]; !has || val != v {
+			d[k] = v.String()
+		}
+	}
 	return d
 }
