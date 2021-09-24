@@ -673,9 +673,19 @@ func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args *utils
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	usageID := args.OptsAsString(rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	var usageID string
+	if usageID, err = filterStringCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.UsageID); err != nil {
+		return
+	}
+	usageID = args.OptsAsString(usageID, utils.OptsResourcesUsageID)
+
 	var ttl time.Duration
-	if ttl, err = args.OptsAsDuration(*rS.cgrcfg.ResourceSCfg().Opts.UsageTTL, utils.OptsResourcesUsageTTL); err != nil {
+	if ttl, err = filterDurationCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.UsageTTL); err != nil {
+		return
+	}
+	if ttl, err = args.OptsAsDuration(ttl, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
 	usageTTL := utils.DurationPointer(ttl)
@@ -725,13 +735,28 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *util
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	usageID := args.OptsAsString(rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
-	var units float64
-	if units, err = args.OptsAsFloat64(rS.cgrcfg.ResourceSCfg().Opts.Units, utils.OptsResourcesUnits); err != nil {
+	var usageID string
+	if usageID, err = filterStringCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.UsageID); err != nil {
 		return
 	}
+	usageID = args.OptsAsString(usageID, utils.OptsResourcesUsageID)
+
+	var units float64
+	if units, err = filterFloat64CfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.Units); err != nil {
+		return
+	}
+	if units, err = args.OptsAsFloat64(units, utils.OptsResourcesUnits); err != nil {
+		return
+	}
+
 	var ttl time.Duration
-	if ttl, err = args.OptsAsDuration(*rS.cgrcfg.ResourceSCfg().Opts.UsageTTL, utils.OptsResourcesUsageTTL); err != nil {
+	if ttl, err = filterDurationCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.UsageTTL); err != nil {
+		return
+	}
+	if ttl, err = args.OptsAsDuration(ttl, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
 	usageTTL := utils.DurationPointer(ttl)
@@ -793,13 +818,28 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *utils
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	usageID := args.OptsAsString(rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
-	var units float64
-	if units, err = args.OptsAsFloat64(rS.cgrcfg.ResourceSCfg().Opts.Units, utils.OptsResourcesUnits); err != nil {
+	var usageID string
+	if usageID, err = filterStringCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.UsageID); err != nil {
 		return
 	}
+	usageID = args.OptsAsString(usageID, utils.OptsResourcesUsageID)
+
+	var units float64
+	if units, err = filterFloat64CfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.Units); err != nil {
+		return
+	}
+	if units, err = args.OptsAsFloat64(units, utils.OptsResourcesUnits); err != nil {
+		return
+	}
+
 	var ttl time.Duration
-	if ttl, err = args.OptsAsDuration(*rS.cgrcfg.ResourceSCfg().Opts.UsageTTL, utils.OptsResourcesUsageTTL); err != nil {
+	if ttl, err = filterDurationCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.UsageTTL); err != nil {
+		return
+	}
+	if ttl, err = args.OptsAsDuration(ttl, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
 	usageTTL := utils.DurationPointer(ttl)
@@ -865,9 +905,19 @@ func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *utils.
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	usageID := args.OptsAsString(rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
+	var usageID string
+	if usageID, err = filterStringCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.UsageID); err != nil {
+		return
+	}
+	usageID = args.OptsAsString(usageID, utils.OptsResourcesUsageID)
+
 	var ttl time.Duration
-	if ttl, err = args.OptsAsDuration(*rS.cgrcfg.ResourceSCfg().Opts.UsageTTL, utils.OptsResourcesUsageTTL); err != nil {
+	if ttl, err = filterDurationCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cgrcfg.ResourceSCfg().Opts.UsageTTL); err != nil {
+		return
+	}
+	if ttl, err = args.OptsAsDuration(ttl, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
 	usageTTL := utils.DurationPointer(ttl)

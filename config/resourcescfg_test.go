@@ -45,10 +45,7 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
-		Opts: &ResourcesOpts{
-			UsageTTL: utils.DurationPointer(time.Duration(time.Minute)),
-			Units:    1,
-		},
+		Opts:                &ResourcesOpts{},
 	}
 	cfg := NewDefaultCGRConfig()
 	if err = cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -82,9 +79,9 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUsageIDCfg:  utils.EmptyString,
-			utils.MetaUsageTTLCfg: time.Duration(time.Minute).String(),
-			utils.MetaUnitsCfg:    float64(1),
+			utils.MetaUsageIDCfg:  map[string]string(nil),
+			utils.MetaUsageTTLCfg: map[string]time.Duration(nil),
+			utils.MetaUnitsCfg:    map[string]float64(nil),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -117,9 +114,9 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUsageIDCfg:  utils.EmptyString,
-			utils.MetaUsageTTLCfg: time.Duration(time.Minute).String(),
-			utils.MetaUnitsCfg:    float64(1),
+			utils.MetaUsageIDCfg:  map[string]string(nil),
+			utils.MetaUsageTTLCfg: map[string]time.Duration(nil),
+			utils.MetaUnitsCfg:    map[string]float64(nil),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -172,9 +169,15 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index3"},
 		NestedFields:        false,
 		Opts: &ResourcesOpts{
-			UsageID:  "usg1",
-			UsageTTL: utils.DurationPointer(time.Second),
-			Units:    1,
+			UsageID: map[string]string{
+				utils.EmptyString: "usg1",
+			},
+			UsageTTL: map[string]time.Duration{
+				utils.EmptyString: time.Second,
+			},
+			Units: map[string]float64{
+				utils.EmptyString: float64(1),
+			},
 		},
 	}
 
@@ -188,9 +191,15 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index33"},
 		NestedFields:        true,
 		Opts: &ResourcesOpts{
-			UsageID:  "usg2",
-			UsageTTL: utils.DurationPointer(time.Minute),
-			Units:    2,
+			UsageID: map[string]string{
+				utils.EmptyString: "usg2",
+			},
+			UsageTTL: map[string]time.Duration{
+				utils.EmptyString: time.Minute,
+			},
+			Units: map[string]float64{
+				utils.EmptyString: float64(2),
+			},
 		},
 	}
 
@@ -204,9 +213,15 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index33"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &ResourcesOptsJson{
-			UsageID:  utils.StringPointer("usg2"),
-			UsageTTL: utils.StringPointer("1m0s"),
-			Units:    utils.Float64Pointer(2),
+			UsageID: map[string]string{
+				utils.EmptyString: "usg2",
+			},
+			UsageTTL: map[string]string{
+				utils.EmptyString: "1m0s",
+			},
+			Units: map[string]float64{
+				utils.EmptyString: float64(2),
+			},
 		},
 	}
 
@@ -217,7 +232,11 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &ResourceSJsonCfg{
-		Opts: &ResourcesOptsJson{},
+		Opts: &ResourcesOptsJson{
+			UsageID:  make(map[string]string),
+			UsageTTL: make(map[string]string),
+			Units:    make(map[string]float64),
+		},
 	}
 	rcv = diffResourceSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {

@@ -680,3 +680,54 @@ func (fltr *FilterRule) passRegex(dDP utils.DataProvider) (bool, error) {
 	}
 	return false, nil
 }
+
+func filterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]float64) (float64, error) {
+	for filter, opt := range opts {
+		if filter == utils.EmptyString {
+			continue
+		}
+		if pass, err := fS.Pass(ctx, tnt, []string{filter}, ev); err != nil {
+			return 0, err
+		} else if pass {
+			return opt, nil
+		}
+	}
+	if opt, has := opts[utils.EmptyString]; has {
+		return opt, nil
+	}
+	return 0, utils.ErrNotFound
+}
+
+func filterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]time.Duration) (time.Duration, error) {
+	for filter, opt := range opts {
+		if filter == utils.EmptyString {
+			continue
+		}
+		if pass, err := fS.Pass(ctx, tnt, []string{filter}, ev); err != nil {
+			return 0, err
+		} else if pass {
+			return opt, nil
+		}
+	}
+	if opt, has := opts[utils.EmptyString]; has {
+		return opt, nil
+	}
+	return 0, utils.ErrNotFound
+}
+
+func filterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]string) (string, error) {
+	for filter, opt := range opts {
+		if filter == utils.EmptyString {
+			continue
+		}
+		if pass, err := fS.Pass(ctx, tnt, []string{filter}, ev); err != nil {
+			return utils.EmptyString, err
+		} else if pass {
+			return opt, nil
+		}
+	}
+	if opt, has := opts[utils.EmptyString]; has {
+		return opt, nil
+	}
+	return utils.EmptyString, utils.ErrNotFound
+}

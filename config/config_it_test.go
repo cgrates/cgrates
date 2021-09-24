@@ -313,8 +313,12 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
 		Opts: &ResourcesOpts{
-			UsageTTL: utils.DurationPointer(time.Duration(time.Minute)),
-			Units:    1,
+			UsageTTL: map[string]time.Duration{
+				utils.EmptyString: time.Minute,
+			},
+			Units: map[string]float64{
+				utils.EmptyString: float64(1),
+			},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ResourceSCfg()) {
