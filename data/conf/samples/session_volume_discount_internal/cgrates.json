@@ -1,0 +1,41 @@
+{
+ // CGRateS Configuration file
+ //
+ // Used for sessions/sessions_volume_discount_it_test.go
+
+    "general": {
+        "log_level": 7,
+    },
+
+    "data_db": {
+        "db_type": "*internal",	
+    },
+    
+    "stor_db": {
+        "db_type": "*internal",	
+    },
+
+    "sessions": {
+        "enabled": true,
+        "routes_conns": ["*internal"],
+    },
+
+    "loaders": [
+        {
+            "id": "*default",
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume",
+            "tp_out_dir": "",
+            "lockfile_path": "",
+        },
+    ],
+
+    "routes": {
+        "enabled": true,
+    },
+
+    "admins": {
+        "enabled": true,
+    },
+}
