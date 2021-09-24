@@ -20,206 +20,206 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package general_tests
 
-import (
-	"net/rpc"
-	"path"
-	"testing"
-	"time"
+// import (
+// 	"net/rpc"
+// 	"path"
+// 	"testing"
+// 	"time"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
-	"github.com/cgrates/cgrates/utils"
-)
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/sessions"
+// 	"github.com/cgrates/cgrates/utils"
+// )
 
-var (
-	sesCfgPath string
-	sesCfgDIR  string
-	sesCfg     *config.CGRConfig
-	sesRPC     *rpc.Client
-	sesAccount = "refundAcc"
-	sesTenant  = "cgrates.org"
+// var (
+// 	sesCfgPath string
+// 	sesCfgDIR  string
+// 	sesCfg     *config.CGRConfig
+// 	sesRPC     *rpc.Client
+// 	sesAccount = "refundAcc"
+// 	sesTenant  = "cgrates.org"
 
-	sTestSesIt = []func(t *testing.T){
-		testSesItLoadConfig,
-		testSesItResetDataDB,
-		testSesItResetStorDb,
-		testSesItStartEngine,
-		testSesItRPCConn,
-		testSesItLoadFromFolder,
-		testSesItAddVoiceBalance,
-		testSesItInitSession,
-		testSesItTerminateSession,
-		testSesItStopCgrEngine,
-	}
-)
+// 	sTestSesIt = []func(t *testing.T){
+// 		testSesItLoadConfig,
+// 		testSesItResetDataDB,
+// 		testSesItResetStorDb,
+// 		testSesItStartEngine,
+// 		testSesItRPCConn,
+// 		testSesItLoadFromFolder,
+// 		testSesItAddVoiceBalance,
+// 		testSesItInitSession,
+// 		testSesItTerminateSession,
+// 		testSesItStopCgrEngine,
+// 	}
+// )
 
-func TestSesIt(t *testing.T) {
-	switch *dbType {
-	case utils.MetaInternal:
-		sesCfgDIR = "tutinternal"
-	case utils.MetaMySQL:
-		sesCfgDIR = "tutmysql_internal"
-	case utils.MetaMongo:
-		sesCfgDIR = "tutmongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, stest := range sTestSesIt {
-		t.Run(sesCfgDIR, stest)
-	}
-}
+// func TestSesIt(t *testing.T) {
+// 	switch *dbType {
+// 	case utils.MetaInternal:
+// 		sesCfgDIR = "tutinternal"
+// 	case utils.MetaMySQL:
+// 		sesCfgDIR = "tutmysql_internal"
+// 	case utils.MetaMongo:
+// 		sesCfgDIR = "tutmongo"
+// 	case utils.MetaPostgres:
+// 		t.SkipNow()
+// 	default:
+// 		t.Fatal("Unknown Database type")
+// 	}
+// 	for _, stest := range sTestSesIt {
+// 		t.Run(sesCfgDIR, stest)
+// 	}
+// }
 
-// test for 0 balance with session terminate with 1s usage
-func testSesItLoadConfig(t *testing.T) {
-	sesCfgPath = path.Join(*dataDir, "conf", "samples", sesCfgDIR)
-	if sesCfg, err = config.NewCGRConfigFromPath(sesCfgPath); err != nil {
-		t.Error(err)
-	}
-}
+// // test for 0 balance with session terminate with 1s usage
+// func testSesItLoadConfig(t *testing.T) {
+// 	sesCfgPath = path.Join(*dataDir, "conf", "samples", sesCfgDIR)
+// 	if sesCfg, err = config.NewCGRConfigFromPath(sesCfgPath); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
-func testSesItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDB(sesCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesItResetDataDB(t *testing.T) {
+// 	if err := engine.InitDataDB(sesCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(sesCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesItResetStorDb(t *testing.T) {
+// 	if err := engine.InitStorDB(sesCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesItStartEngine(t *testing.T) {
+// 	if _, err := engine.StopStartEngine(sesCfgPath, *waitRater); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesItRPCConn(t *testing.T) {
-	var err error
-	sesRPC, err = newRPCClient(sesCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesItRPCConn(t *testing.T) {
+// 	var err error
+// 	sesRPC, err = newRPCClient(sesCfg.ListenCfg())
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesItLoadFromFolder(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := sesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(100 * time.Millisecond)
-}
+// func testSesItLoadFromFolder(t *testing.T) {
+// 	var reply string
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+// 	if err := sesRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+// 		t.Error(err)
+// 	}
+// 	time.Sleep(100 * time.Millisecond)
+// }
 
-func testAccountBalance2(t *testing.T, sracc, srten, balType string, expected float64) {
-	var acnt engine.Account
-	attrs := &utils.AttrGetAccount{
-		Tenant:  srten,
-		Account: sracc,
-	}
-	if err := sesRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
-		t.Error(err)
-	} else if rply := acnt.BalanceMap[balType].GetTotalValue(); rply != expected {
-		t.Errorf("Expecting: %v, received: %v",
-			expected, rply)
-	}
-}
+// func testAccountBalance2(t *testing.T, sracc, srten, balType string, expected float64) {
+// 	var acnt engine.Account
+// 	attrs := &utils.AttrGetAccount{
+// 		Tenant:  srten,
+// 		Account: sracc,
+// 	}
+// 	if err := sesRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+// 		t.Error(err)
+// 	} else if rply := acnt.BalanceMap[balType].GetTotalValue(); rply != expected {
+// 		t.Errorf("Expecting: %v, received: %v",
+// 			expected, rply)
+// 	}
+// }
 
-func testSesItAddVoiceBalance(t *testing.T) {
-	attrSetBalance := utils.AttrSetBalance{
-		Tenant:      sesTenant,
-		Account:     sesAccount,
-		BalanceType: utils.MetaMonetary,
-		Value:       0,
-		Balance: map[string]interface{}{
-			utils.ID:            "TestDynamicDebitBalance",
-			utils.RatingSubject: "*zero1s",
-		},
-	}
-	var reply string
-	if err := sesRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Received: %s", reply)
-	}
-	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
-}
+// func testSesItAddVoiceBalance(t *testing.T) {
+// 	attrSetBalance := utils.AttrSetBalance{
+// 		Tenant:      sesTenant,
+// 		Account:     sesAccount,
+// 		BalanceType: utils.MetaMonetary,
+// 		Value:       0,
+// 		Balance: map[string]interface{}{
+// 			utils.ID:            "TestDynamicDebitBalance",
+// 			utils.RatingSubject: "*zero1s",
+// 		},
+// 	}
+// 	var reply string
+// 	if err := sesRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply != utils.OK {
+// 		t.Errorf("Received: %s", reply)
+// 	}
+// 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
+// }
 
-func testSesItInitSession(t *testing.T) {
-	args1 := &sessions.V1InitSessionArgs{
-		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: sesTenant,
-			ID:     "TestSesItInitiateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:       sesTenant,
-				utils.Category:     "call",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "TestRefund",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: sesAccount,
-				utils.Subject:      "TEST",
-				utils.Destination:  "TEST",
-				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:        5 * time.Second,
-			},
-		},
-	}
-	var rply1 sessions.V1InitSessionReply
-	if err := sesRPC.Call(utils.SessionSv1InitiateSession,
-		args1, &rply1); err != nil {
-		t.Error(err)
-		return
-	} else if rply1.MaxUsage != nil && *rply1.MaxUsage != 0 {
-		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
-	}
-	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
-}
+// func testSesItInitSession(t *testing.T) {
+// 	args1 := &sessions.V1InitSessionArgs{
+// 		InitSession: true,
+// 		CGREvent: &utils.CGREvent{
+// 			Tenant: sesTenant,
+// 			ID:     "TestSesItInitiateSession",
+// 			Event: map[string]interface{}{
+// 				utils.Tenant:       sesTenant,
+// 				utils.Category:     "call",
+// 				utils.ToR:          utils.MetaVoice,
+// 				utils.OriginID:     "TestRefund",
+// 				utils.RequestType:  utils.MetaPrepaid,
+// 				utils.AccountField: sesAccount,
+// 				utils.Subject:      "TEST",
+// 				utils.Destination:  "TEST",
+// 				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+// 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+// 				utils.Usage:        5 * time.Second,
+// 			},
+// 		},
+// 	}
+// 	var rply1 sessions.V1InitSessionReply
+// 	if err := sesRPC.Call(utils.SessionSv1InitiateSession,
+// 		args1, &rply1); err != nil {
+// 		t.Error(err)
+// 		return
+// 	} else if rply1.MaxUsage != nil && *rply1.MaxUsage != 0 {
+// 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
+// 	}
+// 	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
+// }
 
-func testSesItTerminateSession(t *testing.T) {
-	args := &sessions.V1TerminateSessionArgs{
-		TerminateSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: sesTenant,
-			ID:     "TestSesItUpdateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:       sesTenant,
-				utils.Category:     "call",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "TestRefund",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: sesAccount,
-				utils.Subject:      "TEST",
-				utils.Destination:  "TEST",
-				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:        time.Second,
-			},
-		},
-	}
-	var rply string
-	if err := sesRPC.Call(utils.SessionSv1TerminateSession,
-		args, &rply); err != nil {
-		t.Error(err)
-	}
-	if rply != utils.OK {
-		t.Errorf("Unexpected reply: %s", rply)
-	}
-	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sesRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	t.Run("TestTerminateSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
-}
+// func testSesItTerminateSession(t *testing.T) {
+// 	args := &sessions.V1TerminateSessionArgs{
+// 		TerminateSession: true,
+// 		CGREvent: &utils.CGREvent{
+// 			Tenant: sesTenant,
+// 			ID:     "TestSesItUpdateSession",
+// 			Event: map[string]interface{}{
+// 				utils.Tenant:       sesTenant,
+// 				utils.Category:     "call",
+// 				utils.ToR:          utils.MetaVoice,
+// 				utils.OriginID:     "TestRefund",
+// 				utils.RequestType:  utils.MetaPrepaid,
+// 				utils.AccountField: sesAccount,
+// 				utils.Subject:      "TEST",
+// 				utils.Destination:  "TEST",
+// 				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+// 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+// 				utils.Usage:        time.Second,
+// 			},
+// 		},
+// 	}
+// 	var rply string
+// 	if err := sesRPC.Call(utils.SessionSv1TerminateSession,
+// 		args, &rply); err != nil {
+// 		t.Error(err)
+// 	}
+// 	if rply != utils.OK {
+// 		t.Errorf("Unexpected reply: %s", rply)
+// 	}
+// 	aSessions := make([]*sessions.ExternalSession, 0)
+// 	if err := sesRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
+// 		err.Error() != utils.ErrNotFound.Error() {
+// 		t.Error(err)
+// 	}
+// 	t.Run("TestTerminateSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MetaMonetary, 0) })
+// }
 
-func testSesItStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
-	}
-}
+// func testSesItStopCgrEngine(t *testing.T) {
+// 	if err := engine.KillEngine(100); err != nil {
+// 		t.Error(err)
+// 	}
+// }

@@ -21,214 +21,214 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-import (
-	"net/rpc"
-	"path"
-	"reflect"
-	"testing"
-	"time"
+// import (
+// 	"net/rpc"
+// 	"path"
+// 	"reflect"
+// 	"testing"
+// 	"time"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
-	"github.com/cgrates/cgrates/utils"
-)
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/sessions"
+// 	"github.com/cgrates/cgrates/utils"
+// )
 
-var (
-	sesTntChngCfgDir  string
-	sesTntChngCfgPath string
-	sesTntChngCfg     *config.CGRConfig
-	sesTntChngRPC     *rpc.Client
+// var (
+// 	sesTntChngCfgDir  string
+// 	sesTntChngCfgPath string
+// 	sesTntChngCfg     *config.CGRConfig
+// 	sesTntChngRPC     *rpc.Client
 
-	sesTntChngTests = []func(t *testing.T){
-		testSesTntChngLoadConfig,
-		testSesTntChngResetDataDB,
-		testSesTntChngResetStorDb,
-		testSesTntChngStartEngine,
-		testSesTntChngRPCConn,
-		testSesTntChngSetChargerProfile1,
-		testSesTntChngSetChargerProfile2,
-		testChargerSAuthProcessEventAuth,
-		testSesTntChngStopCgrEngine,
-	}
-)
+// 	sesTntChngTests = []func(t *testing.T){
+// 		testSesTntChngLoadConfig,
+// 		testSesTntChngResetDataDB,
+// 		testSesTntChngResetStorDb,
+// 		testSesTntChngStartEngine,
+// 		testSesTntChngRPCConn,
+// 		testSesTntChngSetChargerProfile1,
+// 		testSesTntChngSetChargerProfile2,
+// 		testChargerSAuthProcessEventAuth,
+// 		testSesTntChngStopCgrEngine,
+// 	}
+// )
 
-func TestSesTntChange(t *testing.T) {
-	switch *dbType {
-	case utils.MetaInternal:
-		sesTntChngCfgDir = "tutinternal"
-	case utils.MetaMySQL:
-		sesTntChngCfgDir = "tutmysql"
-	case utils.MetaMongo:
-		sesTntChngCfgDir = "tutmongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, sestest := range sesTntChngTests {
-		t.Run(sesTntChngCfgDir, sestest)
-	}
-}
+// func TestSesTntChange(t *testing.T) {
+// 	switch *dbType {
+// 	case utils.MetaInternal:
+// 		sesTntChngCfgDir = "tutinternal"
+// 	case utils.MetaMySQL:
+// 		sesTntChngCfgDir = "tutmysql"
+// 	case utils.MetaMongo:
+// 		sesTntChngCfgDir = "tutmongo"
+// 	case utils.MetaPostgres:
+// 		t.SkipNow()
+// 	default:
+// 		t.Fatal("Unknown Database type")
+// 	}
+// 	for _, sestest := range sesTntChngTests {
+// 		t.Run(sesTntChngCfgDir, sestest)
+// 	}
+// }
 
-func testSesTntChngLoadConfig(t *testing.T) {
-	sesTntChngCfgPath = path.Join(*dataDir, "conf", "samples", sesTntChngCfgDir)
-	if sesTntChngCfg, err = config.NewCGRConfigFromPath(sesTntChngCfgPath); err != nil {
-		t.Error(err)
-	}
-}
+// func testSesTntChngLoadConfig(t *testing.T) {
+// 	sesTntChngCfgPath = path.Join(*dataDir, "conf", "samples", sesTntChngCfgDir)
+// 	if sesTntChngCfg, err = config.NewCGRConfigFromPath(sesTntChngCfgPath); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
-func testSesTntChngResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesTntChngCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesTntChngResetDataDB(t *testing.T) {
+// 	if err := engine.InitDataDb(sesTntChngCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesTntChngResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(sesTntChngCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesTntChngResetStorDb(t *testing.T) {
+// 	if err := engine.InitStorDb(sesTntChngCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesTntChngStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sesTntChngCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesTntChngStartEngine(t *testing.T) {
+// 	if _, err := engine.StopStartEngine(sesTntChngCfgPath, *waitRater); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesTntChngRPCConn(t *testing.T) {
-	var err error
-	sesTntChngRPC, err = newRPCClient(sesTntChngCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-}
+// func testSesTntChngRPCConn(t *testing.T) {
+// 	var err error
+// 	sesTntChngRPC, err = newRPCClient(sesTntChngCfg.ListenCfg())
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testSesTntChngSetChargerProfile1(t *testing.T) {
-	var reply *engine.ChargerProfile
-	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatal(err)
-	}
-	chargerProfile := &v1.ChargerWithCache{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "Charger1",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*constant:*tenant:cgrates.ro;*constant:*req.Account:1234"},
-		},
-	}
+// func testSesTntChngSetChargerProfile1(t *testing.T) {
+// 	var reply *engine.ChargerProfile
+// 	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}, &reply); err == nil ||
+// 		err.Error() != utils.ErrNotFound.Error() {
+// 		t.Fatal(err)
+// 	}
+// 	chargerProfile := &v1.ChargerWithCache{
+// 		ChargerProfile: &engine.ChargerProfile{
+// 			Tenant:       "cgrates.org",
+// 			ID:           "Charger1",
+// 			RunID:        utils.MetaDefault,
+// 			AttributeIDs: []string{"*constant:*tenant:cgrates.ro;*constant:*req.Account:1234"},
+// 		},
+// 	}
 
-	var result string
-	if err := sesTntChngRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
+// 	var result string
+// 	if err := sesTntChngRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
+// 		t.Error(err)
+// 	} else if result != utils.OK {
+// 		t.Error("Unexpected reply returned", result)
+// 	}
 
-	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
-	}
-}
+// 	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
+// 		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
+// 	}
+// }
 
-func testSesTntChngSetChargerProfile2(t *testing.T) {
-	var reply *engine.ChargerProfile
-	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger2"}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatal(err)
-	}
-	chargerProfile := &v1.ChargerWithCache{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "Charger2",
-			RunID:        utils.MetaRaw,
-			AttributeIDs: []string{},
-		},
-	}
+// func testSesTntChngSetChargerProfile2(t *testing.T) {
+// 	var reply *engine.ChargerProfile
+// 	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger2"}, &reply); err == nil ||
+// 		err.Error() != utils.ErrNotFound.Error() {
+// 		t.Fatal(err)
+// 	}
+// 	chargerProfile := &v1.ChargerWithCache{
+// 		ChargerProfile: &engine.ChargerProfile{
+// 			Tenant:       "cgrates.org",
+// 			ID:           "Charger2",
+// 			RunID:        utils.MetaRaw,
+// 			AttributeIDs: []string{},
+// 		},
+// 	}
 
-	var result string
-	if err := sesTntChngRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
+// 	var result string
+// 	if err := sesTntChngRPC.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
+// 		t.Error(err)
+// 	} else if result != utils.OK {
+// 		t.Error("Unexpected reply returned", result)
+// 	}
 
-	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger2"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
-	}
-}
+// 	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
+// 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger2"}, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
+// 		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
+// 	}
+// }
 
-func testChargerSAuthProcessEventAuth(t *testing.T) {
-	attrSetBalance := utils.AttrSetBalance{
-		Tenant:      "cgrates.org",
-		Account:     "1001",
-		BalanceType: utils.VOICE,
-		Value:       float64(2 * time.Minute),
-		Balance: map[string]interface{}{
-			utils.ID:            "testSes",
-			utils.RatingSubject: "*zero1ms",
-		},
-	}
-	var reply string
-	if err := sesTntChngRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Received: %s", reply)
-	}
+// func testChargerSAuthProcessEventAuth(t *testing.T) {
+// 	attrSetBalance := utils.AttrSetBalance{
+// 		Tenant:      "cgrates.org",
+// 		Account:     "1001",
+// 		BalanceType: utils.VOICE,
+// 		Value:       float64(2 * time.Minute),
+// 		Balance: map[string]interface{}{
+// 			utils.ID:            "testSes",
+// 			utils.RatingSubject: "*zero1ms",
+// 		},
+// 	}
+// 	var reply string
+// 	if err := sesTntChngRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply != utils.OK {
+// 		t.Errorf("Received: %s", reply)
+// 	}
 
-	attrSetBalance2 := utils.AttrSetBalance{
-		Tenant:      "cgrates.ro",
-		Account:     "1234",
-		BalanceType: utils.VOICE,
-		Value:       float64(2 * time.Minute),
-		Balance: map[string]interface{}{
-			utils.ID:            "testSes",
-			utils.RatingSubject: "*zero1ms",
-		},
-	}
-	var reply2 string
-	if err := sesTntChngRPC.Call(utils.APIerSv2SetBalance, attrSetBalance2, &reply2); err != nil {
-		t.Error(err)
-	} else if reply2 != utils.OK {
-		t.Errorf("Received: %s", reply2)
-	}
+// 	attrSetBalance2 := utils.AttrSetBalance{
+// 		Tenant:      "cgrates.ro",
+// 		Account:     "1234",
+// 		BalanceType: utils.VOICE,
+// 		Value:       float64(2 * time.Minute),
+// 		Balance: map[string]interface{}{
+// 			utils.ID:            "testSes",
+// 			utils.RatingSubject: "*zero1ms",
+// 		},
+// 	}
+// 	var reply2 string
+// 	if err := sesTntChngRPC.Call(utils.APIerSv2SetBalance, attrSetBalance2, &reply2); err != nil {
+// 		t.Error(err)
+// 	} else if reply2 != utils.OK {
+// 		t.Errorf("Received: %s", reply2)
+// 	}
 
-	ev := &sessions.V1AuthorizeArgs{
-		GetMaxUsage: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestEv1",
-			Event: map[string]interface{}{
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestEv1",
-				utils.RequestType: "*prepaid",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
-				utils.Usage:       time.Minute,
-			},
-		},
-	}
-	var rply sessions.V1AuthorizeReply
-	if err := sesTntChngRPC.Call(utils.SessionSv1AuthorizeEvent, ev, &rply); err != nil {
-		t.Fatal(err)
-	}
-	expected := &sessions.V1AuthorizeReply{}
-	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
-		t.Errorf("Expecting : %T, received: %T", utils.ToJSON(&expected), utils.ToJSON(&rply))
-	}
-}
+// 	ev := &sessions.V1AuthorizeArgs{
+// 		GetMaxUsage: true,
+// 		CGREvent: &utils.CGREvent{
+// 			Tenant: "cgrates.org",
+// 			ID:     "TestEv1",
+// 			Event: map[string]interface{}{
+// 				utils.ToR:         utils.VOICE,
+// 				utils.OriginID:    "TestEv1",
+// 				utils.RequestType: "*prepaid",
+// 				utils.Account:     "1001",
+// 				utils.Subject:     "1001",
+// 				utils.Destination: "1002",
+// 				utils.Usage:       time.Minute,
+// 			},
+// 		},
+// 	}
+// 	var rply sessions.V1AuthorizeReply
+// 	if err := sesTntChngRPC.Call(utils.SessionSv1AuthorizeEvent, ev, &rply); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	expected := &sessions.V1AuthorizeReply{}
+// 	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
+// 		t.Errorf("Expecting : %T, received: %T", utils.ToJSON(&expected), utils.ToJSON(&rply))
+// 	}
+// }
 
-func testSesTntChngStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
-	}
-}
+// func testSesTntChngStopCgrEngine(t *testing.T) {
+// 	if err := engine.KillEngine(100); err != nil {
+// 		t.Error(err)
+// 	}
+// }

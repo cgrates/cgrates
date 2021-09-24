@@ -21,122 +21,122 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-import (
-	"flag"
-	"net/rpc"
-	"os/exec"
-	"path"
-	"testing"
+// import (
+// 	"flag"
+// 	"net/rpc"
+// 	"os/exec"
+// 	"path"
+// 	"testing"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
 
-var (
-	loaderGoogleSheet = flag.Bool("google_sheet", false, "Run the test with google sheet")
-	cgrloaderCfgPath  string
-	cgrloaderCfg      *config.CGRConfig
-	cgrloaderRPC      *rpc.Client
-	cgrloaderConfDIR  string //run tests for specific configuration
+// var (
+// 	loaderGoogleSheet = flag.Bool("google_sheet", false, "Run the test with google sheet")
+// 	cgrloaderCfgPath  string
+// 	cgrloaderCfg      *config.CGRConfig
+// 	cgrloaderRPC      *rpc.Client
+// 	cgrloaderConfDIR  string //run tests for specific configuration
 
-	sTestsCGRLoaders = []func(t *testing.T){
-		testCGRLoaderInitConfig,
-		testCGRLoaderInitDataDb,
-		testCGRLoaderInitCdrDb,
-		testCGRLoaderStartEngine,
-		testCGRLoaderRpcConn,
-		testCGRLoaderLoadData,
-		testCGRLoaderGetData,
-		testCGRLoaderKillEngine,
-	}
-)
+// 	sTestsCGRLoaders = []func(t *testing.T){
+// 		testCGRLoaderInitConfig,
+// 		testCGRLoaderInitDataDb,
+// 		testCGRLoaderInitCdrDb,
+// 		testCGRLoaderStartEngine,
+// 		testCGRLoaderRpcConn,
+// 		testCGRLoaderLoadData,
+// 		testCGRLoaderGetData,
+// 		testCGRLoaderKillEngine,
+// 	}
+// )
 
-//Test start here
-func TestCGRLoader(t *testing.T) {
-	if !*loaderGoogleSheet {
-		t.SkipNow()
-		return
-	}
-	switch *dbType {
-	case utils.MetaInternal:
-		t.SkipNow()
-	case utils.MetaMySQL:
-		cgrloaderConfDIR = "loader_mysql"
-	case utils.MetaMongo:
-		cgrloaderConfDIR = "loader_mongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, stest := range sTestsCGRLoaders {
-		t.Run(cgrloaderConfDIR, stest)
-	}
-}
+// //Test start here
+// func TestCGRLoader(t *testing.T) {
+// 	if !*loaderGoogleSheet {
+// 		t.SkipNow()
+// 		return
+// 	}
+// 	switch *dbType {
+// 	case utils.MetaInternal:
+// 		t.SkipNow()
+// 	case utils.MetaMySQL:
+// 		cgrloaderConfDIR = "loader_mysql"
+// 	case utils.MetaMongo:
+// 		cgrloaderConfDIR = "loader_mongo"
+// 	case utils.MetaPostgres:
+// 		t.SkipNow()
+// 	default:
+// 		t.Fatal("Unknown Database type")
+// 	}
+// 	for _, stest := range sTestsCGRLoaders {
+// 		t.Run(cgrloaderConfDIR, stest)
+// 	}
+// }
 
-func testCGRLoaderInitConfig(t *testing.T) {
-	var err error
-	cgrloaderCfgPath = path.Join(*dataDir, "conf", "samples", cgrloaderConfDIR)
-	if cgrloaderCfg, err = config.NewCGRConfigFromPath(cgrloaderCfgPath); err != nil {
-		t.Fatal("Got config error: ", err.Error())
-	}
-}
+// func testCGRLoaderInitConfig(t *testing.T) {
+// 	var err error
+// 	cgrloaderCfgPath = path.Join(*dataDir, "conf", "samples", cgrloaderConfDIR)
+// 	if cgrloaderCfg, err = config.NewCGRConfigFromPath(cgrloaderCfgPath); err != nil {
+// 		t.Fatal("Got config error: ", err.Error())
+// 	}
+// }
 
-func testCGRLoaderInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(cgrloaderCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testCGRLoaderInitDataDb(t *testing.T) {
+// 	if err := engine.InitDataDB(cgrloaderCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testCGRLoaderInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDB(cgrloaderCfg); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testCGRLoaderInitCdrDb(t *testing.T) {
+// 	if err := engine.InitStorDB(cgrloaderCfg); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testCGRLoaderStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cgrloaderCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testCGRLoaderStartEngine(t *testing.T) {
+// 	if _, err := engine.StopStartEngine(cgrloaderCfgPath, *waitRater); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testCGRLoaderRpcConn(t *testing.T) {
-	var err error
-	cgrloaderRPC, err = newRPCClient(cgrloaderCfg.ListenCfg())
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
-}
+// func testCGRLoaderRpcConn(t *testing.T) {
+// 	var err error
+// 	cgrloaderRPC, err = newRPCClient(cgrloaderCfg.ListenCfg())
+// 	if err != nil {
+// 		t.Fatal("Could not connect to rater: ", err.Error())
+// 	}
+// }
 
-func testCGRLoaderLoadData(t *testing.T) {
-	loaderPath, err := exec.LookPath("cgr-loader")
-	if err != nil {
-		t.Fatal(err)
-	}
-	loader := exec.Command(loaderPath, "-config_path", cgrloaderCfgPath, "-path", "*gapi:1pRFnsFBlKeGnD3wysZ1CXxylZI7r_Zh5iZI99ViOyPM")
-	if err := loader.Start(); err != nil {
-		t.Fatal(err)
-	}
-	if err := loader.Wait(); err != nil {
-		t.Error(err)
-	}
-}
+// func testCGRLoaderLoadData(t *testing.T) {
+// 	loaderPath, err := exec.LookPath("cgr-loader")
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	loader := exec.Command(loaderPath, "-config_path", cgrloaderCfgPath, "-path", "*gapi:1pRFnsFBlKeGnD3wysZ1CXxylZI7r_Zh5iZI99ViOyPM")
+// 	if err := loader.Start(); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if err := loader.Wait(); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
-func testCGRLoaderGetData(t *testing.T) {
-	expected := []string{"ATTR_1001_SIMPLEAUTH", "ATTR_1002_SIMPLEAUTH", "ATTR_1003_SIMPLEAUTH",
-		"ATTR_1001_SESSIONAUTH", "ATTR_1002_SESSIONAUTH", "ATTR_1003_SESSIONAUTH",
-		"ATTR_ACC_ALIAS"}
-	var result []string
-	if err := cgrloaderRPC.Call(utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
-		t.Error(err)
-	} else if len(expected) != len(result) {
-		t.Errorf("Expecting : %+v, received: %+v", expected, result)
-	}
-}
+// func testCGRLoaderGetData(t *testing.T) {
+// 	expected := []string{"ATTR_1001_SIMPLEAUTH", "ATTR_1002_SIMPLEAUTH", "ATTR_1003_SIMPLEAUTH",
+// 		"ATTR_1001_SESSIONAUTH", "ATTR_1002_SESSIONAUTH", "ATTR_1003_SESSIONAUTH",
+// 		"ATTR_ACC_ALIAS"}
+// 	var result []string
+// 	if err := cgrloaderRPC.Call(utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
+// 		t.Error(err)
+// 	} else if len(expected) != len(result) {
+// 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+// 	}
+// }
 
-func testCGRLoaderKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
-		t.Error(err)
-	}
-}
+// func testCGRLoaderKillEngine(t *testing.T) {
+// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 		t.Error(err)
+// 	}
+// }

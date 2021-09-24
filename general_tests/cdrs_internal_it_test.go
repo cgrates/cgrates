@@ -21,115 +21,115 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-import (
-	"path"
-	"testing"
-	"time"
+// import (
+// 	"path"
+// 	"testing"
+// 	"time"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
 
-var (
-	cdrsIntCfgPath string
-	cdrsIntCfgDIR  string
-	cdrsIntCfg     *config.CGRConfig
-	cdrsIntRPC     *birpc.Client
+// var (
+// 	cdrsIntCfgPath string
+// 	cdrsIntCfgDIR  string
+// 	cdrsIntCfg     *config.CGRConfig
+// 	cdrsIntRPC     *birpc.Client
 
-	sTestsCdrsInt = []func(t *testing.T){
-		testCdrsIntInitCfg,
-		testCdrsIntStartEngine,
-		testCdrsIntRpcConn,
-		testCdrsIntTestTTL,
-		testCdrsIntStopEngine,
-	}
-)
+// 	sTestsCdrsInt = []func(t *testing.T){
+// 		testCdrsIntInitCfg,
+// 		testCdrsIntStartEngine,
+// 		testCdrsIntRpcConn,
+// 		testCdrsIntTestTTL,
+// 		testCdrsIntStopEngine,
+// 	}
+// )
 
-// This test is valid only for internal
-// to test the ttl for cdrs
-func TestCdrsIntIT(t *testing.T) {
-	switch *dbType {
-	case utils.MetaInternal:
-		cdrsIntCfgDIR = "internal_ttl_internal"
-	case utils.MetaMySQL:
-		t.SkipNow()
-	case utils.MetaMongo:
-		t.SkipNow()
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, stest := range sTestsCdrsInt {
-		t.Run(cdrsIntCfgDIR, stest)
-	}
-}
+// // This test is valid only for internal
+// // to test the ttl for cdrs
+// func TestCdrsIntIT(t *testing.T) {
+// 	switch *dbType {
+// 	case utils.MetaInternal:
+// 		cdrsIntCfgDIR = "internal_ttl_internal"
+// 	case utils.MetaMySQL:
+// 		t.SkipNow()
+// 	case utils.MetaMongo:
+// 		t.SkipNow()
+// 	case utils.MetaPostgres:
+// 		t.SkipNow()
+// 	default:
+// 		t.Fatal("Unknown Database type")
+// 	}
+// 	for _, stest := range sTestsCdrsInt {
+// 		t.Run(cdrsIntCfgDIR, stest)
+// 	}
+// }
 
-func testCdrsIntInitCfg(t *testing.T) {
-	var err error
-	cdrsIntCfgPath = path.Join(*dataDir, "conf", "samples", cdrsIntCfgDIR)
-	cdrsIntCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsIntCfgPath)
-	if err != nil {
-		t.Error(err)
-	}
-}
+// func testCdrsIntInitCfg(t *testing.T) {
+// 	var err error
+// 	cdrsIntCfgPath = path.Join(*dataDir, "conf", "samples", cdrsIntCfgDIR)
+// 	cdrsIntCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsIntCfgPath)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
-func testCdrsIntStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsIntCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-}
+// func testCdrsIntStartEngine(t *testing.T) {
+// 	if _, err := engine.StopStartEngine(cdrsIntCfgPath, *waitRater); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testCdrsIntRpcConn(t *testing.T) {
-	var err error
-	cdrsIntRPC, err = newRPCClient(cdrsIntCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-}
+// func testCdrsIntRpcConn(t *testing.T) {
+// 	var err error
+// 	cdrsIntRPC, err = newRPCClient(cdrsIntCfg.ListenCfg())
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
-func testCdrsIntTestTTL(t *testing.T) {
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]interface{}{
-			utils.OriginID:     "testCdrsIntTestTTL",
-			utils.OriginHost:   "192.168.1.1",
-			utils.Source:       "testCdrsIntTestTTL",
-			utils.RequestType:  utils.MetaNone,
-			utils.Category:     "call",
-			utils.AccountField: "testCdrsIntTestTTL",
-			utils.Subject:      "ANY2CNT2",
-			utils.Destination:  "+4986517174963",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			utils.Usage:        time.Minute,
-		},
-		APIOpts: map[string]interface{}{utils.OptsCDRsStore: true},
-	}
+// func testCdrsIntTestTTL(t *testing.T) {
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		Event: map[string]interface{}{
+// 			utils.OriginID:     "testCdrsIntTestTTL",
+// 			utils.OriginHost:   "192.168.1.1",
+// 			utils.Source:       "testCdrsIntTestTTL",
+// 			utils.RequestType:  utils.MetaNone,
+// 			utils.Category:     "call",
+// 			utils.AccountField: "testCdrsIntTestTTL",
+// 			utils.Subject:      "ANY2CNT2",
+// 			utils.Destination:  "+4986517174963",
+// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+// 			utils.Usage:        time.Minute,
+// 		},
+// 		APIOpts: map[string]interface{}{utils.OptsCDRsStore: true},
+// 	}
 
-	var reply string
-	if err := cdrsIntRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
-	var cdrs []*engine.ExternalCDR
-	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err != nil {
-		t.Fatal("Unexpected error: ", err.Error())
-	} else if len(cdrs) != 1 {
-		t.Errorf("Expected 1 result received %v ", len(cdrs))
-	}
-	time.Sleep(time.Second + 50*time.Millisecond)
-	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatal("Unexpected error: ", err)
-	}
-}
+// 	var reply string
+// 	if err := cdrsIntRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+// 		t.Error("Unexpected error: ", err.Error())
+// 	} else if reply != utils.OK {
+// 		t.Error("Unexpected reply received: ", reply)
+// 	}
+// 	var cdrs []*engine.ExternalCDR
+// 	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err != nil {
+// 		t.Fatal("Unexpected error: ", err.Error())
+// 	} else if len(cdrs) != 1 {
+// 		t.Errorf("Expected 1 result received %v ", len(cdrs))
+// 	}
+// 	time.Sleep(time.Second + 50*time.Millisecond)
+// 	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err == nil ||
+// 		err.Error() != utils.ErrNotFound.Error() {
+// 		t.Fatal("Unexpected error: ", err)
+// 	}
+// }
 
-func testCdrsIntStopEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
-		t.Error(err)
-	}
-}
+// func testCdrsIntStopEngine(t *testing.T) {
+// 	if err := engine.KillEngine(*waitRater); err != nil {
+// 		t.Error(err)
+// 	}
+// }

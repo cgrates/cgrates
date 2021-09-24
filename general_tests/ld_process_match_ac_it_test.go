@@ -41,11 +41,11 @@ var (
 		testLdPrMatchAcLoadConfig,
 		testLdPrMatchAcResetDataDB,
 		testLdPrMatchAcResetStorDb,
-		testLdPrMatchAcStartEngine,
+		// testLdPrMatchAcStartEngine,
 		testLdPrMatchAcRPCConn,
 		testLdPrMatchAcLoadTP,
 		testLdPrMatchAcCDRSProcessEvent,
-		testLdPrMatchAcStopCgrEngine,
+		// testLdPrMatchAcStopCgrEngine,
 	}
 )
 
@@ -115,24 +115,22 @@ func testLdPrMatchAcLoadTP(t *testing.T) {
 }
 
 func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
-	ev := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestEv1",
-			Event: map[string]interface{}{
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "TestEv1",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.Usage:        time.Minute,
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsRateS:      false,
-				utils.OptsCDRsExport: false,
-				utils.OptsAccountS:   true,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEv1",
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.OriginID:     "TestEv1",
+			utils.RequestType:  utils.MetaPrepaid,
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+			utils.Usage:        time.Minute,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRateS:      false,
+			utils.OptsCDRsExport: false,
+			utils.OptsAccountS:   true,
 		},
 	}
 	var rply string
