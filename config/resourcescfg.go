@@ -155,11 +155,7 @@ func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
 	if rsOpts.UsageTTL != nil {
 		cln.UsageTTL = utils.DurationPointer(*rsOpts.UsageTTL)
 	}
-	return &ResourcesOpts{
-		UsageID:  rsOpts.UsageID,
-		UsageTTL: rsOpts.UsageTTL,
-		Units:    rsOpts.Units,
-	}
+	return
 }
 
 // Clone returns a deep copy of ResourceSConfig
