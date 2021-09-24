@@ -515,7 +515,7 @@ func testAccMaxAbstracts(t *testing.T) {
 	}
 	for _, val := range reply3.Rating {
 		if !reflect.DeepEqual(val, expRating) {
-			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
 		}
 	}
 	reply3.Rating = map[string]*utils.ExtRateSInterval{}
@@ -670,7 +670,7 @@ func testAccDebitAbstracts(t *testing.T) {
 	}
 	for _, val := range reply3.Rating {
 		if !reflect.DeepEqual(val, expRating) {
-			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
 		}
 	}
 	reply3.Rating = map[string]*utils.ExtRateSInterval{}

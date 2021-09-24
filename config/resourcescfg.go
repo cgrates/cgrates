@@ -113,9 +113,11 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 // AsMapInterface returns the config as a map[string]interface{}
 func (rlcfg ResourceSConfig) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaUsageIDCfg:  rlcfg.Opts.UsageID,
-		utils.MetaUsageTTLCfg: rlcfg.Opts.UsageTTL,
-		utils.MetaUnitsCfg:    rlcfg.Opts.Units,
+		utils.MetaUsageIDCfg: rlcfg.Opts.UsageID,
+		utils.MetaUnitsCfg:   rlcfg.Opts.Units,
+	}
+	if rlcfg.Opts.UsageTTL != nil {
+		opts[utils.MetaUsageTTLCfg] = (*rlcfg.Opts.UsageTTL).String()
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        rlcfg.Enabled,
@@ -145,7 +147,14 @@ func (rlcfg ResourceSConfig) AsMapInterface(string) interface{} {
 func (ResourceSConfig) SName() string               { return ResourceSJSON }
 func (rlcfg ResourceSConfig) CloneSection() Section { return rlcfg.Clone() }
 
-func (rsOpts *ResourcesOpts) Clone() *ResourcesOpts {
+func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
+	cln = &ResourcesOpts{
+		UsageID: rsOpts.UsageID,
+		Units:   rsOpts.Units,
+	}
+	if rsOpts.UsageTTL != nil {
+		cln.UsageTTL = utils.DurationPointer(*rsOpts.UsageTTL)
+	}
 	return &ResourcesOpts{
 		UsageID:  rsOpts.UsageID,
 		UsageTTL: rsOpts.UsageTTL,

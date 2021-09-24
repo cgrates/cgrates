@@ -312,6 +312,10 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
+		Opts: &ResourcesOpts{
+			UsageTTL: utils.DurationPointer(time.Duration(time.Minute)),
+			Units:    1,
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ResourceSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ResourceSCfg()))
