@@ -1429,6 +1429,24 @@ func (sS *SessionS) chargeEvent(ctx *context.Context, cgrEv *utils.CGREvent, for
 	return // returns here the maxUsage from update
 }
 
+// accounSMaxAbstracts computes the maximum abstract units for the events provided
+func (sS *SessionS) accounSMaxAbstracts(ctx *context.Context, cgrEvs []*utils.CGREvent) (maxAbstracts *utils.Decimal, err error) {
+	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
+		return nil, utils.NewErrNotConnected(utils.AccountS)
+	}
+	for _, cgrEv := range cgrEvs {
+		acntCost := new(utils.ExtEventCharges)
+		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttrSConns, // Fix Here with AccountS
+			utils.AccountSv1DebitAbstracts, cgrEv, &acntCost); err != nil {
+			return
+		} else if maxAbstracts == nil ||
+			maxAbstracts.Compare(utils.NewDecimalFromFloat64(*acntCost.Abstracts)) == 1 { // should compare directly against Decimal
+			maxAbstracts = utils.NewDecimalFromFloat64(*acntCost.Abstracts) // did not optimize here since we need to remove floats from acntCost
+		}
+	}
+	return
+}
+
 // APIs start here
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
