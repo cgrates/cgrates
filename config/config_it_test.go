@@ -753,15 +753,15 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SessionSCfg{
-		Enabled:       true,
-		ListenBijson:  "127.0.0.1:2014",
-		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		ResSConns:     []string{utils.MetaLocalHost},
-		ThreshSConns:  []string{},
-		StatSConns:    []string{},
-		RouteSConns:   []string{utils.MetaLocalHost},
-		AttrSConns:    []string{utils.MetaLocalHost},
-		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		Enabled:         true,
+		ListenBijson:    "127.0.0.1:2014",
+		ChargerSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		ResourceSConns:  []string{utils.MetaLocalHost},
+		ThresholdSConns: []string{},
+		StatSConns:      []string{},
+		RouteSConns:     []string{utils.MetaLocalHost},
+		AttributeSConns: []string{utils.MetaLocalHost},
+		CDRsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
 		SessionIndexes:    utils.StringSet{},
@@ -806,15 +806,15 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SessionSCfg{
-		Enabled:       true,
-		ListenBijson:  "127.0.0.1:2014",
-		ChargerSConns: []string{utils.MetaLocalHost},
-		ResSConns:     []string{utils.MetaLocalHost},
-		ThreshSConns:  []string{},
-		StatSConns:    []string{},
-		RouteSConns:   []string{utils.MetaLocalHost},
-		AttrSConns:    []string{utils.MetaLocalHost},
-		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		Enabled:         true,
+		ListenBijson:    "127.0.0.1:2014",
+		ChargerSConns:   []string{utils.MetaLocalHost},
+		ResourceSConns:  []string{utils.MetaLocalHost},
+		ThresholdSConns: []string{},
+		StatSConns:      []string{},
+		RouteSConns:     []string{utils.MetaLocalHost},
+		AttributeSConns: []string{utils.MetaLocalHost},
+		CDRsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
 		SessionIndexes:    utils.StringSet{},
@@ -862,15 +862,15 @@ func testCGRConfigReloadAll(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SessionSCfg{
-		Enabled:       true,
-		ListenBijson:  "127.0.0.1:2014",
-		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		ResSConns:     []string{utils.MetaLocalHost},
-		ThreshSConns:  []string{},
-		StatSConns:    []string{},
-		RouteSConns:   []string{utils.MetaLocalHost},
-		AttrSConns:    []string{utils.MetaLocalHost},
-		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		Enabled:         true,
+		ListenBijson:    "127.0.0.1:2014",
+		ChargerSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		ResourceSConns:  []string{utils.MetaLocalHost},
+		ThresholdSConns: []string{},
+		StatSConns:      []string{},
+		RouteSConns:     []string{utils.MetaLocalHost},
+		AttributeSConns: []string{utils.MetaLocalHost},
+		CDRsConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []string{},
 		SessionIndexes:    utils.StringSet{},

@@ -231,30 +231,30 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.sessionSCfg.ChargerSConns = []string{}
 	cfg.chargerSCfg.Enabled = true
 
-	cfg.sessionSCfg.ResSConns = []string{utils.MetaInternal}
+	cfg.sessionSCfg.ResourceSConns = []string{utils.MetaInternal}
 	expected = "<ResourceS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.ResSConns = []string{"test"}
+	cfg.sessionSCfg.ResourceSConns = []string{"test"}
 	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.ResSConns = []string{}
+	cfg.sessionSCfg.ResourceSConns = []string{}
 	cfg.resourceSCfg.Enabled = true
 
-	cfg.sessionSCfg.ThreshSConns = []string{utils.MetaInternal}
+	cfg.sessionSCfg.ThresholdSConns = []string{utils.MetaInternal}
 	expected = "<ThresholdS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.ThreshSConns = []string{"test"}
+	cfg.sessionSCfg.ThresholdSConns = []string{"test"}
 	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.ThreshSConns = []string{}
+	cfg.sessionSCfg.ThresholdSConns = []string{}
 	cfg.thresholdSCfg.Enabled = true
 
 	cfg.sessionSCfg.StatSConns = []string{utils.MetaInternal}
@@ -283,17 +283,17 @@ func TestConfigSanitySessionS(t *testing.T) {
 	cfg.sessionSCfg.RouteSConns = []string{}
 	cfg.routeSCfg.Enabled = true
 
-	cfg.sessionSCfg.AttrSConns = []string{utils.MetaInternal}
+	cfg.sessionSCfg.AttributeSConns = []string{utils.MetaInternal}
 	expected = "<AttributeS> not enabled but requested by <SessionS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.AttrSConns = []string{"test"}
+	cfg.sessionSCfg.AttributeSConns = []string{"test"}
 	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.AttrSConns = []string{}
+	cfg.sessionSCfg.AttributeSConns = []string{}
 	cfg.attributeSCfg.Enabled = true
 
 	cfg.sessionSCfg.CDRsConns = []string{utils.MetaInternal}

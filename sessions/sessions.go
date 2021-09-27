@@ -383,7 +383,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		}
 	}
 	// release the resources for the session
-	if len(sS.cgrCfg.SessionSCfg().ResSConns) != 0 && s.ResourceID != "" {
+	if len(sS.cgrCfg.SessionSCfg().ResourceSConns) != 0 && s.ResourceID != "" {
 		var reply string
 		if s.OptsStart == nil {
 			s.OptsStart = make(engine.MapEvent)
@@ -396,7 +396,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		}
 		args.APIOpts[utils.OptsResourcesUsageID] = s.ResourceID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
-		if err := sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns,
+		if err := sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResourceSConns,
 			utils.ResourceSv1ReleaseResources,
 			args, &reply); err != nil {
 			utils.Logger.Warning(
@@ -1616,7 +1616,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	if args.AuthorizeResources ||
 		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
@@ -1626,7 +1626,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		args.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMsg string
-		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AuthorizeResources,
+		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1AuthorizeResources,
 			args, &allocMsg); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -1777,7 +1777,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		}
 	}
 	if resS {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -1786,7 +1786,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		args.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMessage string
-		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns,
+		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResourceSConns,
 			utils.ResourceSv1AllocateResources, args, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2068,7 +2068,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		}
 	}
 	if resS {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -2077,7 +2077,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		args.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var reply string
-		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1ReleaseResources,
+		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1ReleaseResources,
 			args, &reply); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2201,7 +2201,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		}
 	}
 	if utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAlocate) {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -2210,7 +2210,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		args.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMessage string
-		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AllocateResources,
+		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResourceSConns, utils.ResourceSv1AllocateResources,
 			args, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2453,7 +2453,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 
 	// check for *resources
 	if opt, has := args.APIOpts[utils.OptsResourceS]; has {
-		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
+		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		var method string
@@ -2478,7 +2478,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			cgrEv.APIOpts[utils.OptsResourcesUsageID] = originID
 			cgrEv.APIOpts[utils.OptsResourcesUnits] = 1
 			var resMessage string
-			if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResSConns, method,
+			if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ResourceSConns, method,
 				cgrEv, &resMessage); err != nil {
 				if blockError {
 					return utils.NewErrResourceS(err)
@@ -2810,7 +2810,7 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 
 // processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent, thIDs []string, clnb bool) (tIDs []string, err error) {
-	if len(sS.cgrCfg.SessionSCfg().ThreshSConns) == 0 {
+	if len(sS.cgrCfg.SessionSCfg().ThresholdSConns) == 0 {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
 	}
 	// check if we have thresholdIDs
@@ -2819,7 +2819,7 @@ func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent
 	}
 	cgrEv.SetCloneable(clnb)
 	//initialize the returned variable
-	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ThreshSConns, utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs)
+	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns, utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs)
 	return
 }
 
@@ -2860,7 +2860,7 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 
 // processAttributes will receive the event and send it to AttributeS to be processed
 func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREvent) (rplyEv engine.AttrSProcessEventReply, err error) {
-	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
+	if len(sS.cgrCfg.SessionSCfg().AttributeSConns) == 0 {
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}
 	if cgrEv.APIOpts == nil {
@@ -2870,7 +2870,7 @@ func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREven
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaSessionS)
-	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttrSConns, utils.AttributeSv1ProcessEvent,
+	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttributeSConns, utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv)
 	return
 }

@@ -96,11 +96,11 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Enabled:             true,
 		ListenBijson:        "127.0.0.1:2018",
 		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		ResSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		ThreshSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
-		AttrSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
 		ReplicationConns:    []string{"*conn1"},
 		DebitInterval:       2,
@@ -233,11 +233,11 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		Enabled:             false,
 		ListenBijson:        "127.0.0.1:2014",
 		ChargerSConns:       []string{},
-		ResSConns:           []string{},
-		ThreshSConns:        []string{},
+		ResourceSConns:      []string{},
+		ThresholdSConns:     []string{},
 		StatSConns:          []string{},
 		RouteSConns:         []string{},
-		AttrSConns:          []string{},
+		AttributeSConns:     []string{},
 		CDRsConns:           []string{},
 		ReplicationConns:    []string{},
 		DebitInterval:       0,
@@ -1191,11 +1191,11 @@ func TestSessionSCfgClone(t *testing.T) {
 		Enabled:             true,
 		ListenBijson:        "127.0.0.1:2018",
 		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		ResSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		ThreshSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		RouteSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"},
-		AttrSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
 		ReplicationConns:    []string{"*conn1"},
 		DebitInterval:       2,
@@ -1234,10 +1234,10 @@ func TestSessionSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 
-	if rcv.ResSConns[1] = ""; ban.ResSConns[1] != "*conn1" {
+	if rcv.ResourceSConns[1] = ""; ban.ResourceSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ThreshSConns[1] = ""; ban.ThreshSConns[1] != "*conn1" {
+	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
@@ -1246,7 +1246,7 @@ func TestSessionSCfgClone(t *testing.T) {
 	if rcv.RouteSConns[1] = ""; ban.RouteSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.AttrSConns[1] = ""; ban.AttrSConns[1] != "*conn1" {
+	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.CDRsConns[1] = ""; ban.CDRsConns[1] != "*conn1" {
@@ -1311,13 +1311,13 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		ListenBijson:        "*bijson_rpc",
 		ListenBigob:         "*bigob_rpc",
 		ChargerSConns:       []string{"*localhost"},
-		ResSConns:           []string{"*localhost"},
-		ThreshSConns:        []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		ThresholdSConns:     []string{"*localhost"},
 		StatSConns:          []string{"*localhost"},
 		RouteSConns:         []string{"*localhost"},
 		CDRsConns:           []string{"*localhost"},
 		ReplicationConns:    []string{"*localhost"},
-		AttrSConns:          []string{"*localhost"},
+		AttributeSConns:     []string{"*localhost"},
 		DebitInterval:       1 * time.Second,
 		StoreSCosts:         false,
 		SessionTTL:          1 * time.Second,
@@ -1350,13 +1350,13 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		ListenBijson:        "*bijson",
 		ListenBigob:         "*bigob",
 		ChargerSConns:       []string{"*birpc"},
-		ResSConns:           []string{"*birpc"},
-		ThreshSConns:        []string{"*birpc"},
+		ResourceSConns:      []string{"*birpc"},
+		ThresholdSConns:     []string{"*birpc"},
 		StatSConns:          []string{"*birpc"},
 		RouteSConns:         []string{"*birpc"},
 		CDRsConns:           []string{"*birpc"},
 		ReplicationConns:    []string{"*birpc"},
-		AttrSConns:          []string{"*birpc"},
+		AttributeSConns:     []string{"*birpc"},
 		DebitInterval:       2 * time.Second,
 		StoreSCosts:         true,
 		SessionTTL:          2 * time.Second,
