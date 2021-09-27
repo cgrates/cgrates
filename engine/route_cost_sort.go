@@ -51,22 +51,45 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			},
 			RouteParameters: route.RouteParameters,
 		}
-		ev.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(route.RateProfileIDs)
-		var rpCost utils.RateProfileCost
-		if err = connMgr.Call(ctx, cfg.RouteSCfg().RateSConns,
-			utils.RateSv1CostForEvent, ev, &rpCost); err != nil {
-			if extraOpts.ignoreErrors {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
-						utils.RouteS, route.ID, err.Error()))
-				continue
+		var cost float64
+		if len(route.AccountIDs) != 0 { // query AccountS for cost
+
+			acntCost := new(utils.ExtEventCharges)
+			ev.APIOpts[utils.OptsAccountsAccountIDs] = utils.CloneStringSlice(route.AccountIDs)
+			if err = connMgr.Call(ctx, cfg.RouteSCfg().AccountSConns,
+				utils.AccountSv1MaxAbstracts, ev, &acntCost); err != nil {
+				return
 			}
-			return
+
+			cost = *acntCost.Concretes
+			acntIDs := make([]string, 0, len(acntCost.Accounts))
+			for acntID := range acntCost.Accounts {
+				acntIDs = append(acntIDs, acntID)
+			}
+			srtRoute.SortingData[utils.AccountIDs] = acntIDs
+
+		} else { // query RateS for cost
+
+			ev.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(route.RateProfileIDs)
+			var rpCost utils.RateProfileCost
+			if err = connMgr.Call(ctx, cfg.RouteSCfg().RateSConns,
+				utils.RateSv1CostForEvent, ev, &rpCost); err != nil {
+				if extraOpts.ignoreErrors {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
+							utils.RouteS, route.ID, err.Error()))
+					continue
+				}
+				return
+			}
+			cost, _ = rpCost.Cost.Float64()
+			srtRoute.SortingData[utils.RatingPlanID] = rpCost.ID
+
 		}
-		cost, _ := rpCost.Cost.Float64()
+
 		srtRoute.sortingDataF64[utils.Cost] = cost
 		srtRoute.SortingData[utils.Cost] = cost
-		srtRoute.SortingData[utils.RatingPlanID] = rpCost.ID
+
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			cfg.FilterSCfg().ResourceSConns,
