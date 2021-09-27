@@ -2123,9 +2123,13 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 
 // Event Opts
 const (
-	// SessionS
-	OptsCDRs = "*cdrS"
 
+	//CDRS and Sessions Opts
+	OptsCDRs      = "*cdrS"
+	OptsRouteS    = "*routeS"
+	OptsResourceS = "*resourceS"
+
+	// SessionS
 	OptsSesTTL           = "*sesTTL"
 	OptsSesChargeable    = "*sesChargeable"
 	OptsSesDebitInterval = "*sesDebitInterval"
@@ -2137,12 +2141,10 @@ const (
 	OptsSesAttributeSDerivedReply = "*sesAttributeSDerivedReply"
 	OptsSesBlockerError           = "*sesBlockerError"
 	OptsSesCDRsDerivedReply       = "*sesCDRsDerivedReply"
-	OptsResourceS                 = "*resourceS"
 	OptsSesResourceSAuthorize     = "*sesResourceSAuthorize"
 	OptsSesResourceSAlocate       = "*sesResourceSAlocate"
 	OptsSesResourceSRelease       = "*sesResourceSRelease"
 	OptsSesResourceSDerivedReply  = "*sesResourceSDerivedReply"
-	OptsRouteS                    = "*routeS"
 	OptsSesRouteSDerivedReply     = "*sesRouteSDerivedReply"
 	OptsSesRouteSIgnoreErrors     = "*sesRouteSIgnoreErrors"
 	OptsSesRouteSMaxCost          = "*sesRouteSMaxCost"
