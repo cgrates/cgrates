@@ -40,6 +40,8 @@ type SessionSCfg struct {
 	AttributeSConns     []string
 	CDRsConns           []string
 	ReplicationConns    []string
+	RateSConns          []string
+	AccountSConns       []string
 	DebitInterval       time.Duration
 	StoreSCosts         bool
 	SessionTTL          time.Duration
@@ -112,6 +114,12 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 			scfg.ReplicationConns[idx] = connID
 		}
+	}
+	if jsnCfg.Rates_conns != nil {
+		scfg.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRateS)
+	}
+	if jsnCfg.Accounts_conns != nil {
+		scfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	if jsnCfg.Debit_interval != nil {
 		if scfg.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
@@ -269,6 +277,12 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 	if scfg.ActionSConns != nil {
 		mp[utils.ActionSConnsCfg] = getInternalJSONConns(scfg.ActionSConns)
 	}
+	if scfg.RateSConns != nil {
+		mp[utils.RateSConnsCfg] = getInternalJSONConns(scfg.RateSConns)
+	}
+	if scfg.AccountSConns != nil {
+		mp[utils.AccountSConnsCfg] = getInternalJSONConns(scfg.AccountSConns)
+	}
 	return mp
 }
 
@@ -335,6 +349,12 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	}
 	if scfg.ActionSConns != nil {
 		cln.ActionSConns = utils.CloneStringSlice(scfg.ActionSConns)
+	}
+	if scfg.RateSConns != nil {
+		cln.RateSConns = utils.CloneStringSlice(scfg.RateSConns)
+	}
+	if scfg.AccountSConns != nil {
+		cln.AccountSConns = utils.CloneStringSlice(scfg.AccountSConns)
 	}
 
 	return
@@ -447,6 +467,9 @@ type SessionSJsonCfg struct {
 	Cdrs_conns             *[]string
 	Replication_conns      *[]string
 	Attributes_conns       *[]string
+	Actions_conns          *[]string
+	Rates_conns            *[]string
+	Accounts_conns         *[]string
 	Debit_interval         *string
 	Store_session_costs    *bool
 	Session_ttl            *string
@@ -460,7 +483,6 @@ type SessionSJsonCfg struct {
 	Terminate_attempts     *int
 	Alterable_fields       *[]string
 	Min_dur_low_balance    *string
-	Actions_conns          *[]string
 	Stir                   *STIRJsonCfg
 	Default_usage          map[string]string
 }
@@ -501,6 +523,12 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	}
 	if !utils.SliceStringEqual(v1.ReplicationConns, v2.ReplicationConns) {
 		d.Attributes_conns = utils.SliceStringPointer(v2.ReplicationConns)
+	}
+	if !utils.SliceStringEqual(v1.RateSConns, v2.RateSConns) {
+		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
+	}
+	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	if v1.DebitInterval != v2.DebitInterval {
 		d.Debit_interval = utils.StringPointer(v2.DebitInterval.String())

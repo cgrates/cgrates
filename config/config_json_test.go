@@ -544,6 +544,9 @@ func TestSmgJsonCfg(t *testing.T) {
 		Stats_conns:           &[]string{},
 		Routes_conns:          &[]string{},
 		Attributes_conns:      &[]string{},
+		Actions_conns:         &[]string{},
+		Rates_conns:           &[]string{},
+		Accounts_conns:        &[]string{},
 		Replication_conns:     &[]string{},
 		Debit_interval:        utils.StringPointer("0s"),
 		Store_session_costs:   utils.BoolPointer(false),
@@ -566,7 +569,6 @@ func TestSmgJsonCfg(t *testing.T) {
 			Privatekey_path:     utils.StringPointer(""),
 			Publickey_path:      utils.StringPointer(""),
 		},
-		Actions_conns: &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

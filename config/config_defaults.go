@@ -565,6 +565,8 @@ const CGRATES_CFG_JSON = `
 		"privatekey_path": "",				// the path to the private key
 	},
 	"actions_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
+	"rates_conns": [], 						// connections to RateS
+	"accounts_conns": [],					// connections to AccountS
 },
 
 
