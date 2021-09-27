@@ -26,7 +26,7 @@ import (
 )
 
 type ThresholdsOpts struct {
-	ThresholdIDs []string
+	ThresholdIDs map[string][]string
 }
 
 // ThresholdSCfg the threshold config section
@@ -47,7 +47,7 @@ func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) (err 
 		return nil
 	}
 	if jsnCfg.ThresholdIDs != nil {
-		thdOpts.ThresholdIDs = *jsnCfg.ThresholdIDs
+		thdOpts.ThresholdIDs = jsnCfg.ThresholdIDs
 	}
 
 	return nil
@@ -133,12 +133,8 @@ func (ThresholdSCfg) SName() string           { return ThresholdSJSON }
 func (t ThresholdSCfg) CloneSection() Section { return t.Clone() }
 
 func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
-	var thdIDs []string
-	if thdOpts.ThresholdIDs != nil {
-		thdIDs = utils.CloneStringSlice(thdOpts.ThresholdIDs)
-	}
 	return &ThresholdsOpts{
-		ThresholdIDs: thdIDs,
+		ThresholdIDs: thdOpts.ThresholdIDs,
 	}
 }
 
@@ -168,7 +164,7 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 }
 
 type ThresholdsOptsJson struct {
-	ThresholdIDs *[]string `json:"*thresholdIDs"`
+	ThresholdIDs map[string][]string `json:"*thresholdIDs"`
 }
 
 // Threshold service config section
@@ -188,9 +184,7 @@ func diffThresholdsOptsJsonCfg(d *ThresholdsOptsJson, v1, v2 *ThresholdsOpts) *T
 	if d == nil {
 		d = new(ThresholdsOptsJson)
 	}
-	if !utils.SliceStringEqual(v1.ThresholdIDs, v2.ThresholdIDs) {
-		d.ThresholdIDs = utils.SliceStringPointer(v2.ThresholdIDs)
-	}
+	d.ThresholdIDs = diffMapStringStringSlice(d.ThresholdIDs, v1.ThresholdIDs, v2.ThresholdIDs)
 	return d
 }
 
@@ -217,5 +211,17 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
 	}
 	d.Opts = diffThresholdsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
+	return d
+}
+
+func diffMapStringStringSlice(d, v1, v2 map[string][]string) map[string][]string {
+	if d == nil {
+		d = make(map[string][]string)
+	}
+	for k, v := range v2 {
+		if val, has := v1[k]; !has || !utils.SliceStringEqual(val, v) {
+			d[k] = v
+		}
+	}
 	return d
 }

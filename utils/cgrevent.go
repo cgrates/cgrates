@@ -126,6 +126,16 @@ func (ev *CGREvent) OptsAsFloat64(defaultValue float64, optNames ...string) (flo
 	return defaultValue, nil
 }
 
+// OptsAsStringSlice returns an option as []string
+func (ev *CGREvent) OptsAsStringSlice(defaultValue []string, optNames ...string) ([]string, error) {
+	for _, optName := range optNames {
+		if iface, has := ev.APIOpts[optName]; has {
+			return IfaceAsStringSlice(iface)
+		}
+	}
+	return defaultValue, nil
+}
+
 func (ev *CGREvent) Clone() (clned *CGREvent) {
 	clned = &CGREvent{
 		Tenant:  ev.Tenant,

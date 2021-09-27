@@ -296,13 +296,11 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 	opts[utils.MetaEventType] = utils.StatUpdate
 	var withErrs bool
 	for _, sq := range sQs {
-		if len(sq.sqPrfl.ThresholdIDs) != 0 {
-			if len(sq.sqPrfl.ThresholdIDs) == 1 &&
-				sq.sqPrfl.ThresholdIDs[0] == utils.MetaNone {
-				continue
-			}
-			opts[utils.OptsThresholdsThresholdIDs] = sq.sqPrfl.ThresholdIDs
+		if len(sq.sqPrfl.ThresholdIDs) == 1 &&
+			sq.sqPrfl.ThresholdIDs[0] == utils.MetaNone {
+			continue
 		}
+		opts[utils.OptsThresholdsThresholdIDs] = sq.sqPrfl.ThresholdIDs
 		thEv := &utils.CGREvent{
 			Tenant: sq.Tenant,
 			ID:     utils.GenUUID(),
@@ -315,14 +313,11 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 		for metricID, metric := range sq.SQMetrics {
 			thEv.Event[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
 		}
-		var thIDsOpts []string
-		if thIDsOpts, err = utils.OptAsStringSlice(opts, utils.OptsThresholdsThresholdIDs); err != nil {
-			return
-		}
+
 		var tIDs []string
 		if err := sS.connMgr.Call(ctx, sS.cgrcfg.StatSCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-			(len(thIDsOpts) != 0 || err.Error() != utils.ErrNotFound.Error()) {
+			(len(sq.sqPrfl.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 			withErrs = true

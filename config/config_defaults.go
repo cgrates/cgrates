@@ -729,7 +729,9 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"actions_conns": [],					// connections to ActionS to execute the actions
 	"opts":{								//
-		// "*thresholdIDs: [],				//
+		"*thresholdIDs": {					//	
+			"": [],
+		},									
 	},								
 },
 
