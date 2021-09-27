@@ -1429,20 +1429,19 @@ func (sS *SessionS) chargeEvent(ctx *context.Context, cgrEv *utils.CGREvent, for
 	return // returns here the maxUsage from update
 }
 
-// accounSMaxAbstracts computes the maximum abstract units for the events provided
-func (sS *SessionS) accounSMaxAbstracts(ctx *context.Context, cgrEvs []*utils.CGREvent) (maxAbstracts *utils.Decimal, err error) {
+// accounSMaxAbstracts computes the maximum abstract units for the events provided as reply from the ChargerS
+func (sS *SessionS) accounSMaxAbstracts(ctx *context.Context, cgrEvs map[string]*utils.CGREvent) (maxAbstracts map[string]*utils.Decimal, err error) {
 	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.AccountS)
 	}
-	for _, cgrEv := range cgrEvs {
+	maxAbstracts = make(map[string]*utils.Decimal)
+	for runID, cgrEv := range cgrEvs {
 		acntCost := new(utils.ExtEventCharges)
 		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttrSConns, // Fix Here with AccountS
 			utils.AccountSv1DebitAbstracts, cgrEv, &acntCost); err != nil {
 			return
-		} else if maxAbstracts == nil ||
-			maxAbstracts.Compare(utils.NewDecimalFromFloat64(*acntCost.Abstracts)) == 1 { // should compare directly against Decimal
-			maxAbstracts = utils.NewDecimalFromFloat64(*acntCost.Abstracts) // did not optimize here since we need to remove floats from acntCost
 		}
+		maxAbstracts[runID] = utils.NewDecimalFromFloat64(*acntCost.Abstracts) // did not optimize here since we need to remove floats from acntCost
 	}
 	return
 }
@@ -1592,23 +1591,28 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	if args.GetMaxUsage ||
-		utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) {
-		var sRunsUsage map[string]time.Duration
-		if sRunsUsage, err = sS.authEvent(ctx, args.CGREvent,
-			args.ForceDuration || utils.OptAsBool(args.APIOpts, utils.OptsSesForceDuration)); err != nil {
+	runEvents := make(map[string]*utils.CGREvent)
+
+	if args.GetMaxUsage || // backwards compatibility
+		utils.OptAsBool(args.APIOpts, utils.OptsChargerS) {
+		var chrgrs []*engine.ChrgSProcessEventReply
+		if chrgrs, err = sS.processChargerS(ctx, args.CGREvent); err != nil {
+			return
+		}
+		for _, chrgr := range chrgrs {
+			runEvents[chrgr.ChargerSProfile] = chrgr.CGREvent
+		}
+	} else {
+		runEvents[utils.MetaRaw] = args.CGREvent
+	}
+
+	if args.GetMaxUsage || // backwards compatibility
+		utils.OptAsBool(args.APIOpts, utils.OptsAccountS) {
+		var maxAbstracts map[string]*utils.Decimal
+		if maxAbstracts, err = sS.accounSMaxAbstracts(ctx, runEvents); err != nil {
 			return err
 		}
-
-		var maxUsage time.Duration
-		var maxUsageSet bool // so we know if we have set the 0 on purpose
-		for _, rplyMaxUsage := range sRunsUsage {
-			if !maxUsageSet || rplyMaxUsage < maxUsage {
-				maxUsage = rplyMaxUsage
-				maxUsageSet = true
-			}
-		}
-		authReply.MaxUsage = &maxUsage
+		authReply.MaxUsage = getMaxUsageFromRuns(maxAbstracts)
 	}
 	if args.AuthorizeResources ||
 		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
@@ -1700,8 +1704,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
 	if args.GetMaxUsage ||
-		utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) {
-		authReply.MaxUsage = initAuthRply.MaxUsage.Seconds()
+		utils.OptAsBool(args.APIOpts, utils.OptsAccountS) {
+		maxDur, _ := initAuthRply.MaxUsage.Duration()
+		authReply.MaxUsage = maxDur.Seconds()
 	}
 	if args.GetRoutes ||
 		utils.OptAsBool(args.APIOpts, utils.OptsRouteS) {

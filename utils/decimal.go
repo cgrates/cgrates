@@ -206,3 +206,13 @@ func (d *Decimal) Round(rndDec int) *Decimal {
 func (d *Decimal) Float64() (f float64, ok bool) {
 	return d.Big.Float64()
 }
+
+// Duration returns the decimal as duration or !ok otherwise
+func (d *Decimal) Duration() (dur time.Duration, ok bool) {
+	var i64 int64
+	if i64, ok = d.Big.Int64(); !ok {
+		return
+	}
+	dur = time.Duration(i64)
+	return
+}

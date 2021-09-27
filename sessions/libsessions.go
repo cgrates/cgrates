@@ -512,7 +512,7 @@ func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
 type V1AuthorizeReply struct {
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
-	MaxUsage           *time.Duration                 `json:",omitempty"`
+	MaxUsage           *utils.Decimal                 `json:",omitempty"`
 	RouteProfiles      engine.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
@@ -693,4 +693,15 @@ type ArgsReplicateSessions struct {
 	CGRID   string
 	Passive bool
 	ConnIDs []string
+}
+
+// getMaxUsageFromRuns will return maxUsage with the lowest one from maxAbstractsRuns
+func getMaxUsageFromRuns(maxAbstractsRuns map[string]*utils.Decimal) (maxUsage *utils.Decimal) {
+	for _, maxAbstr := range maxAbstractsRuns {
+		if maxUsage == nil ||
+			maxUsage.Compare(maxAbstr) == 1 {
+			maxUsage = maxAbstr
+		}
+	}
+	return
 }

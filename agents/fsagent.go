@@ -179,13 +179,15 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 		}
 	}
 	if authArgs.GetMaxUsage {
-		if authReply.MaxUsage == nil || *authReply.MaxUsage == 0 {
+		if authReply.MaxUsage == nil ||
+			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
 			fsa.unparkCall(fsev.GetUUID(), connIdx,
 				fsev.GetCallDestNr(utils.MetaDefault), utils.ErrInsufficientCredit.Error())
 			return
 		}
+		maxDur, _ := authReply.MaxUsage.Duration()
 		fsa.setMaxCallDuration(fsev.GetUUID(), connIdx,
-			*authReply.MaxUsage, fsev.GetCallDestNr(utils.MetaDefault))
+			maxDur, fsev.GetCallDestNr(utils.MetaDefault))
 	}
 	if authReply.ResourceAllocation != nil {
 		if _, err := fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",

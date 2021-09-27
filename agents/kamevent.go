@@ -209,7 +209,8 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	}
 	if authArgs.GetMaxUsage {
 		if authReply.MaxUsage != nil {
-			kar.MaxUsage = authReply.MaxUsage.Seconds()
+			maxDur, _ := authReply.MaxUsage.Duration()
+			kar.MaxUsage = maxDur.Seconds()
 		} else {
 			kar.MaxUsage = 0
 		}

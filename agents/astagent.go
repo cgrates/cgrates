@@ -200,13 +200,15 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		}
 	}
 	if authArgs.GetMaxUsage {
-		if authReply.MaxUsage == nil || *authReply.MaxUsage == time.Duration(0) {
+		if authReply.MaxUsage == nil ||
+			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
 			sma.hangupChannel(ev.ChannelID(), "")
 			return
 		}
+		maxDur, _ := authReply.MaxUsage.Duration()
 		//  Set absolute timeout for non-postpaid calls
 		if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
-			strconv.Itoa(int(authReply.MaxUsage.Milliseconds()))) {
+			strconv.Itoa(int(maxDur.Milliseconds()))) {
 			return
 		}
 	}
