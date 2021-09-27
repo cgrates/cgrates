@@ -48,7 +48,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		ldrID:         cfg.ID,
 		tpInDir:       cfg.TpInDir,
 		tpOutDir:      cfg.TpOutDir,
-		lockFilepath:  cfg.LockFilePath,
+		lockFilepath:  cfg.GetLockFilePath(),
 		fieldSep:      cfg.FieldSeparator,
 		runDelay:      cfg.RunDelay,
 		dataTpls:      make(map[string][]*config.FCTemplate),
@@ -131,8 +131,9 @@ func (ldr *Loader) ProcessFolder(caching, loadOption string, stopOnError bool) (
 
 // lockFolder will attempt to lock the folder by creating the lock file
 func (ldr *Loader) lockFolder() (err error) {
-	if _, err = os.Stat(ldr.lockFilepath); err != nil && os.IsNotExist(err) {
-		return fmt.Errorf("file: %v not found", ldr.lockFilepath)
+	// If the path is an empty string, we should not be locking
+	if ldr.lockFilepath == utils.EmptyString {
+		return
 	}
 	_, err = os.OpenFile(ldr.lockFilepath,
 		os.O_RDONLY|os.O_CREATE, 0644)
@@ -140,6 +141,10 @@ func (ldr *Loader) lockFolder() (err error) {
 }
 
 func (ldr *Loader) unlockFolder() (err error) {
+	// If the path is an empty string, we should not be locking
+	if ldr.lockFilepath == utils.EmptyString {
+		return
+	}
 	if _, err = os.Stat(ldr.lockFilepath); err == nil {
 		return os.Remove(ldr.lockFilepath)
 	}
@@ -147,6 +152,10 @@ func (ldr *Loader) unlockFolder() (err error) {
 }
 
 func (ldr *Loader) isFolderLocked() (locked bool, err error) {
+	// If the path is an empty string, we should not be locking
+	if ldr.lockFilepath == utils.EmptyString {
+		return
+	}
 	if _, err = os.Stat(ldr.lockFilepath); err == nil {
 		return true, nil
 	}
