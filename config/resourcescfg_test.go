@@ -45,7 +45,17 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
-		Opts:                &ResourcesOpts{},
+		Opts: &ResourcesOpts{
+			UsageID: map[string]string{
+				utils.EmptyString: utils.EmptyString,
+			},
+			UsageTTL: map[string]time.Duration{
+				utils.EmptyString: 72 * time.Hour,
+			},
+			Units: map[string]float64{
+				utils.EmptyString: 1,
+			},
+		},
 	}
 	cfg := NewDefaultCGRConfig()
 	if err = cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -79,9 +89,15 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUsageIDCfg:  map[string]string(nil),
-			utils.MetaUsageTTLCfg: map[string]time.Duration(nil),
-			utils.MetaUnitsCfg:    map[string]float64(nil),
+			utils.MetaUsageIDCfg: map[string]string{
+				utils.EmptyString: utils.EmptyString,
+			},
+			utils.MetaUsageTTLCfg: map[string]string{
+				utils.EmptyString: "72h0m0s",
+			},
+			utils.MetaUnitsCfg: map[string]float64{
+				utils.EmptyString: 1,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -114,9 +130,15 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUsageIDCfg:  map[string]string(nil),
-			utils.MetaUsageTTLCfg: map[string]time.Duration(nil),
-			utils.MetaUnitsCfg:    map[string]float64(nil),
+			utils.MetaUsageIDCfg: map[string]string{
+				utils.EmptyString: utils.EmptyString,
+			},
+			utils.MetaUsageTTLCfg: map[string]string{
+				utils.EmptyString: "72h0m0s",
+			},
+			utils.MetaUnitsCfg: map[string]float64{
+				utils.EmptyString: 1,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

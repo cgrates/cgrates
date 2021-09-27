@@ -114,9 +114,13 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (rlcfg ResourceSConfig) AsMapInterface(string) interface{} {
+	usageTTL := make(map[string]string)
+	for index, value := range rlcfg.Opts.UsageTTL {
+		usageTTL[index] = value.String()
+	}
 	opts := map[string]interface{}{
 		utils.MetaUsageIDCfg:  rlcfg.Opts.UsageID,
-		utils.MetaUsageTTLCfg: rlcfg.Opts.UsageTTL,
+		utils.MetaUsageTTLCfg: usageTTL,
 		utils.MetaUnitsCfg:    rlcfg.Opts.Units,
 	}
 	mp := map[string]interface{}{
