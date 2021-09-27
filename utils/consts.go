@@ -2125,9 +2125,14 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 const (
 
 	//CDRS and Sessions Opts
-	OptsCDRs      = "*cdrS"
-	OptsRouteS    = "*routeS"
-	OptsResourceS = "*resourceS"
+	OptsCDRs       = "*cdrS"
+	OptsRouteS     = "*routeS"
+	OptsResourceS  = "*resourceS"
+	OptsAttributeS = "*attributeS"
+	OptsChargerS   = "*chargerS"
+	OptsStatS      = "*statS"
+	OptsThresholdS = "*thresholdS"
+	OptsRateS      = "*rateS"
 
 	// SessionS
 	OptsSesTTL           = "*sesTTL"
@@ -2176,12 +2181,6 @@ const (
 	OptsAttributesProcessRuns  = "*attrProcessRuns"
 
 	// CDRs
-	OptsAttributeS = "*attributeS"
-	OptsChargerS   = "*chargerS"
-	OptsStatS      = "*statS"
-	OptsThresholdS = "*thresholdS"
-	OptsRateS      = "*rateS"
-
 	OptsCDRsExport = "*cdrsExport"
 	OptsCDRsRefund = "*cdrsRefund"
 	OptsCDRsRerate = "*cdrsRerate"
