@@ -104,8 +104,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		if ldrSCfg.LockFilePath != utils.EmptyString { // tpOutDir support empty string for no moving files after process
-			if _, err := os.Stat(path.Dir(ldrSCfg.LockFilePath)); err != nil && os.IsNotExist(err) {
-				return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, ldrSCfg.LockFilePath)
+			pathL := ldrSCfg.GetLockFilePath()
+			if _, err := os.Stat(path.Dir(pathL)); err != nil && os.IsNotExist(err) {
+				return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, pathL)
 			}
 		}
 		for _, data := range ldrSCfg.Data {

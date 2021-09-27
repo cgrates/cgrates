@@ -62,7 +62,7 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 			Enabled:        true,
 			ID:             utils.MetaDefault,
 			Tenant:         ten,
-			LockFilePath:   "/var/spool/cgrates/loader/in/.cgr.lck",
+			LockFilePath:   ".cgr.lck",
 			CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 			FieldSeparator: ",",
 			TpInDir:        "/var/spool/cgrates/loader/in",
@@ -1518,7 +1518,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.TenantCfg:       "cgrates.org",
 			utils.DryRunCfg:       false,
 			utils.RunDelayCfg:     "0",
-			utils.LockFilePathCfg: "/var/spool/cgrates/loader/in/.cgr.lck",
+			utils.LockFilePathCfg: ".cgr.lck",
 			utils.CachesConnsCfg:  []string{utils.MetaInternal},
 			utils.FieldSepCfg:     ",",
 			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
@@ -2853,7 +2853,7 @@ func TestLockFolderRelativePath(t *testing.T) {
 		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
 		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
-	expPath := path.Join(ldr.TpInDir, ldr.LockFilePath)
+	expPath := path.Join(ldr.LockFilePath)
 	if err = ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if ldr.LockFilePath != expPath {
@@ -2900,7 +2900,7 @@ func TestLockFolderIsDir(t *testing.T) {
 		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
 		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
-	expPath := path.Join("/tmp", *jsonCfg.ID+".lck")
+	expPath := path.Join("/tmp")
 
 	if err = ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
 		t.Error(err)
