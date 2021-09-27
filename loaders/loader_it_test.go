@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"encoding/csv"
 	"io"
 	"net/rpc"
 	"os"
@@ -433,7 +434,7 @@ cgrates.org,NewRes1
 		fieldSep:      utils.FieldsSep,
 		tpInDir:       flPath,
 		tpOutDir:      "/tmp",
-		lockFilepath:  utils.ResourcesCsv,
+		lockFilepath:  "/tmp/testProcessFile/.lck",
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
@@ -457,17 +458,17 @@ cgrates.org,NewRes1
 		t.Error(err)
 	}
 
-	resCsv := `
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`
-	rdr := io.NopCloser(strings.NewReader(resCsv))
+	// 	resCsv := `
+	// #Tenant[0],ID[1]
+	// cgrates.org,NewRes1
+	// `
+	// 	rdr := io.NopCloser(strings.NewReader(resCsv))
 
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaResources: {
 			utils.ResourcesCsv: &openedCSVFile{
-				fileName: utils.ResourcesCsv,
-				rdr:      rdr,
+				rdr:    io.NopCloser(nil),
+				csvRdr: csv.NewReader(nil),
 			},
 		},
 	}
@@ -495,6 +496,16 @@ cgrates.org,NewRes1
 		t.Error(err)
 	}
 
+	file, err = os.Create(path.Join(flPath, utils.ResourcesCsv))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`))
+	file.Close()
+
 	//cannot move file when tpOutDir is empty
 	ldr.tpOutDir = utils.EmptyString
 	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err != nil {
@@ -503,7 +514,7 @@ cgrates.org,NewRes1
 
 	if err := os.Remove(path.Join("/tmp", utils.ResourcesCsv)); err != nil {
 		t.Error(err)
-	} else if err := os.Remove(flPath); err != nil {
+	} else if err := os.RemoveAll(flPath); err != nil {
 		t.Error(err)
 	}
 }
@@ -579,21 +590,30 @@ func testProcessFileLockFolder(t *testing.T) {
 	}
 
 	ldr := &Loader{
-		ldrID:    "testProcessFileLockFolder",
-		tpInDir:  flPath,
-		tpOutDir: "/tmp",
+		ldrID:        "testProcessFileLockFolder",
+		tpInDir:      flPath,
+		tpOutDir:     "/tmp",
+		lockFilepath: "/tmp/test/.cgr.lck",
+		fieldSep:     utils.InfieldSep,
 	}
+
+	resCsv := `
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`
+	rdr := io.NopCloser(strings.NewReader(resCsv))
 
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaResources: {
 			utils.ResourcesCsv: &openedCSVFile{
 				fileName: utils.ResourcesCsv,
+				rdr:      rdr,
 			},
 		},
 	}
 
 	//unable to lock the folder, because lockFileName is missing
-	expected := "open /tmp/testProcessFileLockFolder: is a directory"
+	expected := "open /tmp/test/.cgr.lck: no such file or directory"
 	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -674,27 +694,37 @@ func testProcessFileRenameError(t *testing.T) {
 		},
 	}
 
-	resCsv := `
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`
-	rdr := io.NopCloser(strings.NewReader(resCsv))
+	// 	resCsv := `
+	// #Tenant[0],ID[1]
+	// cgrates.org,NewRes1
+	// `
+	// 	rdr := io.NopCloser(strings.NewReader(resCsv))
 
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaResources: {
 			utils.ResourcesCsv: &openedCSVFile{
-				fileName: utils.ResourcesCsv,
-				rdr:      rdr,
+				rdr:    io.NopCloser(nil),
+				csvRdr: csv.NewReader(nil),
 			},
 		},
 	}
+
+	file, err := os.Create(path.Join(flPath1, utils.ResourcesCsv))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`))
+	file.Close()
 
 	expected := "rename /tmp/testProcessFileLockFolder/Resources.csv INEXISTING_FILE/Resources.csv: no such file or directory"
 	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	if err := os.Remove(flPath1); err != nil {
+	if err := os.RemoveAll(flPath1); err != nil {
 		t.Error(err)
 	}
 }
@@ -768,7 +798,7 @@ func testNewLockFolderNotFound(t *testing.T) {
 		timezone:      "UTC",
 	}
 
-	errExpect := "file: /tmp/testNewLockFolder/Resources.csv not found"
+	errExpect := "open /tmp/testNewLockFolder/Resources.csv: no such file or directory"
 	if err := ldr.lockFolder(); err == nil || err.Error() != errExpect {
 		t.Error(err)
 	}

@@ -21,6 +21,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -126,6 +127,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if ldrSCfg.TpOutDir != utils.EmptyString { // tpOutDir support empty string for no moving files after process
 			if _, err := os.Stat(ldrSCfg.TpOutDir); err != nil && os.IsNotExist(err) {
 				return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, ldrSCfg.TpOutDir)
+			}
+		}
+		if ldrSCfg.LockFilePath != utils.EmptyString { // tpOutDir support empty string for no moving files after process
+			pathL := ldrSCfg.GetLockFilePath()
+			if _, err := os.Stat(path.Dir(pathL)); err != nil && os.IsNotExist(err) {
+				return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, pathL)
 			}
 		}
 		for _, data := range ldrSCfg.Data {

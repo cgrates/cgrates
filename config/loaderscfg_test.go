@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -436,5 +437,78 @@ func TestLoaderSCfgsClone(t *testing.T) {
 	}
 	if rcv[0].Data[0].Type = ""; ban[0].Data[0].Type != "*attributes" {
 		t.Errorf("Expected clone to not modify the cloned")
+	}
+}
+
+func TestLockFolderRelativePath(t *testing.T) {
+	ldr := &LoaderSCfg{
+		TpInDir:      "/var/spool/cgrates/loader/in/",
+		TpOutDir:     "/var/spool/cgrates/loader/out/",
+		LockFilePath: utils.ResourcesCsv,
+	}
+
+	jsonCfg := &LoaderJsonCfg{
+		ID:              utils.StringPointer("loaderid"),
+		Enabled:         utils.BoolPointer(true),
+		Tenant:          utils.StringPointer("cgrates.org"),
+		Dry_run:         utils.BoolPointer(false),
+		Lockfile_path:   utils.StringPointer(utils.ResourcesCsv),
+		Field_separator: utils.StringPointer(utils.InfieldSep),
+		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
+		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
+	}
+	expPath := path.Join(ldr.LockFilePath)
+	if err = ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+		t.Error(err)
+	} else if ldr.LockFilePath != expPath {
+		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
+	}
+}
+func TestLockFolderNonRelativePath(t *testing.T) {
+	ldr := &LoaderSCfg{
+		TpInDir:      "/var/spool/cgrates/loader/in/",
+		TpOutDir:     "/var/spool/cgrates/loader/out/",
+		LockFilePath: utils.ResourcesCsv,
+	}
+
+	jsonCfg := &LoaderJsonCfg{
+		ID:              utils.StringPointer("loaderid"),
+		Enabled:         utils.BoolPointer(true),
+		Tenant:          utils.StringPointer("cgrates.org"),
+		Dry_run:         utils.BoolPointer(false),
+		Lockfile_path:   utils.StringPointer(path.Join("/tmp/", utils.ResourcesCsv)),
+		Field_separator: utils.StringPointer(utils.InfieldSep),
+		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
+		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
+	}
+	expPath := path.Join("/tmp/", utils.ResourcesCsv)
+	if err = ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+		t.Error(err)
+	} else if ldr.LockFilePath != expPath {
+		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
+	}
+}
+
+func TestLockFolderIsDir(t *testing.T) {
+	ldr := &LoaderSCfg{
+		LockFilePath: "test",
+	}
+
+	jsonCfg := &LoaderJsonCfg{
+		ID:              utils.StringPointer("loaderid"),
+		Enabled:         utils.BoolPointer(true),
+		Tenant:          utils.StringPointer("cgrates.org"),
+		Dry_run:         utils.BoolPointer(false),
+		Lockfile_path:   utils.StringPointer("/tmp"),
+		Field_separator: utils.StringPointer(utils.InfieldSep),
+		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
+		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
+	}
+	expPath := path.Join("/tmp")
+
+	if err = ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+		t.Error(err)
+	} else if ldr.LockFilePath != expPath {
+		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
 	}
 }

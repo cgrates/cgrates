@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"os"
+	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -134,9 +137,6 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 			return
 		}
 	}
-	if jsnCfg.Lockfile_path != nil {
-		l.LockFilePath = *jsnCfg.Lockfile_path
-	}
 	if jsnCfg.Caches_conns != nil {
 		l.CacheSConns = make([]string, len(*jsnCfg.Caches_conns))
 		for idx, connID := range *jsnCfg.Caches_conns {
@@ -157,6 +157,9 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	if jsnCfg.Tp_out_dir != nil {
 		l.TpOutDir = *jsnCfg.Tp_out_dir
 	}
+	if jsnCfg.Lockfile_path != nil {
+		l.LockFilePath = *jsnCfg.Lockfile_path
+	}
 	if jsnCfg.Data != nil {
 		data := make([]*LoaderDataType, len(*jsnCfg.Data))
 		for idx, jsnLoCfg := range *jsnCfg.Data {
@@ -169,6 +172,18 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	}
 
 	return nil
+}
+
+func (l LoaderSCfg) GetLockFilePath() (pathL string) {
+	pathL = l.LockFilePath
+	if !filepath.IsAbs(pathL) {
+		pathL = path.Join(l.TpInDir, pathL)
+	}
+
+	if file, err := os.Stat(pathL); err == nil && file.IsDir() {
+		pathL = path.Join(pathL, l.ID+".lck")
+	}
+	return
 }
 
 // Clone itself into a new LoaderDataType
