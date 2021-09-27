@@ -38,6 +38,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -548,6 +549,8 @@ func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
 
 func testProcessFolderRemoveContent(t *testing.T) {
 	flPath := "/tmp/TestLoadFromFilesCsvActionProfile"
+	content := `#Tenant[0],ID[1]
+cgrates.org,SET_ACTPROFILE_3`
 	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
 	}
@@ -555,54 +558,40 @@ func testProcessFolderRemoveContent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newFile.Write([]byte(`
-#Tenant[0],ID[1]
-cgrates.org,SET_ACTPROFILE_3
-`))
-	content, err := os.ReadFile(path.Join(flPath, "ActionProfiles.csv"))
-	if err != nil {
-		t.Error(err)
-	}
+	newFile.Write([]byte(content))
 	newFile.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		tpInDir:       flPath,
+		dm:            engine.NewDataManager(engine.NewInternalDB(nil, nil, true), config.CgrConfig().CacheCfg(), nil),
+		tpInDir:       "/tmp/TestLoadFromFilesCsvActionProfile",
 		tpOutDir:      utils.EmptyString,
 		rdrTypes:      []string{utils.MetaActionProfiles},
 		lockFilepath:  "ActionProfiles.csv",
 		fieldSep:      ",",
 		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaActionProfiles: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	ldr.connMgr = engine.NewConnManager(config.NewDefaultCGRConfig())
 
-	rdr := io.NopCloser(strings.NewReader(string(content)))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
+		dataTpls: map[string][]*config.FCTemplate{
+			utils.MetaActionProfiles: {
+				{Tag: "TenantID",
+					Path:      "Tenant",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
+					Mandatory: true},
+				{Tag: "ProfileID",
+					Path:      "ID",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
+					Mandatory: true},
+			},
+		},
+		connMgr: engine.NewConnManager(config.NewDefaultCGRConfig()),
+	}
+
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
+			utils.ActionProfilesCsv: {},
 		},
 	}
 	expACtPrf := &engine.ActionProfile{
@@ -626,22 +615,15 @@ cgrates.org,SET_ACTPROFILE_3
 
 	//checking the error by adding a caching method
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = io.NopCloser(strings.NewReader(string(content)))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
+			utils.ActionProfilesCsv: {},
 		},
 	}
 	if err := ldr.dm.SetActionProfile(context.TODO(), expACtPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.ProcessFolder(context.TODO(), utils.MetaReload, utils.MetaRemove, true); err != utils.ErrNotFound {
+	if err := ldr.ProcessFolder(context.TODO(), utils.MetaReload, utils.MetaRemove, true); err != rpcclient.ErrUnsupporteServiceMethod {
 		t.Error(err)
 	}
 }
@@ -653,15 +635,9 @@ func testLoadFromFilesCsvActionProfileLockFolderError(t *testing.T) {
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
+		lockFilepath:  "/tmp/test/.lck",
 	}
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
-			},
-		},
-	}
-	expectedErr := "open : no such file or directory"
+	expectedErr := "open /tmp/test/.lck: no such file or directory"
 	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -767,7 +743,7 @@ cgrates.org,NewRes1
 		fieldSep:      utils.FieldsSep,
 		tpInDir:       flPath,
 		tpOutDir:      "/tmp",
-		lockFilepath:  utils.ResourcesCsv,
+		lockFilepath:  "/tmp/testProcessFile/.lck",
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
@@ -791,17 +767,11 @@ cgrates.org,NewRes1
 		t.Error(err)
 	}
 
-	resCsv := `
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`
-	rdr := io.NopCloser(strings.NewReader(resCsv))
-
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaResources: {
-			utils.ResourcesCsv: &openedCSVFile{
-				fileName: utils.ResourcesCsv,
-				rdr:      rdr,
+			utils.ResourcesCsv: {
+				rdr:    io.NopCloser(nil),
+				csvRdr: csv.NewReader(nil),
 			},
 		},
 	}
@@ -829,6 +799,16 @@ cgrates.org,NewRes1
 		t.Error(err)
 	}
 
+	file, err = os.Create(path.Join(flPath, utils.ResourcesCsv))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`))
+	file.Close()
+
 	//cannot move file when tpOutDir is empty
 	ldr.tpOutDir = utils.EmptyString
 	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err != nil {
@@ -837,7 +817,7 @@ cgrates.org,NewRes1
 
 	if err := os.Remove(path.Join("/tmp", utils.ResourcesCsv)); err != nil {
 		t.Error(err)
-	} else if err := os.Remove(flPath); err != nil {
+	} else if err := os.RemoveAll(flPath); err != nil {
 		t.Error(err)
 	}
 }
@@ -913,21 +893,30 @@ func testProcessFileLockFolder(t *testing.T) {
 	}
 
 	ldr := &Loader{
-		ldrID:    "testProcessFileLockFolder",
-		tpInDir:  flPath,
-		tpOutDir: "/tmp",
+		ldrID:        "testProcessFileLockFolder",
+		tpInDir:      flPath,
+		tpOutDir:     "/tmp",
+		lockFilepath: "/tmp/test/.cgr.lck",
+		fieldSep:     utils.InfieldSep,
 	}
+
+	resCsv := `
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`
+	rdr := io.NopCloser(strings.NewReader(resCsv))
 
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaResources: {
 			utils.ResourcesCsv: &openedCSVFile{
 				fileName: utils.ResourcesCsv,
+				rdr:      rdr,
 			},
 		},
 	}
 
 	//unable to lock the folder, because lockFileName is missing
-	expected := "open /tmp/testProcessFileLockFolder: is a directory"
+	expected := "open /tmp/test/.cgr.lck: no such file or directory"
 	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -1008,27 +997,37 @@ func testProcessFileRenameError(t *testing.T) {
 		},
 	}
 
-	resCsv := `
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`
-	rdr := io.NopCloser(strings.NewReader(resCsv))
+	// 	resCsv := `
+	// #Tenant[0],ID[1]
+	// cgrates.org,NewRes1
+	// `
+	// 	rdr := io.NopCloser(strings.NewReader(resCsv))
 
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaResources: {
 			utils.ResourcesCsv: &openedCSVFile{
-				fileName: utils.ResourcesCsv,
-				rdr:      rdr,
+				rdr:    io.NopCloser(nil),
+				csvRdr: csv.NewReader(nil),
 			},
 		},
 	}
+
+	file, err := os.Create(path.Join(flPath1, utils.ResourcesCsv))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`
+#Tenant[0],ID[1]
+cgrates.org,NewRes1
+`))
+	file.Close()
 
 	expected := "rename /tmp/testProcessFileLockFolder/Resources.csv INEXISTING_FILE/Resources.csv: no such file or directory"
 	if err := ldr.processFile("unusedValue", utils.ResourcesCsv); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	if err := os.Remove(flPath1); err != nil {
+	if err := os.RemoveAll(flPath1); err != nil {
 		t.Error(err)
 	}
 }
@@ -1097,12 +1096,12 @@ func testNewLockFolderNotFound(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "testNewLockFolder",
 		tpInDir:       "",
-		lockFilepath:  pathL + utils.ResourcesCsv,
+		lockFilepath:  pathL + ".lck",
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
 
-	errExpect := "file: /tmp/testNewLockFolder/Resources.csv not found"
+	errExpect := "open /tmp/testNewLockFolder/.lck: no such file or directory"
 	if err := ldr.lockFolder(); err == nil || err.Error() != errExpect {
 		t.Error(err)
 	}
@@ -1152,7 +1151,7 @@ func testNewIsFolderUnlock(t *testing.T) {
 		timezone:      "UTC",
 	}
 
-	errExpect := "file: /tmp/testNewLockFolder/Resources.csv not found"
+	errExpect := "open /tmp/testNewLockFolder/Resources.csv: no such file or directory"
 	if err := ldr.lockFolder(); err == nil || err.Error() != errExpect {
 		t.Error(err)
 	}

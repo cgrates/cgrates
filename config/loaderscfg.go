@@ -177,15 +177,6 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	if jsnCfg.Lockfile_path != nil {
 		// Check if path is relative, case in which "tpIn" folder should be prepended
 		l.LockFilePath = *jsnCfg.Lockfile_path
-
-		if !filepath.IsAbs(l.LockFilePath) {
-			l.LockFilePath = path.Join(l.TpInDir, l.LockFilePath)
-		}
-
-		file, err := os.Stat(l.LockFilePath)
-		if err == nil && file.IsDir() {
-			l.LockFilePath = path.Join(l.LockFilePath, l.ID+".lck")
-		}
 	}
 	if jsnCfg.Data != nil {
 		for _, jsnLoCfg := range *jsnCfg.Data {
@@ -212,6 +203,18 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	}
 
 	return nil
+}
+
+func (l LoaderSCfg) GetLockFilePath() (pathL string) {
+	pathL = l.LockFilePath
+	if !filepath.IsAbs(pathL) {
+		pathL = path.Join(l.TpInDir, pathL)
+	}
+
+	if file, err := os.Stat(pathL); err == nil && file.IsDir() {
+		pathL = path.Join(pathL, l.ID+".lck")
+	}
+	return
 }
 
 // Clone itself into a new LoaderDataType
