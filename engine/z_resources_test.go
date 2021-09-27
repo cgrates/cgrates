@@ -3435,7 +3435,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 			},
 			dirty:  utils.BoolPointer(false),
 			tUsage: utils.Float64Pointer(10),
-			ttl:    utils.DurationPointer(time.Minute),
+			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
 		},
 	}
@@ -3752,7 +3752,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 		},
 	}
 
-	exp := Resources{
+	exp := &Resources{
 		{
 			rPrf:   rsPrf,
 			Tenant: "cgrates.org",
@@ -3766,22 +3766,22 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 			},
 			dirty:  utils.BoolPointer(false),
 			tUsage: utils.Float64Pointer(10),
-			ttl:    utils.DurationPointer(time.Minute),
+			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
 		},
 	}
 	var reply Resources
 	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, exp) {
+	} else if !reflect.DeepEqual(reply, *exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(exp), utils.ToJSON(reply))
 	}
 
 	if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 		resp := itm.(*utils.CachedRPCResponse)
-		if !reflect.DeepEqual(*resp.Result.(*Resources), exp) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, *resp.Result.(*Resources))
+		if !reflect.DeepEqual(resp.Result, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(resp.Result))
 		}
 	}
 
