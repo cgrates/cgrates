@@ -148,7 +148,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
 			}
 		}
-		for _, connID := range cfg.sessionSCfg.ResSConns {
+		for _, connID := range cfg.sessionSCfg.ResourceSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.resourceSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ResourceS, utils.SessionS)
 			}
@@ -156,7 +156,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
 			}
 		}
-		for _, connID := range cfg.sessionSCfg.ThreshSConns {
+		for _, connID := range cfg.sessionSCfg.ThresholdSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.SessionS)
 			}
@@ -180,7 +180,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
 			}
 		}
-		for _, connID := range cfg.sessionSCfg.AttrSConns {
+		for _, connID := range cfg.sessionSCfg.AttributeSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AttributeS, utils.SessionS)
 			}
