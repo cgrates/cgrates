@@ -896,7 +896,11 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Actions_conns:         &[]string{},
-		Opts:                  &ThresholdsOptsJson{},
+		Opts: &ThresholdsOptsJson{
+			ThresholdIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

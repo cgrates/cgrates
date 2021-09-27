@@ -131,8 +131,10 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			UsageTTL: make(map[string]time.Duration),
 			Units:    make(map[string]float64),
 		}},
-		statsCfg:       &StatSCfg{Opts: &StatsOpts{}},
-		thresholdSCfg:  &ThresholdSCfg{Opts: &ThresholdsOpts{}},
+		statsCfg: &StatSCfg{Opts: &StatsOpts{}},
+		thresholdSCfg: &ThresholdSCfg{Opts: &ThresholdsOpts{
+			ThresholdIDs: make(map[string][]string),
+		}},
 		routeSCfg:      &RouteSCfg{Opts: &RoutesOpts{}},
 		sureTaxCfg:     new(SureTaxCfg),
 		dispatcherSCfg: new(DispatcherSCfg),

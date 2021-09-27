@@ -1431,13 +1431,13 @@ func (sS *SessionS) chargeEvent(ctx *context.Context, cgrEv *utils.CGREvent, for
 
 // accounSMaxAbstracts computes the maximum abstract units for the events provided as reply from the ChargerS
 func (sS *SessionS) accounSMaxAbstracts(ctx *context.Context, cgrEvs map[string]*utils.CGREvent) (maxAbstracts map[string]*utils.Decimal, err error) {
-	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
+	if len(sS.cgrCfg.SessionSCfg().AttributeSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.AccountS)
 	}
 	maxAbstracts = make(map[string]*utils.Decimal)
 	for runID, cgrEv := range cgrEvs {
 		acntCost := new(utils.ExtEventCharges)
-		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttrSConns, // Fix Here with AccountS
+		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttributeSConns, // Fix Here with AccountS
 			utils.AccountSv1DebitAbstracts, cgrEv, &acntCost); err != nil {
 			return
 		}
