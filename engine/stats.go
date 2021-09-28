@@ -337,7 +337,11 @@ func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *Stat
 		utils.MetaOpts: args.APIOpts,
 	}
 	var sqIDs []string
-	if sqIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsStatsStatIDs); err != nil {
+	if sqIDs, err = filterStringSliceCfgOpts(ctx, tnt, args.AsDataProvider(), sS.filterS,
+		sS.cgrcfg.StatSCfg().Opts.StatIDs); err != nil {
+		return
+	}
+	if sqIDs, err = args.OptsAsStringSlice(sqIDs, utils.OptsStatsStatIDs); err != nil {
 		return
 	}
 	matchSQs, err := sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, evNm)
@@ -402,7 +406,10 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *Stats
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var sqIDs []string
-	if sqIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsStatsStatIDs); err != nil {
+	if sqIDs, err = filterStringSliceCfgOpts(ctx, tnt, args.AsDataProvider(), sS.filterS,
+		sS.cgrcfg.StatSCfg().Opts.StatIDs); err != nil {
+	}
+	if sqIDs, err = args.OptsAsStringSlice(sqIDs, utils.OptsStatsStatIDs); err != nil {
 		return
 	}
 	var sQs StatQueues

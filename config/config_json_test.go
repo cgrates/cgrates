@@ -872,7 +872,11 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Prefix_indexed_fields:    &[]string{},
 		Suffix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
-		Opts:                     &StatsOptsJson{},
+		Opts: &StatsOptsJson{
+			StatIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
