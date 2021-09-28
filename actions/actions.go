@@ -264,7 +264,11 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 // V1ScheduleActions will be called to schedule actions matching the arguments
 func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	var actPrfIDs []string
-	if actPrfIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsActionsActionProfileIDs); err != nil {
+	if actPrfIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
+		aS.cfg.ActionSCfg().Opts.ActionProfileIDs); err != nil {
+		return
+	}
+	if actPrfIDs, err = args.OptsAsStringSlice(actPrfIDs, utils.OptsActionsActionProfileIDs); err != nil {
 		return
 	}
 	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args},
@@ -278,7 +282,11 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
 func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	var actPrfIDs []string
-	if actPrfIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsActionsActionProfileIDs); err != nil {
+	if actPrfIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
+		aS.cfg.ActionSCfg().Opts.ActionProfileIDs); err != nil {
+		return
+	}
+	if actPrfIDs, err = args.OptsAsStringSlice(actPrfIDs, utils.OptsActionsActionProfileIDs); err != nil {
 		return
 	}
 	var schedActSet []*scheduledActs

@@ -330,7 +330,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 		utils.MetaOpts: args.APIOpts,
 	}
 	var thIDs []string
-	if thIDs, err = filterStringSliceCfgOpts(ctx, tnt, args.AsDataProvider(), tS.filterS,
+	if thIDs, err = FilterStringSliceCfgOpts(ctx, tnt, args.AsDataProvider(), tS.filterS,
 		tS.cgrcfg.ThresholdSCfg().Opts.ThresholdIDs); err != nil {
 		return
 	}

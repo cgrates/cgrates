@@ -24,7 +24,7 @@ import (
 )
 
 type ActionsOpts struct {
-	ActionProfileIDs []string
+	ActionProfileIDs map[string][]string
 }
 
 // ActionSCfg is the configuration of ActionS
@@ -59,7 +59,7 @@ func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) (err error)
 		return nil
 	}
 	if jsnCfg.ActionProfileIDs != nil {
-		actOpts.ActionProfileIDs = *jsnCfg.ActionProfileIDs
+		actOpts.ActionProfileIDs = jsnCfg.ActionProfileIDs
 	}
 
 	return nil
@@ -163,12 +163,8 @@ func (ActionSCfg) SName() string             { return ActionSJSON }
 func (acS ActionSCfg) CloneSection() Section { return acS.Clone() }
 
 func (actOpts *ActionsOpts) Clone() *ActionsOpts {
-	var actPrfIDs []string
-	if actOpts.ActionProfileIDs != nil {
-		actPrfIDs = utils.CloneStringSlice(actOpts.ActionProfileIDs)
-	}
 	return &ActionsOpts{
-		ActionProfileIDs: actPrfIDs,
+		ActionProfileIDs: actOpts.ActionProfileIDs,
 	}
 }
 
@@ -217,7 +213,7 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 }
 
 type ActionsOptsJson struct {
-	ActionProfileIDs *[]string `json:"*actionProfileIDs"`
+	ActionProfileIDs map[string][]string `json:"*actionProfileIDs"`
 }
 
 // Action service config section
@@ -242,9 +238,7 @@ func diffActionsOptsJsonCfg(d *ActionsOptsJson, v1, v2 *ActionsOpts) *ActionsOpt
 	if d == nil {
 		d = new(ActionsOptsJson)
 	}
-	if !utils.SliceStringEqual(v1.ActionProfileIDs, v2.ActionProfileIDs) {
-		d.ActionProfileIDs = utils.SliceStringPointer(v2.ActionProfileIDs)
-	}
+	d.ActionProfileIDs = diffMapStringStringSlice(d.ActionProfileIDs, v1.ActionProfileIDs, v2.ActionProfileIDs)
 	return d
 }
 
