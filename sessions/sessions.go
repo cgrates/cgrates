@@ -1885,6 +1885,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2164,6 +2167,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2390,6 +2396,9 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
 	}
@@ -2525,6 +2534,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2655,6 +2667,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 // BiRPCv1ProcessCDR sends the CDR to CDRs
 func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 	cgrEvWithArgDisp *utils.CGREventWithArgDispatcher, rply *string) (err error) {
+	if cgrEvWithArgDisp.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	if cgrEvWithArgDisp.ID == utils.EmptyString {
 		cgrEvWithArgDisp.ID = utils.GenUUID()
 	}
@@ -2897,6 +2912,9 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	var withErrors bool
 	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
@@ -3077,6 +3095,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	var withErrors bool
 	if args.CGREvent.ID == utils.EmptyString {
