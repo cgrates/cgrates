@@ -55,7 +55,11 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		SuffixIndexedFields:      &[]string{"*req.index1"},
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1", "val2"},
-		Opts:                     &ActionsOpts{},
+		Opts: &ActionsOpts{
+			ActionProfileIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -99,7 +103,9 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.DynaprepaidActionplansCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaActionProfileIDsCfg: []string(nil),
+			utils.MetaActionProfileIDsCfg: map[string][]string{
+				utils.EmptyString: {},
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -179,7 +185,11 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		SuffixIndexedFields:      &[]string{},
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{},
-		Opts:                     &ActionsOpts{},
+		Opts: &ActionsOpts{
+			ActionProfileIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
+		},
 	}
 
 	v2 := &ActionSCfg{
@@ -196,7 +206,11 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		SuffixIndexedFields:      nil,
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
-		Opts:                     &ActionsOpts{},
+		Opts: &ActionsOpts{
+			ActionProfileIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
+		},
 	}
 
 	expected := &ActionSJsonCfg{
@@ -213,7 +227,9 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:     nil,
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{"dynaprepaid"},
-		Opts:                      &ActionsOptsJson{},
+		Opts: &ActionsOptsJson{
+			ActionProfileIDs: map[string][]string{},
+		},
 	}
 
 	rcv := diffActionSJsonCfg(d, v1, v2)
@@ -224,7 +240,9 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 	//The output "d" should be nil when there isn't any difference between v1 and v2_2
 	v2_2 := v1
 	expected2 := &ActionSJsonCfg{
-		Opts: &ActionsOptsJson{},
+		Opts: &ActionsOptsJson{
+			ActionProfileIDs: map[string][]string{},
+		},
 	}
 	rcv = diffActionSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {

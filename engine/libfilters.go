@@ -25,8 +25,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// filterFloat64CfgOpts returns the option as float64 if the filters match
-func filterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]float64) (float64, error) {
+// FilterFloat64CfgOpts returns the option as float64 if the filters match
+func FilterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]float64) (float64, error) {
 	for filter, opt := range opts { // iterate through the option map
 		if filter == utils.EmptyString { // if the filter key is empty continue
 			continue
@@ -43,8 +43,8 @@ func filterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvide
 	return 0, utils.ErrNotFound // return NOT_FOUND if option map is empty or none of the filters pass
 }
 
-// filterDurationCfgOpts returns the option as time.Duration if the filters match
-func filterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]time.Duration) (time.Duration, error) {
+// FilterDurationCfgOpts returns the option as time.Duration if the filters match
+func FilterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]time.Duration) (time.Duration, error) {
 	for filter, opt := range opts { // iterate through the option map
 		if filter == utils.EmptyString { // if the filter key is empty continue
 			continue
@@ -61,8 +61,8 @@ func filterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvid
 	return 0, utils.ErrNotFound // return NOT_FOUND if option map is empty or none of the filters pass
 }
 
-// filterStringCfgOpts returns the option as string if the filters match
-func filterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]string) (string, error) {
+// FilterStringCfgOpts returns the option as string if the filters match
+func FilterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]string) (string, error) {
 	for filter, opt := range opts { // iterate through the option map
 		if filter == utils.EmptyString { // if the filter key is empty continue
 			continue
@@ -79,8 +79,8 @@ func filterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider
 	return utils.EmptyString, utils.ErrNotFound // return NOT_FOUND if option map is empty or none of the filters pass
 }
 
-// filterStringSliceCfgOpts returns the option as []string if the filters match
-func filterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string][]string) ([]string, error) {
+// FilterStringSliceCfgOpts returns the option as []string if the filters match
+func FilterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string][]string) ([]string, error) {
 	for filter, opt := range opts { // iterate through the option map
 		if filter == utils.EmptyString { // if the filter key is empty continue
 			continue

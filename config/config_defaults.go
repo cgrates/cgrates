@@ -1260,7 +1260,9 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"dynaprepaid_actionprofile": [],		//
 	"opts":{								//	
-		// "*actionProfileIDs": [],			//
+		"*actionProfileIDs": {				//
+			"": [],
+		},			
 	},
 },
 
