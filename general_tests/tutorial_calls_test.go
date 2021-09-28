@@ -382,15 +382,13 @@ func testCallCall1001To1002(t *testing.T) {
 // GetActiveSessions
 func testCallGetActiveSessions(t *testing.T) {
 	var reply *[]*sessions.ExternalSession
-	expected := &[]*sessions.ExternalSession{
-		{
-			RequestType: "*prepaid",
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "1001",
-			Subject:     "1001",
-			Destination: "1002",
-		},
+	expected := &sessions.ExternalSession{
+		RequestType: "*prepaid",
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
 	}
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
 		nil, &reply); err != nil {
@@ -401,15 +399,14 @@ func testCallGetActiveSessions(t *testing.T) {
 				continue
 			}
 			// compare some fields (eg. CGRId is generated)
-			if !reflect.DeepEqual((*expected)[0].RequestType, (*reply)[0].RequestType) {
-				t.Errorf("Expected: %s, received: %s", (*expected)[0].RequestType, (*reply)[0].RequestType)
-			} else if !reflect.DeepEqual((*expected)[0].Account, (*reply)[0].Account) {
-				t.Errorf("Expected: %s, received: %s", (*expected)[0].Account, (*reply)[0].Account)
-			} else if !reflect.DeepEqual((*expected)[0].Destination, (*reply)[0].Destination) {
-				t.Errorf("Expected: %s, received: %s", (*expected)[0].Destination, (*reply)[0].Destination)
+			if !reflect.DeepEqual(expected.RequestType, session.RequestType) {
+				t.Errorf("Expected: %s, received: %s", expected.RequestType, session.RequestType)
+			} else if !reflect.DeepEqual(expected.Account, session.Account) {
+				t.Errorf("Expected: %s, received: %s", expected.Account, session.Account)
+			} else if !reflect.DeepEqual(expected.Destination, session.Destination) {
+				t.Errorf("Expected: %s, received: %s", expected.Destination, session.Destination)
 			}
 		}
-
 	}
 }
 

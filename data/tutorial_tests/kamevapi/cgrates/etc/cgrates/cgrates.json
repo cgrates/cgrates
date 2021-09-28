@@ -102,6 +102,7 @@
 	"enabled": true,
 	"resources_conns": ["*internal"],
 	"stats_conns": ["*internal"],
+	"rals_conns": ["*internal"],
 	"string_indexed_fields": ["Account"],
 },
 
