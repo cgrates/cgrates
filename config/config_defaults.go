@@ -1122,7 +1122,9 @@ const CGRATES_CFG_JSON = `
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "verbosity": 1000,                      // number of increment iterations allowed
 	"opts":{								//	
-		// "*rateProfileIDs": [],			//
+		"*rateProfileIDs": {				//
+			"": [],
+		},			
 		"*startTime": "*now",				//
 		"*usage": "1m",						//	
 		"*intervalStart": "0",				//

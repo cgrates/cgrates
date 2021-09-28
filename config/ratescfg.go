@@ -25,7 +25,7 @@ import (
 )
 
 type RatesOpts struct {
-	RateProfileIDs []string
+	RateProfileIDs map[string][]string
 	StartTime      string
 	Usage          *decimal.Big
 	IntervalStart  *decimal.Big
@@ -62,7 +62,7 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 		return nil
 	}
 	if jsnCfg.RateProfileIDs != nil {
-		rateOpts.RateProfileIDs = *jsnCfg.RateProfileIDs
+		rateOpts.RateProfileIDs = jsnCfg.RateProfileIDs
 	}
 	if jsnCfg.StartTime != nil {
 		rateOpts.StartTime = *jsnCfg.StartTime
@@ -170,12 +170,8 @@ func (RateSCfg) SName() string              { return RateSJSON }
 func (rCfg RateSCfg) CloneSection() Section { return rCfg.Clone() }
 
 func (rateOpts *RatesOpts) Clone() *RatesOpts {
-	var rtIDs []string
-	if rateOpts.RateProfileIDs != nil {
-		rtIDs = utils.CloneStringSlice(rateOpts.RateProfileIDs)
-	}
 	return &RatesOpts{
-		RateProfileIDs: rtIDs,
+		RateProfileIDs: rateOpts.RateProfileIDs,
 		StartTime:      rateOpts.StartTime,
 		Usage:          rateOpts.Usage,
 		IntervalStart:  rateOpts.IntervalStart,
@@ -216,10 +212,10 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 }
 
 type RatesOptsJson struct {
-	RateProfileIDs *[]string `json:"*rateProfileIDs"`
-	StartTime      *string   `json:"*startTime"`
-	Usage          *string   `json:"*usage"`
-	IntervalStart  *string   `json:"*intervalStart"`
+	RateProfileIDs map[string][]string `json:"*rateProfileIDs"`
+	StartTime      *string             `json:"*startTime"`
+	Usage          *string             `json:"*usage"`
+	IntervalStart  *string             `json:"*intervalStart"`
 }
 
 type RateSJsonCfg struct {
@@ -242,9 +238,7 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 	if d == nil {
 		d = new(RatesOptsJson)
 	}
-	if !utils.SliceStringEqual(v1.RateProfileIDs, v2.RateProfileIDs) {
-		d.RateProfileIDs = utils.SliceStringPointer(v2.RateProfileIDs)
-	}
+	d.RateProfileIDs = diffMapStringStringSlice(d.RateProfileIDs, v1.RateProfileIDs, v2.RateProfileIDs)
 	if v1.StartTime != v2.StartTime {
 		d.StartTime = utils.StringPointer(v2.StartTime)
 	}
