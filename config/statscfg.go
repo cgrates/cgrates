@@ -26,7 +26,7 @@ import (
 )
 
 type StatsOpts struct {
-	StatIDs []string
+	StatIDs map[string][]string
 }
 
 // StatSCfg the stats config section
@@ -57,7 +57,7 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) (err error) {
 		return nil
 	}
 	if jsnCfg.StatIDs != nil {
-		sqOpts.StatIDs = *jsnCfg.StatIDs
+		sqOpts.StatIDs = jsnCfg.StatIDs
 	}
 	return nil
 }
@@ -137,12 +137,8 @@ func (StatSCfg) SName() string            { return StatSJSON }
 func (st StatSCfg) CloneSection() Section { return st.Clone() }
 
 func (sqOpts *StatsOpts) Clone() *StatsOpts {
-	var sqIDs []string
-	if sqOpts.StatIDs != nil {
-		sqIDs = utils.CloneStringSlice(sqOpts.StatIDs)
-	}
 	return &StatsOpts{
-		StatIDs: sqIDs,
+		StatIDs: sqOpts.StatIDs,
 	}
 }
 
@@ -173,7 +169,7 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 }
 
 type StatsOptsJson struct {
-	StatIDs *[]string `json:"*statIDs"`
+	StatIDs map[string][]string `json:"*statIDs"`
 }
 
 // Stat service config section
@@ -194,9 +190,7 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 	if d == nil {
 		d = new(StatsOptsJson)
 	}
-	if !utils.SliceStringEqual(v1.StatIDs, v2.StatIDs) {
-		d.StatIDs = utils.SliceStringPointer(v2.StatIDs)
-	}
+	d.StatIDs = diffMapStringStringSlice(d.StatIDs, v1.StatIDs, v2.StatIDs)
 	return d
 }
 
