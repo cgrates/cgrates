@@ -41,31 +41,31 @@ var (
 		testV1FIdxCaStartEngine,
 		testV1FIdxCaRpcConn,
 
-		testV1FIdxCaProcessEventWithNotFound,
-		testV1FIdxCaSetThresholdProfile,
-		testV1FIdxCaFromFolder,
-		testV1FIdxCaGetThresholdFromTP,
-		testV1FIdxCaUpdateThresholdProfile,
-		testV1FIdxCaUpdateThresholdProfileFromTP,
-		testV1FIdxCaRemoveThresholdProfile,
+		// testV1FIdxCaProcessEventWithNotFound,
+		// testV1FIdxCaSetThresholdProfile,
+		// testV1FIdxCaFromFolder,
+		// testV1FIdxCaGetThresholdFromTP,
+		// testV1FIdxCaUpdateThresholdProfile,
+		// testV1FIdxCaUpdateThresholdProfileFromTP,
+		// testV1FIdxCaRemoveThresholdProfile,
 
-		testV1FIdxCaInitDataDb,
-		testV1FIdxCaGetStatQueuesWithNotFound,
-		testV1FIdxCaSetStatQueueProfile,
-		testV1FIdxCaFromFolder,
-		testV1FIdxCaGetStatQueuesFromTP,
-		testV1FIdxCaUpdateStatQueueProfile,
-		testV1FIdxCaUpdateStatQueueProfileFromTP,
-		testV1FIdxCaRemoveStatQueueProfile,
+		// testV1FIdxCaInitDataDb,
+		// testV1FIdxCaGetStatQueuesWithNotFound,
+		// testV1FIdxCaSetStatQueueProfile,
+		// testV1FIdxCaFromFolder,
+		// testV1FIdxCaGetStatQueuesFromTP,
+		// testV1FIdxCaUpdateStatQueueProfile,
+		// testV1FIdxCaUpdateStatQueueProfileFromTP,
+		// testV1FIdxCaRemoveStatQueueProfile,
 
-		testV1FIdxCaInitDataDb,
-		testV1FIdxCaProcessAttributeProfileEventWithNotFound,
-		testV1FIdxCaSetAttributeProfile,
-		testV1FIdxCaFromFolder,
-		testV1FIdxCaGetAttributeProfileFromTP,
-		testV1FIdxCaUpdateAttributeProfile,
-		testV1FIdxCaUpdateAttributeProfileFromTP,
-		testV1FIdxCaRemoveAttributeProfile,
+		// testV1FIdxCaInitDataDb,
+		// testV1FIdxCaProcessAttributeProfileEventWithNotFound,
+		// testV1FIdxCaSetAttributeProfile,
+		// testV1FIdxCaFromFolder,
+		// testV1FIdxCaGetAttributeProfileFromTP,
+		// testV1FIdxCaUpdateAttributeProfile,
+		// testV1FIdxCaUpdateAttributeProfileFromTP,
+		// testV1FIdxCaRemoveAttributeProfile,
 
 		testV1FIdxCaInitDataDb,
 		testV1FIdxCaGetResourceProfileWithNotFound,
@@ -1248,7 +1248,6 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 			Blocker:           true,
 			Stored:            true,
 			Weight:            20,
-			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile, rlsConfig, &result); err != nil {
@@ -1274,7 +1273,6 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	} else if result != "Approved" {
 		t.Error("Unexpected reply returned", result)
 	}
-
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
 		argsRU, &result); err != nil {
 		t.Error(err)
@@ -1377,7 +1375,6 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 			Blocker:           true,
 			Stored:            true,
 			Weight:            20,
-			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.APIerSv1SetResourceProfile,
