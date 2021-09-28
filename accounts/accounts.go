@@ -237,11 +237,12 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 // V1AccountsForEvent returns the matching Accounts for Event
 func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) (err error) {
 	var accIDs []string
-	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
-	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
-		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
-			return
-		}
+	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
+		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
+		return
+	}
+	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+		return
 	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
@@ -258,11 +259,12 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 // V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
 	var accIDs []string
-	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
-	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
-		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
-			return
-		}
+	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
+		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
+		return
+	}
+	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+		return
 	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
@@ -289,11 +291,12 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 // V1DebitAbstracts performs debit for the provided event
 func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
 	var accIDs []string
-	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
-	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
-		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
-			return
-		}
+	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
+		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
+		return
+	}
+	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+		return
 	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
@@ -322,11 +325,12 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 // V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
 	var accIDs []string
-	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
-	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
-		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
-			return
-		}
+	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
+		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
+		return
+	}
+	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+		return
 	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
@@ -353,11 +357,12 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 // V1DebitConcretes performs debit of concrete units for the provided event
 func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
 	var accIDs []string
-	accIDs = aS.cfg.AccountSCfg().Opts.AccountIDs
-	if args.APIOpts[utils.OptsAccountsAccountIDs] != nil {
-		if accIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsAccountsAccountIDs]); err != nil {
-			return
-		}
+	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
+		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
+		return
+	}
+	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+		return
 	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,

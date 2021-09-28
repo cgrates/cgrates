@@ -131,7 +131,9 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			UsageTTL: make(map[string]time.Duration),
 			Units:    make(map[string]float64),
 		}},
-		statsCfg: &StatSCfg{Opts: &StatsOpts{}},
+		statsCfg: &StatSCfg{Opts: &StatsOpts{
+			StatIDs: make(map[string][]string),
+		}},
 		thresholdSCfg: &ThresholdSCfg{Opts: &ThresholdsOpts{
 			ThresholdIDs: make(map[string][]string),
 		}},
@@ -153,12 +155,16 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		ersCfg:       new(ERsCfg),
 		eesCfg:       &EEsCfg{Cache: make(map[string]*CacheParamCfg)},
 		rateSCfg:     &RateSCfg{Opts: &RatesOpts{}},
-		actionSCfg:   &ActionSCfg{Opts: &ActionsOpts{}},
-		sipAgentCfg:  new(SIPAgentCfg),
-		configSCfg:   new(ConfigSCfg),
-		apiBanCfg:    new(APIBanCfg),
-		coreSCfg:     new(CoreSCfg),
-		accountSCfg:  &AccountSCfg{Opts: &AccountsOpts{}},
+		actionSCfg: &ActionSCfg{Opts: &ActionsOpts{
+			ActionProfileIDs: make(map[string][]string),
+		}},
+		sipAgentCfg: new(SIPAgentCfg),
+		configSCfg:  new(ConfigSCfg),
+		apiBanCfg:   new(APIBanCfg),
+		coreSCfg:    new(CoreSCfg),
+		accountSCfg: &AccountSCfg{Opts: &AccountsOpts{
+			AccountIDs: make(map[string][]string),
+		}},
 		configDBCfg: &ConfigDBCfg{
 			Opts: make(map[string]interface{}),
 		},

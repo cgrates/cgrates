@@ -25,7 +25,7 @@ import (
 )
 
 type AccountsOpts struct {
-	AccountIDs []string
+	AccountIDs map[string][]string
 	Usage      *decimal.Big
 }
 
@@ -50,7 +50,7 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 		return nil
 	}
 	if jsnCfg.AccountIDs != nil {
-		accOpts.AccountIDs = *jsnCfg.AccountIDs
+		accOpts.AccountIDs = jsnCfg.AccountIDs
 	}
 	if jsnCfg.Usage != nil {
 		if accOpts.Usage, err = utils.StringAsBig(*jsnCfg.Usage); err != nil {
@@ -152,12 +152,8 @@ func (acS AccountSCfg) AsMapInterface(string) interface{} {
 }
 
 func (accOpts *AccountsOpts) Clone() *AccountsOpts {
-	var accIDs []string
-	if accOpts.AccountIDs != nil {
-		accIDs = utils.CloneStringSlice(accOpts.AccountIDs)
-	}
 	return &AccountsOpts{
-		AccountIDs: accIDs,
+		AccountIDs: accOpts.AccountIDs,
 		Usage:      accOpts.Usage,
 	}
 }
@@ -196,8 +192,8 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 }
 
 type AccountsOptsJson struct {
-	AccountIDs *[]string `json:"*accountIDs"`
-	Usage      *string   `json:"*usage"`
+	AccountIDs map[string][]string `json:"*accountIDs"`
+	Usage      *string             `json:"*usage"`
 }
 
 // Account service config section
@@ -220,9 +216,7 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 	if d == nil {
 		d = new(AccountsOptsJson)
 	}
-	if !utils.SliceStringEqual(v1.AccountIDs, v2.AccountIDs) {
-		d.AccountIDs = utils.SliceStringPointer(v2.AccountIDs)
-	}
+	d.AccountIDs = diffMapStringStringSlice(d.AccountIDs, v1.AccountIDs, v2.AccountIDs)
 	if v1.Usage.Cmp(v2.Usage) != 0 {
 		d.Usage = utils.StringPointer(v2.Usage.String())
 	}

@@ -58,6 +58,9 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		MaxIterations:       1000,
 		MaxUsage:            usage,
 		Opts: &AccountsOpts{
+			AccountIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
 			Usage: decimal.New(int64(72*time.Hour), 0),
 		},
 	}
@@ -110,8 +113,10 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.MaxIterations:          100,
 		utils.MaxUsage:               "259200000000000", // 72h in ns
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccountIDsCfg: []string(nil),
-			utils.MetaUsage:         decimal.New(int64(72*time.Hour), 0),
+			utils.MetaAccountIDsCfg: map[string][]string{
+				utils.EmptyString: {},
+			},
+			utils.MetaUsage: decimal.New(int64(72*time.Hour), 0),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -180,7 +185,9 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       1,
 		MaxUsage:            nil,
 		Opts: &AccountsOpts{
-			AccountIDs: []string{"ACC1"},
+			AccountIDs: map[string][]string{
+				utils.EmptyString: {"ACC1"},
+			},
 		},
 	}
 
@@ -197,7 +204,9 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       3,
 		MaxUsage:            utils.NewDecimal(60, 0),
 		Opts: &AccountsOpts{
-			AccountIDs: []string{"ACC2"},
+			AccountIDs: map[string][]string{
+				utils.EmptyString: {"ACC2"},
+			},
 		},
 	}
 
@@ -214,7 +223,9 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Max_iterations:        utils.IntPointer(3),
 		Max_usage:             utils.StringPointer("60"),
 		Opts: &AccountsOptsJson{
-			AccountIDs: &[]string{"ACC2"},
+			AccountIDs: map[string][]string{
+				utils.EmptyString: {"ACC2"},
+			},
 		},
 	}
 
@@ -237,7 +248,9 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       3,
 		MaxUsage:            nil,
 		Opts: &AccountsOpts{
-			AccountIDs: []string{"ACC2"},
+			AccountIDs: map[string][]string{
+				utils.EmptyString: {"ACC2"},
+			},
 		},
 	}
 
@@ -254,7 +267,9 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Max_iterations:        utils.IntPointer(3),
 		Max_usage:             nil,
 		Opts: &AccountsOptsJson{
-			AccountIDs: &[]string{"ACC2"},
+			AccountIDs: map[string][]string{
+				utils.EmptyString: {"ACC2"},
+			},
 		},
 	}
 
@@ -278,7 +293,9 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Nested_fields:         nil,
 		Max_iterations:        nil,
 		Max_usage:             nil,
-		Opts:                  &AccountsOptsJson{},
+		Opts: &AccountsOptsJson{
+			AccountIDs: map[string][]string{},
+		},
 	}
 
 	rcv = diffAccountSJsonCfg(d, v1, v2_3)
