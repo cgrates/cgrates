@@ -146,13 +146,30 @@ func testSesMRSItAddVoiceBalance(t *testing.T) {
 		Tenant:      sesMRSTenant,
 		Account:     sesMRSAccount,
 		BalanceType: utils.MetaMonetary,
-		Value:       float64(time.Hour),
+		Value:       float64(time.Hour - 5*time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestSesBal1",
 			utils.RatingSubject: "*zero1s",
 		},
 	}
 	var reply string
+	if err := sesMRSRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
+	attrSetBalance = utils.AttrSetBalance{
+		Tenant:      sesMRSTenant,
+		Account:     sesMRSAccount,
+		BalanceType: utils.MetaVoice,
+		Value:       float64(5 * time.Second),
+		Balance: map[string]interface{}{
+			utils.ID:            "TestSesBal2",
+			utils.RatingSubject: "*zero1s",
+			utils.Weight:        10,
+		},
+	}
 	if err := sesMRSRPC.Call(utils.APIerSv2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -167,8 +184,12 @@ func testSesMRSItAddVoiceBalance(t *testing.T) {
 		}, &acnt); err != nil {
 		t.Fatal(err)
 	}
-	expected := float64(time.Hour)
+	expected := float64(time.Hour - 5*time.Second)
 	if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != expected {
+		t.Errorf("Expected: %v, received: %v", expected, rply)
+	}
+	expected = float64(5 * time.Second)
+	if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expected {
 		t.Errorf("Expected: %v, received: %v", expected, rply)
 	}
 }
@@ -219,6 +240,10 @@ func testSesMRSItTerminateSession(t *testing.T) {
 	expected := float64(time.Hour - 10*time.Second)
 	if rply := acnt.BalanceMap[utils.MetaMonetary].GetTotalValue(); rply != expected {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+	expected = 0
+	if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != expected {
+		t.Errorf("Expected: %v, received: %v", expected, rply)
 	}
 }
 
