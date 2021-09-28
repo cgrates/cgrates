@@ -56,6 +56,9 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		RateNestedFields:        true,
 		Verbosity:               20,
 		Opts: &RatesOpts{
+			RateProfileIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
 			StartTime:     utils.MetaNow,
 			Usage:         decimal.New(int64(time.Minute), 0),
 			IntervalStart: decimal.New(0, 0),
@@ -85,10 +88,12 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.RateNestedFieldsCfg:        false,
 		utils.Verbosity:                  1000,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaRateProfileIDsCfg: []string(nil),
-			utils.MetaStartTime:         utils.MetaNow,
-			utils.MetaUsage:             decimal.New(int64(time.Minute), 0),
-			utils.MetaIntervalStartCfg:  decimal.New(0, 0),
+			utils.MetaRateProfileIDsCfg: map[string][]string{
+				utils.EmptyString: {},
+			},
+			utils.MetaStartTime:        utils.MetaNow,
+			utils.MetaUsage:            decimal.New(int64(time.Minute), 0),
+			utils.MetaIntervalStartCfg: decimal.New(0, 0),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -128,10 +133,12 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.RateNestedFieldsCfg:        true,
 		utils.Verbosity:                  1000,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaRateProfileIDsCfg: []string(nil),
-			utils.MetaStartTime:         utils.MetaNow,
-			utils.MetaUsage:             decimal.New(int64(time.Minute), 0),
-			utils.MetaIntervalStartCfg:  decimal.New(0, 0),
+			utils.MetaRateProfileIDsCfg: map[string][]string{
+				utils.EmptyString: {},
+			},
+			utils.MetaStartTime:        utils.MetaNow,
+			utils.MetaUsage:            decimal.New(int64(time.Minute), 0),
+			utils.MetaIntervalStartCfg: decimal.New(0, 0),
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -205,7 +212,9 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               2,
 		Opts: &RatesOpts{
-			RateProfileIDs: []string{"RP1"},
+			RateProfileIDs: map[string][]string{
+				utils.EmptyString: {"RP1"},
+			},
 		},
 	}
 
@@ -223,7 +232,9 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateNestedFields:        true,
 		Verbosity:               3,
 		Opts: &RatesOpts{
-			RateProfileIDs: []string{"RP2"},
+			RateProfileIDs: map[string][]string{
+				utils.EmptyString: {"RP2"},
+			},
 		},
 	}
 
@@ -241,7 +252,9 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Rate_nested_fields:         utils.BoolPointer(true),
 		Verbosity:                  utils.IntPointer(3),
 		Opts: &RatesOptsJson{
-			RateProfileIDs: &[]string{"RP2"},
+			RateProfileIDs: map[string][]string{
+				utils.EmptyString: {"RP2"},
+			},
 		},
 	}
 
@@ -252,7 +265,9 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &RateSJsonCfg{
-		Opts: &RatesOptsJson{},
+		Opts: &RatesOptsJson{
+			RateProfileIDs: map[string][]string{},
+		},
 	}
 	rcv = diffRateSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {

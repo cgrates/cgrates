@@ -210,11 +210,12 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 // V1CostForEvent will be called to calculate the cost for an event
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string
-	rPfIDs = rS.cfg.RateSCfg().Opts.RateProfileIDs
-	if args.APIOpts[utils.OptsRatesRateProfileIDs] != nil {
-		if rPfIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsRatesRateProfileIDs]); err != nil {
-			return
-		}
+	if rPfIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cfg.RateSCfg().Opts.RateProfileIDs); err != nil {
+		return
+	}
+	if rPfIDs, err = args.OptsAsStringSlice(rPfIDs, utils.OptsRatesRateProfileIDs); err != nil {
+		return
 	}
 	var rtPrl *utils.RateProfile
 	if rtPrl, err = rS.matchingRateProfileForEvent(ctx, args.Tenant, rPfIDs, args); err != nil {

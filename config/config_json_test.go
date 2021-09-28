@@ -1993,6 +1993,9 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Rate_nested_fields:         utils.BoolPointer(false),
 		Verbosity:                  utils.IntPointer(1000),
 		Opts: &RatesOptsJson{
+			RateProfileIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
 			StartTime:     utils.StringPointer(utils.MetaNow),
 			Usage:         utils.StringPointer("1m"),
 			IntervalStart: utils.StringPointer("0"),
