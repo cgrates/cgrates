@@ -146,6 +146,52 @@ func setAccBalance(acc string) (err error) {
 	return err
 }
 
+func initSes(n int) (err error) {
+	var accIDs []string
+	for i := 0; i < 100; i++ {
+		accIDs = append(accIDs, fmt.Sprintf("acc%d", i))
+	}
+	_, err = getAccounts(accIDs)
+	if err != nil {
+		return
+	}
+
+	initArgs := &sessions.V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				utils.EventName:    "TEST_EVENT",
+				utils.OriginID:     utils.UUIDSha1Prefix(),
+				utils.ToR:          utils.MetaVoice,
+				utils.Category:     "call",
+				utils.Tenant:       "cgrates.org",
+				utils.AccountField: "1001",
+				utils.Subject:      "1001",
+				utils.Destination:  "1002",
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsDebitInterval: 2 * time.Second,
+			},
+		},
+	}
+
+	var initRpl *sessions.V1InitSessionReply
+
+	for i := 0; i < n; i++ {
+		initArgs.CGREvent.Event[utils.AccountField] = accIDs[i]
+		initArgs.CGREvent.Event[utils.OriginID] = accIDs[i]
+		if err = sesPRPC.Call(utils.SessionSv1InitiateSession,
+			initArgs, &initRpl); err != nil {
+			return
+		}
+	}
+	return
+}
+
 func testSesPItBenchmark(t *testing.T) {
 	// add 2 charger profiles
 	var reply string
@@ -186,43 +232,15 @@ func testSesPItBenchmark(t *testing.T) {
 		t.Error(err)
 	}
 
-	initArgs := &sessions.V1InitSessionArgs{
-		InitSession: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.EventName:    "TEST_EVENT",
-				utils.OriginID:     utils.UUIDSha1Prefix(),
-				utils.ToR:          utils.MetaVoice,
-				utils.Category:     "call",
-				utils.Tenant:       "cgrates.org",
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsDebitInterval: 2 * time.Second,
-			},
-		},
-	}
-
-	var initRpl *sessions.V1InitSessionReply
-	if err := sesPRPC.Call(utils.SessionSv1InitiateSession,
-		initArgs, &initRpl); err != nil {
-		t.Fatal(err)
-	}
-
-	var accIDs []string
-	for i := 0; i < 100; i++ {
-		accIDs = append(accIDs, fmt.Sprintf("acc%d", i))
-	}
-	_, err := getAccounts(accIDs)
-	if err != nil {
+	if err := initSes(100); err != nil {
 		t.Error(err)
 	}
+	var statusRpl map[string]interface{}
+
+	if err := sesPRPC.Call(utils.CoreSv1Status, nil, &statusRpl); err != nil {
+		t.Error(err)
+	}
+	fmt.Println(statusRpl)
 }
 
 func testSesPItStopCgrEngine(t *testing.T) {
