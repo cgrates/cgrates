@@ -24,6 +24,7 @@ require (
 	github.com/cgrates/rpcclient v0.0.0-20210218104959-97dcf0d39a2c
 	github.com/creack/pty v1.1.16
 	github.com/fiorix/go-diameter v3.0.2+incompatible
+	github.com/fiorix/go-diameter/v4 v4.0.5-0.20210920174124-0a51495cbb92 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-sql-driver/mysql v1.6.0
