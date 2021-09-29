@@ -159,7 +159,7 @@ func TestProcessRequest(t *testing.T) {
 				return nil
 			}
 			*prply = sessions.V1AuthorizeReply{
-				MaxUsage: utils.DurationPointer(-1),
+				MaxUsage: utils.NewDecimalFromFloat64(-1),
 			}
 			return nil
 		},
@@ -436,7 +436,7 @@ func TestProcessRequest(t *testing.T) {
 	}
 	srv, _ := birpc.NewService(da, "", false)
 	da.ctx = context.WithClient(context.Background(), srv)
-	pr, err := da.processRequest(reqProcessor, agReq)
+	pr, err := processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -465,7 +465,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(clnReq, agReq)
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -494,7 +494,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(clnReq, agReq)
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -502,7 +502,6 @@ func TestProcessRequest(t *testing.T) {
 	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
-
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesTerminate,
@@ -526,7 +525,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(clnReq, agReq)
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -554,7 +553,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(clnReq, agReq)
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -562,5 +561,4 @@ func TestProcessRequest(t *testing.T) {
 	} else if len(rply.GetOrder()) != 1 {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
-
 }

@@ -546,7 +546,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() map[string]*utils.DataNode
 		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*v1AuthReply.ResourceAllocation)
 	}
 	if v1AuthReply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(*v1AuthReply.MaxUsage)
+		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(v1AuthReply.MaxUsage)
 	} else if v1AuthReply.needsMaxUsage {
 		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(0)
 	}

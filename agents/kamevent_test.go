@@ -236,7 +236,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		},
 	}
 	authRply := &sessions.V1AuthorizeReply{
-		MaxUsage: utils.DurationPointer(5 * time.Second),
+		MaxUsage: utils.NewDecimalFromFloat64(5 * float64(time.Second)),
 	}
 	expected := &KamReply{
 		Event:    CGR_AUTH_REPLY,

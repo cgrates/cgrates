@@ -8,7 +8,7 @@ go 1.16
 
 require (
 	cloud.google.com/go v0.75.0 // indirect
-	github.com/Azure/go-amqp v0.13.1
+	github.com/Azure/go-amqp v0.15.0
 	github.com/RoaringBitmap/roaring v0.5.5 // indirect
 	github.com/antchfx/xmlquery v1.3.3
 	github.com/antchfx/xpath v1.1.11 // indirect
@@ -42,7 +42,7 @@ require (
 	github.com/lib/pq v1.8.0 // indirect
 	github.com/mattn/go-runewidth v0.0.10 // indirect
 	github.com/mediocregopher/radix/v3 v3.7.0
-	github.com/miekg/dns v1.1.35
+	github.com/miekg/dns v1.1.44-0.20210927135021-1630ffe2ca11
 	github.com/nats-io/nats-server/v2 v2.2.6 // indirect
 	github.com/nats-io/nats.go v1.11.0
 	github.com/nyaruka/phonenumbers v1.0.71
@@ -57,11 +57,11 @@ require (
 	github.com/xdg/stringprep v1.0.1-0.20180714160509-73f8eece6fdc // indirect
 	go.mongodb.org/mongo-driver v1.4.4
 	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b
-	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
+	golang.org/x/mod v0.5.1 // indirect
+	golang.org/x/net v0.0.0-20210929193557-e81a3d93ecf6
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
-	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect
-	golang.org/x/sys v0.0.0-20210112091331-59c308dcf3cc // indirect
-	golang.org/x/text v0.3.5 // indirect
+	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
+	golang.org/x/tools v0.1.7 // indirect
 	google.golang.org/api v0.36.0
 	google.golang.org/genproto v0.0.0-20210111234610-22ae2b108f89 // indirect
 	google.golang.org/grpc v1.34.1 // indirect
