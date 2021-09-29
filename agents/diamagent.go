@@ -271,14 +271,18 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
-		lclProcessed, err = da.processRequest(
+		lclProcessed, err = processRequest(
+			da.ctx,
 			reqProcessor,
 			NewAgentRequest(
 				diamDP, reqVars, cgrRplyNM, rply, opts,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
-				da.filterS, nil))
+				da.filterS, nil),
+			utils.DiameterAgent, da.connMgr,
+			da.cgrCfg.DiameterAgentCfg().SessionSConns,
+			da.filterS)
 		if lclProcessed {
 			processed = lclProcessed
 		}
@@ -311,130 +315,6 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	writeOnConn(c, a)
-}
-
-func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
-	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := da.filterS.Pass(context.TODO(), agReq.Tenant,
-		reqProcessor.Filters, agReq); err != nil || !pass {
-		return pass, err
-	}
-	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
-		return
-	}
-	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	var reqType string
-	for _, typ := range []string{
-		utils.MetaDryRun, utils.MetaAuthorize,
-		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone} {
-		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
-			reqType = typ
-			break
-		}
-	}
-
-	if reqProcessor.Flags.Has(utils.MetaLog) {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
-				utils.DiameterAgent, reqProcessor.ID, agReq.Request.String()))
-	}
-	switch reqType {
-	default:
-		return false, fmt.Errorf("unknown request type: <%s>", reqType)
-	case utils.MetaNone: // do nothing on CGRateS side
-	case utils.MetaDryRun:
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, DiameterMessage: %s",
-				utils.DiameterAgent, reqProcessor.ID, agReq.Request.String()))
-	case utils.MetaAuthorize:
-		authArgs := sessions.NewV1AuthorizeArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaResources),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.GetBool(utils.MetaRoutes),
-			reqProcessor.Flags.Has(utils.OptsRoutesIgnoreErrors),
-			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD),
-			reqProcessor.Flags.ParamValue(utils.OptsRoutesMaxCost),
-		)
-		rply := new(sessions.V1AuthorizeReply)
-		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
-			authArgs, rply)
-		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
-		agReq.setCGRReply(rply, err)
-	case utils.MetaInitiate:
-		rply := new(sessions.V1InitSessionReply)
-		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
-			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInitiate))
-		agReq.setCGRReply(rply, err)
-	case utils.MetaUpdate:
-		rply := new(sessions.V1UpdateSessionReply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesUpdate))
-		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
-			cgrEv, rply)
-		agReq.setCGRReply(rply, err)
-	case utils.MetaTerminate:
-		var rply string
-		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
-			cgrEv, &rply)
-		agReq.setCGRReply(nil, err)
-	case utils.MetaMessage:
-		rply := new(sessions.V1ProcessMessageReply)
-		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1ProcessMessage,
-			cgrEv, rply)
-		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		// } else
-		messageS := utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesMessage)
-		if messageS {
-			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		}
-		rply.SetMaxUsageNeeded(messageS)
-		agReq.setCGRReply(rply, err)
-	case utils.MetaEvent:
-		rply := new(sessions.V1ProcessEventReply)
-		err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
-			cgrEv, rply)
-		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		// } else
-		// if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
-		// cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		// }
-		agReq.setCGRReply(rply, err)
-	case utils.MetaCDRs: // allow CDR processing
-	}
-	// separate request so we can capture the Terminate/Event also here
-	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
-		!reqProcessor.Flags.Has(utils.MetaDryRun) {
-		var rplyCDRs string
-		if err = da.connMgr.Call(da.ctx, da.cgrCfg.DiameterAgentCfg().SessionSConns, utils.SessionSv1ProcessCDR,
-			cgrEv, &rplyCDRs); err != nil {
-			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
-		}
-	}
-	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
-		return
-	}
-	if reqProcessor.Flags.Has(utils.MetaLog) {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, Diameter reply: %s",
-				utils.DiameterAgent, agReq.Reply))
-	}
-	if reqType == utils.MetaDryRun {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, Diameter reply: %s",
-				utils.DiameterAgent, agReq.Reply))
-	}
-	return true, nil
 }
 
 // V1DisconnectSession is part of the sessions.BiRPClient

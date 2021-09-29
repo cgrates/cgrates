@@ -26,12 +26,11 @@ import (
 )
 
 // NewObjectDP constructs a utils.DataProvider
-func NewObjectDP(obj interface{}) (dP utils.DataProvider) {
-	dP = &ObjectDP{
+func NewObjectDP(obj interface{}) utils.DataProvider {
+	return &ObjectDP{
 		obj:   obj,
 		cache: make(map[string]interface{}),
 	}
-	return
 }
 
 // ObjectDP implements the DataProvider for any interface{}
@@ -119,8 +118,7 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 // FieldAsString is part of engine.utils.DataProvider interface
 func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface interface{}
-	valIface, err = objDP.FieldAsInterface(fldPath)
-	if err != nil {
+	if valIface, err = objDP.FieldAsInterface(fldPath); err != nil {
 		return
 	}
 	return utils.IfaceAsString(valIface), nil

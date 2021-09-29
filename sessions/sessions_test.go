@@ -1064,15 +1064,15 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
-	v1AuthRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected[utils.CapMaxUsage] = utils.NewLeafNode(5 * time.Minute)
+	v1AuthRpl.MaxUsage = utils.NewDecimalFromFloat64(float64(5 * time.Minute))
+	expected[utils.CapMaxUsage] = utils.NewLeafNode(v1AuthRpl.MaxUsage)
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1AuthRpl = &V1AuthorizeReply{
 		Attributes:         attrs,
 		ResourceAllocation: utils.StringPointer("ResGr1"),
-		MaxUsage:           utils.DurationPointer(5 * time.Minute),
+		MaxUsage:           utils.NewDecimalFromFloat64(float64(5 * time.Minute)),
 		RouteProfiles:      splrs,
 		ThresholdIDs:       thIDs,
 		StatQueueIDs:       statIDs,
@@ -1081,7 +1081,7 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 	expected = map[string]*utils.DataNode{
 		utils.CapAttributes:         {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}},
 		utils.CapResourceAllocation: utils.NewLeafNode("ResGr1"),
-		utils.CapMaxUsage:           utils.NewLeafNode(5 * time.Minute),
+		utils.CapMaxUsage:           utils.NewLeafNode(v1AuthRpl.MaxUsage),
 		utils.CapRouteProfiles:      nm,
 		utils.CapThresholds:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("THD_RES_1"), utils.NewLeafNode("THD_STATS_1"), utils.NewLeafNode("THD_STATS_2"), utils.NewLeafNode("THD_CDRS_1")}},
 		utils.CapStatQueues:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("Stats2"), utils.NewLeafNode("Stats1"), utils.NewLeafNode("Stats3")}},
