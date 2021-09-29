@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -73,7 +72,9 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ha.filterS, nil)
-		lclProcessed, err := ha.processRequest(reqProcessor, agReq)
+		lclProcessed, err := processRequest(reqProcessor, agReq,
+			utils.HTTPAgent, ha.connMgr, ha.sessionConns,
+			nil, agReq.filterS)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing request: %s",
@@ -100,178 +101,4 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error(), utils.ToJSON(rplyNM)))
 		return
 	}
-}
-
-// processRequest represents one processor processing the request
-func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
-	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := ha.filterS.Pass(agReq.Tenant,
-		reqProcessor.Filters, agReq); err != nil || !pass {
-		return pass, err
-	}
-	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
-		return
-	}
-	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	var reqType string
-	for _, typ := range []string{
-		utils.MetaDryRun, utils.MetaAuthorize,
-		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.MetaEmpty} {
-		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
-			reqType = typ
-			break
-		}
-	}
-	var cgrArgs utils.Paginator
-	if reqType == utils.MetaAuthorize ||
-		reqType == utils.MetaMessage ||
-		reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
-				utils.HTTPAgent, err.Error()))
-			err = nil // reset the error and continue the processing
-		}
-	}
-	if reqProcessor.Flags.Has(utils.MetaLog) {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, http message: %s",
-				utils.HTTPAgent, reqProcessor.ID, agReq.Request.String()))
-	}
-	switch reqType {
-	default:
-		return false, fmt.Errorf("unknown request type: <%s>", reqType)
-	case utils.MetaNone: // do nothing on CGRateS side
-	case utils.MetaDryRun:
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.HTTPAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
-	case utils.MetaAuthorize:
-		authArgs := sessions.NewV1AuthorizeArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaResources),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.GetBool(utils.MetaRoutes),
-			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
-			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
-			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
-		)
-		rply := new(sessions.V1AuthorizeReply)
-		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1AuthorizeEvent,
-			authArgs, rply)
-		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
-		agReq.setCGRReply(rply, err)
-	case utils.MetaInitiate:
-		initArgs := sessions.NewV1InitSessionArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaResources),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
-		rply := new(sessions.V1InitSessionReply)
-		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1InitiateSession,
-			initArgs, rply)
-		rply.SetMaxUsageNeeded(initArgs.InitSession)
-		agReq.setCGRReply(rply, err)
-	case utils.MetaUpdate:
-		updateArgs := sessions.NewV1UpdateSessionArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
-		rply := new(sessions.V1UpdateSessionReply)
-		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1UpdateSession,
-			updateArgs, rply)
-		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
-		agReq.setCGRReply(rply, err)
-	case utils.MetaTerminate:
-		terminateArgs := sessions.NewV1TerminateSessionArgs(
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.GetBool(utils.MetaResources),
-			reqProcessor.Flags.GetBool(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
-		var rply string
-		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1TerminateSession,
-			terminateArgs, &rply)
-		agReq.setCGRReply(nil, err)
-	case utils.MetaMessage:
-		evArgs := sessions.NewV1ProcessMessageArgs(
-			reqProcessor.Flags.GetBool(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaStats),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			reqProcessor.Flags.GetBool(utils.MetaResources),
-			reqProcessor.Flags.Has(utils.MetaAccounts),
-			reqProcessor.Flags.GetBool(utils.MetaRoutes),
-			reqProcessor.Flags.Has(utils.MetaRoutesIgnoreErrors),
-			reqProcessor.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, cgrArgs, reqProcessor.Flags.Has(utils.MetaFD),
-			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
-		)
-		rply := new(sessions.V1ProcessMessageReply)
-		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessMessage,
-			evArgs, rply)
-		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if evArgs.Debit {
-			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		}
-		rply.SetMaxUsageNeeded(evArgs.Debit)
-		agReq.setCGRReply(nil, err)
-	case utils.MetaEvent:
-		evArgs := &sessions.V1ProcessEventArgs{
-			Flags:     reqProcessor.Flags.SliceFlags(),
-			CGREvent:  cgrEv,
-			Paginator: cgrArgs,
-		}
-		rply := new(sessions.V1ProcessEventReply)
-		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessEvent,
-			evArgs, rply)
-		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
-			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		}
-		agReq.setCGRReply(rply, err)
-	case utils.MetaCDRs: // allow CDR processing
-	}
-	// separate request so we can capture the Terminate/Event also here
-	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
-		!reqProcessor.Flags.Has(utils.MetaDryRun) {
-		var rplyCDRs string
-		if err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessCDR,
-			cgrEv, &rplyCDRs); err != nil {
-			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
-		}
-	}
-	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
-		return false, err
-	}
-	if reqProcessor.Flags.Has(utils.MetaLog) {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, HTTP reply: %s",
-				utils.HTTPAgent, agReq.Reply))
-	}
-	if reqType == utils.MetaDryRun {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, HTTP reply: %s",
-				utils.HTTPAgent, agReq.Reply))
-	}
-	return true, nil
 }

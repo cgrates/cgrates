@@ -1181,3 +1181,45 @@ func TestSliceConverter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
+
+func TestE164FromNAPTRConverter(t *testing.T) {
+	exp := new(e164Converter)
+	cnv, err := NewDataConverter(E164Converter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+	if e164, err := cnv.Convert("8.7.6.5.4.3.2.1.0.1.6.e164.arpa."); err != nil {
+		t.Error(err)
+	} else if e164 != "61012345678" {
+		t.Errorf("received: <%s>", e164)
+	}
+}
+
+func TestDomainNameFromNAPTRConverter(t *testing.T) {
+	exp := new(e164DomainConverter)
+	cnv, err := NewDataConverter(E164DomainConverter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+	if dName, err := cnv.Convert("8.7.6.5.4.3.2.1.0.1.6.e164.arpa."); err != nil {
+		t.Fatal(err)
+	} else if dName != "e164.arpa" {
+		t.Errorf("received: <%s>", dName)
+	}
+	if dName, err := cnv.Convert("8.7.6.5.4.3.2.1.0.1.6.e164.itsyscom.com."); err != nil {
+		t.Fatal(err)
+	} else if dName != "e164.itsyscom.com" {
+		t.Errorf("received: <%s>", dName)
+	}
+	if dName, err := cnv.Convert("8.7.6.5.4.3.2.1.0.1.6.itsyscom.com."); err != nil {
+		t.Fatal(err)
+	} else if dName != "8.7.6.5.4.3.2.1.0.1.6.itsyscom.com" {
+		t.Errorf("received: <%s>", dName)
+	}
+}

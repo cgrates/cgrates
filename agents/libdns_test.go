@@ -19,33 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/miekg/dns"
 )
-
-func TestE164FromNAPTR(t *testing.T) {
-	if e164, err := e164FromNAPTR("8.7.6.5.4.3.2.1.0.1.6.e164.arpa."); err != nil {
-		t.Error(err)
-	} else if e164 != "61012345678" {
-		t.Errorf("received: <%s>", e164)
-	}
-}
-
-func TestDomainNameFromNAPTR(t *testing.T) {
-	if dName := domainNameFromNAPTR("8.7.6.5.4.3.2.1.0.1.6.e164.arpa."); dName != "e164.arpa" {
-		t.Errorf("received: <%s>", dName)
-	}
-	if dName := domainNameFromNAPTR("8.7.6.5.4.3.2.1.0.1.6.e164.itsyscom.com."); dName != "e164.itsyscom.com" {
-		t.Errorf("received: <%s>", dName)
-	}
-	if dName := domainNameFromNAPTR("8.7.6.5.4.3.2.1.0.1.6.itsyscom.com."); dName != "8.7.6.5.4.3.2.1.0.1.6.itsyscom.com" {
-		t.Errorf("received: <%s>", dName)
-	}
-}
 
 func TestAppendDNSAnswerTypeNAPTR(t *testing.T) {
 	m := new(dns.Msg)
@@ -93,84 +72,6 @@ func TestAppendDNSAnswerUnexpectedType(t *testing.T) {
 	}
 }
 
-func TestDNSDPFieldAsInterface(t *testing.T) {
-	m := new(dns.Msg)
-	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
-	dp := newDNSDataProvider(m, nil)
-	expected := m.Question[0]
-	if data, err := dp.FieldAsInterface([]string{"test"}); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(data, expected) {
-		t.Errorf("expecting: <%+v>, received: <%+v>", expected, data)
-	}
-}
-
-func TestDNSDPFieldAsInterfaceEmptyPath(t *testing.T) {
-	m := new(dns.Msg)
-	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
-	dp := newDNSDataProvider(m, nil)
-	if _, err := dp.FieldAsInterface([]string{}); err == nil ||
-		err.Error() != "empty field path" {
-		t.Error(err)
-	}
-}
-
-func TestDNSDPFieldAsInterfaceFromCache(t *testing.T) {
-	m := new(dns.Msg)
-	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
-	dp := newDNSDataProvider(m, nil)
-	expected := m.Question[0]
-	if data, err := dp.FieldAsInterface([]string{"test"}); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(data, expected) {
-		t.Errorf("expecting: <%+v>, received: <%+v>", expected, data)
-	}
-	if data, err := dp.FieldAsInterface([]string{"test"}); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(data, expected) {
-		t.Errorf("expecting: <%+v>, received: <%+v>", expected, data)
-	}
-}
-
-func TestDNSDPFieldAsString(t *testing.T) {
-	m := new(dns.Msg)
-	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
-	dp := newDNSDataProvider(m, nil)
-	expected := utils.ToJSON(m.Question[0])
-	if data, err := dp.FieldAsString([]string{"test"}); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(data, expected) {
-		t.Errorf("expecting: <%+v>, received: <%+v>", expected, data)
-	}
-}
-
-func TestDNSDPFieldAsStringEmptyPath(t *testing.T) {
-	m := new(dns.Msg)
-	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
-	dp := newDNSDataProvider(m, nil)
-	if _, err := dp.FieldAsString([]string{}); err == nil ||
-		err.Error() != "empty field path" {
-		t.Error(err)
-	}
-}
-
-func TestDNSDPFieldAsStringFromCache(t *testing.T) {
-	m := new(dns.Msg)
-	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
-	dp := newDNSDataProvider(m, nil)
-	expected := utils.ToJSON(m.Question[0])
-	if data, err := dp.FieldAsString([]string{"test"}); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(data, expected) {
-		t.Errorf("expecting: <%+v>, received: <%+v>", expected, data)
-	}
-	if data, err := dp.FieldAsString([]string{"test"}); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(data, expected) {
-		t.Errorf("expecting: <%+v>, received: <%+v>", expected, data)
-	}
-}
-
 func TestUpdateDNSMsgFromNM(t *testing.T) {
 	m := new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
@@ -206,7 +107,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Order}
+	path = []string{utils.Answer, utils.Order}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: "RandomValue",
 	}}
@@ -215,12 +116,12 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `item: <Order>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
+		err.Error() != `item: <[Answer Order]>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
 		t.Error(err)
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Preference}
+	path = []string{utils.Answer, utils.Preference}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: "RandomValue",
 	}}
@@ -229,14 +130,14 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `item: <Preference>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
+		err.Error() != `item: <[Answer Preference]>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
 		t.Error(err)
 	}
 
 	m = new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeA)
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Order}
+	path = []string{utils.Answer, utils.Order}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -245,12 +146,12 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `field <Order> only works with NAPTR` {
+		err.Error() != `item: <[Answer Order]>, err: unsuported dns option type <*dns.A>` {
 		t.Error(err)
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Preference}
+	path = []string{utils.Answer, utils.Preference}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -259,12 +160,12 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `field <Preference> only works with NAPTR` {
+		err.Error() != `item: <[Answer Preference]>, err: unsuported dns option type <*dns.A>` {
 		t.Error(err)
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Flags}
+	path = []string{utils.Answer, utils.Flags}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -273,12 +174,12 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `field <Flags> only works with NAPTR` {
+		err.Error() != `item: <[Answer Flags]>, err: unsuported dns option type <*dns.A>` {
 		t.Error(err)
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Service}
+	path = []string{utils.Answer, utils.Service}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -287,12 +188,12 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `field <Service> only works with NAPTR` {
+		err.Error() != `item: <[Answer Service]>, err: unsuported dns option type <*dns.A>` {
 		t.Error(err)
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Regexp}
+	path = []string{utils.Answer, utils.Regexp}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -301,12 +202,12 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `field <Regexp> only works with NAPTR` {
+		err.Error() != `item: <[Answer Regexp]>, err: unsuported dns option type <*dns.A>` {
 		t.Error(err)
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Replacement}
+	path = []string{utils.Answer, utils.Replacement}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -315,7 +216,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != `field <Replacement> only works with NAPTR` {
+		err.Error() != `item: <[Answer Replacement]>, err: unsuported dns option type <*dns.A>` {
 		t.Error(err)
 	}
 

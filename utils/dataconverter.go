@@ -21,6 +21,7 @@ package utils
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -94,6 +95,10 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(SliceConverter), nil
 	case params == MetaFloat64:
 		return new(Float64Converter), nil
+	case params == E164DomainConverter:
+		return new(e164DomainConverter), nil
+	case params == E164Converter:
+		return new(e164Converter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter(EmptyString)
@@ -546,4 +551,28 @@ type Float64Converter struct{}
 // Convert implements DataConverter interface
 func (Float64Converter) Convert(in interface{}) (interface{}, error) {
 	return IfaceAsFloat64(in)
+}
+
+// e164DomainConverter extracts the domain part out of a NAPTR name record
+type e164DomainConverter struct{}
+
+func (e164DomainConverter) Convert(in interface{}) (interface{}, error) {
+	name := IfaceAsString(in)
+	if i := strings.Index(name, ".e164."); i != -1 {
+		name = name[i:]
+	}
+	return strings.Trim(name, "."), nil
+}
+
+// e164Converter extracts the E164 address out of a NAPTR name record
+type e164Converter struct{}
+
+func (e164Converter) Convert(in interface{}) (interface{}, error) {
+	name := IfaceAsString(in)
+	i := strings.Index(name, ".e164.")
+	if i == -1 {
+		return nil, errors.New("unknown format")
+	}
+	return ReverseString(
+		strings.Replace(name[:i], ".", "", -1)), nil
 }
