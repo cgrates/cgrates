@@ -551,8 +551,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 
 	if cfg.attributeSCfg.Enabled {
-		if cfg.attributeSCfg.Opts.ProcessRuns < 1 {
-			return fmt.Errorf("<%s> processRuns needs to be bigger than 0", utils.AttributeS)
+		for _, opt := range cfg.attributeSCfg.Opts.ProcessRuns {
+			if opt.Value < 1 {
+				return fmt.Errorf("<%s> processRuns needs to be bigger than 0", utils.AttributeS)
+			}
 		}
 	}
 	if cfg.chargerSCfg.Enabled {

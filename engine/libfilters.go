@@ -26,73 +26,61 @@ import (
 )
 
 // FilterFloat64CfgOpts returns the option as float64 if the filters match
-func FilterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]float64) (float64, error) {
-	for filter, opt := range opts { // iterate through the option map
-		if filter == utils.EmptyString { // if the filter key is empty continue
-			continue
-		}
-		if pass, err := fS.Pass(ctx, tnt, []string{filter}, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+func FilterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicFloat64Opt) (float64, error) {
+	for _, opt := range dynOpts { // iterate through the options
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
 		} else if pass {
-			return opt, nil
+			return opt.Value, nil
 		}
 	}
-	if opt, has := opts[utils.EmptyString]; has { // if the empty key exists in the opts map we can assume the filter is passing so we can return the option
-		return opt, nil
-	}
-	return 0, utils.ErrNotFound // return NOT_FOUND if option map is empty or none of the filters pass
+	return 0, utils.ErrNotFound // return NOT_FOUND if there are no options or none of the filters pass
 }
 
 // FilterDurationCfgOpts returns the option as time.Duration if the filters match
-func FilterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]time.Duration) (time.Duration, error) {
-	for filter, opt := range opts { // iterate through the option map
-		if filter == utils.EmptyString { // if the filter key is empty continue
-			continue
-		}
-		if pass, err := fS.Pass(ctx, tnt, []string{filter}, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+func FilterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicDurationOpt) (time.Duration, error) {
+	for _, opt := range dynOpts { // iterate through the options
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
 		} else if pass {
-			return opt, nil
+			return opt.Value, nil
 		}
 	}
-	if opt, has := opts[utils.EmptyString]; has { // if the empty key exists in the opts map we can assume the filter is passing so we can return the option
-		return opt, nil
-	}
-	return 0, utils.ErrNotFound // return NOT_FOUND if option map is empty or none of the filters pass
+	return 0, utils.ErrNotFound // return NOT_FOUND if there are no options or none of the filters pass
 }
 
 // FilterStringCfgOpts returns the option as string if the filters match
-func FilterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string]string) (string, error) {
-	for filter, opt := range opts { // iterate through the option map
-		if filter == utils.EmptyString { // if the filter key is empty continue
-			continue
-		}
-		if pass, err := fS.Pass(ctx, tnt, []string{filter}, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+func FilterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicStringOpt) (string, error) {
+	for _, opt := range dynOpts { // iterate through the options
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return utils.EmptyString, err
 		} else if pass {
-			return opt, nil
+			return opt.Value, nil
 		}
 	}
-	if opt, has := opts[utils.EmptyString]; has { // if the empty key exists in the opts map we can assume the filter is passing so we can return the option
-		return opt, nil
-	}
-	return utils.EmptyString, utils.ErrNotFound // return NOT_FOUND if option map is empty or none of the filters pass
+	return utils.EmptyString, utils.ErrNotFound // return NOT_FOUND if there are no options or none of the filters pass
 }
 
 // FilterStringSliceCfgOpts returns the option as []string if the filters match
-func FilterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, opts map[string][]string) ([]string, error) {
-	for filter, opt := range opts { // iterate through the option map
-		if filter == utils.EmptyString { // if the filter key is empty continue
-			continue
-		}
-		if pass, err := fS.Pass(ctx, tnt, []string{filter}, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+func FilterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicStringSliceOpt) ([]string, error) {
+	for _, opt := range dynOpts { // iterate through the options
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
 		} else if pass {
-			return opt, nil
+			return opt.Value, nil
 		}
 	}
-	if opt, has := opts[utils.EmptyString]; has { // if the empty key exists in the opts map we can assume the filter is passing so we can return the option
-		return opt, nil
+	return nil, utils.ErrNotFound // return NOT_FOUND if there are no options or none of the filters pass
+}
+
+// FilterIntCfgOpts returns the option as int if the filters match
+func FilterIntCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicIntOpt) (int, error) {
+	for _, opt := range dynOpts { // iterate through the options
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+			return 0, err
+		} else if pass {
+			return opt.Value, nil
+		}
 	}
-	return nil, utils.ErrNotFound // return NOT_FOUND if option map is empty or none of the filters pass
+	return 0, utils.ErrNotFound // return NOT_FOUND if there are no options or none of the filters pass
 }
