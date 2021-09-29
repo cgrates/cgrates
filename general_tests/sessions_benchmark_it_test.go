@@ -24,6 +24,7 @@ package general_tests
 import (
 	"fmt"
 	"net/rpc"
+	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -46,10 +47,11 @@ var (
 		testSesPItResetDataDB,
 		testSesPItResetStorDB,
 		testSesPItStartEngine,
+		// testSesPItStartEngineWithProfiling,
 		testSesPItRPCConn,
 		testSesPItBenchmark,
 		// testSesPItCheckAccounts,
-		testSesPItStopCgrEngine,
+		// testSesPItStopCgrEngine,
 	}
 )
 
@@ -93,6 +95,13 @@ func testSesPItResetStorDB(t *testing.T) {
 func testSesPItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sesPCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testSesPItStartEngineWithProfiling(t *testing.T) {
+	engine := exec.Command("cgr-engine", "-config_path", fmt.Sprintf("/usr/share/cgrates/conf/samples/%s", sesPCfgDir), "-cpuprof_dir=~/prof/")
+	if err := engine.Start(); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -148,7 +157,7 @@ func setAccBalance(acc string) (err error) {
 
 func initSes(n int) (err error) {
 	var accIDs []string
-	for i := 0; i < 100; i++ {
+	for i := 0; i < n; i++ {
 		accIDs = append(accIDs, fmt.Sprintf("acc%d", i))
 	}
 	_, err = getAccounts(accIDs)
@@ -183,7 +192,7 @@ func initSes(n int) (err error) {
 
 	for i := 0; i < n; i++ {
 		initArgs.CGREvent.Event[utils.AccountField] = accIDs[i]
-		initArgs.CGREvent.Event[utils.OriginID] = accIDs[i]
+		initArgs.CGREvent.Event[utils.OriginID] = utils.UUIDSha1Prefix()
 		if err = sesPRPC.Call(utils.SessionSv1InitiateSession,
 			initArgs, &initRpl); err != nil {
 			return
@@ -195,6 +204,7 @@ func initSes(n int) (err error) {
 func testSesPItBenchmark(t *testing.T) {
 	// add 2 charger profiles
 	var reply string
+	n := 100
 	args := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
@@ -228,11 +238,11 @@ func testSesPItBenchmark(t *testing.T) {
 
 	////////// charger profiles set
 
-	if err := setAccounts(t, 100); err != nil {
+	if err := setAccounts(t, n); err != nil {
 		t.Error(err)
 	}
 
-	if err := initSes(100); err != nil {
+	if err := initSes(n); err != nil {
 		t.Error(err)
 	}
 	var statusRpl map[string]interface{}
