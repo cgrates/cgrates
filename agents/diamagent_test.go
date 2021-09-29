@@ -458,7 +458,7 @@ func TestProcessRequest(t *testing.T) {
 		filterS: filters,
 		connMgr: connMgr,
 	}
-	pr, err := da.processRequest(reqProcessor, agReq)
+	pr, err := processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -475,7 +475,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(reqProcessor, agReq)
+	pr, err = processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -492,7 +492,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(reqProcessor, agReq)
+	pr, err = processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -515,7 +515,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(reqProcessor, agReq)
+	pr, err = processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -532,7 +532,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = da.processRequest(reqProcessor, agReq)
+	pr, err = processRequest(reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {

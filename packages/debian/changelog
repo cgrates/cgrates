@@ -172,6 +172,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [CacheS] Updated LoadCache and ReloadCache APIs
   * [EEs] Added *log exporter
   * [AttributeS] Added profile_runs to control how many times a profile is proccessed for an event
+  * [DNSAgent] Updated Msg handling from templates
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

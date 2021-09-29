@@ -4,18 +4,18 @@
 	"request_processors": [
 		{
 			"id": "DryRunNAPTR",
-			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.E164Address:4986517174963"],
+			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*req.Question[0].Name{*e164}:4986517174963"],
 			"flags": ["*dryrun","*log"],
 			"request_fields":[
-				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"},
+				{"tag": "ToR", "path": "*cgreq.Order", "type": "*variable", "value": "~*req.Question[0].Name"},
 			],
 			"reply_fields":[
-				{"tag": "NAPTROrder", "path": "*rep.Order", "type": "*constant", "value": "100"},
-				{"tag": "NAPTRPreference", "path": "*rep.Preference", "type": "*constant", "value": "10"},
-				{"tag": "NAPTRFlags", "path": "*rep.Flags", "type": "*constant", "value": "U"},
-				{"tag": "NAPTRService", "path": "*rep.Service", "type": "*constant", "value": "E2U+SIP"},
-				{"tag": "NAPTRRegexp", "path": "*rep.Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
-				{"tag": "NAPTRReplacement", "path": "*rep.Replacement", "type": "*constant", "value": "."},
+				{"tag": "NAPTROrder", "path": "*rep.Answer.Order", "type": "*constant", "value": "100"},
+				{"tag": "NAPTRPreference", "path": "*rep.Answer.Preference", "type": "*constant", "value": "10"},
+				{"tag": "NAPTRFlags", "path": "*rep.Answer.Flags", "type": "*constant", "value": "U"},
+				{"tag": "NAPTRService", "path": "*rep.Answer.Service", "type": "*constant", "value": "E2U+SIP"},
+				{"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
+				{"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement", "type": "*constant", "value": "."},
 			],
 		},
 	],

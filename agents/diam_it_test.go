@@ -221,6 +221,18 @@ func testDiamItResetAllDB(t *testing.T) {
 	if err := engine.InitStorDb(allCfg); err != nil {
 		t.Fatal(err)
 	}
+
+	cfgPath2 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all2")
+	allCfg2, err := config.NewCGRConfigFromPath(cfgPath2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitDataDb(allCfg2); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDb(allCfg2); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Remove data in both rating and accounting db

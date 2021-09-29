@@ -696,6 +696,8 @@ const (
 	MetaSIPURIMethod        = "*sipuri_method"
 	MetaSIPURIHost          = "*sipuri_host"
 	MetaSIPURIUser          = "*sipuri_user"
+	E164DomainConverter     = "*e164Domain"
+	E164Converter           = "*e164"
 	MetaReload              = "*reload"
 	MetaLoad                = "*load"
 	MetaFloat64             = "*float64"
@@ -713,7 +715,6 @@ const (
 	DNSAgent                = "DNSAgent"
 	TLSNoCaps               = "tls"
 	UsageID                 = "UsageID"
-	Rcode                   = "Rcode"
 	Replacement             = "Replacement"
 	Regexp                  = "Regexp"
 	Order                   = "Order"
@@ -853,6 +854,26 @@ const (
 	BalanceIDs              = "BalanceIDs"
 	MetaCostIncrement       = "*costIncrement"
 	Length                  = "Length"
+
+	// dns
+	Rcode              = "Rcode"
+	Id                 = "Id"
+	Response           = "Response"
+	Opcode             = "Opcode"
+	Authoritative      = "Authoritative"
+	Truncated          = "Truncated"
+	RecursionDesired   = "RecursionDesired"
+	RecursionAvailable = "RecursionAvailable"
+	Zero               = "Zero"
+	AuthenticatedData  = "AuthenticatedData"
+	CheckingDisabled   = "CheckingDisabled"
+	Question           = "Question"
+	Answer             = "Answer"
+	Ns                 = "Ns"
+	Extra              = "Extra"
+	Name               = "Name"
+	Qtype              = "Qtype"
+	Qclass             = "Qclass"
 )
 
 // Migrator Action

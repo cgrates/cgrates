@@ -4,7 +4,7 @@
 	"request_processors": [
 		{
 			"id": "NAPTRAttributes",
-			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.E164Address:4986517174964"],
+			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*req.Question[0].Name{*e164}:4986517174964"],
 			"flags": ["*authorize", "*attributes","*log"],
 			"request_fields":[
 				{"tag": "E164Address", "path": "*cgreq.E164Address", 
@@ -13,15 +13,15 @@
 					"type": "*constant", "value": "*attributes"}
 			],
 			"reply_fields":[
-				{"tag": "NAPTROrder", "path": "*rep.Order", 
+				{"tag": "NAPTROrder", "path": "*rep.Answer.Order", 
 					"type": "*constant", "value": "100"},
-				{"tag": "NAPTRPreference", "path": "*rep.Preference", 
+				{"tag": "NAPTRPreference", "path": "*rep.Answer.Preference", 
 					"type": "*constant", "value": "10"},
-				{"tag": "NAPTRFlags", "path": "*rep.Flags", 
+				{"tag": "NAPTRFlags", "path": "*rep.Answer.Flags", 
 					"type": "*constant", "value": "U"},
-				{"tag": "NAPTRService", "path": "*rep.Service", 
+				{"tag": "NAPTRService", "path": "*rep.Answer.Service", 
 					"type": "*constant", "value": "E2U+SIP"},
-				{"tag": "NAPTRRegex", "path": "*rep.Regexp", 
+				{"tag": "NAPTRRegex", "path": "*rep.Answer.Regexp", 
 					"type": "*variable", "value": "~*cgrep.Attributes.NAPTRAddress"},
 			],
 		},

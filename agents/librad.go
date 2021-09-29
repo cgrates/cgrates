@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"bytes"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -112,9 +114,7 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		if len(userPassAvps) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(UserPasswordAVP)
 		}
-		if userPassAvps[0].StringValue != pass {
-			return false, nil
-		}
+		return userPassAvps[0].StringValue == pass, nil
 	case flags.Has(utils.MetaCHAP):
 		chapAVPs := req.AttributesWithName(CHAPPasswordAVP, utils.EmptyString)
 		if len(chapAVPs) == 0 {
@@ -131,34 +131,25 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		if len(msResponse) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(MSCHAPResponseAVP)
 		}
-		vsaMSResponde := msResponse[0].Value.(*radigo.VSA)
-		vsaMSChallange := msChallenge[0].Value.(*radigo.VSA)
+		vsaMSResponde := msResponse[0].Value.(*radigo.VSA).RawValue
+		vsaMSChallange := msChallenge[0].Value.(*radigo.VSA).RawValue
 
 		userName := req.AttributesWithName("User-Name", utils.EmptyString)[0].StringValue
-		passwordFromAttributes := pass
 
-		if len(vsaMSChallange.RawValue) != 16 || len(vsaMSResponde.RawValue) != 50 {
+		if len(vsaMSChallange) != 16 || len(vsaMSResponde) != 50 {
 			return false, nil
 		}
-		ident := vsaMSResponde.RawValue[0]
-		peerChallenge := vsaMSResponde.RawValue[2:18]
-		peerResponse := vsaMSResponde.RawValue[26:50]
-		ntResponse, err := radigo.GenerateNTResponse(vsaMSChallange.RawValue,
-			peerChallenge, userName, passwordFromAttributes)
-		if err != nil {
+		ident := vsaMSResponde[0]
+		peerChallenge := vsaMSResponde[2:18]
+		peerResponse := vsaMSResponde[26:50]
+		ntResponse, err := radigo.GenerateNTResponse(vsaMSChallange,
+			peerChallenge, userName, pass)
+		if err != nil || !bytes.Equal(ntResponse, peerResponse) {
 			return false, err
 		}
-		if len(ntResponse) != len(peerResponse) {
-			return false, nil
-		}
-		for i := range ntResponse {
-			if ntResponse[i] != peerResponse[i] {
-				return false, nil
-			}
-		}
 
-		authenticatorResponse, err := radigo.GenerateAuthenticatorResponse(vsaMSChallange.RawValue, peerChallenge,
-			ntResponse, userName, passwordFromAttributes)
+		authenticatorResponse, err := radigo.GenerateAuthenticatorResponse(vsaMSChallange, peerChallenge,
+			ntResponse, userName, pass)
 		if err != nil {
 			return false, err
 		}
@@ -167,9 +158,9 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		copy(success[1:], authenticatorResponse)
 		// this AVP need to be added to be verified on the client side
 		rpl.AddAVPWithName(MSCHAP2SuccessAVP, string(success), MicrosoftVendor)
+		return true, nil
 	default:
 		return false, utils.NewErrMandatoryIeMissing(utils.Flags)
 	}
 
-	return true, nil
 }

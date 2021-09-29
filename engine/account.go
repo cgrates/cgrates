@@ -430,7 +430,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			moneyBalanceChecker = false
 			for _, balance := range usefulMoneyBalances {
 				partCC, debitErr := balance.debit(cd, balance.account,
-					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0,false)
+					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0, false)
 				if debitErr != nil {
 					return nil, debitErr
 				}
