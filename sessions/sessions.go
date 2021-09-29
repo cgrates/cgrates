@@ -1582,41 +1582,41 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 			sUsage = sr.TotalUsage
 		}
 		if sr.EventCost != nil {
-			if !isMsg { // in case of one time charge there is no need of corrections
-				if notCharged := sUsage - sr.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
-					if !s.chargeable {
-						sS.pause(sr, notCharged)
-					} else {
-						if sr.CD.LoopIndex > 0 {
-							sr.CD.TimeStart = sr.CD.TimeEnd
-						}
-						sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
-						sr.CD.DurationIndex += notCharged
-						cc := new(engine.CallCost)
-						if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
-							&engine.CallDescriptorWithAPIOpts{
-								CallDescriptor: sr.CD,
-								APIOpts:        s.OptsStart,
-							}, cc); err == nil {
-							sr.EventCost.Merge(
-								engine.NewEventCostFromCallCost(cc, s.CGRID,
-									sr.Event.GetStringIgnoreErrors(utils.RunID)))
-						}
+			// if !isMsg { // in case of one time charge there is no need of corrections
+			if notCharged := sUsage - sr.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
+				if !s.chargeable {
+					sS.pause(sr, notCharged)
+				} else {
+					if sr.CD.LoopIndex > 0 {
+						sr.CD.TimeStart = sr.CD.TimeEnd
 					}
-				} else if notCharged < 0 { // charged too much, try refund
-					if err = sS.refundSession(s, sRunIdx, -notCharged); err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf(
-								"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
-								utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+					sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
+					sr.CD.DurationIndex += notCharged
+					cc := new(engine.CallCost)
+					if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
+						&engine.CallDescriptorWithAPIOpts{
+							CallDescriptor: sr.CD,
+							APIOpts:        s.OptsStart,
+						}, cc); err == nil {
+						sr.EventCost.Merge(
+							engine.NewEventCostFromCallCost(cc, s.CGRID,
+								sr.Event.GetStringIgnoreErrors(utils.RunID)))
 					}
 				}
-				if err := sS.roundCost(s, sRunIdx); err != nil { // will round the cost and refund the extra increment
+			} else if notCharged < 0 { // charged too much, try refund
+				if err = sS.refundSession(s, sRunIdx, -notCharged); err != nil {
 					utils.Logger.Warning(
-						fmt.Sprintf("<%s> failed rounding  session cost for <%s>, srIdx: <%d>, error: <%s>",
+						fmt.Sprintf(
+							"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
 							utils.SessionS, s.CGRID, sRunIdx, err.Error()))
 				}
 			}
+			if err := sS.roundCost(s, sRunIdx); err != nil { // will round the cost and refund the extra increment
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> failed rounding  session cost for <%s>, srIdx: <%d>, error: <%s>",
+						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+			}
+			// }
 			// compute the event cost before saving the SessionCost
 			// add here to be applied for messages also
 			sr.EventCost.Compute()
