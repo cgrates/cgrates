@@ -18,6 +18,23 @@
     "sessions": {
         "enabled": true,
         "routes_conns": ["*internal"],
+        "cdrs_conns": ["*internal"],
+    },
+
+    "cdrs": {									// CDRs config
+        "enabled": true,
+    },
+
+    "chargers": {
+       "enabled": true,
+    },
+
+    "rates": {
+        "enabled": true,
+    },
+
+    "accounts": {
+        "enabled": true,
     },
 
     "loaders": [
@@ -33,6 +50,9 @@
 
     "routes": {
         "enabled": true,
+        "indexed_selects": false,
+        "rates_conns": ["*localhost"],						// connections to RateS
+	    "accounts_conns": ["*internal"],					// connections to AccountS
     },
 
     "admins": {

@@ -1564,7 +1564,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-
 	if !(args.GetAttributes || utils.OptAsBool(args.APIOpts, utils.OptsAttributeS) ||
 		args.GetMaxUsage || utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) ||
 		args.AuthorizeResources || utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) ||
@@ -1574,7 +1573,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	if args.APIOpts == nil {
 		args.APIOpts = make(map[string]interface{})
 	}
-
 	if args.GetAttributes ||
 		utils.OptAsBool(args.APIOpts, utils.OptsAttributeS) {
 		if args.APIOpts == nil {
@@ -1592,7 +1590,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		}
 	}
 	runEvents := make(map[string]*utils.CGREvent)
-
 	if args.GetMaxUsage || // backwards compatibility
 		utils.OptAsBool(args.APIOpts, utils.OptsChargerS) {
 		var chrgrs []*engine.ChrgSProcessEventReply
@@ -1605,7 +1602,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	} else {
 		runEvents[utils.MetaRaw] = args.CGREvent
 	}
-
 	if args.GetMaxUsage || // backwards compatibility
 		utils.OptAsBool(args.APIOpts, utils.OptsAccountS) {
 		var maxAbstracts map[string]*utils.Decimal

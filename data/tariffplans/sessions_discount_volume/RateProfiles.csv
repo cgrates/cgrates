@@ -1,16 +1,10 @@
 #Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
 
-cgrates.org,RP1,,,,,,RT_10,*prefix:~*req.Destination:10,,;10,,,,0.03,1m,1s
-cgrates.org,RP1,,,,,,RT_20,*prefix:~*req.Destination:20,,;10,,,,0.01,1m,1s
-cgrates.org,RP1,,,,,,RT_DFLT,,,,,,,0.92,1m,1s
+cgrates.org,RP_ABS_BALANCE1,,,,,,RT_ABS1,,,;10,,,,0.01,1m,1s
 
-cgrates.org,RP2,,,,,,RT_100,*prefix:~*req.Destination:100,,;10,,,,0.92,1m,1s
-cgrates.org,RP2,,,,,,RT_DFLT,,,,,,,0.95,1m,1s
+cgrates.org,RP_ABS_BALANCE2,,,,,,RT_ABS2,,,;10,,,,0.02,1m,1s
 
-cgrates.org,RP3,,,,,,RT_1,*prefix:~*req.Destination:1,,;10,,,,0.01,1m,1s
-cgrates.org,RP3,,,,,,RT_DFLT,,,,,,,0.97,1m,1s
+cgrates.org,RP_CNCRT_BALANCE1,,,,,,RT_CNC1,,,;10,,,,0.1,1m,1s
 
-cgrates.org,RP4,,,,,,RT_200,*prefix:~*req.Destination:200,,,,,,0.02,1m,1s
-cgrates.org,RP4,,,,,,RT_1002,*prefix:~*req.Destination:1002,,;10,,,,0.09,1m,1s
-cgrates.org,RP4,,,,,,RT_6,*prefix:~*req.Destination:6,,;10,,,,0.09,1m,1s
-cgrates.org,RP4,,,,,,RT_DFLT,,,,,,,0.91,1m,1s
+cgrates.org,RP_ROUTE2,,,,,,RT_ROUTE,,,;10,,,,0.05,1m,1s
+

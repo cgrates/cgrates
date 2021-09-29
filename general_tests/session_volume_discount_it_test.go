@@ -23,8 +23,6 @@ package general_tests
 import (
 	"errors"
 	"path"
-	"reflect"
-	"sort"
 	"testing"
 	"time"
 
@@ -32,10 +30,10 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
 
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,8 +50,8 @@ var (
 		testSessVolDiscStartEngine,
 		testSessVolDiscApierRpcConn,
 		testSessVolDiscLoadersLoad,
-		testSessVolDiscCheckRoutesAndRateProfiles,
-		testSessVolDiscSetAccounts,
+		testSessVolDiscAuthorizeEvent1,
+		// testSessVolDiscProcessCDR,
 		testSessVolDiscStopCgrEngine,
 	}
 )
@@ -140,238 +138,57 @@ func testSessVolDiscLoadersLoad(t *testing.T) {
 	}
 }
 
-func testSessVolDiscCheckRoutesAndRateProfiles(t *testing.T) {
-	expRp := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{},
-		MinCost:   utils.NewDecimal(0, 0),
-		MaxCost:   utils.NewDecimal(0, 0),
-		Rates: map[string]*utils.Rate{
-			"RT_10": {
-				ID:        "RT_10",
-				FilterIDs: []string{"*prefix:~*req.Destination:10"},
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(3, 2),
-						Unit:          utils.NewDecimal(60000000000, 0),
-						Increment:     utils.NewDecimal(1000000000, 0),
-					},
-				},
-			},
-			"RT_20": {
-				ID:        "RT_20",
-				FilterIDs: []string{"*prefix:~*req.Destination:20"},
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(1, 2),
-						Unit:          utils.NewDecimal(60000000000, 0),
-						Increment:     utils.NewDecimal(1000000000, 0),
-					},
-				},
-			},
-			"RT_DFLT": {
-				ID: "RT_DFLT",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(92, 2),
-						Unit:          utils.NewDecimal(60000000000, 0),
-						Increment:     utils.NewDecimal(1000000000, 0),
-					},
-				},
-			},
-		},
-	}
-	var reply *utils.RateProfile
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-				ID:     "RP1",
-			},
-		}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expRp) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRp), utils.ToJSON(reply))
+func testSessVolDiscAuthorizeEvent1(t *testing.T) {
+	var reply *engine.APIRouteProfile
+	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
+		t.Fatal(err)
 	}
 
-	expRoutePrf := &engine.APIRouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "LC1",
-		FilterIDs:         []string{},
-		Sorting:           "*lc",
-		SortingParameters: []string{},
-		Routes: []*engine.ExternalRoute{
-			{
-				ID:             "supplier1",
-				RateProfileIDs: []string{"RP1"},
-			},
-			{
-				ID:             "supplier2",
-				RateProfileIDs: []string{"RP2"},
-			},
-			{
-				ID:             "supplier3",
-				RateProfileIDs: []string{"RP3"},
-			},
-			{
-				ID:             "supplier4",
-				RateProfileIDs: []string{"RP4"},
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testSessVolDiscAuthorizeEvent1",
+		Event: map[string]interface{}{
+			utils.AccountField: "ACCOUNT1",
+			utils.Category:     "call",
+			utils.ToR:          "*voice",
+		},
+		APIOpts: map[string]interface{}{
+			utils.Usage:      time.Minute + 30*time.Second,
+			utils.OptsRouteS: true,
 		},
 	}
-	var result *engine.APIRouteProfile
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-				ID:     "LC1",
-			},
-		}, &result); err != nil {
+	// authorize the session
+	var rplyFirst sessions.V1AuthorizeReply
+	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
+		args, &rplyFirst); err != nil {
 		t.Error(err)
-	} else {
-		sort.Slice(result.Routes, func(i, j int) bool {
-			return result.Routes[i].ID < result.Routes[j].ID
-		})
-		if !reflect.DeepEqual(result, expRoutePrf) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRoutePrf), utils.ToJSON(result))
-		}
 	}
 }
 
-func testSessVolDiscSetAccounts(t *testing.T) {
-	accPrf1 := &apis.APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "ACC1",
-			FilterIDs: []string{"*string:~*req.Account:1"},
-			Balances: map[string]*utils.APIBalance{
-				"AbstractBalance1": {
-					ID:    "AbstractBalance1",
-					Type:  utils.MetaAbstract,
-					Units: float64(40 * time.Second),
-					CostIncrements: []*utils.APICostIncrement{
-						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
-							FixedFee:     utils.Float64Pointer(float64(0)),
-							RecurrentFee: utils.Float64Pointer(float64(1)),
-						},
-					},
-				},
-			},
-			Weights: ";10",
+func testSessVolDiscProcessCDR(t *testing.T) {
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestSSv1ItProcessCDR",
+		Event: map[string]interface{}{
+			utils.AccountField: "ACCOUNT1",
+			utils.Destination:  "1002",
 		},
-		APIOpts: nil,
-	}
-	accPrf2 := &apis.APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "ACC2",
-			FilterIDs: []string{"*string:~*req.Account:2"},
-			Balances: map[string]*utils.APIBalance{
-				"AbstractBalance2": {
-					ID:    "AbstractBalance2",
-					Type:  utils.MetaAbstract,
-					Units: float64(80 * time.Second),
-					CostIncrements: []*utils.APICostIncrement{
-						{
-							Increment:    utils.Float64Pointer(float64(time.Minute)),
-							FixedFee:     utils.Float64Pointer(float64(0)),
-							RecurrentFee: utils.Float64Pointer(float64(1)),
-						},
-					},
-				},
-			},
-			Weights: ";10",
+		APIOpts: map[string]interface{}{
+			utils.OptsChargerS: true,
+			utils.OptsAccountS: true,
+			utils.StartTime:    time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.Usage:        time.Minute + 30*time.Second,
 		},
-		APIOpts: nil,
 	}
-	accPrf3 := &apis.APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "ACC3",
-			FilterIDs: []string{"*string:~*req.Account:3"},
-			Balances: map[string]*utils.APIBalance{
-				"AbstractBalance3": {
-					ID:    "AbstractBalance3",
-					Type:  utils.MetaAbstract,
-					Units: float64(120 * time.Second),
-					UnitFactors: []*utils.APIUnitFactor{
-						{
-							Factor: 100,
-						},
-					},
-					CostIncrements: []*utils.APICostIncrement{
-						{
-							Increment:    utils.Float64Pointer(float64(time.Minute)),
-							FixedFee:     utils.Float64Pointer(float64(0)),
-							RecurrentFee: utils.Float64Pointer(float64(1)),
-						},
-					},
-				},
-			},
-			Weights: ";10",
-		},
-		APIOpts: nil,
+
+	var rply string
+	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
+		args, &rply); err != nil {
+		t.Fatal(err)
 	}
-	accPrf4 := &apis.APIAccountWithAPIOpts{
-		APIAccount: &utils.APIAccount{
-			Tenant:    "cgrates.org",
-			ID:        "ACC3",
-			FilterIDs: []string{"*string:~*req.Account:4"},
-			Balances: map[string]*utils.APIBalance{
-				"AbstractBalance4": {
-					ID:    "AbstractBalance4",
-					Type:  utils.MetaAbstract,
-					Units: float64(30 * time.Second),
-					UnitFactors: []*utils.APIUnitFactor{
-						{
-							Factor: 100,
-						},
-					},
-					CostIncrements: []*utils.APICostIncrement{
-						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
-							FixedFee:     utils.Float64Pointer(float64(0.01)),
-							RecurrentFee: utils.Float64Pointer(float64(2)),
-						},
-					},
-				},
-			},
-			Weights: ";10",
-		},
-		APIOpts: nil,
-	}
-	var reply string
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf1, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
-	}
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf2, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
-	}
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf3, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
-	}
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		accPrf4, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error(err)
+	if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
 	}
 }
 
