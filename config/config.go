@@ -123,9 +123,13 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ClientDictionaries: make(map[string]string),
 			ClientSecrets:      make(map[string]string),
 		},
-		dnsAgentCfg:   new(DNSAgentCfg),
-		attributeSCfg: &AttributeSCfg{Opts: &AttributesOpts{}},
-		chargerSCfg:   new(ChargerSCfg),
+		dnsAgentCfg: new(DNSAgentCfg),
+		attributeSCfg: &AttributeSCfg{Opts: &AttributesOpts{
+			AttributeIDs: []*utils.DynamicStringSliceOpt{},
+			ProcessRuns:  []*utils.DynamicIntOpt{},
+			ProfileRuns:  []*utils.DynamicIntOpt{},
+		}},
+		chargerSCfg: new(ChargerSCfg),
 		resourceSCfg: &ResourceSConfig{Opts: &ResourcesOpts{
 			UsageID:  make(map[string]string),
 			UsageTTL: make(map[string]time.Duration),
@@ -155,7 +159,10 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		ersCfg:       new(ERsCfg),
 		eesCfg:       &EEsCfg{Cache: make(map[string]*CacheParamCfg)},
 		rateSCfg: &RateSCfg{Opts: &RatesOpts{
-			RateProfileIDs: make(map[string][]string),
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{},
+			StartTime:      []*utils.DynamicStringOpt{},
+			Usage:          []*utils.DynamicDecimalBigOpt{},
+			IntervalStart:  []*utils.DynamicDecimalBigOpt{},
 		}},
 		actionSCfg: &ActionSCfg{Opts: &ActionsOpts{
 			ActionProfileIDs: make(map[string][]string),
@@ -165,7 +172,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		apiBanCfg:   new(APIBanCfg),
 		coreSCfg:    new(CoreSCfg),
 		accountSCfg: &AccountSCfg{Opts: &AccountsOpts{
-			AccountIDs: make(map[string][]string),
+			AccountIDs: []*utils.DynamicStringSliceOpt{},
+			Usage:      []*utils.DynamicDecimalBigOpt{},
 		}},
 		configDBCfg: &ConfigDBCfg{
 			Opts: make(map[string]interface{}),

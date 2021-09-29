@@ -19,14 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
 type AccountsOpts struct {
-	AccountIDs map[string][]string
-	Usage      *decimal.Big
+	AccountIDs []*utils.DynamicStringSliceOpt
+	Usage      []*utils.DynamicDecimalBigOpt
 }
 
 // AccountSCfg is the configuration of ActionS
@@ -49,13 +51,21 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 	if jsnCfg == nil {
 		return nil
 	}
-	if jsnCfg.AccountIDs != nil {
-		accOpts.AccountIDs = jsnCfg.AccountIDs
+	for filters, value := range jsnCfg.AccountIDs {
+		accOpts.AccountIDs = append(accOpts.AccountIDs, &utils.DynamicStringSliceOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     value,
+		})
 	}
-	if jsnCfg.Usage != nil {
-		if accOpts.Usage, err = utils.StringAsBig(*jsnCfg.Usage); err != nil {
+	for filters, value := range jsnCfg.Usage {
+		var strVal *decimal.Big
+		if strVal, err = utils.StringAsBig(value); err != nil {
 			return
 		}
+		accOpts.Usage = append(accOpts.Usage, &utils.DynamicDecimalBigOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     strVal,
+		})
 	}
 	return nil
 }
@@ -117,8 +127,8 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS AccountSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaAccountIDsCfg: acS.Opts.AccountIDs,
-		utils.MetaUsage:         acS.Opts.Usage,
+		utils.MetaAccountIDsCfg: utils.DynamicStringSliceOptsToMap(acS.Opts.AccountIDs),
+		utils.MetaUsage:         utils.DynamicDecimalBigOptsToMap(acS.Opts.Usage),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        acS.Enabled,
@@ -152,9 +162,17 @@ func (acS AccountSCfg) AsMapInterface(string) interface{} {
 }
 
 func (accOpts *AccountsOpts) Clone() *AccountsOpts {
+	var accIDs []*utils.DynamicStringSliceOpt
+	if accOpts.AccountIDs != nil {
+		accIDs = utils.CloneDynamicStringSliceOpt(accOpts.AccountIDs)
+	}
+	var usage []*utils.DynamicDecimalBigOpt
+	if accOpts.Usage != nil {
+		usage = utils.CloneDynamicDecimalBigOpt(accOpts.Usage)
+	}
 	return &AccountsOpts{
-		AccountIDs: accOpts.AccountIDs,
-		Usage:      accOpts.Usage,
+		AccountIDs: accIDs,
+		Usage:      usage,
 	}
 }
 func (AccountSCfg) SName() string             { return AccountSJSON }
@@ -193,7 +211,7 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 
 type AccountsOptsJson struct {
 	AccountIDs map[string][]string `json:"*accountIDs"`
-	Usage      *string             `json:"*usage"`
+	Usage      map[string]string   `json:"*usage"`
 }
 
 // Account service config section
@@ -216,9 +234,11 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 	if d == nil {
 		d = new(AccountsOptsJson)
 	}
-	d.AccountIDs = diffMapStringStringSlice(d.AccountIDs, v1.AccountIDs, v2.AccountIDs)
-	if v1.Usage.Cmp(v2.Usage) != 0 {
-		d.Usage = utils.StringPointer(v2.Usage.String())
+	if !utils.DynamicStringSliceOptEqual(v1.AccountIDs, v2.AccountIDs) {
+		d.AccountIDs = utils.DynamicStringSliceOptsToMap(v2.AccountIDs)
+	}
+	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
+		d.Usage = utils.DynamicDecimalBigOptsToMap(v2.Usage)
 	}
 	return d
 }

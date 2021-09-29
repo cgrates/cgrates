@@ -1853,7 +1853,12 @@ func TestAttributeSConfig(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 		Opts: &AttributesOpts{
-			ProcessRuns: 1,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     1,
+				},
+			},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -5917,7 +5922,12 @@ func TestSetCfgInDb(t *testing.T) {
 		SuffixIndexedFields: &[]string{"field1"},
 		PrefixIndexedFields: &[]string{"field1"},
 		Opts: &AttributesOpts{
-			ProcessRuns: 2,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
 		},
 		NestedFields: true,
 	}
@@ -5935,7 +5945,9 @@ func TestSetCfgInDb(t *testing.T) {
 				Suffix_indexed_fields: &[]string{"field2"},
 				Prefix_indexed_fields: &[]string{"field2"},
 				Opts: &AttributesOptsJson{
-					ProcessRuns: utils.IntPointer(3),
+					ProcessRuns: map[string]int{
+						utils.EmptyString: 3,
+					},
 				},
 				Nested_fields: utils.BoolPointer(false),
 			},
@@ -5951,7 +5963,9 @@ func TestSetCfgInDb(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"field2"},
 		Prefix_indexed_fields: &[]string{"field2"},
 		Opts: &AttributesOptsJson{
-			ProcessRuns: utils.IntPointer(3),
+			ProcessRuns: map[string]int{
+				utils.EmptyString: 3,
+			},
 		},
 		Nested_fields: utils.BoolPointer(false),
 	}
@@ -5983,7 +5997,12 @@ func TestSetNilCfgInDb(t *testing.T) {
 		SuffixIndexedFields: &[]string{"field1"},
 		PrefixIndexedFields: &[]string{"field1"},
 		Opts: &AttributesOpts{
-			ProcessRuns: 2,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
 		},
 		NestedFields: true,
 	}
@@ -6026,7 +6045,12 @@ func TestReloadCfgInDb(t *testing.T) {
 		SuffixIndexedFields: &[]string{"field1"},
 		PrefixIndexedFields: &[]string{"field1"},
 		Opts: &AttributesOpts{
-			ProcessRuns: 2,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
 		},
 		NestedFields: true,
 	}
@@ -6044,7 +6068,9 @@ func TestReloadCfgInDb(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"field2"},
 		Prefix_indexed_fields: &[]string{"field2"},
 		Opts: &AttributesOptsJson{
-			ProcessRuns: utils.IntPointer(3),
+			ProcessRuns: map[string]int{
+				utils.EmptyString: 3,
+			},
 		},
 		Nested_fields: utils.BoolPointer(false),
 	}
@@ -6059,7 +6085,12 @@ func TestReloadCfgInDb(t *testing.T) {
 		SuffixIndexedFields: &[]string{"field2"},
 		PrefixIndexedFields: &[]string{"field2"},
 		Opts: &AttributesOpts{
-			ProcessRuns: 3,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     3,
+				},
+			},
 		},
 		NestedFields: false,
 	}

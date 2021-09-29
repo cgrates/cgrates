@@ -19,14 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type AttributesOpts struct {
-	AttributeIDs []string
-	ProcessRuns  int
-	ProfileRuns  int
+	AttributeIDs []*utils.DynamicStringSliceOpt
+	ProcessRuns  []*utils.DynamicIntOpt
+	ProfileRuns  []*utils.DynamicIntOpt
 }
 
 // AttributeSCfg is the configuration of attribute service
@@ -47,14 +49,23 @@ func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) (err
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.AttributeIDs != nil {
-		attrOpts.AttributeIDs = *jsnCfg.AttributeIDs
+	for filters, value := range jsnCfg.AttributeIDs {
+		attrOpts.AttributeIDs = append(attrOpts.AttributeIDs, &utils.DynamicStringSliceOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     value,
+		})
 	}
-	if jsnCfg.ProcessRuns != nil {
-		attrOpts.ProcessRuns = *jsnCfg.ProcessRuns
+	for filters, value := range jsnCfg.ProcessRuns {
+		attrOpts.ProcessRuns = append(attrOpts.ProcessRuns, &utils.DynamicIntOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     value,
+		})
 	}
-	if jsnCfg.ProfileRuns != nil {
-		attrOpts.ProfileRuns = *jsnCfg.ProfileRuns
+	for filters, value := range jsnCfg.ProfileRuns {
+		attrOpts.ProfileRuns = append(attrOpts.ProfileRuns, &utils.DynamicIntOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     value,
+		})
 	}
 	return
 }
@@ -107,15 +118,16 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (alS AttributeSCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaAttributeIDsCfg: utils.DynamicStringSliceOptsToMap(alS.Opts.AttributeIDs),
+		utils.MetaProcessRunsCfg:  utils.DynamicIntOptsToMap(alS.Opts.ProcessRuns),
+		utils.MetaProfileRunsCfg:  utils.DynamicIntOptsToMap(alS.Opts.ProfileRuns),
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.NestedFieldsCfg:   alS.NestedFields,
-		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAttributeIDsCfg: alS.Opts.AttributeIDs,
-			utils.MetaProcessRunsCfg:  alS.Opts.ProcessRuns,
-			utils.MetaProfileRunsCfg:  alS.Opts.ProfileRuns,
-		},
+		utils.OptsCfg:           opts,
 	}
 	if alS.StringIndexedFields != nil {
 		mp[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*alS.StringIndexedFields)
@@ -140,14 +152,22 @@ func (alS AttributeSCfg) AsMapInterface(string) interface{} {
 }
 
 func (attrOpts AttributesOpts) Clone() *AttributesOpts {
-	var attrIDs []string
+	var attrIDs []*utils.DynamicStringSliceOpt
 	if attrOpts.AttributeIDs != nil {
-		attrIDs = utils.CloneStringSlice(attrOpts.AttributeIDs)
+		attrIDs = utils.CloneDynamicStringSliceOpt(attrOpts.AttributeIDs)
+	}
+	var processRuns []*utils.DynamicIntOpt
+	if attrOpts.ProcessRuns != nil {
+		processRuns = utils.CloneDynamicIntOpt(attrOpts.ProcessRuns)
+	}
+	var profileRuns []*utils.DynamicIntOpt
+	if attrOpts.ProfileRuns != nil {
+		profileRuns = utils.CloneDynamicIntOpt(attrOpts.ProfileRuns)
 	}
 	return &AttributesOpts{
 		AttributeIDs: attrIDs,
-		ProcessRuns:  attrOpts.ProcessRuns,
-		ProfileRuns:  attrOpts.ProfileRuns,
+		ProcessRuns:  processRuns,
+		ProfileRuns:  profileRuns,
 	}
 }
 
@@ -185,9 +205,9 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 }
 
 type AttributesOptsJson struct {
-	AttributeIDs *[]string `json:"*attributeIDs"`
-	ProcessRuns  *int      `json:"*processRuns"`
-	ProfileRuns  *int      `json:"*profileRuns"`
+	AttributeIDs map[string][]string `json:"*attributeIDs"`
+	ProcessRuns  map[string]int      `json:"*processRuns"`
+	ProfileRuns  map[string]int      `json:"*profileRuns"`
 }
 
 // Attribute service config section
@@ -208,14 +228,14 @@ func diffAttributesOptsJsonCfg(d *AttributesOptsJson, v1, v2 *AttributesOpts) *A
 	if d == nil {
 		d = new(AttributesOptsJson)
 	}
-	if !utils.SliceStringEqual(v1.AttributeIDs, v2.AttributeIDs) {
-		d.AttributeIDs = utils.SliceStringPointer(v2.AttributeIDs)
+	if !utils.DynamicStringSliceOptEqual(v1.AttributeIDs, v2.AttributeIDs) {
+		d.AttributeIDs = utils.DynamicStringSliceOptsToMap(v2.AttributeIDs)
 	}
-	if v1.ProcessRuns != v2.ProcessRuns {
-		d.ProcessRuns = utils.IntPointer(v2.ProcessRuns)
+	if !utils.DynamicIntOptEqual(v1.ProcessRuns, v2.ProcessRuns) {
+		d.ProcessRuns = utils.DynamicIntOptsToMap(v2.ProcessRuns)
 	}
-	if v1.ProfileRuns != v2.ProfileRuns {
-		d.ProfileRuns = utils.IntPointer(v2.ProfileRuns)
+	if !utils.DynamicIntOptEqual(v1.ProfileRuns, v2.ProfileRuns) {
+		d.ProfileRuns = utils.DynamicIntOptsToMap(v2.ProfileRuns)
 	}
 	return d
 }

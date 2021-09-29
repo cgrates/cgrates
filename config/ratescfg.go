@@ -19,16 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
 type RatesOpts struct {
-	RateProfileIDs map[string][]string
-	StartTime      string
-	Usage          *decimal.Big
-	IntervalStart  *decimal.Big
+	RateProfileIDs []*utils.DynamicStringSliceOpt
+	StartTime      []*utils.DynamicStringOpt
+	Usage          []*utils.DynamicDecimalBigOpt
+	IntervalStart  []*utils.DynamicDecimalBigOpt
 }
 
 // RateSCfg the rates config section
@@ -61,21 +63,37 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
-	if jsnCfg.RateProfileIDs != nil {
-		rateOpts.RateProfileIDs = jsnCfg.RateProfileIDs
+	for filters, value := range jsnCfg.RateProfileIDs {
+		rateOpts.RateProfileIDs = append(rateOpts.RateProfileIDs, &utils.DynamicStringSliceOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     value,
+		})
 	}
-	if jsnCfg.StartTime != nil {
-		rateOpts.StartTime = *jsnCfg.StartTime
+	for filters, value := range jsnCfg.StartTime {
+		rateOpts.StartTime = append(rateOpts.StartTime, &utils.DynamicStringOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     value,
+		})
 	}
-	if jsnCfg.Usage != nil {
-		if rateOpts.Usage, err = utils.StringAsBig(*jsnCfg.Usage); err != nil {
+	for filters, value := range jsnCfg.Usage {
+		var strVal *decimal.Big
+		if strVal, err = utils.StringAsBig(value); err != nil {
 			return
 		}
+		rateOpts.Usage = append(rateOpts.Usage, &utils.DynamicDecimalBigOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     strVal,
+		})
 	}
-	if jsnCfg.IntervalStart != nil {
-		if rateOpts.IntervalStart, err = utils.StringAsBig(*jsnCfg.IntervalStart); err != nil {
+	for filters, value := range jsnCfg.IntervalStart {
+		var strVal *decimal.Big
+		if strVal, err = utils.StringAsBig(value); err != nil {
 			return
 		}
+		rateOpts.IntervalStart = append(rateOpts.IntervalStart, &utils.DynamicDecimalBigOpt{
+			FilterIDs: strings.Split(filters, utils.InfieldSep),
+			Value:     strVal,
+		})
 	}
 
 	return nil
@@ -131,10 +149,10 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaRateProfileIDsCfg: rCfg.Opts.RateProfileIDs,
-		utils.MetaStartTime:         rCfg.Opts.StartTime,
-		utils.MetaUsage:             rCfg.Opts.Usage,
-		utils.MetaIntervalStartCfg:  rCfg.Opts.IntervalStart,
+		utils.MetaRateProfileIDsCfg: utils.DynamicStringSliceOptsToMap(rCfg.Opts.RateProfileIDs),
+		utils.MetaStartTime:         utils.DynamicStringOptsToMap(rCfg.Opts.StartTime),
+		utils.MetaUsage:             utils.DynamicDecimalBigOptsToMap(rCfg.Opts.Usage),
+		utils.MetaIntervalStartCfg:  utils.DynamicDecimalBigOptsToMap(rCfg.Opts.IntervalStart),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:            rCfg.Enabled,
@@ -170,11 +188,27 @@ func (RateSCfg) SName() string              { return RateSJSON }
 func (rCfg RateSCfg) CloneSection() Section { return rCfg.Clone() }
 
 func (rateOpts *RatesOpts) Clone() *RatesOpts {
+	var ratePrfIDs []*utils.DynamicStringSliceOpt
+	if rateOpts.RateProfileIDs != nil {
+		ratePrfIDs = utils.CloneDynamicStringSliceOpt(rateOpts.RateProfileIDs)
+	}
+	var startTime []*utils.DynamicStringOpt
+	if rateOpts.StartTime != nil {
+		startTime = utils.CloneDynamicStringOpt(rateOpts.StartTime)
+	}
+	var usage []*utils.DynamicDecimalBigOpt
+	if rateOpts.Usage != nil {
+		usage = utils.CloneDynamicDecimalBigOpt(rateOpts.Usage)
+	}
+	var intervalStart []*utils.DynamicDecimalBigOpt
+	if rateOpts.IntervalStart != nil {
+		intervalStart = utils.CloneDynamicDecimalBigOpt(rateOpts.IntervalStart)
+	}
 	return &RatesOpts{
-		RateProfileIDs: rateOpts.RateProfileIDs,
-		StartTime:      rateOpts.StartTime,
-		Usage:          rateOpts.Usage,
-		IntervalStart:  rateOpts.IntervalStart,
+		RateProfileIDs: ratePrfIDs,
+		StartTime:      startTime,
+		Usage:          usage,
+		IntervalStart:  intervalStart,
 	}
 }
 
@@ -213,9 +247,9 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 
 type RatesOptsJson struct {
 	RateProfileIDs map[string][]string `json:"*rateProfileIDs"`
-	StartTime      *string             `json:"*startTime"`
-	Usage          *string             `json:"*usage"`
-	IntervalStart  *string             `json:"*intervalStart"`
+	StartTime      map[string]string   `json:"*startTime"`
+	Usage          map[string]string   `json:"*usage"`
+	IntervalStart  map[string]string   `json:"*intervalStart"`
 }
 
 type RateSJsonCfg struct {
@@ -238,15 +272,17 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 	if d == nil {
 		d = new(RatesOptsJson)
 	}
-	d.RateProfileIDs = diffMapStringStringSlice(d.RateProfileIDs, v1.RateProfileIDs, v2.RateProfileIDs)
-	if v1.StartTime != v2.StartTime {
-		d.StartTime = utils.StringPointer(v2.StartTime)
+	if !utils.DynamicStringSliceOptEqual(v1.RateProfileIDs, v2.RateProfileIDs) {
+		d.RateProfileIDs = utils.DynamicStringSliceOptsToMap(v2.RateProfileIDs)
 	}
-	if v1.Usage.Cmp(v2.Usage) != 0 {
-		d.Usage = utils.StringPointer(v2.Usage.String())
+	if !utils.DynamicStringOptEqual(v1.StartTime, v2.StartTime) {
+		d.StartTime = utils.DynamicStringOptsToMap(v2.StartTime)
 	}
-	if v1.IntervalStart.Cmp(v2.IntervalStart) != 0 {
-		d.IntervalStart = utils.StringPointer(v2.IntervalStart.String())
+	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
+		d.Usage = utils.DynamicDecimalBigOptsToMap(v2.Usage)
+	}
+	if !utils.DynamicDecimalBigOptEqual(v1.IntervalStart, v2.IntervalStart) {
+		d.IntervalStart = utils.DynamicDecimalBigOptsToMap(v2.IntervalStart)
 	}
 	return d
 }

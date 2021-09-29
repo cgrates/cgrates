@@ -670,9 +670,15 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								// 
-		// "*attributeIDs": [],				//
-		"*processRuns": 1,					// number of run loops when processing event
-		"*profileRuns": 0,					// number of runs a profile will process during the event
+		"*attributeIDs": { 					//
+			"": [],
+		},				
+		"*processRuns": {					// number of run loops when processing event
+			"": 1,
+		},					
+		"*profileRuns": {					// number of runs a profile will process during the event
+			"": 0,
+		},					
 	},
 },
 
@@ -1125,9 +1131,15 @@ const CGRATES_CFG_JSON = `
 		"*rateProfileIDs": {				//
 			"": [],
 		},			
-		"*startTime": "*now",				//
-		"*usage": "1m",						//	
-		"*intervalStart": "0",				//
+		"*startTime": {						//
+			"": "*now",
+		},
+		"*usage": {							//
+			"": "1m",
+		},
+		"*intervalStart": {					//
+			"": "0",
+		},
 	},
 },
 
