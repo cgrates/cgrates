@@ -988,7 +988,12 @@ func TestConfigSanityAttributesCfg(t *testing.T) {
 	cfg.attributeSCfg = &AttributeSCfg{
 		Enabled: true,
 		Opts: &AttributesOpts{
-			ProcessRuns: 0,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     0,
+				},
+			},
 		},
 	}
 	expected := "<AttributeS> processRuns needs to be bigger than 0"

@@ -771,8 +771,12 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &AttributesOptsJson{
-			ProcessRuns: utils.IntPointer(1),
-			ProfileRuns: utils.IntPointer(0),
+			ProcessRuns: map[string]int{
+				utils.EmptyString: 1,
+			},
+			ProfileRuns: map[string]int{
+				utils.EmptyString: 0,
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

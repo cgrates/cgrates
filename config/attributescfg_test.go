@@ -47,7 +47,12 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
-			ProcessRuns: 1,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     1,
+				},
+			},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -207,7 +212,12 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
-			ProcessRuns: 1,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     1,
+				},
+			},
 		},
 	}
 
@@ -222,7 +232,12 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: nil,
 		NestedFields:        false,
 		Opts: &AttributesOpts{
-			ProcessRuns: 1,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				&utils.DynamicIntOpt{
+					FilterIDs: []string{},
+					Value:     1,
+				},
+			},
 		},
 	}
 
