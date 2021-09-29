@@ -587,6 +587,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 			"Method": "RALsV1.Ping",
 		},
 	}
+	time.Sleep(10 * time.Millisecond)
 	var ids []string
 	eIDs := []string{"TH_CGRRPC"}
 	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: ev}, &ids); err != nil {

@@ -368,7 +368,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	time.Sleep(1*time.Second + 500*time.Millisecond)
 
 	if err := rpcRpc.Call(utils.SessionSv1InitiateSession,
-		args, &rply); err == nil || !(err.Error() == "RALS_ERROR:ACCOUNT_DISABLED" || err.Error() == utils.NewErrRALs(utils.ErrExists).Error()) { // ErrExist -> initSession twice
+		args, &rply); err == nil || !(err.Error() == "RALS_ERROR:ACCOUNT_DISABLED" || err.Error() == (utils.ErrExists).Error()) { // ErrExist -> initSession twice
 		t.Error("Unexpected error returned", err)
 	}
 
