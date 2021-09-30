@@ -704,9 +704,15 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								//	
-		"*usageID": {"": ""},				//
-		"*usageTTL": {"": "72h"},			//
-		"*units": {"": 1},					//
+		"*usageID": {						//
+			"": "",
+		},				
+		"*usageTTL": {						//
+			"": "72h",
+		},			
+		"*units": {							//
+			"": 1,
+		},					
 	},
 },
 
@@ -760,10 +766,18 @@ const CGRATES_CFG_JSON = `
 	"accounts_conns": [],					// connections to AccountS
 	"default_ratio":1,						// default ratio used in case of *load strategy
 	"opts":{								//	
-		"*context": "*routes",				//
-		"*profileCount": 1,					//			
-		"*ignoreErrors": false,				//
-		"*maxCost": "",						//
+		"*context": {						//
+			"": "*routes",
+		},
+		"*profileCount": {					//
+			"": 1,
+		},
+		"*ignoreErrors": {					//
+			"": false,
+		},
+		"*maxCost": {						//
+			"": "",
+		},
 		// "*limit": 1,						//			
 		// "*offset": 1,					//
 	},
@@ -1297,7 +1311,9 @@ const CGRATES_CFG_JSON = `
 		"*accountIDs": {					//
 			"": [],
 		},				
-		"*usage": "72h",					//
+		"*usage": {							//
+			"": "72h",			
+		},
 	},
 },
 
