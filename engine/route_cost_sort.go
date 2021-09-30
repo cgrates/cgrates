@@ -58,6 +58,13 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			ev.APIOpts[utils.OptsAccountsAccountIDs] = utils.CloneStringSlice(route.AccountIDs)
 			if err = connMgr.Call(ctx, cfg.RouteSCfg().AccountSConns,
 				utils.AccountSv1MaxAbstracts, ev, &acntCost); err != nil {
+				if extraOpts.ignoreErrors {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
+							utils.RouteS, route.ID, err.Error()))
+					continue
+				}
+				err = utils.NewErrAccountS(err)
 				return
 			}
 
@@ -80,6 +87,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 							utils.RouteS, route.ID, err.Error()))
 					continue
 				}
+				err = utils.NewErrRateS(err)
 				return
 			}
 			cost, _ = rpCost.Cost.Float64()

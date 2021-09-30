@@ -25,6 +25,29 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+func TestConvertDecimalToFloat(t *testing.T) {
+	decm := NewDecimal(9999000000000000, 13)
+	if conv, ok := decm.Float64(); !ok {
+		t.Errorf("Cannot convert decimal: %v to float64: %v", decm, conv)
+	} else {
+		t.Error(conv)
+	}
+
+	decm = NewDecimal(9999, 12)
+	if conv, ok := decm.Float64(); !ok {
+		t.Errorf("Cannot convert decimal: %v to float64", decm)
+	} else {
+		t.Error(conv)
+	}
+
+	decm = NewDecimal(1000000000000000, 16)
+	if conv, ok := decm.Float64(); !ok {
+		t.Errorf("Cannot convert decimal: %v to float64", decm)
+	} else {
+		t.Error(conv)
+	}
+}
+
 func TestNewDecimalDivide(t *testing.T) {
 	x := new(decimal.Big).SetUint64(10)
 	y := new(decimal.Big).SetUint64(5)

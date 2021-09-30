@@ -2255,6 +2255,7 @@ func (apm AccountMdls) AsTPAccount() (result []*utils.TPAccount, err error) {
 			if tp.BalanceFilterIDs != utils.EmptyString {
 				aPrf.Balances[tp.BalanceID].FilterIDs = utils.NewStringSet(strings.Split(tp.BalanceFilterIDs, utils.InfieldSep)).AsSlice()
 			}
+			// cost increment mdl: fltr1&fltr2;incr;fixed;recurrent
 			if tp.BalanceCostIncrements != utils.EmptyString {
 				costIncrements := make([]*utils.TPBalanceCostIncrement, 0)
 				sls := strings.Split(tp.BalanceCostIncrements, utils.InfieldSep)
