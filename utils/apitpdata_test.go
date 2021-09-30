@@ -516,7 +516,7 @@ func TestStartTimeNow(t *testing.T) {
 		},
 	}
 	timpulet1 := time.Now()
-	result, err := ev.StartTime(MetaNow, "")
+	result, err := ev.StartTime(MetaNow, "", OptsRatesStartTime, MetaStartTime)
 	timpulet2 := time.Now()
 	if err != nil {
 		t.Errorf("Expected <nil> , received <%+v>", err)
@@ -536,7 +536,7 @@ func TestStartTime(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	if result, err := ev.StartTime(MetaNow, ""); err != nil {
+	if result, err := ev.StartTime(MetaNow, "", OptsRatesStartTime, MetaStartTime); err != nil {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
 		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
@@ -550,7 +550,7 @@ func TestStartTime2(t *testing.T) {
 		Event:   map[string]interface{}{},
 		APIOpts: map[string]interface{}{},
 	}
-	if result, err := ev.StartTime("2018-01-07T17:00:10Z", ""); err != nil {
+	if result, err := ev.StartTime("2018-01-07T17:00:10Z", "", OptsRatesStartTime, MetaStartTime); err != nil {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
 		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
@@ -567,7 +567,7 @@ func TestStartTimeError(t *testing.T) {
 			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
 		},
 	}
-	_, err := ev.StartTime(MetaNow, "")
+	_, err := ev.StartTime(MetaNow, "", OptsRatesStartTime, MetaStartTime)
 	if err == nil && err.Error() != "received <Unsupported time format" {
 		t.Errorf("Expected <nil> , received <%+v>", err)
 	}
