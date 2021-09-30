@@ -51,6 +51,8 @@ var sTests = []func(t *testing.T){
 	testITFlush,
 	testITIsDBEmpty,
 	testITTestStoreFilterIndexesWithTransID,
+	testITFlush,
+	testITIsDBEmpty,
 	testITTestStoreFilterIndexesWithTransID2,
 	testITFlush,
 	testITIsDBEmpty,
@@ -651,6 +653,7 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 	} else if !reflect.DeepEqual(eIdx, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdx, rcv)
 	}
+
 }
 
 func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
