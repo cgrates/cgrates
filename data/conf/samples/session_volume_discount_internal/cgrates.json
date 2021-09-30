@@ -31,10 +31,13 @@
 
     "rates": {
         "enabled": true,
+        "rate_indexed_selects": false,
     },
 
     "accounts": {
         "enabled": true,
+        "rates_conns": ["*localhost"],
+        "indexed_selects": false,
     },
 
     "loaders": [
@@ -52,7 +55,7 @@
         "enabled": true,
         "indexed_selects": false,
         "rates_conns": ["*localhost"],						// connections to RateS
-	    "accounts_conns": ["*internal"],					// connections to AccountS
+	    "accounts_conns": ["*localhost"],					// connections to AccountS
     },
 
     "admins": {
