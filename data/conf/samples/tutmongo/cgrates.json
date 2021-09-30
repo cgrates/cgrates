@@ -38,12 +38,13 @@
 
 "schedulers": {
 	"enabled": true,
-	"cdrs_conns": ["*localhost"],
+	"cdrs_conns": ["*internal"],
 },
 
 
 "cdrs": {
 	"enabled": true,
+	"chargers_conns":["*internal"],
 },
 
 
@@ -64,6 +65,11 @@
 			{"path": "*exp.MatchedDestinationID", "type": "*composed", "value": "~*req.CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
 		],
 	},
+},
+
+
+"attributes": {
+	"enabled": true,
 },
 
 
@@ -95,19 +101,18 @@
 
 "suppliers": {
 	"enabled": true,
-	"stats_conns": ["*localhost"],
-	"resources_conns": ["*localhost"],
-	"rals_conns": ["*localhost"],
-},
-
-
-"attributes": {							// Attribute service
-	"enabled": true,				// starts Attribute service: <true|false>.
+	"prefix_indexed_fields":["Destination"],
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"rals_conns": ["*internal"],
 },
 
 
 "sessions": {
 	"enabled": true,
+	"suppliers_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
