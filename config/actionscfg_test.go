@@ -56,8 +56,10 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1", "val2"},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}
@@ -186,8 +188,10 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}
@@ -207,8 +211,10 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}

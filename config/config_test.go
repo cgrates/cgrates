@@ -694,14 +694,20 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		Opts: &ResourcesOpts{
-			UsageID: map[string]string{
-				utils.EmptyString: utils.EmptyString,
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: utils.EmptyString,
+				},
 			},
-			UsageTTL: map[string]time.Duration{
-				utils.EmptyString: 72 * time.Hour,
+			UsageTTL: []*utils.DynamicDurationOpt{
+				{
+					Value: 72 * time.Hour,
+				},
 			},
-			Units: map[string]float64{
-				utils.EmptyString: 1,
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
 			},
 		},
 	}
@@ -721,8 +727,10 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		Opts: &StatsOpts{
-			StatIDs: map[string][]string{
-				utils.EmptyString: {},
+			StatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}
@@ -741,8 +749,10 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		ActionSConns:        []string{},
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: map[string][]string{
-				utils.EmptyString: {},
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}
@@ -765,10 +775,26 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		AccountSConns:       []string{},
 		DefaultRatio:        1,
 		Opts: &RoutesOpts{
-			Context:      utils.MetaRoutes,
-			ProfileCount: float64(1),
-			IgnoreErrors: false,
-			MaxCost:      utils.EmptyString,
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaRoutes,
+				},
+			},
+			ProfileCount: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
+			},
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: utils.EmptyString,
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.routeSCfg) {
@@ -1900,14 +1926,20 @@ func TestResourceSConfig(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 		Opts: &ResourcesOpts{
-			UsageID: map[string]string{
-				utils.EmptyString: utils.EmptyString,
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: utils.EmptyString,
+				},
 			},
-			UsageTTL: map[string]time.Duration{
-				utils.EmptyString: 72 * time.Hour,
+			UsageTTL: []*utils.DynamicDurationOpt{
+				{
+					Value: 72 * time.Hour,
+				},
 			},
-			Units: map[string]float64{
-				utils.EmptyString: 1,
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
 			},
 		},
 	}
@@ -1932,8 +1964,10 @@ func TestStatSConfig(t *testing.T) {
 		SuffixIndexedFields:    &[]string{},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			StatIDs: map[string][]string{
-				utils.EmptyString: {},
+			StatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}
@@ -1957,8 +1991,10 @@ func TestThresholdSConfig(t *testing.T) {
 		NestedFields:        false,
 		ActionSConns:        []string{},
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: map[string][]string{
-				utils.EmptyString: {},
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}
@@ -1986,10 +2022,26 @@ func TestRouteSConfig(t *testing.T) {
 		DefaultRatio:        1,
 		NestedFields:        false,
 		Opts: &RoutesOpts{
-			Context:      utils.MetaRoutes,
-			ProfileCount: float64(1),
-			IgnoreErrors: false,
-			MaxCost:      utils.EmptyString,
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaRoutes,
+				},
+			},
+			ProfileCount: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
+			},
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: utils.EmptyString,
+				},
+			},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -2314,12 +2366,26 @@ func TestRateSConfig(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               1000,
 		Opts: &RatesOpts{
-			RateProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
-			StartTime:     utils.MetaNow,
-			Usage:         decimal.New(int64(time.Minute), 0),
-			IntervalStart: decimal.New(0, 0),
+			StartTime: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaNow,
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Value: decimal.New(int64(time.Minute), 0),
+				},
+			},
+			IntervalStart: []*utils.DynamicDecimalBigOpt{
+				{
+					Value: decimal.New(0, 0),
+				},
+			},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -3597,12 +3663,26 @@ func TestCgrCfgJSONDefaultRateCfg(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               1000,
 		Opts: &RatesOpts{
-			RateProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
-			StartTime:     utils.MetaNow,
-			Usage:         decimal.New(int64(time.Minute), 0),
-			IntervalStart: decimal.New(0, 0),
+			StartTime: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaNow,
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Value: decimal.New(int64(time.Minute), 0),
+				},
+			},
+			IntervalStart: []*utils.DynamicDecimalBigOpt{
+				{
+					Value: decimal.New(0, 0),
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.rateSCfg, eCfg) {
@@ -5798,8 +5878,10 @@ func TestActionSConfig(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}

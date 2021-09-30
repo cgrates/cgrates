@@ -46,14 +46,20 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		Opts: &ResourcesOpts{
-			UsageID: map[string]string{
-				utils.EmptyString: utils.EmptyString,
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: utils.EmptyString,
+				},
 			},
-			UsageTTL: map[string]time.Duration{
-				utils.EmptyString: 72 * time.Hour,
+			UsageTTL: []*utils.DynamicDurationOpt{
+				{
+					Value: 72 * time.Hour,
+				},
 			},
-			Units: map[string]float64{
-				utils.EmptyString: 1,
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
 			},
 		},
 	}
@@ -191,14 +197,20 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index3"},
 		NestedFields:        false,
 		Opts: &ResourcesOpts{
-			UsageID: map[string]string{
-				utils.EmptyString: "usg1",
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: "usg1",
+				},
 			},
-			UsageTTL: map[string]time.Duration{
-				utils.EmptyString: time.Second,
+			UsageTTL: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
 			},
-			Units: map[string]float64{
-				utils.EmptyString: float64(1),
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
 			},
 		},
 	}
@@ -213,14 +225,20 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index33"},
 		NestedFields:        true,
 		Opts: &ResourcesOpts{
-			UsageID: map[string]string{
-				utils.EmptyString: "usg2",
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: "usg2",
+				},
 			},
-			UsageTTL: map[string]time.Duration{
-				utils.EmptyString: time.Minute,
+			UsageTTL: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Minute,
+				},
 			},
-			Units: map[string]float64{
-				utils.EmptyString: float64(2),
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 2,
+				},
 			},
 		},
 	}
