@@ -131,17 +131,22 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		}},
 		chargerSCfg: new(ChargerSCfg),
 		resourceSCfg: &ResourceSConfig{Opts: &ResourcesOpts{
-			UsageID:  make(map[string]string),
-			UsageTTL: make(map[string]time.Duration),
-			Units:    make(map[string]float64),
+			UsageID:  []*utils.DynamicStringOpt{},
+			UsageTTL: []*utils.DynamicDurationOpt{},
+			Units:    []*utils.DynamicFloat64Opt{},
 		}},
 		statsCfg: &StatSCfg{Opts: &StatsOpts{
-			StatIDs: make(map[string][]string),
+			StatIDs: []*utils.DynamicStringSliceOpt{},
 		}},
 		thresholdSCfg: &ThresholdSCfg{Opts: &ThresholdsOpts{
-			ThresholdIDs: make(map[string][]string),
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
 		}},
-		routeSCfg:      &RouteSCfg{Opts: &RoutesOpts{}},
+		routeSCfg: &RouteSCfg{Opts: &RoutesOpts{
+			Context:      []*utils.DynamicStringOpt{},
+			IgnoreErrors: []*utils.DynamicBoolOpt{},
+			MaxCost:      []*utils.DynamicInterfaceOpt{},
+			ProfileCount: []*utils.DynamicFloat64Opt{},
+		}},
 		sureTaxCfg:     new(SureTaxCfg),
 		dispatcherSCfg: new(DispatcherSCfg),
 		registrarCCfg: &RegistrarCCfgs{
@@ -165,7 +170,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			IntervalStart:  []*utils.DynamicDecimalBigOpt{},
 		}},
 		actionSCfg: &ActionSCfg{Opts: &ActionsOpts{
-			ActionProfileIDs: make(map[string][]string),
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{},
 		}},
 		sipAgentCfg: new(SIPAgentCfg),
 		configSCfg:  new(ConfigSCfg),
