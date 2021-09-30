@@ -48,8 +48,10 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			StatIDs: map[string][]string{
-				utils.EmptyString: {},
+			StatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}
@@ -179,7 +181,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			StatIDs: map[string][]string{},
+			StatIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}
 
@@ -194,7 +196,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index33"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			StatIDs: map[string][]string{},
+			StatIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}
 

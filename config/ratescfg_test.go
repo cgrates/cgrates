@@ -56,12 +56,26 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		RateNestedFields:        true,
 		Verbosity:               20,
 		Opts: &RatesOpts{
-			RateProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
-			StartTime:     utils.MetaNow,
-			Usage:         decimal.New(int64(time.Minute), 0),
-			IntervalStart: decimal.New(0, 0),
+			StartTime: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaNow,
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Value: decimal.New(int64(time.Minute), 0),
+				},
+			},
+			IntervalStart: []*utils.DynamicDecimalBigOpt{
+				{
+					Value: decimal.New(0, 0),
+				},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -212,8 +226,10 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               2,
 		Opts: &RatesOpts{
-			RateProfileIDs: map[string][]string{
-				utils.EmptyString: {"RP1"},
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"RP1"},
+				},
 			},
 		},
 	}
@@ -232,8 +248,10 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateNestedFields:        true,
 		Verbosity:               3,
 		Opts: &RatesOpts{
-			RateProfileIDs: map[string][]string{
-				utils.EmptyString: {"RP2"},
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"RP2"},
+				},
 			},
 		},
 	}

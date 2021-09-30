@@ -923,8 +923,6 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 }
 
 func TestDfRouteSJsonCfg(t *testing.T) {
-	var maxCost interface{}
-	maxCost = utils.EmptyString
 	eCfg := &RouteSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Indexed_selects:       utils.BoolPointer(true),
@@ -939,10 +937,18 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &RoutesOptsJson{
-			Context:      utils.StringPointer(utils.MetaRoutes),
-			ProfileCount: utils.Float64Pointer(float64(1)),
-			IgnoreErrors: utils.BoolPointer(false),
-			MaxCost:      maxCost,
+			Context: map[string]string{
+				utils.EmptyString: utils.MetaRoutes,
+			},
+			ProfileCount: map[string]float64{
+				utils.EmptyString: 1,
+			},
+			IgnoreErrors: map[string]bool{
+				utils.EmptyString: false,
+			},
+			MaxCost: map[string]string{
+				utils.EmptyString: utils.EmptyString,
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -2000,9 +2006,15 @@ func TestDfRateSJsonCfg(t *testing.T) {
 			RateProfileIDs: map[string][]string{
 				utils.EmptyString: {},
 			},
-			StartTime:     utils.StringPointer(utils.MetaNow),
-			Usage:         utils.StringPointer("1m"),
-			IntervalStart: utils.StringPointer("0"),
+			StartTime: map[string]string{
+				utils.EmptyString: utils.MetaNow,
+			},
+			Usage: map[string]string{
+				utils.EmptyString: "1m",
+			},
+			IntervalStart: map[string]string{
+				utils.EmptyString: "0",
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
