@@ -24,7 +24,7 @@ import (
 )
 
 type ActionsOpts struct {
-	ActionProfileIDs map[string][]string
+	ActionProfileIDs []*utils.DynamicStringSliceOpt
 }
 
 // ActionSCfg is the configuration of ActionS
@@ -58,9 +58,7 @@ func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) (err error)
 	if jsnCfg == nil {
 		return nil
 	}
-	if jsnCfg.ActionProfileIDs != nil {
-		actOpts.ActionProfileIDs = jsnCfg.ActionProfileIDs
-	}
+	actOpts.ActionProfileIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ActionProfileIDs)
 
 	return nil
 }
@@ -120,7 +118,7 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS ActionSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaActionProfileIDsCfg: acS.Opts.ActionProfileIDs,
+		utils.MetaActionProfileIDsCfg: utils.DynamicStringSliceOptsToMap(acS.Opts.ActionProfileIDs),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                acS.Enabled,
@@ -163,8 +161,12 @@ func (ActionSCfg) SName() string             { return ActionSJSON }
 func (acS ActionSCfg) CloneSection() Section { return acS.Clone() }
 
 func (actOpts *ActionsOpts) Clone() *ActionsOpts {
+	var actPrfIDs []*utils.DynamicStringSliceOpt
+	if actOpts.ActionProfileIDs != nil {
+		actPrfIDs = utils.CloneDynamicStringSliceOpt(actOpts.ActionProfileIDs)
+	}
 	return &ActionsOpts{
-		ActionProfileIDs: actOpts.ActionProfileIDs,
+		ActionProfileIDs: actPrfIDs,
 	}
 }
 
@@ -238,7 +240,9 @@ func diffActionsOptsJsonCfg(d *ActionsOptsJson, v1, v2 *ActionsOpts) *ActionsOpt
 	if d == nil {
 		d = new(ActionsOptsJson)
 	}
-	d.ActionProfileIDs = diffMapStringStringSlice(d.ActionProfileIDs, v1.ActionProfileIDs, v2.ActionProfileIDs)
+	if !utils.DynamicStringSliceOptEqual(v1.ActionProfileIDs, v2.ActionProfileIDs) {
+		d.ActionProfileIDs = utils.DynamicStringSliceOptsToMap(v2.ActionProfileIDs)
+	}
 	return d
 }
 

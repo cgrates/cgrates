@@ -133,7 +133,11 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 
 	var usage *decimal.Big
-	if usage, err = cgrEv.OptsAsDecimal(aS.cfg.AccountSCfg().Opts.Usage, utils.OptsAccountsUsage,
+	if usage, err = engine.FilterDecimalBigCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), aS.fltrS,
+		aS.cfg.AccountSCfg().Opts.Usage); err != nil {
+		return
+	}
+	if usage, err = cgrEv.OptsAsDecimal(usage, utils.OptsAccountsUsage,
 		utils.MetaUsage); err != nil {
 		return
 	}
