@@ -890,8 +890,9 @@ func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
 		&FilterS{dm: dmRES, cfg: cfg}, nil)
 
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInCache", nil, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
+	mres, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
 		"TestResourceMatchingResourcesForEventNotFoundInCache", utils.DurationPointer(10*time.Second))
+	defer mres.unlock()
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
@@ -908,8 +909,9 @@ func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 		&FilterS{dm: dmRES, cfg: cfg}, nil)
 
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventNotFoundInDB", utils.StringMap{"Res2": true}, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
+	mres, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
 		"TestResourceMatchingResourcesForEventNotFoundInDB", utils.DurationPointer(10*time.Second))
+	defer mres.unlock()
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1013,7 +1015,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	rPrf := &ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RES20",
-		FilterIDs:         []string{"FLTR_RES_201"},
+		FilterIDs:         []string{"FLTR_RES_2011"},
 		UsageTTL:          10 * time.Second,
 		Limit:             10.00,
 		AllocationMessage: "AllocationMessage",
@@ -1035,12 +1037,13 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	prfs = append(prfs, rPrf)
 	ids[rPrf.ID] = true
 	Cache.Set(utils.CacheEventResources, "TestResourceMatchingResourcesForEventLocks2", ids, nil, true, utils.NonTransactional)
-	_, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
+	mres, err := rS.matchingResourcesForEvent(&utils.CGREvent{Tenant: "cgrates.org"},
 		"TestResourceMatchingResourcesForEventLocks2", utils.DurationPointer(10*time.Second))
 	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
 	}
+	defer mres.unlock()
 	for _, rPrf := range prfs {
 		if rPrf.isLocked() {
 			t.Fatalf("Expected profile to not be locked %q", rPrf.ID)
@@ -1059,8 +1062,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 func TestResourceMatchingResourcesForEventLocksBlocker(t *testing.T) {
 	Cache.Clear(nil)
 	cfg, _ := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
@@ -1072,7 +1074,7 @@ func TestResourceMatchingResourcesForEventLocksBlocker(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		rPrf := &ResourceProfile{
 			Tenant:            "cgrates.org",
-			ID:                fmt.Sprintf("RES%d", i),
+			ID:                fmt.Sprintf("RESBL%d", i),
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
