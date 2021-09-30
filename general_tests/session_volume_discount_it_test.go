@@ -23,6 +23,7 @@ package general_tests
 import (
 	"errors"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -139,12 +140,32 @@ func testSessVolDiscLoadersLoad(t *testing.T) {
 }
 
 func testSessVolDiscAuthorizeEvent1(t *testing.T) {
-	var reply *engine.APIRouteProfile
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}}, &reply); err != nil {
-		t.Fatal(err)
+	expected := &sessions.V1AuthorizeReply{
+		RouteProfiles: engine.SortedRoutesList{
+			{
+				ProfileID: "RP1",
+				Sorting:   "*lc",
+				Routes: []*engine.SortedRoute{
+					{
+						RouteID: "ROUTE2",
+						SortingData: map[string]interface{}{
+							"Cost":         0.05,
+							"RatingPlanID": "RP_ROUTE2",
+							"Weight":       0,
+						},
+					},
+					{
+						RouteID: "ROUTE1",
+						SortingData: map[string]interface{}{
+							"Cost":       0.1,
+							"AccountIDs": []string{"ACCOUNT1"},
+							"Weight":     0,
+						},
+					},
+				},
+			},
+		},
 	}
-
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
@@ -159,11 +180,14 @@ func testSessVolDiscAuthorizeEvent1(t *testing.T) {
 		},
 	}
 	// authorize the session
-	var rplyFirst sessions.V1AuthorizeReply
+	var rplyFirst *sessions.V1AuthorizeReply
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
 		args, &rplyFirst); err != nil {
 		t.Error(err)
+	} else if reflect.DeepEqual(expected, rplyFirst) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
 	}
+
 }
 
 func testSessVolDiscProcessCDR(t *testing.T) {
