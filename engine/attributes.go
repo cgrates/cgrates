@@ -235,21 +235,24 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CG
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 
-	processRuns := int64(alS.cgrcfg.AttributeSCfg().Opts.ProcessRuns)
-	if v, has := args.APIOpts[utils.OptsAttributesProcessRuns]; has {
-		if processRuns, err = utils.IfaceAsTInt64(v); err != nil {
-			return
-		}
+	var processRuns int
+	if processRuns, err = FilterIntCfgOpts(ctx, tnt, args.AsDataProvider(), alS.filterS,
+		alS.cgrcfg.AttributeSCfg().Opts.ProcessRuns); err != nil {
+		return
+	}
+	if processRuns, err = args.OptsAsInt(processRuns, utils.OptsAttributesProcessRuns); err != nil {
+		return
 	}
 
-	profileRuns := alS.cgrcfg.AttributeSCfg().Opts.ProfileRuns
-	if opt, has := args.APIOpts[utils.OptsAttributesProfileRuns]; has {
-		var val int64
-		if val, err = utils.IfaceAsTInt64(opt); err != nil {
-			return
-		}
-		profileRuns = int(val)
+	var profileRuns int
+	if profileRuns, err = FilterIntCfgOpts(ctx, tnt, args.AsDataProvider(), alS.filterS,
+		alS.cgrcfg.AttributeSCfg().Opts.ProfileRuns); err != nil {
+		return
 	}
+	if profileRuns, err = args.OptsAsInt(profileRuns, utils.OptsAttributesProfileRuns); err != nil {
+		return
+	}
+
 	args = args.Clone()
 	processedPrf := make(utils.StringSet)
 	processedPrfNo := make(map[string]int)
@@ -272,7 +275,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CG
 	alteredFields := make(utils.StringSet)
 	dynDP := newDynamicDP(ctx, alS.cgrcfg.AttributeSCfg().ResourceSConns,
 		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().AccountSConns, args.Tenant, eNV)
-	for i := int64(0); i < processRuns; i++ {
+	for i := 0; i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.MetaProcessRunsCfg] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(ctx, tnt, args, eNV, dynDP, lastID, processedPrfNo, profileRuns)

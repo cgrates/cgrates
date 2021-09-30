@@ -1492,7 +1492,11 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 }
 
 func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
-	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = true
+	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{},
 	}
