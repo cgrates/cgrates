@@ -72,7 +72,7 @@ var (
 func TestCGRLoaderRemove(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		cgrLdrCfgDir = "tutinternal"
+		t.SkipNow()
 	case utils.MetaMongo:
 		cgrLdrCfgDir = "tutmongo"
 	case utils.MetaMySQL:
