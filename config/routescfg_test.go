@@ -53,10 +53,26 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		DefaultRatio:        10,
 		NestedFields:        true,
 		Opts: &RoutesOpts{
-			Context:      utils.MetaRoutes,
-			ProfileCount: float64(1),
-			IgnoreErrors: false,
-			MaxCost:      utils.EmptyString,
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaRoutes,
+				},
+			},
+			ProfileCount: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
+			},
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: utils.EmptyString,
+				},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -195,12 +211,28 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		StatSConns:          []string{"*localhost"},
 		DefaultRatio:        2,
 		Opts: &RoutesOpts{
-			Context:      utils.MetaAny,
-			IgnoreErrors: true,
-			MaxCost:      5,
-			Limit:        utils.IntPointer(1),
-			Offset:       utils.IntPointer(1),
-			ProfileCount: 1,
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaAny,
+				},
+			},
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: true,
+				},
+			},
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: 5,
+				},
+			},
+			Limit:  utils.IntPointer(1),
+			Offset: utils.IntPointer(1),
+			ProfileCount: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
+			},
 		},
 	}
 
@@ -216,12 +248,28 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		StatSConns:          []string{"*birpc"},
 		DefaultRatio:        3,
 		Opts: &RoutesOpts{
-			Context:      utils.MetaRoutes,
-			IgnoreErrors: false,
-			MaxCost:      utils.MetaEventCost,
-			Limit:        utils.IntPointer(2),
-			Offset:       utils.IntPointer(2),
-			ProfileCount: 2,
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaRoutes,
+				},
+			},
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: utils.MetaEventCost,
+				},
+			},
+			Limit:  utils.IntPointer(2),
+			Offset: utils.IntPointer(2),
+			ProfileCount: []*utils.DynamicFloat64Opt{
+				{
+					Value: 2,
+				},
+			},
 		},
 	}
 
@@ -237,12 +285,20 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Stats_conns:           &[]string{"*birpc"},
 		Default_ratio:         utils.IntPointer(3),
 		Opts: &RoutesOptsJson{
-			Context:      utils.StringPointer(utils.MetaRoutes),
-			IgnoreErrors: utils.BoolPointer(false),
-			MaxCost:      &v2.Opts.MaxCost,
-			Limit:        utils.IntPointer(2),
-			Offset:       utils.IntPointer(2),
-			ProfileCount: utils.Float64Pointer(2),
+			Context: map[string]string{
+				utils.EmptyString: utils.MetaRoutes,
+			},
+			IgnoreErrors: map[string]bool{
+				utils.EmptyString: false,
+			},
+			MaxCost: map[string]string{
+				utils.EmptyString: utils.EmptyString,
+			},
+			Limit:  utils.IntPointer(2),
+			Offset: utils.IntPointer(2),
+			ProfileCount: map[string]float64{
+				utils.EmptyString: 2,
+			},
 		},
 	}
 

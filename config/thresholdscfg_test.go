@@ -47,8 +47,10 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		NestedFields:        true,
 		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: map[string][]string{
-				utils.EmptyString: {},
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
 		},
 	}

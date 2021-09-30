@@ -58,10 +58,16 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		MaxIterations:       1000,
 		MaxUsage:            usage,
 		Opts: &AccountsOpts{
-			AccountIDs: map[string][]string{
-				utils.EmptyString: {},
+			AccountIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
 			},
-			Usage: decimal.New(int64(72*time.Hour), 0),
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Value: decimal.New(int64(72*time.Hour), 0),
+				},
+			},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -185,8 +191,10 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       1,
 		MaxUsage:            nil,
 		Opts: &AccountsOpts{
-			AccountIDs: map[string][]string{
-				utils.EmptyString: {"ACC1"},
+			AccountIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"ACC1"},
+				},
 			},
 		},
 	}
@@ -204,8 +212,10 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       3,
 		MaxUsage:            utils.NewDecimal(60, 0),
 		Opts: &AccountsOpts{
-			AccountIDs: map[string][]string{
-				utils.EmptyString: {"ACC2"},
+			AccountIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"ACC2"},
+				},
 			},
 		},
 	}
@@ -248,8 +258,10 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       3,
 		MaxUsage:            nil,
 		Opts: &AccountsOpts{
-			AccountIDs: map[string][]string{
-				utils.EmptyString: {"ACC2"},
+			AccountIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"ACC2"},
+				},
 			},
 		},
 	}
