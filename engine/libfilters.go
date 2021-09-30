@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // FilterFloat64CfgOpts returns the option as float64 if the filters match
@@ -74,13 +75,33 @@ func FilterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataPro
 }
 
 // FilterIntCfgOpts returns the option as int if the filters match
-func FilterIntCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicIntOpt) (int, error) {
+func FilterIntCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicIntOpt) (dft int, err error) {
+	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
+		if len(opt.FilterIDs) == 0 {
+			hasDefault = true
+			dft = opt.Value
+		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
 		} else if pass {
 			return opt.Value, nil
 		}
 	}
-	return 0, utils.ErrNotFound // return NOT_FOUND if there are no options or none of the filters pass
+	if !hasDefault {
+		err = utils.ErrNotFound
+	}
+	return
+}
+
+// FilterDurationCfgOpts returns the option as time.Duration if the filters match
+func FilterDecimalBigCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicDecimalBigOpt) (*decimal.Big, error) {
+	for _, opt := range dynOpts { // iterate through the options
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+			return nil, err
+		} else if pass {
+			return opt.Value, nil
+		}
+	}
+	return nil, utils.ErrNotFound // return NOT_FOUND if there are no options or none of the filters pass
 }

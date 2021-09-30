@@ -19,11 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 type RatesOpts struct {
@@ -63,39 +60,14 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
-	for filters, value := range jsnCfg.RateProfileIDs {
-		rateOpts.RateProfileIDs = append(rateOpts.RateProfileIDs, &utils.DynamicStringSliceOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     value,
-		})
+	rateOpts.RateProfileIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.RateProfileIDs)
+	rateOpts.StartTime = utils.MapToDynamicStringOpts(jsnCfg.StartTime)
+	if rateOpts.Usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+		return
 	}
-	for filters, value := range jsnCfg.StartTime {
-		rateOpts.StartTime = append(rateOpts.StartTime, &utils.DynamicStringOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     value,
-		})
+	if rateOpts.IntervalStart, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.IntervalStart); err != nil {
+		return
 	}
-	for filters, value := range jsnCfg.Usage {
-		var strVal *decimal.Big
-		if strVal, err = utils.StringAsBig(value); err != nil {
-			return
-		}
-		rateOpts.Usage = append(rateOpts.Usage, &utils.DynamicDecimalBigOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     strVal,
-		})
-	}
-	for filters, value := range jsnCfg.IntervalStart {
-		var strVal *decimal.Big
-		if strVal, err = utils.StringAsBig(value); err != nil {
-			return
-		}
-		rateOpts.IntervalStart = append(rateOpts.IntervalStart, &utils.DynamicDecimalBigOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     strVal,
-		})
-	}
-
 	return nil
 }
 
