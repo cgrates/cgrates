@@ -106,6 +106,20 @@ func (ev *CGREvent) OptsAsString(defaultValue string, optNames ...string) string
 	return defaultValue
 }
 
+// OptsAsInt returns an option as int
+func (ev *CGREvent) OptsAsInt(defaultValue int, optNames ...string) (opt int, err error) {
+	for _, optName := range optNames {
+		if iface, has := ev.APIOpts[optName]; has {
+			var value int64
+			if value, err = IfaceAsTInt64(iface); err != nil {
+				return 0, err
+			}
+			return int(value), nil
+		}
+	}
+	return defaultValue, nil
+}
+
 // OptsAsDuration returns an option as time.Duration
 func (ev *CGREvent) OptsAsDuration(defaultValue time.Duration, optNames ...string) (time.Duration, error) {
 	for _, optName := range optNames {
@@ -246,12 +260,11 @@ func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapS
 }
 
 // StartTime returns the event time used to check active rate profiles
-func (args *CGREvent) StartTime(configSTime, tmz string) (time.Time, error) {
-	if tIface, has := args.APIOpts[OptsRatesStartTime]; has {
-		return IfaceAsTime(tIface, tmz)
-	}
-	if tIface, has := args.APIOpts[MetaStartTime]; has {
-		return IfaceAsTime(tIface, tmz)
+func (args *CGREvent) StartTime(configSTime, tmz string, optNames ...string) (time.Time, error) {
+	for _, optName := range optNames {
+		if iface, has := args.APIOpts[optName]; has {
+			return IfaceAsTime(iface, tmz)
+		}
 	}
 	return ParseTimeDetectLayout(configSTime, tmz)
 }
