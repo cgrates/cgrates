@@ -862,14 +862,8 @@ func TestAsExtAccountCheckErrors(t *testing.T) {
 		ThresholdIDs: []string{},
 	}
 
-	expected := "cannot convert decimal Units to float64 "
-	if _, err := acc.AsExtAccount(); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+q, received %+q", expected, err)
-	}
-	acc.Balances["BL1"].Units = NewDecimal(0, 0)
-
 	acc.Balances["BL1"].CostIncrements[0].FixedFee = NewDecimal(int64(math.Inf(1))-1, 0)
-	expected = "cannot convert decimal FixedFee to float64 "
+	expected := "cannot convert decimal FixedFee to float64 "
 	if _, err := acc.AsExtAccount(); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+q, received %+q", expected, err)
 	}

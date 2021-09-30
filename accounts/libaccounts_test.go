@@ -156,8 +156,9 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TEST_ID1",
+		Tenant:  "cgrates.org",
+		ID:      "TEST_ID1",
+		APIOpts: make(map[string]interface{}),
 	}
 
 	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
@@ -193,8 +194,9 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, chanInternal)
 	cgrEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TEST_ID1",
+		Tenant:  "cgrates.org",
+		ID:      "TEST_ID1",
+		APIOpts: make(map[string]interface{}),
 	}
 
 	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
