@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -53,7 +54,6 @@ func (aB *abstractBalance) id() string {
 // debitAbstracts implements the balanceOperator interface
 func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.Big,
 	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
-
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.APIOpts,
 		utils.MetaReq:  cgrEv.Event,
@@ -94,7 +94,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		//dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
 		hasUF = true
 	}
-
 	if blncLmt != nil {
 		maxBlcDbt := new(decimal.Big).Copy(aB.blnCfg.Units.Big)
 		if hasUF {
@@ -105,7 +104,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 			usage = maxBlcDbt
 		}
 	}
-
 	var ecCost *utils.EventCharges
 	if costIcrm != nil && ((costIcrm.FixedFee != nil &&
 		costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0) ||
@@ -123,7 +121,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 			return
 		}
 	}
-
 	var dbtUnits *decimal.Big
 	if ecCost != nil {
 		usage = ecCost.Abstracts.Big
@@ -173,6 +170,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 			RecurrentFee: costIcrm.RecurrentFee,
 		}
 	} else { // take it from first increment, not copying since it will be done bellow
+
 		ratingID = ecCost.Accounting[ecCost.Charges[0].ChargingID].RatingID
 	}
 	// AccountingID

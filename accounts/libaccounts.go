@@ -115,7 +115,7 @@ func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
-	if cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] != nil {
+	if _, has := cgrEv.APIOpts[utils.OptsRatesRateProfileIDs]; !has {
 		cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(rpIDs)
 	}
 	var tmpReply utils.RateProfileCost
@@ -129,6 +129,12 @@ func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 // costIncrement computes the costIncrement for the event
 func costIncrement(ctx *context.Context, cfgCostIncrmts []*utils.CostIncrement,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (costIcrm *utils.CostIncrement, err error) {
+	// no cost increment in our balance, return a default increment to query to rateS
+	if len(cfgCostIncrmts) == 0 {
+		return &utils.CostIncrement{
+			Increment: utils.NewDecimal(1, 0),
+		}, nil
+	}
 	for _, cIcrm := range cfgCostIncrmts {
 		var pass bool
 		if pass, err = fltrS.Pass(ctx, tnt, cIcrm.FilterIDs, ev); err != nil {
