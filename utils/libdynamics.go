@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"strconv"
 	"strings"
 	"time"
 
@@ -44,6 +45,11 @@ type DynamicFloat64Opt struct {
 	FilterIDs []string
 }
 
+type DynamicBoolOpt struct {
+	Value     bool
+	FilterIDs []string
+}
+
 type DynamicDurationOpt struct {
 	Value     time.Duration
 	FilterIDs []string
@@ -51,6 +57,11 @@ type DynamicDurationOpt struct {
 
 type DynamicDecimalBigOpt struct {
 	Value     *decimal.Big
+	FilterIDs []string
+}
+
+type DynamicInterfaceOpt struct {
+	Value     interface{}
 	FilterIDs []string
 }
 
@@ -62,31 +73,78 @@ func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) (cl []*DynamicStrin
 
 func CloneDynamicStringOpt(in []*DynamicStringOpt) (cl []*DynamicStringOpt) {
 	cl = make([]*DynamicStringOpt, len(in))
-	copy(cl, in)
+	for i, val := range in {
+		cl[i] = &DynamicStringOpt{
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     val.Value,
+		}
+	}
+	return
+}
+
+func CloneDynamicInterfaceOpt(in []*DynamicInterfaceOpt) (cl []*DynamicInterfaceOpt) {
+	cl = make([]*DynamicInterfaceOpt, len(in))
+	for i, val := range in {
+		cl[i] = &DynamicInterfaceOpt{
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     val.Value,
+		}
+	}
+	return
+}
+
+func CloneDynamicBoolOpt(in []*DynamicBoolOpt) (cl []*DynamicBoolOpt) {
+	cl = make([]*DynamicBoolOpt, len(in))
+	for i, val := range in {
+		cl[i] = &DynamicBoolOpt{
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     val.Value,
+		}
+	}
 	return
 }
 
 func CloneDynamicIntOpt(in []*DynamicIntOpt) (cl []*DynamicIntOpt) {
 	cl = make([]*DynamicIntOpt, len(in))
-	copy(cl, in)
+	for i, val := range in {
+		cl[i] = &DynamicIntOpt{
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     val.Value,
+		}
+	}
 	return
 }
 
 func CloneDynamicFloat64Opt(in []*DynamicFloat64Opt) (cl []*DynamicFloat64Opt) {
 	cl = make([]*DynamicFloat64Opt, len(in))
-	copy(cl, in)
+	for i, val := range in {
+		cl[i] = &DynamicFloat64Opt{
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     val.Value,
+		}
+	}
 	return
 }
 
 func CloneDynamicDurationOpt(in []*DynamicDurationOpt) (cl []*DynamicDurationOpt) {
 	cl = make([]*DynamicDurationOpt, len(in))
-	copy(cl, in)
+	for i, val := range in {
+		cl[i] = &DynamicDurationOpt{
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     val.Value,
+		}
+	}
 	return
 }
 
 func CloneDynamicDecimalBigOpt(in []*DynamicDecimalBigOpt) (cl []*DynamicDecimalBigOpt) {
 	cl = make([]*DynamicDecimalBigOpt, len(in))
-	copy(cl, in)
+	for i, val := range in {
+		cl[i] = &DynamicDecimalBigOpt{
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     CloneDecimalBig(val.Value),
+		}
+	}
 	return
 }
 
@@ -106,6 +164,21 @@ func DynamicStringSliceOptEqual(v1, v2 []*DynamicStringSliceOpt) bool {
 }
 
 func DynamicStringOptEqual(v1, v2 []*DynamicStringOpt) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v1 {
+		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+			return false
+		}
+		if v1[i].Value != v2[i].Value {
+			return false
+		}
+	}
+	return true
+}
+
+func DynamicBoolOptEqual(v1, v2 []*DynamicBoolOpt) bool {
 	if len(v1) != len(v2) {
 		return false
 	}
@@ -170,10 +243,23 @@ func DynamicDecimalBigOptEqual(v1, v2 []*DynamicDecimalBigOpt) bool {
 		return false
 	}
 	for i := range v1 {
+		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) ||
+			v1[i].Value.Cmp(v2[i].Value) != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func DynamicInterfaceOptEqual(v1, v2 []*DynamicInterfaceOpt) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v1 {
 		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
-		if v1[i].Value.Cmp(v2[i].Value) != 0 {
+		if v1[i].Value != v2[i].Value {
 			return false
 		}
 	}
@@ -183,7 +269,7 @@ func DynamicDecimalBigOptEqual(v1, v2 []*DynamicDecimalBigOpt) bool {
 func DynamicStringSliceOptsToMap(dynOpts []*DynamicStringSliceOpt) map[string][]string {
 	optMap := make(map[string][]string)
 	for _, opt := range dynOpts {
-		optMap[StringSliceToStringWithSep(opt.FilterIDs, InfieldSep)] = opt.Value
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = opt.Value
 	}
 	return optMap
 }
@@ -191,7 +277,15 @@ func DynamicStringSliceOptsToMap(dynOpts []*DynamicStringSliceOpt) map[string][]
 func DynamicStringOptsToMap(dynOpts []*DynamicStringOpt) map[string]string {
 	optMap := make(map[string]string)
 	for _, opt := range dynOpts {
-		optMap[StringSliceToStringWithSep(opt.FilterIDs, InfieldSep)] = opt.Value
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = opt.Value
+	}
+	return optMap
+}
+
+func DynamicBoolOptsToMap(dynOpts []*DynamicBoolOpt) map[string]bool {
+	optMap := make(map[string]bool)
+	for _, opt := range dynOpts {
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = opt.Value
 	}
 	return optMap
 }
@@ -199,7 +293,7 @@ func DynamicStringOptsToMap(dynOpts []*DynamicStringOpt) map[string]string {
 func DynamicIntOptsToMap(dynOpts []*DynamicIntOpt) map[string]int {
 	optMap := make(map[string]int)
 	for _, opt := range dynOpts {
-		optMap[StringSliceToStringWithSep(opt.FilterIDs, InfieldSep)] = opt.Value
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = opt.Value
 	}
 	return optMap
 }
@@ -207,7 +301,7 @@ func DynamicIntOptsToMap(dynOpts []*DynamicIntOpt) map[string]int {
 func DynamicFloat64OptsToMap(dynOpts []*DynamicFloat64Opt) map[string]float64 {
 	optMap := make(map[string]float64)
 	for _, opt := range dynOpts {
-		optMap[StringSliceToStringWithSep(opt.FilterIDs, InfieldSep)] = opt.Value
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = opt.Value
 	}
 	return optMap
 }
@@ -215,7 +309,7 @@ func DynamicFloat64OptsToMap(dynOpts []*DynamicFloat64Opt) map[string]float64 {
 func DynamicDurationOptsToMap(dynOpts []*DynamicDurationOpt) map[string]string {
 	optMap := make(map[string]string)
 	for _, opt := range dynOpts {
-		optMap[StringSliceToStringWithSep(opt.FilterIDs, InfieldSep)] = opt.Value.String()
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = opt.Value.String()
 	}
 	return optMap
 }
@@ -223,18 +317,154 @@ func DynamicDurationOptsToMap(dynOpts []*DynamicDurationOpt) map[string]string {
 func DynamicDecimalBigOptsToMap(dynOpts []*DynamicDecimalBigOpt) map[string]string {
 	optMap := make(map[string]string)
 	for _, opt := range dynOpts {
-		optMap[StringSliceToStringWithSep(opt.FilterIDs, InfieldSep)] = opt.Value.String()
+		value := IfaceAsString(opt.Value)
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = value
 	}
 	return optMap
 }
 
-func StringSliceToStringWithSep(ss []string, sep string) string {
-	var str strings.Builder
-	for i := range ss {
-		str.WriteString(ss[i])
-		if i != len(ss)-1 {
-			str.WriteString(sep)
+func DynamicInterfaceOptsToMap(dynOpts []*DynamicInterfaceOpt) map[string]string {
+	optMap := make(map[string]string)
+	for _, opt := range dynOpts {
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = IfaceAsString(opt.Value)
+	}
+	return optMap
+}
+
+func MapToDynamicStringSliceOpts(optsMap map[string][]string) (dynOpts []*DynamicStringSliceOpt) {
+	dynOpts = make([]*DynamicStringSliceOpt, len(optsMap))
+	for filters, opt := range optsMap {
+		if filters != EmptyString {
+			dynOpts = append(dynOpts, &DynamicStringSliceOpt{
+				FilterIDs: strings.Split(filters, InfieldSep),
+				Value:     opt,
+			})
+		} else {
+			dynOpts = append(dynOpts, &DynamicStringSliceOpt{
+				Value: opt,
+			})
 		}
 	}
-	return str.String()
+	return
+}
+
+func MapToDynamicStringOpts(optsMap map[string]string) (dynOpts []*DynamicStringOpt) {
+	dynOpts = make([]*DynamicStringOpt, len(optsMap))
+	for filters, opt := range optsMap {
+		if filters != EmptyString {
+			dynOpts = append(dynOpts, &DynamicStringOpt{
+				FilterIDs: strings.Split(filters, InfieldSep),
+				Value:     opt,
+			})
+		} else {
+			dynOpts = append(dynOpts, &DynamicStringOpt{
+				Value: opt,
+			})
+		}
+	}
+	return
+}
+
+func MapToDynamicBoolOpts(optsMap map[string]bool) (dynOpts []*DynamicBoolOpt) {
+	dynOpts = make([]*DynamicBoolOpt, len(optsMap))
+	for filters, opt := range optsMap {
+		if filters != EmptyString {
+			dynOpts = append(dynOpts, &DynamicBoolOpt{
+				FilterIDs: strings.Split(filters, InfieldSep),
+				Value:     opt,
+			})
+		} else {
+			dynOpts = append(dynOpts, &DynamicBoolOpt{
+				Value: opt,
+			})
+		}
+	}
+	return
+}
+
+func MapToDynamicDecimalBigOpts(optsMap map[string]string) (dynOpts []*DynamicDecimalBigOpt, err error) {
+	dynOpts = make([]*DynamicDecimalBigOpt, len(optsMap))
+	for filters, opt := range optsMap {
+		var bigVal *decimal.Big
+		if bigVal, err = StringAsBig(opt); err != nil {
+			return
+		}
+		if filters != EmptyString {
+			dynOpts = append(dynOpts, &DynamicDecimalBigOpt{
+				FilterIDs: strings.Split(filters, InfieldSep),
+				Value:     bigVal,
+			})
+		} else {
+			dynOpts = append(dynOpts, &DynamicDecimalBigOpt{
+				Value: bigVal,
+			})
+		}
+	}
+	return
+}
+
+func MapToDynamicDurationOpts(optsMap map[string]string) (dynOpts []*DynamicDurationOpt, err error) {
+	dynOpts = make([]*DynamicDurationOpt, len(optsMap))
+	for filters, opt := range optsMap {
+		var usageTTL time.Duration
+		if usageTTL, err = ParseDurationWithNanosecs(opt); err != nil {
+			return
+		}
+		if filters != EmptyString {
+			dynOpts = append(dynOpts, &DynamicDurationOpt{
+				FilterIDs: strings.Split(filters, InfieldSep),
+				Value:     usageTTL,
+			})
+		} else {
+			dynOpts = append(dynOpts, &DynamicDurationOpt{
+				Value: usageTTL,
+			})
+		}
+	}
+	return
+}
+
+func MapToDynamicFloat64Opts(optsMap map[string]float64) (dynOpts []*DynamicFloat64Opt) {
+	dynOpts = make([]*DynamicFloat64Opt, len(optsMap))
+	for filters, opt := range optsMap {
+		if filters != EmptyString {
+			dynOpts = append(dynOpts, &DynamicFloat64Opt{
+				FilterIDs: strings.Split(filters, InfieldSep),
+				Value:     opt,
+			})
+		} else {
+			dynOpts = append(dynOpts, &DynamicFloat64Opt{
+				Value: opt,
+			})
+		}
+	}
+	return
+}
+
+func MapToDynamicInterfaceOpts(optsMap map[string]string) (dynOpts []*DynamicInterfaceOpt) {
+	dynOpts = make([]*DynamicInterfaceOpt, len(optsMap))
+	for filters, opt := range optsMap {
+		if filters != EmptyString {
+			if optVal, err := strconv.Atoi(opt); err == nil {
+				dynOpts = append(dynOpts, &DynamicInterfaceOpt{
+					FilterIDs: strings.Split(filters, InfieldSep),
+					Value:     optVal,
+				})
+			}
+			dynOpts = append(dynOpts, &DynamicInterfaceOpt{
+				FilterIDs: strings.Split(filters, InfieldSep),
+				Value:     opt,
+			})
+		} else {
+			dynOpts = append(dynOpts, &DynamicInterfaceOpt{
+				Value: opt,
+			})
+		}
+	}
+	return
+}
+
+func CloneDecimalBig(in *decimal.Big) (cln *decimal.Big) {
+	*cln = *in
+	return
 }
