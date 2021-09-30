@@ -167,12 +167,22 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 			return
 		}
 	}
+	var sTimeStr string
+	if sTimeStr, err = engine.FilterStringCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cfg.RateSCfg().Opts.StartTime); err != nil {
+		return
+	}
 	var sTime time.Time
-	if sTime, err = args.StartTime(rS.cfg.RateSCfg().Opts.StartTime, rS.cfg.GeneralCfg().DefaultTimezone); err != nil {
+	if sTime, err = args.StartTime(sTimeStr, rS.cfg.GeneralCfg().DefaultTimezone, utils.OptsRatesStartTime,
+		utils.MetaStartTime); err != nil {
 		return
 	}
 	var usage *decimal.Big
-	if usage, err = args.OptsAsDecimal(rS.cfg.RateSCfg().Opts.Usage, utils.OptsRatesUsage, utils.MetaUsage); err != nil {
+	if usage, err = engine.FilterDecimalBigCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cfg.RateSCfg().Opts.Usage); err != nil {
+		return
+	}
+	if usage, err = args.OptsAsDecimal(usage, utils.OptsRatesUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	var ordRts []*orderedRate
@@ -190,7 +200,11 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		rpCost.MaxCost = rtPfl.MaxCost
 	}
 	var ivalStart *decimal.Big
-	if ivalStart, err = args.OptsAsDecimal(rS.cfg.RateSCfg().Opts.IntervalStart, utils.OptsRatesIntervalStart); err != nil {
+	if ivalStart, err = engine.FilterDecimalBigCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
+		rS.cfg.RateSCfg().Opts.IntervalStart); err != nil {
+		return
+	}
+	if ivalStart, err = args.OptsAsDecimal(ivalStart, utils.OptsRatesIntervalStart); err != nil {
 		return
 	}
 	var costIntervals []*utils.RateSInterval
