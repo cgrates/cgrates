@@ -20,6 +20,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"time"
 
@@ -239,11 +240,11 @@ func (bL *Balance) AsExtBalance() (eBl *ExtBalance, err error) {
 		eBl.Weights = bL.Weights
 	}
 	if bL.Units != nil {
-		if fltUnits, ok := bL.Units.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal Units to float64 ")
-		} else {
-			eBl.Units = &fltUnits
+		fltUnits, ok := bL.Units.Big.Float64()
+		if !ok {
+			Logger.Warning(fmt.Sprintf("Units Balance: %v from ID: %v cannot fit into a float64 without truncation, overflow, or underflow", bL.Units, bL.ID))
 		}
+		eBl.Units = &fltUnits
 	}
 	if bL.UnitFactors != nil {
 		eBl.UnitFactors = make([]*ExtUnitFactor, len(bL.UnitFactors))

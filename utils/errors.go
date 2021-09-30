@@ -64,6 +64,7 @@ var (
 	ErrNotConnected                  = errors.New("NOT_CONNECTED")
 	DispatcherErrorPrefix            = "DISPATCHER_ERROR"
 	RateSErrPrfx                     = "RATES_ERROR"
+	AccountSErrPrfx                  = "ACCOUNTS_ERROR"
 	ErrUnsupportedFormat             = errors.New("UNSUPPORTED_FORMAT")
 	ErrNoDatabaseConn                = errors.New("NO_DATABASE_CONNECTION")
 	ErrMaxIncrementsExceeded         = errors.New("MAX_INCREMENTS_EXCEEDED")
@@ -197,6 +198,10 @@ func NewErrDispatcherS(err error) error {
 
 func NewErrRateS(err error) error {
 	return fmt.Errorf("%s:%s", RateSErrPrfx, err.Error())
+}
+
+func NewErrAccountS(err error) error {
+	return fmt.Errorf("%s:%s", AccountSErrPrfx, err.Error())
 }
 
 // Centralized returns for APIs
