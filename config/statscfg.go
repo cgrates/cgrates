@@ -26,7 +26,7 @@ import (
 )
 
 type StatsOpts struct {
-	StatIDs map[string][]string
+	StatIDs []*utils.DynamicStringSliceOpt
 }
 
 // StatSCfg the stats config section
@@ -56,9 +56,7 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
-	if jsnCfg.StatIDs != nil {
-		sqOpts.StatIDs = jsnCfg.StatIDs
-	}
+	sqOpts.StatIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.StatIDs)
 	return nil
 }
 
@@ -104,7 +102,7 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (st StatSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaStatIDsCfg: st.Opts.StatIDs,
+		utils.MetaStatIDsCfg: utils.DynamicStringSliceOptsToMap(st.Opts.StatIDs),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
@@ -137,8 +135,12 @@ func (StatSCfg) SName() string            { return StatSJSON }
 func (st StatSCfg) CloneSection() Section { return st.Clone() }
 
 func (sqOpts *StatsOpts) Clone() *StatsOpts {
+	var sqIDs []*utils.DynamicStringSliceOpt
+	if sqOpts.StatIDs != nil {
+		sqIDs = utils.CloneDynamicStringSliceOpt(sqOpts.StatIDs)
+	}
 	return &StatsOpts{
-		StatIDs: sqOpts.StatIDs,
+		StatIDs: sqIDs,
 	}
 }
 
@@ -190,7 +192,9 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 	if d == nil {
 		d = new(StatsOptsJson)
 	}
-	d.StatIDs = diffMapStringStringSlice(d.StatIDs, v1.StatIDs, v2.StatIDs)
+	if !utils.DynamicStringSliceOptEqual(v1.StatIDs, v2.StatIDs) {
+		d.StatIDs = utils.DynamicStringSliceOptsToMap(v2.StatIDs)
+	}
 	return d
 }
 

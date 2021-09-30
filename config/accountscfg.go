@@ -19,11 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 type AccountsOpts struct {
@@ -51,21 +48,9 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 	if jsnCfg == nil {
 		return nil
 	}
-	for filters, value := range jsnCfg.AccountIDs {
-		accOpts.AccountIDs = append(accOpts.AccountIDs, &utils.DynamicStringSliceOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     value,
-		})
-	}
-	for filters, value := range jsnCfg.Usage {
-		var strVal *decimal.Big
-		if strVal, err = utils.StringAsBig(value); err != nil {
-			return
-		}
-		accOpts.Usage = append(accOpts.Usage, &utils.DynamicDecimalBigOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     strVal,
-		})
+	accOpts.AccountIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.AccountIDs)
+	if accOpts.Usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+		return
 	}
 	return nil
 }

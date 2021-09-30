@@ -26,7 +26,7 @@ import (
 )
 
 type ThresholdsOpts struct {
-	ThresholdIDs map[string][]string
+	ThresholdIDs []*utils.DynamicStringSliceOpt
 }
 
 // ThresholdSCfg the threshold config section
@@ -46,9 +46,7 @@ func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) (err 
 	if jsnCfg == nil {
 		return nil
 	}
-	if jsnCfg.ThresholdIDs != nil {
-		thdOpts.ThresholdIDs = jsnCfg.ThresholdIDs
-	}
+	thdOpts.ThresholdIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ThresholdIDs)
 
 	return nil
 }
@@ -101,7 +99,7 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (t ThresholdSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaThresholdIDsCfg: t.Opts.ThresholdIDs,
+		utils.MetaThresholdIDsCfg: utils.DynamicStringSliceOptsToMap(t.Opts.ThresholdIDs),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        t.Enabled,
@@ -133,8 +131,12 @@ func (ThresholdSCfg) SName() string           { return ThresholdSJSON }
 func (t ThresholdSCfg) CloneSection() Section { return t.Clone() }
 
 func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
+	var thIDs []*utils.DynamicStringSliceOpt
+	if thdOpts.ThresholdIDs != nil {
+		thIDs = utils.CloneDynamicStringSliceOpt(thdOpts.ThresholdIDs)
+	}
 	return &ThresholdsOpts{
-		ThresholdIDs: thdOpts.ThresholdIDs,
+		ThresholdIDs: thIDs,
 	}
 }
 
@@ -184,7 +186,9 @@ func diffThresholdsOptsJsonCfg(d *ThresholdsOptsJson, v1, v2 *ThresholdsOpts) *T
 	if d == nil {
 		d = new(ThresholdsOptsJson)
 	}
-	d.ThresholdIDs = diffMapStringStringSlice(d.ThresholdIDs, v1.ThresholdIDs, v2.ThresholdIDs)
+	if !utils.DynamicStringSliceOptEqual(v1.ThresholdIDs, v2.ThresholdIDs) {
+		d.ThresholdIDs = utils.DynamicStringSliceOptsToMap(v2.ThresholdIDs)
+	}
 	return d
 }
 

@@ -26,9 +26,9 @@ import (
 )
 
 type ResourcesOpts struct {
-	UsageID  map[string]string
-	UsageTTL map[string]time.Duration
-	Units    map[string]float64
+	UsageID  []*utils.DynamicStringOpt
+	UsageTTL []*utils.DynamicDurationOpt
+	Units    []*utils.DynamicFloat64Opt
 }
 
 // ResourceSConfig is resorces section config
@@ -57,21 +57,11 @@ func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err err
 	if jsnCfg == nil {
 		return nil
 	}
-	if jsnCfg.UsageID != nil {
-		rsOpts.UsageID = jsnCfg.UsageID
+	rsOpts.UsageID = utils.MapToDynamicStringOpts(jsnCfg.UsageID)
+	if rsOpts.UsageTTL, err = utils.MapToDynamicDurationOpts(jsnCfg.UsageTTL); err != nil {
+		return
 	}
-	if jsnCfg.UsageTTL != nil {
-		for key, durStr := range jsnCfg.UsageTTL {
-			var usageTTL time.Duration
-			if usageTTL, err = utils.ParseDurationWithNanosecs(durStr); err != nil {
-				return
-			}
-			rsOpts.UsageTTL[key] = usageTTL
-		}
-	}
-	if jsnCfg.Units != nil {
-		rsOpts.Units = jsnCfg.Units
-	}
+	rsOpts.Units = utils.MapToDynamicFloat64Opts(jsnCfg.Units)
 
 	return nil
 }
@@ -114,14 +104,10 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (rlcfg ResourceSConfig) AsMapInterface(string) interface{} {
-	usageTTL := make(map[string]string)
-	for index, value := range rlcfg.Opts.UsageTTL {
-		usageTTL[index] = value.String()
-	}
 	opts := map[string]interface{}{
-		utils.MetaUsageIDCfg:  rlcfg.Opts.UsageID,
-		utils.MetaUsageTTLCfg: usageTTL,
-		utils.MetaUnitsCfg:    rlcfg.Opts.Units,
+		utils.MetaUsageIDCfg:  utils.DynamicStringOptsToMap(rlcfg.Opts.UsageID),
+		utils.MetaUsageTTLCfg: utils.DynamicDurationOptsToMap(rlcfg.Opts.UsageTTL),
+		utils.MetaUnitsCfg:    utils.DynamicFloat64OptsToMap(rlcfg.Opts.Units),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        rlcfg.Enabled,
@@ -152,10 +138,22 @@ func (ResourceSConfig) SName() string               { return ResourceSJSON }
 func (rlcfg ResourceSConfig) CloneSection() Section { return rlcfg.Clone() }
 
 func (rsOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
+	var usageID []*utils.DynamicStringOpt
+	if rsOpts.UsageID != nil {
+		usageID = utils.CloneDynamicStringOpt(rsOpts.UsageID)
+	}
+	var usageTTL []*utils.DynamicDurationOpt
+	if rsOpts.UsageTTL != nil {
+		usageTTL = utils.CloneDynamicDurationOpt(rsOpts.UsageTTL)
+	}
+	var units []*utils.DynamicFloat64Opt
+	if rsOpts.Units != nil {
+		units = utils.CloneDynamicFloat64Opt(rsOpts.Units)
+	}
 	cln = &ResourcesOpts{
-		UsageID:  rsOpts.UsageID,
-		UsageTTL: rsOpts.UsageTTL,
-		Units:    rsOpts.Units,
+		UsageID:  usageID,
+		UsageTTL: usageTTL,
+		Units:    units,
 	}
 	return
 }
@@ -208,9 +206,15 @@ func diffResourcesOptsJsonCfg(d *ResourcesOptsJson, v1, v2 *ResourcesOpts) *Reso
 	if d == nil {
 		d = new(ResourcesOptsJson)
 	}
-	d.UsageID = diffMapStringString(d.UsageID, v1.UsageID, v2.UsageID)
-	d.UsageTTL = diffMapStringDuration(d.UsageTTL, v1.UsageTTL, v2.UsageTTL)
-	d.Units = diffMapStringFloat64(d.Units, v1.Units, v2.Units)
+	if !utils.DynamicStringOptEqual(v1.UsageID, v2.UsageID) {
+		d.UsageID = utils.DynamicStringOptsToMap(v2.UsageID)
+	}
+	if !utils.DynamicDurationOptEqual(v1.UsageTTL, v2.UsageTTL) {
+		d.UsageTTL = utils.DynamicDurationOptsToMap(v2.UsageTTL)
+	}
+	if !utils.DynamicFloat64OptEqual(v1.Units, v2.Units) {
+		d.Units = utils.DynamicFloat64OptsToMap(v2.Units)
+	}
 	return d
 }
 
