@@ -154,7 +154,11 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		Opts: &AttributesOpts{
-			ProcessRuns: 1.,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
@@ -190,7 +194,11 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		Opts: &AttributesOpts{
-			ProcessRuns: 1.,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
@@ -313,14 +321,20 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
 		Opts: &ResourcesOpts{
-			UsageID: map[string]string{
-				utils.EmptyString: utils.EmptyString,
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: utils.EmptyString,
+				},
 			},
-			UsageTTL: map[string]time.Duration{
-				utils.EmptyString: 72 * time.Hour,
+			UsageTTL: []*utils.DynamicDurationOpt{
+				{
+					Value: 72 * time.Hour,
+				},
 			},
-			Units: map[string]float64{
-				utils.EmptyString: float64(1),
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
 			},
 		},
 	}
@@ -354,10 +368,26 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		IndexedSelects:      true,
 		DefaultRatio:        1,
 		Opts: &RoutesOpts{
-			Context:      utils.MetaRoutes,
-			ProfileCount: 1,
-			IgnoreErrors: false,
-			MaxCost:      utils.EmptyString,
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaRoutes,
+				},
+			},
+			ProfileCount: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
+			},
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: utils.EmptyString,
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RouteSCfg()) {

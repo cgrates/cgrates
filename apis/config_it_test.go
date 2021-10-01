@@ -529,7 +529,9 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
 		Opts: &config.AttributesOptsJson{
-			ProcessRuns: utils.IntPointer(2),
+			ProcessRuns: map[string]int{
+				utils.EmptyString: 2,
+			},
 		},
 	}
 	if !reflect.DeepEqual(attr, expected) {
@@ -549,7 +551,9 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
 		Opts: &config.AttributesOptsJson{
-			ProcessRuns: utils.IntPointer(2),
+			ProcessRuns: map[string]int{
+				utils.EmptyString: 2,
+			},
 		},
 	}
 	err := connDb.SetSection(context.Background(), "attributes", attrSect)
