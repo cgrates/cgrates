@@ -1117,10 +1117,6 @@ func TestRatesSetRateProfileRatesErr2(t *testing.T) {
 				IntervalRates: []*utils.APIIntervalRate{
 					{
 						IntervalStart: "error",
-						FixedFee:      nil,
-						RecurrentFee:  nil,
-						Unit:          nil,
-						Increment:     nil,
 					},
 				},
 			},

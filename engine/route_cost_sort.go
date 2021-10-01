@@ -67,8 +67,9 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 				err = utils.NewErrAccountS(err)
 				return
 			}
-
-			cost = *acntCost.Concretes
+			if acntCost.Concretes != nil {
+				cost = *acntCost.Concretes
+			}
 			acntIDs := make([]string, 0, len(acntCost.Accounts))
 			for acntID := range acntCost.Accounts {
 				acntIDs = append(acntIDs, acntID)
