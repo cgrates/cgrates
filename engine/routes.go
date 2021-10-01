@@ -184,9 +184,14 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt
 	return
 }
 
-func newOptsGetRoutes(ev *utils.CGREvent, def *config.RoutesOpts) (opts *optsGetRoutes, err error) {
+func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def *config.RoutesOpts) (opts *optsGetRoutes, err error) {
+	var ignoreErrors bool
+	if ignoreErrors, err = FilterBoolCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS,
+		def.IgnoreErrors); err != nil {
+		return
+	}
 	opts = &optsGetRoutes{
-		ignoreErrors: utils.OptAsBoolOrDef(ev.APIOpts, utils.OptsRoutesIgnoreErrors, def.IgnoreErrors),
+		ignoreErrors: utils.OptAsBoolOrDef(ev.APIOpts, utils.OptsRoutesIgnoreErrors, ignoreErrors),
 		paginator: &utils.Paginator{
 			Limit:  def.Limit,
 			Offset: def.Offset,
@@ -267,9 +272,14 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent,
 			args.APIOpts = make(map[string]interface{})
 		}
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
+		var context string
+		if context, err = FilterStringCfgOpts(ctx, tnt, args.AsDataProvider(), rpS.filterS,
+			rpS.cfg.RouteSCfg().Opts.Context); err != nil {
+			return
+		}
 		args.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 			utils.IfaceAsString(args.APIOpts[utils.OptsContext]),
-			rpS.cfg.RouteSCfg().Opts.Context,
+			context,
 			utils.MetaRoutes)
 		var rplyEv AttrSProcessEventReply
 		if err := rpS.connMgr.Call(ctx, rpS.cfg.RouteSCfg().AttributeSConns,
@@ -398,7 +408,7 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 		}
 	}
 	var extraOpts *optsGetRoutes
-	if extraOpts, err = newOptsGetRoutes(args, rpS.cfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
+	if extraOpts, err = newOptsGetRoutes(ctx, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
 		return
 	}
 
