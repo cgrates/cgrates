@@ -322,10 +322,10 @@ func DynamicDecimalBigOptsToMap(dynOpts []*DynamicDecimalBigOpt) map[string]stri
 	return optMap
 }
 
-func DynamicInterfaceOptsToMap(dynOpts []*DynamicInterfaceOpt) map[string]string {
-	optMap := make(map[string]string)
+func DynamicInterfaceOptsToMap(dynOpts []*DynamicInterfaceOpt) map[string]interface{} {
+	optMap := make(map[string]interface{})
 	for _, opt := range dynOpts {
-		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = IfaceAsString(opt.Value)
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = opt.Value
 	}
 	return optMap
 }
@@ -443,7 +443,7 @@ func MapToDynamicFloat64Opts(optsMap map[string]float64) (dynOpts []*DynamicFloa
 	return
 }
 
-func MapToDynamicInterfaceOpts(optsMap map[string]string) (dynOpts []*DynamicInterfaceOpt) {
+func MapToDynamicInterfaceOpts(optsMap map[string]interface{}) (dynOpts []*DynamicInterfaceOpt) {
 	dynOpts = make([]*DynamicInterfaceOpt, 0, len(optsMap))
 	for filters, opt := range optsMap {
 		var filterIDs []string
