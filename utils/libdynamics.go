@@ -375,6 +375,21 @@ func MapToDynamicBoolOpts(optsMap map[string]bool) (dynOpts []*DynamicBoolOpt) {
 	return
 }
 
+func MapToDynamicIntOpts(optsMap map[string]int) (dynOpts []*DynamicIntOpt) {
+	dynOpts = make([]*DynamicIntOpt, 0, len(optsMap))
+	for filters, opt := range optsMap {
+		var filterIDs []string
+		if filters != EmptyString {
+			filterIDs = strings.Split(filters, InfieldSep)
+		}
+		dynOpts = append(dynOpts, &DynamicIntOpt{
+			FilterIDs: filterIDs,
+			Value:     opt,
+		})
+	}
+	return
+}
+
 func MapToDynamicDecimalBigOpts(optsMap map[string]string) (dynOpts []*DynamicDecimalBigOpt, err error) {
 	dynOpts = make([]*DynamicDecimalBigOpt, 0, len(optsMap))
 	for filters, opt := range optsMap {
@@ -444,6 +459,7 @@ func MapToDynamicInterfaceOpts(optsMap map[string]string) (dynOpts []*DynamicInt
 }
 
 func CloneDecimalBig(in *decimal.Big) (cln *decimal.Big) {
-	*cln = *in
+	cln = new(decimal.Big)
+	cln.Copy(in)
 	return
 }

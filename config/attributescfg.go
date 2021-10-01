@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -49,24 +47,9 @@ func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) (err
 	if jsnCfg == nil {
 		return
 	}
-	for filters, value := range jsnCfg.AttributeIDs {
-		attrOpts.AttributeIDs = append(attrOpts.AttributeIDs, &utils.DynamicStringSliceOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     value,
-		})
-	}
-	for filters, value := range jsnCfg.ProcessRuns {
-		attrOpts.ProcessRuns = append(attrOpts.ProcessRuns, &utils.DynamicIntOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     value,
-		})
-	}
-	for filters, value := range jsnCfg.ProfileRuns {
-		attrOpts.ProfileRuns = append(attrOpts.ProfileRuns, &utils.DynamicIntOpt{
-			FilterIDs: strings.Split(filters, utils.InfieldSep),
-			Value:     value,
-		})
-	}
+	attrOpts.AttributeIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.AttributeIDs)
+	attrOpts.ProcessRuns = utils.MapToDynamicIntOpts(jsnCfg.ProcessRuns)
+	attrOpts.ProfileRuns = utils.MapToDynamicIntOpts(jsnCfg.ProfileRuns)
 	return
 }
 
