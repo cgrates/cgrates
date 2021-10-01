@@ -149,8 +149,8 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 		return
 	}
 	fsev[VarCGROriginHost] = utils.FirstNonEmpty(fsev[VarCGROriginHost], fsa.cfg.EventSocketConns[connIdx].Alias) // rewrite the OriginHost variable if it is empty
-	authArgs := fsev.V1AuthorizeArgs()
-	authArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID
+	authArgs := fsev.AsCGREvent(fsa.timezone)
+	authArgs.Event[FsConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
 	if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
@@ -178,7 +178,7 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 			}
 		}
 	}
-	if authArgs.GetMaxUsage {
+	if utils.OptAsBool(authArgs.APIOpts, utils.OptsAccountS) {
 		if authReply.MaxUsage == nil ||
 			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
 			fsa.unparkCall(fsev.GetUUID(), connIdx,

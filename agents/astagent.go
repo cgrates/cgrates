@@ -166,7 +166,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		return
 	}
 	//authorize Session
-	authArgs := ev.V1AuthorizeArgs()
+	authArgs := ev.AsCGREvent()
 	if authArgs == nil {
 		sma.hangupChannel(ev.ChannelID(),
 			fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
@@ -199,7 +199,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			}
 		}
 	}
-	if authArgs.GetMaxUsage {
+	if utils.OptAsBool(authArgs.APIOpts, utils.OptsAccountS) {
 		if authReply.MaxUsage == nil ||
 			authReply.MaxUsage.Compare(utils.NewDecimal(0, 0)) == 0 {
 			sma.hangupChannel(ev.ChannelID(), "")
@@ -235,7 +235,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	}
 	// Done with processing event, cache it for later use
 	sma.evCacheMux.Lock()
-	sma.eventsCache[ev.ChannelID()] = authArgs.CGREvent
+	sma.eventsCache[ev.ChannelID()] = authArgs
 	sma.evCacheMux.Unlock()
 }
 

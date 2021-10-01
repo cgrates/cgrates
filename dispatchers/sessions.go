@@ -35,28 +35,28 @@ func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREvent, reply *string)
 	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1AuthorizeArgs,
+func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *utils.CGREvent,
 	reply *sessions.V1AuthorizeReply) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1AuthorizeEvent, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.SessionSv1AuthorizeEvent, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1AuthorizeEvent, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V1AuthorizeArgs,
+func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *utils.CGREvent,
 	reply *sessions.V1AuthorizeReplyWithDigest) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1AuthorizeEventWithDigest, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.SessionSv1AuthorizeEventWithDigest, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEventWithDigest, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1AuthorizeEventWithDigest, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1InitiateSession(args *utils.CGREvent,

@@ -37,12 +37,12 @@ type SessionSv1 struct {
 	sS *sessions.SessionS
 }
 
-func (ssv1 *SessionSv1) AuthorizeEvent(ctx *context.Context, args *sessions.V1AuthorizeArgs,
+func (ssv1 *SessionSv1) AuthorizeEvent(ctx *context.Context, args *utils.CGREvent,
 	rply *sessions.V1AuthorizeReply) error {
 	return ssv1.sS.BiRPCv1AuthorizeEvent(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) AuthorizeEventWithDigest(ctx *context.Context, args *sessions.V1AuthorizeArgs,
+func (ssv1 *SessionSv1) AuthorizeEventWithDigest(ctx *context.Context, args *utils.CGREvent,
 	rply *sessions.V1AuthorizeReplyWithDigest) error {
 	return ssv1.sS.BiRPCv1AuthorizeEventWithDigest(ctx, args, rply)
 }

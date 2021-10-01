@@ -128,27 +128,24 @@ func TestProcessRequest(t *testing.T) {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*sessions.V1AuthorizeArgs); !can {
-				t.Errorf("args is not of sessions.V1AuthorizeArgs type")
+			} else if rargs, can := arg.(*utils.CGREvent); !can {
+				t.Errorf("args is not of utils.CGREvent type")
 			} else {
 				id = rargs.ID
 			}
-			expargs := &sessions.V1AuthorizeArgs{
-				GetMaxUsage: true,
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     id,
-					Event: map[string]interface{}{
-						"Account":     "1001",
-						"Category":    "call",
-						"Destination": "1003",
-						"OriginHost":  "local",
-						"OriginID":    "123456",
-						"ToR":         "*voice",
-						"Usage":       "10s",
-					},
-					APIOpts: map[string]interface{}{},
+			expargs := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     id,
+				Event: map[string]interface{}{
+					"Account":     "1001",
+					"Category":    "call",
+					"Destination": "1003",
+					"OriginHost":  "local",
+					"OriginID":    "123456",
+					"ToR":         "*voice",
+					"Usage":       "10s",
 				},
+				APIOpts: map[string]interface{}{},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
 				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))

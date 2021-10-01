@@ -1004,39 +1004,3 @@ variable_rtp_audio_rtcp_octet_count: 0`
 		t.Errorf("Expecting: %s, received: %s", fsCDR.CGRID, smCDR.CGRID)
 	}
 }
-
-func TestFsEvV1AuthorizeArgs(t *testing.T) {
-	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
-	ev := NewFSEvent(hangupEv)
-	expected := &sessions.V1AuthorizeArgs{
-		GetMaxUsage: true,
-		CGREvent: &utils.CGREvent{
-			Tenant: ev.GetTenant(utils.MetaDefault),
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  ev.AsMapStringInterface(timezone),
-		},
-		GetRoutes:          true,
-		GetAttributes:      true,
-		RoutesIgnoreErrors: true,
-		RoutesMaxCost:      utils.MetaEventCost,
-	}
-	expected.Event[utils.Usage] = config.CgrConfig().SessionSCfg().GetDefaultUsage(utils.MetaVoice)
-	rcv := ev.V1AuthorizeArgs()
-	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
-	} else if !reflect.DeepEqual(expected.GetMaxUsage, rcv.GetMaxUsage) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.GetMaxUsage, rcv.GetMaxUsage)
-	} else if !reflect.DeepEqual(expected.GetRoutes, rcv.GetRoutes) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.GetRoutes, rcv.GetRoutes)
-	} else if !reflect.DeepEqual(expected.GetAttributes, rcv.GetAttributes) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.GetAttributes, rcv.GetAttributes)
-	} else if !reflect.DeepEqual(expected.RoutesMaxCost, rcv.RoutesMaxCost) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.RoutesMaxCost, rcv.RoutesMaxCost)
-	} else if !reflect.DeepEqual(expected.RoutesIgnoreErrors, rcv.RoutesIgnoreErrors) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.RoutesIgnoreErrors, rcv.RoutesIgnoreErrors)
-	}
-}

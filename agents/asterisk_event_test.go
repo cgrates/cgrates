@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessions"
 )
 
 var (
@@ -337,58 +336,6 @@ func TestSMAEventExtraParameters(t *testing.T) {
 	}
 	if extraParams := smaEv.ExtraParameters(); !reflect.DeepEqual(expExtraParams, extraParams) {
 		t.Errorf("Expecting: %+v, received: %+v", expExtraParams, extraParams)
-	}
-}
-
-func TestSMAEventV1AuthorizeArgs(t *testing.T) {
-	var ev map[string]interface{}
-	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
-		t.Error(err)
-	}
-	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1", "")
-	cgrEv, err := smaEv.AsCGREvent()
-	if err != nil {
-		t.Error(err)
-	}
-	exp := &sessions.V1AuthorizeArgs{
-		GetMaxUsage: true,
-		CGREvent:    cgrEv,
-	}
-	if rcv := smaEv.V1AuthorizeArgs(); !reflect.DeepEqual(exp.GetMaxUsage, rcv.GetMaxUsage) {
-		t.Errorf("Expecting: %+v, received: %+v", exp.GetMaxUsage, rcv.GetMaxUsage)
-	}
-
-	stasisStart2 := `{"type":"StasisStart","timestamp":"2018-11-25T05:03:26.464-0500","args":["cgr_reqtype=*prepaid","cgr_route=route1","cgr_flags=*accounts+*attributes+*resources+*stats+*routes+*thresholds"],"channel":{"id":"1543140206.0","dialplan":{"context":"internal","exten":"1002","priority":4},"caller":{"name":"","number":"1001"},"name":"PJSIP/1001-00000000","state":"Ring","connected":{"name":"","number":""},"language":"en","accountcode":"","creationtime":"2018-11-25T05:03:26.463-0500"},"asterisk_id":"08:00:27:b7:b8:1f","application":"cgrates_auth"}`
-	var ev2 map[string]interface{}
-	if err := json.Unmarshal([]byte(stasisStart2), &ev2); err != nil {
-		t.Error(err)
-	}
-	smaEv2 := NewSMAsteriskEvent(ev2, "127.0.0.1", "")
-	//smaEv2.parseStasisArgs()
-	cgrEv2, err := smaEv2.AsCGREvent()
-	if err != nil {
-		t.Error(err)
-	}
-
-	exp2 := &sessions.V1AuthorizeArgs{
-		GetAttributes:      true,
-		AuthorizeResources: true,
-		GetMaxUsage:        true,
-		ProcessThresholds:  true,
-		ProcessStats:       true,
-		GetRoutes:          true,
-		CGREvent:           cgrEv2,
-	}
-	if rcv := smaEv2.V1AuthorizeArgs(); !reflect.DeepEqual(exp2.GetAttributes, rcv.GetAttributes) {
-		t.Errorf("Expecting: %+v, received: %+v", exp2.GetAttributes, rcv.GetAttributes)
-	} else if !reflect.DeepEqual(exp2.AuthorizeResources, rcv.AuthorizeResources) {
-		t.Errorf("Expecting: %+v, received: %+v", exp2.AuthorizeResources, rcv.AuthorizeResources)
-	} else if !reflect.DeepEqual(exp2.GetMaxUsage, rcv.GetMaxUsage) {
-		t.Errorf("Expecting: %+v, received: %+v", exp2.GetMaxUsage, rcv.GetMaxUsage)
-	} else if !reflect.DeepEqual(exp2.ProcessThresholds, rcv.ProcessThresholds) {
-		t.Errorf("Expecting: %+v, received: %+v", exp2.ProcessThresholds, rcv.ProcessThresholds)
-	} else if !reflect.DeepEqual(exp2.ProcessStats, rcv.ProcessStats) {
-		t.Errorf("Expecting: %+v, received: %+v", exp2.ProcessStats, rcv.ProcessStats)
 	}
 }
 

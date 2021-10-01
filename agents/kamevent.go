@@ -20,7 +20,6 @@ package agents
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -169,25 +168,8 @@ func (kev KamEvent) String() string {
 	return utils.ToJSON(kev)
 }
 
-// V1AuthorizeArgs returns the arguments used in SessionSv1.AuthorizeEvent
-func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	args = &sessions.V1AuthorizeArgs{
-		CGREvent: cgrEv,
-	}
-	subsystems, has := kev[utils.CGRFlags]
-	if !has {
-		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
-			utils.KamailioAgent))
-		args.GetMaxUsage = true
-		return
-	}
-	args.ParseFlags(subsystems, utils.InfieldSep)
-	return
-}
-
 // AsKamAuthReply builds up a Kamailio AuthReply based on arguments and reply from SessionS
-func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
+func (kev KamEvent) AsKamAuthReply(authArgs *utils.CGREvent,
 	authReply *sessions.V1AuthorizeReply, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_AUTH_REPLY
 	if kamRouReply, has := kev[KamReplyRoute]; has {
@@ -201,13 +183,13 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 		kar.Error = rplyErr.Error()
 		return
 	}
-	if authArgs.GetAttributes && authReply.Attributes != nil {
+	if authReply.Attributes != nil {
 		kar.Attributes = authReply.Attributes.Digest()
 	}
-	if authArgs.AuthorizeResources && authReply.ResourceAllocation != nil {
+	if authReply.ResourceAllocation != nil {
 		kar.ResourceAllocation = *authReply.ResourceAllocation
 	}
-	if authArgs.GetMaxUsage {
+	if utils.OptAsBool(authArgs.APIOpts, utils.OptsAccountS) {
 		if authReply.MaxUsage != nil {
 			maxDur, _ := authReply.MaxUsage.Duration()
 			kar.MaxUsage = maxDur.Seconds()
@@ -215,14 +197,14 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 			kar.MaxUsage = 0
 		}
 	}
-	if authArgs.GetRoutes && authReply.RouteProfiles != nil {
+	if authReply.RouteProfiles != nil {
 		kar.Routes = authReply.RouteProfiles.Digest()
 	}
 
-	if authArgs.ProcessThresholds && authReply.ThresholdIDs != nil {
+	if authReply.ThresholdIDs != nil {
 		kar.Thresholds = strings.Join(*authReply.ThresholdIDs, utils.FieldsSep)
 	}
-	if authArgs.ProcessStats && authReply.StatQueueIDs != nil {
+	if authReply.StatQueueIDs != nil {
 		kar.StatQueues = strings.Join(*authReply.StatQueueIDs, utils.FieldsSep)
 	}
 	return
