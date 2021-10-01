@@ -58,7 +58,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 					Value: utils.MetaRoutes,
 				},
 			},
-			ProfileCount: []*utils.DynamicFloat64Opt{
+			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 1,
 				},
@@ -226,9 +226,17 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value: 5,
 				},
 			},
-			Limit:  utils.IntPointer(1),
-			Offset: utils.IntPointer(1),
-			ProfileCount: []*utils.DynamicFloat64Opt{
+			Limit: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
+			Offset: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
+			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 1,
 				},
@@ -263,9 +271,17 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value: utils.MetaEventCost,
 				},
 			},
-			Limit:  utils.IntPointer(2),
-			Offset: utils.IntPointer(2),
-			ProfileCount: []*utils.DynamicFloat64Opt{
+			Limit: []*utils.DynamicIntOpt{
+				{
+					Value: 2,
+				},
+			},
+			Offset: []*utils.DynamicIntOpt{
+				{
+					Value: 2,
+				},
+			},
+			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 2,
 				},
@@ -291,12 +307,16 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 			IgnoreErrors: map[string]bool{
 				utils.EmptyString: false,
 			},
-			MaxCost: map[string]string{
+			MaxCost: map[string]interface{}{
 				utils.EmptyString: utils.EmptyString,
 			},
-			Limit:  utils.IntPointer(2),
-			Offset: utils.IntPointer(2),
-			ProfileCount: map[string]float64{
+			Limit: map[string]int{
+				utils.EmptyString: 2,
+			},
+			Offset: map[string]int{
+				utils.EmptyString: 2,
+			},
+			ProfileCount: map[string]int{
 				utils.EmptyString: 2,
 			},
 		},

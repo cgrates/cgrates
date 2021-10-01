@@ -778,8 +778,12 @@ const CGRATES_CFG_JSON = `
 		"*maxCost": {						//
 			"": "",
 		},
-		// "*limit": 1,						//			
-		// "*offset": 1,					//
+		// "*limit": {						//
+		// 	"": 1,
+		// },	
+		// "*offset": {						//					
+		// 	"": 1,
+		// },							
 	},
 },
 

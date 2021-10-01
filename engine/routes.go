@@ -192,16 +192,51 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def
 	}
 	opts = &optsGetRoutes{
 		ignoreErrors: utils.OptAsBoolOrDef(ev.APIOpts, utils.OptsRoutesIgnoreErrors, ignoreErrors),
-		paginator: &utils.Paginator{
-			Limit:  def.Limit,
-			Offset: def.Offset,
-		},
+		paginator:    &utils.Paginator{},
+	}
+	var limit int
+	if limit, err = FilterIntCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS,
+		def.Limit); err != nil {
+		if err == utils.ErrNotFound {
+			if limitOpt, has := ev.APIOpts[utils.OptsRoutesLimit]; has {
+				var limitValue int64
+				limitValue, err = utils.IfaceAsTInt64(limitOpt)
+				if err != nil {
+					return
+				}
+				opts.paginator.Limit = utils.IntPointer(int(limitValue))
+			}
+		} else {
+			return
+		}
+	} else {
+		opts.paginator.Limit = utils.IntPointer(limit)
+	}
+	var offset int
+	if offset, err = FilterIntCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS,
+		def.Offset); err != nil {
+		if err == utils.ErrNotFound {
+			if offsetOpt, has := ev.APIOpts[utils.OptsRoutesOffset]; has {
+				var offsetValue int64
+				offsetValue, err = utils.IfaceAsTInt64(offsetOpt)
+				if err != nil {
+					return
+				}
+				opts.paginator.Offset = utils.IntPointer(int(offsetValue))
+			}
+		} else {
+			return
+		}
+	} else {
+		opts.paginator.Offset = utils.IntPointer(offset)
 	}
 
-	maxCost, has := ev.APIOpts[utils.OptsRoutesMaxCost]
-	if !has {
-		maxCost = def.MaxCost
+	var maxCost interface{}
+	if maxCost, err = FilterInterfaceCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS,
+		def.MaxCost); err != nil {
+		return
 	}
+	maxCost = ev.OptsAsInterface(maxCost, utils.OptsRoutesMaxCost)
 
 	switch maxCost {
 	case utils.EmptyString, nil:
@@ -225,24 +260,6 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def
 		if opts.maxCost, err = utils.IfaceAsFloat64(maxCost); err != nil {
 			return nil, err
 		}
-	}
-
-	if limitValue, has := ev.APIOpts[utils.OptsRoutesLimit]; has {
-		var limit int64
-		limit, err = utils.IfaceAsTInt64(limitValue)
-		if err != nil {
-			return
-		}
-		opts.paginator.Limit = utils.IntPointer(int(limit))
-	}
-
-	if offsetValue, has := ev.APIOpts[utils.OptsRoutesOffset]; has {
-		var offset int64
-		offset, err = utils.IfaceAsTInt64(offsetValue)
-		if err != nil {
-			return
-		}
-		opts.paginator.Offset = utils.IntPointer(int(offset))
 	}
 
 	return
@@ -395,17 +412,16 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
-	prfCountOptInf, has := args.APIOpts[utils.OptsRoutesProfileCount]
-	if !has {
-		prfCountOptInf = rpS.cfg.RouteSCfg().Opts.ProfileCount
+	var prfCountOpt int
+	if prfCountOpt, err = FilterIntCfgOpts(ctx, tnt, args.AsDataProvider(), rpS.filterS,
+		rpS.cfg.RouteSCfg().Opts.ProfileCount); err != nil {
+		return
 	}
-	if prfCountOptInf != nil {
-		prfCountOpt, err := utils.IfaceAsTInt64(prfCountOptInf)
-		if err != nil {
-			return nil, err
-		} else if prfCount > int(prfCountOpt) { // it has the option and is smaller that the current number of profiles
-			prfCount = int(prfCountOpt)
-		}
+	if prfCountOpt, err = args.OptsAsInt(prfCountOpt, utils.OptsRoutesProfileCount); err != nil {
+		return
+	}
+	if prfCount > prfCountOpt { // it has the option and is smaller that the current number of profiles
+		prfCount = prfCountOpt
 	}
 	var extraOpts *optsGetRoutes
 	if extraOpts, err = newOptsGetRoutes(ctx, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data

@@ -373,7 +373,7 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 					Value: utils.MetaRoutes,
 				},
 			},
-			ProfileCount: []*utils.DynamicFloat64Opt{
+			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 1,
 				},
