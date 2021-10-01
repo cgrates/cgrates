@@ -780,7 +780,7 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 					Value: utils.MetaRoutes,
 				},
 			},
-			ProfileCount: []*utils.DynamicFloat64Opt{
+			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 1,
 				},
@@ -2027,7 +2027,7 @@ func TestRouteSConfig(t *testing.T) {
 					Value: utils.MetaRoutes,
 				},
 			},
-			ProfileCount: []*utils.DynamicFloat64Opt{
+			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 1,
 				},

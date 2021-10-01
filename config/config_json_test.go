@@ -940,13 +940,13 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 			Context: map[string]string{
 				utils.EmptyString: utils.MetaRoutes,
 			},
-			ProfileCount: map[string]float64{
+			ProfileCount: map[string]int{
 				utils.EmptyString: 1,
 			},
 			IgnoreErrors: map[string]bool{
 				utils.EmptyString: false,
 			},
-			MaxCost: map[string]string{
+			MaxCost: map[string]interface{}{
 				utils.EmptyString: utils.EmptyString,
 			},
 		},
