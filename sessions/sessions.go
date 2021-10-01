@@ -1565,7 +1565,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	// end of RPC caching
 	if !(args.GetAttributes || utils.OptAsBool(args.APIOpts, utils.OptsAttributeS) ||
-		args.GetMaxUsage || utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) ||
+		utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) ||
 		args.AuthorizeResources || utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) ||
 		args.GetRoutes || utils.OptAsBool(args.APIOpts, utils.OptsRouteS)) {
 		return // Nothing to do
@@ -1590,8 +1590,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		}
 	}
 	runEvents := make(map[string]*utils.CGREvent)
-	if args.GetMaxUsage || // backwards compatibility
-		utils.OptAsBool(args.APIOpts, utils.OptsChargerS) {
+
+	if utils.OptAsBool(args.APIOpts, utils.OptsChargerS) {
 		var chrgrs []*engine.ChrgSProcessEventReply
 		if chrgrs, err = sS.processChargerS(ctx, args.CGREvent); err != nil {
 			return
@@ -1602,8 +1602,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	} else {
 		runEvents[utils.MetaRaw] = args.CGREvent
 	}
-	if args.GetMaxUsage || // backwards compatibility
-		utils.OptAsBool(args.APIOpts, utils.OptsAccountS) {
+	if utils.OptAsBool(args.APIOpts, utils.OptsAccountS) {
 		var maxAbstracts map[string]*utils.Decimal
 		if maxAbstracts, err = sS.accounSMaxAbstracts(ctx, runEvents); err != nil {
 			return err
@@ -1699,8 +1698,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
-	if args.GetMaxUsage ||
-		utils.OptAsBool(args.APIOpts, utils.OptsAccountS) {
+	if utils.OptAsBool(args.APIOpts, utils.OptsAccountS) {
 		maxDur, _ := initAuthRply.MaxUsage.Duration()
 		authReply.MaxUsage = maxDur.Seconds()
 	}

@@ -155,7 +155,7 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 }
 
 // AsDataProvider returns the CGREvent as MapStorage with *opts and *req paths set
-func (cgrEv *CGREvent) AsDataProvider() (ev DataProvider) {
+func (cgrEv *CGREvent) AsDataProvider() (ev MapStorage) {
 	return MapStorage{
 		MetaOpts: cgrEv.APIOpts,
 		MetaReq:  cgrEv.Event,

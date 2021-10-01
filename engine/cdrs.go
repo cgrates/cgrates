@@ -120,7 +120,7 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 
 // rateSProcessEvent will send the event to rateS and attach the cost received back to event
 func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
-	rpCost := new(utils.RateProfileCost)
+	var rpCost utils.RateProfileCost
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().RateSConns,
 		utils.RateSv1CostForEvent,
 		cgrEv, &rpCost); err != nil {
@@ -313,14 +313,13 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent,
 	// end of RPC caching
 
 	// processing options
-	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAttributeS, len(cdrS.cfg.CdrsCfg().AttributeSConns) != 0)
-	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, len(cdrS.cfg.CdrsCfg().OnlineCDRExports) != 0 ||
-		len(cdrS.cfg.CdrsCfg().EEsConns) != 0)
-	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsThresholdS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
-	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsStatS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
-	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsChargerS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
-	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
-	acntS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAccountS, len(cdrS.cfg.CdrsCfg().AccountSConns) != 0)
+	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAttributeS, false)
+	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, false)
+	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsThresholdS, false)
+	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsStatS, false)
+	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsChargerS, false)
+	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsRateS, false)
+	acntS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAccountS, false)
 
 	// end of processing options
 
