@@ -190,7 +190,6 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 // in case of partially executed, both error and evs will be returned
 func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	chrgS, attrS, rateS, acntS, eeS, thdS, stS bool) (evs []*utils.EventWithFlags, err error) {
-
 	if attrS {
 		if err = cdrS.attrSProcessEvent(ctx, ev); err != nil {
 			utils.Logger.Warning(

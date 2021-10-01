@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -377,9 +376,6 @@ func (rpS *RouteService) sortedRoutesForProfile(ctx *context.Context, tnt string
 // sortedRoutesForEvent will return the list of sortedRoutes
 // for event based on filters and sorting algorithms
 func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (sortedRoutes SortedRoutesList, err error) {
-	if _, has := args.Event[utils.Usage]; !has {
-		args.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
-	}
 	var rPrfs RouteProfilesWithWeight
 	if rPrfs, err = rpS.matchingRouteProfilesForEvent(ctx, tnt, args); err != nil {
 		return

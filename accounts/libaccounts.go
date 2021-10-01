@@ -115,9 +115,7 @@ func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
-	if _, has := cgrEv.APIOpts[utils.OptsRatesRateProfileIDs]; !has {
-		cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(rpIDs)
-	}
+	cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(rpIDs)
 	var tmpReply utils.RateProfileCost
 	if err = connMgr.Call(ctx, rateSConns, utils.RateSv1CostForEvent,
 		cgrEv, &tmpReply); err != nil {
@@ -130,22 +128,17 @@ func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 func costIncrement(ctx *context.Context, cfgCostIncrmts []*utils.CostIncrement,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (costIcrm *utils.CostIncrement, err error) {
 	// no cost increment in our balance, return a default increment to query to rateS
-	if len(cfgCostIncrmts) == 0 {
-		return &utils.CostIncrement{
-			Increment: utils.NewDecimal(1, 0),
-		}, nil
-	}
-	for _, cIcrm := range cfgCostIncrmts {
+	for _, costIcrm = range cfgCostIncrmts {
 		var pass bool
-		if pass, err = fltrS.Pass(ctx, tnt, cIcrm.FilterIDs, ev); err != nil {
+		if pass, err = fltrS.Pass(ctx, tnt, costIcrm.FilterIDs, ev); err != nil {
 			return
-		} else if !pass {
-			continue
+		} else if pass {
+			return
 		}
-		costIcrm = cIcrm
-		break
 	}
-	return
+	return &utils.CostIncrement{
+		Increment: utils.NewDecimal(1, 0),
+	}, nil
 }
 
 // unitFactor detects the unitFactor for the event
@@ -218,9 +211,6 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement, dbtedAUnts *decimal.Big) (ec *utils.EventCharges, err error) {
 	// Init EventCharges
-	if costIcrm == nil {
-		costIcrm = &utils.CostIncrement{Increment: utils.NewDecimal(1, 0)}
-	}
 	calculateCost := costIcrm.RecurrentFee == nil && costIcrm.FixedFee == nil
 	//var attrIDs []string // will be populated if attributes are processed successfully
 	// process AttributeS if needed

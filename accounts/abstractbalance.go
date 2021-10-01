@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -58,7 +57,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		utils.MetaOpts: cgrEv.APIOpts,
 		utils.MetaReq:  cgrEv.Event,
 	}
-
 	// pass the general balance filters
 	var pass bool
 	if pass, err = aB.fltrS.Pass(ctx, cgrEv.Tenant, aB.blnCfg.FilterIDs, evNm); err != nil {
@@ -105,10 +103,9 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		}
 	}
 	var ecCost *utils.EventCharges
-	if costIcrm != nil && ((costIcrm.FixedFee != nil &&
-		costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0) ||
-		(costIcrm.RecurrentFee != nil &&
-			costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0)) {
+	if (costIcrm.FixedFee == nil && costIcrm.RecurrentFee == nil) ||
+		(costIcrm.FixedFee != nil && costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0) ||
+		(costIcrm.RecurrentFee != nil && costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0) {
 		// attempt to debit usage with cost
 		if ecCost, err = maxDebitAbstractsFromConcretes(ctx, usage,
 			aB.acntID, aB.cncrtBlncs,
