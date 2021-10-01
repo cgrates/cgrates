@@ -233,9 +233,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:     nil,
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{"dynaprepaid"},
-		Opts: &ActionsOptsJson{
-			ActionProfileIDs: map[string][]string{},
-		},
+		Opts:                      &ActionsOptsJson{},
 	}
 
 	rcv := diffActionSJsonCfg(d, v1, v2)
@@ -246,9 +244,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 	//The output "d" should be nil when there isn't any difference between v1 and v2_2
 	v2_2 := v1
 	expected2 := &ActionSJsonCfg{
-		Opts: &ActionsOptsJson{
-			ActionProfileIDs: map[string][]string{},
-		},
+		Opts: &ActionsOptsJson{},
 	}
 	rcv = diffActionSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {

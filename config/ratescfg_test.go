@@ -105,15 +105,21 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 			utils.MetaRateProfileIDsCfg: map[string][]string{
 				utils.EmptyString: {},
 			},
-			utils.MetaStartTime:        utils.MetaNow,
-			utils.MetaUsage:            decimal.New(int64(time.Minute), 0),
-			utils.MetaIntervalStartCfg: decimal.New(0, 0),
+			utils.MetaStartTime: map[string]string{
+				utils.EmptyString: utils.MetaNow,
+			},
+			utils.MetaUsage: map[string]string{
+				utils.EmptyString: decimal.New(int64(time.Minute), 0).String(),
+			},
+			utils.MetaIntervalStartCfg: map[string]string{
+				utils.EmptyString: decimal.New(0, 0).String(),
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.rateSCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -150,15 +156,21 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 			utils.MetaRateProfileIDsCfg: map[string][]string{
 				utils.EmptyString: {},
 			},
-			utils.MetaStartTime:        utils.MetaNow,
-			utils.MetaUsage:            decimal.New(int64(time.Minute), 0),
-			utils.MetaIntervalStartCfg: decimal.New(0, 0),
+			utils.MetaStartTime: map[string]string{
+				utils.EmptyString: utils.MetaNow,
+			},
+			utils.MetaUsage: map[string]string{
+				utils.EmptyString: decimal.New(int64(time.Minute), 0).String(),
+			},
+			utils.MetaIntervalStartCfg: map[string]string{
+				utils.EmptyString: decimal.New(0, 0).String(),
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.rateSCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -283,9 +295,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &RateSJsonCfg{
-		Opts: &RatesOptsJson{
-			RateProfileIDs: map[string][]string{},
-		},
+		Opts: &RatesOptsJson{},
 	}
 	rcv = diffRateSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {

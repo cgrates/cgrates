@@ -272,11 +272,7 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &ResourceSJsonCfg{
-		Opts: &ResourcesOptsJson{
-			UsageID:  make(map[string]string),
-			UsageTTL: make(map[string]string),
-			Units:    make(map[string]float64),
-		},
+		Opts: &ResourcesOptsJson{},
 	}
 	rcv = diffResourceSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {

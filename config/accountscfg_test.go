@@ -122,7 +122,9 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 			utils.MetaAccountIDsCfg: map[string][]string{
 				utils.EmptyString: {},
 			},
-			utils.MetaUsage: decimal.New(int64(72*time.Hour), 0),
+			utils.MetaUsage: map[string]string{
+				utils.EmptyString: decimal.New(int64(72*time.Hour), 0).String(),
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -305,9 +307,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Nested_fields:         nil,
 		Max_iterations:        nil,
 		Max_usage:             nil,
-		Opts: &AccountsOptsJson{
-			AccountIDs: map[string][]string{},
-		},
+		Opts:                  &AccountsOptsJson{},
 	}
 
 	rcv = diffAccountSJsonCfg(d, v1, v2_3)

@@ -211,7 +211,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{"*req.index33"},
 		Nested_fields:            utils.BoolPointer(true),
 		Opts: &StatsOptsJson{
-			StatIDs: map[string][]string{},
+			StatIDs: map[string][]string(nil),
 		},
 	}
 
@@ -222,9 +222,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &StatServJsonCfg{
-		Opts: &StatsOptsJson{
-			StatIDs: map[string][]string{},
-		},
+		Opts: &StatsOptsJson{},
 	}
 	rcv = diffStatServJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
