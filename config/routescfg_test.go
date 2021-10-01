@@ -73,6 +73,8 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 					Value: utils.EmptyString,
 				},
 			},
+			Limit:  []*utils.DynamicIntOpt{},
+			Offset: []*utils.DynamicIntOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -100,10 +102,20 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{},
 		utils.DefaultRatioCfg:        1,
 		utils.OptsCfg: map[string]interface{}{
-			utils.OptsContext:         utils.MetaRoutes,
-			utils.MetaProfileCountCfg: float64(1),
-			utils.MetaIgnoreErrorsCfg: false,
-			utils.MetaMaxCostCfg:      utils.EmptyString,
+			utils.OptsContext: map[string]string{
+				utils.EmptyString: utils.MetaRoutes,
+			},
+			utils.MetaLimitCfg:  map[string]int{},
+			utils.MetaOffsetCfg: map[string]int{},
+			utils.MetaProfileCountCfg: map[string]int{
+				utils.EmptyString: 1,
+			},
+			utils.MetaIgnoreErrorsCfg: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaMaxCostCfg: map[string]interface{}{
+				utils.EmptyString: utils.EmptyString,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -145,10 +157,20 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
 		utils.OptsCfg: map[string]interface{}{
-			utils.OptsContext:         utils.MetaRoutes,
-			utils.MetaProfileCountCfg: float64(1),
-			utils.MetaIgnoreErrorsCfg: false,
-			utils.MetaMaxCostCfg:      utils.EmptyString,
+			utils.OptsContext: map[string]string{
+				utils.EmptyString: utils.MetaRoutes,
+			},
+			utils.MetaLimitCfg:  map[string]int{},
+			utils.MetaOffsetCfg: map[string]int{},
+			utils.MetaProfileCountCfg: map[string]int{
+				utils.EmptyString: 1,
+			},
+			utils.MetaIgnoreErrorsCfg: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaMaxCostCfg: map[string]interface{}{
+				utils.EmptyString: utils.EmptyString,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -308,7 +330,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 				utils.EmptyString: false,
 			},
 			MaxCost: map[string]interface{}{
-				utils.EmptyString: utils.EmptyString,
+				utils.EmptyString: utils.MetaEventCost,
 			},
 			Limit: map[string]int{
 				utils.EmptyString: 2,

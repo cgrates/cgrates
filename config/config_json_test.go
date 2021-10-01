@@ -771,6 +771,9 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &AttributesOptsJson{
+			AttributeIDs: map[string][]string{
+				utils.EmptyString: {},
+			},
 			ProcessRuns: map[string]int{
 				utils.EmptyString: 1,
 			},

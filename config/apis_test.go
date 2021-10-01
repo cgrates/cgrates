@@ -54,9 +54,7 @@ func TestConfigV1SetConfigWithDB(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
-	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
-		AccountIDs: map[string][]string{},
-	}}
+	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
 		t.Fatal(err)
@@ -88,9 +86,7 @@ func TestConfigV1StoreCfgInDB(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
-	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
-		AccountIDs: map[string][]string{},
-	}}
+	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
 		t.Fatal(err)
@@ -171,9 +167,7 @@ func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
-	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
-		AccountIDs: map[string][]string{},
-	}}
+	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
 		t.Fatal(err)
@@ -264,9 +258,7 @@ func TestConfigLoadFromDB(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
-	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
-		AccountIDs: map[string][]string{},
-	}}
+	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
 		t.Fatal(err)

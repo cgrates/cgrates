@@ -795,6 +795,8 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 					Value: utils.EmptyString,
 				},
 			},
+			Limit:  []*utils.DynamicIntOpt{},
+			Offset: []*utils.DynamicIntOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.routeSCfg) {
@@ -1879,10 +1881,19 @@ func TestAttributeSConfig(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 		Opts: &AttributesOpts{
+			AttributeIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
+			},
 			ProcessRuns: []*utils.DynamicIntOpt{
-				&utils.DynamicIntOpt{
-					FilterIDs: []string{},
-					Value:     1,
+				{
+					Value: 1,
+				},
+			},
+			ProfileRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 0,
 				},
 			},
 		},
@@ -2042,6 +2053,8 @@ func TestRouteSConfig(t *testing.T) {
 					Value: utils.EmptyString,
 				},
 			},
+			Limit:  []*utils.DynamicIntOpt{},
+			Offset: []*utils.DynamicIntOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -4035,7 +4048,7 @@ func TestV1GetConfigCdrs(t *testing.T) {
 			utils.AttributeSConnsCfg:  []string{},
 			utils.ThresholdSConnsCfg:  []string{},
 			utils.StatSConnsCfg:       []string{},
-			utils.OnlineCDRExportsCfg: []string{},
+			utils.OnlineCDRExportsCfg: []string(nil),
 			utils.ActionSConnsCfg:     []string{},
 			utils.EEsConnsCfg:         []string{},
 			utils.RateSConnsCfg:       []string{},
@@ -4270,9 +4283,15 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: []string(nil),
-				utils.MetaProcessRunsCfg:  1,
-				utils.MetaProfileRunsCfg:  0,
+				utils.MetaAttributeIDsCfg: map[string][]string{
+					utils.EmptyString: {},
+				},
+				utils.MetaProcessRunsCfg: map[string]int{
+					utils.EmptyString: 1,
+				},
+				utils.MetaProfileRunsCfg: map[string]int{
+					utils.EmptyString: 0,
+				},
 			},
 		},
 	}
@@ -4407,7 +4426,9 @@ func TestV1GetConfigAcounts(t *testing.T) {
 				utils.MetaAccountIDsCfg: map[string][]string{
 					utils.EmptyString: {},
 				},
-				utils.MetaUsage: decimal.New(int64(72*time.Hour), 0),
+				utils.MetaUsage: map[string]string{
+					utils.EmptyString: decimal.New(int64(72*time.Hour), 0).String(),
+				},
 			},
 		},
 	}
@@ -4435,10 +4456,20 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.AccountSConnsCfg:       []string{},
 			utils.DefaultRatioCfg:        1,
 			utils.OptsCfg: map[string]interface{}{
-				utils.OptsContext:         utils.MetaRoutes,
-				utils.MetaProfileCountCfg: float64(1),
-				utils.MetaIgnoreErrorsCfg: false,
-				utils.MetaMaxCostCfg:      utils.EmptyString,
+				utils.OptsContext: map[string]string{
+					utils.EmptyString: utils.MetaRoutes,
+				},
+				utils.MetaProfileCountCfg: map[string]int{
+					utils.EmptyString: 1,
+				},
+				utils.MetaIgnoreErrorsCfg: map[string]bool{
+					utils.EmptyString: false,
+				},
+				utils.MetaMaxCostCfg: map[string]interface{}{
+					utils.EmptyString: utils.EmptyString,
+				},
+				utils.MetaLimitCfg:  map[string]int{},
+				utils.MetaOffsetCfg: map[string]int{},
 			},
 		},
 	}
@@ -4574,7 +4605,7 @@ func TestV1GetConfigSectionMigrator(t *testing.T) {
 			utils.OutStorDBNameCfg:     "cgrates",
 			utils.OutStorDBUserCfg:     "cgrates",
 			utils.OutStorDBPasswordCfg: "",
-			utils.UsersFiltersCfg:      []string{},
+			utils.UsersFiltersCfg:      []string(nil),
 			utils.OutStorDBOptsCfg:     map[string]interface{}{},
 			utils.OutDataDBOptsCfg: map[string]interface{}{
 				utils.RedisSentinelNameCfg:       "",
@@ -4919,9 +4950,15 @@ func TestV1GetConfigSectionRateS(t *testing.T) {
 				utils.MetaRateProfileIDsCfg: map[string][]string{
 					utils.EmptyString: {},
 				},
-				utils.MetaStartTime:        utils.MetaNow,
-				utils.MetaUsage:            decimal.New(int64(time.Minute), 0),
-				utils.MetaIntervalStartCfg: decimal.New(0, 0),
+				utils.MetaStartTime: map[string]string{
+					utils.EmptyString: utils.MetaNow,
+				},
+				utils.MetaUsage: map[string]string{
+					utils.EmptyString: decimal.New(int64(time.Minute), 0).String(),
+				},
+				utils.MetaIntervalStartCfg: map[string]string{
+					utils.EmptyString: decimal.New(0, 0).String(),
+				},
 			},
 		},
 	}
@@ -5052,7 +5089,7 @@ func TestV1GetConfigAsJSONTListen(t *testing.T) {
 
 func TestV1GetConfigAsJSONAccounts(t *testing.T) {
 	var reply string
-	expected := `{"accounts":{"attributes_conns":[],"enabled":false,"indexed_selects":true,"max_iterations":1000,"max_usage":"259200000000000","nested_fields":false,"opts":{"*accountIDs":{"":[]},"*usage":"259200000000000"},"prefix_indexed_fields":[],"rates_conns":[],"suffix_indexed_fields":[],"thresholds_conns":[]}}`
+	expected := `{"accounts":{"attributes_conns":[],"enabled":false,"indexed_selects":true,"max_iterations":1000,"max_usage":"259200000000000","nested_fields":false,"opts":{"*accountIDs":{"":[]},"*usage":{"":"259200000000000"}},"prefix_indexed_fields":[],"rates_conns":[],"suffix_indexed_fields":[],"thresholds_conns":[]}}`
 	cfg := NewDefaultCGRConfig()
 	if err := cfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{AccountSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5085,7 +5122,7 @@ func TestV1GetConfigAsJSONFilterS(t *testing.T) {
 
 func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 	var reply string
-	expected := `{"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":[],"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"store_cdrs":true,"thresholds_conns":[]}}`
+	expected := `{"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"store_cdrs":true,"thresholds_conns":[]}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{CDRsJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5173,7 +5210,7 @@ func TestV1GetConfigAsJSONDNSAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONAttributes(t *testing.T) {
 	var reply string
-	expected := `{"attributes":{"accounts_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":null,"*processRuns":1,"*profileRuns":0},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expected := `{"attributes":{"accounts_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":{"":[]},"*processRuns":{"":1},"*profileRuns":{"":0}},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{AttributeSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5228,7 +5265,7 @@ func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 
 func TestV1GetConfigAsJSONRouteS(t *testing.T) {
 	var reply string
-	expected := `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_ratio":1,"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*context":"*routes","*ignoreErrors":false,"*maxCost":"","*profileCount":1},"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expected := `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_ratio":1,"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*context":{"":"*routes"},"*ignoreErrors":{"":false},"*limit":{},"*maxCost":{"":""},"*offset":{},"*profileCount":{"":1}},"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{RouteSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5296,7 +5333,7 @@ func TestV1GetConfigAsJSONCgrLoader(t *testing.T) {
 
 func TestV1GetConfigAsJSONCgrMigrator(t *testing.T) {
 	var reply string
-	expected := `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0","redisClusterSync":"5s","redisSentinel":"","redisTLS":false},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"redis","out_datadb_user":"cgrates","out_stordb_host":"127.0.0.1","out_stordb_name":"cgrates","out_stordb_opts":{},"out_stordb_password":"","out_stordb_port":"3306","out_stordb_type":"mysql","out_stordb_user":"cgrates","users_filters":[]}}`
+	expected := `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0","redisClusterSync":"5s","redisSentinel":"","redisTLS":false},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"redis","out_datadb_user":"cgrates","out_stordb_host":"127.0.0.1","out_stordb_name":"cgrates","out_stordb_opts":{},"out_stordb_password":"","out_stordb_port":"3306","out_stordb_type":"mysql","out_stordb_user":"cgrates","users_filters":null}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{MigratorJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5417,7 +5454,7 @@ func TestV1GetConfigAsJSONAnalyzer(t *testing.T) {
 
 func TestV1GetConfigAsJSONRateS(t *testing.T) {
 	var reply string
-	expected := `{"rates":{"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*intervalStart":"0","*rateProfileIDs":{"":[]},"*startTime":"*now","*usage":"60000000000"},"prefix_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[],"verbosity":1000}}`
+	expected := `{"rates":{"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*intervalStart":{"":"0"},"*rateProfileIDs":{"":[]},"*startTime":{"":"*now"},"*usage":{"":"60000000000"}},"prefix_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[],"verbosity":1000}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{RateSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -6167,12 +6204,13 @@ func TestReloadCfgInDb(t *testing.T) {
 		SuffixIndexedFields: &[]string{"field2"},
 		PrefixIndexedFields: &[]string{"field2"},
 		Opts: &AttributesOpts{
+			AttributeIDs: []*utils.DynamicStringSliceOpt{},
 			ProcessRuns: []*utils.DynamicIntOpt{
-				&utils.DynamicIntOpt{
-					FilterIDs: []string{},
-					Value:     3,
+				{
+					Value: 3,
 				},
 			},
+			ProfileRuns: []*utils.DynamicIntOpt{},
 		},
 		NestedFields: false,
 	}

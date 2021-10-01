@@ -316,8 +316,7 @@ func DynamicDurationOptsToMap(dynOpts []*DynamicDurationOpt) map[string]string {
 func DynamicDecimalBigOptsToMap(dynOpts []*DynamicDecimalBigOpt) map[string]string {
 	optMap := make(map[string]string)
 	for _, opt := range dynOpts {
-		value := IfaceAsString(opt.Value)
-		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = value
+		optMap[strings.Join(opt.FilterIDs, InfieldSep)] = opt.Value.String()
 	}
 	return optMap
 }

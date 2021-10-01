@@ -132,7 +132,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.AttributeSConnsCfg:  []string{"*internal"},
 		utils.ThresholdSConnsCfg:  []string{},
 		utils.StatSConnsCfg:       []string{},
-		utils.OnlineCDRExportsCfg: []string{},
+		utils.OnlineCDRExportsCfg: []string(nil),
 		utils.ActionSConnsCfg:     []string{},
 		utils.EEsConnsCfg:         []string{"conn1"},
 		utils.RateSConnsCfg:       []string{},

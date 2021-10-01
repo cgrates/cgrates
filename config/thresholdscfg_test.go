@@ -47,11 +47,7 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		NestedFields:        true,
 		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: []*utils.DynamicStringSliceOpt{
-				{
-					Value: []string{},
-				},
-			},
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -170,7 +166,9 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"req.index3"},
 		ActionSConns:        []string{},
 		NestedFields:        false,
-		Opts:                &ThresholdsOpts{},
+		Opts: &ThresholdsOpts{
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 
 	v2 := &ThresholdSCfg{
@@ -182,7 +180,9 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"req.index33"},
 		ActionSConns:        []string{"*internal"},
 		NestedFields:        true,
-		Opts:                &ThresholdsOpts{},
+		Opts: &ThresholdsOpts{
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
+		},
 	}
 
 	expected := &ThresholdSJsonCfg{
@@ -195,7 +195,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &ThresholdsOptsJson{
-			ThresholdIDs: map[string][]string{},
+			ThresholdIDs: map[string][]string(nil),
 		},
 	}
 
@@ -206,9 +206,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &ThresholdSJsonCfg{
-		Opts: &ThresholdsOptsJson{
-			ThresholdIDs: map[string][]string{},
-		},
+		Opts: &ThresholdsOptsJson{},
 	}
 	rcv = diffThresholdSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
