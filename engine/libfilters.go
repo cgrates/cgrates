@@ -165,3 +165,23 @@ func FilterDecimalBigCfgOpts(ctx *context.Context, tnt string, ev utils.DataProv
 	}
 	return // return the option or NOT_FOUND if there are no options or none of the filters pass
 }
+
+// FilterInterfaceCfgOpts returns the option as interface{} if the filters match
+func FilterInterfaceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicInterfaceOpt) (dft interface{}, err error) {
+	var hasDefault bool
+	for _, opt := range dynOpts { // iterate through the options
+		if len(opt.FilterIDs) == 0 {
+			hasDefault = true
+			dft = opt.Value
+		}
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+			return false, err
+		} else if pass {
+			return opt.Value, nil
+		}
+	}
+	if !hasDefault {
+		err = utils.ErrNotFound
+	}
+	return // return the option or NOT_FOUND if there are no options or none of the filters pass
+}
