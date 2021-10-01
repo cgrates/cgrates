@@ -254,14 +254,14 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 		if calculateCost {
 			var rplyCost *utils.RateProfileCost
 			cgrEv.APIOpts[utils.OptsRatesIntervalStart] = dbtedAUnts
-			cgrEv.APIOpts[utils.OptsAccountsUsage] = aUnits
+			cgrEv.APIOpts[utils.OptsRatesUsage] = aUnits
 			if rplyCost, err = rateSCostForEvent(ctx, connMgr, cgrEv, rateSConns, rpIDs); err != nil {
 				err = utils.NewErrRateS(err)
 				return
 			}
 			// cleanup the opts
 			delete(cgrEv.APIOpts, utils.OptsRatesIntervalStart)
-			delete(cgrEv.APIOpts, utils.OptsAccountsUsage)
+			delete(cgrEv.APIOpts, utils.OptsRatesUsage)
 			costIcrm = costIcrm.Clone() // so we don't modify the original
 			costIcrm.FixedFee = rplyCost.Cost
 		}

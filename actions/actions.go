@@ -192,10 +192,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
 	forceASAP bool) (schedActs []*scheduledActs, err error) {
 	var aPfs engine.ActionProfiles
-	evNm := utils.MapStorage{
-		utils.MetaReq:  cgrEv.Event,
-		utils.MetaOpts: cgrEv.APIOpts,
-	}
+	evNm := cgrEv.AsDataProvider()
 	if aPfs, err = aS.matchingActionProfilesForEvent(ctx, tnt, evNm, aPrflIDs); err != nil {
 		return
 	}
