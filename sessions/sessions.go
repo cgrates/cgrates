@@ -1534,21 +1534,21 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
 
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific components
 func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
-	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
-	if args.CGREvent == nil {
+	args *utils.CGREvent, authReply *V1AuthorizeReply) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
-		args.CGREvent.ID = utils.GenUUID()
+	if args.ID == "" {
+		args.ID = utils.GenUUID()
 	}
-	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	if args.Tenant == "" {
+		args.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -1576,34 +1576,21 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
 		return
 	}
-	if !(args.GetAttributes || attrS || utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) ||
-		args.AuthorizeResources || utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) ||
-		args.GetRoutes || utils.OptAsBool(args.APIOpts, utils.OptsRouteS)) {
+	if !(attrS || utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) ||
+		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) ||
+		utils.OptAsBool(args.APIOpts, utils.OptsRouteS)) {
 		return // Nothing to do
 	}
 	if args.APIOpts == nil {
 		args.APIOpts = make(map[string]interface{})
 	}
-	if v, has := args.APIOpts[utils.OptsAttributeS]; !has {
-		/*
-			if attrS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.CGREvent.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Attributes); err != nil {
-				return
-			}
-		*/
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	if args.GetAttributes || attrS {
+	if attrS {
 		if args.APIOpts == nil {
 			args.APIOpts = make(map[string]interface{})
 		}
-		if args.AttributeIDs != nil {
-			args.APIOpts[utils.OptsAttributesAttributeIDs] = args.AttributeIDs
-		}
-		rplyAttr, err := sS.processAttributes(ctx, args.CGREvent)
+		rplyAttr, err := sS.processAttributes(ctx, args)
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent
+			args = rplyAttr.CGREvent
 			authReply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -1624,14 +1611,14 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	if chrgS {
 		var chrgrs []*engine.ChrgSProcessEventReply
-		if chrgrs, err = sS.processChargerS(ctx, args.CGREvent); err != nil {
+		if chrgrs, err = sS.processChargerS(ctx, args); err != nil {
 			return
 		}
 		for _, chrgr := range chrgrs {
 			runEvents[chrgr.ChargerSProfile] = chrgr.CGREvent
 		}
 	} else {
-		runEvents[utils.MetaRaw] = args.CGREvent
+		runEvents[utils.MetaRaw] = args
 	}
 	var acntS bool
 	if v, has := args.APIOpts[utils.OptsAccountS]; !has {
@@ -1647,16 +1634,14 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	if acntS {
 		var maxAbstracts map[string]*utils.Decimal
 		if maxAbstracts, err = sS.accounSMaxAbstracts(ctx, runEvents); err != nil {
-			return err
+			authReply.MaxUsage = getMaxUsageFromRuns(maxAbstracts)
 		}
-		authReply.MaxUsage = getMaxUsageFromRuns(maxAbstracts)
 	}
-	if args.AuthorizeResources ||
-		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
 		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
-		originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
+		originID, _ := args.FieldAsString(utils.OriginID)
 		if originID == "" {
 			originID = utils.UUIDSha1Prefix()
 		}
@@ -1669,11 +1654,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		}
 		authReply.ResourceAllocation = &allocMsg
 	}
-	if args.GetRoutes ||
-		utils.OptAsBool(args.APIOpts, utils.OptsRouteS) {
-		args.APIOpts[utils.OptsRoutesMaxCost] = utils.FirstNonEmpty(args.RoutesMaxCost, utils.IfaceAsString(args.APIOpts[utils.OptsSesRouteSMaxCost]))
-		args.APIOpts[utils.OptsRoutesIgnoreErrors] = args.RoutesIgnoreErrors || utils.OptAsBool(args.APIOpts, utils.OptsSesRouteSIgnoreErrors)
-		routesReply, err := sS.getRoutes(ctx, args.CGREvent.Clone())
+	if utils.OptAsBool(args.APIOpts, utils.OptsRouteS) {
+		routesReply, err := sS.getRoutes(ctx, args.Clone())
 		if err != nil {
 			return err
 		}
@@ -1692,20 +1674,16 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
 		return
 	}
-	if args.ProcessThresholds ||
-		thdS {
+	if thdS {
 		var thIDs []string
 		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
 			return
 		}
-		if thIDs == nil {
-			thIDs = args.ThresholdIDs
-		}
-		tIDs, err := sS.processThreshold(ctx, args.CGREvent, thIDs, true)
+		tIDs, err := sS.processThreshold(ctx, args, thIDs, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), args))
 			withErrors = true
 		}
 		authReply.ThresholdIDs = &tIDs
@@ -1721,20 +1699,17 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	} else if stS, err = utils.IfaceAsBool(v); err != nil {
 		return
 	}
-	if args.ProcessStats || stS {
+	if stS {
 		var statIDs []string
 		if statIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
 			return
 		}
-		if statIDs == nil {
-			statIDs = args.StatIDs
-		}
-		sIDs, err := sS.processStats(ctx, args.CGREvent, statIDs, false)
+		sIDs, err := sS.processStats(ctx, args, statIDs, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), args))
 			withErrors = true
 		}
 		authReply.StatQueueIDs = &sIDs
@@ -1748,7 +1723,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 // BiRPCv1AuthorizeEventWithDigest performs authorization for CGREvent based on specific components
 // returning one level fields instead of multiple ones returned by BiRPCv1AuthorizeEvent
 func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
-	args *V1AuthorizeArgs, authReply *V1AuthorizeReplyWithDigest) (err error) {
+	args *utils.CGREvent, authReply *V1AuthorizeReplyWithDigest) (err error) {
 	var initAuthRply V1AuthorizeReply
 	if err = sS.BiRPCv1AuthorizeEvent(ctx, args, &initAuthRply); err != nil {
 		return
@@ -1764,11 +1739,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
 		return
 	}
-	if (args.GetAttributes || attrS) && initAuthRply.Attributes != nil {
+	if attrS && initAuthRply.Attributes != nil {
 		authReply.AttributesDigest = utils.StringPointer(initAuthRply.Attributes.Digest())
 	}
-	if args.AuthorizeResources ||
-		utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAuthorize) {
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
 	var acntS bool
@@ -1786,8 +1760,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 		maxDur, _ := initAuthRply.MaxUsage.Duration()
 		authReply.MaxUsage = maxDur.Seconds()
 	}
-	if args.GetRoutes ||
-		utils.OptAsBool(args.APIOpts, utils.OptsRouteS) {
+	if utils.OptAsBool(args.APIOpts, utils.OptsRouteS) {
 		authReply.RoutesDigest = utils.StringPointer(initAuthRply.RouteProfiles.Digest())
 	}
 	var thdS bool
@@ -1801,7 +1774,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
 		return
 	}
-	if args.ProcessThresholds || thdS {
+	if thdS {
 		authReply.Thresholds = utils.StringPointer(
 			strings.Join(*initAuthRply.ThresholdIDs, utils.FieldsSep))
 	}
@@ -1816,7 +1789,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 	} else if stS, err = utils.IfaceAsBool(v); err != nil {
 		return
 	}
-	if args.ProcessStats || stS {
+	if stS {
 		authReply.StatQueues = utils.StringPointer(
 			strings.Join(*initAuthRply.StatQueueIDs, utils.FieldsSep))
 	}

@@ -134,13 +134,13 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 		}
 		return
 	}
-	authArgs := kev.V1AuthorizeArgs()
+	authArgs := kev.AsCGREvent(ka.timezone)
 	if authArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	authArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
+	authArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
 	// take the error after calling SessionSv1.AuthorizeEvent
 	// and send it as parameter to AsKamAuthReply

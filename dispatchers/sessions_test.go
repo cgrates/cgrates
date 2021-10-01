@@ -58,10 +58,8 @@ func TestDspSessionSv1PingErrorNil(t *testing.T) {
 func TestDspSessionSv1AuthorizeEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &sessions.V1AuthorizeArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *sessions.V1AuthorizeReply
 	result := dspSrv.SessionSv1AuthorizeEvent(CGREvent, reply)
@@ -75,10 +73,8 @@ func TestDspSessionSv1AuthorizeEventErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &sessions.V1AuthorizeArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *sessions.V1AuthorizeReply
 	result := dspSrv.SessionSv1AuthorizeEvent(CGREvent, reply)
@@ -91,10 +87,8 @@ func TestDspSessionSv1AuthorizeEventErrorNil(t *testing.T) {
 func TestDspSessionSv1AuthorizeEventWithDigestNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &sessions.V1AuthorizeArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *sessions.V1AuthorizeReplyWithDigest
 	result := dspSrv.SessionSv1AuthorizeEventWithDigest(CGREvent, reply)
@@ -108,10 +102,8 @@ func TestDspSessionSv1AuthorizeEventWithDigestErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &sessions.V1AuthorizeArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *sessions.V1AuthorizeReplyWithDigest
 	result := dspSrv.SessionSv1AuthorizeEventWithDigest(CGREvent, reply)

@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
@@ -389,24 +388,6 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.Route] = fsev.GetRoute(utils.MetaDefault)
 	mp[utils.DisconnectCause] = fsev.GetDisconnectCause(utils.MetaDefault)
 	return mp
-}
-
-// V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
-func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
-	cgrEv.Event[utils.Usage] = config.CgrConfig().SessionSCfg().GetDefaultUsage(utils.IfaceAsString(cgrEv.Event[utils.ToR])) // no billsec available in auth
-	args = &sessions.V1AuthorizeArgs{                                                                                        // defaults
-		CGREvent: cgrEv,
-	}
-	subsystems, has := fsev[VarCGRFlags]
-	if !has {
-		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
-			utils.FreeSWITCHAgent))
-		args.GetMaxUsage = true
-		return
-	}
-	args.ParseFlags(subsystems, utils.InfieldSep)
-	return
 }
 
 // SliceAsFsArray Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now

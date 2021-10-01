@@ -19,11 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -269,31 +267,12 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 }
 
 // AsCGREvent converts AsteriskEvent into CGREvent
-func (smaEv *SMAsteriskEvent) AsCGREvent() (cgrEv *utils.CGREvent, err error) {
-	cgrEv = &utils.CGREvent{
+func (smaEv *SMAsteriskEvent) AsCGREvent() *utils.CGREvent {
+	return &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(smaEv.Tenant(),
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
 		Event:   smaEv.AsMapStringInterface(),
 		APIOpts: smaEv.opts,
 	}
-	return
-}
-
-func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv, err := smaEv.AsCGREvent()
-	if err != nil {
-		return
-	}
-	args = &sessions.V1AuthorizeArgs{
-		CGREvent: cgrEv,
-	}
-	if smaEv.Subsystems() == utils.EmptyString {
-		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
-			utils.AsteriskAgent))
-		args.GetMaxUsage = true
-		return
-	}
-	args.ParseFlags(smaEv.Subsystems(), utils.PlusChar)
-	return
 }

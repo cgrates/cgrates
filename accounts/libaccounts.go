@@ -111,14 +111,17 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 
 // rateSCostForEvent will process the event with RateS in order to get the cost
 func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
-	rateSConns, rpIDs []string) (rplyCost *utils.RateProfileCost, err error) {
+	rateSConns, rpIDs []string) (_ *utils.RateProfileCost, err error) {
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
+	tmp := cgrEv.APIOpts[utils.OptsRatesRateProfileIDs]
 	cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(rpIDs)
 	var tmpReply utils.RateProfileCost
-	if err = connMgr.Call(ctx, rateSConns, utils.RateSv1CostForEvent,
-		cgrEv, &tmpReply); err != nil {
+	err = connMgr.Call(ctx, rateSConns, utils.RateSv1CostForEvent,
+		cgrEv, &tmpReply)
+	cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] = tmp
+	if err != nil {
 		return
 	}
 	return &tmpReply, nil

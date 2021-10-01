@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSessionsAuthorize{
 		name:      "session_authorize_event",
 		rpcMethod: utils.SessionSv1AuthorizeEventWithDigest,
-		rpcParams: &sessions.V1AuthorizeArgs{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdSessionsAuthorize struct {
 	name      string
 	rpcMethod string
-	rpcParams *sessions.V1AuthorizeArgs
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,9 +50,7 @@ func (self *CmdSessionsAuthorize) RpcMethod() string {
 
 func (self *CmdSessionsAuthorize) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &sessions.V1AuthorizeArgs{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }

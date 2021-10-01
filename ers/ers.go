@@ -199,24 +199,9 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			fmt.Sprintf("<%s> DRYRUN, reader: <%s>, CGREvent: <%s>",
 				utils.ERs, rdrCfg.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
-		authArgs := sessions.NewV1AuthorizeArgs(
-			rdrCfg.Flags.Has(utils.MetaAttributes),
-			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaThresholds),
-			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaStats),
-			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
-			rdrCfg.Flags.Has(utils.MetaResources),
-			rdrCfg.Flags.Has(utils.MetaAccounts),
-			rdrCfg.Flags.Has(utils.MetaRoutes),
-			rdrCfg.Flags.Has(utils.OptsRoutesIgnoreErrors),
-			rdrCfg.Flags.Has(utils.MetaRoutesEventCost),
-			cgrEv, rdrCfg.Flags.Has(utils.MetaFD),
-			rdrCfg.Flags.ParamValue(utils.OptsRoutesMaxCost),
-		)
 		rply := new(sessions.V1AuthorizeReply)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
-			authArgs, rply)
+			cgrEv, rply)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
