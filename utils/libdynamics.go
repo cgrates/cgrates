@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"strconv"
 	"strings"
 	"time"
 
@@ -332,134 +331,114 @@ func DynamicInterfaceOptsToMap(dynOpts []*DynamicInterfaceOpt) map[string]string
 }
 
 func MapToDynamicStringSliceOpts(optsMap map[string][]string) (dynOpts []*DynamicStringSliceOpt) {
-	dynOpts = make([]*DynamicStringSliceOpt, len(optsMap))
+	dynOpts = make([]*DynamicStringSliceOpt, 0, len(optsMap))
 	for filters, opt := range optsMap {
+		var filterIDs []string
 		if filters != EmptyString {
-			dynOpts = append(dynOpts, &DynamicStringSliceOpt{
-				FilterIDs: strings.Split(filters, InfieldSep),
-				Value:     opt,
-			})
-		} else {
-			dynOpts = append(dynOpts, &DynamicStringSliceOpt{
-				Value: opt,
-			})
+			filterIDs = strings.Split(filters, InfieldSep)
 		}
+		dynOpts = append(dynOpts, &DynamicStringSliceOpt{
+			FilterIDs: filterIDs,
+			Value:     opt,
+		})
 	}
 	return
 }
 
 func MapToDynamicStringOpts(optsMap map[string]string) (dynOpts []*DynamicStringOpt) {
-	dynOpts = make([]*DynamicStringOpt, len(optsMap))
+	dynOpts = make([]*DynamicStringOpt, 0, len(optsMap))
 	for filters, opt := range optsMap {
+		var filterIDs []string
 		if filters != EmptyString {
-			dynOpts = append(dynOpts, &DynamicStringOpt{
-				FilterIDs: strings.Split(filters, InfieldSep),
-				Value:     opt,
-			})
-		} else {
-			dynOpts = append(dynOpts, &DynamicStringOpt{
-				Value: opt,
-			})
+			filterIDs = strings.Split(filters, InfieldSep)
 		}
+		dynOpts = append(dynOpts, &DynamicStringOpt{
+			FilterIDs: filterIDs,
+			Value:     opt,
+		})
 	}
 	return
 }
 
 func MapToDynamicBoolOpts(optsMap map[string]bool) (dynOpts []*DynamicBoolOpt) {
-	dynOpts = make([]*DynamicBoolOpt, len(optsMap))
+	dynOpts = make([]*DynamicBoolOpt, 0, len(optsMap))
 	for filters, opt := range optsMap {
+		var filterIDs []string
 		if filters != EmptyString {
-			dynOpts = append(dynOpts, &DynamicBoolOpt{
-				FilterIDs: strings.Split(filters, InfieldSep),
-				Value:     opt,
-			})
-		} else {
-			dynOpts = append(dynOpts, &DynamicBoolOpt{
-				Value: opt,
-			})
+			filterIDs = strings.Split(filters, InfieldSep)
 		}
+		dynOpts = append(dynOpts, &DynamicBoolOpt{
+			FilterIDs: filterIDs,
+			Value:     opt,
+		})
 	}
 	return
 }
 
 func MapToDynamicDecimalBigOpts(optsMap map[string]string) (dynOpts []*DynamicDecimalBigOpt, err error) {
-	dynOpts = make([]*DynamicDecimalBigOpt, len(optsMap))
+	dynOpts = make([]*DynamicDecimalBigOpt, 0, len(optsMap))
 	for filters, opt := range optsMap {
 		var bigVal *decimal.Big
 		if bigVal, err = StringAsBig(opt); err != nil {
 			return
 		}
+		var filterIDs []string
 		if filters != EmptyString {
-			dynOpts = append(dynOpts, &DynamicDecimalBigOpt{
-				FilterIDs: strings.Split(filters, InfieldSep),
-				Value:     bigVal,
-			})
-		} else {
-			dynOpts = append(dynOpts, &DynamicDecimalBigOpt{
-				Value: bigVal,
-			})
+			filterIDs = strings.Split(filters, InfieldSep)
 		}
+		dynOpts = append(dynOpts, &DynamicDecimalBigOpt{
+			FilterIDs: filterIDs,
+			Value:     bigVal,
+		})
 	}
 	return
 }
 
 func MapToDynamicDurationOpts(optsMap map[string]string) (dynOpts []*DynamicDurationOpt, err error) {
-	dynOpts = make([]*DynamicDurationOpt, len(optsMap))
+	dynOpts = make([]*DynamicDurationOpt, 0, len(optsMap))
 	for filters, opt := range optsMap {
 		var usageTTL time.Duration
 		if usageTTL, err = ParseDurationWithNanosecs(opt); err != nil {
 			return
 		}
+		var filterIDs []string
 		if filters != EmptyString {
-			dynOpts = append(dynOpts, &DynamicDurationOpt{
-				FilterIDs: strings.Split(filters, InfieldSep),
-				Value:     usageTTL,
-			})
-		} else {
-			dynOpts = append(dynOpts, &DynamicDurationOpt{
-				Value: usageTTL,
-			})
+			filterIDs = strings.Split(filters, InfieldSep)
 		}
+		dynOpts = append(dynOpts, &DynamicDurationOpt{
+			FilterIDs: filterIDs,
+			Value:     usageTTL,
+		})
 	}
 	return
 }
 
 func MapToDynamicFloat64Opts(optsMap map[string]float64) (dynOpts []*DynamicFloat64Opt) {
-	dynOpts = make([]*DynamicFloat64Opt, len(optsMap))
+	dynOpts = make([]*DynamicFloat64Opt, 0, len(optsMap))
 	for filters, opt := range optsMap {
+		var filterIDs []string
 		if filters != EmptyString {
-			dynOpts = append(dynOpts, &DynamicFloat64Opt{
-				FilterIDs: strings.Split(filters, InfieldSep),
-				Value:     opt,
-			})
-		} else {
-			dynOpts = append(dynOpts, &DynamicFloat64Opt{
-				Value: opt,
-			})
+			filterIDs = strings.Split(filters, InfieldSep)
 		}
+		dynOpts = append(dynOpts, &DynamicFloat64Opt{
+			FilterIDs: filterIDs,
+			Value:     opt,
+		})
 	}
 	return
 }
 
 func MapToDynamicInterfaceOpts(optsMap map[string]string) (dynOpts []*DynamicInterfaceOpt) {
-	dynOpts = make([]*DynamicInterfaceOpt, len(optsMap))
+	dynOpts = make([]*DynamicInterfaceOpt, 0, len(optsMap))
 	for filters, opt := range optsMap {
+		var filterIDs []string
 		if filters != EmptyString {
-			if optVal, err := strconv.Atoi(opt); err == nil {
-				dynOpts = append(dynOpts, &DynamicInterfaceOpt{
-					FilterIDs: strings.Split(filters, InfieldSep),
-					Value:     optVal,
-				})
-			}
-			dynOpts = append(dynOpts, &DynamicInterfaceOpt{
-				FilterIDs: strings.Split(filters, InfieldSep),
-				Value:     opt,
-			})
-		} else {
-			dynOpts = append(dynOpts, &DynamicInterfaceOpt{
-				Value: opt,
-			})
+			filterIDs = strings.Split(filters, InfieldSep)
 		}
+		dynOpts = append(dynOpts, &DynamicInterfaceOpt{
+			FilterIDs: filterIDs,
+			Value:     opt,
+		})
 	}
 	return
 }
