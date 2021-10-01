@@ -1,0 +1,3 @@
+#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
+cgrates.org,Raw,,20,raw,*none
+cgrates.org,Default,,10,Default,*none

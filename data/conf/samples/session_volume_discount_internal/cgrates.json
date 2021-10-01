@@ -17,16 +17,19 @@
 
     "sessions": {
         "enabled": true,
-        "routes_conns": ["*internal"],
-        "cdrs_conns": ["*internal"],
+        "routes_conns": ["*localhost"],
+        "cdrs_conns": ["*localhost"],
     },
 
     "cdrs": {									// CDRs config
         "enabled": true,
+        "accounts_conns":["*localhost"],
+        "chargers_conns":["*localhost"],
     },
 
     "chargers": {
        "enabled": true,
+       "indexed_selects": false,
     },
 
     "rates": {
