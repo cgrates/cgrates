@@ -36,18 +36,19 @@ import (
 )
 
 // NewSessionService returns the Session Service
-func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
+func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SessionService{
-		connChan: internalChan,
-		cfg:      cfg,
-		dm:       dm,
-		server:   server,
-		connMgr:  connMgr,
-		anz:      anz,
-		srvDep:   srvDep,
+		connChan:    internalChan,
+		cfg:         cfg,
+		dm:          dm,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
+		anz:         anz,
+		srvDep:      srvDep,
 	}
 }
 
@@ -82,10 +83,8 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	}
 
 	var datadb *engine.DataManager
-	if smg.dm.IsRunning() {
-		if datadb, err = smg.dm.WaitForDM(ctx); err != nil {
-			return
-		}
+	if datadb, err = smg.dm.WaitForDM(ctx); err != nil {
+		return
 	}
 	smg.Lock()
 	defer smg.Unlock()

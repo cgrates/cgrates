@@ -1,0 +1,88 @@
+{
+ // CGRateS Configuration file
+ //
+ // Used for sessions/sessions_volume_discount_it_test.go
+
+    "general": {
+        "log_level": 7,
+    },
+
+    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+        "db_type": "redis",						// data_db type: <redis|mongo>
+        "db_port": 6379, 						// data_db port to reach the database
+        "db_name": "10", 						// data_db database name to connect to
+    },
+    
+    "stor_db": {
+        "db_password": "CGRateS.org",
+    },
+
+    "sessions": {
+        "enabled": true,
+        "routes_conns": ["*localhost"],
+        "cdrs_conns": ["*localhost"],
+    },
+
+    "attributes": {
+        "enabled": true,
+        "indexed_selects": false,
+    },
+
+    "cdrs": {									// CDRs config
+        "enabled": true,
+        "accounts_conns":["*localhost"],
+        "rates_conns": ["*localhost"],
+        "chargers_conns":["*localhost"],
+        "opts": {								//
+            "*chargerS": {						//
+                "": true,
+            },
+            "*rateS": {						//
+                "": true,
+            },
+            "*accountS": {						//
+                "*string:~*req.Account:ACCOUNT1": true,
+                "": false,
+            },
+        },   
+    },
+
+    "chargers": {
+       "enabled": true,
+       "attributes_conns": ["*localhost"],
+       "indexed_selects": false,
+    },
+
+    "rates": {
+        "enabled": true,
+        "rate_indexed_selects": false,
+    },
+
+    "accounts": {
+        "enabled": true,
+        "rates_conns": ["*localhost"],
+        "indexed_selects": false,
+    },
+
+    "loaders": [
+        {
+            "id": "*default",
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume",
+            "tp_out_dir": "",
+            "lockfile_path": "",
+        },
+    ],
+
+    "routes": {
+        "enabled": true,
+        "indexed_selects": false,
+        "rates_conns": ["*localhost"],						// connections to RateS
+	    "accounts_conns": ["*localhost"],					// connections to AccountS
+    },
+
+    "admins": {
+        "enabled": true,
+    },
+}

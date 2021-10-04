@@ -54,9 +54,10 @@ var (
 		testSessVolDiscAuthorizeEventSortRoutes1Min30Sec,
 		testSessVolDiscAuthorizeEventSortRoutes11Min10Sec,
 		testSessVolDiscAuthorizeEventSortRoutes20Min,
-		testSessVolDiscProcessCDR,
+		testSessVolDiscProcessCDRSupplier,
+		testSessVolDiscProcessCDRCustomer,
 		testSessVolDiscAccountAfterDebiting,
-		testSessVolDiscAuthorizeEventSortRoutes1Min30SecBeforeDebiting,
+		testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting,
 		testSessVolDiscStopCgrEngine,
 	}
 )
@@ -183,7 +184,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 			utils.OptsRouteS: true,
 		},
 	}
-	// authorize the session
+	// authorize the session for 1m30s
 	var rplyFirst *sessions.V1AuthorizeReply
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
 		args, &rplyFirst); err != nil {
@@ -233,7 +234,7 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 			utils.OptsRouteS: true,
 		},
 	}
-	// authorize the session
+	// authorize the session for 11m10s
 	var rplyFirst *sessions.V1AuthorizeReply
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
 		args, &rplyFirst); err != nil {
@@ -283,7 +284,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 			utils.OptsRouteS: true,
 		},
 	}
-	// authorize the session
+	// authorize the session for 20m
 	var rplyFirst *sessions.V1AuthorizeReply
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
 		args, &rplyFirst); err != nil {
@@ -293,7 +294,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 	}
 }
 
-func testSessVolDiscProcessCDR(t *testing.T) {
+func testSessVolDiscProcessCDRSupplier(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
@@ -302,10 +303,37 @@ func testSessVolDiscProcessCDR(t *testing.T) {
 			utils.Destination:  "1002",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsChargerS: true,
-			utils.OptsAccountS: true,
-			utils.StartTime:    time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.MetaUsage:    15 * time.Minute,
+			//utils.OptsAttributeS: true,
+			// utils.OptsChargerS: true,
+			//utils.OptsAccountS: true,
+			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.MetaUsage: 15 * time.Minute,
+		},
+	}
+
+	var rply string
+	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
+		args, &rply); err != nil {
+		t.Fatal(err)
+	}
+	if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+}
+
+func testSessVolDiscProcessCDRCustomer(t *testing.T) {
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestSSv1ItProcessCDR",
+		Event: map[string]interface{}{
+			utils.Destination: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			// utils.OptsAttributeS: true,
+			// utils.OptsChargerS: true,
+			// utils.OptsAccountS: true,
+			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.MetaUsage: 15 * time.Minute,
 		},
 	}
 
@@ -334,7 +362,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 					},
 				},
 				Type:           "*abstract",
-				Units:          &utils.Decimal{utils.SumDecimalAsBig(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0))},
+				Units:          &utils.Decimal{utils.SumDecimalAsBig(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0))}, // this should be -0
 				RateProfileIDs: []string{"RP_ABS_BALANCE1"},
 			},
 			"ABS_BALANCE2": {
@@ -381,7 +409,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 	}
 }
 
-func testSessVolDiscAuthorizeEventSortRoutes1Min30SecBeforeDebiting(t *testing.T) {
+func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T) {
 	expected := &sessions.V1AuthorizeReply{
 		RouteProfiles: engine.SortedRoutesList{
 			{
@@ -421,7 +449,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecBeforeDebiting(t *testing.T
 			utils.OptsRouteS: true,
 		},
 	}
-	// authorize the session
+	// authorize the session for 1m30s
 	var rplyFirst *sessions.V1AuthorizeReply
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
 		args, &rplyFirst); err != nil {

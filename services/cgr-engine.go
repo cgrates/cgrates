@@ -212,7 +212,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.sdbS,
 		NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.server,
 			iAdminSCh, cgr.cM, cgr.anzS, cgr.srvDep),
-		NewSessionService(cgr.cfg, cgr.dmS, cgr.server, iSessionSCh, cgr.cM, cgr.anzS, cgr.srvDep),
+		NewSessionService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.server, iSessionSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 		NewAttributeService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server, iAttributeSCh,
 			cgr.anzS, dspS, cgr.srvDep),
 		NewChargerService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
