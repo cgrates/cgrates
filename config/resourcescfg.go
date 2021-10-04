@@ -248,39 +248,3 @@ func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *Resourc
 	d.Opts = diffResourcesOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
-
-func diffMapStringString(d, v1, v2 map[string]string) map[string]string {
-	if d == nil {
-		d = make(map[string]string)
-	}
-	for k, v := range v2 {
-		if val, has := v1[k]; !has || val != v {
-			d[k] = v
-		}
-	}
-	return d
-}
-
-func diffMapStringFloat64(d, v1, v2 map[string]float64) map[string]float64 {
-	if d == nil {
-		d = make(map[string]float64)
-	}
-	for k, v := range v2 {
-		if val, has := v1[k]; !has || val != v {
-			d[k] = v
-		}
-	}
-	return d
-}
-
-func diffMapStringDuration(d map[string]string, v1, v2 map[string]time.Duration) map[string]string {
-	if d == nil {
-		d = make(map[string]string)
-	}
-	for k, v := range v2 {
-		if val, has := v1[k]; !has || val != v {
-			d[k] = v.String()
-		}
-	}
-	return d
-}
