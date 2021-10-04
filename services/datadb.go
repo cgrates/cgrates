@@ -66,15 +66,10 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 		db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
 		db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
 		db.cfg.DataDbCfg().Opts)
-	if db.mandatoryDB() && err != nil { // Cannot configure getter database, show stopper
+	if err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
-	} else if db.cfg.SessionSCfg().Enabled && err != nil {
-		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s. Some SessionS APIs will not work", err))
-		err = nil // reset the error in case of only SessionS active
-		return
 	}
-
 	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
 	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
 		fmt.Println(err)
@@ -143,15 +138,6 @@ func (db *DataDBService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (db *DataDBService) ShouldRun() bool { // db should allways run
 	return true // ||db.mandatoryDB() || db.cfg.SessionSCfg().Enabled
-}
-
-// mandatoryDB returns if the current configuration needs the DB
-func (db *DataDBService) mandatoryDB() bool {
-	return db.cfg.ChargerSCfg().Enabled ||
-		db.cfg.AttributeSCfg().Enabled || db.cfg.ResourceSCfg().Enabled || db.cfg.StatSCfg().Enabled ||
-		db.cfg.ThresholdSCfg().Enabled || db.cfg.RouteSCfg().Enabled || db.cfg.DispatcherSCfg().Enabled ||
-		db.cfg.LoaderCfg().Enabled() || db.cfg.AdminSCfg().Enabled || db.cfg.RateSCfg().Enabled ||
-		db.cfg.AccountSCfg().Enabled || db.cfg.ActionSCfg().Enabled || db.cfg.AnalyzerSCfg().Enabled
 }
 
 // needsConnectionReload returns if the DB connection needs to reloaded
