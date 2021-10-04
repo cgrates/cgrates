@@ -188,8 +188,17 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 
 // processEvent processes a CGREvent based on arguments
 // in case of partially executed, both error and evs will be returned
-func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
-	chrgS, attrS, rateS, acntS, eeS, thdS, stS bool) (evs []*utils.EventWithFlags, err error) {
+func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (evs []*utils.EventWithFlags, err error) {
+	// making the options
+	var attrS bool
+	if v, has := ev.APIOpts[utils.OptsAttributeS]; !has {
+		if attrS, err = FilterBoolCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Attributes); err != nil {
+			return
+		}
+	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
 	if attrS {
 		if err = cdrS.attrSProcessEvent(ctx, ev); err != nil {
 			utils.Logger.Warning(
@@ -201,6 +210,14 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	}
 
 	var cgrEvs []*utils.CGREvent
+	var chrgS bool
+	if v, has := ev.APIOpts[utils.OptsChargerS]; !has {
+		if chrgS, err = FilterBoolCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Chargers); err != nil {
+			return
+		}
+	} else if chrgS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
 	if chrgS {
 		if cgrEvs, err = cdrS.chrgrSProcessEvent(ctx, ev); err != nil {
 			utils.Logger.Warning(
@@ -215,8 +232,17 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 
 	var partiallyExecuted bool // from here actions are optional and a general error is returned
 
-	if rateS {
-		for _, cgrEv := range cgrEvs {
+	var rateS bool
+	for _, cgrEv := range cgrEvs {
+		if v, has := cgrEv.APIOpts[utils.OptsRateS]; !has {
+			if rateS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
+				cdrS.cfg.CdrsCfg().Opts.Rates); err != nil {
+				return
+			}
+		} else if rateS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+		if rateS {
 			if err := cdrS.rateSCostForEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
@@ -226,20 +252,41 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 		}
 	}
 
-	if acntS {
-		for _, cgrEv := range cgrEvs {
-			if err := cdrS.accountSDebitEvent(ctx, cgrEv); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.AccountS))
-				partiallyExecuted = true
+	var acntS bool
+	for _, cgrEv := range cgrEvs {
+		if v, has := ev.APIOpts[utils.OptsAccountS]; !has {
+			if acntS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, ev.AsDataProvider(), cdrS.filterS,
+				cdrS.cfg.CdrsCfg().Opts.Accounts); err != nil {
+				return
+			}
+		} else if acntS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+		if acntS {
+
+			if acntS {
+				if err := cdrS.accountSDebitEvent(ctx, cgrEv); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+							utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.AccountS))
+					partiallyExecuted = true
+				}
 			}
 		}
 	}
 
-	if eeS {
-		if len(cdrS.cfg.CdrsCfg().EEsConns) != 0 {
-			for _, cgrEv := range cgrEvs {
+	var export bool
+	if len(cdrS.cfg.CdrsCfg().EEsConns) != 0 {
+		for _, cgrEv := range cgrEvs {
+			if v, has := cgrEv.APIOpts[utils.OptsCDRsExport]; !has {
+				if export, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
+					cdrS.cfg.CdrsCfg().Opts.Export); err != nil {
+					return
+				}
+			} else if export, err = utils.IfaceAsBool(v); err != nil {
+				return
+			}
+			if export {
 				evWithOpts := &utils.CGREventWithEeIDs{
 					CGREvent: cgrEv,
 					EeIDs:    cdrS.cfg.CdrsCfg().OnlineCDRExports,
@@ -254,8 +301,17 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 		}
 	}
 
-	if thdS {
-		for _, cgrEv := range cgrEvs {
+	var thdS bool
+	for _, cgrEv := range cgrEvs {
+		if v, has := cgrEv.APIOpts[utils.OptsThresholdS]; !has {
+			if thdS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
+				cdrS.cfg.CdrsCfg().Opts.Thresholds); err != nil {
+				return
+			}
+		} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+		if thdS {
 			if err := cdrS.thdSProcessEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
@@ -265,8 +321,17 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 		}
 	}
 
-	if stS {
-		for _, cgrEv := range cgrEvs {
+	var stS bool
+	for _, cgrEv := range cgrEvs {
+		if v, has := cgrEv.APIOpts[utils.OptsStatS]; !has {
+			if stS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
+				cdrS.cfg.CdrsCfg().Opts.Stats); err != nil {
+				return
+			}
+		} else if stS, err = utils.IfaceAsBool(v); err != nil {
+			return
+		}
+		if stS {
 			if err := cdrS.statSProcessEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
@@ -279,7 +344,6 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent,
 	if partiallyExecuted {
 		err = utils.ErrPartiallyExecuted
 	}
-
 	return
 }
 
@@ -311,81 +375,14 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent,
 	}
 	// end of RPC caching
 
-	// processing options
-	argsDP := arg.AsDataProvider()
-	var acntS bool
-	if v, has := arg.APIOpts[utils.OptsAccountS]; !has {
-		if acntS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Accounts); err != nil {
-			return
-		}
-	} else if acntS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var attrS bool
-	if v, has := arg.APIOpts[utils.OptsAttributeS]; !has {
-		if attrS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Attributes); err != nil {
-			return
-		}
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var chrgS bool
-	if v, has := arg.APIOpts[utils.OptsChargerS]; !has {
-		if chrgS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Chargers); err != nil {
-			return
-		}
-	} else if chrgS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var export bool
-	if v, has := arg.APIOpts[utils.OptsCDRsExport]; !has {
-		if export, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Export); err != nil {
-			return
-		}
-	} else if export, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var rateS bool
-	if v, has := arg.APIOpts[utils.OptsRateS]; !has {
-		if rateS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Rates); err != nil {
-			return
-		}
-	} else if rateS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var stS bool
-	if v, has := arg.APIOpts[utils.OptsStatS]; !has {
-		if stS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Stats); err != nil {
-			return
-		}
-	} else if stS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var thdS bool
-	if v, has := arg.APIOpts[utils.OptsThresholdS]; !has {
-		if thdS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Thresholds); err != nil {
-			return
-		}
-	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	// end of processing options
-
-	if _, err = cdrS.processEvent(ctx, arg,
-		chrgS, attrS, rateS, acntS, export, thdS, stS); err != nil {
+	if _, err = cdrS.processEvent(ctx, arg); err != nil {
 		return
 	}
 	*reply = utils.OK
 	return nil
 }
 
+/*
 // V1ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
 func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CGREvent, evs *[]*utils.EventWithFlags) (err error) {
 	if arg.ID == "" {
@@ -486,3 +483,5 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 	*evs = procEvs
 	return nil
 }
+
+*/
