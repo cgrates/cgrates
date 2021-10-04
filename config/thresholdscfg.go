@@ -217,15 +217,3 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 	d.Opts = diffThresholdsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
-
-func diffMapStringStringSlice(d, v1, v2 map[string][]string) map[string][]string {
-	if d == nil {
-		d = make(map[string][]string)
-	}
-	for k, v := range v2 {
-		if val, has := v1[k]; !has || !utils.SliceStringEqual(val, v) {
-			d[k] = v
-		}
-	}
-	return d
-}
