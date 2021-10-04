@@ -44,17 +44,6 @@ type AccountSCfg struct {
 	Opts                *AccountsOpts
 }
 
-func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err error) {
-	if jsnCfg == nil {
-		return nil
-	}
-	accOpts.AccountIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.AccountIDs)
-	if accOpts.Usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
-		return
-	}
-	return nil
-}
-
 // loadAccountSCfg loads the AccountS section of the configuration
 func (acS *AccountSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnActionCfg := new(AccountSJsonCfg)
@@ -62,6 +51,21 @@ func (acS *AccountSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig
 		return
 	}
 	return acS.loadFromJSONCfg(jsnActionCfg)
+}
+
+func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.AccountIDs != nil {
+		accOpts.AccountIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.AccountIDs)
+	}
+	if jsnCfg.Usage != nil {
+		if accOpts.Usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
@@ -104,7 +108,7 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Opts != nil {
-		acS.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		err = acS.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	return
 }

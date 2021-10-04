@@ -42,15 +42,6 @@ type ThresholdSCfg struct {
 	Opts                *ThresholdsOpts
 }
 
-func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) (err error) {
-	if jsnCfg == nil {
-		return nil
-	}
-	thdOpts.ThresholdIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ThresholdIDs)
-
-	return nil
-}
-
 // loadThresholdSCfg loads the ThresholdS section of the configuration
 func (t *ThresholdSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnThresholdSCfg := new(ThresholdSJsonCfg)
@@ -58,6 +49,15 @@ func (t *ThresholdSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig
 		return
 	}
 	return t.loadFromJSONCfg(jsnThresholdSCfg)
+}
+
+func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.ThresholdIDs != nil {
+		thdOpts.ThresholdIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ThresholdIDs)
+	}
 }
 
 func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
@@ -93,7 +93,7 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg.Opts != nil {
 		t.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}

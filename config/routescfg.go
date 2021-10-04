@@ -49,21 +49,6 @@ type RouteSCfg struct {
 	Opts                *RoutesOpts
 }
 
-func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
-	if jsnCfg == nil {
-		return
-	}
-
-	rtsOpts.Context = utils.MapToDynamicStringOpts(jsnCfg.Context)
-	rtsOpts.IgnoreErrors = utils.MapToDynamicBoolOpts(jsnCfg.IgnoreErrors)
-	rtsOpts.MaxCost = utils.MapToDynamicInterfaceOpts(jsnCfg.MaxCost)
-	rtsOpts.Limit = utils.MapToDynamicIntOpts(jsnCfg.Limit)
-	rtsOpts.Offset = utils.MapToDynamicIntOpts(jsnCfg.Offset)
-	rtsOpts.ProfileCount = utils.MapToDynamicIntOpts(jsnCfg.ProfileCount)
-
-	return
-}
-
 // loadRouteSCfg loads the RouteS section of the configuration
 func (rts *RouteSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRouteSCfg := new(RouteSJsonCfg)
@@ -71,6 +56,30 @@ func (rts *RouteSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) 
 		return
 	}
 	return rts.loadFromJSONCfg(jsnRouteSCfg)
+}
+
+func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Context != nil {
+		rtsOpts.Context = utils.MapToDynamicStringOpts(jsnCfg.Context)
+	}
+	if jsnCfg.IgnoreErrors != nil {
+		rtsOpts.IgnoreErrors = utils.MapToDynamicBoolOpts(jsnCfg.IgnoreErrors)
+	}
+	if jsnCfg.MaxCost != nil {
+		rtsOpts.MaxCost = utils.MapToDynamicInterfaceOpts(jsnCfg.MaxCost)
+	}
+	if jsnCfg.Limit != nil {
+		rtsOpts.Limit = utils.MapToDynamicIntOpts(jsnCfg.Limit)
+	}
+	if jsnCfg.Offset != nil {
+		rtsOpts.Offset = utils.MapToDynamicIntOpts(jsnCfg.Offset)
+	}
+	if jsnCfg.ProfileCount != nil {
+		rtsOpts.ProfileCount = utils.MapToDynamicIntOpts(jsnCfg.ProfileCount)
+	}
 }
 
 func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {

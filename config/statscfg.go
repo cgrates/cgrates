@@ -52,12 +52,13 @@ func (st *StatSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (e
 	return st.loadFromJSONCfg(jsnStatSCfg)
 }
 
-func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) (err error) {
+func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
-	sqOpts.StatIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.StatIDs)
-	return nil
+	if jsnCfg.StatIDs != nil {
+		sqOpts.StatIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.StatIDs)
+	}
 }
 
 func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {

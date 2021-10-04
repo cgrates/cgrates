@@ -58,17 +58,25 @@ func (rCfg *RateSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) 
 
 func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	if jsnCfg == nil {
-		return nil
-	}
-	rateOpts.RateProfileIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.RateProfileIDs)
-	rateOpts.StartTime = utils.MapToDynamicStringOpts(jsnCfg.StartTime)
-	if rateOpts.Usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
 		return
 	}
-	if rateOpts.IntervalStart, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.IntervalStart); err != nil {
-		return
+	if jsnCfg.RateProfileIDs != nil {
+		rateOpts.RateProfileIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.RateProfileIDs)
 	}
-	return nil
+	if jsnCfg.StartTime != nil {
+		rateOpts.StartTime = utils.MapToDynamicStringOpts(jsnCfg.StartTime)
+	}
+	if jsnCfg.Usage != nil {
+		if rateOpts.Usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+			return
+		}
+	}
+	if jsnCfg.IntervalStart != nil {
+		if rateOpts.IntervalStart, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.IntervalStart); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
@@ -113,7 +121,7 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 		rCfg.Verbosity = *jsnCfg.Verbosity
 	}
 	if jsnCfg.Opts != nil {
-		rCfg.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		err = rCfg.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	return
 }

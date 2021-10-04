@@ -54,13 +54,13 @@ func (acS *ActionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig)
 	return acS.loadFromJSONCfg(jsnActionCfg)
 }
 
-func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) (err error) {
+func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
-	actOpts.ActionProfileIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ActionProfileIDs)
-
-	return nil
+	if jsnCfg.ActionProfileIDs != nil {
+		actOpts.ActionProfileIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ActionProfileIDs)
+	}
 }
 
 func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
