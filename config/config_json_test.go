@@ -519,6 +519,29 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Ees_conns:            &[]string{},
 		Rates_conns:          &[]string{},
 		Accounts_conns:       &[]string{},
+		Opts: &CdrsOptsJson{
+			Accounts: map[string]bool{
+				utils.EmptyString: false,
+			},
+			Attributes: map[string]bool{
+				utils.EmptyString: false,
+			},
+			Chargers: map[string]bool{
+				utils.EmptyString: false,
+			},
+			Export: map[string]bool{
+				utils.EmptyString: false,
+			},
+			Rates: map[string]bool{
+				utils.EmptyString: false,
+			},
+			Stats: map[string]bool{
+				utils.EmptyString: false,
+			},
+			Thresholds: map[string]bool{
+				utils.EmptyString: false,
+			},
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -528,7 +551,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 	if err := dfCgrJSONCfg.GetSection(context.Background(), CDRsJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Received: %+v", cfg)
+		t.Errorf("Received: %+v", utils.ToJSON(cfg))
 	}
 }
 
