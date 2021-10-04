@@ -23,6 +23,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type CdrsOpts struct {
+	Accounts   []*utils.DynamicBoolOpt
+	Attributes []*utils.DynamicBoolOpt
+	Chargers   []*utils.DynamicBoolOpt
+	Export     []*utils.DynamicBoolOpt
+	Rates      []*utils.DynamicBoolOpt
+	Stats      []*utils.DynamicBoolOpt
+	Thresholds []*utils.DynamicBoolOpt
+}
+
 // CdrsCfg is the CDR server
 type CdrsCfg struct {
 	Enabled          bool       // Enable CDR Server service
@@ -38,6 +48,7 @@ type CdrsCfg struct {
 	EEsConns         []string
 	RateSConns       []string
 	AccountSConns    []string
+	Opts             *CdrsOpts
 }
 
 // loadCdrsCfg loads the Cdrs section of the configuration
@@ -49,17 +60,44 @@ func (cdrscfg *CdrsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig
 	return cdrscfg.loadFromJSONCfg(jsnCdrsCfg)
 }
 
+func (cdrsOpts *CdrsOpts) loadFromJSONCfg(jsnCfg *CdrsOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Accounts != nil {
+		cdrsOpts.Accounts = utils.MapToDynamicBoolOpts(jsnCfg.Accounts)
+	}
+	if jsnCfg.Attributes != nil {
+		cdrsOpts.Attributes = utils.MapToDynamicBoolOpts(jsnCfg.Attributes)
+	}
+	if jsnCfg.Chargers != nil {
+		cdrsOpts.Chargers = utils.MapToDynamicBoolOpts(jsnCfg.Chargers)
+	}
+	if jsnCfg.Export != nil {
+		cdrsOpts.Export = utils.MapToDynamicBoolOpts(jsnCfg.Export)
+	}
+	if jsnCfg.Rates != nil {
+		cdrsOpts.Rates = utils.MapToDynamicBoolOpts(jsnCfg.Rates)
+	}
+	if jsnCfg.Stats != nil {
+		cdrsOpts.Stats = utils.MapToDynamicBoolOpts(jsnCfg.Stats)
+	}
+	if jsnCfg.Thresholds != nil {
+		cdrsOpts.Thresholds = utils.MapToDynamicBoolOpts(jsnCfg.Thresholds)
+	}
+}
+
 // loadFromJSONCfg loads Cdrs config from JsonCfg
 func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	if jsnCdrsCfg == nil {
-		return nil
+		return
 	}
 	if jsnCdrsCfg.Enabled != nil {
 		cdrscfg.Enabled = *jsnCdrsCfg.Enabled
 	}
 	if jsnCdrsCfg.Extra_fields != nil {
 		if cdrscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCdrsCfg.Extra_fields); err != nil {
-			return err
+			return
 		}
 	}
 	if jsnCdrsCfg.Store_cdrs != nil {
@@ -95,17 +133,30 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	if jsnCdrsCfg.Accounts_conns != nil {
 		cdrscfg.AccountSConns = updateInternalConns(*jsnCdrsCfg.Accounts_conns, utils.MetaAccounts)
 	}
-	return nil
+	if jsnCdrsCfg.Opts != nil {
+		cdrscfg.Opts.loadFromJSONCfg(jsnCdrsCfg.Opts)
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (cdrscfg CdrsCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.MetaAccounts:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Accounts),
+		utils.MetaAttributes: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Attributes),
+		utils.MetaChargers:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Chargers),
+		utils.MetaExport:     utils.DynamicBoolOptsToMap(cdrscfg.Opts.Export),
+		utils.MetaRateS:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Rates),
+		utils.MetaStats:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Stats),
+		utils.MetaThresholds: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Thresholds),
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:          cdrscfg.Enabled,
 		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
 		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
 		utils.ExtraFieldsCfg:      cdrscfg.ExtraFields.AsStringSlice(),
 		utils.OnlineCDRExportsCfg: utils.CloneStringSlice(cdrscfg.OnlineCDRExports),
+		utils.OptsCfg:             opts,
 	}
 
 	if cdrscfg.ChargerSConns != nil {
@@ -138,6 +189,46 @@ func (cdrscfg CdrsCfg) AsMapInterface(string) interface{} {
 func (CdrsCfg) SName() string                 { return CDRsJSON }
 func (cdrscfg CdrsCfg) CloneSection() Section { return cdrscfg.Clone() }
 
+func (cdrsOpts *CdrsOpts) Clone() *CdrsOpts {
+	var accS []*utils.DynamicBoolOpt
+	if cdrsOpts.Accounts != nil {
+		accS = utils.CloneDynamicBoolOpt(cdrsOpts.Accounts)
+	}
+	var attrS []*utils.DynamicBoolOpt
+	if cdrsOpts.Attributes != nil {
+		attrS = utils.CloneDynamicBoolOpt(cdrsOpts.Attributes)
+	}
+	var chrgS []*utils.DynamicBoolOpt
+	if cdrsOpts.Chargers != nil {
+		chrgS = utils.CloneDynamicBoolOpt(cdrsOpts.Chargers)
+	}
+	var export []*utils.DynamicBoolOpt
+	if cdrsOpts.Export != nil {
+		export = utils.CloneDynamicBoolOpt(cdrsOpts.Export)
+	}
+	var rtS []*utils.DynamicBoolOpt
+	if cdrsOpts.Rates != nil {
+		rtS = utils.CloneDynamicBoolOpt(cdrsOpts.Rates)
+	}
+	var stS []*utils.DynamicBoolOpt
+	if cdrsOpts.Stats != nil {
+		stS = utils.CloneDynamicBoolOpt(cdrsOpts.Stats)
+	}
+	var thdS []*utils.DynamicBoolOpt
+	if cdrsOpts.Thresholds != nil {
+		thdS = utils.CloneDynamicBoolOpt(cdrsOpts.Thresholds)
+	}
+	return &CdrsOpts{
+		Accounts:   accS,
+		Attributes: attrS,
+		Chargers:   chrgS,
+		Export:     export,
+		Rates:      rtS,
+		Stats:      stS,
+		Thresholds: thdS,
+	}
+}
+
 // Clone returns a deep copy of CdrsCfg
 func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 	cln = &CdrsCfg{
@@ -145,6 +236,7 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 		ExtraFields:   cdrscfg.ExtraFields.Clone(),
 		StoreCdrs:     cdrscfg.StoreCdrs,
 		SMCostRetries: cdrscfg.SMCostRetries,
+		Opts:          cdrscfg.Opts.Clone(),
 	}
 	if cdrscfg.ChargerSConns != nil {
 		cln.ChargerSConns = utils.CloneStringSlice(cdrscfg.ChargerSConns)
@@ -177,6 +269,16 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 	return
 }
 
+type CdrsOptsJson struct {
+	Accounts   map[string]bool `json:"*accountS"`
+	Attributes map[string]bool `json:"*attributeS"`
+	Chargers   map[string]bool `json:"*chargerS"`
+	Export     map[string]bool `json:"*export"`
+	Rates      map[string]bool `json:"*rateS"`
+	Stats      map[string]bool `json:"*statS"`
+	Thresholds map[string]bool `json:"*thresholdS"`
+}
+
 // Cdrs config section
 type CdrsJsonCfg struct {
 	Enabled              *bool
@@ -192,13 +294,41 @@ type CdrsJsonCfg struct {
 	Ees_conns            *[]string
 	Rates_conns          *[]string
 	Accounts_conns       *[]string
+	Opts                 *CdrsOptsJson
+}
+
+func diffCdrsOptsJsonCfg(d *CdrsOptsJson, v1, v2 *CdrsOpts) *CdrsOptsJson {
+	if d == nil {
+		d = new(CdrsOptsJson)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Accounts, v2.Accounts) {
+		d.Accounts = utils.DynamicBoolOptsToMap(v2.Accounts)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Attributes, v2.Attributes) {
+		d.Attributes = utils.DynamicBoolOptsToMap(v2.Attributes)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Chargers, v2.Chargers) {
+		d.Chargers = utils.DynamicBoolOptsToMap(v2.Chargers)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Export, v2.Export) {
+		d.Export = utils.DynamicBoolOptsToMap(v2.Export)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Rates, v2.Rates) {
+		d.Rates = utils.DynamicBoolOptsToMap(v2.Rates)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Stats, v2.Stats) {
+		d.Stats = utils.DynamicBoolOptsToMap(v2.Stats)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
+		d.Thresholds = utils.DynamicBoolOptsToMap(v2.Thresholds)
+	}
+	return d
 }
 
 func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
 	if d == nil {
 		d = new(CdrsJsonCfg)
 	}
-
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
@@ -240,5 +370,6 @@ func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
 	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
 		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
+	d.Opts = diffCdrsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }

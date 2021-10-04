@@ -33,6 +33,7 @@ func FilterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvide
 		if len(opt.FilterIDs) == 0 {
 			hasDefault = true
 			dft = opt.Value
+			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
@@ -53,6 +54,7 @@ func FilterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvid
 		if len(opt.FilterIDs) == 0 {
 			hasDefault = true
 			dft = opt.Value
+			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
@@ -73,6 +75,7 @@ func FilterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider
 		if len(opt.FilterIDs) == 0 {
 			hasDefault = true
 			dft = opt.Value
+			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return utils.EmptyString, err
@@ -93,6 +96,7 @@ func FilterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataPro
 		if len(opt.FilterIDs) == 0 {
 			hasDefault = true
 			dft = opt.Value
+			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
@@ -113,6 +117,7 @@ func FilterIntCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, f
 		if len(opt.FilterIDs) == 0 {
 			hasDefault = true
 			dft = opt.Value
+			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
@@ -133,6 +138,7 @@ func FilterBoolCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, 
 		if len(opt.FilterIDs) == 0 {
 			hasDefault = true
 			dft = opt.Value
+			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return false, err
@@ -153,6 +159,7 @@ func FilterDecimalBigCfgOpts(ctx *context.Context, tnt string, ev utils.DataProv
 		if len(opt.FilterIDs) == 0 {
 			hasDefault = true
 			dft = opt.Value
+			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
@@ -173,6 +180,7 @@ func FilterInterfaceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvi
 		if len(opt.FilterIDs) == 0 {
 			hasDefault = true
 			dft = opt.Value
+			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return false, err
@@ -184,4 +192,14 @@ func FilterInterfaceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvi
 		err = utils.ErrNotFound
 	}
 	return // return the option or NOT_FOUND if there are no options or none of the filters pass
+}
+
+func GetInterfaceOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicInterfaceOpt,
+	apiOpts map[string]interface{}, optNames ...string) (dft interface{}, err error) {
+	for _, optName := range optNames {
+		if opt, has := apiOpts[optName]; has {
+			return opt, nil
+		}
+	}
+	return FilterInterfaceCfgOpts(ctx, tnt, ev, fS, dynOpts)
 }

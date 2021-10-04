@@ -312,14 +312,70 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent,
 	// end of RPC caching
 
 	// processing options
-	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAttributeS, false)
-	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, false)
-	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsThresholdS, false)
-	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsStatS, false)
-	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsChargerS, false)
-	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsRateS, false)
-	acntS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAccountS, false)
-
+	argsDP := arg.AsDataProvider()
+	var acntS bool
+	if v, has := arg.APIOpts[utils.OptsAccountS]; !has {
+		if acntS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Accounts); err != nil {
+			return
+		}
+	} else if acntS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var attrS bool
+	if v, has := arg.APIOpts[utils.OptsAttributeS]; !has {
+		if attrS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Attributes); err != nil {
+			return
+		}
+	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var chrgS bool
+	if v, has := arg.APIOpts[utils.OptsChargerS]; !has {
+		if chrgS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Chargers); err != nil {
+			return
+		}
+	} else if chrgS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var export bool
+	if v, has := arg.APIOpts[utils.OptsCDRsExport]; !has {
+		if export, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Export); err != nil {
+			return
+		}
+	} else if export, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var rateS bool
+	if v, has := arg.APIOpts[utils.OptsRateS]; !has {
+		if rateS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Rates); err != nil {
+			return
+		}
+	} else if rateS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var stS bool
+	if v, has := arg.APIOpts[utils.OptsStatS]; !has {
+		if stS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Stats); err != nil {
+			return
+		}
+	} else if stS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var thdS bool
+	if v, has := arg.APIOpts[utils.OptsThresholdS]; !has {
+		if thdS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Thresholds); err != nil {
+			return
+		}
+	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
 	// end of processing options
 
 	if _, err = cdrS.processEvent(ctx, arg,
@@ -356,14 +412,70 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 	// end of RPC caching
 
 	// processing options
-	attrS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAttributeS, len(cdrS.cfg.CdrsCfg().AttributeSConns) != 0)
-	export := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsCDRsExport, len(cdrS.cfg.CdrsCfg().OnlineCDRExports) != 0 ||
-		len(cdrS.cfg.CdrsCfg().EEsConns) != 0)
-	thdS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsThresholdS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
-	stS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsStatS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
-	chrgS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsChargerS, len(cdrS.cfg.CdrsCfg().ThresholdSConns) != 0)
-	rateS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsRateS, len(cdrS.cfg.CdrsCfg().RateSConns) != 0)
-	acntS := utils.OptAsBoolOrDef(arg.APIOpts, utils.OptsAccountS, len(cdrS.cfg.CdrsCfg().AccountSConns) != 0)
+	argsDP := arg.AsDataProvider()
+	var acntS bool
+	if v, has := arg.APIOpts[utils.OptsAccountS]; !has {
+		if acntS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Accounts); err != nil {
+			return
+		}
+	} else if acntS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var attrS bool
+	if v, has := arg.APIOpts[utils.OptsAttributeS]; !has {
+		if attrS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Attributes); err != nil {
+			return
+		}
+	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var chrgS bool
+	if v, has := arg.APIOpts[utils.OptsChargerS]; !has {
+		if chrgS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Chargers); err != nil {
+			return
+		}
+	} else if chrgS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var export bool
+	if v, has := arg.APIOpts[utils.OptsCDRsExport]; !has {
+		if export, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Export); err != nil {
+			return
+		}
+	} else if export, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var rateS bool
+	if v, has := arg.APIOpts[utils.OptsRateS]; !has {
+		if rateS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Rates); err != nil {
+			return
+		}
+	} else if rateS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var stS bool
+	if v, has := arg.APIOpts[utils.OptsStatS]; !has {
+		if stS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Stats); err != nil {
+			return
+		}
+	} else if stS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
+	var thdS bool
+	if v, has := arg.APIOpts[utils.OptsThresholdS]; !has {
+		if thdS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
+			cdrS.cfg.CdrsCfg().Opts.Thresholds); err != nil {
+			return
+		}
+	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+		return
+	}
 	// end of processing options
 
 	var procEvs []*utils.EventWithFlags

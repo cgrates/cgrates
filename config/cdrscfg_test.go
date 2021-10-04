@@ -53,6 +53,43 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		RateSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "*conn1"},
 		AccountSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
 		ExtraFields:      RSRParsers{},
+		Opts: &CdrsOpts{
+			Accounts: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			Attributes: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			Chargers: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			Export: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			Rates: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			Stats: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+			Thresholds: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
+			},
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -106,6 +143,29 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.EEsConnsCfg:         []string{utils.MetaInternal, "*conn1"},
 		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaAccounts: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaAttributes: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaChargers: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaExport: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaRateS: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaStats: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaThresholds: map[string]bool{
+				utils.EmptyString: false,
+			},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -137,6 +197,29 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.EEsConnsCfg:         []string{"conn1"},
 		utils.RateSConnsCfg:       []string{},
 		utils.AccountSConnsCfg:    []string{},
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaAccounts: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaAttributes: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaChargers: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaExport: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaRateS: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaStats: map[string]bool{
+				utils.EmptyString: false,
+			},
+			utils.MetaThresholds: map[string]bool{
+				utils.EmptyString: false,
+			},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -158,6 +241,7 @@ func TestCdrsCfgClone(t *testing.T) {
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		OnlineCDRExports: []string{"randomVal"},
 		ExtraFields:      RSRParsers{},
+		Opts:             &CdrsOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -206,6 +290,7 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		OnlineCDRExports: []string{},
 		ActionSConns:     []string{"*localhost"},
 		EEsConns:         []string{"*localhost"},
+		Opts:             &CdrsOpts{},
 	}
 
 	v2 := &CdrsCfg{
@@ -224,6 +309,7 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		OnlineCDRExports: []string{"val1"},
 		ActionSConns:     []string{"*birpc"},
 		EEsConns:         []string{"*birpc"},
+		Opts:             &CdrsOpts{},
 	}
 
 	expected := &CdrsJsonCfg{
@@ -238,6 +324,7 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		Online_cdr_exports:   &[]string{"val1"},
 		Actions_conns:        &[]string{"*birpc"},
 		Ees_conns:            &[]string{"*birpc"},
+		Opts:                 &CdrsOptsJson{},
 	}
 
 	rcv := diffCdrsJsonCfg(d, v1, v2)
@@ -246,7 +333,9 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 	}
 
 	v2_2 := v1
-	expected2 := &CdrsJsonCfg{}
+	expected2 := &CdrsJsonCfg{
+		Opts: &CdrsOptsJson{},
+	}
 
 	rcv = diffCdrsJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {

@@ -4488,7 +4488,7 @@ func TestBiRPCv1DisconnectPeer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	sessions := NewSessionS(cfg, dm, nil)
+	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	sessions.biJIDs = map[string]*biJClient{
 		"client1": &biJClient{
@@ -4539,7 +4539,7 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	sessions := NewSessionS(cfg, dm, nil)
+	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	var reply string
 	if err := sessions.BiRPCv1ForceDisconnect(ctx, nil, &reply); err == nil || err != utils.ErrNotFound {

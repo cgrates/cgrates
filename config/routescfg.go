@@ -127,7 +127,7 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	}
 	return
 }
-func (rts RoutesOpts) Clone() (cln *RoutesOpts) {
+func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 	var context []*utils.DynamicStringOpt
 	if rts.Context != nil {
 		context = utils.CloneDynamicStringOpt(rts.Context)

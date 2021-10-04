@@ -87,7 +87,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	sessions := NewSessionS(cfg, dm, nil)
+	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	//connect BiJSON
 	client := &birpc.Service{}
@@ -97,7 +97,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	sessions.biJClnts[client] = "test_conn"
 	sessions.biJIDs = nil
 
-	expected := NewSessionS(cfg, dm, nil)
+	expected := NewSessionS(cfg, dm, nil, nil)
 	expected.biJClnts[client] = "test_conn"
 	expected.biJIDs = nil
 
@@ -117,7 +117,7 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	sessions := NewSessionS(cfg, dm, nil)
+	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	client := &birpc.Service{}
 
@@ -1331,7 +1331,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionStransitSState(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
@@ -1377,7 +1377,7 @@ func TestSessionStransitSState(t *testing.T) {
 
 func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
@@ -1516,7 +1516,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	mpStr := engine.NewInternalDB(nil, nil, true)
-	sS := NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	sS := NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil, nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		{
@@ -1537,7 +1537,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil, nil)
 	expIndx = map[string][]string{(utils.ToR): {utils.MetaVoice}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1550,7 +1550,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR1",
 	})
-	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil, nil)
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
@@ -1739,7 +1739,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 
 func TestSessionSgetSession(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",

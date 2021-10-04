@@ -307,6 +307,29 @@ const CGRATES_CFG_JSON = `
 	"ees_conns": [],						// connections to EventExporter
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
+	"opts": {								//
+		"*accountS": {						//
+			"": false,
+		},
+		"*attributeS": {					//
+			"": false,
+		},
+		"*chargerS": {						//
+			"": false,
+		},
+		"*export": {						//
+			"": false,	
+		},
+		"*rateS": {							//
+			"": false,
+		},
+		"*statS": {							//
+			"": false,
+		},
+		"*thresholdS": {					//
+			"": false,
+		},
+	},
 },
 
 

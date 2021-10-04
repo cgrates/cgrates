@@ -255,7 +255,6 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *utils.CGREvent,
 	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsRouteS) && procEvReply.RouteProfiles != nil {
 		kar.Routes = procEvReply.RouteProfiles.Digest()
 	}
-
 	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsThresholdS) {
 		kar.Thresholds = strings.Join(*procEvReply.ThresholdIDs, utils.FieldsSep)
 	}
