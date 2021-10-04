@@ -1,9 +1,0 @@
-#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
-cgrates.org,call,*any,2018-01-01T00:00:00Z,RP_TESTIT1,
-cgrates.org,call,SPECIAL_1002,2014-01-14T00:00:00Z,RP_SPECIAL_1002,
-cgrates.org,call,ANY2CNT,2018-01-01T00:00:00Z,RP_ANY2CNT,
-cgrates.org,call,SUPPLIER1,2018-01-01T00:00:00Z,RP_ANY1CNT,
-cgrates.org,Standard,TEST,2017-11-27T00:00:00Z,RP_TEST,
-cgrates.org,call,RP_RETAIL,2018-01-01T00:00:00Z,RP_RETAIL1,
-cgrates.org,free,RP_FREE,2018-01-01T00:00:00Z,RP_FREE,
-cgrates.org,*routes,*any,2018-01-01T00:00:00Z,RP_TESTIT1,
