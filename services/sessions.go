@@ -54,10 +54,11 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 // SessionService implements Service interface
 type SessionService struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	dm       *DataDBService
-	server   *cores.Server
-	stopChan chan struct{}
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	filterSChan chan *engine.FilterS
+	server      *cores.Server
+	stopChan    chan struct{}
 
 	sm       *sessions.SessionS
 	connChan chan birpc.ClientConnector
@@ -75,6 +76,11 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, smg.filterSChan); err != nil {
+		return
+	}
+
 	var datadb *engine.DataManager
 	if smg.dm.IsRunning() {
 		if datadb, err = smg.dm.WaitForDM(ctx); err != nil {
@@ -84,7 +90,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	smg.Lock()
 	defer smg.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
+	smg.sm = sessions.NewSessionS(smg.cfg, datadb, filterS, smg.connMgr)
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)
