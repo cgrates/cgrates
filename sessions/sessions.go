@@ -1538,6 +1538,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	var withErrors bool
 	if args.ID == "" {
 		args.ID = utils.GenUUID()
@@ -1802,6 +1805,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	var withErrors bool
 	if args.ID == "" {
 		args.ID = utils.GenUUID()
@@ -2002,6 +2008,9 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	if args.ID == utils.EmptyString {
 		args.ID = utils.GenUUID()
 	}
@@ -2095,6 +2104,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	args *utils.CGREvent, rply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	var withErrors bool
 	if args.ID == "" {
@@ -2255,6 +2267,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 // BiRPCv1ProcessCDR sends the CDR to CDRs
 func (sS *SessionS) BiRPCv1ProcessCDR(ctx *context.Context,
 	cgrEv *utils.CGREvent, rply *string) (err error) {
+	if cgrEv.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
 	if cgrEv.ID == utils.EmptyString {
 		cgrEv.ID = utils.GenUUID()
 	}
@@ -2294,6 +2309,9 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	args *utils.CGREvent, rply *V1ProcessMessageReply) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	var withErrors bool
 	if args.ID == utils.EmptyString {
@@ -2441,6 +2459,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	args *utils.CGREvent, rply *V1ProcessEventReply) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	var withErrors bool
 	if args.ID == "" {
