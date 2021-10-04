@@ -48,6 +48,7 @@
 		"ees_conns": ["conn1"]
 	},
 	
+	
 	"chargers": {
 		"enabled": true,
 		"attributes_conns": ["*internal"],
@@ -62,6 +63,7 @@
 
 	"accounts": {
 		"enabled": true,
+		"rates_conns": ["*internal"],
 	},
 
 	"rpc_conns": {

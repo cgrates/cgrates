@@ -41,11 +41,11 @@ var (
 		testLdPrMatchAcLoadConfig,
 		testLdPrMatchAcResetDataDB,
 		testLdPrMatchAcResetStorDb,
-		testLdPrMatchAcStartEngine,
+		// testLdPrMatchAcStartEngine,
 		testLdPrMatchAcRPCConn,
 		testLdPrMatchAcLoadTP,
 		testLdPrMatchAcCDRSProcessEvent,
-		testLdPrMatchAcStopCgrEngine,
+		// testLdPrMatchAcStopCgrEngine,
 	}
 )
 

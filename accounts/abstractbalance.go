@@ -115,7 +115,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 			costIcrm, dbted); err != nil {
 			return
 		} else if ecCost.Abstracts.Compare(utils.NewDecimal(0, 0)) == 0 { // no debit performed
-			return
+			return ecCost, nil
 		}
 	}
 	var dbtUnits *decimal.Big

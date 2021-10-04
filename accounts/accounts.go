@@ -131,7 +131,6 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 // accountsDebit will debit an usage out of multiple accounts
 func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
-
 	var usage *decimal.Big
 	if usage, err = engine.FilterDecimalBigCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), aS.fltrS,
 		aS.cfg.AccountSCfg().Opts.Usage); err != nil {
@@ -316,7 +315,6 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, true); err != nil {
 		return
 	}
-
 	var rcvEec *utils.ExtEventCharges
 	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
 		return
