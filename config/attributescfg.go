@@ -43,16 +43,6 @@ type AttributeSCfg struct {
 	Opts                *AttributesOpts
 }
 
-func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) (err error) {
-	if jsnCfg == nil {
-		return
-	}
-	attrOpts.AttributeIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.AttributeIDs)
-	attrOpts.ProcessRuns = utils.MapToDynamicIntOpts(jsnCfg.ProcessRuns)
-	attrOpts.ProfileRuns = utils.MapToDynamicIntOpts(jsnCfg.ProfileRuns)
-	return
-}
-
 // loadAttributeSCfg loads the AttributeS section of the configuration
 func (alS *AttributeSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnAttributeSCfg := new(AttributeSJsonCfg)
@@ -60,6 +50,21 @@ func (alS *AttributeSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConf
 		return
 	}
 	return alS.loadFromJSONCfg(jsnAttributeSCfg)
+}
+
+func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.AttributeIDs != nil {
+		attrOpts.AttributeIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.AttributeIDs)
+	}
+	if jsnCfg.ProcessRuns != nil {
+		attrOpts.ProcessRuns = utils.MapToDynamicIntOpts(jsnCfg.ProcessRuns)
+	}
+	if jsnCfg.ProfileRuns != nil {
+		attrOpts.ProfileRuns = utils.MapToDynamicIntOpts(jsnCfg.ProfileRuns)
+	}
 }
 
 func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error) {

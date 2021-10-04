@@ -99,11 +99,15 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAttributeIDsCfg: map[string][]string{},
+			utils.MetaAttributeIDsCfg: map[string][]string{
+				utils.EmptyString: {},
+			},
 			utils.MetaProcessRunsCfg: map[string]int{
 				utils.EmptyString: 3,
 			},
-			utils.MetaProfileRunsCfg: map[string]int{},
+			utils.MetaProfileRunsCfg: map[string]int{
+				utils.EmptyString: 0,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -136,11 +140,15 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAttributeIDsCfg: map[string][]string{},
+			utils.MetaAttributeIDsCfg: map[string][]string{
+				"": {},
+			},
 			utils.MetaProcessRunsCfg: map[string]int{
 				utils.EmptyString: 7,
 			},
-			utils.MetaProfileRunsCfg: map[string]int{},
+			utils.MetaProfileRunsCfg: map[string]int{
+				utils.EmptyString: 0,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

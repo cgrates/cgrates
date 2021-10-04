@@ -6204,13 +6204,11 @@ func TestReloadCfgInDb(t *testing.T) {
 		SuffixIndexedFields: &[]string{"field2"},
 		PrefixIndexedFields: &[]string{"field2"},
 		Opts: &AttributesOpts{
-			AttributeIDs: []*utils.DynamicStringSliceOpt{},
 			ProcessRuns: []*utils.DynamicIntOpt{
 				{
 					Value: 3,
 				},
 			},
-			ProfileRuns: []*utils.DynamicIntOpt{},
 		},
 		NestedFields: false,
 	}

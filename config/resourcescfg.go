@@ -55,20 +55,25 @@ func (rlcfg *ResourceSConfig) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGR
 
 func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err error) {
 	if jsnCfg == nil {
-		return nil
-	}
-	rsOpts.UsageID = utils.MapToDynamicStringOpts(jsnCfg.UsageID)
-	if rsOpts.UsageTTL, err = utils.MapToDynamicDurationOpts(jsnCfg.UsageTTL); err != nil {
 		return
 	}
-	rsOpts.Units = utils.MapToDynamicFloat64Opts(jsnCfg.Units)
-
-	return nil
+	if jsnCfg.UsageID != nil {
+		rsOpts.UsageID = utils.MapToDynamicStringOpts(jsnCfg.UsageID)
+	}
+	if jsnCfg.UsageTTL != nil {
+		if rsOpts.UsageTTL, err = utils.MapToDynamicDurationOpts(jsnCfg.UsageTTL); err != nil {
+			return
+		}
+	}
+	if jsnCfg.Units != nil {
+		rsOpts.Units = utils.MapToDynamicFloat64Opts(jsnCfg.Units)
+	}
+	return
 }
 
 func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Enabled != nil {
 		rlcfg.Enabled = *jsnCfg.Enabled
@@ -97,9 +102,9 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 		rlcfg.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Opts != nil {
-		rlcfg.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		err = rlcfg.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
