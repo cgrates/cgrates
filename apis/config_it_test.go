@@ -157,13 +157,13 @@ func testCfgGetConfig(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.EmptyString: {},
+					utils.MetaDefault: {},
 				},
 				utils.MetaProcessRunsCfg: map[string]int{
-					utils.EmptyString: 1,
+					utils.MetaDefault: 1,
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
-					utils.EmptyString: 0,
+					utils.MetaDefault: 0,
 				},
 			},
 		},
@@ -202,7 +202,7 @@ func testCfgSetGetConfig(t *testing.T) {
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
 						utils.MetaProcessRunsCfg: map[string]int{
-							utils.EmptyString: 2,
+							utils.MetaDefault: 2,
 						},
 					},
 				},
@@ -227,13 +227,13 @@ func testCfgSetGetConfig(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.EmptyString: {},
+					utils.MetaDefault: {},
 				},
 				utils.MetaProcessRunsCfg: map[string]int{
-					utils.EmptyString: 2,
+					utils.MetaDefault: 2,
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
-					utils.EmptyString: 0,
+					utils.MetaDefault: 0,
 				},
 			},
 		},
@@ -301,16 +301,16 @@ func testCfgSetEmptyReload(t *testing.T) {
 			"verbosity":                  1000,
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaRateProfileIDsCfg: map[string][]string{
-					utils.EmptyString: {},
+					utils.MetaDefault: {},
 				},
 				utils.MetaStartTime: map[string]string{
-					utils.EmptyString: utils.MetaNow,
+					utils.MetaDefault: utils.MetaNow,
 				},
 				utils.MetaUsage: map[string]string{
-					utils.EmptyString: decimal.New(int64(time.Minute), 0).String(),
+					utils.MetaDefault: decimal.New(int64(time.Minute), 0).String(),
 				},
 				utils.MetaIntervalStartCfg: map[string]string{
-					utils.EmptyString: decimal.New(0, 0).String(),
+					utils.MetaDefault: decimal.New(0, 0).String(),
 				},
 			},
 		},
@@ -346,7 +346,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"opts\":{\"*attributeIDs\":{\"\":[]},\"*processRuns\":{\"\":2},\"*profileRuns\":{\"\":0}},\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*attributeIDs":{"*default":[]},"*processRuns":{"":2,"*default":2},"*profileRuns":{"*default":0}},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -357,8 +357,8 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 		&replyGet); err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(utils.ToJSON(expectedGet), utils.ToJSON(replyGet)) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(replyGet))
+	if expectedGet != replyGet {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
 	}
 }
 
@@ -492,7 +492,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
 						utils.MetaProcessRunsCfg: map[string]int{
-							utils.EmptyString: 2,
+							utils.MetaDefault: 2,
 						},
 					},
 				},
@@ -517,13 +517,13 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.EmptyString: {},
+					utils.MetaDefault: {},
 				},
 				utils.MetaProcessRunsCfg: map[string]int{
-					utils.EmptyString: 2,
+					utils.MetaDefault: 2,
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
-					utils.EmptyString: 0,
+					utils.MetaDefault: 0,
 				},
 			},
 		},
@@ -560,7 +560,7 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		Nested_fields:         nil,
 		Opts: &config.AttributesOptsJson{
 			ProcessRuns: map[string]int{
-				utils.EmptyString: 2,
+				utils.MetaDefault: 2,
 			},
 		},
 	}
@@ -582,7 +582,7 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Nested_fields:         nil,
 		Opts: &config.AttributesOptsJson{
 			ProcessRuns: map[string]int{
-				utils.EmptyString: 2,
+				utils.MetaDefault: 2,
 			},
 		},
 	}
@@ -623,13 +623,13 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.EmptyString: {},
+					utils.MetaDefault: {},
 				},
 				utils.MetaProcessRunsCfg: map[string]int{
-					utils.EmptyString: 2,
+					utils.MetaDefault: 2,
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
-					utils.EmptyString: 0,
+					utils.MetaDefault: 0,
 				},
 			},
 		},

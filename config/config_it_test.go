@@ -156,17 +156,20 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		Opts: &AttributesOpts{
 			AttributeIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 			ProcessRuns: []*utils.DynamicIntOpt{
 				{
-					Value: 1,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     1,
 				},
 			},
 			ProfileRuns: []*utils.DynamicIntOpt{
 				{
-					Value: 0,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     0,
 				},
 			},
 		},
@@ -206,17 +209,20 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 		Opts: &AttributesOpts{
 			AttributeIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 			ProcessRuns: []*utils.DynamicIntOpt{
 				{
-					Value: 1,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     1,
 				},
 			},
 			ProfileRuns: []*utils.DynamicIntOpt{
 				{
-					Value: 0,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     0,
 				},
 			},
 		},
@@ -291,7 +297,8 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		Opts: &ThresholdsOpts{
 			ThresholdIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 		},
@@ -323,7 +330,8 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		Opts: &StatsOpts{
 			StatIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 		},
@@ -355,17 +363,20 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		Opts: &ResourcesOpts{
 			UsageID: []*utils.DynamicStringOpt{
 				{
-					Value: utils.EmptyString,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     utils.EmptyString,
 				},
 			},
 			UsageTTL: []*utils.DynamicDurationOpt{
 				{
-					Value: 72 * time.Hour,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     72 * time.Hour,
 				},
 			},
 			Units: []*utils.DynamicFloat64Opt{
 				{
-					Value: 1,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     1,
 				},
 			},
 		},
@@ -402,22 +413,26 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		Opts: &RoutesOpts{
 			Context: []*utils.DynamicStringOpt{
 				{
-					Value: utils.MetaRoutes,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     utils.MetaRoutes,
 				},
 			},
 			ProfileCount: []*utils.DynamicIntOpt{
 				{
-					Value: 1,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     1,
 				},
 			},
 			IgnoreErrors: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 			MaxCost: []*utils.DynamicInterfaceOpt{
 				{
-					Value: utils.EmptyString,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     utils.EmptyString,
 				},
 			},
 			Limit:  []*utils.DynamicIntOpt{},
