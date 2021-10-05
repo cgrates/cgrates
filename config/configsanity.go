@@ -834,7 +834,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !utils.IsSliceMember([]string{utils.PostgressSSLModeDisable, utils.PostgressSSLModeAllow,
 			utils.PostgressSSLModePrefer, utils.PostgressSSLModeRequire, utils.PostgressSSLModeVerifyCa,
 			utils.PostgressSSLModeVerifyFull}, utils.IfaceAsString(cfg.storDbCfg.Opts[utils.SSLModeCfg])) {
-			return fmt.Errorf("<%s> unsuported sslmode for storDB", utils.StorDB)
+			return fmt.Errorf("<%s> unsupported sslmode for storDB", utils.StorDB)
 		}
 	}
 	// DataDB sanity checks
@@ -864,7 +864,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for _, rpc := range conn.Conns {
 			if rpc.Transport != utils.MetaGOB {
-				return fmt.Errorf("<%s> unsuported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
+				return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
 			}
 		}
 	}
@@ -875,7 +875,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for _, rpc := range conn.Conns {
 			if rpc.Transport != utils.MetaGOB {
-				return fmt.Errorf("<%s> unsuported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
+				return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
 			}
 		}
 	}
@@ -915,7 +915,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		for _, rpc := range conn.Conns {
 			if rpc.Transport != utils.MetaGOB {
-				return fmt.Errorf("<%s> unsuported transport <%s> for connection with ID: <%s>", utils.CacheS, rpc.Transport, connID)
+				return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.CacheS, rpc.Transport, connID)
 			}
 		}
 	}
@@ -1014,7 +1014,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 
 	if cfg.analyzerSCfg.Enabled {
 		if !utils.AnzIndexType.Has(cfg.analyzerSCfg.IndexType) {
-			return fmt.Errorf("<%s> unsuported index type: %q", utils.AnalyzerS, cfg.analyzerSCfg.IndexType)
+			return fmt.Errorf("<%s> unsupported index type: %q", utils.AnalyzerS, cfg.analyzerSCfg.IndexType)
 		}
 		if cfg.analyzerSCfg.IndexType != utils.MetaInternal {
 			if _, err := os.Stat(cfg.analyzerSCfg.DBPath); err != nil && os.IsNotExist(err) {

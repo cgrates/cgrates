@@ -51,6 +51,7 @@ var (
 		testDNSitClntNAPTRDryRun,
 		testDNSitClntNAPTRAttributes,
 		testDNSitClntNAPTRSuppliers,
+		testDNSitClntNAPTROpts,
 		testDNSitStopEngine,
 	}
 )
@@ -212,6 +213,57 @@ func testDNSitClntNAPTRSuppliers(t *testing.T) {
 	answr2 := rply.Answer[1].(*dns.NAPTR)
 	if answr2.Regexp != "!^(.*)$!sip:1@172.16.1.12!" {
 		t.Errorf("received: <%q>", answr2.Regexp)
+	}
+}
+
+func testDNSitClntNAPTROpts(t *testing.T) {
+	m := new(dns.Msg)
+	m.SetQuestion("5.6.9.4.7.1.7.1.5.6.8.9.5.e164.arpa.", dns.TypeNAPTR)
+	m.SetEdns0(4096, false)
+	m.IsEdns0().Option = append(m.IsEdns0().Option, &dns.EDNS0_ESU{Uri: "sip:cgrates@cgrates.org"})
+	if err := dnsClnt.WriteMsg(m); err != nil {
+		t.Error(err)
+	}
+	rply, err := dnsClnt.ReadMsg()
+	if err != nil {
+		t.Error(err)
+	} else if len(rply.Answer) != 1 {
+		t.Fatalf("wrong number of records: %s", utils.ToIJSON(rply.Answer))
+	}
+	if rply.Rcode != dns.RcodeSuccess {
+		t.Errorf("failed to get an valid answer\n%v", rply)
+	}
+	answr := rply.Answer[0].(*dns.NAPTR)
+	if answr.Order != 100 {
+		t.Errorf("received: <%q>", answr.Order)
+	}
+	if answr.Preference != 10 {
+		t.Errorf("received: <%q>", answr.Preference)
+	}
+	if answr.Flags != "U" {
+		t.Errorf("received: <%q>", answr.Flags)
+	}
+	if answr.Service != "E2U+SIP" {
+		t.Errorf("received: <%q>", answr.Service)
+	}
+	if answr.Regexp != "!^(.*)$!sip:1@172.16.1.10.!" {
+		t.Errorf("received: <%q>", answr.Regexp)
+	}
+	if answr.Replacement != "." {
+		t.Errorf("received: <%q>", answr.Replacement)
+	}
+	if opts := rply.IsEdns0(); opts == nil {
+		t.Error("recieved nil options")
+	} else if len(opts.Option) != 2 {
+		t.Errorf("recieved wrong number of options: %v", len(opts.Option))
+	} else if ov, can := opts.Option[0].(*dns.EDNS0_ESU); !can {
+		t.Errorf("recieved wrong option type: %T", opts.Option[0])
+	} else if expected := "sip:cgrates@cgrates.com"; ov.Uri != expected {
+		t.Errorf("Expected :<%q> , received: <%q>", expected, ov.Uri)
+	} else if ov, can := opts.Option[1].(*dns.EDNS0_ESU); !can {
+		t.Errorf("recieved wrong option type: %T", opts.Option[1])
+	} else if expected := "sip:cgrates@cgrates.net"; ov.Uri != expected {
+		t.Errorf("Expected :<%q> , received: <%q>", expected, ov.Uri)
 	}
 }
 

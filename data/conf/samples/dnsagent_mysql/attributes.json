@@ -1,10 +1,9 @@
 {
-
 "dns_agent": {
 	"request_processors": [
 		{
 			"id": "NAPTRAttributes",
-			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*req.Question[0].Name{*e164}:4986517174964"],
+			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174964"],
 			"flags": ["*authorize", "*attributes","*log"],
 			"request_fields":[
 				{"tag": "E164Address", "path": "*cgreq.E164Address", 
@@ -27,5 +26,4 @@
 		},
 	],
 },
-
 }

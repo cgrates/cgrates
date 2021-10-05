@@ -95,9 +95,6 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	rply := new(dns.Msg)
 	rply.SetReply(req)
 	// message preprocesing
-	if req.Question[0].Qtype == dns.TypeNAPTR {
-		reqVars.Map[QueryName] = utils.NewLeafNode(req.Question[0].Name)
-	}
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	rplyNM := utils.NewOrderedNavigableMap() // share it among different processors
 	opts := utils.MapStorage{}
@@ -141,7 +138,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		dnsWriteMsg(w, rply)
 		return
 	}
-	if err = updateDNSMsgFromNM(rply, rplyNM); err != nil {
+	if err = updateDNSMsgFromNM(rply, rplyNM, q.Qtype, q.Name); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s updating answer: %s from NM %s",
 				utils.DNSAgent, err.Error(), utils.ToJSON(rply), utils.ToJSON(rplyNM)))
