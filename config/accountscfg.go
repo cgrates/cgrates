@@ -58,12 +58,14 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 		return
 	}
 	if jsnCfg.AccountIDs != nil {
-		accOpts.AccountIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.AccountIDs)
+		accOpts.AccountIDs = append(accOpts.AccountIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.AccountIDs)...)
 	}
 	if jsnCfg.Usage != nil {
-		if accOpts.Usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+		var usage []*utils.DynamicDecimalBigOpt
+		if usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
 			return
 		}
+		accOpts.Usage = append(accOpts.Usage, usage...)
 	}
 	return
 }

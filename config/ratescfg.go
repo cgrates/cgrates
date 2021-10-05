@@ -61,20 +61,24 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 		return
 	}
 	if jsnCfg.RateProfileIDs != nil {
-		rateOpts.RateProfileIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.RateProfileIDs)
+		rateOpts.RateProfileIDs = append(rateOpts.RateProfileIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.RateProfileIDs)...)
 	}
 	if jsnCfg.StartTime != nil {
-		rateOpts.StartTime = utils.MapToDynamicStringOpts(jsnCfg.StartTime)
+		rateOpts.StartTime = append(rateOpts.StartTime, utils.MapToDynamicStringOpts(jsnCfg.StartTime)...)
 	}
 	if jsnCfg.Usage != nil {
-		if rateOpts.Usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+		var usage []*utils.DynamicDecimalBigOpt
+		if usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
 			return
 		}
+		rateOpts.Usage = append(rateOpts.Usage, usage...)
 	}
 	if jsnCfg.IntervalStart != nil {
-		if rateOpts.IntervalStart, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.IntervalStart); err != nil {
+		var intervalStart []*utils.DynamicDecimalBigOpt
+		if intervalStart, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.IntervalStart); err != nil {
 			return
 		}
+		rateOpts.IntervalStart = append(rateOpts.IntervalStart, intervalStart...)
 	}
 	return
 }

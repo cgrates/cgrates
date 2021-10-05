@@ -57,13 +57,13 @@ func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) {
 		return
 	}
 	if jsnCfg.AttributeIDs != nil {
-		attrOpts.AttributeIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.AttributeIDs)
+		attrOpts.AttributeIDs = append(attrOpts.AttributeIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.AttributeIDs)...)
 	}
 	if jsnCfg.ProcessRuns != nil {
-		attrOpts.ProcessRuns = utils.MapToDynamicIntOpts(jsnCfg.ProcessRuns)
+		attrOpts.ProcessRuns = append(attrOpts.ProcessRuns, utils.MapToDynamicIntOpts(jsnCfg.ProcessRuns)...)
 	}
 	if jsnCfg.ProfileRuns != nil {
-		attrOpts.ProfileRuns = utils.MapToDynamicIntOpts(jsnCfg.ProfileRuns)
+		attrOpts.ProfileRuns = append(attrOpts.ProfileRuns, utils.MapToDynamicIntOpts(jsnCfg.ProfileRuns)...)
 	}
 }
 

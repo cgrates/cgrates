@@ -58,15 +58,17 @@ func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err err
 		return
 	}
 	if jsnCfg.UsageID != nil {
-		rsOpts.UsageID = utils.MapToDynamicStringOpts(jsnCfg.UsageID)
+		rsOpts.UsageID = append(rsOpts.UsageID, utils.MapToDynamicStringOpts(jsnCfg.UsageID)...)
 	}
 	if jsnCfg.UsageTTL != nil {
-		if rsOpts.UsageTTL, err = utils.MapToDynamicDurationOpts(jsnCfg.UsageTTL); err != nil {
+		var usageTTL []*utils.DynamicDurationOpt
+		if usageTTL, err = utils.MapToDynamicDurationOpts(jsnCfg.UsageTTL); err != nil {
 			return
 		}
+		rsOpts.UsageTTL = append(rsOpts.UsageTTL, usageTTL...)
 	}
 	if jsnCfg.Units != nil {
-		rsOpts.Units = utils.MapToDynamicFloat64Opts(jsnCfg.Units)
+		rsOpts.Units = append(rsOpts.Units, utils.MapToDynamicFloat64Opts(jsnCfg.Units)...)
 	}
 	return
 }
