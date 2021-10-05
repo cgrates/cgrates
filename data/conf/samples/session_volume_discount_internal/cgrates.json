@@ -11,44 +11,41 @@
         "db_type": "*internal"
     },
     
-
     "stor_db": {
         "db_type": "*internal"
     },
    
        "sessions": {
            "enabled": true,
-           "routes_conns": ["*localhost"],
-           "cdrs_conns": ["*localhost"],
+           "routes_conns": ["*internal"],
+           "cdrs_conns": ["*internal"],
        },
    
        "attributes": {
            "enabled": true,
            "indexed_selects": false,
+           "opts":{								// 			
+               "*processRuns": {					// number of run loops when processing event
+                   "": 2,
+               },										
+           },
        },
    
        "cdrs": {									// CDRs config
            "enabled": true,
            "accounts_conns":["*localhost"],
-           "rates_conns": ["*localhost"],
-           "chargers_conns":["*localhost"],
+           "rates_conns": ["*internal"],
+           "chargers_conns":["*internal"],
            "opts": {								//
                "*chargerS": {						//
                    "": true,
-               },
-               "*rateS": {						//
-                   "": true,
-               },
-               "*accountS": {						//
-                   "*string:~*req.Account:ACCOUNT1": true,
-                   "": false,
                },
            },   
        },
    
        "chargers": {
           "enabled": true,
-          "attributes_conns": ["*localhost"],
+          "attributes_conns": ["*internal"],
           "indexed_selects": false,
        },
    
@@ -59,7 +56,7 @@
    
        "accounts": {
            "enabled": true,
-           "rates_conns": ["*localhost"],
+           "rates_conns": ["*internal"],
            "indexed_selects": false,
        },
    
@@ -77,7 +74,7 @@
        "routes": {
            "enabled": true,
            "indexed_selects": false,
-           "rates_conns": ["*localhost"],						// connections to RateS
+           "rates_conns": ["*internal"],						// connections to RateS
            "accounts_conns": ["*localhost"],					// connections to AccountS
        },
    

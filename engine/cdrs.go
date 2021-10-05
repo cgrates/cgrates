@@ -254,8 +254,8 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 
 	var acntS bool
 	for _, cgrEv := range cgrEvs {
-		if v, has := ev.APIOpts[utils.OptsAccountS]; !has {
-			if acntS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, ev.AsDataProvider(), cdrS.filterS,
+		if v, has := cgrEv.APIOpts[utils.OptsAccountS]; !has {
+			if acntS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
 				cdrS.cfg.CdrsCfg().Opts.Accounts); err != nil {
 				return
 			}
@@ -263,14 +263,11 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 			return
 		}
 		if acntS {
-
-			if acntS {
-				if err := cdrS.accountSDebitEvent(ctx, cgrEv); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-							utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.AccountS))
-					partiallyExecuted = true
-				}
+			if err := cdrS.accountSDebitEvent(ctx, cgrEv); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+						utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.AccountS))
+				partiallyExecuted = true
 			}
 		}
 	}
