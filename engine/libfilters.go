@@ -49,13 +49,14 @@ func FilterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvide
 
 // GetFloat64Opts checks the specified option names in order among the keys in APIOpts returning the first value it finds as float64, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetFloat64Opts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicFloat64Opt,
-	apiOpts map[string]interface{}, optNames ...string) (cfgOpt float64, err error) {
+func GetFloat64Opts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicFloat64Opt,
+	optNames ...string) (cfgOpt float64, err error) {
 	for _, optName := range optNames {
-		if opt, has := apiOpts[optName]; has {
+		if opt, has := ev.APIOpts[optName]; has {
 			return utils.IfaceAsFloat64(opt)
 		}
 	}
+	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
 		if len(opt.FilterIDs) == 0 {
@@ -63,7 +64,7 @@ func GetFloat64Opts(ctx *context.Context, tnt string, ev utils.DataProvider, fS 
 			cfgOpt = opt.Value
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
 		} else if pass {
 			return opt.Value, nil
@@ -98,13 +99,14 @@ func FilterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvid
 
 // GetDurationOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Duration, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetDurationOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicDurationOpt,
-	apiOpts map[string]interface{}, optNames ...string) (cfgOpt time.Duration, err error) {
+func GetDurationOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicDurationOpt,
+	optNames ...string) (cfgOpt time.Duration, err error) {
 	for _, optName := range optNames {
-		if opt, has := apiOpts[optName]; has {
+		if opt, has := ev.APIOpts[optName]; has {
 			return utils.IfaceAsDuration(opt)
 		}
 	}
+	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
 		if len(opt.FilterIDs) == 0 {
@@ -112,7 +114,7 @@ func GetDurationOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS
 			cfgOpt = opt.Value
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
 		} else if pass {
 			return opt.Value, nil
@@ -147,13 +149,14 @@ func FilterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider
 
 // GetStringOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as string, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetStringOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicStringOpt,
-	apiOpts map[string]interface{}, optNames ...string) (cfgOpt string, err error) {
+func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicStringOpt,
+	optNames ...string) (cfgOpt string, err error) {
 	for _, optName := range optNames {
-		if opt, has := apiOpts[optName]; has {
+		if opt, has := ev.APIOpts[optName]; has {
 			return utils.IfaceAsString(opt), nil
 		}
 	}
+	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
 		if len(opt.FilterIDs) == 0 {
@@ -161,7 +164,7 @@ func GetStringOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *
 			cfgOpt = opt.Value
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return utils.EmptyString, err
 		} else if pass {
 			return opt.Value, nil
@@ -196,13 +199,14 @@ func FilterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataPro
 
 // GetStringSliceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as []string, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetStringSliceOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicStringSliceOpt,
-	apiOpts map[string]interface{}, optNames ...string) (cfgOpt []string, err error) {
+func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicStringSliceOpt,
+	optNames ...string) (cfgOpt []string, err error) {
 	for _, optName := range optNames {
-		if opt, has := apiOpts[optName]; has {
+		if opt, has := ev.APIOpts[optName]; has {
 			return utils.IfaceAsStringSlice(opt)
 		}
 	}
+	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
 		if len(opt.FilterIDs) == 0 {
@@ -210,7 +214,7 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, ev utils.DataProvider,
 			cfgOpt = opt.Value
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
 		} else if pass {
 			return opt.Value, nil
@@ -245,10 +249,10 @@ func FilterIntCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, f
 
 // GetIntOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as int, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetIntOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicIntOpt,
-	apiOpts map[string]interface{}, optNames ...string) (cfgOpt int, err error) {
+func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicIntOpt,
+	optNames ...string) (cfgOpt int, err error) {
 	for _, optName := range optNames {
-		if opt, has := apiOpts[optName]; has {
+		if opt, has := ev.APIOpts[optName]; has {
 			var value int64
 			if value, err = utils.IfaceAsTInt64(opt); err != nil {
 				return 0, err
@@ -256,6 +260,7 @@ func GetIntOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *Fil
 			return int(value), nil
 		}
 	}
+	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
 		if len(opt.FilterIDs) == 0 {
@@ -263,7 +268,7 @@ func GetIntOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *Fil
 			cfgOpt = opt.Value
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return 0, err
 		} else if pass {
 			return opt.Value, nil
@@ -298,13 +303,14 @@ func FilterBoolCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, 
 
 // GetBoolOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as bool, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetBoolOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicBoolOpt,
-	apiOpts map[string]interface{}, optNames ...string) (cfgOpt bool, err error) {
+func GetBoolOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicBoolOpt,
+	optNames ...string) (cfgOpt bool, err error) {
 	for _, optName := range optNames {
-		if opt, has := apiOpts[optName]; has {
+		if opt, has := ev.APIOpts[optName]; has {
 			return utils.IfaceAsBool(opt)
 		}
 	}
+	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
 		if len(opt.FilterIDs) == 0 {
@@ -312,7 +318,7 @@ func GetBoolOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *Fi
 			cfgOpt = opt.Value
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return false, err
 		} else if pass {
 			return opt.Value, nil
@@ -347,13 +353,14 @@ func FilterDecimalBigCfgOpts(ctx *context.Context, tnt string, ev utils.DataProv
 
 // GetDecimalBigOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *decimal.Big, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetDecimalBigOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicDecimalBigOpt,
-	apiOpts map[string]interface{}, optNames ...string) (cfgOpt *decimal.Big, err error) {
+func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicDecimalBigOpt,
+	optNames ...string) (cfgOpt *decimal.Big, err error) {
 	for _, optName := range optNames {
-		if opt, has := apiOpts[optName]; has {
+		if opt, has := ev.APIOpts[optName]; has {
 			return utils.IfaceAsBig(opt)
 		}
 	}
+	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
 		if len(opt.FilterIDs) == 0 {
@@ -361,7 +368,7 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev utils.DataProvider, 
 			cfgOpt = opt.Value
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
 		} else if pass {
 			return opt.Value, nil
@@ -396,13 +403,14 @@ func FilterInterfaceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvi
 
 // GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as interface{}, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetInterfaceOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicInterfaceOpt,
-	apiOpts map[string]interface{}, optNames ...string) (cfgOpt interface{}, err error) {
+func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicInterfaceOpt,
+	optNames ...string) (cfgOpt interface{}, err error) {
 	for _, optName := range optNames {
-		if opt, has := apiOpts[optName]; has {
+		if opt, has := ev.APIOpts[optName]; has {
 			return opt, nil
 		}
 	}
+	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
 		if len(opt.FilterIDs) == 0 {
@@ -410,7 +418,7 @@ func GetInterfaceOpts(ctx *context.Context, tnt string, ev utils.DataProvider, f
 			cfgOpt = opt.Value
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, ev); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return false, err
 		} else if pass {
 			return opt.Value, nil
