@@ -330,19 +330,11 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 		utils.MetaOpts: args.APIOpts,
 	}
 	var thIDs []string
-	if thIDs, err = FilterStringSliceCfgOpts(ctx, tnt, args.AsDataProvider(), tS.filterS,
-		tS.cgrcfg.ThresholdSCfg().Opts.ThresholdIDs); err != nil {
-		return
-	}
-	if thIDs, err = args.OptsAsStringSlice(thIDs, utils.OptsThresholdsThresholdIDs); err != nil {
+	if thIDs, err = GetStringSliceOpts(ctx, tnt, args, tS.filterS, tS.cgrcfg.ThresholdSCfg().Opts.ThresholdIDs,
+		utils.OptsThresholdsThresholdIDs); err != nil {
 		return
 	}
 
-	if args.APIOpts[utils.OptsThresholdsThresholdIDs] != nil {
-		if thIDs, err = utils.IfaceAsStringSlice(args.APIOpts[utils.OptsThresholdsThresholdIDs]); err != nil {
-			return
-		}
-	}
 	tIDs := utils.NewStringSet(thIDs)
 	if len(tIDs) == 0 {
 		tIDs, err = MatchingItemIDsForEvent(ctx, evNm,
