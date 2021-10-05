@@ -50,7 +50,8 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Opts: &StatsOpts{
 			StatIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 		},
@@ -89,7 +90,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaStatIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 		},
 	}
@@ -126,7 +127,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaStatIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 		},
 	}

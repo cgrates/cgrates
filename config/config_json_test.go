@@ -521,25 +521,25 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Accounts_conns:       &[]string{},
 		Opts: &CdrsOptsJson{
 			Accounts: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			Attributes: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			Chargers: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			Export: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			Rates: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			Stats: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			Thresholds: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 		},
 	}
@@ -795,13 +795,13 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &AttributesOptsJson{
 			AttributeIDs: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 			ProcessRuns: map[string]int{
-				utils.EmptyString: 1,
+				utils.MetaDefault: 1,
 			},
 			ProfileRuns: map[string]int{
-				utils.EmptyString: 0,
+				utils.MetaDefault: 0,
 			},
 		},
 	}
@@ -869,13 +869,13 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &ResourcesOptsJson{
 			UsageID: map[string]string{
-				utils.EmptyString: utils.EmptyString,
+				utils.MetaDefault: utils.EmptyString,
 			},
 			UsageTTL: map[string]string{
-				utils.EmptyString: "72h",
+				utils.MetaDefault: "72h",
 			},
 			Units: map[string]float64{
-				utils.EmptyString: 1,
+				utils.MetaDefault: 1,
 			},
 		},
 	}
@@ -904,7 +904,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Nested_fields:            utils.BoolPointer(false),
 		Opts: &StatsOptsJson{
 			StatIDs: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 		},
 	}
@@ -932,7 +932,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Actions_conns:         &[]string{},
 		Opts: &ThresholdsOptsJson{
 			ThresholdIDs: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 		},
 	}
@@ -964,16 +964,16 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &RoutesOptsJson{
 			Context: map[string]string{
-				utils.EmptyString: utils.MetaRoutes,
+				utils.MetaDefault: utils.MetaRoutes,
 			},
 			ProfileCount: map[string]int{
-				utils.EmptyString: 1,
+				utils.MetaDefault: 1,
 			},
 			IgnoreErrors: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			MaxCost: map[string]interface{}{
-				utils.EmptyString: utils.EmptyString,
+				utils.MetaDefault: utils.EmptyString,
 			},
 		},
 	}
@@ -2030,16 +2030,16 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Verbosity:                  utils.IntPointer(1000),
 		Opts: &RatesOptsJson{
 			RateProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 			StartTime: map[string]string{
-				utils.EmptyString: utils.MetaNow,
+				utils.MetaDefault: utils.MetaNow,
 			},
 			Usage: map[string]string{
-				utils.EmptyString: "1m",
+				utils.MetaDefault: "1m",
 			},
 			IntervalStart: map[string]string{
-				utils.EmptyString: "0",
+				utils.MetaDefault: "0",
 			},
 		},
 	}
@@ -2333,7 +2333,7 @@ func TestDfActionSJsonCfg(t *testing.T) {
 		Dynaprepaid_actionprofile: &[]string{},
 		Opts: &ActionsOptsJson{
 			ActionProfileIDs: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 		},
 	}

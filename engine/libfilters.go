@@ -30,7 +30,7 @@ import (
 func FilterFloat64CfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicFloat64Opt) (dft float64, err error) {
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			dft = opt.Value
 			continue
@@ -59,7 +59,7 @@ func GetFloat64Opts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fi
 	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			cfgOpt = opt.Value
 			continue
@@ -80,7 +80,7 @@ func GetFloat64Opts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fi
 func FilterDurationCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicDurationOpt) (dft time.Duration, err error) {
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			dft = opt.Value
 			continue
@@ -109,7 +109,7 @@ func GetDurationOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *F
 	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			cfgOpt = opt.Value
 			continue
@@ -130,7 +130,7 @@ func GetDurationOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *F
 func FilterStringCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicStringOpt) (dft string, err error) {
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			dft = opt.Value
 			continue
@@ -159,7 +159,7 @@ func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fil
 	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			cfgOpt = opt.Value
 			continue
@@ -180,7 +180,7 @@ func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fil
 func FilterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicStringSliceOpt) (dft []string, err error) {
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			dft = opt.Value
 			continue
@@ -209,7 +209,7 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS
 	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			cfgOpt = opt.Value
 			continue
@@ -230,7 +230,7 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS
 func FilterIntCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicIntOpt) (dft int, err error) {
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			dft = opt.Value
 			continue
@@ -263,7 +263,7 @@ func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filter
 	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			cfgOpt = opt.Value
 			continue
@@ -284,7 +284,7 @@ func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filter
 func FilterBoolCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicBoolOpt) (dft bool, err error) {
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			dft = opt.Value
 			continue
@@ -313,7 +313,7 @@ func GetBoolOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filte
 	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			cfgOpt = opt.Value
 			continue
@@ -334,7 +334,7 @@ func GetBoolOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filte
 func FilterDecimalBigCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicDecimalBigOpt) (dft *decimal.Big, err error) {
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			dft = opt.Value
 			continue
@@ -363,7 +363,7 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			cfgOpt = opt.Value
 			continue
@@ -384,7 +384,7 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 func FilterInterfaceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicInterfaceOpt) (dft interface{}, err error) {
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			dft = opt.Value
 			continue
@@ -413,7 +413,7 @@ func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *
 	evDP := ev.AsDataProvider()
 	var hasDefault bool
 	for _, opt := range dynOpts { // iterate through the options
-		if len(opt.FilterIDs) == 0 {
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
 			hasDefault = true
 			cfgOpt = opt.Value
 			continue

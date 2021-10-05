@@ -48,17 +48,20 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		Opts: &ResourcesOpts{
 			UsageID: []*utils.DynamicStringOpt{
 				{
-					Value: utils.EmptyString,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     utils.EmptyString,
 				},
 			},
 			UsageTTL: []*utils.DynamicDurationOpt{
 				{
-					Value: 72 * time.Hour,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     72 * time.Hour,
 				},
 			},
 			Units: []*utils.DynamicFloat64Opt{
 				{
-					Value: 1,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     1,
 				},
 			},
 		},
@@ -96,13 +99,13 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaUsageIDCfg: map[string]string{
-				utils.EmptyString: utils.EmptyString,
+				utils.MetaDefault: utils.EmptyString,
 			},
 			utils.MetaUsageTTLCfg: map[string]string{
-				utils.EmptyString: "72h0m0s",
+				utils.MetaDefault: "72h0m0s",
 			},
 			utils.MetaUnitsCfg: map[string]float64{
-				utils.EmptyString: 1,
+				utils.MetaDefault: 1,
 			},
 		},
 	}
@@ -137,13 +140,13 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaUsageIDCfg: map[string]string{
-				utils.EmptyString: utils.EmptyString,
+				utils.MetaDefault: utils.EmptyString,
 			},
 			utils.MetaUsageTTLCfg: map[string]string{
-				utils.EmptyString: "72h0m0s",
+				utils.MetaDefault: "72h0m0s",
 			},
 			utils.MetaUnitsCfg: map[string]float64{
-				utils.EmptyString: 1,
+				utils.MetaDefault: 1,
 			},
 		},
 	}

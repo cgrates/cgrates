@@ -56,37 +56,44 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		Opts: &CdrsOpts{
 			Accounts: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 			Attributes: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 			Chargers: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 			Export: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 			Rates: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 			Stats: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 			Thresholds: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 		},
@@ -145,25 +152,25 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaAccounts: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaAttributes: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaChargers: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaExport: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaRateS: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaStats: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaThresholds: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 		},
 	}
@@ -199,25 +206,25 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.AccountSConnsCfg:    []string{},
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaAccounts: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaAttributes: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaChargers: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaExport: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaRateS: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaStats: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaThresholds: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 		},
 	}

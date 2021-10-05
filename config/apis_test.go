@@ -57,10 +57,10 @@ func TestConfigV1SetConfigWithDB(t *testing.T) {
 	}
 	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
 		AccountIDs: map[string][]string{
-			utils.EmptyString: {},
+			utils.MetaDefault: {},
 		},
 		Usage: map[string]string{
-			utils.EmptyString: decimal.New(int64(72*time.Hour), 0).String(),
+			utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
 		},
 	}}
 	rpl2 := new(AccountSJsonCfg)
@@ -177,10 +177,10 @@ func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 	}
 	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
 		AccountIDs: map[string][]string{
-			utils.EmptyString: {},
+			utils.MetaDefault: {},
 		},
 		Usage: map[string]string{
-			utils.EmptyString: decimal.New(int64(72*time.Hour), 0).String(),
+			utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
 		},
 	}}
 	rpl2 := new(AccountSJsonCfg)

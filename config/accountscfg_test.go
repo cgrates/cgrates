@@ -60,12 +60,14 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		Opts: &AccountsOpts{
 			AccountIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 			Usage: []*utils.DynamicDecimalBigOpt{
 				{
-					Value: decimal.New(int64(72*time.Hour), 0),
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     decimal.New(int64(72*time.Hour), 0),
 				},
 			},
 		},
@@ -120,10 +122,10 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.MaxUsage:               "259200000000000", // 72h in ns
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaAccountIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 			utils.MetaUsage: map[string]string{
-				utils.EmptyString: decimal.New(int64(72*time.Hour), 0).String(),
+				utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
 			},
 		},
 	}

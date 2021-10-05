@@ -309,25 +309,25 @@ const CGRATES_CFG_JSON = `
 	"accounts_conns": [],					// connections to AccountS
 	"opts": {								//
 		"*accountS": {						//
-			"": false,
+			"*default": false,
 		},
 		"*attributeS": {					//
-			"": false,
+			"*default": false,
 		},
 		"*chargerS": {						//
-			"": false,
+			"*default": false,
 		},
 		"*export": {						//
-			"": false,	
+			"*default": false,	
 		},
 		"*rateS": {							//
-			"": false,
+			"*default": false,
 		},
 		"*statS": {							//
-			"": false,
+			"*default": false,
 		},
 		"*thresholdS": {					//
-			"": false,
+			"*default": false,
 		},
 	},
 },
@@ -694,13 +694,13 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								// 
 		"*attributeIDs": { 					//
-			"": [],
+			"*default": [],
 		},				
 		"*processRuns": {					// number of run loops when processing event
-			"": 1,
+			"*default": 1,
 		},					
 		"*profileRuns": {					// number of runs a profile will process during the event
-			"": 0,
+			"*default": 0,
 		},					
 	},
 },
@@ -728,13 +728,13 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								//	
 		"*usageID": {						//
-			"": "",
+			"*default": "",
 		},				
 		"*usageTTL": {						//
-			"": "72h",
+			"*default": "72h",
 		},			
 		"*units": {							//
-			"": 1,
+			"*default": 1,
 		},					
 	},
 },
@@ -752,7 +752,7 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {								//
 		"*statIDs": {						//
-			"": [],
+			"*default": [],
 		},
 	},								
 },
@@ -769,7 +769,7 @@ const CGRATES_CFG_JSON = `
 	"actions_conns": [],					// connections to ActionS to execute the actions
 	"opts":{								//
 		"*thresholdIDs": {					//	
-			"": [],
+			"*default": [],
 		},									
 	},								
 },
@@ -790,22 +790,22 @@ const CGRATES_CFG_JSON = `
 	"default_ratio":1,						// default ratio used in case of *load strategy
 	"opts":{								//	
 		"*context": {						//
-			"": "*routes",
+			"*default": "*routes",
 		},
 		"*profileCount": {					//
-			"": 1,
+			"*default": 1,
 		},
 		"*ignoreErrors": {					//
-			"": false,
+			"*default": false,
 		},
 		"*maxCost": {						//
-			"": "",
+			"*default": "",
 		},
 		// "*limit": {						//
-		// 	"": 1,
+		// 	"*default": 1,
 		// },	
 		// "*offset": {						//					
-		// 	"": 1,
+		// 	"*default": 1,
 		// },							
 	},
 },
@@ -1170,16 +1170,16 @@ const CGRATES_CFG_JSON = `
     "verbosity": 1000,                      // number of increment iterations allowed
 	"opts":{								//	
 		"*rateProfileIDs": {				//
-			"": [],
+			"*default": [],
 		},			
 		"*startTime": {						//
-			"": "*now",
+			"*default": "*now",
 		},
 		"*usage": {							//
-			"": "1m",
+			"*default": "1m",
 		},
 		"*intervalStart": {					//
-			"": "0",
+			"*default": "0",
 		},
 	},
 },
@@ -1316,7 +1316,7 @@ const CGRATES_CFG_JSON = `
 	"dynaprepaid_actionprofile": [],		//
 	"opts":{								//	
 		"*actionProfileIDs": {				//
-			"": [],
+			"*default": [],
 		},			
 	},
 },
@@ -1336,10 +1336,10 @@ const CGRATES_CFG_JSON = `
     "max_usage": "72h",                     // maximum time of usage
 	"opts":{								//	
 		"*accountIDs": {					//
-			"": [],
+			"*default": [],
 		},				
 		"*usage": {							//
-			"": "72h",			
+			"*default": "72h",			
 		},
 	},
 },
