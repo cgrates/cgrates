@@ -175,7 +175,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "ACCOUNT1",
+			utils.AccountField: "dan.bogos",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
@@ -225,7 +225,7 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "ACCOUNT1",
+			utils.AccountField: "dan.bogos",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
@@ -275,7 +275,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "ACCOUNT1",
+			utils.AccountField: "dan.bogos",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
@@ -299,34 +299,8 @@ func testSessVolDiscProcessCDRSupplier(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]interface{}{
-			utils.AccountField: "ACCOUNT1",
+			utils.AccountField: "dan.bogos",
 			utils.Destination:  "1002",
-		},
-		APIOpts: map[string]interface{}{
-			//utils.OptsAttributeS: true,
-			// utils.OptsChargerS: true,
-			//utils.OptsAccountS: true,
-			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.MetaUsage: 15 * time.Minute,
-		},
-	}
-
-	var rply string
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
-		args, &rply); err != nil {
-		t.Fatal(err)
-	}
-	if rply != utils.OK {
-		t.Errorf("Unexpected reply: %s", rply)
-	}
-}
-
-func testSessVolDiscProcessCDRCustomer(t *testing.T) {
-	args := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TestSSv1ItProcessCDR",
-		Event: map[string]interface{}{
-			utils.Destination: "1002",
 		},
 		APIOpts: map[string]interface{}{
 			// utils.OptsAttributeS: true,
@@ -340,7 +314,34 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 	var rply string
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
 		args, &rply); err != nil {
-		t.Fatal(err)
+		t.Error(err)
+	}
+	if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+}
+
+func testSessVolDiscProcessCDRCustomer(t *testing.T) {
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestSSv1ItProcessCDR",
+		Event: map[string]interface{}{
+			utils.AccountField: "DIFFERENT_ACCOUNT1",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			// utils.OptsAttributeS: true,
+			// utils.OptsChargerS: true,
+			// utils.OptsAccountS: true,
+			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.MetaUsage: 15 * time.Minute,
+		},
+	}
+
+	var rply string
+	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
+		args, &rply); err != nil {
+		t.Error(err)
 	}
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
@@ -440,7 +441,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "ACCOUNT1",
+			utils.AccountField: "dan.bogos",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
