@@ -763,7 +763,7 @@ func testCallSyncSessions(t *testing.T) {
 		engine.ForceKillProcName(utils.Asterisk,
 			int(tutorialCallsCfg.SessionSCfg().ChannelSyncInterval.Nanoseconds()/1e6))
 	default:
-		t.Errorf("Unsuported format")
+		t.Errorf("unsupported format")
 	}
 
 	time.Sleep(2 * time.Second)
@@ -850,6 +850,6 @@ func testCallStopFS(t *testing.T) {
 	case utils.Asterisk:
 		engine.ForceKillProcName(utils.Asterisk, 1000)
 	default:
-		t.Errorf("Unsuported format")
+		t.Errorf("unsupported format")
 	}
 }

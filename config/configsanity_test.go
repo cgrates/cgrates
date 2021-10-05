@@ -1519,7 +1519,7 @@ func TestConfigSanityCache(t *testing.T) {
 	}
 
 	cfg.cacheCfg.ReplicationConns = []string{utils.MetaLocalHost}
-	expected = "<CacheS> unsuported transport <*json> for connection with ID: <*localhost>"
+	expected = "<CacheS> unsupported transport <*json> for connection with ID: <*localhost>"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1673,7 +1673,7 @@ func TestConfigSanityStorDB(t *testing.T) {
 			utils.SSLModeCfg: "wrongSSLMode",
 		},
 	}
-	expected := "<stor_db> unsuported sslmode for storDB"
+	expected := "<stor_db> unsupported sslmode for storDB"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1687,7 +1687,7 @@ func TestConfigSanityAnalyzer(t *testing.T) {
 		DBPath:  "/",
 	}
 
-	expected := "<AnalyzerS> unsuported index type: \"\""
+	expected := "<AnalyzerS> unsupported index type: \"\""
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1788,7 +1788,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 			Transport: utils.MetaNone,
 		},
 	}
-	expected = "<data_db> unsuported transport <*none> for connection with ID: <*internal>"
+	expected = "<data_db> unsupported transport <*none> for connection with ID: <*internal>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1807,7 +1807,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 			Transport: utils.MetaNone,
 		},
 	}
-	expected = "<data_db> unsuported transport <*none> for connection with ID: <*internal>"
+	expected = "<data_db> unsupported transport <*none> for connection with ID: <*internal>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

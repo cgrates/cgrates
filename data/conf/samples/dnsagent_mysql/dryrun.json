@@ -1,13 +1,12 @@
 {
-
 "dns_agent": {
 	"request_processors": [
 		{
 			"id": "DryRunNAPTR",
-			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*req.Question[0].Name{*e164}:4986517174963"],
+			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174963"],
 			"flags": ["*dryrun","*log"],
 			"request_fields":[
-				{"tag": "ToR", "path": "*cgreq.Order", "type": "*variable", "value": "~*req.Question[0].Name"},
+				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"},
 			],
 			"reply_fields":[
 				{"tag": "NAPTROrder", "path": "*rep.Answer.Order", "type": "*constant", "value": "100"},
@@ -20,5 +19,4 @@
 		},
 	],
 },
-
 }

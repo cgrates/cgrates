@@ -47,7 +47,7 @@ func Newlogger(loggertype, id string) (lgr LoggerInterface, err error) {
 		lgr.SetSyslog(l) // if we received an error, l is nil
 		return
 	default:
-		return nil, fmt.Errorf("unsuported logger: <%s>", loggertype)
+		return nil, fmt.Errorf("unsupported logger: <%s>", loggertype)
 	}
 }
 

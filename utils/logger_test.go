@@ -318,7 +318,7 @@ func TestNewLoggerInvalidLoggerType(t *testing.T) {
 	log.SetOutput(io.Discard)
 
 	loggertype := "Invalid_TYPE"
-	expected := "unsuported logger: <Invalid_TYPE>"
+	expected := "unsupported logger: <Invalid_TYPE>"
 	if _, err := Newlogger(loggertype, EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
