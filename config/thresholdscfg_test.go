@@ -49,7 +49,8 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Opts: &ThresholdsOpts{
 			ThresholdIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 		},
@@ -87,7 +88,7 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ActionSConnsCfg:        []string{},
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaThresholdIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 		},
 	}
@@ -122,7 +123,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ActionSConnsCfg:        []string{utils.MetaInternal},
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaThresholdIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 		},
 	}

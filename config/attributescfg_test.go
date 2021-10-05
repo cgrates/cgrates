@@ -49,17 +49,20 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		Opts: &AttributesOpts{
 			AttributeIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 			ProcessRuns: []*utils.DynamicIntOpt{
 				{
-					Value: 1,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     1,
 				},
 			},
 			ProfileRuns: []*utils.DynamicIntOpt{
 				{
-					Value: 0,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     0,
 				},
 			},
 		},
@@ -83,7 +86,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
     "string_indexed_fields": ["*req.index1"],
 	"opts": {
 		"*processRuns": {
-			"": 3,
+			"*default": 3,
 		},
 	},					
 	},		
@@ -100,13 +103,13 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaAttributeIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 			utils.MetaProcessRunsCfg: map[string]int{
-				utils.EmptyString: 3,
+				utils.MetaDefault: 3,
 			},
 			utils.MetaProfileRunsCfg: map[string]int{
-				utils.EmptyString: 0,
+				utils.MetaDefault: 0,
 			},
 		},
 	}
@@ -125,7 +128,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
            "enabled": true,
            "opts": {
 			"*processRuns": {
-				"": 7,
+				"*default": 7,
 			},
 		},	
      },
@@ -141,13 +144,13 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaAttributeIDsCfg: map[string][]string{
-				"": {},
+				utils.MetaDefault: {},
 			},
 			utils.MetaProcessRunsCfg: map[string]int{
-				utils.EmptyString: 7,
+				utils.MetaDefault: 7,
 			},
 			utils.MetaProfileRunsCfg: map[string]int{
-				utils.EmptyString: 0,
+				utils.MetaDefault: 0,
 			},
 		},
 	}
@@ -175,13 +178,13 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaAttributeIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 			utils.MetaProcessRunsCfg: map[string]int{
-				utils.EmptyString: 1,
+				utils.MetaDefault: 1,
 			},
 			utils.MetaProfileRunsCfg: map[string]int{
-				utils.EmptyString: 0,
+				utils.MetaDefault: 0,
 			},
 		},
 	}

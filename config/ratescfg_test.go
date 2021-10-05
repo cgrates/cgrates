@@ -58,22 +58,26 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		Opts: &RatesOpts{
 			RateProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 			StartTime: []*utils.DynamicStringOpt{
 				{
-					Value: utils.MetaNow,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     utils.MetaNow,
 				},
 			},
 			Usage: []*utils.DynamicDecimalBigOpt{
 				{
-					Value: decimal.New(int64(time.Minute), 0),
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     decimal.New(int64(time.Minute), 0),
 				},
 			},
 			IntervalStart: []*utils.DynamicDecimalBigOpt{
 				{
-					Value: decimal.New(0, 0),
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     decimal.New(0, 0),
 				},
 			},
 		},
@@ -103,16 +107,16 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.Verbosity:                  1000,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaRateProfileIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 			utils.MetaStartTime: map[string]string{
-				utils.EmptyString: utils.MetaNow,
+				utils.MetaDefault: utils.MetaNow,
 			},
 			utils.MetaUsage: map[string]string{
-				utils.EmptyString: decimal.New(int64(time.Minute), 0).String(),
+				utils.MetaDefault: decimal.New(int64(time.Minute), 0).String(),
 			},
 			utils.MetaIntervalStartCfg: map[string]string{
-				utils.EmptyString: decimal.New(0, 0).String(),
+				utils.MetaDefault: decimal.New(0, 0).String(),
 			},
 		},
 	}
@@ -154,16 +158,16 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.Verbosity:                  1000,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaRateProfileIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 			utils.MetaStartTime: map[string]string{
-				utils.EmptyString: utils.MetaNow,
+				utils.MetaDefault: utils.MetaNow,
 			},
 			utils.MetaUsage: map[string]string{
-				utils.EmptyString: decimal.New(int64(time.Minute), 0).String(),
+				utils.MetaDefault: decimal.New(int64(time.Minute), 0).String(),
 			},
 			utils.MetaIntervalStartCfg: map[string]string{
-				utils.EmptyString: decimal.New(0, 0).String(),
+				utils.MetaDefault: decimal.New(0, 0).String(),
 			},
 		},
 	}
@@ -240,7 +244,8 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Opts: &RatesOpts{
 			RateProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"RP1"},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{"RP1"},
 				},
 			},
 		},
@@ -262,7 +267,8 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Opts: &RatesOpts{
 			RateProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"RP2"},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{"RP2"},
 				},
 			},
 		},
@@ -283,7 +289,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Verbosity:                  utils.IntPointer(3),
 		Opts: &RatesOptsJson{
 			RateProfileIDs: map[string][]string{
-				utils.EmptyString: {"RP2"},
+				utils.MetaDefault: {"RP2"},
 			},
 		},
 	}

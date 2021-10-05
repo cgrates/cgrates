@@ -75,13 +75,13 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.EmptyString: {},
+					utils.MetaDefault: {},
 				},
 				utils.MetaProcessRunsCfg: map[string]int{
-					utils.EmptyString: 1,
+					utils.MetaDefault: 1,
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
-					utils.EmptyString: 0,
+					utils.MetaDefault: 0,
 				},
 			},
 		},
@@ -150,13 +150,13 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.EmptyString: {},
+					utils.MetaDefault: {},
 				},
 				utils.MetaProcessRunsCfg: map[string]int{
-					utils.EmptyString: 1,
+					utils.MetaDefault: 1,
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
-					utils.EmptyString: 0,
+					utils.MetaDefault: 0,
 				},
 			},
 		},
@@ -199,13 +199,13 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.EmptyString: {},
+					utils.MetaDefault: {},
 				},
 				utils.MetaProcessRunsCfg: map[string]int{
-					utils.EmptyString: 1,
+					utils.MetaDefault: 1,
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
-					utils.EmptyString: 0,
+					utils.MetaDefault: 0,
 				},
 			},
 		},
@@ -250,7 +250,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
-	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":{"":[]},"*processRuns":{"":1},"*profileRuns":{"":0}},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":{"*default":[]},"*processRuns":{"*default":1},"*profileRuns":{"*default":0}},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}

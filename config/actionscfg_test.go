@@ -58,7 +58,8 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		Opts: &ActionsOpts{
 			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{},
 				},
 			},
 		},
@@ -106,7 +107,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.DynaprepaidActionplansCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaActionProfileIDsCfg: map[string][]string{
-				utils.EmptyString: {},
+				utils.MetaDefault: {},
 			},
 		},
 	}

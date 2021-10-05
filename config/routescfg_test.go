@@ -55,22 +55,26 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Opts: &RoutesOpts{
 			Context: []*utils.DynamicStringOpt{
 				{
-					Value: utils.MetaRoutes,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     utils.MetaRoutes,
 				},
 			},
 			ProfileCount: []*utils.DynamicIntOpt{
 				{
-					Value: 1,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     1,
 				},
 			},
 			IgnoreErrors: []*utils.DynamicBoolOpt{
 				{
-					Value: false,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 			MaxCost: []*utils.DynamicInterfaceOpt{
 				{
-					Value: utils.EmptyString,
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     utils.EmptyString,
 				},
 			},
 			Limit:  []*utils.DynamicIntOpt{},
@@ -103,18 +107,18 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.DefaultRatioCfg:        1,
 		utils.OptsCfg: map[string]interface{}{
 			utils.OptsContext: map[string]string{
-				utils.EmptyString: utils.MetaRoutes,
+				utils.MetaDefault: utils.MetaRoutes,
 			},
 			utils.MetaLimitCfg:  map[string]int{},
 			utils.MetaOffsetCfg: map[string]int{},
 			utils.MetaProfileCountCfg: map[string]int{
-				utils.EmptyString: 1,
+				utils.MetaDefault: 1,
 			},
 			utils.MetaIgnoreErrorsCfg: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaMaxCostCfg: map[string]interface{}{
-				utils.EmptyString: utils.EmptyString,
+				utils.MetaDefault: utils.EmptyString,
 			},
 		},
 	}
@@ -158,18 +162,18 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.DefaultRatioCfg:        2,
 		utils.OptsCfg: map[string]interface{}{
 			utils.OptsContext: map[string]string{
-				utils.EmptyString: utils.MetaRoutes,
+				utils.MetaDefault: utils.MetaRoutes,
 			},
 			utils.MetaLimitCfg:  map[string]int{},
 			utils.MetaOffsetCfg: map[string]int{},
 			utils.MetaProfileCountCfg: map[string]int{
-				utils.EmptyString: 1,
+				utils.MetaDefault: 1,
 			},
 			utils.MetaIgnoreErrorsCfg: map[string]bool{
-				utils.EmptyString: false,
+				utils.MetaDefault: false,
 			},
 			utils.MetaMaxCostCfg: map[string]interface{}{
-				utils.EmptyString: utils.EmptyString,
+				utils.MetaDefault: utils.EmptyString,
 			},
 		},
 	}
