@@ -191,12 +191,8 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (evs []*utils.EventWithFlags, err error) {
 	// making the options
 	var attrS bool
-	if v, has := ev.APIOpts[utils.OptsAttributeS]; !has {
-		if attrS, err = FilterBoolCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Attributes); err != nil {
-			return
-		}
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+	if attrS, err = GetBoolOpts(ctx, ev.Tenant, ev, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Attributes,
+		utils.OptsAttributeS); err != nil {
 		return
 	}
 	if attrS {
@@ -211,11 +207,8 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 
 	var cgrEvs []*utils.CGREvent
 	var chrgS bool
-	if v, has := ev.APIOpts[utils.OptsChargerS]; !has {
-		if chrgS, err = FilterBoolCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Chargers); err != nil {
-			return
-		}
-	} else if chrgS, err = utils.IfaceAsBool(v); err != nil {
+	if chrgS, err = GetBoolOpts(ctx, ev.Tenant, ev, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Chargers,
+		utils.OptsChargerS); err != nil {
 		return
 	}
 	if chrgS {
@@ -234,12 +227,8 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 
 	var rateS bool
 	for _, cgrEv := range cgrEvs {
-		if v, has := cgrEv.APIOpts[utils.OptsRateS]; !has {
-			if rateS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
-				cdrS.cfg.CdrsCfg().Opts.Rates); err != nil {
-				return
-			}
-		} else if rateS, err = utils.IfaceAsBool(v); err != nil {
+		if rateS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Rates,
+			utils.OptsRateS); err != nil {
 			return
 		}
 		if rateS {
@@ -254,12 +243,8 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 
 	var acntS bool
 	for _, cgrEv := range cgrEvs {
-		if v, has := cgrEv.APIOpts[utils.OptsAccountS]; !has {
-			if acntS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
-				cdrS.cfg.CdrsCfg().Opts.Accounts); err != nil {
-				return
-			}
-		} else if acntS, err = utils.IfaceAsBool(v); err != nil {
+		if acntS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Accounts,
+			utils.OptsAccountS); err != nil {
 			return
 		}
 		if acntS {
@@ -275,12 +260,8 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var export bool
 	if len(cdrS.cfg.CdrsCfg().EEsConns) != 0 {
 		for _, cgrEv := range cgrEvs {
-			if v, has := cgrEv.APIOpts[utils.OptsCDRsExport]; !has {
-				if export, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
-					cdrS.cfg.CdrsCfg().Opts.Export); err != nil {
-					return
-				}
-			} else if export, err = utils.IfaceAsBool(v); err != nil {
+			if export, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Export,
+				utils.OptsCDRsExport); err != nil {
 				return
 			}
 			if export {
@@ -300,12 +281,8 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 
 	var thdS bool
 	for _, cgrEv := range cgrEvs {
-		if v, has := cgrEv.APIOpts[utils.OptsThresholdS]; !has {
-			if thdS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
-				cdrS.cfg.CdrsCfg().Opts.Thresholds); err != nil {
-				return
-			}
-		} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+		if thdS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
+			utils.OptsThresholdS); err != nil {
 			return
 		}
 		if thdS {
@@ -320,12 +297,8 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 
 	var stS bool
 	for _, cgrEv := range cgrEvs {
-		if v, has := cgrEv.APIOpts[utils.OptsStatS]; !has {
-			if stS, err = FilterBoolCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.filterS,
-				cdrS.cfg.CdrsCfg().Opts.Stats); err != nil {
-				return
-			}
-		} else if stS, err = utils.IfaceAsBool(v); err != nil {
+		if stS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Stats,
+			utils.OptsStatS); err != nil {
 			return
 		}
 		if stS {

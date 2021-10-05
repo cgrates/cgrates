@@ -185,45 +185,27 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt
 
 func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def *config.RoutesOpts) (opts *optsGetRoutes, err error) {
 	var ignoreErrors bool
-	if ignoreErrors, err = FilterBoolCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS,
-		def.IgnoreErrors); err != nil {
+	if ignoreErrors, err = GetBoolOpts(ctx, ev.Tenant, ev, fS, def.IgnoreErrors,
+		utils.OptsRoutesIgnoreErrors); err != nil {
 		return
 	}
 	opts = &optsGetRoutes{
-		ignoreErrors: utils.OptAsBoolOrDef(ev.APIOpts, utils.OptsRoutesIgnoreErrors, ignoreErrors),
+		ignoreErrors: ignoreErrors,
 		paginator:    &utils.Paginator{},
 	}
 	var limit int
-	if limit, err = FilterIntCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS,
-		def.Limit); err != nil {
-		if err == utils.ErrNotFound {
-			if limitOpt, has := ev.APIOpts[utils.OptsRoutesLimit]; has {
-				var limitValue int64
-				limitValue, err = utils.IfaceAsTInt64(limitOpt)
-				if err != nil {
-					return
-				}
-				opts.paginator.Limit = utils.IntPointer(int(limitValue))
-			}
-		} else {
+	if limit, err = GetIntOpts(ctx, ev.Tenant, ev, fS, def.Limit,
+		utils.OptsRoutesLimit); err != nil {
+		if err != utils.ErrNotFound {
 			return
 		}
 	} else {
 		opts.paginator.Limit = utils.IntPointer(limit)
 	}
 	var offset int
-	if offset, err = FilterIntCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS,
-		def.Offset); err != nil {
-		if err == utils.ErrNotFound {
-			if offsetOpt, has := ev.APIOpts[utils.OptsRoutesOffset]; has {
-				var offsetValue int64
-				offsetValue, err = utils.IfaceAsTInt64(offsetOpt)
-				if err != nil {
-					return
-				}
-				opts.paginator.Offset = utils.IntPointer(int(offsetValue))
-			}
-		} else {
+	if offset, err = GetIntOpts(ctx, ev.Tenant, ev, fS, def.Offset,
+		utils.OptsRoutesOffset); err != nil {
+		if err != utils.ErrNotFound {
 			return
 		}
 	} else {
@@ -231,11 +213,10 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def
 	}
 
 	var maxCost interface{}
-	if maxCost, err = FilterInterfaceCfgOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS,
-		def.MaxCost); err != nil {
+	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, ev, fS, def.MaxCost,
+		utils.OptsRoutesMaxCost); err != nil {
 		return
 	}
-	maxCost = ev.OptsAsInterface(maxCost, utils.OptsRoutesMaxCost)
 
 	switch maxCost {
 	case utils.EmptyString, nil:
@@ -289,14 +270,11 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent,
 		}
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
 		var context string
-		if context, err = FilterStringCfgOpts(ctx, tnt, args.AsDataProvider(), rpS.filterS,
-			rpS.cfg.RouteSCfg().Opts.Context); err != nil {
+		if context, err = GetStringOpts(ctx, tnt, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts.Context,
+			utils.OptsContext); err != nil {
 			return
 		}
-		args.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
-			utils.IfaceAsString(args.APIOpts[utils.OptsContext]),
-			context,
-			utils.MetaRoutes)
+		args.APIOpts[utils.OptsContext] = context
 		var rplyEv AttrSProcessEventReply
 		if err := rpS.connMgr.Call(ctx, rpS.cfg.RouteSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
@@ -409,11 +387,8 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
 	var prfCountOpt int
-	if prfCountOpt, err = FilterIntCfgOpts(ctx, tnt, args.AsDataProvider(), rpS.filterS,
-		rpS.cfg.RouteSCfg().Opts.ProfileCount); err != nil {
-		return
-	}
-	if prfCountOpt, err = args.OptsAsInt(prfCountOpt, utils.OptsRoutesProfileCount); err != nil {
+	if prfCountOpt, err = GetIntOpts(ctx, tnt, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts.ProfileCount,
+		utils.OptsRoutesProfileCount); err != nil {
 		return
 	}
 	if prfCount > prfCountOpt { // it has the option and is smaller that the current number of profiles

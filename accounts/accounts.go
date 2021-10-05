@@ -132,12 +132,8 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	var usage *decimal.Big
-	if usage, err = engine.FilterDecimalBigCfgOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), aS.fltrS,
-		aS.cfg.AccountSCfg().Opts.Usage); err != nil {
-		return
-	}
-	if usage, err = cgrEv.OptsAsDecimal(usage, utils.OptsAccountsUsage,
-		utils.MetaUsage); err != nil {
+	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
+		utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	dbted := decimal.New(0, 0)
@@ -240,11 +236,8 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 // V1AccountsForEvent returns the matching Accounts for Event
 func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
-		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
-		return
-	}
-	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
+		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -262,11 +255,8 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 // V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
-		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
-		return
-	}
-	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
+		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -294,11 +284,8 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 // V1DebitAbstracts performs debit for the provided event
 func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
-		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
-		return
-	}
-	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
+		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -327,11 +314,8 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 // V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
-		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
-		return
-	}
-	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
+		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -359,11 +343,8 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 // V1DebitConcretes performs debit of concrete units for the provided event
 func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS,
-		aS.cfg.AccountSCfg().Opts.AccountIDs); err != nil {
-		return
-	}
-	if accIDs, err = args.OptsAsStringSlice(accIDs, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
+		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight

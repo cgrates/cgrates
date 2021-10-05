@@ -178,11 +178,8 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		return
 	}
 	var usage *decimal.Big
-	if usage, err = engine.FilterDecimalBigCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
-		rS.cfg.RateSCfg().Opts.Usage); err != nil {
-		return
-	}
-	if usage, err = args.OptsAsDecimal(usage, utils.OptsRatesUsage, utils.MetaUsage); err != nil {
+	if usage, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.Usage,
+		utils.OptsRatesUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	var ordRts []*orderedRate
@@ -200,11 +197,8 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		rpCost.MaxCost = rtPfl.MaxCost
 	}
 	var ivalStart *decimal.Big
-	if ivalStart, err = engine.FilterDecimalBigCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
-		rS.cfg.RateSCfg().Opts.IntervalStart); err != nil {
-		return
-	}
-	if ivalStart, err = args.OptsAsDecimal(ivalStart, utils.OptsRatesIntervalStart); err != nil {
+	if ivalStart, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.IntervalStart,
+		utils.OptsRatesIntervalStart); err != nil {
 		return
 	}
 	var costIntervals []*utils.RateSInterval
@@ -224,11 +218,8 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 // V1CostForEvent will be called to calculate the cost for an event
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string
-	if rPfIDs, err = engine.FilterStringSliceCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
-		rS.cfg.RateSCfg().Opts.RateProfileIDs); err != nil {
-		return
-	}
-	if rPfIDs, err = args.OptsAsStringSlice(rPfIDs, utils.OptsRatesRateProfileIDs); err != nil {
+	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.RateProfileIDs,
+		utils.OptsRatesRateProfileIDs); err != nil {
 		return
 	}
 	var rtPrl *utils.RateProfile
