@@ -57,7 +57,7 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
 		return
 	}
 	if jsnCfg.StatIDs != nil {
-		sqOpts.StatIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.StatIDs)
+		sqOpts.StatIDs = append(sqOpts.StatIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.StatIDs)...)
 	}
 }
 

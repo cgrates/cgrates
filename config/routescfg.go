@@ -63,22 +63,22 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) {
 		return
 	}
 	if jsnCfg.Context != nil {
-		rtsOpts.Context = utils.MapToDynamicStringOpts(jsnCfg.Context)
+		rtsOpts.Context = append(rtsOpts.Context, utils.MapToDynamicStringOpts(jsnCfg.Context)...)
 	}
 	if jsnCfg.IgnoreErrors != nil {
-		rtsOpts.IgnoreErrors = utils.MapToDynamicBoolOpts(jsnCfg.IgnoreErrors)
+		rtsOpts.IgnoreErrors = append(rtsOpts.IgnoreErrors, utils.MapToDynamicBoolOpts(jsnCfg.IgnoreErrors)...)
 	}
 	if jsnCfg.MaxCost != nil {
-		rtsOpts.MaxCost = utils.MapToDynamicInterfaceOpts(jsnCfg.MaxCost)
+		rtsOpts.MaxCost = append(rtsOpts.MaxCost, utils.MapToDynamicInterfaceOpts(jsnCfg.MaxCost)...)
 	}
 	if jsnCfg.Limit != nil {
-		rtsOpts.Limit = utils.MapToDynamicIntOpts(jsnCfg.Limit)
+		rtsOpts.Limit = append(rtsOpts.Limit, utils.MapToDynamicIntOpts(jsnCfg.Limit)...)
 	}
 	if jsnCfg.Offset != nil {
-		rtsOpts.Offset = utils.MapToDynamicIntOpts(jsnCfg.Offset)
+		rtsOpts.Offset = append(rtsOpts.Offset, utils.MapToDynamicIntOpts(jsnCfg.Offset)...)
 	}
 	if jsnCfg.ProfileCount != nil {
-		rtsOpts.ProfileCount = utils.MapToDynamicIntOpts(jsnCfg.ProfileCount)
+		rtsOpts.ProfileCount = append(rtsOpts.ProfileCount, utils.MapToDynamicIntOpts(jsnCfg.ProfileCount)...)
 	}
 }
 

@@ -65,25 +65,25 @@ func (cdrsOpts *CdrsOpts) loadFromJSONCfg(jsnCfg *CdrsOptsJson) {
 		return
 	}
 	if jsnCfg.Accounts != nil {
-		cdrsOpts.Accounts = utils.MapToDynamicBoolOpts(jsnCfg.Accounts)
+		cdrsOpts.Accounts = append(cdrsOpts.Accounts, utils.MapToDynamicBoolOpts(jsnCfg.Accounts)...)
 	}
 	if jsnCfg.Attributes != nil {
-		cdrsOpts.Attributes = utils.MapToDynamicBoolOpts(jsnCfg.Attributes)
+		cdrsOpts.Attributes = append(cdrsOpts.Attributes, utils.MapToDynamicBoolOpts(jsnCfg.Attributes)...)
 	}
 	if jsnCfg.Chargers != nil {
-		cdrsOpts.Chargers = utils.MapToDynamicBoolOpts(jsnCfg.Chargers)
+		cdrsOpts.Chargers = append(cdrsOpts.Chargers, utils.MapToDynamicBoolOpts(jsnCfg.Chargers)...)
 	}
 	if jsnCfg.Export != nil {
-		cdrsOpts.Export = utils.MapToDynamicBoolOpts(jsnCfg.Export)
+		cdrsOpts.Export = append(cdrsOpts.Export, utils.MapToDynamicBoolOpts(jsnCfg.Export)...)
 	}
 	if jsnCfg.Rates != nil {
-		cdrsOpts.Rates = utils.MapToDynamicBoolOpts(jsnCfg.Rates)
+		cdrsOpts.Rates = append(cdrsOpts.Rates, utils.MapToDynamicBoolOpts(jsnCfg.Rates)...)
 	}
 	if jsnCfg.Stats != nil {
-		cdrsOpts.Stats = utils.MapToDynamicBoolOpts(jsnCfg.Stats)
+		cdrsOpts.Stats = append(cdrsOpts.Stats, utils.MapToDynamicBoolOpts(jsnCfg.Stats)...)
 	}
 	if jsnCfg.Thresholds != nil {
-		cdrsOpts.Thresholds = utils.MapToDynamicBoolOpts(jsnCfg.Thresholds)
+		cdrsOpts.Thresholds = append(cdrsOpts.Thresholds, utils.MapToDynamicBoolOpts(jsnCfg.Thresholds)...)
 	}
 }
 

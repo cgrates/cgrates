@@ -59,7 +59,7 @@ func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) {
 		return
 	}
 	if jsnCfg.ActionProfileIDs != nil {
-		actOpts.ActionProfileIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ActionProfileIDs)
+		actOpts.ActionProfileIDs = append(actOpts.ActionProfileIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.ActionProfileIDs)...)
 	}
 }
 

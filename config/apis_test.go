@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestConfigV1SetConfigWithDB(t *testing.T) {
@@ -54,7 +55,14 @@ func TestConfigV1SetConfigWithDB(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
-	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{}}
+	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
+		AccountIDs: map[string][]string{
+			utils.EmptyString: {},
+		},
+		Usage: map[string]string{
+			utils.EmptyString: decimal.New(int64(72*time.Hour), 0).String(),
+		},
+	}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
 		t.Fatal(err)
@@ -167,7 +175,14 @@ func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
-	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{}}
+	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
+		AccountIDs: map[string][]string{
+			utils.EmptyString: {},
+		},
+		Usage: map[string]string{
+			utils.EmptyString: decimal.New(int64(72*time.Hour), 0).String(),
+		},
+	}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
 		t.Fatal(err)

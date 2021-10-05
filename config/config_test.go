@@ -6225,7 +6225,7 @@ func TestReloadCfgInDb(t *testing.T) {
 		PrefixIndexedFields: &[]string{"field1"},
 		Opts: &AttributesOpts{
 			ProcessRuns: []*utils.DynamicIntOpt{
-				&utils.DynamicIntOpt{
+				{
 					FilterIDs: []string{},
 					Value:     2,
 				},
@@ -6265,6 +6265,10 @@ func TestReloadCfgInDb(t *testing.T) {
 		PrefixIndexedFields: &[]string{"field2"},
 		Opts: &AttributesOpts{
 			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     2,
+				},
 				{
 					Value: 3,
 				},
