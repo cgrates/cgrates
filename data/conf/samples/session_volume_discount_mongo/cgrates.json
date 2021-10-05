@@ -21,13 +21,12 @@
 
     "sessions": {
         "enabled": true,
-        "routes_conns": ["*internal"],
-        "cdrs_conns": ["*internal"],
+        "routes_conns": ["*localhost"],
+        "cdrs_conns": ["*localhost"],
     },
 
     "attributes": {
         "enabled": true,
-        "indexed_selects": false,
         "opts":{								// 			
             "*processRuns": {					// number of run loops when processing event
                 "": 2,
@@ -38,30 +37,36 @@
     "cdrs": {									// CDRs config
         "enabled": true,
         "accounts_conns":["*localhost"],
-        "rates_conns": ["*internal"],
-        "chargers_conns":["*internal"],
-        "opts": {								//
+        "rates_conns": ["*localhost"],
+        "chargers_conns":["*localhost"],
+        "opts": 
+        {		 						//
             "*chargerS": {						//
                 "": true,
+            }, 
+            "*rateS": {
+                "*string:~*req.Account:dan.bogos;*string:~*req.RunID:supplier": false,
+                "": true,
             },
+            "*accountS": {
+                "*string:~*req.Account:dan.bogos;*string:~*req.RunID:supplier": true,
+                "": false,
+                }, 
         },   
     },
 
     "chargers": {
        "enabled": true,
-       "attributes_conns": ["*internal"],
-       "indexed_selects": false,
+       "attributes_conns": ["*localhost"],
     },
 
     "rates": {
         "enabled": true,
-        "rate_indexed_selects": false,
     },
 
     "accounts": {
         "enabled": true,
-        "rates_conns": ["*internal"],
-        "indexed_selects": false,
+        "rates_conns": ["*localhost"],
     },
 
     "loaders": [
@@ -78,8 +83,11 @@
     "routes": {
         "enabled": true,
         "indexed_selects": false,
-        "rates_conns": ["*internal"],						// connections to RateS
-	    "accounts_conns": ["*localhost"],					// connections to AccountS
+        "accounts_conns": ["*localhost"],
+        "rates_conns": ["*localhost"],
+        "default_opts":{
+            "*ignoreErrors": true
+        }
     },
 
     "admins": {
