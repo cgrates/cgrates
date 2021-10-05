@@ -145,7 +145,7 @@ func (cdrscfg CdrsCfg) AsMapInterface(string) interface{} {
 		utils.MetaAccounts:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Accounts),
 		utils.MetaAttributes: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Attributes),
 		utils.MetaChargers:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Chargers),
-		utils.MetaExport:     utils.DynamicBoolOptsToMap(cdrscfg.Opts.Export),
+		utils.MetaEEs:        utils.DynamicBoolOptsToMap(cdrscfg.Opts.Export),
 		utils.MetaRateS:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Rates),
 		utils.MetaStats:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Stats),
 		utils.MetaThresholds: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Thresholds),
@@ -273,7 +273,7 @@ type CdrsOptsJson struct {
 	Accounts   map[string]bool `json:"*accountS"`
 	Attributes map[string]bool `json:"*attributeS"`
 	Chargers   map[string]bool `json:"*chargerS"`
-	Export     map[string]bool `json:"*export"`
+	Export     map[string]bool `json:"*eeS"`
 	Rates      map[string]bool `json:"*rateS"`
 	Stats      map[string]bool `json:"*statS"`
 	Thresholds map[string]bool `json:"*thresholdS"`

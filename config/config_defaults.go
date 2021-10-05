@@ -317,7 +317,7 @@ const CGRATES_CFG_JSON = `
 		"*chargerS": {						//
 			"*default": false,
 		},
-		"*export": {						//
+		"*eeS": {							//
 			"*default": false,	
 		},
 		"*rateS": {							//
