@@ -30,7 +30,7 @@ import (
 
 func processRequest(reqProcessor *config.RequestProcessor, agReq *AgentRequest,
 	agentName string, connMgr *engine.ConnManager, sessionsConns []string,
-	aConn rpcclient.BiRPCConector, filterS *engine.FilterS) (processed bool, err error) {
+	aConn rpcclient.BiRPCConector, filterS *engine.FilterS) (_ bool, err error) {
 	if pass, err := filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err

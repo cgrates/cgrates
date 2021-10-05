@@ -1,0 +1,26 @@
+{
+    "dns_agent": {
+        "request_processors": [
+            {
+                "id": "OptsNAPTR",
+                "filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:5986517174965", "*string:~*req.Option[0].Uri:sip:cgrates@cgrates.org"],
+                "flags": ["*dryrun","*log"],
+                "request_fields":[
+                    {"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"},
+                ],
+                "reply_fields":[
+                    {"tag": "NAPTROrder", "path": "*rep.Answer.Order", "type": "*constant", "value": "100"},
+                    {"tag": "NAPTRPreference", "path": "*rep.Answer.Preference", "type": "*constant", "value": "10"},
+                    {"tag": "NAPTRFlags", "path": "*rep.Answer.Flags", "type": "*constant", "value": "U"},
+                    {"tag": "NAPTRService", "path": "*rep.Answer.Service", "type": "*constant", "value": "E2U+SIP"},
+                    {"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
+                    {"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement", "type": "*constant", "value": "."},
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*constant", "value": "sip:cgrates@cgrates.co"},
+                    {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "new_branch":true},
+                    {"tag": "Opts3", "path": "*rep.Option[0].Uri", "type": "*constant", "value": "sip:cgrates@cgrates.com"},
+                ],
+            },
+        ],
+    },
+    
+    }

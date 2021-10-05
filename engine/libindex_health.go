@@ -348,7 +348,7 @@ func getFiltersAndContexts(dm *DataManager, indxType, tnt, id string) (filterIDs
 		filterIDs = ds.FilterIDs
 		contexts = &ds.Subsystems
 	default:
-		return nil, nil, fmt.Errorf("unsuported index type:<%q>", indxType)
+		return nil, nil, fmt.Errorf("unsupported index type:<%q>", indxType)
 	}
 	return
 }

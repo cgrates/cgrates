@@ -534,7 +534,7 @@ package general_tests
 // 		engine.ForceKillProcName(utils.Freeswitch,
 // 			int(tutorial2CallsCfg.SessionSCfg().ChannelSyncInterval.Nanoseconds()/1e6))
 // 	default:
-// 		t.Errorf("Unsuported format")
+// 		t.Errorf("unsupported format")
 // 	}
 
 // 	time.Sleep(2 * time.Second)
@@ -609,6 +609,6 @@ package general_tests
 // 	case utils.Freeswitch:
 // 		engine.ForceKillProcName(utils.Freeswitch, 1000)
 // 	default:
-// 		t.Errorf("Unsuported format")
+// 		t.Errorf("unsupported format")
 // 	}
 // }

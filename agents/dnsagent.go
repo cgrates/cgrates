@@ -125,21 +125,6 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 		},
 	}
 	// message preprocesing
-	if q.Qtype == dns.TypeNAPTR {
-		/*
-			e164, err := e164FromNAPTR(req.Question[0].Name)
-			if err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> decoding NAPTR query: <%s>, err: %s",
-						utils.DNSAgent, req.Question[0].Name, err.Error()))
-				rply.Rcode = dns.RcodeServerFailure
-				dnsWriteMsg(w, rply)
-				return
-			}
-			reqVars.Map[E164Address] = utils.NewLeafNode(e164)
-			reqVars.Map[DomainName] = utils.NewLeafNode(domainNameFromNAPTR(req.Question[0].Name))
-		*/
-	}
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	rplyNM := utils.NewOrderedNavigableMap() // share it among different processors
 	opts := utils.MapStorage{}
@@ -173,7 +158,7 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 				utils.DNSAgent, dnsDP, rmtAddr))
 		return
 	}
-	if err = updateDNSMsgFromNM(rply, rplyNM); err != nil {
+	if err = updateDNSMsgFromNM(rply, rplyNM, q.Qtype, q.Name); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s updating answer: %s from NM %s",
 				utils.DNSAgent, err.Error(), utils.ToJSON(rply), utils.ToJSON(rplyNM)))
