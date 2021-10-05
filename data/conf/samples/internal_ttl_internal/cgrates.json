@@ -21,7 +21,7 @@
 "stor_db": {
 	"db_type": "*internal",	
 	"items":{
-		"cdrs": {"ttl": "2s"}
+		"cdrs": {"limit": -1,"ttl": "2s"}
 	}
 },
 
