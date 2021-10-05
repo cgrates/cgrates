@@ -127,7 +127,7 @@ func testCdrsIntTestTTL(t *testing.T) {
 	time.Sleep(3 * time.Second)
 	if err := cdrsIntRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Fatal("Unexpected error: ", err.Error())
+		t.Fatal("Unexpected error: ", err)
 	}
 }
 
