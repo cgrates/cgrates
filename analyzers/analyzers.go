@@ -146,7 +146,7 @@ type QueryArgs struct {
 }
 
 // V1StringQuery returns a list of API that match the query
-func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]interface{}) error {
+func (aS *AnalyzerService) V1StringQuery(ctx *context.Context, args *QueryArgs, reply *[]map[string]interface{}) error {
 	var q query.Query
 	if args.HeaderFilters == utils.EmptyString {
 		q = bleve.NewMatchAllQuery()
@@ -155,7 +155,7 @@ func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]in
 	}
 	s := bleve.NewSearchRequest(q)
 	s.Fields = []string{utils.Meta} // return all fields
-	searchResults, err := aS.db.Search(s)
+	searchResults, err := aS.db.SearchInContext(ctx, s)
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]in
 			if err != nil {
 				return err
 			}
-			if pass, err := aS.filterS.Pass(context.TODO(), aS.cfg.GeneralCfg().DefaultTenant,
+			if pass, err := aS.filterS.Pass(ctx, aS.cfg.GeneralCfg().DefaultTenant,
 				args.ContentFilters, dp); err != nil {
 				return err
 			} else if !pass {

@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -96,11 +97,11 @@ func (anz *AnalyzerService) start() {
 		anz.filterSChan <- fS
 		anz.anz.SetFilterS(fS)
 	}
-	// if !anz.cfg.DispatcherSCfg().Enabled {
-	// anz.server.RpcRegister(anz.rpc)
-	// }
-	// anz.connChan <- anz.rpc
-	anz.connChan <- nil // temporary
+	srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
+	if !anz.cfg.DispatcherSCfg().Enabled {
+		anz.server.RpcRegister(srv)
+	}
+	anz.connChan <- anz.GetInternalCodec(srv, utils.AnalyzerS)
 }
 
 // Reload handles the change of config
@@ -117,6 +118,7 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.anz = nil
 	<-anz.connChan
 	anz.Unlock()
+	anz.server.RpcUnregisterName(utils.AnalyzerSv1)
 	return
 }
 
