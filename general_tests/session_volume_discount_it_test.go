@@ -389,7 +389,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 					utils.MetaBalanceUnlimited: "true",
 				},
 				Type:           "*concrete",
-				Units:          utils.NewDecimal(89800, 2),
+				Units:          utils.NewDecimal(98800, 2),
 				RateProfileIDs: []string{"RP_CNCRT_BALANCE1"},
 			},
 		},

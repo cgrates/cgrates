@@ -252,7 +252,6 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CG
 	if profileRuns, err = args.OptsAsInt(profileRuns, utils.OptsAttributesProfileRuns); err != nil {
 		return
 	}
-
 	args = args.Clone()
 	processedPrf := make(utils.StringSet)
 	processedPrfNo := make(map[string]int)
