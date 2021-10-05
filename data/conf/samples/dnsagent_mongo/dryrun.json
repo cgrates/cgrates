@@ -4,8 +4,8 @@
 	"request_processors": [
 		{
 			"id": "DryRunNAPTR",
-			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*req.Question[0].Name{*e164}:4986517174963"],
-			"flags": ["*dryRun","*log"],
+			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174963"],
+			"flags": ["*dryrun","*log"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"},
 			],

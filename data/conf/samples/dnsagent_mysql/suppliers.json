@@ -1,11 +1,10 @@
 {
-
 	"dns_agent": {
 		"request_processors": [
 			{
 				"id": "NAPTRRoutesQuery",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
-					"*string:~*req.Question[0].Name{*e164}:4986517174965"],
+					"*string:~*vars.QueryName{*e164}:4986517174965"],
 				"flags": ["*message", "*routes","*continue"],
 				"request_fields":[
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
@@ -18,7 +17,7 @@
 			{
 				"id": "NAPTRSuppliersOneSupplier",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
-					"*string:~*req.Question[0].Name{*e164}:4986517174965",
+					"*string:~*vars.QueryName{*e164}:4986517174965",
 					"*gte:~*cgrep.RouteProfiles.Length:1",
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:1"],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
@@ -40,7 +39,7 @@
 			{
 				"id": "NAPTRSuppliersTwoSuppliers",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
-					"*string:~*req.Question[0].Name{*e164}:4986517174965",
+					"*string:~*vars.QueryName{*e164}:4986517174965",
 					"*gte:~*cgrep.RouteProfiles.Length:1",
 					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],

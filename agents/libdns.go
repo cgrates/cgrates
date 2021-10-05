@@ -45,43 +45,10 @@ func dnsWriteMsg(w dns.ResponseWriter, msg *dns.Msg) (err error) {
 	return
 }
 
-// appendDNSAnswer will append the right answer payload to the message
-func appendDNSAnswer(msg *dns.Msg) (err error) {
-	switch msg.Question[0].Qtype {
-	case dns.TypeA:
-		msg.Answer = append(msg.Answer,
-			&dns.A{
-				Hdr: dns.RR_Header{
-					Name:   msg.Question[0].Name,
-					Rrtype: dns.TypeA,
-					Class:  dns.ClassINET,
-					Ttl:    60},
-			},
-		)
-	case dns.TypeNAPTR:
-		msg.Answer = append(msg.Answer,
-			&dns.NAPTR{
-				Hdr: dns.RR_Header{
-					Name:   msg.Question[0].Name,
-					Rrtype: msg.Question[0].Qtype,
-					Class:  dns.ClassINET,
-					Ttl:    60},
-			},
-		)
-	default:
-		return fmt.Errorf("unsupported DNS type: <%v>", msg.Question[0].Qtype)
-	}
-	return
-}
-
 func newDnsDP(req *dns.Msg) utils.DataProvider {
-	var opts interface{}
-	if o := req.IsEdns0(); o != nil {
-		opts = o
-	}
 	return &dnsDP{
 		req:  config.NewObjectDP(req),
-		opts: config.NewObjectDP(opts),
+		opts: config.NewObjectDP(req.IsEdns0()),
 	}
 }
 
@@ -91,9 +58,9 @@ type dnsDP struct {
 }
 
 func (dp dnsDP) String() string { return dp.req.String() }
-func (dp dnsDP) FieldAsInterface(fldPath []string) (interface{}, error) {
-	if len(fldPath) != 0 && fldPath[0] == dnsOption {
-		return dp.opts.FieldAsInterface(fldPath[1:])
+func (dp dnsDP) FieldAsInterface(fldPath []string) (o interface{}, e error) {
+	if len(fldPath) != 0 && strings.HasPrefix(fldPath[0], dnsOption) {
+		return dp.opts.FieldAsInterface(fldPath)
 	}
 	return dp.req.FieldAsInterface(fldPath)
 }
@@ -105,7 +72,7 @@ func (dp dnsDP) FieldAsString(fldPath []string) (string, error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error) {
+func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap, qType uint16, qName string) (err error) {
 	msgFields := make(utils.StringSet) // work around to NMap issue
 	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
@@ -189,7 +156,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error)
 				msgFields = make(utils.StringSet)      // reset the fields inside since we have a new message
 				msgFields.Add(strings.Join(path, ".")) // detect new branch
 			}
-			if msg.Answer, err = updateDnsAnswer(msg.Answer, msg.Question[0].Qtype, msg.Question[0].Name, path[1:len(path)-1], itm.Data, newBranch); err != nil {
+			if msg.Answer, err = updateDnsAnswer(msg.Answer, qType, qName, path[1:len(path)-1], itm.Data, newBranch); err != nil {
 				return fmt.Errorf("item: <%s>, err: %s", path[:len(path)-1], err.Error())
 			}
 		case utils.Ns: //ToDO
@@ -464,9 +431,9 @@ func updateDnsOption(q []dns.EDNS0, path []string, value interface{}, newBranch 
 		}
 		v.Data = []byte(utils.IfaceAsString(value))
 	case nil:
-		err = fmt.Errorf("unsuported dns option type <%T>", v)
+		err = fmt.Errorf("unsupported dns option type <%T>", v)
 	default:
-		err = fmt.Errorf("unsuported dns option type <%T>", v)
+		err = fmt.Errorf("unsupported dns option type <%T>", v)
 	}
 	return q, err
 }
@@ -583,42 +550,61 @@ func createDnsOption(field string, value interface{}) (o dns.EDNS0, err error) {
 
 func updateDnsAnswer(q []dns.RR, qType uint16, qName string, path []string, value interface{}, newBranch bool) (_ []dns.RR, err error) {
 	var idx int
-	switch len(path) {
-	case 1: // only the field so update the last one
-		if newBranch || len(q) == 0 {
-			var a dns.RR
-			if a, err = newDNSAnswer(qType, qName); err != nil {
-				return
-			}
-			q = append(q, a)
-		}
-		idx = len(q) - 1
-	case 2: // the index is specified
-		if idx, err = strconv.Atoi(path[0]); err != nil {
-			return
-		}
-		if lq := len(q); idx > lq {
-			err = utils.ErrWrongPath
-			return
-		} else if lq == idx {
-			var a dns.RR
-			if a, err = newDNSAnswer(qType, qName); err != nil {
-				return
-			}
-			q = append(q, a)
-		}
-		path = path[1:]
-	default:
+	if lPath := len(path); lPath == 0 {
 		err = utils.ErrWrongPath
 		return
+	} else {
+		var hasIdx bool
+		if idx, err = strconv.Atoi(path[0]); err == nil {
+			hasIdx = true
+		}
+		err = nil
+		if !hasIdx || lPath == 1 { // only the field so update the last one
+			if newBranch || len(q) == 0 {
+				var a dns.RR
+				if a, err = newDNSAnswer(qType, qName); err != nil {
+					return
+				}
+				q = append(q, a)
+			}
+			idx = len(q) - 1
+		} else { // the index is specified
+			if lq := len(q); idx > lq {
+				err = utils.ErrWrongPath
+				return
+			} else if lq == idx {
+				var a dns.RR
+				if a, err = newDNSAnswer(qType, qName); err != nil {
+					return
+				}
+				q = append(q, a)
+			}
+			path = path[1:]
+		}
 	}
+
 	switch v := q[idx].(type) {
 	case *dns.NAPTR:
 		err = updateDnsNAPTRAnswer(v, path, value)
+	case *dns.A:
+		if len(path) < 1 ||
+			(path[0] != "Hdr" && len(path) != 1) ||
+			(path[0] == "Hdr" && len(path) != 2) {
+			err = utils.ErrWrongPath
+			return
+		}
+		switch path[0] {
+		case "Hdr":
+			err = updateDnsRRHeader(&v.Hdr, path[1:], value)
+		case "A":
+			v.A = net.IP(utils.IfaceAsString(value))
+		default:
+			err = utils.ErrWrongPath
+		}
 	case nil:
-		err = fmt.Errorf("unsuported dns option type <%T>", v)
+		err = fmt.Errorf("unsupported dns option type <%T>", v)
 	default:
-		err = fmt.Errorf("unsuported dns option type <%T>", v)
+		err = fmt.Errorf("unsupported dns option type <%T>", v)
 	}
 
 	return q, err
@@ -638,7 +624,7 @@ func newDNSAnswer(qType uint16, qName string) (a dns.RR, err error) {
 	case dns.TypeNAPTR:
 		a = &dns.NAPTR{Hdr: hdr}
 	default:
-		err = fmt.Errorf("unsupported DNS type: <%v>", qType)
+		err = fmt.Errorf("unsupported DNS type: <%v>", dns.TypeToString[qType])
 	}
 	return
 }

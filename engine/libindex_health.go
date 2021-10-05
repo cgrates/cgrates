@@ -125,7 +125,7 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 		}
 		filterIDs = ac.FilterIDs
 	default:
-		return nil, fmt.Errorf("unsuported index type:<%q>", indxType)
+		return nil, fmt.Errorf("unsupported index type:<%q>", indxType)
 	}
 	if filterIDs == nil { // nil means ErrNotFound in cache
 		filterIDs = make([]string, 0)
