@@ -160,7 +160,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 			utils.MetaChargers: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaExport: map[string]bool{
+			utils.MetaEEs: map[string]bool{
 				utils.MetaDefault: false,
 			},
 			utils.MetaRateS: map[string]bool{
@@ -214,7 +214,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 			utils.MetaChargers: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaExport: map[string]bool{
+			utils.MetaEEs: map[string]bool{
 				utils.MetaDefault: false,
 			},
 			utils.MetaRateS: map[string]bool{
