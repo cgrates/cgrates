@@ -55,6 +55,13 @@ func TestIdxCheckAfterLoad(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		idxLoadConfigDIR = "session_volume_discount_internal"
+	case utils.MetaMySQL:
+		t.Skip()
+	case utils.MetaMongo:
+		t.Skip()
+	case utils.MetaPostgres:
+		t.Skip()
+
 	default:
 		t.Fatal("Unknown Database type")
 	}

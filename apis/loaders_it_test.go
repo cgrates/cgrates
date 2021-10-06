@@ -194,7 +194,7 @@ func testLoadersWriteCSVs(t *testing.T) {
 	defer csvAccounts.Close()
 
 	data := `#Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,ACC_PRF,,;20,,MonetaryBalance,,;10,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none`
+cgrates.org,ACC_PRF,,;20,,MonetaryBalance,,;10,*concrete,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none`
 
 	_, err = csvAccounts.WriteString(data)
 	if err != nil {
@@ -442,11 +442,46 @@ func testLoadersGetAccount(t *testing.T) {
 	}
 
 	expAccPrf := utils.Account{
-		Tenant:       "cgrates.org",
-		ID:           "ACC_PRF",
-		FilterIDs:    []string{},
+		Tenant: "cgrates.org",
+		ID:     "ACC_PRF",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		FilterIDs: []string{},
+		Balances: map[string]*utils.Balance{
+			"MonetaryBalance": {
+				ID: "MonetaryBalance",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  "*concrete",
+				Units: utils.NewDecimal(14, 0),
+				UnitFactors: []*utils.UnitFactor{
+					{
+						FilterIDs: []string{"fltr1", "fltr2"},
+						Factor:    utils.NewDecimal(100, 0),
+					},
+					{
+						FilterIDs: []string{"fltr3"},
+						Factor:    utils.NewDecimal(200, 0),
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"fltr1", "fltr2"},
+						Increment:    utils.NewDecimal(13, 1),
+						FixedFee:     utils.NewDecimal(23, 1),
+						RecurrentFee: utils.NewDecimal(33, 1),
+					},
+				},
+				AttributeIDs: []string{"attr1", "attr2"},
+			},
+		},
 		ThresholdIDs: []string{utils.MetaNone},
-		Balances:     map[string]*utils.Balance{},
 	}
 
 	var rplyAccPrf utils.Account
