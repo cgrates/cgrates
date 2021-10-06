@@ -167,14 +167,9 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 			return
 		}
 	}
-	var sTimeStr string
-	if sTimeStr, err = engine.FilterStringCfgOpts(ctx, args.Tenant, args.AsDataProvider(), rS.filterS,
-		rS.cfg.RateSCfg().Opts.StartTime); err != nil {
-		return
-	}
 	var sTime time.Time
-	if sTime, err = args.StartTime(sTimeStr, rS.cfg.GeneralCfg().DefaultTimezone, utils.OptsRatesStartTime,
-		utils.MetaStartTime); err != nil {
+	if sTime, err = engine.GetTimeOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.StartTime,
+		rS.cfg.GeneralCfg().DefaultTimezone, utils.OptsRatesStartTime, utils.MetaStartTime); err != nil {
 		return
 	}
 	var usage *decimal.Big
