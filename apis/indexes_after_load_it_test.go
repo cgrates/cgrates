@@ -46,7 +46,7 @@ var (
 		testIdxLoadStartEngine,
 		testIdxLoadRPCConn,
 		testIdxLoadTariffPlan,
-		// testIdxLoadCheckRateProfileIndexes,
+		testIdxLoadCheckIndexes,
 		testIdxLoadKillEngine,
 	}
 )
@@ -55,12 +55,6 @@ func TestIdxCheckAfterLoad(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		idxLoadConfigDIR = "session_volume_discount_internal"
-	case utils.MetaMySQL:
-		idxLoadConfigDIR = "session_volume_discount_mysql"
-	case utils.MetaMongo:
-		idxLoadConfigDIR = "session_volume_discount_mongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
@@ -110,7 +104,7 @@ func testIdxLoadTariffPlan(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			Caching: utils.StringPointer(utils.MetaReload),
+			Caching: utils.StringPointer(utils.MetaReload), // after laode, we got CacheIDs and it will be called Cachesv1.Clear, so indexes will be removed
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -118,34 +112,30 @@ func testIdxLoadTariffPlan(t *testing.T) {
 	}
 }
 
-func testIdxLoadCheckRateProfileIndexes(t *testing.T) {
+func testIdxLoadCheckIndexes(t *testing.T) {
 	//get indexes *rate_profiles
 	var reply []string
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaRateProfiles,
-		}, &reply); err != nil {
+		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
-	//get indexes
+	//get indexes *chargers
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaChargers,
-		}, &reply); err != nil {
+		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else {
-		t.Error(reply)
 	}
 
-	//get indexes
+	//get indexes *attributes
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaAttributes,
-		}, &reply); err != nil {
+		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else {
-		t.Error(reply)
 	}
 }
 
