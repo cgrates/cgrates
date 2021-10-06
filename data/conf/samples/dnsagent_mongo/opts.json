@@ -20,6 +20,25 @@
                     {"tag": "Opts3", "path": "*rep.Option[0].Uri", "type": "*constant", "value": "sip:cgrates@cgrates.com"},
                 ],
             },
+            {
+                "id": "OptsWithAttributes",
+                "filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:5986517174967"],
+                "flags": ["*event","*attributes"],
+                "request_fields":[
+                    {"tag": "Origin", "path": "*cgreq.Origin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
+                    {"tag": "Domanin", "path": "*cgreq.Domanin", "type": "*variable", "value": "~*vars.QueryName{*e164Domain}"},
+                    {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"},
+                ],
+                "reply_fields":[
+                    {"tag": "NAPTROrder", "path": "*rep.Answer.Order", "type": "*constant", "value": "100"},
+                    {"tag": "NAPTRPreference", "path": "*rep.Answer.Preference", "type": "*constant", "value": "10"},
+                    {"tag": "NAPTRFlags", "path": "*rep.Answer.Flags", "type": "*constant", "value": "U"},
+                    {"tag": "NAPTRService", "path": "*rep.Answer.Service", "type": "*constant", "value": "E2U+SIP"},
+                    {"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
+                    {"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement", "type": "*constant", "value": "."},
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes[*raw].SipURI", "mandatory": true},
+                ],
+            },
         ],
     },
     
