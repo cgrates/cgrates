@@ -21,8 +21,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 func TestPaginatorPaginateStringSlice(t *testing.T) {
@@ -506,123 +504,6 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 	}
 }
 
-func TestStartTimeNow(t *testing.T) {
-	ev := &CGREvent{
-		Tenant: "*req.CGRID",
-		ID:     "",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
-			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
-		},
-	}
-	timpulet1 := time.Now()
-	result, err := ev.StartTime(MetaNow, "", OptsRatesStartTime, MetaStartTime)
-	timpulet2 := time.Now()
-	if err != nil {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	}
-	if result.Before(timpulet1) && result.After(timpulet2) {
-		t.Errorf("Expected between <%+v> and <%+v>, received <%+v>", timpulet1, timpulet2, result)
-	}
-}
-
-func TestStartTime(t *testing.T) {
-	ev := &CGREvent{
-		Tenant: "*req.CGRID",
-		ID:     "",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
-			"*ratesStartTime":       "2018-01-07T17:00:10Z",
-			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
-		},
-	}
-	if result, err := ev.StartTime(MetaNow, "", OptsRatesStartTime, MetaStartTime); err != nil {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
-		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
-	}
-}
-
-func TestStartTime2(t *testing.T) {
-	ev := &CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "TestEvent",
-		Event:   map[string]interface{}{},
-		APIOpts: map[string]interface{}{},
-	}
-	if result, err := ev.StartTime("2018-01-07T17:00:10Z", "", OptsRatesStartTime, MetaStartTime); err != nil {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
-		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
-	}
-}
-
-func TestStartTimeError(t *testing.T) {
-	ev := &CGREvent{
-		Tenant: "*req.CGRID",
-		ID:     "",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
-			"*ratesStartTime":       "start",
-			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
-		},
-	}
-	_, err := ev.StartTime(MetaNow, "", OptsRatesStartTime, MetaStartTime)
-	if err == nil && err.Error() != "received <Unsupported time format" {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	}
-}
-
-func TestUsageMinute(t *testing.T) {
-	ev := &CGREvent{
-		Tenant: "*req.CGRID",
-		ID:     "",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
-			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
-		},
-	}
-	if rcv, err := ev.OptsAsDecimal(decimal.New(int64(60*time.Second), 0), OptsRatesUsage, MetaUsage); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(decimal.New(int64(time.Minute), 0), rcv) {
-		t.Errorf("Expected %+v, received %+v", decimal.New(int64(time.Minute), 0), rcv)
-	}
-}
-
-func TestUsageError(t *testing.T) {
-	ev := &CGREvent{
-		Tenant: "*req.CGRID",
-		ID:     "",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
-			"*ratesUsage":           "start",
-			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
-		},
-	}
-	_, err := ev.OptsAsDecimal(decimal.New(int64(time.Minute), 0), OptsRatesUsage, MetaUsage)
-	if err == nil && err.Error() != "received <Unsupported time format" {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	}
-}
-
-func TestUsage(t *testing.T) {
-	ev := &CGREvent{
-		Tenant: "*req.CGRID",
-		ID:     "",
-		Event:  map[string]interface{}{},
-		APIOpts: map[string]interface{}{
-			"*ratesUsage":           "2m10s",
-			OptsRatesRateProfileIDs: []string{"123", "456", "789"},
-		},
-	}
-
-	if result, err := ev.OptsAsDecimal(decimal.New(int64(time.Minute), 0), OptsRatesUsage, MetaUsage); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result.String(), "130000000000") {
-		t.Errorf("Expected <130000000000> , received <%+v>", result.String())
-	}
-}
-
 func TestNewTPBalanceCostIncrement(t *testing.T) {
 	incrementStr := "20"
 	fixedFeeStr := "10"
@@ -701,21 +582,6 @@ func TestBalanceUnitFactor(t *testing.T) {
 	}
 }
 
-func TestATDUsage(t *testing.T) {
-	ev := &CGREvent{
-		ID: "testID",
-		APIOpts: map[string]interface{}{
-			OptsRatesUsage: true,
-		},
-	}
-
-	_, err := ev.OptsAsDecimal(decimal.New(int64(time.Minute), 0), OptsRatesUsage, MetaUsage)
-	expected := "cannot convert field: bool to decimal.Big"
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
-	}
-}
-
 func TestActivationIntervalEquals(t *testing.T) {
 	aI := &ActivationInterval{
 		ActivationTime: time.Time{},
@@ -732,36 +598,6 @@ func TestActivationIntervalEquals(t *testing.T) {
 	}
 }
 
-func TestIntervalStart(t *testing.T) {
-	args := &CGREvent{
-		APIOpts: map[string]interface{}{
-			OptsRatesIntervalStart:  "1ns",
-			OptsRatesRateProfileIDs: []string{"RP_1001"},
-		},
-	}
-	rcv, err := args.OptsAsDecimal(decimal.New(0, 0), OptsRatesIntervalStart)
-	exp := new(decimal.Big).SetUint64(1)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("Expected %v but received %v", rcv, exp)
-	}
-}
-
-func TestIntervalStartDefault(t *testing.T) {
-	args := &CGREvent{
-		APIOpts: map[string]interface{}{
-			OptsRatesRateProfileIDs: []string{"RP_1001"},
-		},
-	}
-	rcv, err := args.OptsAsDecimal(decimal.New(0, 0), OptsRatesIntervalStart)
-	exp := new(decimal.Big).SetUint64(0)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("Expected %v but received %v", rcv, exp)
-	}
-}
 func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
 	excluded := NewStringSet([]string{MetaAPIBan, MetaLoadIDs})
 	mp := make(map[string][]string)
