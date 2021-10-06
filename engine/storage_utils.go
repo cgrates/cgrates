@@ -59,7 +59,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 			return
 		}
 		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler,
-			utils.RedisMaxConns, utils.IfaceAsString(opts[utils.RedisSentinelNameCfg]),
+			utils.RedisMaxConns, utils.RedisMaxAttempts, utils.IfaceAsString(opts[utils.RedisSentinelNameCfg]),
 			isCluster, clusterSync, clusterOnDownDelay, hasTLSConn,
 			utils.IfaceAsString(opts[utils.RedisClientCertificate]),
 			utils.IfaceAsString(opts[utils.RedisClientKey]),

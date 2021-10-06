@@ -127,10 +127,10 @@ func testCoreItStartEngineByExecWithCPUProfiling(t *testing.T) {
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
-	fib := utils.Fib()
+	fib := utils.FibDuration(time.Millisecond)
 	var connected bool
 	for i := 0; i < 200; i++ {
-		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		time.Sleep(fib())
 		if _, err := jsonrpc.Dial(utils.TCP, coreSCfg.ListenCfg().RPCJSONListen); err != nil {
 			t.Log(err)
 		} else {
@@ -183,10 +183,10 @@ func testCoreItStartEngineByExecWIthMemProfiling(t *testing.T) {
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
-	fib := utils.Fib()
+	fib := utils.FibDuration(time.Millisecond)
 	var connected bool
 	for i := 0; i < 200; i++ {
-		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		time.Sleep(fib())
 		if _, err := jsonrpc.Dial(utils.TCP, coreSCfg.ListenCfg().RPCJSONListen); err != nil {
 			t.Log(err)
 		} else {

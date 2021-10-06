@@ -287,14 +287,14 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 			}
 		}()
 	}
-	fib := utils.Fib()
+	fib := utils.FibDuration(time.Second)
 
 	for i := 0; i < exp.Cfg().Attempts; i++ {
 		if err = exp.Connect(); err == nil {
 			break
 		}
 		if i+1 < exp.Cfg().Attempts {
-			time.Sleep(time.Duration(fib()) * time.Second)
+			time.Sleep(fib())
 		}
 	}
 	if err != nil {
@@ -309,7 +309,7 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 			break
 		}
 		if i+1 < exp.Cfg().Attempts {
-			time.Sleep(time.Duration(fib()) * time.Second)
+			time.Sleep(fib())
 		}
 	}
 	if err != nil {
