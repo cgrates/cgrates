@@ -156,6 +156,7 @@ const (
 	Version                  = "v0.11.0~dev"
 	DiameterFirmwareRevision = 918
 	RedisMaxConns            = 10
+	RedisMaxAttempts         = 20
 	CGRateSLwr               = "cgrates"
 	Postgres                 = "postgres"
 	MySQL                    = "mysql"

@@ -95,10 +95,10 @@ func testPreloadITStartEngine(t *testing.T) {
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
-	fib := utils.Fib()
+	fib := utils.FibDuration(time.Millisecond)
 	var connected bool
 	for i := 0; i < 25; i++ {
-		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		time.Sleep(fib())
 		if _, err := jsonrpc.Dial(utils.TCP, preloadCfg.ListenCfg().RPCJSONListen); err != nil {
 			t.Logf("Error <%s> when opening test connection to: <%s>",
 				err.Error(), preloadCfg.ListenCfg().RPCJSONListen)
