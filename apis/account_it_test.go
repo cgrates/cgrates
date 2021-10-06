@@ -507,13 +507,15 @@ func testAccMaxAbstracts(t *testing.T) {
 				IncrementStart:    nil,
 				IntervalRateIndex: 0,
 				RateID:            "",
-				CompressFactor:    0,
+				CompressFactor:    1,
 				Usage:             nil,
 			},
 		},
 		CompressFactor: 1,
 	}
 	for _, val := range reply3.Rating {
+		val.Increments[0].RateID = "RateID" // changed due to Sha1Prefix
+		expRating.Increments[0].RateID = "RateID"
 		if !reflect.DeepEqual(val, expRating) {
 			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
 		}
@@ -659,16 +661,16 @@ func testAccDebitAbstracts(t *testing.T) {
 		IntervalStart: nil,
 		Increments: []*utils.ExtRateSIncrement{
 			{
-				IncrementStart:    nil,
 				IntervalRateIndex: 0,
 				RateID:            "",
-				CompressFactor:    0,
-				Usage:             nil,
+				CompressFactor:    1,
 			},
 		},
 		CompressFactor: 1,
 	}
 	for _, val := range reply3.Rating {
+		val.Increments[0].RateID = "RateID"
+		expRating.Increments[0].RateID = "RateID"
 		if !reflect.DeepEqual(val, expRating) {
 			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
 		}
