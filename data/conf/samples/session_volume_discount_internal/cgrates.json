@@ -1,47 +1,42 @@
-{
+ {
     // CGRateS Configuration file
     //
     // Used for sessions/sessions_volume_discount_it_test.go
-   
-       "general": {
-           "log_level": 7,
-       },
-   
-       "data_db": {
-        "db_type": "*internal"
+        
+    "general": {
+        "log_level": 7,
     },
-    
+        
+    "data_db": {
+       "db_type": "*internal"
+    },
+            
     "stor_db": {
         "db_type": "*internal"
     },
-   
-       "sessions": {
-           "enabled": true,
-           "routes_conns": ["*localhost"],
-           "cdrs_conns": ["*localhost"],
-       },
-   
-       "attributes": {
-           "enabled": true,
-           "opts":{								// 			
-               "*processRuns": {					// number of run loops when processing event
-                   "": 2,
-               },										
-           },
-       },
-   
-       "cdrs": {									// CDRs config
-           "enabled": true,
-           "accounts_conns":["*localhost"],
-           "rates_conns": ["*localhost"],
-           "chargers_conns":["*localhost"],
-           "opts": {		
-               /*						//
-               "*chargerS": {						//
-                   "": true,
-               },
-               */
-               "*chargerS": {						//
+        
+    "sessions": {
+        "enabled": true,
+        "routes_conns": ["*localhost"],
+        "cdrs_conns": ["*localhost"],
+    },
+        
+    "attributes": {
+        "enabled": true,
+        "opts":{								// 			
+            "*processRuns": {					// number of run loops when processing event
+                "": 2,
+            },										
+        },
+    },
+        
+    "cdrs": {									// CDRs config
+        "enabled": true,
+        "accounts_conns":["*localhost"],
+        "rates_conns": ["*localhost"],
+        "chargers_conns":["*localhost"],
+        "opts": {		
+            "*chargerS": {						//
                 "": true,
             }, 
             "*rateS": {
@@ -51,36 +46,35 @@
             "*accountS": {
                 "*string:~*req.Account:dan.bogos;*string:~*req.RunID:supplier": true,
                 "": false,
-                },
-           },   
-       },
-   
-       "chargers": {
-          "enabled": true,
-          "attributes_conns": ["*localhost"],
-       },
-   
-       "rates": {
-           "enabled": true,
-
-       },
-   
-       "accounts": {
-           "enabled": true,
-           "rates_conns": ["*localhost"],
-       },
-   
-       "loaders": [
-           {
-               "id": "*default",
-               "enabled": true,
-               "tenant": "cgrates.org",
-               "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume",
-               "tp_out_dir": "",
-               "lockfile_path": "",
-           },
-       ],
-   
+            },
+        },   
+    },
+        
+    "chargers": {
+        "enabled": true,
+        "attributes_conns": ["*localhost"],
+    },
+        
+    "rates": {
+        "enabled": true,
+    },
+        
+    "accounts": {
+        "enabled": true,
+        "rates_conns": ["*localhost"],
+    },
+        
+    "loaders": [
+        {
+            "id": "*default",
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume",
+            "tp_out_dir": "",
+            "lockfile_path": "",
+        },
+    ],
+        
     "routes": {
         "enabled": true,
         "accounts_conns": ["*localhost"],
@@ -89,8 +83,9 @@
             "*ignoreErrors": true
         }
     },
-   
-       "admins": {
-           "enabled": true,
-       },
-   }
+        
+    "admins": {
+        "enabled": true,
+    },
+
+}
