@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -120,7 +121,7 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 	}
 	_, err := newCDRSrv.chrgrSProcessEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
 	}
 }
 
@@ -149,7 +150,7 @@ func TestCDRsAttrSProcessEventNoOpts(t *testing.T) {
 	}
 	err := newCDRSrv.attrSProcessEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
 	}
 }
 
@@ -181,7 +182,7 @@ func TestCDRsAttrSProcessEvent(t *testing.T) {
 	}
 	err := newCDRSrv.attrSProcessEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
 	}
 }
 
@@ -213,7 +214,7 @@ func TestCDRsRateSCostForEventErr(t *testing.T) {
 	}
 	err := newCDRSrv.rateSCostForEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
 	}
 }
 
@@ -245,7 +246,7 @@ func TestCDRsAccountSDebitEventErr(t *testing.T) {
 	}
 	err := newCDRSrv.accountSDebitEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
 	}
 }
 
@@ -277,6 +278,119 @@ func TestCDRsThdSProcessEventErr(t *testing.T) {
 	}
 	err := newCDRSrv.thdSProcessEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
+	}
+
+}
+
+func TestCDRsChrgrSProcessEvent(t *testing.T) {
+	Cache.Clear(nil)
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaChargers)}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*[]*ChrgSProcessEventReply) = []*ChrgSProcessEventReply{
+					{
+						ChargerSProfile: "string",
+					},
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaChargers), utils.ChargerSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+	result, err := newCDRSrv.chrgrSProcessEvent(context.Background(), cgrEv)
+	if err != nil {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
+	var expecte *utils.CGREvent
+	expected := []*utils.CGREvent{
+		expecte,
+	}
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", expected, result)
+	}
+	if err := dm.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
 }
+
+// func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
+// 	Cache.Clear(nil)
+// 	var sent StorDB
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+// 		utils.MetaChargers)}
+// 	storDBChan := make(chan StorDB, 1)
+// 	storDBChan <- sent
+// 	data := NewInternalDB(nil, nil, true)
+// 	connMng := NewConnManager(cfg)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	fltrs := NewFilterS(cfg, nil, dm)
+// 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+// 	ccM := &ccMock{
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+// 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+// 				return nil
+// 			},
+// 		},
+// 	}
+// 	rpcInternal := make(chan birpc.ClientConnector, 1)
+// 	rpcInternal <- ccM
+// 	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+// 		utils.MetaChargers), utils.ChargerSv1, rpcInternal)
+
+// 	cgrEv := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testID",
+// 		Event: map[string]interface{}{
+// 			"Resources":      "ResourceProfile1",
+// 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+// 			"UsageInterval":  "1s",
+// 			"PddInterval":    "1s",
+// 			utils.Weight:     "20.0",
+// 			utils.Usage:      135 * time.Second,
+// 			utils.Cost:       123.0,
+// 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.Subsys: utils.MetaChargers,
+// 		},
+// 	}
+// 	_, err := newCDRSrv.chrgrSProcessEvent(context.Background(), cgrEv)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+// 	}
+// 	if err := dm.DataDB().Flush(""); err != nil {
+// 		t.Error(err)
+// 	}
+// }
