@@ -176,6 +176,38 @@ func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fil
 	return // return the option or NOT_FOUND if there are no options or none of the filters pass
 }
 
+// GetTimeOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Time, otherwise it
+// returns the config option if at least one filter passes or NOT_FOUND if none of them do
+func GetTimeOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicStringOpt,
+	tmz string, optNames ...string) (_ time.Time, err error) {
+	for _, optName := range optNames {
+		if opt, has := ev.APIOpts[optName]; has {
+			return utils.IfaceAsTime(opt, tmz)
+		}
+	}
+	evDP := ev.AsDataProvider()
+	var cfgOptStr string
+	var hasDefault bool
+	for _, opt := range dynOpts { // iterate through the options
+		if len(opt.FilterIDs) == 1 && opt.FilterIDs[0] == utils.MetaDefault {
+			hasDefault = true
+			cfgOptStr = opt.Value
+			continue
+		}
+		var pass bool
+		if pass, err = fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+			return
+		} else if pass {
+			return utils.ParseTimeDetectLayout(opt.Value, tmz)
+		}
+	}
+	if !hasDefault {
+		err = utils.ErrNotFound
+		return
+	}
+	return utils.ParseTimeDetectLayout(cfgOptStr, tmz) // return the option or NOT_FOUND if there are no options or none of the filters pass
+}
+
 // FilterStringSliceCfgOpts returns the option as []string if the filters match
 func FilterStringSliceCfgOpts(ctx *context.Context, tnt string, ev utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicStringSliceOpt) (dft []string, err error) {
 	var hasDefault bool
