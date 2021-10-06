@@ -24,12 +24,18 @@ package apis
 import (
 	"os"
 	"path"
+	"reflect"
+	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -37,7 +43,21 @@ var (
 	anzCfg     *config.CGRConfig
 	anzBiRPC   *birpc.Client
 
-	sTestsAnz = []func(t *testing.T){}
+	sTestsAnz = []func(t *testing.T){
+		testAnalyzerSInitCfg,
+		testAnalyzerSInitDataDb,
+		testAnalyzerSResetStorDb,
+		testAnalyzerSStartEngine,
+		testAnzBiSRPCConn,
+		testAnalyzerSLoad,
+		// testAnalyzerSGetAttributeProfiles,
+		testAnalyzerSChargerSv1ProcessEvent,
+		testAnalyzerSSearchCall1,
+		testAnalyzerSSearchCall2,
+		testAnalyzerSGetFilterIDs,
+		testAnalyzerSSearchCall3,
+		testAnalyzerSKillEngine,
+	}
 )
 
 func TestAnalyzerSIT(t *testing.T) {
@@ -86,5 +106,127 @@ func testAnzBiSRPCConn(t *testing.T) {
 	anzBiRPC, err = newRPCClient(anzCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testAnalyzerSLoad(t *testing.T) {
+	var reply string
+
+	args := &loaders.ArgsProcessFolder{
+		Caching: utils.StringPointer(utils.MetaReload),
+	}
+	if err := anzBiRPC.Call(context.Background(), utils.LoaderSv1Load, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testAnalyzerSKillEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+	if err := os.RemoveAll(anzCfg.AnalyzerSCfg().DBPath); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1010",
+			utils.Subject:      "Something_inter",
+			utils.Destination:  "999",
+		},
+	}
+	var result2 []*engine.ChrgSProcessEventReply
+
+	if err := anzBiRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testAnalyzerSSearchCall1(t *testing.T) {
+	time.Sleep(10 * time.Millisecond)
+	var result []map[string]interface{}
+	queryArgs := &analyzers.QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`,
+	}
+	if err := anzBiRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, queryArgs, &result); err != nil {
+		t.Error(err)
+	} else if len(result) != 1 {
+		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
+	}
+}
+
+func testAnalyzerSSearchCall2(t *testing.T) {
+	var result []map[string]interface{}
+	queryArgs := &analyzers.QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:ChargerSv1\.ProcessEvent`,
+	}
+	if err := anzBiRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, queryArgs, &result); err != nil {
+		t.Error(err)
+	} else if len(result) != 1 {
+		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
+	}
+}
+
+func testAnalyzerSGetFilterIDs(t *testing.T) {
+	var filterIDs []string
+	if err := anzBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
+		&utils.PaginatorWithTenant{
+			Tenant:    "cgrates.org",
+			Paginator: utils.Paginator{},
+		}, &filterIDs); err != nil {
+		t.Error(err)
+	}
+	expIDs := []string{"FLTR_ACNT_1001", "FLTR_ACNT_1001_1002", "FLTR_ACNT_1002", "FLTR_ACNT_1003", "FLTR_ACNT_1003_1001", "FLTR_DST_FS", "FLTR_RES"}
+	sort.Slice(filterIDs, func(i, j int) bool {
+		return filterIDs[i] < filterIDs[j]
+	})
+	if !reflect.DeepEqual(filterIDs, expIDs) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expIDs), utils.ToJSON(filterIDs))
+	}
+
+	var result engine.Filter
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     filterIDs[0],
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	if err := anzBiRPC.Call(context.Background(), utils.AdminSv1GetFilter, args, &result); err != nil {
+		t.Error(err)
+	}
+	expFilter := engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_ACNT_1001",
+		Rules: []*engine.FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+		},
+	}
+	if !reflect.DeepEqual(result, expFilter) {
+		t.Errorf("Expected %v \n but received \n %v", expFilter, result)
+	}
+	// fmt.Println(utils.ToJSON(result))
+}
+
+func testAnalyzerSSearchCall3(t *testing.T) {
+	var result []map[string]interface{}
+	queryArgs := &analyzers.QueryArgs{
+		HeaderFilters: `+RequestEncoding:\*json +RequestMethod:AdminSv1\.GetFilter`,
+	}
+	if err := anzBiRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, queryArgs, &result); err != nil {
+		t.Error(err)
+	} else if len(result) != 2 {
+		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 }
