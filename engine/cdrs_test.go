@@ -123,3 +123,160 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
 }
+
+func TestCDRsAttrSProcessEventNoOpts(t *testing.T) {
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	dm := &DataManager{}
+	fltrs := &FilterS{}
+	connMng := &ConnManager{}
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+	}
+	err := newCDRSrv.attrSProcessEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+}
+
+func TestCDRsAttrSProcessEvent(t *testing.T) {
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	dm := &DataManager{}
+	fltrs := &FilterS{}
+	connMng := &ConnManager{}
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+	err := newCDRSrv.attrSProcessEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+}
+
+func TestCDRsRateSCostForEventErr(t *testing.T) {
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	dm := &DataManager{}
+	fltrs := &FilterS{}
+	connMng := &ConnManager{}
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+	err := newCDRSrv.rateSCostForEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+}
+
+func TestCDRsAccountSDebitEventErr(t *testing.T) {
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	dm := &DataManager{}
+	fltrs := &FilterS{}
+	connMng := &ConnManager{}
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+	err := newCDRSrv.accountSDebitEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+}
+
+func TestCDRsThdSProcessEventErr(t *testing.T) {
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	dm := &DataManager{}
+	fltrs := &FilterS{}
+	connMng := &ConnManager{}
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+	err := newCDRSrv.thdSProcessEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+}
