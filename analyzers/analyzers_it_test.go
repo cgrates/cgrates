@@ -24,6 +24,7 @@ package analyzers
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -39,6 +40,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -124,6 +126,8 @@ func testAnalyzerSStartEngine(t *testing.T) {
 	}
 }
 
+//make loader in confi
+
 // Connect rpc client to rater
 func testAnalyzerSRPCConn(t *testing.T) {
 	var err error
@@ -142,8 +146,17 @@ func testAnalyzerSRPCConn(t *testing.T) {
 
 func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := anzRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	// attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	// if err := anzRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	// 	t.Error(err)
+	// } else if reply != utils.OK {
+	// 	t.Error("Unexpected reply returned", reply)
+	// }
+	// time.Sleep(100 * time.Millisecond)
+	args := &loaders.ArgsProcessFolder{
+		Caching: utils.StringPointer(utils.MetaReload),
+	}
+	if err := anzRPC.Call(utils.LoaderSv1Load, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -193,7 +206,11 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 					"RunID":       "*raw",
 					"Subject":     "Something_inter",
 				},
-				APIOpts: map[string]interface{}{"*subsys": "*chargers"},
+				APIOpts: map[string]interface{}{
+					"*attributeIDs": []string{"*constant:*req.RequestType:*none"},
+					"*context":      "*chargers",
+					"*subsys":       "*chargers",
+				},
 			},
 		},
 	}
@@ -219,6 +236,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
+	fmt.Println(utils.ToJSON(result))
 }
 
 func testAnalyzerSV1Search2(t *testing.T) {

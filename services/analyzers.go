@@ -52,7 +52,8 @@ type AnalyzerService struct {
 	cfg         *config.CGRConfig
 	server      *cores.Server
 	filterSChan chan *engine.FilterS
-	stopChan    chan struct{}
+	ctx         *context.Context
+	cancelFunc  context.CancelFunc
 
 	anz      *analyzers.AnalyzerService
 	connChan chan birpc.ClientConnector
@@ -60,7 +61,7 @@ type AnalyzerService struct {
 }
 
 // Start should handle the sercive start
-func (anz *AnalyzerService) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
+func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	if anz.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -71,36 +72,36 @@ func (anz *AnalyzerService) Start(_ *context.Context, shtDwn context.CancelFunc)
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}
-	anz.stopChan = make(chan struct{})
+	anz.ctx, anz.cancelFunc = context.WithCancel(ctx)
 	go func(a *analyzers.AnalyzerService) {
-		if err := a.ListenAndServe(anz.stopChan); err != nil {
+		if err := a.ListenAndServe(anz.ctx); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
 			shtDwn()
 		}
 	}(anz.anz)
 	anz.server.SetAnalyzer(anz.anz)
-	go anz.start()
+	go anz.start(ctx)
 	return
 }
 
-func (anz *AnalyzerService) start() {
-	var fS *engine.FilterS
-	select {
-	case <-anz.stopChan:
+func (anz *AnalyzerService) start(ctx *context.Context) {
+	fS, err := waitForFilterS(ctx, anz.filterSChan)
+	if err != nil {
+		anz.connChan <- nil
 		return
-	case fS = <-anz.filterSChan:
-		if !anz.IsRunning() {
-			return
-		}
-		anz.Lock()
-		defer anz.Unlock()
-		anz.filterSChan <- fS
-		anz.anz.SetFilterS(fS)
 	}
+
+	if !anz.IsRunning() {
+		return
+	}
+	anz.Lock()
+	anz.anz.SetFilterS(fS)
+
 	srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
 	if !anz.cfg.DispatcherSCfg().Enabled {
 		anz.server.RpcRegister(srv)
 	}
+	anz.Unlock()
 	anz.connChan <- anz.GetInternalCodec(srv, utils.AnalyzerS)
 }
 
@@ -112,7 +113,7 @@ func (anz *AnalyzerService) Reload(*context.Context, context.CancelFunc) (err er
 // Shutdown stops the service
 func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.Lock()
-	close(anz.stopChan)
+	anz.cancelFunc()
 	anz.server.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
@@ -137,11 +138,6 @@ func (anz *AnalyzerService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (anz *AnalyzerService) ShouldRun() bool {
 	return anz.cfg.AnalyzerSCfg().Enabled
-}
-
-// GetAnalyzerS returns the analyzer object
-func (anz *AnalyzerService) GetAnalyzerS() *analyzers.AnalyzerService {
-	return anz.anz
 }
 
 // GetInternalCodec returns the connection wrapped in analyzer connector

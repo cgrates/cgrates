@@ -48,7 +48,6 @@ func TestAnalyzerCoverage(t *testing.T) {
 		cfg:         cfg,
 		server:      server,
 		filterSChan: filterSChan,
-		stopChan:    make(chan struct{}, 1),
 		connChan:    connChan,
 		srvDep:      srvDep,
 	}
@@ -72,10 +71,6 @@ func TestAnalyzerCoverage(t *testing.T) {
 	shouldRun := anz2.ShouldRun()
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-	getAnalyzerS := anz2.GetAnalyzerS()
-	if !reflect.DeepEqual(anz2.anz, getAnalyzerS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(anz2.anz), utils.ToJSON(getAnalyzerS))
 	}
 	var rpcClientCnctr2 birpc.ClientConnector
 	getIntrnCdc2 := anz2.GetInternalCodec(rpcClientCnctr2, utils.EmptyString)
