@@ -23,6 +23,8 @@ package apis
 
 import (
 	"path"
+	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -56,12 +58,11 @@ func TestIdxCheckAfterLoad(t *testing.T) {
 	case utils.MetaInternal:
 		idxLoadConfigDIR = "session_volume_discount_internal"
 	case utils.MetaMySQL:
-		t.Skip()
+		idxLoadConfigDIR = "session_volume_discount_mysql"
 	case utils.MetaMongo:
-		t.Skip()
+		idxLoadConfigDIR = "session_volume_discount_mongo"
 	case utils.MetaPostgres:
 		t.Skip()
-
 	default:
 		t.Fatal("Unknown Database type")
 	}
@@ -120,29 +121,61 @@ func testIdxLoadTariffPlan(t *testing.T) {
 }
 
 func testIdxLoadCheckIndexes(t *testing.T) {
+	expected := []string{
+		"*none:*any:*any:RP_ABS_BALANCE1",
+		"*none:*any:*any:RP_ABS_BALANCE2",
+		"*none:*any:*any:RP_CNCRT_BALANCE1",
+		"*none:*any:*any:RP_ROUTE2",
+	}
 	//get indexes *rate_profiles
 	var reply []string
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaRateProfiles,
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadConfigDIR == "session_volume_discount_internal" {
 		t.Error(err)
+	} else {
+		sort.Strings(expected)
+		sort.Strings(reply)
+		if !reflect.DeepEqual(expected, reply) && idxLoadConfigDIR != "session_volume_discount_internal" {
+			t.Errorf("Expected %+v, received %+v", expected, reply)
+		}
 	}
 
+	expected = []string{
+		"*none:*any:*any:CHRG_SUPPLIER",
+		"*none:*any:*any:CHRG_CUSTOMER",
+	}
 	//get indexes *chargers
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaChargers,
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadConfigDIR == "session_volume_discount_internal" {
 		t.Error(err)
+	} else {
+		sort.Strings(expected)
+		sort.Strings(reply)
+		if !reflect.DeepEqual(expected, reply) && idxLoadConfigDIR != "session_volume_discount_internal" {
+			t.Errorf("Expected %+v, received %+v", expected, reply)
+		}
 	}
 
+	expected = []string{
+		"*none:*any:*any:ATTR_RATES",
+		"*string:*req.Account:ACCOUNT1:ATTR_ACCOUNTS",
+	}
 	//get indexes *attributes
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaAttributes,
-		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadConfigDIR == "session_volume_discount_internal" {
 		t.Error(err)
+	} else {
+		sort.Strings(expected)
+		sort.Strings(reply)
+		if !reflect.DeepEqual(expected, reply) && idxLoadConfigDIR != "session_volume_discount_internal" {
+			t.Errorf("Expected %+v, received %+v", expected, reply)
+		}
 	}
 }
 
