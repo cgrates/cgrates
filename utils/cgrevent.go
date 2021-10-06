@@ -21,8 +21,6 @@ package utils
 import (
 	"strings"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 // CGREvent is a generic event processed by CGR services
@@ -84,80 +82,6 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 		return
 	}
 	return IfaceAsDuration(iface)
-}
-
-// OptsAsDecimal returns an option as decimal.Big instance
-func (ev *CGREvent) OptsAsDecimal(defaultValue *decimal.Big, optNames ...string) (*decimal.Big, error) {
-	for _, optName := range optNames {
-		if iface, has := ev.APIOpts[optName]; has {
-			return IfaceAsBig(iface)
-		}
-	}
-	return defaultValue, nil
-}
-
-// OptsAsString returns an option as string
-func (ev *CGREvent) OptsAsString(defaultValue string, optNames ...string) string {
-	for _, optName := range optNames {
-		if iface, has := ev.APIOpts[optName]; has {
-			return IfaceAsString(iface)
-		}
-	}
-	return defaultValue
-}
-
-// OptsAsInt returns an option as int
-func (ev *CGREvent) OptsAsInt(defaultValue int, optNames ...string) (opt int, err error) {
-	for _, optName := range optNames {
-		if iface, has := ev.APIOpts[optName]; has {
-			var value int64
-			if value, err = IfaceAsTInt64(iface); err != nil {
-				return 0, err
-			}
-			return int(value), nil
-		}
-	}
-	return defaultValue, nil
-}
-
-// OptsAsDuration returns an option as time.Duration
-func (ev *CGREvent) OptsAsDuration(defaultValue time.Duration, optNames ...string) (time.Duration, error) {
-	for _, optName := range optNames {
-		if iface, has := ev.APIOpts[optName]; has {
-			return IfaceAsDuration(iface)
-		}
-	}
-	return defaultValue, nil
-}
-
-// OptsAsFloat64 returns an option as float64
-func (ev *CGREvent) OptsAsFloat64(defaultValue float64, optNames ...string) (float64, error) {
-	for _, optName := range optNames {
-		if iface, has := ev.APIOpts[optName]; has {
-			return IfaceAsFloat64(iface)
-		}
-	}
-	return defaultValue, nil
-}
-
-// OptsAsStringSlice returns an option as []string
-func (ev *CGREvent) OptsAsStringSlice(defaultValue []string, optNames ...string) ([]string, error) {
-	for _, optName := range optNames {
-		if iface, has := ev.APIOpts[optName]; has {
-			return IfaceAsStringSlice(iface)
-		}
-	}
-	return defaultValue, nil
-}
-
-// OptsAsInterface returns an option as float64
-func (ev *CGREvent) OptsAsInterface(defaultValue interface{}, optNames ...string) interface{} {
-	for _, optName := range optNames {
-		if iface, has := ev.APIOpts[optName]; has {
-			return iface
-		}
-	}
-	return defaultValue
 }
 
 func (ev *CGREvent) Clone() (clned *CGREvent) {
@@ -267,16 +191,6 @@ func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapS
 		}
 	}
 	return
-}
-
-// StartTime returns the event time used to check active rate profiles
-func (args *CGREvent) StartTime(configSTime, tmz string, optNames ...string) (time.Time, error) {
-	for _, optName := range optNames {
-		if iface, has := args.APIOpts[optName]; has {
-			return IfaceAsTime(iface, tmz)
-		}
-	}
-	return ParseTimeDetectLayout(configSTime, tmz)
 }
 
 // SetCloneable sets if the args should be clonned on internal connections

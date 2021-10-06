@@ -22,8 +22,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 func TestCGREventHasField(t *testing.T) {
@@ -332,37 +330,6 @@ func TestCGREventOptAsInt64(t *testing.T) {
 	errExpect := ErrNotFound
 	if _, err = ev.OptAsInt64("nonExistingKey"); err == nil || err != errExpect {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", errExpect, err)
-	}
-}
-
-func TestCGREventOptAsDurationNoOpts(t *testing.T) {
-	ev := &CGREvent{}
-
-	expdur := decimal.New(int64(time.Minute), 0)
-	received, err := ev.OptsAsDecimal(decimal.New(int64(time.Minute), 0), "testString")
-
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expdur, received) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expdur, received)
-	}
-}
-
-func TestCGREventOptAsDuration(t *testing.T) {
-	ev := &CGREvent{
-		APIOpts: map[string]interface{}{
-			"*usage": 30,
-		},
-	}
-
-	received, err := ev.OptsAsDecimal(decimal.New(int64(72*time.Hour), 0), "*usage")
-	if err != nil {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, err)
-	}
-	expected := decimal.New(int64(30*time.Nanosecond), 0)
-
-	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
 
