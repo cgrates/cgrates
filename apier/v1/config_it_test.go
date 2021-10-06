@@ -443,11 +443,11 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
-	fib := utils.Fib()
+	fib := utils.FibDuration(time.Millisecond)
 	var jsonClnt *rpc.Client
 	var connected bool
 	for i := 0; i < 200; i++ {
-		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		time.Sleep(fib())
 		if jsonClnt, err = jsonrpc.Dial(utils.TCP, "localhost:2012"); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
 				err.Error(), "localhost:2012"))

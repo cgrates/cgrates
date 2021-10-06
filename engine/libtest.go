@@ -341,10 +341,10 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err != nil {
 		return nil, err
 	}
-	fib := utils.Fib()
+	fib := utils.FibDuration(time.Millisecond)
 	var connected bool
 	for i := 0; i < 200; i++ {
-		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		time.Sleep(fib())
 		if _, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
 				err.Error(), cfg.ListenCfg().RPCJSONListen))
@@ -370,9 +370,9 @@ func StartEngineWithContext(ctx context.Context, cfgPath string, waitEngine int)
 	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		return
 	}
-	fib := utils.Fib()
+	fib := utils.FibDuration(time.Millisecond)
 	for i := 0; i < 200; i++ {
-		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		time.Sleep(fib())
 		if _, err = jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err != nil {
 			continue
 		}

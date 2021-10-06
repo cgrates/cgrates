@@ -487,6 +487,12 @@ func Fib() func() int {
 		return a
 	}
 }
+func FibDuration(mult time.Duration) func() time.Duration {
+	fib := Fib()
+	return func() time.Duration {
+		return time.Duration(fib()) * mult
+	}
+}
 
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {

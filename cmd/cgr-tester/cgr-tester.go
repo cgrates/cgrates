@@ -71,7 +71,6 @@ var (
 	destination  = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
 	json         = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
 	version      = cgrTesterFlags.Bool("version", false, "Prints the application version.")
-	nilDuration  = time.Duration(0)
 	usage        = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
 	fPath        = cgrTesterFlags.String("file_path", "", "read requests from file with path")
 	reqSep       = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
@@ -86,13 +85,13 @@ func durInternalRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, erro
 		tstCfg.DataDbCfg().Password, tstCfg.GeneralCfg().DBDataEncoding,
 		tstCfg.DataDbCfg().Opts)
 	if err != nil {
-		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
+		return 0, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
 	dm := engine.NewDataManager(dbConn, cgrConfig.CacheCfg(), nil) // for the momentn we use here "" for sentinelName
 	defer dm.DataDB().Close()
 	engine.SetDataStorage(dm)
 	if err := engine.LoadAllDataDBToCache(dm); err != nil {
-		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
+		return 0, fmt.Errorf("Cache rating error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)
 	var result *engine.CallCost
@@ -131,7 +130,7 @@ func durRemoteRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, error)
 	}
 
 	if err != nil {
-		return nilDuration, fmt.Errorf("Could not connect to engine: %s", err.Error())
+		return 0, fmt.Errorf("Could not connect to engine: %s", err.Error())
 	}
 	defer client.Close()
 	start := time.Now()

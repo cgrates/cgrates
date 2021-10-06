@@ -170,7 +170,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithAPIOpts) ([]*CDR, error) {
 		(cdr.Usage != 0 || hasLastUsed) && cdr.CostDetails == nil {
 		// ToDo: Get rid of Prepaid as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
-		fib := utils.Fib()
+		fib := utils.FibDuration(time.Second)
 		var smCosts []*SMCost
 		cgrID := cdr.CGRID
 		if _, hasIT := cdr.ExtraFields[utils.OriginIDPrefix]; hasIT {
@@ -183,7 +183,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithAPIOpts) ([]*CDR, error) {
 				break
 			}
 			if i <= cdrS.cgrCfg.CdrsCfg().SMCostRetries-1 {
-				time.Sleep(time.Duration(fib()) * time.Second)
+				time.Sleep(fib())
 			}
 		}
 		if len(smCosts) != 0 { // Cost retrieved from SMCost table
