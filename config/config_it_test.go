@@ -36,6 +36,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/ericlagergren/decimal"
 )
 
 var (
@@ -437,6 +438,12 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 			},
 			Limit:  []*utils.DynamicIntOpt{},
 			Offset: []*utils.DynamicIntOpt{},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     decimal.New(int64(time.Minute), 0),
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RouteSCfg()) {

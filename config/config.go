@@ -156,6 +156,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ProfileCount: []*utils.DynamicIntOpt{},
 			Limit:        []*utils.DynamicIntOpt{},
 			Offset:       []*utils.DynamicIntOpt{},
+			Usage:        []*utils.DynamicDecimalBigOpt{},
 		}},
 		sureTaxCfg:     new(SureTaxCfg),
 		dispatcherSCfg: new(DispatcherSCfg),

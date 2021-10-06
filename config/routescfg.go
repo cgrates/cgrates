@@ -30,6 +30,7 @@ type RoutesOpts struct {
 	Limit        []*utils.DynamicIntOpt
 	Offset       []*utils.DynamicIntOpt
 	ProfileCount []*utils.DynamicIntOpt
+	Usage        []*utils.DynamicDecimalBigOpt
 }
 
 // RouteSCfg is the configuration of route service
@@ -58,7 +59,7 @@ func (rts *RouteSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) 
 	return rts.loadFromJSONCfg(jsnRouteSCfg)
 }
 
-func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) {
+func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -80,6 +81,14 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) {
 	if jsnCfg.ProfileCount != nil {
 		rtsOpts.ProfileCount = append(rtsOpts.ProfileCount, utils.MapToDynamicIntOpts(jsnCfg.ProfileCount)...)
 	}
+	if jsnCfg.Usage != nil {
+		var usage []*utils.DynamicDecimalBigOpt
+		if usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+			return
+		}
+		rtsOpts.Usage = append(rtsOpts.Usage, usage...)
+	}
+	return
 }
 
 func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
@@ -119,11 +128,11 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
 	}
-	if jsnCfg.Opts != nil {
-		rts.Opts.loadFromJSONCfg(jsnCfg.Opts)
-	}
 	if jsnCfg.Nested_fields != nil {
 		rts.NestedFields = *jsnCfg.Nested_fields
+	}
+	if jsnCfg.Opts != nil {
+		err = rts.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	return
 }
@@ -152,6 +161,10 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 	if rts.Offset != nil {
 		offset = utils.CloneDynamicIntOpt(rts.Offset)
 	}
+	var usage []*utils.DynamicDecimalBigOpt
+	if rts.Usage != nil {
+		usage = utils.CloneDynamicDecimalBigOpt(rts.Usage)
+	}
 	cln = &RoutesOpts{
 		Context:      context,
 		IgnoreErrors: ignoreErrors,
@@ -159,6 +172,7 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 		Limit:        limit,
 		Offset:       offset,
 		ProfileCount: profileCount,
+		Usage:        usage,
 	}
 	return
 }
@@ -172,6 +186,7 @@ func (rts RouteSCfg) AsMapInterface(string) interface{} {
 		utils.MetaMaxCostCfg:      utils.DynamicInterfaceOptsToMap(rts.Opts.MaxCost),
 		utils.MetaLimitCfg:        utils.DynamicIntOptsToMap(rts.Opts.Limit),
 		utils.MetaOffsetCfg:       utils.DynamicIntOptsToMap(rts.Opts.Offset),
+		utils.MetaUsage:           utils.DynamicDecimalBigOptsToMap(rts.Opts.Usage),
 	}
 
 	mp := map[string]interface{}{
@@ -254,6 +269,7 @@ type RoutesOptsJson struct {
 	Limit        map[string]int         `json:"*limit"`
 	Offset       map[string]int         `json:"*offset"`
 	ProfileCount map[string]int         `json:"*profileCount"`
+	Usage        map[string]string      `json:"*usage"`
 }
 
 // Route service config section
@@ -294,6 +310,9 @@ func diffRoutesOptsJsonCfg(d *RoutesOptsJson, v1, v2 *RoutesOpts) *RoutesOptsJso
 	}
 	if !utils.DynamicIntOptEqual(v1.ProfileCount, v2.ProfileCount) {
 		d.ProfileCount = utils.DynamicIntOptsToMap(v2.ProfileCount)
+	}
+	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
+		d.Usage = utils.DynamicDecimalBigOptsToMap(v2.Usage)
 	}
 	return d
 }

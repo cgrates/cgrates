@@ -20,8 +20,10 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
@@ -79,6 +81,12 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 			},
 			Limit:  []*utils.DynamicIntOpt{},
 			Offset: []*utils.DynamicIntOpt{},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     decimal.New(int64(time.Minute), 0),
+				},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -119,6 +127,9 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 			},
 			utils.MetaMaxCostCfg: map[string]interface{}{
 				utils.MetaDefault: utils.EmptyString,
+			},
+			utils.MetaUsage: map[string]string{
+				utils.MetaDefault: decimal.New(int64(time.Minute), 0).String(),
 			},
 		},
 	}
@@ -174,6 +185,9 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			},
 			utils.MetaMaxCostCfg: map[string]interface{}{
 				utils.MetaDefault: utils.EmptyString,
+			},
+			utils.MetaUsage: map[string]string{
+				utils.MetaDefault: decimal.New(int64(time.Minute), 0).String(),
 			},
 		},
 	}
