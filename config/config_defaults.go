@@ -806,7 +806,10 @@ const CGRATES_CFG_JSON = `
 		// },	
 		// "*offset": {						//					
 		// 	"*default": 1,
-		// },							
+		// },		
+		"*usage": {							//
+			"*default": "1m",
+		},					
 	},
 },
 

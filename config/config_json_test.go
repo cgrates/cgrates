@@ -975,6 +975,9 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 			MaxCost: map[string]interface{}{
 				utils.MetaDefault: utils.EmptyString,
 			},
+			Usage: map[string]string{
+				utils.MetaDefault: "1m",
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

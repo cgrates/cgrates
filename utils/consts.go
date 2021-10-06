@@ -2137,7 +2137,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesAttributeIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
 	RemoteHostOpt, CacheOpt, OptsThresholdsThresholdIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
-	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError,
+	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
 	OptsCDRs, OptsSesCDRsDerivedReply, OptsChargerS, OptsResourceS, OptsSesResourceSAuthorize,
 	OptsSesResourceSAlocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
 	OptsSesRouteSDerivedReply, OptsSesRouteSIgnoreErrors, OptsSesRouteSMaxCost, OptsStatS,
@@ -2238,6 +2238,7 @@ const (
 	OptsRoutesOffset       = "*rouOffset"
 	OptsRoutesIgnoreErrors = "*rouIgnoreErrors"
 	OptsRoutesMaxCost      = "*rouMaxCost"
+	OptsRoutesUsage        = "*rouUsage"
 
 	// Stats
 	OptsStatsStatIDs = "*statIDs"
