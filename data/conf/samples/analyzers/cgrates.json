@@ -118,6 +118,16 @@
 	"enabled": true
 },
 
+"loaders": [
+	{
+		"enabled":true,
+		"id": "*default",
+		"tenant": "cgrates.org",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/tutorial",
+		"tp_out_dir": "",
+		"lockfile_path": "",
+	},
+],
 
 "filters": {								
 	"accounts_conns": ["*internal"],

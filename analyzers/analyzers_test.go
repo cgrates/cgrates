@@ -58,7 +58,9 @@ func TestNewAnalyzerService(t *testing.T) {
 	}
 	shdChan := make(chan struct{}, 1)
 	shdChan <- struct{}{}
-	if err := anz.ListenAndServe(shdChan); err != nil {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := anz.ListenAndServe(ctx); err != nil {
 		t.Fatal(err)
 	}
 	anz.db.Close()
@@ -162,7 +164,7 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 	if err := anz.db.Close(); err != nil {
 		t.Fatal(err)
 	}
-	anz.ListenAndServe(make(chan struct{}))
+	anz.ListenAndServe(context.Background())
 
 	cfg.AnalyzerSCfg().CleanupInterval = 1
 	anz, err = NewAnalyzerService(cfg)
@@ -174,7 +176,7 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 		runtime.Gosched()
 		anz.db.Close()
 	}()
-	anz.ListenAndServe(make(chan struct{}))
+	anz.ListenAndServe(context.Background())
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
 	}

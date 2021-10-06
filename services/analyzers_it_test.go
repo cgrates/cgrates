@@ -117,10 +117,10 @@ func TestAnalyzerSReload2(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anzRPC := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, anzRPC, srvDep)
-	anz.stopChan = make(chan struct{})
-	anz.start()
-	close(anz.stopChan)
-	anz.start()
+	// anz.stopChan = make(chan struct{})
+	// anz.start()
+	// close(anz.stopChan)
+	// anz.start()
 	anz.anz = nil
 	if err := os.RemoveAll("/tmp/analyzers"); err != nil {
 		t.Fatal(err)
@@ -146,11 +146,11 @@ func TestAnalyzerSReload3(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anzRPC := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, anzRPC, srvDep)
-	anz.stopChan = make(chan struct{})
+	// anz.stopChan = make(chan struct{})
 	ctx, cancel := context.WithCancel(context.TODO())
 	anz.Start(ctx, cancel)
 
 	anz.anz = nil
-	close(anz.stopChan)
+	// close(anz.stopChan)
 
 }
