@@ -136,7 +136,7 @@ func testSessVolDiscLoadersLoad(t *testing.T) {
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			Caching: utils.StringPointer(utils.MetaReload),
+			Caching: utils.StringPointer(utils.MetaNone),
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
