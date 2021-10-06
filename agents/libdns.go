@@ -35,6 +35,21 @@ const (
 	dnsOption = "Option"
 )
 
+func newDnsReply(req *dns.Msg) (rply *dns.Msg) {
+	rply = new(dns.Msg)
+	rply.SetReply(req)
+	if len(req.Question) > 0 {
+		rply.Question = make([]dns.Question, len(req.Question))
+		for i, q := range req.Question {
+			rply.Question[i] = q
+		}
+	}
+	if opts := rply.IsEdns0(); opts != nil {
+		rply.SetEdns0(4096, false).IsEdns0().Option = opts.Option
+	}
+	return
+}
+
 // dnsWriteErr writes the error with code back to the client
 func dnsWriteMsg(w dns.ResponseWriter, msg *dns.Msg) (err error) {
 	if err = w.WriteMsg(msg); err != nil {

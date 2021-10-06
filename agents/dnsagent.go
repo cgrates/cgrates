@@ -86,24 +86,20 @@ func (da *DNSAgent) Reload() (err error) {
 func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	dnsDP := newDnsDP(req)
 
-	rply := new(dns.Msg)
-	rply.SetReply(req)
-
+	rply := newDnsReply(req)
 	rmtAddr := w.RemoteAddr().String()
 	for _, q := range req.Question {
 		if processed, err := da.handleQuestion(dnsDP, rply, &q, rmtAddr); err != nil ||
 			!processed {
+			rply := newDnsReply(req)
 			rply.Rcode = dns.RcodeServerFailure
-			rply = new(dns.Msg)
-			rply.SetReply(req)
 			dnsWriteMsg(w, rply)
 			return
 		}
 	}
 
 	if err := dnsWriteMsg(w, rply); err != nil { // failed sending, most probably content issue
-		rply = new(dns.Msg)
-		rply.SetReply(req)
+		rply := newDnsReply(req)
 		rply.Rcode = dns.RcodeServerFailure
 		dnsWriteMsg(w, rply)
 	}
