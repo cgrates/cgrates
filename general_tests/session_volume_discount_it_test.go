@@ -132,11 +132,15 @@ func testSessVolDiscApierRpcConn(t *testing.T) {
 }
 
 func testSessVolDiscLoadersLoad(t *testing.T) {
+	caching := utils.MetaReload
+	if tSessVolDiscCfgDIR == "session_volume_discount_internal" {
+		caching = utils.MetaNone
+	}
 	var reply string
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			Caching: utils.StringPointer(utils.MetaNone),
+			Caching: utils.StringPointer(caching),
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
