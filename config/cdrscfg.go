@@ -142,13 +142,13 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (cdrscfg CdrsCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaAccounts:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Accounts),
-		utils.MetaAttributes: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Attributes),
-		utils.MetaChargers:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Chargers),
-		utils.MetaEEs:        utils.DynamicBoolOptsToMap(cdrscfg.Opts.Export),
-		utils.MetaRateS:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Rates),
-		utils.MetaStats:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Stats),
-		utils.MetaThresholds: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Thresholds),
+		utils.MetaAccountSCfg:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Accounts),
+		utils.MetaAttributeSCfg: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Attributes),
+		utils.MetaChargerSCfg:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Chargers),
+		utils.MetaEeSCfg:        utils.DynamicBoolOptsToMap(cdrscfg.Opts.Export),
+		utils.MetaRateSCfg:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Rates),
+		utils.MetaStatSCfg:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Stats),
+		utils.MetaThresholdSCfg: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Thresholds),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:          cdrscfg.Enabled,

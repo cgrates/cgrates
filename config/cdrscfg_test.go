@@ -151,25 +151,25 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccounts: map[string]bool{
+			utils.MetaAccountSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaAttributes: map[string]bool{
+			utils.MetaAttributeSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaChargers: map[string]bool{
+			utils.MetaChargerSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaEEs: map[string]bool{
+			utils.MetaEeSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaRateS: map[string]bool{
+			utils.MetaRateSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaStats: map[string]bool{
+			utils.MetaStatSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaThresholds: map[string]bool{
+			utils.MetaThresholdSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
 		},
@@ -205,25 +205,25 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.RateSConnsCfg:       []string{},
 		utils.AccountSConnsCfg:    []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccounts: map[string]bool{
+			utils.MetaAccountSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaAttributes: map[string]bool{
+			utils.MetaAttributeSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaChargers: map[string]bool{
+			utils.MetaChargerSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaEEs: map[string]bool{
+			utils.MetaEeSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaRateS: map[string]bool{
+			utils.MetaRateSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaStats: map[string]bool{
+			utils.MetaStatSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
-			utils.MetaThresholds: map[string]bool{
+			utils.MetaThresholdSCfg: map[string]bool{
 				utils.MetaDefault: false,
 			},
 		},

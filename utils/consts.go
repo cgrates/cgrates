@@ -1913,7 +1913,14 @@ const (
 	PartitionsCfg = "partitions"
 	PrecacheCfg   = "precache"
 
-	// CdreCfg
+	// CdrsCfg
+	MetaAccountSCfg     = "*accountS"
+	MetaAttributeSCfg   = "*attributeS"
+	MetaChargerSCfg     = "*chargerS"
+	MetaEeSCfg          = "*eeS"
+	MetaRateSCfg        = "*rateS"
+	MetaStatSCfg        = "*statS"
+	MetaThresholdSCfg   = "*thresholdS"
 	ExportPathCfg       = "export_path"
 	SynchronousCfg      = "synchronous"
 	AttemptsCfg         = "attempts"
