@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"testing"
@@ -1318,5 +1319,615 @@ func TestEqualsExtEventCharges(t *testing.T) {
 	}
 	if ok := rcv.Equals(extEvCh); !ok {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(extEvCh), ToJSON(rcv))
+	}
+}
+
+func TestEventChargerMerge(t *testing.T) {
+	eEvChgs := &EventCharges{
+		Abstracts: NewDecimal(47500, 3),
+		Concretes: NewDecimal(515, 2),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"THIS_GENUUID1": {
+				AccountID:    "TestEventChargesMerge",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(8, 1),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR1",
+			},
+			"GENUUID1": {
+				AccountID:       "TestEventChargesMerge",
+				BalanceID:       "ABSTRACT2",
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "GENUUID_RATING1",
+				JoinedChargeIDs: []string{"THIS_GENUUID1"},
+			},
+			"GENUUID2": {
+				AccountID:    "TestEventChargesMerge",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR1": {
+				Factor:    NewDecimal(100, 0),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+			"GENUUID_FACTOR2": {
+				Factor: NewDecimal(200, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING1": {
+				Increments: []*RateSIncrement{
+					{
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_2",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+			"GENUUID_RATING2": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(4, 2),
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_1",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE_1": {
+				IntervalStart: NewDecimal(0, 0),
+				FixedFee:      NewDecimal(4, 1),
+				RecurrentFee:  NewDecimal(24, 1),
+			},
+			"RATE_2": {
+				IntervalStart: NewDecimal(12, 1),
+				FixedFee:      NewDecimal(1, 0),
+				RecurrentFee:  NewDecimal(5, 2),
+			},
+		},
+		Accounts: map[string]*Account{
+			"ACC1": {
+				Tenant:    CGRateSorg,
+				ID:        "account_1",
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+					},
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				Balances: map[string]*Balance{
+					"bal1": {
+						ID:        "BAL1",
+						FilterIDs: []string{"*string:~*req.Account:1003"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(int64(30*time.Second), 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor:    NewDecimal(100, 0),
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+							},
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								Increment:    NewDecimal(int64(time.Second), 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1003"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs: []string{"ATTRIBUTE1"},
+					},
+					"bal2": {
+						ID:        "BAL2",
+						FilterIDs: []string{"*string:~*req.Account:1004"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaConcrete,
+						Units: NewDecimal(2000, 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1004"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs:   []string{"ATTRIBUTE1"},
+						RateProfileIDs: []string{"RATE1", "RATE2"},
+					},
+				},
+				ThresholdIDs: []string{},
+			},
+			"ACC2": {
+				Tenant: CGRateSorg,
+				ID:     "account_2",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+
+	newEc := &EventCharges{
+		Accounting: map[string]*AccountCharge{
+			"GENUUID3": {
+				AccountID:    "TestEventChargesMerge",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR3": {
+				Factor: NewDecimal(200, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING3": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(4, 2),
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_1",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+		},
+		Accounts: map[string]*Account{
+			"ACC3": {
+				Tenant: CGRateSorg,
+				ID:     "account_3",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+
+	expEc := &EventCharges{
+		Abstracts: NewDecimal(47500, 3),
+		Concretes: NewDecimal(515, 2),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"THIS_GENUUID1": {
+				AccountID:    "TestEventChargesMerge",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(8, 1),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR1",
+			},
+			"GENUUID1": {
+				AccountID:       "TestEventChargesMerge",
+				BalanceID:       "ABSTRACT2",
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "GENUUID_RATING1",
+				JoinedChargeIDs: []string{"THIS_GENUUID1"},
+			},
+			"GENUUID2": {
+				AccountID:    "TestEventChargesMerge",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+			"GENUUID3": {
+				AccountID:    "TestEventChargesMerge",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR1": {
+				Factor:    NewDecimal(100, 0),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+			"GENUUID_FACTOR2": {
+				Factor: NewDecimal(200, 0),
+			},
+			"GENUUID_FACTOR3": {
+				Factor: NewDecimal(200, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING1": {
+				Increments: []*RateSIncrement{
+					{
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_2",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+			"GENUUID_RATING2": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(4, 2),
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_1",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+			"GENUUID_RATING3": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(4, 2),
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_1",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE_1": {
+				IntervalStart: NewDecimal(0, 0),
+				FixedFee:      NewDecimal(4, 1),
+				RecurrentFee:  NewDecimal(24, 1),
+			},
+			"RATE_2": {
+				IntervalStart: NewDecimal(12, 1),
+				FixedFee:      NewDecimal(1, 0),
+				RecurrentFee:  NewDecimal(5, 2),
+			},
+		},
+		Accounts: map[string]*Account{
+			"ACC1": {
+				Tenant:    CGRateSorg,
+				ID:        "account_1",
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+					},
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				Balances: map[string]*Balance{
+					"bal1": {
+						ID:        "BAL1",
+						FilterIDs: []string{"*string:~*req.Account:1003"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(int64(30*time.Second), 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor:    NewDecimal(100, 0),
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+							},
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								Increment:    NewDecimal(int64(time.Second), 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1003"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs: []string{"ATTRIBUTE1"},
+					},
+					"bal2": {
+						ID:        "BAL2",
+						FilterIDs: []string{"*string:~*req.Account:1004"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaConcrete,
+						Units: NewDecimal(2000, 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1004"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs:   []string{"ATTRIBUTE1"},
+						RateProfileIDs: []string{"RATE1", "RATE2"},
+					},
+				},
+				ThresholdIDs: []string{},
+			},
+			"ACC2": {
+				Tenant: CGRateSorg,
+				ID:     "account_2",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+			"ACC3": {
+				Tenant: CGRateSorg,
+				ID:     "account_3",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+	eEvChgs.Merge(newEc)
+	if !reflect.DeepEqual(expEc, eEvChgs) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(expEc), ToJSON(eEvChgs))
+	}
+	// fmt.Println(ToJSON(eEvChgs))
+}
+
+func TestEventChargesAppendChargeEntry(t *testing.T) {
+	eC := &EventCharges{
+		Accounting: map[string]*AccountCharge{
+			"GENUUID3": {
+				AccountID:    "TestEventChargesMerge",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR3": {
+				Factor: NewDecimal(200, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING3": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(4, 2),
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_1",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+		},
+		Accounts: map[string]*Account{
+			"ACC3": {
+				Tenant: CGRateSorg,
+				ID:     "account_3",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+
+	cIls := &ChargeEntry{
+		ChargingID:     "chrgid1",
+		CompressFactor: 1,
+	}
+
+	cIls2 := &ChargeEntry{
+		ChargingID:     "chrgid2",
+		CompressFactor: 2,
+	}
+
+	exp := []*ChargeEntry{
+		{
+			ChargingID:     "chrgid1",
+			CompressFactor: 1,
+		},
+		{
+			ChargingID:     "chrgid2",
+			CompressFactor: 2,
+		},
+	}
+	eC.appendChargeEntry(cIls, cIls2)
+	if !reflect.DeepEqual(exp, eC.Charges) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp[0]), ToJSON(exp))
+	}
+}
+
+func TestEventChargesAppendChargeEntryNonEmptyCharges(t *testing.T) {
+	eC := &EventCharges{
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "chrgid3",
+				CompressFactor: 3,
+			},
+			{
+				ChargingID:     "chrgid4",
+				CompressFactor: 4,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"GENUUID3": {
+				AccountID:    "TestEventChargesMerge",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR3": {
+				Factor: NewDecimal(200, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING3": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(4, 2),
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						RateIntervalIndex: 0,
+						RateID:            "RATE_1",
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+		},
+		Accounts: map[string]*Account{
+			"ACC3": {
+				Tenant: CGRateSorg,
+				ID:     "account_3",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+
+	cIls3 := &ChargeEntry{
+		ChargingID:     "chrgid4",
+		CompressFactor: 4,
+	}
+
+	eC.appendChargeEntry(cIls3)
+	if eC.Charges[len(eC.Charges)-1].CompressFactor != 5 {
+		fmt.Println(eC.Charges[len(eC.Charges)-1].CompressFactor)
+		t.Errorf("Expected 5, received %v", eC.Charges[len(eC.Charges)-1].CompressFactor)
 	}
 }
