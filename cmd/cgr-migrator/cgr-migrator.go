@@ -75,10 +75,10 @@ var (
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
 	dbQueryTimeout = cgrMigratorFlags.String(utils.MongoQueryTimeoutCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]),
 		"The timeout for queries")
-	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLS, false, "Enable TLS when connecting to Redis")
-	dbRedisClientCertificate = cgrMigratorFlags.String(utils.RedisClientCertificate, utils.EmptyString, "Path to the client certificate")
-	dbRedisClientKey         = cgrMigratorFlags.String(utils.RedisClientKey, utils.EmptyString, "Path to the client key")
-	dbRedisCACertificate     = cgrMigratorFlags.String(utils.RedisCACertificate, utils.EmptyString, "Path to the CA certificate")
+	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLSCfg, false, "Enable TLS when connecting to Redis")
+	dbRedisClientCertificate = cgrMigratorFlags.String(utils.RedisClientCertificateCfg, utils.EmptyString, "Path to the client certificate")
+	dbRedisClientKey         = cgrMigratorFlags.String(utils.RedisClientKeyCfg, utils.EmptyString, "Path to the client key")
+	dbRedisCACertificate     = cgrMigratorFlags.String(utils.RedisCACertificateCfg, utils.EmptyString, "Path to the CA certificate")
 
 	outDataDBType = cgrMigratorFlags.String(utils.OutDataDBTypeCfg, utils.MetaDataDB,
 		"output DataDB type <*redis|*mongo>")
