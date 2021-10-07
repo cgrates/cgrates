@@ -1,10 +1,11 @@
 {
 	// CGRateS Configuration file
+	//
 	
 	
 	"general": {
 		"log_level": 7,
-		"reply_timeout": "30s",
+		"reply_timeout": "50s",
 	},
 	
 	
@@ -13,7 +14,6 @@
 		"rpc_gob": ":2013",
 		"http": ":2080",
 	},
-	
 	
 	"data_db": {
 		"db_type": "mongo",
@@ -27,11 +27,13 @@
 		"db_name": "cgrates",
 		"db_port": 27017,
 	},
+	
 	"loaders": [
 		{
 			"id": "*default",
 			"enabled": true,
 			"tenant": "cgrates.org",
+			"lockfile_path": ".cgr.lck",
 			"tp_in_dir": "/usr/share/cgrates/tariffplans/loadRateTest",
 			"tp_out_dir": "",
 		},
@@ -49,6 +51,7 @@
 		"ees_conns": ["conn1"]
 	},
 	
+	
 	"chargers": {
 		"enabled": true,
 		"attributes_conns": ["*internal"],
@@ -63,6 +66,7 @@
 
 	"accounts": {
 		"enabled": true,
+		"rates_conns": ["*internal"],
 	},
 
 	"rpc_conns": {
@@ -71,6 +75,5 @@
 			"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],
 		},
 	},
-	
 	
 	}

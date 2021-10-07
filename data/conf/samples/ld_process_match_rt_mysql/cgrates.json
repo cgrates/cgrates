@@ -63,7 +63,7 @@
 
 	"accounts": {
 		"enabled": true,
-		"rates_conns": ["*internal"],
+		"rates_conns": ["*localhost"],
 	},
 
 	"rpc_conns": {
