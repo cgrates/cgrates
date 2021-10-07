@@ -34,7 +34,7 @@ type ConfigDBCfg struct {
 	Name     string // The name of the database to connect to.
 	User     string // The user to sign in as.
 	Password string // The user's password.
-	Opts     map[string]interface{}
+	Opts     *DataDBOpts
 }
 
 // loadConfigDBCfg loads the DataDB section of the configuration
@@ -76,11 +76,8 @@ func (dbcfg *ConfigDBCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Db_password != nil {
 		dbcfg.Password = *jsnDbCfg.Db_password
 	}
-
 	if jsnDbCfg.Opts != nil {
-		for k, v := range jsnDbCfg.Opts {
-			dbcfg.Opts[k] = v
-		}
+		err = dbcfg.Opts.loadFromJSONCfg(jsnDbCfg.Opts)
 	}
 	return
 }
@@ -97,26 +94,31 @@ func (dbcfg ConfigDBCfg) Clone() (cln *ConfigDBCfg) {
 		Name:     dbcfg.Name,
 		User:     dbcfg.User,
 		Password: dbcfg.Password,
-		Opts:     make(map[string]interface{}),
-	}
-	for k, v := range dbcfg.Opts {
-		cln.Opts[k] = v
+		Opts:     dbcfg.Opts.Clone(),
 	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (dbcfg ConfigDBCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.RedisSentinelNameCfg:       dbcfg.Opts.RedisSentinel,
+		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
+		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
+		utils.RedisClusterOnDownDelayCfg: dbcfg.Opts.RedisClusterOndownDelay.String(),
+		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
+		utils.RedisTLS:                   dbcfg.Opts.RedisTLS,
+		utils.RedisClientCertificate:     dbcfg.Opts.RedisClientCertificate,
+		utils.RedisClientKey:             dbcfg.Opts.RedisClientKey,
+		utils.RedisCACertificate:         dbcfg.Opts.RedisCACertificate,
+	}
 	mp := map[string]interface{}{
 		utils.DataDbTypeCfg: utils.Meta + dbcfg.Type,
 		utils.DataDbHostCfg: dbcfg.Host,
 		utils.DataDbNameCfg: dbcfg.Name,
 		utils.DataDbUserCfg: dbcfg.User,
 		utils.DataDbPassCfg: dbcfg.Password,
-	}
-	opts := make(map[string]interface{})
-	for k, v := range dbcfg.Opts {
-		opts[k] = v
+		utils.OptsCfg:       opts,
 	}
 	mp[utils.OptsCfg] = opts
 	if dbcfg.Port != "" {
