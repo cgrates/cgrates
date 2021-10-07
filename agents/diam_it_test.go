@@ -223,7 +223,7 @@ func testDiamItResetAllDB(t *testing.T) {
 	}
 
 	cfgPath2 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all2")
-	allCfg2, err := config.NewCGRConfigFromPath(cfgPath2)
+	allCfg2, err := config.NewCGRConfigFromPath(context.Background(), cfgPath2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -279,7 +279,7 @@ func testDiamItApierRpcConn(t *testing.T) {
 func testDiamItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
-	if err := apierRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := apierRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	if isDispatcherActive {
