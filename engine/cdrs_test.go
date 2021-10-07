@@ -18,11 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"net/http"
+	"net/url"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -283,35 +284,15 @@ func TestCDRsThdSProcessEventErr(t *testing.T) {
 
 }
 
-func TestCDRsChrgrSProcessEvent(t *testing.T) {
-	Cache.Clear(nil)
+func TestCDRsStatSProcessEventErrMsnConnIDs(t *testing.T) {
 	var sent StorDB
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
-		utils.MetaChargers)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
-	connMng := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	fltrs := NewFilterS(cfg, nil, dm)
+	dm := &DataManager{}
+	fltrs := &FilterS{}
+	connMng := &ConnManager{}
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
-	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*[]*ChrgSProcessEventReply) = []*ChrgSProcessEventReply{
-					{
-						ChargerSProfile: "string",
-					},
-				}
-				return nil
-			},
-		},
-	}
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- ccM
-	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
-		utils.MetaChargers), utils.ChargerSv1, rpcInternal)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -329,21 +310,141 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 			utils.Subsys: utils.MetaChargers,
 		},
 	}
-	result, err := newCDRSrv.chrgrSProcessEvent(context.Background(), cgrEv)
+	err := newCDRSrv.statSProcessEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
+	}
+
+}
+
+func TestCDRsEESProcessEventErrMsnConnIDs(t *testing.T) {
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	dm := &DataManager{}
+	fltrs := &FilterS{}
+	connMng := &ConnManager{}
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+
+	cgrEv := &utils.CGREventWithEeIDs{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testID",
+			Event: map[string]interface{}{
+				"Resources":      "ResourceProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
+				utils.Usage:      135 * time.Second,
+				utils.Cost:       123.0,
+			},
+			APIOpts: map[string]interface{}{
+				utils.Subsys: utils.MetaChargers,
+			},
+		},
+	}
+	err := newCDRSrv.eeSProcessEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
+	}
+
+}
+
+func TestCDRsNewMapEventFromReqForm(t *testing.T) {
+	httpReq := &http.Request{
+		Form: url.Values{
+			"value1": {"value2"},
+		},
+	}
+	result, err := newMapEventFromReqForm(httpReq)
 	if err != nil {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+		t.Errorf("\nExpected <nil> \n, received <%+v>", err)
 	}
-	var expecte *utils.CGREvent
-	expected := []*utils.CGREvent{
-		expecte,
+	expected := MapEvent{
+		"value1": "value2",
+		"Source": "",
 	}
-	if !reflect.DeepEqual(result, expected) {
+	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", expected, result)
 	}
-	if err := dm.DataDB().Flush(""); err != nil {
-		t.Error(err)
-	}
 }
+
+func TestCDRsNewMapEventFromReqFormErr(t *testing.T) {
+	httpReq := &http.Request{
+		URL: &url.URL{
+			RawQuery: ";",
+		},
+	}
+	_, err := newMapEventFromReqForm(httpReq)
+	if err == nil || err.Error() != "invalid semicolon separator in query" {
+		t.Errorf("\nExpected <invalid semicolon separator in query> \n, received <%+v>", err)
+	}
+
+}
+
+// func TestCDRsChrgrSProcessEvent(t *testing.T) {
+// 	Cache.Clear(nil)
+// 	var sent StorDB
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+// 		utils.MetaChargers)}
+// 	storDBChan := make(chan StorDB, 1)
+// 	storDBChan <- sent
+// 	data := NewInternalDB(nil, nil, true)
+// 	connMng := NewConnManager(cfg)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	fltrs := NewFilterS(cfg, nil, dm)
+// 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+// 	ccM := &ccMock{
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+// 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+// 				*reply.(*[]*ChrgSProcessEventReply) = []*ChrgSProcessEventReply{
+// 					{
+// 						ChargerSProfile: "string",
+// 					},
+// 				}
+// 				return nil
+// 			},
+// 		},
+// 	}
+// 	rpcInternal := make(chan birpc.ClientConnector, 1)
+// 	rpcInternal <- ccM
+// 	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+// 		utils.MetaChargers), utils.ChargerSv1, rpcInternal)
+
+// 	cgrEv := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testID",
+// 		Event: map[string]interface{}{
+// 			"Resources":      "ResourceProfile1",
+// 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+// 			"UsageInterval":  "1s",
+// 			"PddInterval":    "1s",
+// 			utils.Weight:     "20.0",
+// 			utils.Usage:      135 * time.Second,
+// 			utils.Cost:       123.0,
+// 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.Subsys: utils.MetaChargers,
+// 		},
+// 	}
+// 	result, err := newCDRSrv.chrgrSProcessEvent(context.Background(), cgrEv)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+// 	}
+// 	var expecte *utils.CGREvent
+// 	expected := []*utils.CGREvent{
+// 		expecte,
+// 	}
+// 	if !reflect.DeepEqual(result, expected) {
+// 		t.Errorf("\nExpected <%+v> \n, received <%+v>", expected, result)
+// 	}
+// 	if err := dm.DataDB().Flush(""); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
 // func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 // 	Cache.Clear(nil)
