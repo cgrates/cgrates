@@ -1452,7 +1452,9 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	cfg.AccountSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	// Set the internal rateS within connMngr
 	rateSConn := make(chan birpc.ClientConnector, 1)
-	rateSrv, _ := birpc.NewServiceWithMethodsRename(rates.NewRateS(cfg, fltrS, dm), utils.RateSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
+	rateSrv, _ := birpc.NewServiceWithMethodsRename(rates.NewRateS(cfg, fltrS, dm), utils.RateSv1, true, func(key string) (newKey string) {
+		return strings.TrimPrefix(key, utils.V1Prfx)
+	}) // update the name of the functions
 	rateSConn <- rateSrv
 
 	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}

@@ -20,14 +20,15 @@ package rates
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/utils"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestListenAndServe(t *testing.T) {
@@ -1044,4 +1045,135 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Error(err)
 	}
+}
+
+func TestCDRProcessRatesCostForEvent(t *testing.T) {
+	cache := engine.Cache
+	engine.Cache.Clear(nil)
+	jsonCfg := `{
+
+		"cdrs": {
+			"enabled": true,
+			"rates_conns": ["*internal"],
+			"opts": {								
+				"*rateS": {						
+					"*default": true,
+				}, 
+			},	
+		},
+
+		"rates": {
+			"enabled": true,
+		},
+	}
+`
+	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(jsonCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	connMgr := engine.NewConnManager(cfg)
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	filters := engine.NewFilterS(cfg, connMgr, dm)
+	storDBChan := make(chan engine.StorDB, 1)
+	storDBChan <- new(engine.InternalDB)
+
+	cdrs := engine.NewCDRServer(cfg, storDBChan, dm, filters, connMgr)
+
+	ratesConns := make(chan birpc.ClientConnector, 1)
+	rateSrv, err := birpc.NewServiceWithMethodsRename(NewRateS(cfg, filters, dm), utils.RateSv1, true, func(key string) (newKey string) {
+		return strings.TrimPrefix(key, utils.V1Prfx)
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	ratesConns <- rateSrv
+
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, ratesConns)
+	// set a RateProfile for usage
+	ratePrf := &utils.RateProfile{
+		Tenant:          utils.CGRateSorg,
+		ID:              "TEST_RATE_PROCESS_CDR",
+		FilterIDs:       []string{"*string:~*req.Account:1001"},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 1),
+					},
+				},
+			},
+		},
+	}
+	err = dm.SetRateProfile(context.Background(), ratePrf, true)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestCDRProcessRatesCostForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: 15 * time.Second,
+		},
+	}
+	var reply string
+	// here we will test that cdrs can communicate with rates correctly
+	if err := cdrs.V1ProcessEvent(context.Background(), cgrEv, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+q, received %+q", utils.OK, reply)
+	}
+
+	//compare the new event that we got from RateSv1.CostForEvent called from cdrs
+	expCgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestCDRProcessRatesCostForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.MetaRateSCost: utils.RateProfileCost{
+				ID:   "TEST_RATE_PROCESS_CDR",
+				Cost: utils.NewDecimal(int64(15*time.Second)/10, 0),
+				CostIntervals: []*utils.RateSIntervalCost{
+					{
+						Increments: []*utils.RateSIncrementCost{
+							{
+								Usage:             utils.NewDecimal(int64(15*time.Second), 0),
+								RateID:            cgrEv.Event[utils.MetaRateSCost].(utils.RateProfileCost).CostIntervals[0].Increments[0].RateID,
+								RateIntervalIndex: 0,
+								CompressFactor:    150,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				Rates: map[string]*utils.IntervalRate{
+					cgrEv.Event[utils.MetaRateSCost].(utils.RateProfileCost).CostIntervals[0].Increments[0].RateID: {
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 1),
+					},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: 15 * time.Second,
+		},
+	}
+	if !reflect.DeepEqual(expCgrEv, cgrEv) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expCgrEv), utils.ToJSON(cgrEv))
+	}
+
+	engine.Cache = cache
 }

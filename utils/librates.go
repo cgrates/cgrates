@@ -324,9 +324,11 @@ func (rI *RateSInterval) AsRatesIntervalsCost() (rIc *RateSIntervalCost) {
 	rIc = &RateSIntervalCost{
 		CompressFactor: rI.CompressFactor,
 	}
-	if rI.cost != nil {
-		rIc.cost = rI.cost
-	}
+	/*
+		if rI.cost != nil {
+			rIc.cost = rI.cost
+		}
+	*/
 	if rI.Increments != nil {
 		rIc.Increments = make([]*RateSIncrementCost, len(rI.Increments))
 		for idx, incr := range rI.Increments {
@@ -497,10 +499,9 @@ type RateProfileCost struct {
 	MinCost         *Decimal
 	MaxCost         *Decimal
 	MaxCostStrategy string
-	// RateSIntervals  []*RateSInterval
-	CostIntervals []*RateSIntervalCost
-	Rates         map[string]*IntervalRate
-	Altered       []string
+	CostIntervals   []*RateSIntervalCost
+	Rates           map[string]*IntervalRate
+	Altered         []string
 }
 
 // RateSIntervalCost is used in the RateProfileCost to reflect the RateSInterval used
@@ -532,9 +533,11 @@ func (rI *RateSIncrement) AsRateSIncrementCost() (rIc *RateSIncrementCost) {
 	if rI.Usage != nil {
 		rIc.Usage = rI.Usage
 	}
-	if rI.cost != nil {
-		rIc.cost = rI.cost
-	}
+	/*
+		if rI.cost != nil {
+			rIc.cost = rI.cost
+		}
+	*/
 	return
 
 }
