@@ -127,7 +127,7 @@ func testSAitApierRpcConn(t *testing.T) {
 func testSAitTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tut_sip_redirect")}
 	var loadInst utils.LoadInstance
-	if err := saRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	if err := saRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups

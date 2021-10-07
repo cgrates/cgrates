@@ -115,7 +115,7 @@ func testDNSitApierRpcConn(t *testing.T) {
 func testDNSitTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "dnsagent")}
 	var loadInst utils.LoadInstance
-	if err := dnsRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder,
+	if err := dnsRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
