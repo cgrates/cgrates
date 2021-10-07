@@ -122,5 +122,4 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
-
 }
