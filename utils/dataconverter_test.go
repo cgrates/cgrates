@@ -1224,3 +1224,30 @@ func TestDomainNameFromNAPTRConverter(t *testing.T) {
 		t.Errorf("received: <%s>", dName)
 	}
 }
+
+func TestDataConverterLengthConvert(t *testing.T) {
+	var lC LengthConverter
+	input := NewDecimal(2, 0)
+	rcv, _ := lC.Convert(input)
+	if rcv != 1 {
+		t.Error("Expected 1")
+	}
+}
+
+func TestDataConverterSliceConvert(t *testing.T) {
+	var lC SliceConverter
+	input := NewDecimal(2, 0)
+	rcv, _ := lC.Convert(input)
+	if rcv != "2" {
+		t.Error("Expected 2")
+	}
+}
+
+func TestDataConverterE164Convert(t *testing.T) {
+	var lC e164Converter
+	input := NewDecimal(2, 0)
+	_, err := lC.Convert(input)
+	if err == nil || err.Error() != "unknown format" {
+		t.Errorf("Expected 'unknown format' error")
+	}
+}

@@ -946,6 +946,30 @@ func TestEventChargesEquals(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(eEvChgs), ToJSON(expectedEqual))
 	}
 
+	eEvChgs.Charges[0].CompressFactor = 2
+	expectedEqual.Charges[0].CompressFactor = 3
+	if ok := eEvChgs.Equals(expectedEqual); ok {
+		t.Errorf("Expected %+v, received %+v", ToJSON(eEvChgs), ToJSON(expectedEqual))
+	}
+
+	eEvChgs.Charges[0].CompressFactor = 3
+
+	eEvChgs.Accounts["ACC2"].ID = "id1"
+	expectedEqual.Accounts["ACC2"].ID = "id2"
+
+	if ok := eEvChgs.Equals(expectedEqual); ok {
+		t.Errorf("Expected %+v, received %+v", ToJSON(eEvChgs), ToJSON(expectedEqual))
+	}
+
+	eEvChgs = nil
+	if ok := eEvChgs.Equals(expectedEqual); ok {
+		t.Errorf("Expected %+v, received %+v", ToJSON(eEvChgs), ToJSON(expectedEqual))
+	}
+
+	expectedEqual = nil
+	if ok := eEvChgs.Equals(expectedEqual); !ok {
+		t.Errorf("Expected %+v, received %+v", ToJSON(eEvChgs), ToJSON(expectedEqual))
+	}
 }
 
 func TestEqualsExtEventCharges(t *testing.T) {

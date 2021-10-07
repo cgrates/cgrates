@@ -596,6 +596,12 @@ func TestActivationIntervalEquals(t *testing.T) {
 	if aI.Equals(actInt) {
 		t.Error("ActivationInervals should not match")
 	}
+
+	aI.ActivationTime = time.Time{}
+	actInt.ActivationTime = time.Time{}
+	if !aI.Equals(actInt) {
+		t.Error("Expected both activation interval to be equal")
+	}
 }
 
 func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {

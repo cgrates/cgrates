@@ -447,3 +447,65 @@ func TestNMAsCGREvent(t *testing.T) {
 		t.Errorf("expecting: %+v, \nreceived: %+v", ToJSON(eEv), ToJSON(cgrEv.Event))
 	}
 }
+
+func TestCGREventSetCloneable(t *testing.T) {
+	cgrEv := &CGREvent{
+		clnb: false,
+	}
+
+	cgrEv.SetCloneable(true)
+	if !cgrEv.clnb {
+		t.Error("Expected clnb to be set to true")
+	}
+}
+
+func TestCGREventRPCClone(t *testing.T) {
+	cgrEv := &CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "CGRID",
+		Event: map[string]interface{}{
+			AnswerTime:         nil,
+			"supplierprofile1": "Supplier",
+			"UsageInterval":    "54.2",
+			"PddInterval":      "1s",
+			"Weight":           20.0,
+		},
+		APIOpts: map[string]interface{}{
+			"testKey": 12,
+		},
+		clnb: false, //first make it non clonable
+	}
+
+	rcv, err := cgrEv.RPCClone()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(cgrEv, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", cgrEv, rcv)
+	}
+
+	cgrEv.clnb = true
+	rcv, err = cgrEv.RPCClone()
+	if err != nil {
+		t.Error(err)
+	}
+	exp := &CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "CGRID",
+		Event: map[string]interface{}{
+			AnswerTime:         nil,
+			"supplierprofile1": "Supplier",
+			"UsageInterval":    "54.2",
+			"PddInterval":      "1s",
+			"Weight":           20.0,
+		},
+		APIOpts: map[string]interface{}{
+			"testKey": 12,
+		},
+		clnb: false,
+	}
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv.(*CGREvent))
+	}
+}
