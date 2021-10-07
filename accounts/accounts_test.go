@@ -1984,3 +1984,75 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 	}
 }
 */
+
+func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
+	// this test will call maxDebitAbstractsFromConcretes but without any concreteBal and not calling rates
+	cache := engine.Cache
+	engine.Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+
+	acnts := NewAccountS(cfg, filterS, nil, dm)
+	acnt := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1DebitAbstractsWithRecurrentFeeNegative",
+		Balances: map[string]*utils.Balance{
+			"ab1": &utils.Balance{
+				ID:    "ab1",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(60*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FixedFee:  utils.NewDecimal(1, 1),
+						Increment: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(context.Background(), acnt, true); err != nil {
+		t.Error(err)
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EV",
+		Event: map[string]interface{}{
+			utils.ToR:          utils.MetaVoice,
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:    2 * time.Minute,
+			utils.OptsAccountS: true,
+		},
+	}
+
+	extAc, err := acnt.AsExtAccount()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expEcCh := utils.ExtEventCharges{
+		Abstracts:   utils.Float64Pointer(0),
+		Accounting:  make(map[string]*utils.ExtAccountCharge),
+		UnitFactors: make(map[string]*utils.ExtUnitFactor),
+		Rating:      make(map[string]*utils.ExtRateSInterval),
+		Rates:       make(map[string]*utils.ExtIntervalRate),
+		Accounts: map[string]*utils.ExtAccount{
+			"TestV1DebitAbstractsWithRecurrentFeeNegative": extAc,
+		},
+	}
+
+	// not having concrBal and connection to rates, this will not perform a debit, so the EventChargers abstract will be empty
+	var eEc utils.ExtEventCharges
+	if err := acnts.V1DebitAbstracts(context.Background(), cgrEv, &eEc); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eEc, expEcCh) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expEcCh), utils.ToJSON(eEc))
+	}
+
+	engine.Cache = cache
+}
