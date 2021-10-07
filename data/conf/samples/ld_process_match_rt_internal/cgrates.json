@@ -5,22 +5,21 @@
 	
 	"general": {
 		"log_level": 7,
-		"reply_timeout": "50s"
+		"reply_timeout": "50s",
 	},
 	
 	
 	"listen": {
 		"rpc_json": ":2012",
 		"rpc_gob": ":2013",
-		"http": ":2080"
+		"http": ":2080",
 	},
-	
 	
 	"data_db": {
 		"db_type": "*internal"
 	},
 	
-	
+
 	"stor_db": {
 		"db_type": "*internal"
 	},
@@ -30,6 +29,7 @@
 			"id": "*default",
 			"enabled": true,
 			"tenant": "cgrates.org",
+			"lockfile_path": ".cgr.lck",
 			"tp_in_dir": "/usr/share/cgrates/tariffplans/loadRateTest",
 			"tp_out_dir": "",
 		},
@@ -47,6 +47,7 @@
 		"ees_conns": ["conn1"]
 	},
 	
+	
 	"chargers": {
 		"enabled": true,
 		"attributes_conns": ["*internal"],
@@ -61,6 +62,7 @@
 
 	"accounts": {
 		"enabled": true,
+		"rates_conns": ["*internal"],
 	},
 
 	"rpc_conns": {

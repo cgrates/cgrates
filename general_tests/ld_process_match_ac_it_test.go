@@ -41,11 +41,11 @@ var (
 		testLdPrMatchAcLoadConfig,
 		testLdPrMatchAcResetDataDB,
 		testLdPrMatchAcResetStorDb,
-		// testLdPrMatchAcStartEngine,
+		testLdPrMatchAcStartEngine,
 		testLdPrMatchAcRPCConn,
 		testLdPrMatchAcLoadTP,
 		testLdPrMatchAcCDRSProcessEvent,
-		// testLdPrMatchAcStopCgrEngine,
+		testLdPrMatchAcStopCgrEngine,
 	}
 )
 
@@ -102,11 +102,15 @@ func testLdPrMatchAcRPCConn(t *testing.T) {
 }
 
 func testLdPrMatchAcLoadTP(t *testing.T) {
+	caching := utils.MetaReload
+	if testLdPrMatchAcCfgDir == "ld_process_match_rt_internal" {
+		caching = utils.MetaNone
+	}
 	var reply string
 	if err := testLdPrMatchAcRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&loaders.ArgsProcessFolder{
 			StopOnError: true,
-			Caching:     utils.StringPointer(utils.MetaReload),
+			Caching:     utils.StringPointer(caching),
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -125,9 +129,9 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 			utils.AccountField: "1001",
 			utils.Subject:      "1001",
 			utils.Destination:  "1002",
-			utils.Usage:        time.Minute,
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaUsage:      2 * time.Minute,
 			utils.OptsRateS:      false,
 			utils.OptsCDRsExport: false,
 			utils.OptsAccountS:   true,
