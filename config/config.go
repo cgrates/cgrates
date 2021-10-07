@@ -98,7 +98,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		generalCfg: &GeneralCfg{NodeID: utils.UUIDSha1Prefix()},
 		dataDbCfg: &DataDbCfg{
 			Items: make(map[string]*ItemOpt),
-			Opts:  make(map[string]interface{}),
+			Opts:  &DataDBOpts{},
 		},
 		storDbCfg: &StorDbCfg{
 			Items: make(map[string]*ItemOpt),
