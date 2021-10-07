@@ -65,7 +65,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
 
 	nM := utils.NewOrderedNavigableMap()
-	path := []string{utils.Rcode}
+	path := []string{utils.DNSRcode}
 	itm := &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -81,7 +81,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Rcode}
+	path = []string{utils.DNSRcode}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: "RandomValue",
 	}}
@@ -95,7 +95,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Answer, utils.Order}
+	path = []string{utils.DNSAnswer, utils.Order}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: "RandomValue",
 	}}
@@ -109,7 +109,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Answer, utils.Preference}
+	path = []string{utils.DNSAnswer, utils.Preference}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: "RandomValue",
 	}}
@@ -125,7 +125,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	m = new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeAFSDB)
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Answer, utils.Order}
+	path = []string{utils.DNSAnswer, utils.Order}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -139,7 +139,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Answer, utils.Preference}
+	path = []string{utils.DNSAnswer, utils.Preference}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -153,7 +153,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Answer, utils.Flags}
+	path = []string{utils.DNSAnswer, utils.Flags}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -167,7 +167,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Answer, utils.Service}
+	path = []string{utils.DNSAnswer, utils.Service}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -181,7 +181,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Answer, utils.Regexp}
+	path = []string{utils.DNSAnswer, utils.Regexp}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}
@@ -195,7 +195,7 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
-	path = []string{utils.Answer, utils.Replacement}
+	path = []string{utils.DNSAnswer, utils.Replacement}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
 		Data: 10,
 	}}

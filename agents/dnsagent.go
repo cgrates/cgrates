@@ -115,9 +115,9 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 	reqVars := &utils.DataNode{
 		Type: utils.NMMapType,
 		Map: map[string]*utils.DataNode{
-			QueryType:        utils.NewLeafNode(dns.TypeToString[q.Qtype]),
-			QueryName:        utils.NewLeafNode(q.Name),
-			utils.RemoteHost: utils.NewLeafNode(rmtAddr),
+			utils.DNSQueryType: utils.NewLeafNode(dns.TypeToString[q.Qtype]),
+			utils.DNSQueryName: utils.NewLeafNode(q.Name),
+			utils.RemoteHost:   utils.NewLeafNode(rmtAddr),
 		},
 	}
 	// message preprocesing
