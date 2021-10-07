@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -45,6 +46,18 @@ func defaultDBPort(dbType, port string) string {
 	return port
 }
 
+type DataDBOpts struct {
+	RedisSentinel           string
+	RedisCluster            bool
+	RedisClusterSync        time.Duration
+	RedisClusterOndownDelay time.Duration
+	MongoQueryTimeout       time.Duration
+	RedisTLS                bool
+	RedisClientCertificate  string
+	RedisClientKey          string
+	RedisCACertificate      string
+}
+
 // DataDbCfg Database config
 type DataDbCfg struct {
 	Type        string
@@ -59,7 +72,7 @@ type DataDbCfg struct {
 	RplFiltered bool
 	RplCache    string
 	Items       map[string]*ItemOpt
-	Opts        map[string]interface{}
+	Opts        *DataDBOpts
 }
 
 // loadDataDBCfg loads the DataDB section of the configuration
@@ -70,6 +83,46 @@ func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig
 	}
 	if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		return
+	}
+	return
+}
+
+func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DataDBOptsJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.RedisSentinel != nil {
+		dbOpts.RedisSentinel = *jsnCfg.RedisSentinel
+	}
+	if jsnCfg.RedisCluster != nil {
+		dbOpts.RedisCluster = *jsnCfg.RedisCluster
+	}
+	if jsnCfg.RedisClusterSync != nil {
+		if dbOpts.RedisClusterSync, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisClusterSync); err != nil {
+			return
+		}
+	}
+	if jsnCfg.RedisClusterOndownDelay != nil {
+		if dbOpts.RedisClusterOndownDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisClusterOndownDelay); err != nil {
+			return
+		}
+	}
+	if jsnCfg.MongoQueryTimeout != nil {
+		if dbOpts.MongoQueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.MongoQueryTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.RedisTLS != nil {
+		dbOpts.RedisTLS = *jsnCfg.RedisTLS
+	}
+	if jsnCfg.RedisClientCertificate != nil {
+		dbOpts.RedisClientCertificate = *jsnCfg.RedisClientCertificate
+	}
+	if jsnCfg.RedisClientKey != nil {
+		dbOpts.RedisClientKey = *jsnCfg.RedisClientKey
+	}
+	if jsnCfg.RedisCACertificate != nil {
+		dbOpts.RedisCACertificate = *jsnCfg.RedisCACertificate
 	}
 	return
 }
@@ -129,11 +182,6 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			dbcfg.Items[kJsn] = val
 		}
 	}
-	if jsnDbCfg.Opts != nil {
-		for k, v := range jsnDbCfg.Opts {
-			dbcfg.Opts[k] = v
-		}
-	}
 	if jsnDbCfg.Replication_filtered != nil {
 		dbcfg.RplFiltered = *jsnDbCfg.Replication_filtered
 	}
@@ -143,11 +191,28 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Replication_cache != nil {
 		dbcfg.RplCache = *jsnDbCfg.Replication_cache
 	}
+	if jsnDbCfg.Opts != nil {
+		err = dbcfg.Opts.loadFromJSONCfg(jsnDbCfg.Opts)
+	}
 	return
 }
 
 func (DataDbCfg) SName() string               { return DataDBJSON }
 func (dbcfg DataDbCfg) CloneSection() Section { return dbcfg.Clone() }
+
+func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
+	return &DataDBOpts{
+		RedisSentinel:           dbOpts.RedisSentinel,
+		RedisCluster:            dbOpts.RedisCluster,
+		RedisClusterSync:        dbOpts.RedisClusterSync,
+		RedisClusterOndownDelay: dbOpts.RedisClusterOndownDelay,
+		MongoQueryTimeout:       dbOpts.MongoQueryTimeout,
+		RedisTLS:                dbOpts.RedisTLS,
+		RedisClientCertificate:  dbOpts.RedisClientCertificate,
+		RedisClientKey:          dbOpts.RedisClientKey,
+		RedisCACertificate:      dbOpts.RedisCACertificate,
+	}
+}
 
 // Clone returns the cloned object
 func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
@@ -162,15 +227,11 @@ func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 		RplCache:    dbcfg.RplCache,
 		RmtConnID:   dbcfg.RmtConnID,
 		Items:       make(map[string]*ItemOpt),
-		Opts:        make(map[string]interface{}),
+		Opts:        dbcfg.Opts.Clone(),
 	}
 	for k, itm := range dbcfg.Items {
 		cln.Items[k] = itm.Clone()
 	}
-	for k, v := range dbcfg.Opts {
-		cln.Opts[k] = v
-	}
-
 	if dbcfg.RmtConns != nil {
 		cln.RmtConns = utils.CloneStringSlice(dbcfg.RmtConns)
 	}
@@ -182,6 +243,17 @@ func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
+	opts := map[string]interface{}{
+		utils.RedisSentinelNameCfg:       dbcfg.Opts.RedisSentinel,
+		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
+		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
+		utils.RedisClusterOnDownDelayCfg: dbcfg.Opts.RedisClusterOndownDelay.String(),
+		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
+		utils.RedisTLS:                   dbcfg.Opts.RedisTLS,
+		utils.RedisClientCertificate:     dbcfg.Opts.RedisClientCertificate,
+		utils.RedisClientKey:             dbcfg.Opts.RedisClientKey,
+		utils.RedisCACertificate:         dbcfg.Opts.RedisCACertificate,
+	}
 	mp := map[string]interface{}{
 		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
@@ -193,12 +265,8 @@ func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 		utils.ReplicationConnsCfg:    dbcfg.RplConns,
 		utils.ReplicationFilteredCfg: dbcfg.RplFiltered,
 		utils.ReplicationCache:       dbcfg.RplCache,
+		utils.OptsCfg:                opts,
 	}
-	opts := make(map[string]interface{})
-	for k, v := range dbcfg.Opts {
-		opts[k] = v
-	}
-	mp[utils.OptsCfg] = opts
 	if dbcfg.Items != nil {
 		items := make(map[string]interface{})
 		for key, item := range dbcfg.Items {
@@ -314,6 +382,18 @@ func diffMapItemOptJson(d map[string]*ItemOptJson, v1, v2 map[string]*ItemOpt) m
 	return d
 }
 
+type DataDBOptsJson struct {
+	RedisSentinel           *string `json:"*redisSentinel"`
+	RedisCluster            *bool   `json:"*redisCluster"`
+	RedisClusterSync        *string `json:"*redisClusterSync"`
+	RedisClusterOndownDelay *string `json:"*redisClusterOndownDelay"`
+	MongoQueryTimeout       *string `json:"*mongoQueryTimeout"`
+	RedisTLS                *bool   `json:"*redisTLS"`
+	RedisClientCertificate  *string `json:"*redisClientCertificate"`
+	RedisClientKey          *string `json:"*redisClientKey"`
+	RedisCACertificate      *string `json:"*redisCACertificate"`
+}
+
 // Database config
 type DbJsonCfg struct {
 	Db_type               *string
@@ -330,7 +410,41 @@ type DbJsonCfg struct {
 	Replication_filtered  *bool
 	Replication_cache     *string
 	Items                 map[string]*ItemOptJson
-	Opts                  map[string]interface{}
+	Opts                  *DataDBOptsJson
+}
+
+func diffDataDBOptsJsonCfg(d *DataDBOptsJson, v1, v2 *DataDBOpts) *DataDBOptsJson {
+	if d == nil {
+		d = new(DataDBOptsJson)
+	}
+	if v1.RedisSentinel != v2.RedisSentinel {
+		d.RedisSentinel = utils.StringPointer(v2.RedisSentinel)
+	}
+	if v1.RedisCluster != v2.RedisCluster {
+		d.RedisCluster = utils.BoolPointer(v2.RedisCluster)
+	}
+	if v1.RedisClusterSync != v2.RedisClusterSync {
+		d.RedisClusterSync = utils.StringPointer(v2.RedisClusterSync.String())
+	}
+	if v1.RedisClusterOndownDelay != v2.RedisClusterOndownDelay {
+		d.RedisClusterOndownDelay = utils.StringPointer(v2.RedisClusterOndownDelay.String())
+	}
+	if v1.MongoQueryTimeout != v2.MongoQueryTimeout {
+		d.MongoQueryTimeout = utils.StringPointer(v2.MongoQueryTimeout.String())
+	}
+	if v1.RedisTLS != v2.RedisTLS {
+		d.RedisTLS = utils.BoolPointer(v2.RedisTLS)
+	}
+	if v1.RedisClientCertificate != v2.RedisClientCertificate {
+		d.RedisClientCertificate = utils.StringPointer(v2.RedisClientCertificate)
+	}
+	if v1.RedisClientKey != v2.RedisClientKey {
+		d.RedisClientKey = utils.StringPointer(v2.RedisClientKey)
+	}
+	if v1.RedisCACertificate != v2.RedisCACertificate {
+		d.RedisCACertificate = utils.StringPointer(v2.RedisCACertificate)
+	}
+	return d
 }
 
 func diffDataDbJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
@@ -372,6 +486,6 @@ func diffDataDbJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
 		d.Replication_cache = utils.StringPointer(v2.RplCache)
 	}
 	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
-	d.Opts = diffMap(d.Opts, v1.Opts, v2.Opts)
+	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
