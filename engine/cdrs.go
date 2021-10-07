@@ -200,7 +200,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.AttributeS))
-			err = utils.ErrPartiallyExecuted
+			err = utils.NewErrAttributeS(err)
 			return
 		}
 	}
@@ -216,7 +216,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.ChargerS))
-			err = utils.ErrPartiallyExecuted
+			err = utils.NewErrChargerS(err)
 			return
 		}
 	} else { // ChargerS not requested, charge the original event
@@ -258,23 +258,21 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	}
 
 	var export bool
-	if len(cdrS.cfg.CdrsCfg().EEsConns) != 0 {
-		for _, cgrEv := range cgrEvs {
-			if export, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Export,
-				utils.OptsCDRsExport); err != nil {
-				return
+	for _, cgrEv := range cgrEvs {
+		if export, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Export,
+			utils.OptsCDRsExport); err != nil {
+			return
+		}
+		if export {
+			evWithOpts := &utils.CGREventWithEeIDs{
+				CGREvent: cgrEv,
+				EeIDs:    cdrS.cfg.CdrsCfg().OnlineCDRExports,
 			}
-			if export {
-				evWithOpts := &utils.CGREventWithEeIDs{
-					CGREvent: cgrEv,
-					EeIDs:    cdrS.cfg.CdrsCfg().OnlineCDRExports,
-				}
-				if err := cdrS.eeSProcessEvent(ctx, evWithOpts); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: <%s> exporting cdr %+v",
-							utils.CDRs, err.Error(), utils.ToJSON(evWithOpts)))
-					partiallyExecuted = true
-				}
+			if err := cdrS.eeSProcessEvent(ctx, evWithOpts); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: <%s> exporting cdr %+v",
+						utils.CDRs, err.Error(), utils.ToJSON(evWithOpts)))
+				partiallyExecuted = true
 			}
 		}
 	}
