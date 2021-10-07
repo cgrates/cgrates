@@ -1676,3 +1676,25 @@ func TestAccountEqualsCase6(t *testing.T) {
 		t.Error("Thresholds should not match")
 	}
 }
+
+func TestAccountClone(t *testing.T) {
+	aI := &ActivationInterval{
+		ActivationTime: time.Date(2021, 10, 7, 13, 0, 0, 0, time.Local),
+		ExpiryTime:     time.Date(2021, 10, 7, 18, 0, 0, 0, time.Local),
+	}
+
+	expAI := &ActivationInterval{
+		ActivationTime: time.Date(2021, 10, 7, 13, 0, 0, 0, time.Local),
+		ExpiryTime:     time.Date(2021, 10, 7, 18, 0, 0, 0, time.Local),
+	}
+
+	rcv := aI.Clone()
+	if !reflect.DeepEqual(rcv, expAI) {
+		t.Errorf("Expected %v \n but received \n %v", expAI, rcv)
+	}
+
+	aI = nil
+	if err := aI.Clone(); err != nil {
+		t.Error(err)
+	}
+}

@@ -24,7 +24,6 @@ package analyzers
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -207,7 +206,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 					"Subject":     "Something_inter",
 				},
 				APIOpts: map[string]interface{}{
-					"*attributeIDs": []string{"*constant:*req.RequestType:*none"},
+					"*attributeIDs": []interface{}{"*constant:*req.RequestType:*none"},
 					"*context":      "*chargers",
 					"*subsys":       "*chargers",
 				},
@@ -236,7 +235,7 @@ func testAnalyzerSV1Search(t *testing.T) {
 	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
-	fmt.Println(utils.ToJSON(result))
+	// fmt.Println(utils.ToJSON(result))
 }
 
 func testAnalyzerSV1Search2(t *testing.T) {

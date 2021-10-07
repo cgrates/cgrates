@@ -199,6 +199,14 @@ func TestNewErrResourceS(t *testing.T) {
 	}
 }
 
+func TestNewErrAccountS(t *testing.T) {
+	err := errors.New("TEST_ACCOUNTS_ERROR")
+	exp := "ACCOUNTS_ERROR:TEST_ACCOUNTS_ERROR"
+	if rcv := NewErrAccountS(err); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
 func TestNewErrRouteS(t *testing.T) {
 	err := errors.New("TEST_ROUTES_ERROR")
 	exp := "ROUTES_ERROR:TEST_ROUTES_ERROR"

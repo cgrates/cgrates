@@ -21,6 +21,7 @@ package utils
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/ericlagergren/decimal"
 )
@@ -309,5 +310,15 @@ func TestDecimalFloat64(t *testing.T) {
 		t.Error("expected ok to be true")
 	} else if rcv != exp {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestDecimalDuration(t *testing.T) {
+	d := NewDecimal(3, 0)
+	rcv, ok := d.Duration()
+	if !ok {
+		t.Error("Cannot convert")
+	} else if rcv != time.Nanosecond*3 {
+		t.Errorf("Expected 3ns")
 	}
 }
