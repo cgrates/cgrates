@@ -174,50 +174,40 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 	if ec.Accounting != nil {
 		eEc.Accounting = make(map[string]*ExtAccountCharge, len(eEc.Accounting))
 		for key, val := range ec.Accounting {
-			if extAcc, err := val.AsExtAccountCharge(); err != nil {
+			if eEc.Accounting[key], err = val.AsExtAccountCharge(); err != nil {
 				return nil, err
-			} else {
-				eEc.Accounting[key] = extAcc
 			}
 		}
 	}
 	if ec.UnitFactors != nil {
 		eEc.UnitFactors = make(map[string]*ExtUnitFactor, len(ec.UnitFactors))
 		for key, val := range ec.UnitFactors {
-			if extUnit, err := val.AsExtUnitFactor(); err != nil {
+			if eEc.UnitFactors[key], err = val.AsExtUnitFactor(); err != nil {
 				return nil, err
-			} else {
-				eEc.UnitFactors[key] = extUnit
 			}
 		}
 	}
 	if ec.Rating != nil {
 		eEc.Rating = make(map[string]*ExtRateSInterval, len(ec.Rating))
 		for key, val := range ec.Rating {
-			if extRate, err := val.AsExtRateSInterval(); err != nil {
+			if eEc.Rating[key], err = val.AsExtRateSInterval(); err != nil {
 				return nil, err
-			} else {
-				eEc.Rating[key] = extRate
 			}
 		}
 	}
 	if ec.Rates != nil {
 		eEc.Rates = make(map[string]*ExtIntervalRate, len(ec.Rates))
 		for key, val := range ec.Rates {
-			if extRate, err := val.AsExtIntervalRate(); err != nil {
+			if eEc.Rates[key], err = val.AsExtIntervalRate(); err != nil {
 				return nil, err
-			} else {
-				eEc.Rates[key] = extRate
 			}
 		}
 	}
 	if ec.Accounts != nil {
 		eEc.Accounts = make(map[string]*ExtAccount, len(ec.Accounts))
 		for acntID, acnt := range ec.Accounts {
-			if extAccs, err := acnt.AsExtAccount(); err != nil {
+			if eEc.Accounts[acntID], err = acnt.AsExtAccount(); err != nil {
 				return nil, err
-			} else {
-				eEc.Accounts[acntID] = extAccs
 			}
 		}
 	}

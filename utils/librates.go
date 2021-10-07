@@ -324,11 +324,6 @@ func (rI *RateSInterval) AsRatesIntervalsCost() (rIc *RateSIntervalCost) {
 	rIc = &RateSIntervalCost{
 		CompressFactor: rI.CompressFactor,
 	}
-	/*
-		if rI.cost != nil {
-			rIc.cost = rI.cost
-		}
-	*/
 	if rI.Increments != nil {
 		rIc.Increments = make([]*RateSIncrementCost, len(rI.Increments))
 		for idx, incr := range rI.Increments {
@@ -508,8 +503,6 @@ type RateProfileCost struct {
 type RateSIntervalCost struct {
 	Increments     []*RateSIncrementCost
 	CompressFactor int64
-
-	cost *decimal.Big // unexported total interval cost
 }
 
 // RateSIncrementCost is used in the RateProfileCost to reflect RateSIncrement
@@ -518,8 +511,6 @@ type RateSIncrementCost struct {
 	RateID            string
 	RateIntervalIndex int
 	CompressFactor    int64
-
-	cost *decimal.Big // unexported total increment cost
 }
 
 // AsRateSIncrementCost converts RateSIncrement to RateSIncrementCost
@@ -533,11 +524,6 @@ func (rI *RateSIncrement) AsRateSIncrementCost() (rIc *RateSIncrementCost) {
 	if rI.Usage != nil {
 		rIc.Usage = rI.Usage
 	}
-	/*
-		if rI.cost != nil {
-			rIc.cost = rI.cost
-		}
-	*/
 	return
 
 }
@@ -720,6 +706,7 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 	return rIcr.cost
 }
 
+/*
 // CostForIntervals sums the costs for all intervals
 func CostForIntervals(rtIvls []*RateSInterval, rts map[string]*IntervalRate) (cost *decimal.Big) {
 	cost = new(decimal.Big)
@@ -728,6 +715,7 @@ func CostForIntervals(rtIvls []*RateSInterval, rts map[string]*IntervalRate) (co
 	}
 	return
 }
+*/
 
 // CompressIntervals will compress intervals which equal
 func CompressIntervals(rtIvls []*RateSInterval) {
