@@ -192,7 +192,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Usage:      []*utils.DynamicDecimalBigOpt{},
 		}},
 		configDBCfg: &ConfigDBCfg{
-			Opts: make(map[string]interface{}),
+			Opts: &DataDBOpts{},
 		},
 
 		rldCh:   make(chan string, 1),
