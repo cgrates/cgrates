@@ -55,15 +55,15 @@ func NewDataDBConn(dbType, host, port, name, user,
 			return
 		}
 		var hasTLSConn bool
-		if hasTLSConn, err = utils.IfaceAsBool(opts[utils.RedisTLS]); err != nil {
+		if hasTLSConn, err = utils.IfaceAsBool(opts[utils.RedisTLSCfg]); err != nil {
 			return
 		}
 		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler,
 			utils.RedisMaxConns, utils.RedisMaxAttempts, utils.IfaceAsString(opts[utils.RedisSentinelNameCfg]),
 			isCluster, clusterSync, clusterOnDownDelay, hasTLSConn,
-			utils.IfaceAsString(opts[utils.RedisClientCertificate]),
-			utils.IfaceAsString(opts[utils.RedisClientKey]),
-			utils.IfaceAsString(opts[utils.RedisCACertificate]))
+			utils.IfaceAsString(opts[utils.RedisClientCertificateCfg]),
+			utils.IfaceAsString(opts[utils.RedisClientKeyCfg]),
+			utils.IfaceAsString(opts[utils.RedisCACertificateCfg]))
 	case utils.Mongo:
 		var ttl time.Duration
 		if ttl, err = utils.IfaceAsDuration(opts[utils.MongoQueryTimeoutCfg]); err != nil {

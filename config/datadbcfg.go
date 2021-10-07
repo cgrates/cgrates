@@ -249,10 +249,10 @@ func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
 		utils.RedisClusterOnDownDelayCfg: dbcfg.Opts.RedisClusterOndownDelay.String(),
 		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
-		utils.RedisTLS:                   dbcfg.Opts.RedisTLS,
-		utils.RedisClientCertificate:     dbcfg.Opts.RedisClientCertificate,
-		utils.RedisClientKey:             dbcfg.Opts.RedisClientKey,
-		utils.RedisCACertificate:         dbcfg.Opts.RedisCACertificate,
+		utils.RedisTLSCfg:                dbcfg.Opts.RedisTLS,
+		utils.RedisClientCertificateCfg:  dbcfg.Opts.RedisClientCertificate,
+		utils.RedisClientKeyCfg:          dbcfg.Opts.RedisClientKey,
+		utils.RedisCACertificateCfg:      dbcfg.Opts.RedisCACertificate,
 	}
 	mp := map[string]interface{}{
 		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
