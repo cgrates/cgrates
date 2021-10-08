@@ -270,7 +270,7 @@ func TestOpenDB2Err(t *testing.T) {
 func TestOpenDB3(t *testing.T) {
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
-	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLMaxConnLifetime: 2})
+	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLConnMaxLifetime: 2})
 	if err != nil {
 		t.Error(err)
 	}
@@ -279,7 +279,7 @@ func TestOpenDB3(t *testing.T) {
 func TestOpenDB3Err(t *testing.T) {
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
-	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLMaxConnLifetime: "test"})
+	_, _, err := openDB(dialect, map[string]interface{}{utils.SQLConnMaxLifetime: "test"})
 	errExpect := "time: invalid duration \"test\""
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
