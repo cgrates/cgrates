@@ -142,7 +142,7 @@ const CGRATES_CFG_JSON = `
 	"opts": {
 		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
-		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
 		"sslMode":"disable",				// sslMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
@@ -493,7 +493,7 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-				// "sqlConnMaxLifetime": 0,						// SQLMaxConnLifetime 
+				// "sqlConnMaxLifetime": "0",						// SQLConnMaxLifetime 
 
 
 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported

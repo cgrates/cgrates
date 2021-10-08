@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package main
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestCGRLoaderFlags(t *testing.T) {
 	if err := cgrLoaderFlags.Parse([]string{"-config_path", "/etc/cgrates"}); err != nil {
@@ -83,19 +86,19 @@ func TestCGRLoaderFlags(t *testing.T) {
 
 	if err := cgrLoaderFlags.Parse([]string{"-redisClusterSync", "3s"}); err != nil {
 		t.Error(err)
-	} else if *dbRedisClusterSync != "3s" {
+	} else if *dbRedisClusterSync != 3*time.Second {
 		t.Errorf("Expected 3s, received %+v", *dbRedisClusterSync)
 	}
 
 	if err := cgrLoaderFlags.Parse([]string{"-redisClusterOndownDelay", "0"}); err != nil {
 		t.Error(err)
-	} else if *dbRedisClusterDownDelay != "0" {
+	} else if *dbRedisClusterDownDelay != 0 {
 		t.Errorf("Expected 0, received %+v", *dbRedisClusterDownDelay)
 	}
 
 	if err := cgrLoaderFlags.Parse([]string{"-mongoQueryTimeout", "5s"}); err != nil {
 		t.Error(err)
-	} else if *dbQueryTimeout != "5s" {
+	} else if *dbQueryTimeout != 5*time.Second {
 		t.Errorf("Expected 5s, received %+v", *dbQueryTimeout)
 	}
 

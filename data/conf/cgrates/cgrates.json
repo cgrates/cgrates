@@ -449,7 +449,7 @@
 // 				// SQL
 // 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 // 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-// 				// "sqlConnMaxLifetime": 0,						// SQLMaxConnLifetime 
+// 				// "sqlConnMaxLifetime": 0,						// SQLConnMaxLifetime 
 
 
 // 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported

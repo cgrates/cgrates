@@ -313,16 +313,16 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Replication_filtered: utils.BoolPointer(false),
 		Remote_conn_id:       utils.StringPointer(""),
 		Replication_cache:    utils.StringPointer(""),
-		Opts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:       "",
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
+		Opts: &DBOptsJson{
+			RedisCACertificate:      utils.StringPointer(utils.EmptyString),
+			RedisClientCertificate:  utils.StringPointer(utils.EmptyString),
+			RedisClientKey:          utils.StringPointer(utils.EmptyString),
+			RedisCluster:            utils.BoolPointer(false),
+			RedisTLS:                utils.BoolPointer(false),
+			RedisSentinel:           utils.StringPointer(utils.EmptyString),
+			MongoQueryTimeout:       utils.StringPointer("10s"),
+			RedisClusterOndownDelay: utils.StringPointer("0"),
+			RedisClusterSync:        utils.StringPointer("5s"),
 		},
 		Items: map[string]*ItemOptJson{
 			utils.MetaAccounts: {
@@ -421,13 +421,13 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		Db_password:           utils.StringPointer(""),
 		String_indexed_fields: &[]string{},
 		Prefix_indexed_fields: &[]string{},
-		Opts: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.SSLModeCfg:            utils.PostgressSSLModeDisable,
-			utils.MysqlLocation:         "Local",
+		Opts: &DBOptsJson{
+			MongoQueryTimeout:  utils.StringPointer("10s"),
+			SQLMaxOpenConns:    utils.IntPointer(100),
+			SQLMaxIdleConns:    utils.IntPointer(10),
+			SQLConnMaxLifetime: utils.StringPointer("0"),
+			SSLMode:            utils.StringPointer(utils.PostgressSSLModeDisable),
+			MySQLLocation:      utils.StringPointer("Local"),
 		},
 		Items: map[string]*ItemOptJson{
 			utils.CacheTBLTPResources: {
@@ -1824,16 +1824,16 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_storDB_user:     utils.StringPointer("cgrates"),
 		Out_storDB_password: utils.StringPointer(""),
 		Users_filters:       &[]string{},
-		Out_storDB_opts:     make(map[string]interface{}),
-		Out_dataDB_opts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisClusterCfg:            false,
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
+		Out_storDB_opts:     &DBOptsJson{},
+		Out_dataDB_opts: &DBOptsJson{
+			RedisClusterSync:        utils.StringPointer("5s"),
+			RedisClusterOndownDelay: utils.StringPointer("0"),
+			RedisCACertificate:      utils.StringPointer(utils.EmptyString),
+			RedisClientCertificate:  utils.StringPointer(utils.EmptyString),
+			RedisClientKey:          utils.StringPointer(utils.EmptyString),
+			RedisCluster:            utils.BoolPointer(false),
+			RedisSentinel:           utils.StringPointer(utils.EmptyString),
+			RedisTLS:                utils.BoolPointer(false),
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

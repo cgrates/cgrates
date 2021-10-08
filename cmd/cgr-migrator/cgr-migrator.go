@@ -267,11 +267,11 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutDataDBEncoding = *outDBDataEncoding
 	}
 	if *outDataDBRedisSentinel == utils.MetaDataDB {
-		if utils.IfaceAsString(dfltCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg]) == utils.IfaceAsString(mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg]) {
-			mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg] = dfltCfg.DataDbCfg().Opts.RedisSentinel
+		if dfltCfg.MigratorCgrCfg().OutDataDBOpts.RedisSentinel == mgrCfg.MigratorCgrCfg().OutDataDBOpts.RedisSentinel {
+			mgrCfg.MigratorCgrCfg().OutDataDBOpts.RedisSentinel = dfltCfg.DataDbCfg().Opts.RedisSentinel
 		}
 	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg] = *outDataDBRedisSentinel
+		mgrCfg.MigratorCgrCfg().OutDataDBOpts.RedisSentinel = *outDataDBRedisSentinel
 	}
 
 	sameDataDB = mgrCfg.MigratorCgrCfg().OutDataDBType == mgrCfg.DataDbCfg().Type &&

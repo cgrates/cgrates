@@ -20,6 +20,7 @@ package main
 
 import (
 	"testing"
+	"time"
 )
 
 // if the flag change this should fail
@@ -85,19 +86,19 @@ func TestFlags(t *testing.T) {
 	} else if !*dbRedisCluster {
 		t.Errorf("Expected true received:%v ", *dbRedisCluster)
 	}
-	if err := cgrMigratorFlags.Parse([]string{"-redisClusterSync", "true"}); err != nil {
+	if err := cgrMigratorFlags.Parse([]string{"-redisClusterSync", "3s"}); err != nil {
 		t.Fatal(err)
-	} else if *dbRedisClusterSync != "true" {
+	} else if *dbRedisClusterSync != 3*time.Second {
 		t.Errorf("Expected true received:%v ", *dbRedisClusterSync)
 	}
-	if err := cgrMigratorFlags.Parse([]string{"-redisClusterOndownDelay", "true"}); err != nil {
+	if err := cgrMigratorFlags.Parse([]string{"-redisClusterOndownDelay", "3s"}); err != nil {
 		t.Fatal(err)
-	} else if *dbRedisClusterDownDelay != "true" {
+	} else if *dbRedisClusterDownDelay != 3*time.Second {
 		t.Errorf("Expected true received:%v ", *dbRedisClusterDownDelay)
 	}
-	if err := cgrMigratorFlags.Parse([]string{"-mongoQueryTimeout", "true"}); err != nil {
+	if err := cgrMigratorFlags.Parse([]string{"-mongoQueryTimeout", "3s"}); err != nil {
 		t.Fatal(err)
-	} else if *dbQueryTimeout != "true" {
+	} else if *dbQueryTimeout != 3*time.Second {
 		t.Errorf("Expected true received:%v ", *dbQueryTimeout)
 	}
 	if err := cgrMigratorFlags.Parse([]string{"-redisTLS", "true"}); err != nil {

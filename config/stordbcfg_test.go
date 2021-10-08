@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -43,11 +44,11 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 			},
 		},
-		Opts: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MysqlLocation:         "UTC",
+		Opts: &DBOptsJson{
+			SQLMaxOpenConns:    utils.IntPointer(100),
+			SQLMaxIdleConns:    utils.IntPointer(10),
+			SQLConnMaxLifetime: utils.StringPointer("0"),
+			MySQLLocation:      utils.StringPointer("UTC"),
 		},
 	}
 	expected := &StorDbCfg{
@@ -67,13 +68,12 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 				Replicate: false,
 			},
 		},
-		Opts: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SSLModeCfg:            "disable",
-			utils.MysqlLocation:         "UTC",
+		Opts: &StorDBOpts{
+			SQLMaxOpenConns:   100,
+			SQLMaxIdleConns:   10,
+			MongoQueryTimeout: 10 * time.Second,
+			SSLMode:           "disable",
+			MySQLLocation:     "UTC",
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -125,10 +125,10 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	"db_type": "mongo",
 	}
 }`
-	dbcfg.Opts = make(map[string]interface{})
+	dbcfg.Opts = &StorDBOpts{}
 	expected := StorDbCfg{
 		Type: "mongo",
-		Opts: make(map[string]interface{}),
+		Opts: &StorDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -146,7 +146,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	expected = StorDbCfg{
 		Type: "mongo",
 		Port: "27017",
-		Opts: make(map[string]interface{}),
+		Opts: &StorDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -164,7 +164,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	expected = StorDbCfg{
 		Type: "internal",
 		Port: "internal",
-		Opts: make(map[string]interface{}),
+		Opts: &StorDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -191,7 +191,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			"opts": {	
 				"sqlMaxOpenConns": 100,					
 				"sqlMaxIdleConns": 10,					
-				"sqlConnMaxLifetime": 0, 			
+				"sqlConnMaxLifetime": "0", 			
 				"mongoQueryTimeout":"10s",
 				"sslMode":"disable",		
 				"mysqlLocation": "UTC",			
@@ -215,9 +215,9 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:         []string{"*conn1"},
 		utils.ReplicationConnsCfg:    []string{"*conn1"},
 		utils.OptsCfg: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.SQLMaxOpenConnsCfg:    100,
+			utils.SQLMaxIdleConnsCfg:    10,
+			utils.SQLConnMaxLifetimeCfg: "0s",
 			utils.MongoQueryTimeoutCfg:  "10s",
 			utils.SSLModeCfg:            "disable",
 			utils.MysqlLocation:         "UTC",
@@ -265,12 +265,11 @@ func TestStorDbCfgClone(t *testing.T) {
 				Replicate: false,
 			},
 		},
-		Opts: map[string]interface{}{
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SSLModeCfg:            "disable",
+		Opts: &StorDBOpts{
+			SQLMaxOpenConns:   100,
+			SQLMaxIdleConns:   10,
+			MongoQueryTimeout: 10 * time.Second,
+			SSLMode:           "disable",
 		},
 	}
 	rcv := ban.Clone()
@@ -294,7 +293,7 @@ func TestStorDbCfgClone(t *testing.T) {
 	if rcv.Items[utils.MetaCDRs].Remote = false; !ban.Items[utils.MetaCDRs].Remote {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.Opts[utils.SSLModeCfg] = ""; ban.Opts[utils.SSLModeCfg] != "disable" {
+	if rcv.Opts.SSLMode = ""; ban.Opts.SSLMode != "disable" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 
@@ -319,7 +318,9 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 				Remote: false,
 			},
 		},
-		Opts: map[string]interface{}{},
+		Opts: &StorDBOpts{
+			SQLMaxOpenConns: 50,
+		},
 	}
 
 	v2 := &StorDbCfg{
@@ -338,8 +339,8 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 				Remote: true,
 			},
 		},
-		Opts: map[string]interface{}{
-			"OPT_1": "opt1",
+		Opts: &StorDBOpts{
+			SQLMaxOpenConns: 100,
 		},
 	}
 
@@ -359,8 +360,8 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 				Remote: utils.BoolPointer(true),
 			},
 		},
-		Opts: map[string]interface{}{
-			"OPT_1": "opt1",
+		Opts: &DBOptsJson{
+			SQLMaxOpenConns: utils.IntPointer(100),
 		},
 	}
 
@@ -372,7 +373,7 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 	v1 = v2
 	expected = &DbJsonCfg{
 		Items: map[string]*ItemOptJson{},
-		Opts:  map[string]interface{}{},
+		Opts:  &DBOptsJson{},
 	}
 	rcv = diffStorDBDbJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
