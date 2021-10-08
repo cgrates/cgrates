@@ -1737,7 +1737,6 @@ func TestAccountMaxConcretes(t *testing.T) {
 	admS := NewAdminSv1(cfg, dm, nil)
 	accPrf := &APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
-
 			Tenant:    "cgrates.org",
 			ID:        "TestV1DebitAbstracts",
 			FilterIDs: []string{"*string:~*req.Account:1004"},
@@ -1798,7 +1797,7 @@ func TestAccountMaxConcretes(t *testing.T) {
 			utils.Usage:        "3m",
 		},
 	}
-	reply := utils.ExtEventCharges{}
+	reply := utils.EventCharges{}
 	if err := accSv1.MaxConcretes(context.Background(), ev, &reply); err != nil {
 		t.Errorf("Expected %+v, received %+v", nil, err)
 	}
@@ -1814,12 +1813,7 @@ func TestAccountMaxConcretes(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.ExtBalance{
 			"AbstractBalance1": {
-				ID: "AbstractBalance1",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 15,
-					},
-				},
+				ID:    "AbstractBalance1",
 				Type:  utils.MetaAbstract,
 				Units: utils.Float64Pointer(float64(40 * time.Second)),
 				CostIncrements: []*utils.ExtCostIncrement{
@@ -1869,8 +1863,8 @@ func TestAccountMaxConcretes(t *testing.T) {
 	extAccPrf.Balances["ConcreteBalance1"].Units = utils.Float64Pointer(0)
 	extAccPrf.Balances["ConcreteBalance2"].Units = utils.Float64Pointer(0)
 
-	exEvCh := utils.ExtEventCharges{
-		Concretes: utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
+	exEvCh := utils.EventCharges{
+		Concretes: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 		Charges: []*utils.ChargeEntry{
 			{
 				ChargingID:     "GENUUID1",
@@ -1881,27 +1875,85 @@ func TestAccountMaxConcretes(t *testing.T) {
 				CompressFactor: 1,
 			},
 		},
-		Accounting: map[string]*utils.ExtAccountCharge{
+		Accounting: map[string]*utils.AccountCharge{
 			"GENUUID1": {
 				AccountID:    "TestV1DebitAbstracts",
 				BalanceID:    "ConcreteBalance1",
-				Units:        utils.Float64Pointer(float64(time.Minute)),
-				BalanceLimit: utils.Float64Pointer(0),
+				Units:        utils.NewDecimal(int64(time.Minute), 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
 			},
 			"GENUUID2": {
 				AccountID:    "TestV1DebitAbstracts",
 				BalanceID:    "ConcreteBalance2",
-				Units:        utils.Float64Pointer(float64(30 * time.Second)),
-				BalanceLimit: utils.Float64Pointer(0),
+				Units:        utils.NewDecimal(int64(30*time.Second), 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
 			},
 		},
-		UnitFactors: map[string]*utils.ExtUnitFactor{},
-		Rating:      map[string]*utils.ExtRateSInterval{},
-		Rates:       map[string]*utils.ExtIntervalRate{},
-		Accounts: map[string]*utils.ExtAccount{
-			"TestV1DebitAbstracts": extAccPrf,
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
+			"TestV1DebitAbstracts": {
+				Tenant:    "cgrates.org",
+				ID:        "TestV1DebitAbstracts",
+				FilterIDs: []string{"*string:~*req.Account:1004"},
+				Balances: map[string]*utils.Balance{
+					"AbstractBalance1": {
+						ID:   "AbstractBalance1",
+						Type: utils.MetaAbstract,
+						Weights: []*utils.DynamicWeight{
+							{
+								Weight: 15,
+							},
+						},
+						Units: utils.NewDecimal(int64(40*time.Second), 0),
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(1, 0),
+							},
+						},
+					},
+					"ConcreteBalance1": {
+						ID: "ConcreteBalance1",
+						Weights: []*utils.DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  utils.MetaConcrete,
+						Units: utils.NewDecimal(0, 0),
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(1, 0),
+							},
+						},
+					},
+					"ConcreteBalance2": {
+						ID: "ConcreteBalance2",
+						Weights: []*utils.DynamicWeight{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  utils.MetaConcrete,
+						Units: utils.NewDecimal(0, 0),
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(1, 0),
+							},
+						},
+					},
+				},
+			},
 		},
 	}
+
 	if err := accSv1.MaxConcretes(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else {
@@ -1986,7 +2038,7 @@ func TestAccountDebitConcretes(t *testing.T) {
 			utils.Usage:        "3m",
 		},
 	}
-	reply := utils.ExtEventCharges{}
+	reply := utils.EventCharges{}
 	if err := accSv1.DebitConcretes(context.Background(), ev, &reply); err != nil {
 		t.Errorf("Expected %+v, received %+v", nil, err)
 	}
