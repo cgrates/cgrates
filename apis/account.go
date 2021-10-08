@@ -163,25 +163,25 @@ func (aSv1 *AccountSv1) AccountsForEvent(ctx *context.Context, args *utils.CGREv
 
 // MaxAbstracts returns the maximum abstracts for the event, based on matching Account
 func (aSv1 *AccountSv1) MaxAbstracts(ctx *context.Context, args *utils.CGREvent,
-	eEc *utils.ExtEventCharges) (err error) {
+	eEc *utils.EventCharges) (err error) {
 	return aSv1.aS.V1MaxAbstracts(ctx, args, eEc)
 }
 
 // DebitAbstracts performs debit for the provided event
 func (aSv1 *AccountSv1) DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
-	eEc *utils.ExtEventCharges) (err error) {
+	eEc *utils.EventCharges) (err error) {
 	return aSv1.aS.V1DebitAbstracts(ctx, args, eEc)
 }
 
 // MaxConcretes returns the maximum concretes for the event, based on the matching Account
 func (aSv1 *AccountSv1) MaxConcretes(ctx *context.Context, args *utils.CGREvent,
-	eEc *utils.ExtEventCharges) (err error) {
+	eEc *utils.EventCharges) (err error) {
 	return aSv1.aS.V1MaxConcretes(ctx, args, eEc)
 }
 
 // DebitConcretes performs debit of concrete units for the provided event
 func (aSv1 *AccountSv1) DebitConcretes(ctx *context.Context, args *utils.CGREvent,
-	eEc *utils.ExtEventCharges) (err error) {
+	eEc *utils.EventCharges) (err error) {
 	return aSv1.aS.V1DebitConcretes(ctx, args, eEc)
 }
 
