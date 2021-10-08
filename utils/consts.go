@@ -2168,13 +2168,12 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
 	OptsCDRs, OptsSesCDRsDerivedReply, OptsChargerS, OptsResourceS, OptsSesResourceSAuthorize,
 	OptsSesResourceSAlocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
-	OptsSesRouteSDerivedReply, OptsSesRouteSIgnoreErrors, OptsSesRouteSMaxCost, OptsStatS,
-	OptsSesStatSDerivedReply, OptsSesStatIDs, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
-	OptsSesSTIRInitiate, OptsThresholdS, OptsSesThresholdSDerivedReply, OptsSesThresholdIDs,
+	OptsSesRouteSDerivedReply, OptsStatS, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
+	OptsSesSTIRInitiate, OptsThresholdS, OptsSesThresholdSDerivedReply,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, OptsAttributeS, OptsChargerS, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, OptsStatS, OptsCDRsStore, OptsThresholdS, OptsRateS, OptsAccountS,
-	OptsAccountsUsage, OptsStatsStatIDs, OptsActionsActionProfileIDs})
+	OptsAccountsUsage, OptsStatsStatIDs, OptsActionsActionProfileIDs, MetaProfileIgnoreFilters})
 
 // Event Opts
 const (
@@ -2206,15 +2205,11 @@ const (
 	OptsSesResourceSRelease       = "*sesResourceSRelease"
 	OptsSesResourceSDerivedReply  = "*sesResourceSDerivedReply"
 	OptsSesRouteSDerivedReply     = "*sesRouteSDerivedReply"
-	OptsSesRouteSIgnoreErrors     = "*sesRouteSIgnoreErrors"
-	OptsSesRouteSMaxCost          = "*sesRouteSMaxCost"
 	OptsSesStatSDerivedReply      = "*sesStatSDerivedReply"
-	OptsSesStatIDs                = "*sesStatIDs"
 	OptsSesSTIRAuthenticate       = "*sesSTIRAuthenticate"
 	OptsSesSTIRDerivedReply       = "*sesSTIRDerivedReply"
 	OptsSesSTIRInitiate           = "*sesSTIRInitiate"
 	OptsSesThresholdSDerivedReply = "*sesThresholdSDerivedReply"
-	OptsSesThresholdIDs           = "*sesThresholdIDs"
 	OptsSesMaxUsage               = "*sesMaxUsage"
 	OptsSesForceDuration          = "*sesForceDuration"
 	OptsSesInitiate               = "*sesInitiate"
@@ -2286,12 +2281,13 @@ const (
 	OptsStirPrivateKeyPath     = "*stirPrivateKeyPath"
 
 	// Others
-	OptsContext   = "*context"
-	Subsys        = "*subsys"
-	MetaMethod    = "*reqMethod"
-	MetaEventType = "*eventType"
-	EventType     = "EventType"
-	SchedulerInit = "SchedulerInit"
+	OptsContext              = "*context"
+	Subsys                   = "*subsys"
+	MetaMethod               = "*reqMethod"
+	MetaEventType            = "*eventType"
+	EventType                = "EventType"
+	SchedulerInit            = "SchedulerInit"
+	MetaProfileIgnoreFilters = "*profileIgnoreFilters"
 
 	RemoteHostOpt = "*rmtHost"
 	CacheOpt      = "*cache"

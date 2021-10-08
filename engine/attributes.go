@@ -56,7 +56,7 @@ func (alS *AttributeService) Shutdown() {
 
 // attributeProfileForEvent returns the matching attribute
 func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt string, attrsIDs []string,
-	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int) (matchAttrPrfl *AttributeProfile, err error) {
+	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
 	if len(attrsIDs) != 0 {
 		attrIDs = attrsIDs
@@ -84,11 +84,13 @@ func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt 
 		}
 		tntID := aPrfl.TenantIDInline()
 		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = tntID
-		if pass, err := alS.filterS.Pass(ctx, tnt, aPrfl.FilterIDs,
-			evNm); err != nil {
-			return nil, err
-		} else if !pass {
-			continue
+		if len(attrsIDs) == 0 || !ignoreFilters {
+			if pass, err := alS.filterS.Pass(ctx, tnt, aPrfl.FilterIDs,
+				evNm); err != nil {
+				return nil, err
+			} else if !pass {
+				continue
+			}
 		}
 		if (matchAttrPrfl == nil || matchAttrPrfl.Weight < aPrfl.Weight) &&
 			tntID != lastID &&
@@ -137,8 +139,13 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 		utils.OptsAttributesAttributeIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, attrIDs, evNm, lastID, processedPrfNo, profileRuns); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, attrIDs, evNm, lastID, processedPrfNo, profileRuns, ignFilters); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -212,13 +219,18 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 		utils.OptsAttributesAttributeIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, attrIDs, utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.OptsAttributesProcessRuns: 0,
 		},
-	}, utils.EmptyString, make(map[string]int), 0)
+	}, utils.EmptyString, make(map[string]int), 0, ignFilters)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)

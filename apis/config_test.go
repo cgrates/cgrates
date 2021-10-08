@@ -83,6 +83,9 @@ func TestConfigSetGetConfig(t *testing.T) {
 				utils.MetaProfileRunsCfg: map[string]int{
 					utils.MetaDefault: 0,
 				},
+				utils.MetaProfileIgnoreFilters: map[string]bool{
+					utils.MetaDefault: false,
+				},
 			},
 		},
 	}
@@ -158,6 +161,9 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				utils.MetaProfileRunsCfg: map[string]int{
 					utils.MetaDefault: 0,
 				},
+				utils.MetaProfileIgnoreFilters: map[string]bool{
+					utils.MetaDefault: false,
+				},
 			},
 		},
 	}
@@ -207,6 +213,9 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				utils.MetaProfileRunsCfg: map[string]int{
 					utils.MetaDefault: 0,
 				},
+				utils.MetaProfileIgnoreFilters: map[string]bool{
+					utils.MetaDefault: false,
+				},
 			},
 		},
 	}
@@ -250,7 +259,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
-	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":{"*default":[]},"*processRuns":{"*default":1},"*profileRuns":{"*default":0}},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":{"*default":[]},"*processRuns":{"*default":1},"*profileIgnoreFilters":{"*default":false},"*profileRuns":{"*default":0}},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}

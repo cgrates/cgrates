@@ -701,7 +701,10 @@ const CGRATES_CFG_JSON = `
 		},					
 		"*profileRuns": {					// number of runs a profile will process during the event
 			"*default": 0,
-		},					
+		},	
+		"*profileIgnoreFilters": {			// if we should check the filters
+			"*default": false,
+		}				
 	},
 },
 

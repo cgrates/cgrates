@@ -173,6 +173,12 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 					Value:     0,
 				},
 			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
@@ -224,6 +230,12 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 				{
 					FilterIDs: []string{utils.MetaDefault},
 					Value:     0,
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 		},
