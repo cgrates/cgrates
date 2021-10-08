@@ -395,7 +395,7 @@ type DBOptsJson struct {
 	SQLMaxOpenConns         *int    `json:"sqlMaxOpenConns"`
 	SQLMaxIdleConns         *int    `json:"sqlMaxIdleConns"`
 	SQLConnMaxLifetime      *string `json:"sqlConnMaxLifetime"`
-	SSLMode                 *string `json:"mongoQueryTimeout"`
+	SSLMode                 *string `json:"sslMode"`
 	MySQLLocation           *string `json:"mysqlLocation"`
 }
 
