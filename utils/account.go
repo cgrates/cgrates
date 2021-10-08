@@ -918,7 +918,6 @@ func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 		}
 	}
 	return
-
 }
 
 // APICostIncrement represent one CostIncrement inside an APIBalance
