@@ -383,15 +383,20 @@ func diffMapItemOptJson(d map[string]*ItemOptJson, v1, v2 map[string]*ItemOpt) m
 }
 
 type DataDBOptsJson struct {
-	RedisSentinel           *string `json:"*redisSentinel"`
-	RedisCluster            *bool   `json:"*redisCluster"`
-	RedisClusterSync        *string `json:"*redisClusterSync"`
-	RedisClusterOndownDelay *string `json:"*redisClusterOndownDelay"`
-	MongoQueryTimeout       *string `json:"*mongoQueryTimeout"`
-	RedisTLS                *bool   `json:"*redisTLS"`
-	RedisClientCertificate  *string `json:"*redisClientCertificate"`
-	RedisClientKey          *string `json:"*redisClientKey"`
-	RedisCACertificate      *string `json:"*redisCACertificate"`
+	RedisSentinel           *string `json:"redisSentinel"`
+	RedisCluster            *bool   `json:"redisCluster"`
+	RedisClusterSync        *string `json:"redisClusterSync"`
+	RedisClusterOndownDelay *string `json:"redisClusterOndownDelay"`
+	MongoQueryTimeout       *string `json:"mongoQueryTimeout"`
+	RedisTLS                *bool   `json:"redisTLS"`
+	RedisClientCertificate  *string `json:"redisClientCertificate"`
+	RedisClientKey          *string `json:"redisClientKey"`
+	RedisCACertificate      *string `json:"redisCACertificate"`
+	SQLMaxOpenConns         *int    `json:"sqlMaxOpenConns"`
+	SQLMaxIdleConns         *int    `json:"sqlMaxIdleConns"`
+	SQLConnMaxLifetime      *string `json:"sqlConnMaxLifetime"`
+	SSLMode                 *string `json:"mongoQueryTimeout"`
+	MySQLLocation           *string `json:"mysqlLocation"`
 }
 
 // Database config

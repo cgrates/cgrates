@@ -102,7 +102,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		},
 		storDbCfg: &StorDbCfg{
 			Items: make(map[string]*ItemOpt),
-			Opts:  make(map[string]interface{}),
+			Opts:  &StorDBOpts{},
 		},
 		tlsCfg:     new(TLSCfg),
 		cacheCfg:   &CacheCfg{Partitions: make(map[string]*CacheParamCfg)},
