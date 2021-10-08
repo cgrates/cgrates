@@ -195,7 +195,6 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}
-
 	for _, blncOper := range blncOpers {
 		debFunc := blncOper.debitAbstracts
 		if concretes {
@@ -253,7 +252,7 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 }
 
 // V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
-func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
 		utils.OptsAccountsAccountIDs); err != nil {
@@ -273,16 +272,18 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, false); err != nil {
 		return
 	}
-	var rcvEec *utils.ExtEventCharges
-	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
-		return
-	}
-	*eEc = *rcvEec
+	/*
+		var rcvEec *utils.ExtEventCharges
+		if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
+			return
+		}
+	*/
+	*eEc = *procEC
 	return
 }
 
 // V1DebitAbstracts performs debit for the provided event
-func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
 		utils.OptsAccountsAccountIDs); err != nil {
@@ -302,17 +303,18 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, true); err != nil {
 		return
 	}
-	var rcvEec *utils.ExtEventCharges
-	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
-		return
-	}
-
-	*eEc = *rcvEec
+	/*
+		var rcvEec *utils.ExtEventCharges
+		if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
+			return
+		}
+	*/
+	*eEc = *procEC
 	return
 }
 
 // V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
-func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
 		utils.OptsAccountsAccountIDs); err != nil {
@@ -332,16 +334,18 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, true, false); err != nil {
 		return
 	}
-	var rcvEec *utils.ExtEventCharges
-	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
-		return
-	}
-	*eEc = *rcvEec
+	/*
+		var rcvEec *utils.ExtEventCharges
+		if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
+			return
+		}
+	*/
+	*eEc = *procEC
 	return
 }
 
 // V1DebitConcretes performs debit of concrete units for the provided event
-func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
 		utils.OptsAccountsAccountIDs); err != nil {
@@ -361,13 +365,13 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, true, true); err != nil {
 		return
 	}
-
-	var rcvEec *utils.ExtEventCharges
-	if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
-		return
-	}
-
-	*eEc = *rcvEec
+	/*
+		var rcvEec *utils.ExtEventCharges
+		if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
+			return
+		}
+	*/
+	*eEc = *procEC
 	return
 }
 

@@ -83,12 +83,11 @@ type balanceOperator interface {
 }
 
 // roundUnitsWithIncrements rounds the usage based on increments
-func roundUnitsWithIncrements(usage, incrm *decimal.Big) (rndedUsage *decimal.Big) {
+func roundUnitsWithIncrements(usage, incrm *decimal.Big) *decimal.Big {
 	usgMaxIncrm := decimal.WithContext(
 		decimal.Context{RoundingMode: decimal.ToZero}).Quo(usage,
 		incrm).RoundToInt()
-	rndedUsage = utils.MultiplyBig(usgMaxIncrm, incrm)
-	return
+	return utils.MultiplyBig(usgMaxIncrm, incrm)
 }
 
 // processAttributeS will process the event with AttributeS
