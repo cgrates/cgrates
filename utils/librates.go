@@ -706,17 +706,6 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 	return rIcr.cost
 }
 
-/*
-// CostForIntervals sums the costs for all intervals
-func CostForIntervals(rtIvls []*RateSInterval, rts map[string]*IntervalRate) (cost *decimal.Big) {
-	cost = new(decimal.Big)
-	for _, rtIvl := range rtIvls {
-		cost = SumBig(cost, rtIvl.Cost(rts))
-	}
-	return
-}
-*/
-
 // CompressIntervals will compress intervals which equal
 func CompressIntervals(rtIvls []*RateSInterval) {
 }
