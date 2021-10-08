@@ -21,7 +21,6 @@ package services
 import (
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -98,16 +97,12 @@ func (db *DataDBService) Reload(*context.Context, context.CancelFunc) (err error
 		return
 	}
 	if db.cfg.DataDbCfg().Type == utils.Mongo {
-		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(db.cfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]); err != nil {
-			return
-		}
 		mgo, canCast := db.dm.DataDB().(*engine.MongoStorage)
 		if !canCast {
 			return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
 				db.cfg.DataDbCfg().Type)
 		}
-		mgo.SetTTL(ttl)
+		mgo.SetTTL(db.cfg.DataDbCfg().Opts.MongoQueryTimeout)
 	}
 	return
 }
@@ -151,10 +146,10 @@ func (db *DataDBService) needsConnectionReload() bool {
 		return true
 	}
 	return db.oldDBCfg.Type == utils.Redis &&
-		(db.oldDBCfg.Opts[utils.RedisSentinelNameCfg] != db.cfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] ||
-			db.oldDBCfg.Opts[utils.RedisClusterCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterCfg] ||
-			db.oldDBCfg.Opts[utils.RedisClusterSyncCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] ||
-			db.oldDBCfg.Opts[utils.RedisClusterOnDownDelayCfg] != db.cfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg])
+		(db.oldDBCfg.Opts.RedisSentinel != db.cfg.DataDbCfg().Opts.RedisSentinel ||
+			db.oldDBCfg.Opts.RedisCluster != db.cfg.DataDbCfg().Opts.RedisCluster ||
+			db.oldDBCfg.Opts.RedisClusterSync != db.cfg.DataDbCfg().Opts.RedisClusterSync ||
+			db.oldDBCfg.Opts.RedisClusterOndownDelay != db.cfg.DataDbCfg().Opts.RedisClusterOndownDelay)
 }
 
 // GetDM returns the DataManager

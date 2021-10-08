@@ -65,15 +65,15 @@ var (
 		"the DataDB password")
 	inDBDataEncoding = cgrMigratorFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
-	inDataDBRedisSentinel = cgrMigratorFlags.String(utils.RedisSentinelNameCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]),
+	inDataDBRedisSentinel = cgrMigratorFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DataDbCfg().Opts.RedisSentinel,
 		"the name of redis sentinel")
 	dbRedisCluster = cgrMigratorFlags.Bool(utils.RedisClusterCfg, false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrMigratorFlags.String(utils.RedisClusterSyncCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
+	dbRedisClusterSync = cgrMigratorFlags.Duration(utils.RedisClusterSyncCfg, dfltCfg.DataDbCfg().Opts.RedisClusterSync,
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrMigratorFlags.String(utils.RedisClusterOnDownDelayCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
+	dbRedisClusterDownDelay = cgrMigratorFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbQueryTimeout = cgrMigratorFlags.String(utils.MongoQueryTimeoutCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]),
+	dbQueryTimeout = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
 	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLSCfg, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrMigratorFlags.String(utils.RedisClientCertificateCfg, utils.EmptyString, "Path to the client certificate")
@@ -186,35 +186,33 @@ func main() {
 	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
 		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
 	}
-	if *inDataDBRedisSentinel != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]) {
-		mgrCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg] = *inDataDBRedisSentinel
+	if *inDataDBRedisSentinel != dfltCfg.DataDbCfg().Opts.RedisSentinel {
+		mgrCfg.DataDbCfg().Opts.RedisSentinel = *inDataDBRedisSentinel
 	}
-	rdsCls, _ := utils.IfaceAsBool(dfltCfg.DataDbCfg().Opts[utils.RedisClusterCfg])
-	if *dbRedisCluster != rdsCls {
-		mgrCfg.DataDbCfg().Opts[utils.RedisClusterCfg] = *dbRedisCluster
+	if *dbRedisCluster != dfltCfg.DataDbCfg().Opts.RedisCluster {
+		mgrCfg.DataDbCfg().Opts.RedisCluster = *dbRedisCluster
 	}
-	if *dbRedisClusterSync != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg]) {
-		mgrCfg.DataDbCfg().Opts[utils.RedisClusterSyncCfg] = *dbRedisClusterSync
+	if *dbRedisClusterSync != dfltCfg.DataDbCfg().Opts.RedisClusterSync {
+		mgrCfg.DataDbCfg().Opts.RedisClusterSync = *dbRedisClusterSync
 	}
-	if *dbRedisClusterDownDelay != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]) {
-		mgrCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
+	if *dbRedisClusterDownDelay != dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay {
+		mgrCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
 	}
-	if *dbQueryTimeout != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]) {
-		mgrCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg] = *dbQueryTimeout
+	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
+		mgrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
 	}
 
-	rdsTLS, _ := utils.IfaceAsBool(dfltCfg.DataDbCfg().Opts[utils.RedisTLS])
-	if *dbRedisTls != rdsTLS {
-		mgrCfg.DataDbCfg().Opts[utils.RedisTLS] = *dbRedisTls
+	if *dbRedisTls != dfltCfg.DataDbCfg().Opts.RedisTLS {
+		mgrCfg.DataDbCfg().Opts.RedisTLS = *dbRedisTls
 	}
-	if *dbRedisClientCertificate != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClientCertificate]) {
-		mgrCfg.DataDbCfg().Opts[utils.RedisClientCertificate] = *dbRedisClientCertificate
+	if *dbRedisClientCertificate != dfltCfg.DataDbCfg().Opts.RedisClientCertificate {
+		mgrCfg.DataDbCfg().Opts.RedisClientCertificate = *dbRedisClientCertificate
 	}
-	if *dbRedisClientKey != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClientKey]) {
-		mgrCfg.DataDbCfg().Opts[utils.RedisClientKey] = *dbRedisClientKey
+	if *dbRedisClientKey != dfltCfg.DataDbCfg().Opts.RedisClientKey {
+		mgrCfg.DataDbCfg().Opts.RedisClientKey = *dbRedisClientKey
 	}
-	if *dbRedisCACertificate != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisCACertificate]) {
-		mgrCfg.DataDbCfg().Opts[utils.RedisCACertificate] = *dbRedisCACertificate
+	if *dbRedisCACertificate != dfltCfg.DataDbCfg().Opts.RedisCACertificate {
+		mgrCfg.DataDbCfg().Opts.RedisCACertificate = *dbRedisCACertificate
 	}
 
 	// outDataDB
@@ -270,7 +268,7 @@ func main() {
 	}
 	if *outDataDBRedisSentinel == utils.MetaDataDB {
 		if utils.IfaceAsString(dfltCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg]) == utils.IfaceAsString(mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg]) {
-			mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg] = dfltCfg.DataDbCfg().Opts[utils.RedisSentinelNameCfg]
+			mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg] = dfltCfg.DataDbCfg().Opts.RedisSentinel
 		}
 	} else {
 		mgrCfg.MigratorCgrCfg().OutDataDBOpts[utils.RedisSentinelNameCfg] = *outDataDBRedisSentinel
