@@ -33,7 +33,7 @@ var (
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	marshaler string, cacheCfg *config.CacheCfg,
-	opts map[string]interface{}) (db MigratorDataDB, err error) {
+	opts *config.DataDBOpts) (db MigratorDataDB, err error) {
 	dbCon, err := engine.NewDataDBConn(db_type, host,
 		port, name, user, pass, marshaler, opts)
 	if err != nil {
@@ -59,8 +59,7 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 
 func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
-	opts map[string]interface{}) (db MigratorStorDB, err error) {
-	var d MigratorStorDB
+	opts *config.StorDBOpts) (db MigratorStorDB, err error) {
 	storDb, err := engine.NewStorDBConn(db_type, host, port, name, user,
 		pass, marshaler, stringIndexedFields, prefixIndexedFields, opts)
 	if err != nil {
@@ -68,22 +67,18 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 	}
 	switch db_type {
 	case utils.Mongo:
-		d = newMongoStorDBMigrator(storDb)
-		db = d.(MigratorStorDB)
+		db = newMongoStorDBMigrator(storDb)
 	case utils.MySQL:
-		d = newMigratorSQL(storDb)
-		db = d.(MigratorStorDB)
+		db = newMigratorSQL(storDb)
 	case utils.Postgres:
-		d = newMigratorSQL(storDb)
-		db = d.(MigratorStorDB)
+		db = newMigratorSQL(storDb)
 	case utils.Internal:
-		d = newInternalStorDBMigrator(storDb)
-		db = d.(MigratorStorDB)
+		db = newInternalStorDBMigrator(storDb)
 	default:
 		err = fmt.Errorf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
 			db_type, utils.MySQL, utils.Mongo, utils.Postgres, utils.Internal)
 	}
-	return d, nil
+	return
 }
 func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
 	if str == utils.CDRs || str == utils.SessionSCosts || strings.HasPrefix(str, "Tp") {

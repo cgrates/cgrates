@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,7 +31,7 @@ import (
 
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
-	pass, marshaler string, opts map[string]interface{}) (d DataDBDriver, err error) {
+	pass, marshaler string, opts *config.DataDBOpts) (d DataDBDriver, err error) {
 	switch dbType {
 	case utils.Redis:
 		var dbNo int
@@ -43,33 +43,11 @@ func NewDataDBConn(dbType, host, port, name, user,
 		if port != "" && !strings.Contains(host, ":") {
 			host += ":" + port
 		}
-		var isCluster bool
-		if isCluster, err = utils.IfaceAsBool(opts[utils.RedisClusterCfg]); err != nil {
-			return
-		}
-		var clusterSync, clusterOnDownDelay time.Duration
-		if clusterSync, err = utils.IfaceAsDuration(opts[utils.RedisClusterSyncCfg]); err != nil {
-			return
-		}
-		if clusterOnDownDelay, err = utils.IfaceAsDuration(opts[utils.RedisClusterOnDownDelayCfg]); err != nil {
-			return
-		}
-		var hasTLSConn bool
-		if hasTLSConn, err = utils.IfaceAsBool(opts[utils.RedisTLSCfg]); err != nil {
-			return
-		}
-		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler,
-			utils.RedisMaxConns, utils.RedisMaxAttempts, utils.IfaceAsString(opts[utils.RedisSentinelNameCfg]),
-			isCluster, clusterSync, clusterOnDownDelay, hasTLSConn,
-			utils.IfaceAsString(opts[utils.RedisClientCertificateCfg]),
-			utils.IfaceAsString(opts[utils.RedisClientKeyCfg]),
-			utils.IfaceAsString(opts[utils.RedisCACertificateCfg]))
+		d, err = NewRedisStorage(host, dbNo, user, pass, marshaler, utils.RedisMaxConns, utils.RedisMaxAttempts,
+			opts.RedisSentinel, opts.RedisCluster, opts.RedisClusterSync, opts.RedisClusterOndownDelay,
+			opts.RedisTLS, opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
 	case utils.Mongo:
-		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(opts[utils.MongoQueryTimeoutCfg]); err != nil {
-			return
-		}
-		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, ttl)
+		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
 	case utils.Internal:
 		d = NewInternalDB(nil, nil, true)
 	default:
@@ -81,40 +59,16 @@ func NewDataDBConn(dbType, host, port, name, user,
 // NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
 func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
-	opts map[string]interface{}) (db StorDB, err error) {
+	opts *config.StorDBOpts) (db StorDB, err error) {
 	switch dbType {
 	case utils.Mongo:
-		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(opts[utils.MongoQueryTimeoutCfg]); err != nil {
-			return nil, err
-		}
-		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, ttl)
+		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, opts.MongoQueryTimeout)
 	case utils.Postgres:
-		var maxConn, maxIdleConn, connMaxLifetime int64
-		if maxConn, err = utils.IfaceAsTInt64(opts[utils.SQLMaxOpenConnsCfg]); err != nil {
-			return
-		}
-		if maxIdleConn, err = utils.IfaceAsTInt64(opts[utils.SQLMaxIdleConnsCfg]); err != nil {
-			return
-		}
-		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.SQLConnMaxLifetimeCfg]); err != nil {
-			return
-		}
-		db, err = NewPostgresStorage(host, port, name, user, pass, utils.IfaceAsString(opts[utils.SSLModeCfg]),
-			int(maxConn), int(maxIdleConn), int(connMaxLifetime))
+		db, err = NewPostgresStorage(host, port, name, user, pass, opts.SSLMode,
+			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLConnMaxLifetime)
 	case utils.MySQL:
-		var maxConn, maxIdleConn, connMaxLifetime int64
-		if maxConn, err = utils.IfaceAsTInt64(opts[utils.SQLMaxOpenConnsCfg]); err != nil {
-			return
-		}
-		if maxIdleConn, err = utils.IfaceAsTInt64(opts[utils.SQLMaxIdleConnsCfg]); err != nil {
-			return
-		}
-		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.SQLConnMaxLifetimeCfg]); err != nil {
-			return
-		}
-		db, err = NewMySQLStorage(host, port, name, user, pass, int(maxConn), int(maxIdleConn),
-			int(connMaxLifetime), utils.IfaceAsString(opts[utils.MysqlLocation]))
+		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
+			opts.SQLConnMaxLifetime, opts.MySQLLocation)
 	case utils.Internal:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false)
 	default:
