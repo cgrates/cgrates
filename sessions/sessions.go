@@ -1678,11 +1678,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		return
 	}
 	if thdS {
-		var thIDs []string
-		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
-			return
-		}
-		tIDs, err := sS.processThreshold(ctx, args, thIDs, true)
+		tIDs, err := sS.processThreshold(ctx, args, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
@@ -1703,11 +1699,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		return
 	}
 	if stS {
-		var statIDs []string
-		if statIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
-			return
-		}
-		sIDs, err := sS.processStats(ctx, args, statIDs, false)
+		sIDs, err := sS.processStats(ctx, args, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -1927,11 +1919,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		return
 	}
 	if thdS {
-		var thIDs []string
-		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
-			return
-		}
-		tIDs, err := sS.processThreshold(ctx, args, thIDs, true)
+		tIDs, err := sS.processThreshold(ctx, args, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
@@ -1952,11 +1940,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		return
 	}
 	if stS {
-		var statIDs []string
-		if statIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
-			return
-		}
-		sIDs, err := sS.processStats(ctx, args, statIDs, false)
+		sIDs, err := sS.processStats(ctx, args, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2219,11 +2203,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		return
 	}
 	if thdS {
-		var thIDs []string
-		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
-			return
-		}
-		_, err := sS.processThreshold(ctx, args, thIDs, true)
+		_, err := sS.processThreshold(ctx, args, true)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2244,11 +2224,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		return
 	}
 	if stS {
-		var statIDs []string
-		if statIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
-			return
-		}
-		_, err := sS.processStats(ctx, args, statIDs, false)
+		_, err := sS.processStats(ctx, args, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2408,11 +2384,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		return
 	}
 	if thdS {
-		var thIDs []string
-		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
-			return
-		}
-		tIDs, err := sS.processThreshold(ctx, args, thIDs, true)
+		tIDs, err := sS.processThreshold(ctx, args, true)
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
@@ -2433,11 +2405,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		return
 	}
 	if stS {
-		var stIDs []string
-		if stIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
-			return
-		}
-		sIDs, err := sS.processStats(ctx, args, stIDs, false)
+		sIDs, err := sS.processStats(ctx, args, false)
 		if err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2574,12 +2542,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 	if thdS {
 		rply.ThresholdIDs = make(map[string][]string)
-		var thIDs []string
-		if thIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesThresholdIDs); err != nil {
-			return
-		}
 		for runID, cgrEv := range getDerivedEvents(events, utils.OptAsBool(args.APIOpts, utils.OptsSesThresholdSDerivedReply)) {
-			tIDs, err := sS.processThreshold(ctx, cgrEv, thIDs, true)
+			tIDs, err := sS.processThreshold(ctx, cgrEv, true)
 			if err != nil && err.Error() != utils.ErrNotFound.Error() {
 				if blockError {
 					return utils.NewErrThresholdS(err)
@@ -2607,12 +2571,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 	if stS {
 		rply.StatQueueIDs = make(map[string][]string)
-		var stIDs []string
-		if stIDs, err = utils.OptAsStringSlice(args.APIOpts, utils.OptsSesStatIDs); err != nil {
-			return
-		}
 		for runID, cgrEv := range getDerivedEvents(events, utils.OptAsBool(args.APIOpts, utils.OptsSesStatSDerivedReply)) {
-			sIDs, err := sS.processStats(ctx, cgrEv, stIDs, true)
+			sIDs, err := sS.processStats(ctx, cgrEv, true)
 			if err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				if blockError {
@@ -3041,13 +3001,9 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 }
 
 // processThreshold will receive the event and send it to ThresholdS to be processed
-func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent, thIDs []string, clnb bool) (tIDs []string, err error) {
+func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (tIDs []string, err error) {
 	if len(sS.cgrCfg.SessionSCfg().ThresholdSConns) == 0 {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
-	}
-	// check if we have thresholdIDs
-	if len(thIDs) != 0 {
-		cgrEv.APIOpts[utils.OptsThresholdsThresholdIDs] = thIDs
 	}
 	cgrEv.SetCloneable(clnb)
 	//initialize the returned variable
@@ -3056,17 +3012,13 @@ func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent
 }
 
 // processStats will receive the event and send it to StatS to be processed
-func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, stsIDs []string, clnb bool) (sIDs []string, err error) {
+func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (sIDs []string, err error) {
 	if len(sS.cgrCfg.SessionSCfg().StatSConns) == 0 {
 		return sIDs, utils.NewErrNotConnected(utils.StatS)
 	}
 
 	statArgs := &engine.StatsArgsProcessEvent{
 		CGREvent: cgrEv,
-	}
-	// check in case we have StatIDs inside flags
-	if len(stsIDs) != 0 {
-		cgrEv.APIOpts[utils.OptsStatsStatIDs] = stsIDs
 	}
 	statArgs.SetCloneable(clnb)
 	//initialize the returned variable

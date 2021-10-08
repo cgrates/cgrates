@@ -65,6 +65,12 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 					Value:     0,
 				},
 			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
+				},
+			},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -111,6 +117,9 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 			utils.MetaProfileRunsCfg: map[string]int{
 				utils.MetaDefault: 0,
 			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -152,6 +161,9 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 			utils.MetaProfileRunsCfg: map[string]int{
 				utils.MetaDefault: 0,
 			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -185,6 +197,9 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 			},
 			utils.MetaProfileRunsCfg: map[string]int{
 				utils.MetaDefault: 0,
+			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
 			},
 		},
 	}

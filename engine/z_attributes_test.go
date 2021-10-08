@@ -229,7 +229,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaVars: utils.MapStorage{
 				utils.OptsAttributesProcessRuns: 0,
 			},
-		}, utils.EmptyString, make(map[string]int), 0)
+		}, utils.EmptyString, make(map[string]int), 0, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -248,7 +248,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaVars: utils.MapStorage{
 				utils.OptsAttributesProcessRuns: 0,
 			},
-		}, utils.EmptyString, make(map[string]int), 0)
+		}, utils.EmptyString, make(map[string]int), 0, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -267,7 +267,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaVars: utils.MapStorage{
 				utils.OptsAttributesProcessRuns: 0,
 			},
-		}, utils.EmptyString, make(map[string]int), 0)
+		}, utils.EmptyString, make(map[string]int), 0, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

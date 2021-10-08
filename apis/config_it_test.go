@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/shopspring/decimal"
+	"github.com/ericlagergren/decimal"
 )
 
 var (
@@ -165,6 +165,9 @@ func testCfgGetConfig(t *testing.T) {
 				utils.MetaProfileRunsCfg: map[string]int{
 					utils.MetaDefault: 0,
 				},
+				utils.MetaProfileIgnoreFilters: map[string]bool{
+					utils.MetaDefault: false,
+				},
 			},
 		},
 	}
@@ -234,6 +237,9 @@ func testCfgSetGetConfig(t *testing.T) {
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
 					utils.MetaDefault: 0,
+				},
+				utils.MetaProfileIgnoreFilters: map[string]bool{
+					utils.MetaDefault: false,
 				},
 			},
 		},
@@ -346,7 +352,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*attributeIDs":{"*default":[]},"*processRuns":{"":2,"*default":2},"*profileRuns":{"*default":0}},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*attributeIDs":{"*default":[]},"*processRuns":{"":2,"*default":2},"*profileIgnoreFilters":{"*default":false},"*profileRuns":{"*default":0}},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -525,6 +531,9 @@ func testCfgSetGetConfigStore(t *testing.T) {
 				utils.MetaProfileRunsCfg: map[string]int{
 					utils.MetaDefault: 0,
 				},
+				utils.MetaProfileIgnoreFilters: map[string]bool{
+					utils.MetaDefault: false,
+				},
 			},
 		},
 	}
@@ -630,6 +639,9 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 				},
 				utils.MetaProfileRunsCfg: map[string]int{
 					utils.MetaDefault: 0,
+				},
+				utils.MetaProfileIgnoreFilters: map[string]bool{
+					utils.MetaDefault: false,
 				},
 			},
 		},

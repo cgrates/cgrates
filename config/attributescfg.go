@@ -24,9 +24,10 @@ import (
 )
 
 type AttributesOpts struct {
-	AttributeIDs []*utils.DynamicStringSliceOpt
-	ProcessRuns  []*utils.DynamicIntOpt
-	ProfileRuns  []*utils.DynamicIntOpt
+	AttributeIDs         []*utils.DynamicStringSliceOpt
+	ProcessRuns          []*utils.DynamicIntOpt
+	ProfileRuns          []*utils.DynamicIntOpt
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt
 }
 
 // AttributeSCfg is the configuration of attribute service
@@ -64,6 +65,9 @@ func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) {
 	}
 	if jsnCfg.ProfileRuns != nil {
 		attrOpts.ProfileRuns = append(attrOpts.ProfileRuns, utils.MapToDynamicIntOpts(jsnCfg.ProfileRuns)...)
+	}
+	if jsnCfg.ProfileIgnoreFilters != nil {
+		attrOpts.ProfileIgnoreFilters = append(attrOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
 	}
 }
 
@@ -107,9 +111,10 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 // AsMapInterface returns the config as a map[string]interface{}
 func (alS AttributeSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaAttributeIDsCfg: utils.DynamicStringSliceOptsToMap(alS.Opts.AttributeIDs),
-		utils.MetaProcessRunsCfg:  utils.DynamicIntOptsToMap(alS.Opts.ProcessRuns),
-		utils.MetaProfileRunsCfg:  utils.DynamicIntOptsToMap(alS.Opts.ProfileRuns),
+		utils.MetaAttributeIDsCfg:      utils.DynamicStringSliceOptsToMap(alS.Opts.AttributeIDs),
+		utils.MetaProcessRunsCfg:       utils.DynamicIntOptsToMap(alS.Opts.ProcessRuns),
+		utils.MetaProfileRunsCfg:       utils.DynamicIntOptsToMap(alS.Opts.ProfileRuns),
+		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(alS.Opts.ProfileIgnoreFilters),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        alS.Enabled,
@@ -152,10 +157,15 @@ func (attrOpts AttributesOpts) Clone() *AttributesOpts {
 	if attrOpts.ProfileRuns != nil {
 		profileRuns = utils.CloneDynamicIntOpt(attrOpts.ProfileRuns)
 	}
+	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	if attrOpts.ProfileRuns != nil {
+		profileIgnoreFilters = utils.CloneDynamicBoolOpt(attrOpts.ProfileIgnoreFilters)
+	}
 	return &AttributesOpts{
-		AttributeIDs: attrIDs,
-		ProcessRuns:  processRuns,
-		ProfileRuns:  profileRuns,
+		AttributeIDs:         attrIDs,
+		ProcessRuns:          processRuns,
+		ProfileRuns:          profileRuns,
+		ProfileIgnoreFilters: profileIgnoreFilters,
 	}
 }
 
@@ -193,9 +203,10 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 }
 
 type AttributesOptsJson struct {
-	AttributeIDs map[string][]string `json:"*attributeIDs"`
-	ProcessRuns  map[string]int      `json:"*processRuns"`
-	ProfileRuns  map[string]int      `json:"*profileRuns"`
+	AttributeIDs         map[string][]string `json:"*attributeIDs"`
+	ProcessRuns          map[string]int      `json:"*processRuns"`
+	ProfileRuns          map[string]int      `json:"*profileRuns"`
+	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
 }
 
 // Attribute service config section
@@ -224,6 +235,9 @@ func diffAttributesOptsJsonCfg(d *AttributesOptsJson, v1, v2 *AttributesOpts) *A
 	}
 	if !utils.DynamicIntOptEqual(v1.ProfileRuns, v2.ProfileRuns) {
 		d.ProfileRuns = utils.DynamicIntOptsToMap(v2.ProfileRuns)
+	}
+	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
 	}
 	return d
 }

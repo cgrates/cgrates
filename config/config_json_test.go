@@ -803,6 +803,9 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 			ProfileRuns: map[string]int{
 				utils.MetaDefault: 0,
 			},
+			ProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
