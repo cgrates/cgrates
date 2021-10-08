@@ -87,7 +87,7 @@ func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig
 	return
 }
 
-func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DataDBOptsJson) (err error) {
+func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -382,7 +382,7 @@ func diffMapItemOptJson(d map[string]*ItemOptJson, v1, v2 map[string]*ItemOpt) m
 	return d
 }
 
-type DataDBOptsJson struct {
+type DBOptsJson struct {
 	RedisSentinel           *string `json:"redisSentinel"`
 	RedisCluster            *bool   `json:"redisCluster"`
 	RedisClusterSync        *string `json:"redisClusterSync"`
@@ -415,12 +415,12 @@ type DbJsonCfg struct {
 	Replication_filtered  *bool
 	Replication_cache     *string
 	Items                 map[string]*ItemOptJson
-	Opts                  *DataDBOptsJson
+	Opts                  *DBOptsJson
 }
 
-func diffDataDBOptsJsonCfg(d *DataDBOptsJson, v1, v2 *DataDBOpts) *DataDBOptsJson {
+func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	if d == nil {
-		d = new(DataDBOptsJson)
+		d = new(DBOptsJson)
 	}
 	if v1.RedisSentinel != v2.RedisSentinel {
 		d.RedisSentinel = utils.StringPointer(v2.RedisSentinel)

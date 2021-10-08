@@ -62,7 +62,7 @@ func (dbcfg *StorDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig
 	return dbcfg.loadFromJSONCfg(jsnDataDbCfg)
 }
 
-func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DataDBOptsJson) (err error) {
+func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -236,9 +236,9 @@ func (dbcfg StorDbCfg) AsMapInterface(string) interface{} {
 	return mp
 }
 
-func diffStorDBOptsJsonCfg(d *DataDBOptsJson, v1, v2 *StorDBOpts) *DataDBOptsJson {
+func diffStorDBOptsJsonCfg(d *DBOptsJson, v1, v2 *StorDBOpts) *DBOptsJson {
 	if d == nil {
-		d = new(DataDBOptsJson)
+		d = new(DBOptsJson)
 	}
 	if v1.SQLMaxOpenConns != v2.SQLMaxOpenConns {
 		d.SQLMaxOpenConns = utils.IntPointer(v2.SQLMaxOpenConns)
