@@ -41,8 +41,8 @@ type MigratorCgrCfg struct {
 	OutStorDBUser     string
 	OutStorDBPassword string
 	UsersFilters      []string
-	OutDataDBOpts     map[string]interface{}
-	OutStorDBOpts     map[string]interface{}
+	OutDataDBOpts     *DataDBOpts
+	OutStorDBOpts     *StorDBOpts
 }
 
 // loadMigratorCgrCfg loads the Migrator section of the configuration
@@ -100,29 +100,35 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 	if jsnCfg.Users_filters != nil && len(*jsnCfg.Users_filters) != 0 {
 		mg.UsersFilters = utils.CloneStringSlice(*jsnCfg.Users_filters)
 	}
-
 	if jsnCfg.Out_dataDB_opts != nil {
-		for k, v := range jsnCfg.Out_dataDB_opts {
-			mg.OutDataDBOpts[k] = v
-		}
+		err = mg.OutDataDBOpts.loadFromJSONCfg(jsnCfg.Out_dataDB_opts)
 	}
 	if jsnCfg.Out_storDB_opts != nil {
-		for k, v := range jsnCfg.Out_storDB_opts {
-			mg.OutStorDBOpts[k] = v
-		}
+		err = mg.OutStorDBOpts.loadFromJSONCfg(jsnCfg.Out_storDB_opts)
 	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (mg MigratorCgrCfg) AsMapInterface(string) interface{} {
-	outDataDBOpts := make(map[string]interface{})
-	for k, v := range mg.OutDataDBOpts {
-		outDataDBOpts[k] = v
+	outDataDBOpts := map[string]interface{}{
+		utils.RedisSentinelNameCfg:       mg.OutDataDBOpts.RedisSentinel,
+		utils.RedisClusterCfg:            mg.OutDataDBOpts.RedisCluster,
+		utils.RedisClusterSyncCfg:        mg.OutDataDBOpts.RedisClusterSync.String(),
+		utils.RedisClusterOnDownDelayCfg: mg.OutDataDBOpts.RedisClusterOndownDelay.String(),
+		utils.MongoQueryTimeoutCfg:       mg.OutDataDBOpts.MongoQueryTimeout.String(),
+		utils.RedisTLSCfg:                mg.OutDataDBOpts.RedisTLS,
+		utils.RedisClientCertificateCfg:  mg.OutDataDBOpts.RedisClientCertificate,
+		utils.RedisClientKeyCfg:          mg.OutDataDBOpts.RedisClientKey,
+		utils.RedisCACertificateCfg:      mg.OutDataDBOpts.RedisCACertificate,
 	}
-	outStorDBOpts := make(map[string]interface{})
-	for k, v := range mg.OutStorDBOpts {
-		outStorDBOpts[k] = v
+	outStorDBOpts := map[string]interface{}{
+		utils.SQLMaxOpenConnsCfg:   mg.OutStorDBOpts.SQLMaxOpenConns,
+		utils.SQLMaxIdleConnsCfg:   mg.OutStorDBOpts.SQLMaxIdleConns,
+		utils.SQLConnMaxLifetime:   mg.OutStorDBOpts.SQLConnMaxLifetime.String(),
+		utils.MongoQueryTimeoutCfg: mg.OutStorDBOpts.MongoQueryTimeout.String(),
+		utils.SSLModeCfg:           mg.OutStorDBOpts.SSLMode,
+		utils.MysqlLocation:        mg.OutStorDBOpts.MySQLLocation,
 	}
 	return map[string]interface{}{
 		utils.OutDataDBTypeCfg:     mg.OutDataDBType,
@@ -163,17 +169,11 @@ func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
 		OutStorDBName:     mg.OutStorDBName,
 		OutStorDBUser:     mg.OutStorDBUser,
 		OutStorDBPassword: mg.OutStorDBPassword,
-		OutDataDBOpts:     make(map[string]interface{}),
-		OutStorDBOpts:     make(map[string]interface{}),
+		OutDataDBOpts:     mg.OutDataDBOpts.Clone(),
+		OutStorDBOpts:     mg.OutStorDBOpts.Clone(),
 	}
 	if mg.UsersFilters != nil {
 		cln.UsersFilters = utils.CloneStringSlice(mg.UsersFilters)
-	}
-	for k, v := range mg.OutDataDBOpts {
-		cln.OutDataDBOpts[k] = v
-	}
-	for k, v := range mg.OutStorDBOpts {
-		cln.OutStorDBOpts[k] = v
 	}
 	return
 }
@@ -193,8 +193,8 @@ type MigratorCfgJson struct {
 	Out_storDB_user     *string
 	Out_storDB_password *string
 	Users_filters       *[]string
-	Out_dataDB_opts     map[string]interface{}
-	Out_storDB_opts     map[string]interface{}
+	Out_dataDB_opts     *DBOptsJson
+	Out_storDB_opts     *DBOptsJson
 }
 
 func diffMigratorCfgJson(d *MigratorCfgJson, v1, v2 *MigratorCgrCfg) *MigratorCfgJson {
@@ -243,7 +243,7 @@ func diffMigratorCfgJson(d *MigratorCfgJson, v1, v2 *MigratorCgrCfg) *MigratorCf
 	if !utils.SliceStringEqual(v1.UsersFilters, v2.UsersFilters) {
 		d.Users_filters = utils.SliceStringPointer(utils.CloneStringSlice(v2.UsersFilters))
 	}
-	d.Out_dataDB_opts = diffMap(d.Out_dataDB_opts, v1.OutDataDBOpts, v2.OutDataDBOpts)
-	d.Out_storDB_opts = diffMap(d.Out_storDB_opts, v1.OutStorDBOpts, v2.OutStorDBOpts)
+	d.Out_dataDB_opts = diffDataDBOptsJsonCfg(d.Out_dataDB_opts, v1.OutDataDBOpts, v2.OutDataDBOpts)
+	d.Out_storDB_opts = diffStorDBOptsJsonCfg(d.Out_storDB_opts, v1.OutStorDBOpts, v2.OutStorDBOpts)
 	return d
 }

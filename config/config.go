@@ -166,8 +166,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		},
 		loaderCgrCfg: new(LoaderCgrCfg),
 		migratorCgrCfg: &MigratorCgrCfg{
-			OutDataDBOpts: make(map[string]interface{}),
-			OutStorDBOpts: make(map[string]interface{}),
+			OutDataDBOpts: &DataDBOpts{},
+			OutStorDBOpts: &StorDBOpts{},
 		},
 		loaderCfg:    make(LoaderSCfgs, 0),
 		httpAgentCfg: make(HTTPAgentCfgs, 0),
