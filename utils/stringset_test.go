@@ -290,3 +290,47 @@ func TestStringSetEquals(t *testing.T) {
 		t.Error("The sets should match")
 	}
 }
+
+func TestStringSetFieldAsInterface(t *testing.T) {
+	s := StringSet{
+		"field1": struct{}{},
+	}
+	_, err := s.FieldAsInterface([]string{"field1"})
+	if err != nil {
+		t.Error(err)
+	}
+	// fmt.Println(rcv)
+	_, err = s.FieldAsInterface([]string{"field2"})
+	if err != ErrNotFound {
+		t.Errorf("Expected %v", ErrNotFound)
+	}
+
+	_, err = s.FieldAsInterface([]string{"field2", "field3"})
+	if err != ErrNotFound {
+		t.Errorf("Expected %v", ErrNotFound)
+	}
+}
+
+func TestString(t *testing.T) {
+	s := StringSet{
+		"field1": struct{}{},
+	}
+	rcv := s.String()
+	if rcv != "[\"field1\"]" {
+		t.Errorf("Expected %v \n but received \n %v", "[\"field1\"]", rcv)
+	}
+}
+
+func TestFieldAsString(t *testing.T) {
+	s := StringSet{
+		"field1": struct{}{},
+	}
+	_, err := s.FieldAsString([]string{"field1"})
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = s.FieldAsString([]string{"field2"})
+	if err == nil {
+		t.Error("Expected error")
+	}
+}
