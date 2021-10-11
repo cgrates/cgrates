@@ -863,7 +863,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, args, reply interface{}) error {
-				*reply.(*utils.ExtEventCharges) = utils.ExtEventCharges{}
+				*reply.(*utils.EventCharges) = utils.EventCharges{}
 				return nil
 			},
 		},

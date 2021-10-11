@@ -285,12 +285,6 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, false); err != nil {
 		return
 	}
-	/*
-		var rcvEec *utils.ExtEventCharges
-		if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
-			return
-		}
-	*/
 	*eEc = *procEC
 	return
 }
@@ -321,12 +315,6 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, true); err != nil {
 		return
 	}
-	/*
-		var rcvEec *utils.ExtEventCharges
-		if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
-			return
-		}
-	*/
 	*eEc = *procEC
 	return
 }
@@ -357,12 +345,6 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, true, false); err != nil {
 		return
 	}
-	/*
-		var rcvEec *utils.ExtEventCharges
-		if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
-			return
-		}
-	*/
 	*eEc = *procEC
 	return
 }
@@ -393,12 +375,6 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, true, true); err != nil {
 		return
 	}
-	/*
-		var rcvEec *utils.ExtEventCharges
-		if rcvEec, err = procEC.AsExtEventCharges(); err != nil {
-			return
-		}
-	*/
 	*eEc = *procEC
 	return
 }
