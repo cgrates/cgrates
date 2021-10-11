@@ -372,12 +372,13 @@ func TestCDRsNewMapEventFromReqForm(t *testing.T) {
 func TestCDRsNewMapEventFromReqFormErr(t *testing.T) {
 	httpReq := &http.Request{
 		URL: &url.URL{
-			RawQuery: ";",
+			RawQuery: "%0x;",
 		},
 	}
 	_, err := newMapEventFromReqForm(httpReq)
-	if err == nil || err.Error() != "invalid semicolon separator in query" {
-		t.Errorf("\nExpected <invalid semicolon separator in query> \n, received <%+v>", err)
+	errExpect := `invalid URL escape "%0x"`
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", errExpect, err)
 	}
 
 }
