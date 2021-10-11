@@ -1001,8 +1001,9 @@ type TPAccountBalance struct {
 }
 
 func NewTPBalanceCostIncrement(filtersStr, incrementStr, fixedFeeStr, recurrentFeeStr string) (costIncrement *TPBalanceCostIncrement, err error) {
-	costIncrement = &TPBalanceCostIncrement{
-		FilterIDs: strings.Split(filtersStr, ANDSep),
+	costIncrement = new(TPBalanceCostIncrement)
+	if filtersStr != EmptyString {
+		costIncrement.FilterIDs = strings.Split(filtersStr, ANDSep)
 	}
 	if incrementStr != EmptyString {
 		incr, err := strconv.ParseFloat(incrementStr, 64)
