@@ -39,16 +39,16 @@ import (
 var (
 	sTestItLoaders = []func(t *testing.T){
 		testV1LoadResource,
-		// testV1LoadDefaultIDError,
-		// testV1LoadUnableToDeleteFile,
-		// testV1LoadProcessFolderError,
-		// testV1RemoveResource,
-		// testV1RemoveDefaultIDError,
-		// testV1RemoveUnableToDeleteFile,
-		// testV1RemoveProcessFolderError,
+		testV1LoadDefaultIDError,
+		testV1LoadUnableToDeleteFile,
+		testV1LoadProcessFolderError,
+		testV1RemoveResource,
+		testV1RemoveDefaultIDError,
+		testV1RemoveUnableToDeleteFile,
+		testV1RemoveProcessFolderError,
 		testV1LoadAndRemoveProcessRemoveFolderError,
-		// testLoaderServiceReload,
-		// testLoaderServiceListenAndServe,
+		testLoaderServiceReload,
+		testLoaderServiceListenAndServe,
 	}
 )
 
