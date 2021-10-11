@@ -62,6 +62,12 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 					Value:     []string{},
 				},
 			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
+				},
+			},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -108,6 +114,9 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaActionProfileIDsCfg: map[string][]string{
 				utils.MetaDefault: {},
+			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
 			},
 		},
 	}

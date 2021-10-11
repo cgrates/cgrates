@@ -1326,7 +1326,10 @@ const CGRATES_CFG_JSON = `
 	"opts":{								//	
 		"*actionProfileIDs": {				//
 			"*default": [],
-		},			
+		},	
+		"*profileIgnoreFilters": {			// if we should check the filters
+			"*default": false,
+		}			
 	},
 },
 

@@ -92,11 +92,11 @@ func (aS *ActionS) schedInit() {
 			},
 		}
 	}
-	aS.scheduleActions(context.Background(), cgrEvs, nil, true)
+	aS.scheduleActions(context.Background(), cgrEvs, nil, false, true)
 }
 
 // scheduleActions will set up cron and load the matching data
-func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, crnReset bool) (err error) {
+func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, ignFilters, crnReset bool) (err error) {
 	aS.crnLk.Lock() // make sure we don't have parallel processes running  setu
 	defer aS.crnLk.Unlock()
 	crn := aS.crn
@@ -106,7 +106,7 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 	var partExec bool
 	for _, cgrEv := range cgrEvs {
 		var schedActSet []*scheduledActs
-		if schedActSet, err = aS.scheduledActions(ctx, cgrEv.Tenant, cgrEv, aPrflIDs, false); err != nil {
+		if schedActSet, err = aS.scheduledActions(ctx, cgrEv.Tenant, cgrEv, aPrflIDs, ignFilters, false); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> scheduler init, ignoring tenant: <%s>, error: <%s>",
@@ -144,8 +144,9 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
 func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt string,
-	evNm utils.MapStorage, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
+	evNm utils.MapStorage, aPrflIDs []string, ignoreFilters bool) (aPfs engine.ActionProfiles, err error) {
 	if len(aPrflIDs) == 0 {
+		ignoreFilters = false
 		var aPfIDMp utils.StringSet
 		if aPfIDMp, err = engine.MatchingItemIDsForEvent(
 			ctx,
@@ -173,11 +174,13 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 			}
 			return
 		}
-		var pass bool
-		if pass, err = aS.fltrS.Pass(ctx, tnt, aPf.FilterIDs, evNm); err != nil {
-			return
-		} else if !pass {
-			continue
+		if !ignoreFilters {
+			var pass bool
+			if pass, err = aS.fltrS.Pass(ctx, tnt, aPf.FilterIDs, evNm); err != nil {
+				return
+			} else if !pass {
+				continue
+			}
 		}
 		aPfs = append(aPfs, aPf)
 	}
@@ -190,10 +193,10 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 
 // scheduledActions is responsible for scheduling the action profiles matching cgrEv
 func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
-	forceASAP bool) (schedActs []*scheduledActs, err error) {
+	ignoreFilters, forceASAP bool) (schedActs []*scheduledActs, err error) {
 	var aPfs engine.ActionProfiles
 	evNm := cgrEv.AsDataProvider()
-	if aPfs, err = aS.matchingActionProfilesForEvent(ctx, tnt, evNm, aPrflIDs); err != nil {
+	if aPfs, err = aS.matchingActionProfilesForEvent(ctx, tnt, evNm, aPrflIDs, ignoreFilters); err != nil {
 		return
 	}
 
@@ -265,8 +268,13 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 		utils.OptsActionsActionProfileIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args},
-		actPrfIDs, false); err != nil {
+		actPrfIDs, ignFilters, false); err != nil {
 		return
 	}
 	*rpl = utils.OK
@@ -280,9 +288,14 @@ func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, 
 		utils.OptsActionsActionProfileIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var schedActSet []*scheduledActs
 	if schedActSet, err = aS.scheduledActions(ctx, args.Tenant,
-		args, actPrfIDs, true); err != nil {
+		args, actPrfIDs, ignFilters, true); err != nil {
 		return
 	}
 	var partExec bool

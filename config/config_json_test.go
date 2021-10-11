@@ -2344,6 +2344,9 @@ func TestDfActionSJsonCfg(t *testing.T) {
 			ActionProfileIDs: map[string][]string{
 				utils.MetaDefault: {},
 			},
+			ProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
