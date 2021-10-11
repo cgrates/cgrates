@@ -26,7 +26,8 @@ import (
 )
 
 type StatsOpts struct {
-	StatIDs []*utils.DynamicStringSliceOpt
+	StatIDs              []*utils.DynamicStringSliceOpt
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt
 }
 
 // StatSCfg the stats config section
@@ -58,6 +59,9 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
 	}
 	if jsnCfg.StatIDs != nil {
 		sqOpts.StatIDs = append(sqOpts.StatIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.StatIDs)...)
+	}
+	if jsnCfg.ProfileIgnoreFilters != nil {
+		sqOpts.ProfileIgnoreFilters = append(sqOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
 	}
 }
 
@@ -103,7 +107,8 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (st StatSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaStatIDsCfg: utils.DynamicStringSliceOptsToMap(st.Opts.StatIDs),
+		utils.MetaStatIDsCfg:           utils.DynamicStringSliceOptsToMap(st.Opts.StatIDs),
+		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(st.Opts.ProfileIgnoreFilters),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
@@ -140,8 +145,13 @@ func (sqOpts *StatsOpts) Clone() *StatsOpts {
 	if sqOpts.StatIDs != nil {
 		sqIDs = utils.CloneDynamicStringSliceOpt(sqOpts.StatIDs)
 	}
+	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	if sqOpts.ProfileIgnoreFilters != nil {
+		profileIgnoreFilters = utils.CloneDynamicBoolOpt(sqOpts.ProfileIgnoreFilters)
+	}
 	return &StatsOpts{
-		StatIDs: sqIDs,
+		StatIDs:              sqIDs,
+		ProfileIgnoreFilters: profileIgnoreFilters,
 	}
 }
 
@@ -172,7 +182,8 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 }
 
 type StatsOptsJson struct {
-	StatIDs map[string][]string `json:"*statIDs"`
+	StatIDs              map[string][]string `json:"*statIDs"`
+	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
 }
 
 // Stat service config section
@@ -195,6 +206,9 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 	}
 	if !utils.DynamicStringSliceOptEqual(v1.StatIDs, v2.StatIDs) {
 		d.StatIDs = utils.DynamicStringSliceOptsToMap(v2.StatIDs)
+	}
+	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
 	}
 	return d
 }

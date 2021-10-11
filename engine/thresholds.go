@@ -334,9 +334,15 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 		utils.OptsThresholdsThresholdIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, tS.filterS, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 
 	tIDs := utils.NewStringSet(thIDs)
 	if len(tIDs) == 0 {
+		ignFilters = false
 		tIDs, err = MatchingItemIDsForEvent(ctx, evNm,
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
@@ -365,15 +371,17 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 			return nil, err
 		}
 		tPrfl.lock(lkPrflID)
-		var pass bool
-		if pass, err = tS.filterS.Pass(ctx, tnt, tPrfl.FilterIDs,
-			evNm); err != nil {
-			tPrfl.unlock()
-			ts.unlock()
-			return nil, err
-		} else if !pass {
-			tPrfl.unlock()
-			continue
+		if !ignFilters {
+			var pass bool
+			if pass, err = tS.filterS.Pass(ctx, tnt, tPrfl.FilterIDs,
+				evNm); err != nil {
+				tPrfl.unlock()
+				ts.unlock()
+				return nil, err
+			} else if !pass {
+				tPrfl.unlock()
+				continue
+			}
 		}
 		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout,

@@ -26,7 +26,8 @@ import (
 )
 
 type ThresholdsOpts struct {
-	ThresholdIDs []*utils.DynamicStringSliceOpt
+	ThresholdIDs         []*utils.DynamicStringSliceOpt
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt
 }
 
 // ThresholdSCfg the threshold config section
@@ -57,6 +58,9 @@ func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) {
 	}
 	if jsnCfg.ThresholdIDs != nil {
 		thdOpts.ThresholdIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ThresholdIDs)
+	}
+	if jsnCfg.ProfileIgnoreFilters != nil {
+		thdOpts.ProfileIgnoreFilters = append(thdOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
 	}
 }
 
@@ -99,7 +103,8 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (t ThresholdSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaThresholdIDsCfg: utils.DynamicStringSliceOptsToMap(t.Opts.ThresholdIDs),
+		utils.MetaThresholdIDsCfg:      utils.DynamicStringSliceOptsToMap(t.Opts.ThresholdIDs),
+		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(t.Opts.ProfileIgnoreFilters),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        t.Enabled,
@@ -135,8 +140,13 @@ func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
 	if thdOpts.ThresholdIDs != nil {
 		thIDs = utils.CloneDynamicStringSliceOpt(thdOpts.ThresholdIDs)
 	}
+	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	if thdOpts.ProfileIgnoreFilters != nil {
+		profileIgnoreFilters = utils.CloneDynamicBoolOpt(thdOpts.ProfileIgnoreFilters)
+	}
 	return &ThresholdsOpts{
-		ThresholdIDs: thIDs,
+		ThresholdIDs:         thIDs,
+		ProfileIgnoreFilters: profileIgnoreFilters,
 	}
 }
 
@@ -166,7 +176,8 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 }
 
 type ThresholdsOptsJson struct {
-	ThresholdIDs map[string][]string `json:"*thresholdIDs"`
+	ThresholdIDs         map[string][]string `json:"*thresholdIDs"`
+	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
 }
 
 // Threshold service config section
@@ -188,6 +199,9 @@ func diffThresholdsOptsJsonCfg(d *ThresholdsOptsJson, v1, v2 *ThresholdsOpts) *T
 	}
 	if !utils.DynamicStringSliceOptEqual(v1.ThresholdIDs, v2.ThresholdIDs) {
 		d.ThresholdIDs = utils.DynamicStringSliceOptsToMap(v2.ThresholdIDs)
+	}
+	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
 	}
 	return d
 }

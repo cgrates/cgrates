@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -70,10 +69,8 @@ func TestDspStatSv1PingErrorNil(t *testing.T) {
 func TestDspStatSv1GetStatQueuesForEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]string
 	result := dspSrv.StatSv1GetStatQueuesForEvent(CGREvent, reply)
@@ -87,10 +84,8 @@ func TestDspStatSv1GetStatQueuesForEventErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]string
 	result := dspSrv.StatSv1GetStatQueuesForEvent(CGREvent, reply)
@@ -136,10 +131,8 @@ func TestDspStatSv1GetQueueStringMetricsErrorNil(t *testing.T) {
 func TestDspStatSv1ProcessEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]string
 	result := dspSrv.StatSv1ProcessEvent(CGREvent, reply)
@@ -153,10 +146,8 @@ func TestDspStatSv1ProcessEventErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]string
 	result := dspSrv.StatSv1ProcessEvent(CGREvent, reply)

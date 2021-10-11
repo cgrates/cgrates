@@ -314,6 +314,12 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 					Value:     []string{},
 				},
 			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ThresholdSCfg()) {
@@ -345,6 +351,12 @@ func testCGRConfigReloadStatS(t *testing.T) {
 				{
 					FilterIDs: []string{utils.MetaDefault},
 					Value:     []string{},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
 				},
 			},
 		},

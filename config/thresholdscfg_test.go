@@ -53,6 +53,12 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 					Value:     []string{},
 				},
 			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
+				},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -90,6 +96,9 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaThresholdIDsCfg: map[string][]string{
 				utils.MetaDefault: {},
 			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -124,6 +133,9 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaThresholdIDsCfg: map[string][]string{
 				utils.MetaDefault: {},
+			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
 			},
 		},
 	}

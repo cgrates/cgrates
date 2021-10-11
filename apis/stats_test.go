@@ -620,17 +620,15 @@ func TestStatsAPIs(t *testing.T) {
 		}
 	}
 
-	args := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "StatsEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Usage:        3000,
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsStatsStatIDs: []string{"sq1", "sq2"},
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "StatsEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Usage:        3000,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsStatIDs: []string{"sq1", "sq2"},
 		},
 	}
 

@@ -162,12 +162,9 @@ func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREv
 // statSProcessEvent will send the event to StatS
 func (cdrS *CDRServer) statSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var reply []string
-	statArgs := &StatsArgsProcessEvent{
-		CGREvent: cgrEv.Clone(),
-	}
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().StatSConns,
 		utils.StatSv1ProcessEvent,
-		statArgs, &reply); err != nil &&
+		cgrEv.Clone(), &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // NotFound is not considered error
 	}

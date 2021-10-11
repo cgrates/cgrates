@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdStatsQueueForEvent{
 		name:      "stats_for_event",
 		rpcMethod: utils.StatSv1GetStatQueuesForEvent,
-		rpcParams: &engine.StatsArgsProcessEvent{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +36,7 @@ func init() {
 type CmdStatsQueueForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.StatsArgsProcessEvent
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -51,9 +50,7 @@ func (self *CmdStatsQueueForEvent) RpcMethod() string {
 
 func (self *CmdStatsQueueForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.StatsArgsProcessEvent{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = &utils.CGREvent{}
 	}
 	return self.rpcParams
 }
