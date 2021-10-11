@@ -1,5 +1,0 @@
-#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
-
-cgrates.org,CHRG_SUPPLIER,,20,supplier,*none
-
-cgrates.org,CHRG_CUSTOMER,,10,customer,*none

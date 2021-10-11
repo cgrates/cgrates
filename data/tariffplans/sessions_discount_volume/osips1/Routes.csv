@@ -1,7 +1,5 @@
 #Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
 
-cgrates.org,RP1,*string:~*req.Account:dan.bogos,,*lc,,,,,,,,,,
-cgrates.org,RP1,,,,,ROUTE1,,ACCOUNT1,,,,,,
-cgrates.org,RP1,,,,,ROUTE2,,,RP_ROUTE2,,,,,
-
-
+opensips.org,DEFAULT_ROUTES,,,*weight,,,,,,,,,,
+opensips.org,DEFAULT_ROUTES,,,,,carrier1,,,,,,;20,,
+opensips.org,DEFAULT_ROUTES,,,,,carrier2,,,,,,;10,,

@@ -1,0 +1,5 @@
+#Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
+
+cgrates.org,ACNT_VOL1,,,,ABS_VOLUME1,,;30,*abstract,120000000000,,,;1000000000;0;,,,
+cgrates.org,ACNT_VOL1,,,,ABS_VOLUME2,,;20,*abstract,60000000000,,,;1000000000;;,,RP_ABS_VOLUME2,
+cgrates.org,ACNT_VOL1,,,,CNCRT_BALANCE1,,;10,*concrete,1000,,*balanceUnlimited:true,;1000000000;;,,RP_SUPPLIER1,

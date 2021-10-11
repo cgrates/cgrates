@@ -5,6 +5,7 @@
         
     "general": {
         "log_level": 7,
+        "reply_timeout": "10s",
     },
         
    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
@@ -31,25 +32,38 @@
             },										
         },
     },
-        
-    "cdrs": {									// CDRs config
+
+    "cdrs": {
         "enabled": true,
-        "accounts_conns":["*localhost"],
+        "chargers_conns": ["*localhost"],
+        "accounts_conns": ["*localhost"],
         "rates_conns": ["*localhost"],
-        "chargers_conns":["*localhost"],
-        "opts": {		
-            "*chargerS": {						//
-                "": true,
-            }, 
+        "ees_conns":["*localhost"],
+        "opts": {								
+            "*chargerS": {			
+                "*notstring:~*req.Account:sipp": true,
+            },
             "*rateS": {
-                "*string:~*req.Account:dan.bogos;*string:~*req.RunID:supplier": false,
-                "": true,
+                "*notstring:~*req.Account:sipp;*notstring:~*req.Account:dan.bogos": true,
+                "*string:~*req.RunID:customers": true,
             },
-            "*accountS": {
-                "*string:~*req.Account:dan.bogos;*string:~*req.RunID:supplier": true,
-                "": false,
+            "*accountS": {					
+                "*string:~*req.Account:dan.bogos;*string:~*req.RunID:suppliers": true,
             },
+            "*eeS": {
+                "*default": true,
+            }
         },   
+    },
+
+    "ees": {
+        "enabled": true,
+        "exporters": [
+            {
+                "id": "MyLogger",
+                "type": "*log",
+            }
+        ]
     },
         
     "chargers": {
@@ -59,11 +73,24 @@
         
     "rates": {
         "enabled": true,
+        "string_indexed_fields": ["*req.RunID"],
+        "rate_string_indexed_fields": [],
+        "rate_prefix_indexed_fields": ["*req.Destination"],
+        "opts":{
+            "*profileIgnoreFilters": {
+                "*default": true,
+            }	
+        },
     },
         
     "accounts": {
         "enabled": true,
         "rates_conns": ["*localhost"],
+        "opts":{				
+            "*usage": {	
+                "": "1m",			
+            },
+        },
     },
         
     "loaders": [
@@ -71,9 +98,38 @@
             "id": "*default",
             "enabled": true,
             "tenant": "cgrates.org",
-            "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume",
+            "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume/routes1",
             "tp_out_dir": "",
             "lockfile_path": "",
+        },
+        {
+            "id": "OsipsTestLoader",
+            "enabled": true,
+            "tp_in_dir": "/usr/share/cgrates/tariffplans/sessions_discount_volume/osips1",
+            "tp_out_dir": "",
+            "data":[
+                {
+                    "type": "*routes",
+                    "file_name": "Routes.csv",
+                    "fields": [
+                        {"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                        {"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+                        {"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+                        {"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
+                        {"tag": "Sorting", "path": "Sorting", "type": "*variable", "value": "~*req.4"},
+                        {"tag": "SortingParameters", "path": "SortingParameters", "type": "*variable", "value": "~*req.5"},
+                        {"tag": "RouteID", "path": "RouteID", "type": "*variable", "value": "~*req.6"},
+                        {"tag": "RouteFilterIDs", "path": "RouteFilterIDs", "type": "*variable", "value": "~*req.7"},
+                        {"tag": "RouteAccountIDs", "path": "RouteAccountIDs", "type": "*variable", "value": "~*req.8"},
+                        {"tag": "RouteRateProfileIDs", "path": "RouteRateProfileIDs", "type": "*variable", "value": "~*req.9"},
+                        {"tag": "RouteResourceIDs", "path": "RouteResourceIDs", "type": "*variable", "value": "~*req.10"},
+                        {"tag": "RouteStatIDs", "path": "RouteStatIDs", "type": "*variable", "value": "~*req.11"},
+                        {"tag": "RouteWeights", "path": "RouteWeights", "type": "*variable", "value": "~*req.12"},
+                        {"tag": "RouteBlocker", "path": "RouteBlocker", "type": "*variable", "value": "~*req.13"},
+                        {"tag": "RouteParameters", "path": "RouteParameters", "type": "*variable", "value": "~*req.14"}
+                    ]
+                }
+            ]
         },
     ],
         
@@ -81,9 +137,11 @@
         "enabled": true,
         "accounts_conns": ["*localhost"],
         "rates_conns": ["*localhost"],
-        "default_opts":{
-            "*ignoreErrors": true
-        }
+        "opts":{
+            "*ignoreErrors": {						
+                "": true,
+            },
+        },
     },
         
     "admins": {
