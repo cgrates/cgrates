@@ -1181,19 +1181,19 @@ const CGRATES_CFG_JSON = `
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "verbosity": 1000,                      // number of increment iterations allowed
 	"opts":{								//	
-		"*rateProfileIDs": {				//
+		"*rateProfileIDs": {				// select the rate profiles used for cost calculation
 			"*default": [],
 		},			
-		"*startTime": {						//
+		"*startTime": {						// start time used for cost calculation
 			"*default": "*now",
 		},
-		"*usage": {							//
+		"*usage": {							// usage used for cost calculation
 			"*default": "1m",
 		},
-		"*intervalStart": {					//
+		"*intervalStart": {					// event interval start
 			"*default": "0",
 		},
-		"*profileIgnoreFilters": {			// if we should check the filters
+		"*profileIgnoreFilters": {			// ignore the filters for rateProfileIDs
 			"*default": false,
 		}	
 	},
