@@ -145,3 +145,19 @@ func TestSafeMapStorageClone(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", expected, reply)
 	}
 }
+
+func TestClonedMapStorage(t *testing.T) {
+	ms := &SafeMapStorage{
+		MapStorage: MapStorage{
+			"field1": []string{"v1", "v2"},
+		},
+	}
+	exp := MapStorage{
+		"field1": []string{"v1", "v2"},
+	}
+	msC := ms.ClonedMapStorage()
+	// fmt.Println(msC)
+	if !reflect.DeepEqual(exp, msC) {
+		t.Errorf("Expected %v \n but received \n %v", exp, msC)
+	}
+}

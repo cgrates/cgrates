@@ -360,7 +360,25 @@ func TestIfaceAsBool(t *testing.T) {
 	} else if itmConvert != false {
 		t.Errorf("received: %+v", itmConvert)
 	}
+	val = interface{}(int32(2))
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
 	val = interface{}(1)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(uint32(2))
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(uint64(2))
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
 	} else if itmConvert != true {
@@ -1316,6 +1334,13 @@ func TestIfaceAsBig(t *testing.T) {
 	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(10)) {
 		t.Errorf("Expected %v but received %v", new(decimal.Big).SetUint64(10), rcv)
 	}
+
+	def := []string{"test"}
+	_, err = IfaceAsBig(def)
+	if err == nil || err.Error() != "cannot convert field: []string to decimal.Big" {
+		t.Error(err)
+	}
+
 }
 
 func TestReflectFieldMethodInterfaceStruct(t *testing.T) {
@@ -1477,5 +1502,222 @@ func TestReflectFieldMethodInterfaceInvalidFieldMethod6(t *testing.T) {
 	exp := ErrNotFound
 	if err == nil || err != exp {
 		t.Errorf("Expected %v but received %v", exp, err)
+	}
+}
+
+func TestIfaceAsStringSliceString(t *testing.T) {
+	//case of []string
+	fld := []string{"string_ex"}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"string_ex"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceInt(t *testing.T) {
+	//case of []int
+	fld := []int{1, 2, 3}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"1", "2", "3"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceInt32(t *testing.T) {
+	//case of []int32
+	fld := []int32{1, 2, 3}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"1", "2", "3"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceInt64(t *testing.T) {
+	//case of []int64
+	fld := []int64{1, 2, 3}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"1", "2", "3"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceUInt32(t *testing.T) {
+	//case of []uint32
+	fld := []uint32{1, 2, 3}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"1", "2", "3"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceUInt64(t *testing.T) {
+	//case of []uint64
+	fld := []uint64{1, 2, 3}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"1", "2", "3"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceBool(t *testing.T) {
+	//case of []bool
+	fld := []bool{true, false, false}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"true", "false", "false"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceFloat32(t *testing.T) {
+	//case of []float32
+	fld := []float32{1.2, 2.8, 3.1}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"1.2000000476837158", "2.799999952316284", "3.0999999046325684"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceFloat64(t *testing.T) {
+	//case of []float64
+	fld := []float64{1.2, 2.8, 3.1}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"1.2", "2.8", "3.1"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceInterface(t *testing.T) {
+	//case of []interface
+	fld := []interface{}{1.2, "string", false}
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"1.2", "string", "false"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceStringNonSlice(t *testing.T) {
+	//case of string
+	fld := "very;long;string"
+	rcv, err := IfaceAsStringSlice(fld)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"very", "long", "string"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsStringSliceDefault(t *testing.T) {
+	//case of default
+	fld := time.Second * 2
+	exp := "cannot convert field: 2s to []string"
+	_, err := IfaceAsStringSlice(fld)
+	if err.Error() != exp {
+		t.Errorf("Expected error")
+	}
+}
+
+func TestOptAsBool(t *testing.T) {
+	opts := map[string]interface{}{
+		"field1": 2,
+	}
+	rcv := OptAsBool(opts, "field1")
+	if !rcv {
+		t.Error("Output should've been true")
+	}
+
+	rcv = OptAsBool(opts, "field2")
+	if rcv {
+		t.Error("Output should've been false")
+	}
+}
+
+func TestOptAsBoolOrDef(t *testing.T) {
+	opts := map[string]interface{}{
+		"field1": 2,
+	}
+	rcv := OptAsBoolOrDef(opts, "field1", false)
+	if !rcv {
+		t.Error("Output should've been true")
+	}
+
+	rcv = OptAsBoolOrDef(opts, "field2", false)
+	if rcv {
+		t.Error("Output should've been false")
+	}
+}
+
+func TestOptAsStringSlice(t *testing.T) {
+	opts := map[string]interface{}{
+		"field1": []string{"val1", "val2"},
+	}
+	rcv, err := OptAsStringSlice(opts, "field1")
+	if err != nil {
+		t.Error(err)
+	}
+	exp := []string{"val1", "val2"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+
+	_, err = OptAsStringSlice(opts, "field2")
+	if err != nil {
+		t.Error(err)
+	}
+
+	opts["field1"] = time.Second * 2
+	_, err = OptAsStringSlice(opts, "field1")
+	errExp := "error for option <field1>: cannot convert field: 2s to []string"
+	if err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err)
+	}
+}
+
+func TestStringAsBig(t *testing.T) {
+	itm := "2ns"
+	_, err := StringAsBig(itm)
+	if err != nil {
+		t.Error(err)
 	}
 }
