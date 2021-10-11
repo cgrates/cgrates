@@ -112,7 +112,7 @@ func testIdxLoadTariffPlan(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.LoaderSv1Load,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			Caching: utils.StringPointer(utils.MetaReload), // after laode, we got CacheIDs and it will be called Cachesv1.Clear, so indexes will be removed
+			Caching: utils.StringPointer(utils.MetaReload), // after laod, we got CacheIDs and it will be called Cachesv1.Clear, so indexes will be removed
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -132,7 +132,7 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaRateProfiles,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadConfigDIR == "session_volume_discount_internal" {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DataDbCfg().Type == utils.MetaInternal {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -150,7 +150,7 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaChargers,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadConfigDIR == "session_volume_discount_internal" {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DataDbCfg().Type == utils.MetaInternal {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -168,7 +168,7 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaAttributes,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadConfigDIR == "session_volume_discount_internal" {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DataDbCfg().Type == utils.MetaInternal {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)

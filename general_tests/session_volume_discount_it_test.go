@@ -133,7 +133,7 @@ func testSessVolDiscApierRpcConn(t *testing.T) {
 
 func testSessVolDiscLoadersLoad(t *testing.T) {
 	caching := utils.MetaReload
-	if tSessVolDiscCfgDIR == "session_volume_discount_internal" {
+	if tSessVolDiscCfg.DataDbCfg().Type == utils.Internal {
 		caching = utils.MetaNone
 	}
 	var reply string
@@ -152,22 +152,38 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 	expected := &sessions.V1AuthorizeReply{
 		RouteProfiles: engine.SortedRoutesList{
 			{
-				ProfileID: "RP1",
+				ProfileID: "LC1",
 				Sorting:   "*lc",
 				Routes: []*engine.SortedRoute{
 					{
-						RouteID: "ROUTE1",
+						RouteID: "supplier1",
 						SortingData: map[string]interface{}{
-							"Cost":       float64(0.9), // 90second * 0.01/1sec
-							"AccountIDs": []interface{}{"ACCOUNT1"},
+							"AccountIDs": []interface{}{"ACNT_VOL1"},
+							"Cost":       nil, // returns from accounts null concretes, so the cost will be null,
 							"Weight":     float64(0),
 						},
 					},
 					{
-						RouteID: "ROUTE2",
+						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(4.5), // 90second * 0.05/1sec
-							"RatingPlanID": "RP_ROUTE2",
+							"Cost":         float64(1.200000000000001),
+							"RatingPlanID": "RP_SUPPLIER2",
+							"Weight":       float64(0),
+						},
+					},
+					{
+						RouteID: "supplier4",
+						SortingData: map[string]interface{}{
+							"Cost":         float64(1.365),
+							"RatingPlanID": "RP_SUPPLIER4",
+							"Weight":       float64(0),
+						},
+					},
+					{
+						RouteID: "supplier3",
+						SortingData: map[string]interface{}{
+							"Cost":         float64(1.425000000000001),
+							"RatingPlanID": "RP_SUPPLIER3",
 							"Weight":       float64(0),
 						},
 					},
@@ -179,13 +195,14 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "dan.bogos",
+			utils.AccountField: "sipp",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaUsage:  time.Minute + 30*time.Second,
-			utils.OptsRouteS: true,
+			utils.MetaUsage:                time.Minute + 30*time.Second,
+			utils.OptsRouteS:               true,
+			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
 	// authorize the session for 1m30s
@@ -194,6 +211,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 		args, &rplyFirst); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rplyFirst) {
+		t.Errorf(" %T si %T", expected.RouteProfiles[0].Routes[1].SortingData["Weight"], rplyFirst.RouteProfiles[0].Routes[1].SortingData["Weight"])
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
 	}
 }
@@ -202,22 +220,38 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 	expected := &sessions.V1AuthorizeReply{
 		RouteProfiles: engine.SortedRoutesList{
 			{
-				ProfileID: "RP1",
+				ProfileID: "LC1",
 				Sorting:   "*lc",
 				Routes: []*engine.SortedRoute{
 					{
-						RouteID: "ROUTE1",
+						RouteID: "supplier1",
 						SortingData: map[string]interface{}{
-							"Cost":       float64(7.4), // 600second * 0.01/1sec(from first balance) + 70second * 0.02/1sec(from second balance)
-							"AccountIDs": []interface{}{"ACCOUNT1"},
+							"AccountIDs": []interface{}{"ACNT_VOL1"},
+							"Cost":       float64(8.521666666666668), // returns from accounts null concretes, so the cost will be null,
 							"Weight":     float64(0),
 						},
 					},
 					{
-						RouteID: "ROUTE2",
+						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(33.5), // 670second * 0.05/1sec
-							"RatingPlanID": "RP_ROUTE2",
+							"Cost":         float64(8.933333333333337),
+							"RatingPlanID": "RP_SUPPLIER2",
+							"Weight":       float64(0),
+						},
+					},
+					{
+						RouteID: "supplier4",
+						SortingData: map[string]interface{}{
+							"Cost":         float64(10.16166666666667),
+							"RatingPlanID": "RP_SUPPLIER4",
+							"Weight":       float64(0),
+						},
+					},
+					{
+						RouteID: "supplier3",
+						SortingData: map[string]interface{}{
+							"Cost":         float64(10.60833333333334),
+							"RatingPlanID": "RP_SUPPLIER3",
 							"Weight":       float64(0),
 						},
 					},
@@ -234,8 +268,9 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 			utils.ToR:          "*voice",
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaUsage:  11*time.Minute + 10*time.Second,
-			utils.OptsRouteS: true,
+			utils.MetaUsage:                11*time.Minute + 10*time.Second,
+			utils.OptsRouteS:               true,
+			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
 	// authorize the session for 11m10s
@@ -252,22 +287,38 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 	expected := &sessions.V1AuthorizeReply{
 		RouteProfiles: engine.SortedRoutesList{
 			{
-				ProfileID: "RP1",
+				ProfileID: "LC1",
 				Sorting:   "*lc",
 				Routes: []*engine.SortedRoute{
 					{
-						RouteID: "ROUTE1",
+						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":       float64(42), // 1200total: 600second * 0.01/1sec(from first balance) + 300second * 0.02/1sec(from second balance) + 300sec * 0.1/1sec(third balance)
-							"AccountIDs": []interface{}{"ACCOUNT1"},
+							"RatingPlanID": "RP_SUPPLIER2",
+							"Cost":         float64(16.00000000000001), // returns from accounts null concretes, so the cost will be null,
+							"Weight":       float64(0),
+						},
+					},
+					{
+						RouteID: "supplier1",
+						SortingData: map[string]interface{}{
+							"Cost":       float64(17.09),
+							"AccountIDs": []interface{}{"ACNT_VOL1"},
 							"Weight":     float64(0),
 						},
 					},
 					{
-						RouteID: "ROUTE2",
+						RouteID: "supplier4",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(60), // 1200second * 0.05/1sec
-							"RatingPlanID": "RP_ROUTE2",
+							"Cost":         float64(18.2),
+							"RatingPlanID": "RP_SUPPLIER4",
+							"Weight":       float64(0),
+						},
+					},
+					{
+						RouteID: "supplier3",
+						SortingData: map[string]interface{}{
+							"Cost":         float64(19.00000000000001),
+							"RatingPlanID": "RP_SUPPLIER3",
 							"Weight":       float64(0),
 						},
 					},
@@ -284,8 +335,9 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 			utils.ToR:          "*voice",
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaUsage:  20 * time.Minute,
-			utils.OptsRouteS: true,
+			utils.MetaUsage:                20 * time.Minute,
+			utils.OptsRouteS:               true,
+			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
 	// authorize the session for 20m
@@ -307,9 +359,6 @@ func testSessVolDiscProcessCDRSupplier(t *testing.T) {
 			utils.Destination:  "1002",
 		},
 		APIOpts: map[string]interface{}{
-			// utils.OptsAttributeS: true,
-			// utils.OptsChargerS: true,
-			// utils.OptsAccountS: true,
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.MetaUsage: 15 * time.Minute,
 		},
@@ -334,9 +383,6 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 			utils.Destination:  "1002",
 		},
 		APIOpts: map[string]interface{}{
-			// utils.OptsAttributeS: true,
-			// utils.OptsChargerS: true,
-			// utils.OptsAccountS: true,
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.MetaUsage: 15 * time.Minute,
 		},
@@ -418,22 +464,38 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 	expected := &sessions.V1AuthorizeReply{
 		RouteProfiles: engine.SortedRoutesList{
 			{
-				ProfileID: "RP1",
+				ProfileID: "LC1",
 				Sorting:   "*lc",
 				Routes: []*engine.SortedRoute{
 					{
-						RouteID: "ROUTE2",
+						RouteID: "supplier2",
 						SortingData: map[string]interface{}{
-							"Cost":         float64(4.5), // 90second * 0.05/1sec
-							"RatingPlanID": "RP_ROUTE2",
+							"Cost":         float64(1.200000000000001),
+							"RatingPlanID": "RP_SUPPLIER2",
 							"Weight":       float64(0),
 						},
 					},
 					{
-						RouteID: "ROUTE1",
+						RouteID: "supplier4",
 						SortingData: map[string]interface{}{
-							"Cost":       float64(9), // 90second * 0.1/1sec (the last balance with remain units)
-							"AccountIDs": []interface{}{"ACCOUNT1"},
+							"Cost":         float64(1.365),
+							"RatingPlanID": "RP_SUPPLIER4",
+							"Weight":       float64(0),
+						},
+					},
+					{
+						RouteID: "supplier3",
+						SortingData: map[string]interface{}{
+							"Cost":         float64(1.425000000000001),
+							"RatingPlanID": "RP_SUPPLIER3",
+							"Weight":       float64(0),
+						},
+					},
+					{
+						RouteID: "supplier1",
+						SortingData: map[string]interface{}{
+							"AccountIDs": []interface{}{"ACNT_VOL1"},
+							"Cost":       float64(1.455), // returns from accounts null concretes, so the cost will be null,
 							"Weight":     float64(0),
 						},
 					},
