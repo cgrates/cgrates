@@ -157,9 +157,10 @@ func (sS *StatService) StoreStatQueue(ctx *context.Context, sq *StatQueue) (err 
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching statQueues which are active by the time of the call
-func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt string, statsIDs []string, evNm utils.MapStorage) (sqs StatQueues, err error) {
+func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt string, statsIDs []string, evNm utils.MapStorage, ignoreFilters bool) (sqs StatQueues, err error) {
 	sqIDs := utils.NewStringSet(statsIDs)
 	if len(sqIDs) == 0 {
+		ignoreFilters = false
 		sqIDs, err = MatchingItemIDsForEvent(ctx, evNm,
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
 			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
@@ -188,15 +189,17 @@ func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt stri
 			return
 		}
 		sqPrfl.lock(lkPrflID)
-		var pass bool
-		if pass, err = sS.filterS.Pass(ctx, tnt, sqPrfl.FilterIDs,
-			evNm); err != nil {
-			sqPrfl.unlock()
-			sqs.unlock()
-			return nil, err
-		} else if !pass {
-			sqPrfl.unlock()
-			continue
+		if !ignoreFilters {
+			var pass bool
+			if pass, err = sS.filterS.Pass(ctx, tnt, sqPrfl.FilterIDs,
+				evNm); err != nil {
+				sqPrfl.unlock()
+				sqs.unlock()
+				return nil, err
+			} else if !pass {
+				sqPrfl.unlock()
+				continue
+			}
 		}
 		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -231,32 +234,6 @@ func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt stri
 		}
 	}
 	return
-}
-
-// StatsArgsProcessEvent the arguments for processing the event with stats
-type StatsArgsProcessEvent struct {
-	*utils.CGREvent
-	clnb bool //rpcclonable
-}
-
-// SetCloneable sets if the args should be clonned on internal connections
-func (attr *StatsArgsProcessEvent) SetCloneable(rpcCloneable bool) {
-	attr.clnb = rpcCloneable
-}
-
-// RPCClone implements rpcclient.RPCCloner interface
-func (attr *StatsArgsProcessEvent) RPCClone() (interface{}, error) {
-	if !attr.clnb {
-		return attr, nil
-	}
-	return attr.Clone(), nil
-}
-
-// Clone creates a clone of the object
-func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
-	return &StatsArgsProcessEvent{
-		CGREvent: attr.CGREvent.Clone(),
-	}
 }
 
 func (sS *StatService) getStatQueue(ctx *context.Context, tnt, id string) (sq *StatQueue, err error) {
@@ -331,17 +308,19 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
-func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
-	evNm := utils.MapStorage{
-		utils.MetaReq:  args.Event,
-		utils.MetaOpts: args.APIOpts,
-	}
+func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
+	evNm := args.AsDataProvider()
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args.CGREvent, sS.filterS, sS.cgrcfg.StatSCfg().Opts.StatIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.StatIDs,
 		utils.OptsStatsStatIDs); err != nil {
 		return
 	}
-	matchSQs, err := sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, evNm)
+	var ignFilters bool
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
+	matchSQs, err := sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, evNm, ignFilters)
 	if err != nil {
 		return nil, err
 	}
@@ -367,8 +346,8 @@ func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *Stat
 }
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *StatsArgsProcessEvent, reply *[]string) (err error) {
-	if args.CGREvent == nil {
+func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
@@ -389,8 +368,8 @@ func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *StatsArgsProce
 }
 
 // V1GetStatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *StatsArgsProcessEvent, reply *[]string) (err error) {
-	if args.CGREvent == nil {
+func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
@@ -403,15 +382,17 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *Stats
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args.CGREvent, sS.filterS, sS.cgrcfg.StatSCfg().Opts.StatIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.StatIDs,
 		utils.OptsStatsStatIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, utils.MapStorage{
-		utils.MetaReq:  args.Event,
-		utils.MetaOpts: args.APIOpts,
-	}); err != nil {
+	if sQs, err = sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, args.AsDataProvider(), ignFilters); err != nil {
 		return
 	}
 

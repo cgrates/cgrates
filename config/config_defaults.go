@@ -757,6 +757,9 @@ const CGRATES_CFG_JSON = `
 		"*statIDs": {						//
 			"*default": [],
 		},
+		"*profileIgnoreFilters": {			// if we should check the filters
+			"*default": false,
+		}	
 	},								
 },
 
@@ -773,7 +776,10 @@ const CGRATES_CFG_JSON = `
 	"opts":{								//
 		"*thresholdIDs": {					//	
 			"*default": [],
-		},									
+		},
+		"*profileIgnoreFilters": {			// if we should check the filters
+			"*default": false,
+		}										
 	},								
 },
 

@@ -147,16 +147,14 @@ func testStatsPing(t *testing.T) {
 }
 
 func testStatsGetStatQueueBeforeSet(t *testing.T) {
-	args := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "StatsEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsStatsStatIDs: []string{"SQ_1", "SQ_2"},
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "StatsEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsStatIDs: []string{"SQ_1", "SQ_2"},
 		},
 	}
 
@@ -469,16 +467,14 @@ func testStatsRemoveStatQueueProfiles(t *testing.T) {
 }
 
 func testStatsGetStatQueuesAfterRemove(t *testing.T) {
-	args := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "StatsEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsStatsStatIDs: []string{"SQ_1", "SQ_2"},
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "StatsEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsStatIDs: []string{"SQ_1", "SQ_2"},
 		},
 	}
 
@@ -664,17 +660,15 @@ func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 }
 
 func testStatsProcessEvent(t *testing.T) {
-	args := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "StatsEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Usage:        30 * time.Second,
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsStatsStatIDs: []string{"SQ_3"},
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "StatsEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Usage:        30 * time.Second,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsStatIDs: []string{"SQ_3"},
 		},
 	}
 	expected := []string{"SQ_3"}

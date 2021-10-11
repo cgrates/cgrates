@@ -909,6 +909,9 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 			StatIDs: map[string][]string{
 				utils.MetaDefault: {},
 			},
+			ProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -936,6 +939,9 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Opts: &ThresholdsOptsJson{
 			ThresholdIDs: map[string][]string{
 				utils.MetaDefault: {},
+			},
+			ProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
 			},
 		},
 	}

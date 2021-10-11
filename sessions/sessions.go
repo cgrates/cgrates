@@ -3017,12 +3017,9 @@ func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, cl
 		return sIDs, utils.NewErrNotConnected(utils.StatS)
 	}
 
-	statArgs := &engine.StatsArgsProcessEvent{
-		CGREvent: cgrEv,
-	}
-	statArgs.SetCloneable(clnb)
+	cgrEv.SetCloneable(clnb)
 	//initialize the returned variable
-	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().StatSConns, utils.StatSv1ProcessEvent, statArgs, &sIDs)
+	err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().StatSConns, utils.StatSv1ProcessEvent, cgrEv, &sIDs)
 	return
 }
 
