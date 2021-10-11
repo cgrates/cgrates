@@ -63,12 +63,13 @@ func (aS *AccountS) Shutdown() {
 // if lked option is passed, each Account will be also locked
 //   so it becomes responsibility of upper layers to release the lock
 func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
-	acntIDs []string, lked bool) (acnts utils.AccountsWithWeight, err error) {
+	acntIDs []string, ignoreFilters, lked bool) (acnts utils.AccountsWithWeight, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
 	}
 	if len(acntIDs) == 0 {
+		ignoreFilters = false
 		var actIDsMp utils.StringSet
 		if actIDsMp, err = engine.MatchingItemIDsForEvent(
 			ctx,
@@ -89,9 +90,9 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 	for _, acntID := range acntIDs {
 		var refID string
 		if lked {
-			cacheKey := utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID)
 			refID = guardian.Guardian.GuardIDs("",
-				aS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+				aS.cfg.GeneralCfg().LockingTimeout,
+				utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID)) // RPC caching needs to be atomic
 		}
 		var qAcnt *utils.Account
 		if qAcnt, err = aS.dm.GetAccount(ctx, tnt, acntID); err != nil {
@@ -103,14 +104,16 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 			unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
 			return
 		}
-		var pass bool
-		if pass, err = aS.fltrS.Pass(ctx, tnt, qAcnt.FilterIDs, evNm); err != nil {
-			guardian.Guardian.UnguardIDs(refID)
-			unlockAccounts(acnts)
-			return
-		} else if !pass {
-			guardian.Guardian.UnguardIDs(refID)
-			continue
+		if !ignoreFilters {
+			var pass bool
+			if pass, err = aS.fltrS.Pass(ctx, tnt, qAcnt.FilterIDs, evNm); err != nil {
+				guardian.Guardian.UnguardIDs(refID)
+				unlockAccounts(acnts)
+				return
+			} else if !pass {
+				guardian.Guardian.UnguardIDs(refID)
+				continue
+			}
 		}
 		var weight float64
 		if weight, err = engine.WeightFromDynamics(ctx, qAcnt.Weights,
@@ -239,9 +242,14 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, false); err != nil {
+		args, accIDs, ignFilters, false); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -258,9 +266,14 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, true); err != nil {
+		args, accIDs, ignFilters, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -289,9 +302,14 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, true); err != nil {
+		args, accIDs, ignFilters, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -320,9 +338,14 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, true); err != nil {
+		args, accIDs, ignFilters, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -351,9 +374,14 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 		utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, true); err != nil {
+		args, accIDs, ignFilters, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}

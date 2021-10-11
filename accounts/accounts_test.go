@@ -131,7 +131,7 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 		newDm := engine.NewDataManager(mockDataDB, cfg.CacheCfg(), nil)
 		accnts = NewAccountS(cfg, fltr, nil, newDm)
 		if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-			[]string{}, true); err == nil || err != utils.ErrNotFound {
+			[]string{}, false,true); err == nil || err != utils.ErrNotFound {
 			t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 		}
 
@@ -142,7 +142,7 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 	newDm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	accnts = NewAccountS(cfg, fltr, nil, newDm)
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, true); err == nil || err != utils.ErrNotImplemented {
+		[]string{}, false, true); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 }
@@ -184,7 +184,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	}
 
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, true); err == nil || err != utils.ErrNotFound {
+		[]string{}, false, true); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -195,28 +195,28 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 
 	cgrEvent.APIOpts = make(map[string]interface{})
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, true); err == nil || err != utils.ErrNotFound {
+		[]string{}, false, true); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
 	accPrf.FilterIDs = []string{"invalid_filter_format"}
 	expected := "NOT_FOUND:invalid_filter_format"
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, true); err == nil || err.Error() != expected {
+		[]string{}, false, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.FilterIDs = []string{"*string:~*req.Account:1003"}
 
 	expected = "NOT_FOUND"
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, true); err == nil || err.Error() != expected {
+		[]string{}, false, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.FilterIDs = []string{"*string:~*req.Account:1004"}
 
 	expected = "NOT_FOUND:invalid_filter_format"
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, true); err == nil || err.Error() != expected {
+		[]string{}, false, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Weights[0].FilterIDs = []string{}
@@ -228,7 +228,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 		},
 	}
 	if rcv, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, false); err != nil {
+		[]string{}, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedAccPrfWeght, rcv) {
 		t.Errorf("Expected %+v, received %+v", expectedAccPrfWeght, utils.ToJSON(rcv))
@@ -1289,13 +1289,13 @@ func TestMultipleAccountsErr(t *testing.T) {
 
 	expected := "NOT_FOUND:invalid_format"
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", args,
-		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, true); err == nil || err.Error() != expected {
+		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, false, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	expected = "NOT_FOUND:invalid_format"
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", args,
-		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, true); err == nil || err.Error() != expected {
+		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, false, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

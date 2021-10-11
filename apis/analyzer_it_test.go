@@ -216,6 +216,7 @@ func testAnalyzerSGetFilterIDs(t *testing.T) {
 	if !reflect.DeepEqual(result, expFilter) {
 		t.Errorf("Expected %v \n but received \n %v", expFilter, result)
 	}
+	time.Sleep(50 * time.Millisecond)
 	// fmt.Println(utils.ToJSON(result))
 }
 

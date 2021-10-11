@@ -70,6 +70,12 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 					Value:     decimal.New(int64(72*time.Hour), 0),
 				},
 			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
+				},
+			},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -126,6 +132,9 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 			},
 			utils.MetaUsage: map[string]string{
 				utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
+			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
 			},
 		},
 	}

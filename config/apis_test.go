@@ -62,6 +62,9 @@ func TestConfigV1SetConfigWithDB(t *testing.T) {
 		Usage: map[string]string{
 			utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
 		},
+		ProfileIgnoreFilters: map[string]bool{
+			utils.MetaDefault: false,
+		},
 	}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
@@ -181,6 +184,9 @@ func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 		},
 		Usage: map[string]string{
 			utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
+		},
+		ProfileIgnoreFilters: map[string]bool{
+			utils.MetaDefault: false,
 		},
 	}}
 	rpl2 := new(AccountSJsonCfg)
