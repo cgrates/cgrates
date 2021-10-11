@@ -103,7 +103,7 @@ func testLdPrMatchAcRPCConn(t *testing.T) {
 
 func testLdPrMatchAcLoadTP(t *testing.T) {
 	caching := utils.MetaReload
-	if testLdPrMatchAcCfgDir == "ld_process_match_rt_internal" {
+	if testLdPrMatchAcCfg.DataDbCfg().Type == utils.Internal {
 		caching = utils.MetaNone
 	}
 	var reply string
