@@ -4656,7 +4656,7 @@ func TestAccountMdlsAsTPAccountError(t *testing.T) {
 			BalanceCostIncrements: "AN;INVALID;COST;INCREMENT;VALUE",
 		},
 	}
-	expectedErr := "invlid key: <AN;INVALID;COST;INCREMENT;VALUE> for BalanceCostIncrements"
+	expectedErr := "invalid key: <AN;INVALID;COST;INCREMENT;VALUE> for BalanceCostIncrements"
 	if _, err := testStruct.AsTPAccount(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -4669,7 +4669,7 @@ func TestAccountMdlsAsTPAccountError(t *testing.T) {
 
 	testStruct[0].BalanceCostIncrements = utils.EmptyString
 	testStruct[0].BalanceUnitFactors = "NOT;A;VALUE"
-	expectedErr = "invlid key: <NOT;A;VALUE> for BalanceUnitFactors"
+	expectedErr = "invalid key: <NOT;A;VALUE> for BalanceUnitFactors"
 	if _, err := testStruct.AsTPAccount(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
