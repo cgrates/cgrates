@@ -85,16 +85,9 @@ func TestDataDBReload(t *testing.T) {
 		Port: "27017",
 		Name: "10",
 		User: "cgrates",
-		Opts: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
+		Opts: &config.DataDBOpts{
+			MongoQueryTimeout: 10 * time.Second,
+			RedisClusterSync:  5 * time.Second,
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
@@ -225,16 +218,9 @@ func TestDataDBReloadBadType(t *testing.T) {
 		Port: "27017",
 		Name: "10",
 		User: "cgrates",
-		Opts: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
+		Opts: &config.DataDBOpts{
+			MongoQueryTimeout: 10 * time.Second,
+			RedisClusterSync:  5 * time.Second,
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
@@ -330,16 +316,9 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 		Port: "27017",
 		Name: "10",
 		User: "cgrates",
-		Opts: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
+		Opts: &config.DataDBOpts{
+			MongoQueryTimeout: 10 * time.Second,
+			RedisClusterSync:  5 * time.Second,
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
@@ -517,16 +496,9 @@ func TestDataDBReloadCastError(t *testing.T) {
 		Port: "27017",
 		Name: "10",
 		User: "cgrates",
-		Opts: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
+		Opts: &config.DataDBOpts{
+			MongoQueryTimeout: 10 * time.Second,
+			RedisClusterSync:  5 * time.Second,
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
@@ -602,142 +574,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 }
 
-func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromPath(context.Background(), path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	dbConn, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		dbConn.Flush("")
-		dbConn.Close()
-	}()
-
-	err = dbConn.SetVersions(engine.Versions{
-		utils.StatS:      4,
-		utils.Accounts:   3,
-		utils.Actions:    2,
-		utils.Thresholds: 4,
-		utils.Routes:     2,
-		// old version for Attributes
-		utils.Attributes:     5,
-		utils.RQF:            5,
-		utils.Resource:       1,
-		utils.Subscribers:    1,
-		utils.Chargers:       2,
-		utils.Dispatchers:    2,
-		utils.LoadIDsVrs:     1,
-		utils.RateProfiles:   1,
-		utils.ActionProfiles: 1,
-	}, true)
-	if err != nil {
-		t.Fatal(err)
-	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
-	db.oldDBCfg = &config.DataDbCfg{
-		Type: utils.Mongo,
-		Host: "127.0.0.1",
-		Port: "27017",
-		Name: "10",
-		User: "cgrates",
-		Opts: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
-		},
-		RmtConns: []string{},
-		RplConns: []string{},
-		Items: map[string]*config.ItemOpt{
-			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaCronExp: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResourceProfile: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueues: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResources: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueueProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholds: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholdProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaFilters: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRouteProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAttributeProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherHosts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaChargerProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
-		},
-	}
-	cfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg] = true
-	db.dm = nil
-	ctx, cancel := context.WithCancel(context.TODO())
-	err = db.Reload(ctx, cancel)
-	if err == nil || err.Error() != "cannot convert field: true to time.Duration" {
-		t.Fatal(err)
-	}
-
-	cancel()
-	time.Sleep(10 * time.Millisecond)
-}
-
 func TestDataDBStartSessionSCfgErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -780,16 +616,9 @@ func TestDataDBReloadError(t *testing.T) {
 		Port: "27017",
 		Name: "10",
 		User: "cgrates",
-		Opts: map[string]interface{}{
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterCfg:            false,
-			utils.RedisSentinelNameCfg:       "",
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
+		Opts: &config.DataDBOpts{
+			MongoQueryTimeout: 10 * time.Second,
+			RedisClusterSync:  5 * time.Second,
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
