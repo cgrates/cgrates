@@ -51,10 +51,10 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			},
 			RouteParameters: route.RouteParameters,
 		}
-		var cost float64
+		var cost *utils.Decimal
 		if len(route.AccountIDs) != 0 { // query AccountS for cost
 
-			acntCost := new(utils.ExtEventCharges)
+			acntCost := new(utils.EventCharges)
 			ev.APIOpts[utils.OptsAccountsAccountIDs] = utils.CloneStringSlice(route.AccountIDs)
 			if err = connMgr.Call(ctx, cfg.RouteSCfg().AccountSConns,
 				utils.AccountSv1MaxAbstracts, ev, &acntCost); err != nil {
@@ -68,7 +68,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 				return
 			}
 			if acntCost.Concretes != nil {
-				cost = *acntCost.Concretes
+				cost = acntCost.Concretes
 			}
 			acntIDs := make([]string, 0, len(acntCost.Accounts))
 			for acntID := range acntCost.Accounts {
@@ -91,12 +91,14 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 				err = utils.NewErrRateS(err)
 				return
 			}
-			cost, _ = rpCost.Cost.Float64()
+			cost = rpCost.Cost
 			srtRoute.SortingData[utils.RatingPlanID] = rpCost.ID
 
 		}
 
-		srtRoute.sortingDataF64[utils.Cost] = cost
+		if cost != nil {
+			srtRoute.sortingDataF64[utils.Cost], _ = cost.Float64()
+		}
 		srtRoute.SortingData[utils.Cost] = cost
 
 		var pass bool

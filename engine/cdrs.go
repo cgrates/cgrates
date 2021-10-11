@@ -132,7 +132,7 @@ func (cdrS *CDRServer) rateSCostForEvent(ctx *context.Context, cgrEv *utils.CGRE
 
 // accountSDebitEvent will send the event to accountS and attach the cost received back to event
 func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
-	acntCost := new(utils.ExtEventCharges)
+	acntCost := new(utils.EventCharges)
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().AccountSConns,
 		utils.AccountSv1DebitAbstracts, cgrEv, acntCost); err != nil {
 		return

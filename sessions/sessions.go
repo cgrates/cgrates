@@ -1437,12 +1437,12 @@ func (sS *SessionS) accounSMaxAbstracts(ctx *context.Context, cgrEvs map[string]
 	}
 	maxAbstracts = make(map[string]*utils.Decimal)
 	for runID, cgrEv := range cgrEvs {
-		acntCost := new(utils.ExtEventCharges)
+		acntCost := new(utils.EventCharges)
 		if err = sS.connMgr.Call(ctx, sS.cgrCfg.SessionSCfg().AttributeSConns, // Fix Here with AccountS
 			utils.AccountSv1MaxAbstracts, cgrEv, &acntCost); err != nil {
 			return
 		}
-		maxAbstracts[runID] = utils.NewDecimalFromFloat64(*acntCost.Abstracts) // did not optimize here since we need to remove floats from acntCost
+		maxAbstracts[runID] = acntCost.Abstracts // did not optimize here since we need to remove floats from acntCost
 	}
 	return
 }
