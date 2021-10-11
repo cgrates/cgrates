@@ -318,6 +318,9 @@ func testCfgSetEmptyReload(t *testing.T) {
 				utils.MetaIntervalStartCfg: map[string]string{
 					utils.MetaDefault: decimal.New(0, 0).String(),
 				},
+				utils.MetaProfileIgnoreFilters: map[string]bool{
+					utils.MetaDefault: false,
+				},
 			},
 		},
 	}

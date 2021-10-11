@@ -1187,6 +1187,9 @@ const CGRATES_CFG_JSON = `
 		"*intervalStart": {					//
 			"*default": "0",
 		},
+		"*profileIgnoreFilters": {			// if we should check the filters
+			"*default": false,
+		}	
 	},
 },
 

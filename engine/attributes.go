@@ -55,12 +55,10 @@ func (alS *AttributeService) Shutdown() {
 }
 
 // attributeProfileForEvent returns the matching attribute
-func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt string, attrsIDs []string,
+func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt string, attrIDs []string,
 	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchAttrPrfl *AttributeProfile, err error) {
-	var attrIDs []string
-	if len(attrsIDs) != 0 {
-		attrIDs = attrsIDs
-	} else {
+	if len(attrIDs) == 0 {
+		ignoreFilters = false
 		aPrflIDs, err := MatchingItemIDsForEvent(ctx, evNm,
 			alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 			alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
@@ -84,7 +82,7 @@ func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt 
 		}
 		tntID := aPrfl.TenantIDInline()
 		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = tntID
-		if len(attrsIDs) == 0 || !ignoreFilters {
+		if !ignoreFilters {
 			if pass, err := alS.filterS.Pass(ctx, tnt, aPrfl.FilterIDs,
 				evNm); err != nil {
 				return nil, err

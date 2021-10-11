@@ -2047,6 +2047,9 @@ func TestDfRateSJsonCfg(t *testing.T) {
 			IntervalStart: map[string]string{
 				utils.MetaDefault: "0",
 			},
+			ProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
+			},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

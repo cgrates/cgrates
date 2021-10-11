@@ -80,6 +80,12 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 					Value:     decimal.New(0, 0),
 				},
 			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     false,
+				},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -117,6 +123,9 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 			},
 			utils.MetaIntervalStartCfg: map[string]string{
 				utils.MetaDefault: decimal.New(0, 0).String(),
+			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
 			},
 		},
 	}
@@ -168,6 +177,9 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 			},
 			utils.MetaIntervalStartCfg: map[string]string{
 				utils.MetaDefault: decimal.New(0, 0).String(),
+			},
+			utils.MetaProfileIgnoreFilters: map[string]bool{
+				utils.MetaDefault: false,
 			},
 		},
 	}
