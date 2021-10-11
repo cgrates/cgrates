@@ -797,28 +797,56 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"default_ratio":1,						// default ratio used in case of *load strategy
-	"opts":{								//	
-		"*context": {						//
-			"*default": "*routes",
-		},
-		"*profileCount": {					//
-			"*default": 1,
-		},
-		"*ignoreErrors": {					//
-			"*default": false,
-		},
-		"*maxCost": {						//
-			"*default": "",
-		},
-		// "*limit": {						//
-		// 	"*default": 1,
-		// },	
-		// "*offset": {						//					
-		// 	"*default": 1,
-		// },		
-		"*usage": {							//
-			"*default": "1m",
-		},					
+	"opts":{
+		"*context": [
+			// {
+			// 	Tenant: "*any",
+			// 	FilterIDs: [],
+			// 	Value: "*routes",
+			// },
+		],			
+		"*profileCount": [
+			// {
+			// 	Tenant: "*any",
+			// 	FilterIDs: [],
+			// 	Value: 1,
+			// },
+		],
+		"*ignoreErrors": [
+			// {
+			// 	Tenant: "*any",
+			// 	FilterIDs: [],
+			// 	Value: false,
+			// },
+		],
+		"*maxCost": [
+			// {
+			// 	Tenant: "*any",
+			// 	FilterIDs: [],
+			// 	Value: "",
+			// },
+		],
+		// "*limit": [
+		// 	{
+		// 		Tenant: "*any",
+		// 		FilterIDs: [],
+		// 		Value: 1,
+		// 	},
+		// ],
+		// "*offset": [
+		// 	{
+		// 		Tenant: "*any",
+		// 		FilterIDs: [],
+		// 		Value: 1,
+		// 	},
+		// ],
+		"*usage": [
+			// {
+			// 	Tenant: "*any",
+			// 	FilterIDs: [],
+			// 	Value: "1m",
+			// },
+		],
 	},
 },
 
