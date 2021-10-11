@@ -186,7 +186,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt
 func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def *config.RoutesOpts) (opts *optsGetRoutes, err error) {
 	var ignoreErrors bool
 	if ignoreErrors, err = GetBoolOpts(ctx, ev.Tenant, ev, fS, def.IgnoreErrors,
-		utils.OptsRoutesIgnoreErrors); err != nil {
+		config.RoutesIgnoreErrorsDftOpt, utils.OptsRoutesIgnoreErrors); err != nil {
 		return
 	}
 	opts = &optsGetRoutes{
@@ -194,7 +194,7 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def
 		paginator:    &utils.Paginator{},
 	}
 	var limit int
-	if limit, err = GetIntOpts(ctx, ev.Tenant, ev, fS, def.Limit,
+	if limit, err = GetIntOpts(ctx, ev.Tenant, ev, fS, def.Limit, config.RoutesLimitDftOpt,
 		utils.OptsRoutesLimit); err != nil {
 		if err != utils.ErrNotFound {
 			return
@@ -203,7 +203,7 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def
 		opts.paginator.Limit = utils.IntPointer(limit)
 	}
 	var offset int
-	if offset, err = GetIntOpts(ctx, ev.Tenant, ev, fS, def.Offset,
+	if offset, err = GetIntOpts(ctx, ev.Tenant, ev, fS, def.Offset, config.RoutesOffsetDftOpt,
 		utils.OptsRoutesOffset); err != nil {
 		if err != utils.ErrNotFound {
 			return
@@ -213,7 +213,7 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def
 	}
 
 	var maxCost interface{}
-	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, ev, fS, def.MaxCost,
+	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, ev, fS, def.MaxCost, config.RoutesMaxCostDftOpt,
 		utils.OptsRoutesMaxCost); err != nil {
 		return
 	}
@@ -271,7 +271,7 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent,
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
 		var context string
 		if context, err = GetStringOpts(ctx, tnt, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts.Context,
-			utils.OptsContext); err != nil {
+			config.RoutesContextDftOpt, utils.OptsContext); err != nil {
 			return
 		}
 		args.APIOpts[utils.OptsContext] = context
@@ -388,7 +388,7 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
 	var prfCountOpt int
 	if prfCountOpt, err = GetIntOpts(ctx, tnt, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts.ProfileCount,
-		utils.OptsRoutesProfileCount); err != nil {
+		config.RoutesProfileCountDftOpt, utils.OptsRoutesProfileCount); err != nil {
 		return
 	}
 	if prfCount > prfCountOpt { // it has the option and is smaller that the current number of profiles
