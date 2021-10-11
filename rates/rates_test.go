@@ -311,7 +311,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}); err != nil {
+		}, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtPRf, rpp) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rpp), utils.ToJSON(rtPRf))
@@ -326,7 +326,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  2002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}); err != utils.ErrNotFound {
+		}, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
@@ -338,7 +338,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  2002,
 				utils.AnswerTime:   t1.Add(10 * time.Second),
 			},
-		}); err != utils.ErrNotFound {
+		}, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
@@ -350,7 +350,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}); err != utils.ErrNotFound {
+		}, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -363,7 +363,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}); err != utils.ErrNotFound {
+		}, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003", "*gt:~*req.Cost{*:10"}
@@ -376,7 +376,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Cost:         1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
+		}, false); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
 		t.Error(err)
 	}
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003"}
@@ -391,7 +391,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}); err != utils.ErrNoDatabaseConn {
+		}, false); err != utils.ErrNoDatabaseConn {
 		t.Error(err)
 	}
 
@@ -920,7 +920,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   time.Date(9999, 7, 21, 10, 0, 0, 0, time.UTC).Add(-10 * time.Second),
 			},
-		})
+		}, false)
 	expectedErr := "NOT_FOUND"
 	if err == nil || err.Error() != expectedErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedErr, err)

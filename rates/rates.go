@@ -67,12 +67,13 @@ func (rS *RateS) Shutdown() (err error) {
 }
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
-func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, rPfIDs []string, args *utils.CGREvent) (rtPfl *utils.RateProfile, err error) {
+func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, rPfIDs []string, args *utils.CGREvent, ignoreFilters bool) (rtPfl *utils.RateProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
 	if len(rPfIDs) == 0 {
+		ignoreFilters = false
 		var rPfIDMp utils.StringSet
 		if rPfIDMp, err = engine.MatchingItemIDsForEvent(ctx,
 			evNm,
@@ -100,11 +101,13 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 			}
 			return
 		}
-		var pass bool
-		if pass, err = rS.filterS.Pass(ctx, tnt, rPf.FilterIDs, evNm); err != nil {
-			return
-		} else if !pass {
-			continue
+		if !ignoreFilters {
+			var pass bool
+			if pass, err = rS.filterS.Pass(ctx, tnt, rPf.FilterIDs, evNm); err != nil {
+				return
+			} else if !pass {
+				continue
+			}
 		}
 		var rPfWeight float64
 		if rPfWeight, err = engine.WeightFromDynamics(ctx, rPf.Weights,
@@ -217,8 +220,13 @@ func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCo
 		utils.OptsRatesRateProfileIDs); err != nil {
 		return
 	}
+	var ignFilters bool
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.ProfileIgnoreFilters,
+		utils.MetaProfileIgnoreFilters); err != nil {
+		return
+	}
 	var rtPrl *utils.RateProfile
-	if rtPrl, err = rS.matchingRateProfileForEvent(ctx, args.Tenant, rPfIDs, args); err != nil {
+	if rtPrl, err = rS.matchingRateProfileForEvent(ctx, args.Tenant, rPfIDs, args, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}

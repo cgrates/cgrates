@@ -24,10 +24,11 @@ import (
 )
 
 type RatesOpts struct {
-	RateProfileIDs []*utils.DynamicStringSliceOpt
-	StartTime      []*utils.DynamicStringOpt
-	Usage          []*utils.DynamicDecimalBigOpt
-	IntervalStart  []*utils.DynamicDecimalBigOpt
+	RateProfileIDs       []*utils.DynamicStringSliceOpt
+	StartTime            []*utils.DynamicStringOpt
+	Usage                []*utils.DynamicDecimalBigOpt
+	IntervalStart        []*utils.DynamicDecimalBigOpt
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt
 }
 
 // RateSCfg the rates config section
@@ -79,6 +80,9 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 			return
 		}
 		rateOpts.IntervalStart = append(rateOpts.IntervalStart, intervalStart...)
+	}
+	if jsnCfg.ProfileIgnoreFilters != nil {
+		rateOpts.ProfileIgnoreFilters = append(rateOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
 	}
 	return
 }
@@ -133,10 +137,11 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaRateProfileIDsCfg: utils.DynamicStringSliceOptsToMap(rCfg.Opts.RateProfileIDs),
-		utils.MetaStartTime:         utils.DynamicStringOptsToMap(rCfg.Opts.StartTime),
-		utils.MetaUsage:             utils.DynamicDecimalBigOptsToMap(rCfg.Opts.Usage),
-		utils.MetaIntervalStartCfg:  utils.DynamicDecimalBigOptsToMap(rCfg.Opts.IntervalStart),
+		utils.MetaRateProfileIDsCfg:    utils.DynamicStringSliceOptsToMap(rCfg.Opts.RateProfileIDs),
+		utils.MetaStartTime:            utils.DynamicStringOptsToMap(rCfg.Opts.StartTime),
+		utils.MetaUsage:                utils.DynamicDecimalBigOptsToMap(rCfg.Opts.Usage),
+		utils.MetaIntervalStartCfg:     utils.DynamicDecimalBigOptsToMap(rCfg.Opts.IntervalStart),
+		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(rCfg.Opts.ProfileIgnoreFilters),
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:            rCfg.Enabled,
@@ -188,11 +193,16 @@ func (rateOpts *RatesOpts) Clone() *RatesOpts {
 	if rateOpts.IntervalStart != nil {
 		intervalStart = utils.CloneDynamicDecimalBigOpt(rateOpts.IntervalStart)
 	}
+	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	if rateOpts.ProfileIgnoreFilters != nil {
+		profileIgnoreFilters = utils.CloneDynamicBoolOpt(rateOpts.ProfileIgnoreFilters)
+	}
 	return &RatesOpts{
-		RateProfileIDs: ratePrfIDs,
-		StartTime:      startTime,
-		Usage:          usage,
-		IntervalStart:  intervalStart,
+		RateProfileIDs:       ratePrfIDs,
+		StartTime:            startTime,
+		Usage:                usage,
+		IntervalStart:        intervalStart,
+		ProfileIgnoreFilters: profileIgnoreFilters,
 	}
 }
 
@@ -230,10 +240,11 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 }
 
 type RatesOptsJson struct {
-	RateProfileIDs map[string][]string `json:"*rateProfileIDs"`
-	StartTime      map[string]string   `json:"*startTime"`
-	Usage          map[string]string   `json:"*usage"`
-	IntervalStart  map[string]string   `json:"*intervalStart"`
+	RateProfileIDs       map[string][]string `json:"*rateProfileIDs"`
+	StartTime            map[string]string   `json:"*startTime"`
+	Usage                map[string]string   `json:"*usage"`
+	IntervalStart        map[string]string   `json:"*intervalStart"`
+	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
 }
 
 type RateSJsonCfg struct {
@@ -267,6 +278,9 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 	}
 	if !utils.DynamicDecimalBigOptEqual(v1.IntervalStart, v2.IntervalStart) {
 		d.IntervalStart = utils.DynamicDecimalBigOptsToMap(v2.IntervalStart)
+	}
+	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
 	}
 	return d
 }

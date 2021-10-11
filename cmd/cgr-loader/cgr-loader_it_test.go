@@ -32,6 +32,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -77,16 +78,16 @@ func TestLoadConfig(t *testing.T) {
 		Name:     "100",
 		User:     "cgrates2",
 		Password: "toor",
-		Opts: map[string]interface{}{
-			utils.RedisSentinelNameCfg:       "sentinel1",
-			utils.MongoQueryTimeoutCfg:       "10s",
-			utils.RedisClusterSyncCfg:        "5s",
-			utils.RedisClusterOnDownDelayCfg: "0",
-			utils.RedisClusterCfg:            false,
-			utils.RedisTLSCfg:                false,
-			utils.RedisClientCertificateCfg:  "",
-			utils.RedisClientKeyCfg:          "",
-			utils.RedisCACertificateCfg:      "",
+		Opts: &config.DataDBOpts{
+			RedisSentinel:           "sentinel1",
+			MongoQueryTimeout:       10 * time.Second,
+			RedisClusterSync:        5 * time.Second,
+			RedisClusterOndownDelay: 0,
+			RedisCluster:            false,
+			RedisTLS:                false,
+			RedisClientCertificate:  "",
+			RedisClientKey:          "",
+			RedisCACertificate:      "",
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
@@ -107,13 +108,13 @@ func TestLoadConfig(t *testing.T) {
 		Password:            "toor",
 		StringIndexedFields: []string{},
 		PrefixIndexedFields: []string{},
-		Opts: map[string]interface{}{
-			utils.SQLConnMaxLifetimeCfg: 0.,
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.SQLMaxOpenConnsCfg:    100.,
-			utils.SQLMaxIdleConnsCfg:    10.,
-			utils.SSLModeCfg:            "disable",
-			utils.MysqlLocation:         "Local",
+		Opts: &config.StorDBOpts{
+			SQLConnMaxLifetime: 0.,
+			MongoQueryTimeout:  10 * time.Second,
+			SQLMaxOpenConns:    100.,
+			SQLMaxIdleConns:    10.,
+			SSLMode:            "disable",
+			MySQLLocation:      "Local",
 		},
 	}
 	// Loader

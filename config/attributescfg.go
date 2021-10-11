@@ -158,7 +158,7 @@ func (attrOpts AttributesOpts) Clone() *AttributesOpts {
 		profileRuns = utils.CloneDynamicIntOpt(attrOpts.ProfileRuns)
 	}
 	var profileIgnoreFilters []*utils.DynamicBoolOpt
-	if attrOpts.ProfileRuns != nil {
+	if attrOpts.ProfileIgnoreFilters != nil {
 		profileIgnoreFilters = utils.CloneDynamicBoolOpt(attrOpts.ProfileIgnoreFilters)
 	}
 	return &AttributesOpts{
