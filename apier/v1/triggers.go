@@ -188,7 +188,7 @@ func (apierSv1 *APIerSv1) ResetAccountActionTriggers(attr *AttrResetAccountActio
 
 		}
 		if attr.Executed == false {
-			account.ExecuteActionTriggers(nil)
+			account.ExecuteActionTriggers(nil, apierSv1.FilterS)
 		}
 		return apierSv1.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
@@ -385,7 +385,7 @@ func (apierSv1 *APIerSv1) SetAccountActionTriggers(attr *AttrSetAccountActionTri
 				account.ActionTriggers = append(account.ActionTriggers, at)
 			}
 		}
-		account.ExecuteActionTriggers(nil)
+		account.ExecuteActionTriggers(nil, apierSv1.FilterS)
 		return apierSv1.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+accID)
 	if err != nil {

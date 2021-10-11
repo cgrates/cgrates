@@ -615,7 +615,7 @@ Returns the approximate max allowed session for user balance. It will try the ma
 If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
-func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Duration, error) {
+func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account, fltrS *FilterS) (time.Duration, error) {
 	// clone the account for discarding chenges on debit dry run
 	account := origAcc.Clone()
 	if account.AllowNegative {
@@ -635,7 +635,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	//use this to check what increment was payed with debt
 	initialDefaultBalanceValue := defaultBalance.GetValue()
 
-	cc, err := cd.debit(account, true, false)
+	cc, err := cd.debit(account, true, false, fltrS)
 	if err != nil {
 		return 0, err
 	}
@@ -679,7 +679,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	return utils.MinDuration(initialDuration, totalDuration), nil
 }
 
-func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
+func (cd *CallDescriptor) GetMaxSessionDuration(fltrS *FilterS) (duration time.Duration, err error) {
 	cd.account = nil // make sure it's not cached
 	err = guardian.Guardian.Guard(func() (_ error) {
 		account, err := cd.getAccount()
@@ -697,7 +697,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 			}
 		}
 		return guardian.Guardian.Guard(func() error {
-			duration, err = cd.getMaxSessionDuration(account)
+			duration, err = cd.getMaxSessionDuration(account, fltrS)
 			return err
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.AccountPrefix+cd.GetAccountKey())
@@ -706,7 +706,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
-func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) (cc *CallCost, err error) {
+func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool, fltrS *FilterS) (cc *CallCost, err error) {
 	if cd.GetDuration() == 0 {
 		cc = cd.CreateCallCost()
 		// add RatingInfo
@@ -725,7 +725,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		cd.ToR = utils.MetaVoice
 	}
 	//log.Printf("Debit CD: %+v", cd)
-	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)
+	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative, fltrS)
 	//log.Printf("HERE: %+v %v", cc, err)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
@@ -743,14 +743,14 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		if len(roundIncrements) != 0 {
 			rcd := cc.CreateCallDescriptor()
 			rcd.Increments = roundIncrements
-			rcd.refundRounding(cd.account)
+			rcd.refundRounding(cd.account, fltrS)
 		}
 	}
 	//log.Printf("OUT CC: ", cc)
 	return
 }
 
-func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+func (cd *CallDescriptor) Debit(fltrS *FilterS) (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	err = guardian.Guardian.Guard(func() (_ error) {
 		// lock all group members
@@ -770,7 +770,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 			}
 		}
 		return guardian.Guardian.Guard(func() (err error) {
-			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
+			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount, fltrS)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
@@ -784,7 +784,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // from user's money balance.
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
-func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
+func (cd *CallDescriptor) MaxDebit(fltrS *FilterS) (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	err = guardian.Guardian.Guard(func() (err error) {
 		account, err := cd.getAccount()
@@ -803,7 +803,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			}
 		}
 		return guardian.Guardian.Guard(func() (err error) {
-			remainingDuration, err := cd.getMaxSessionDuration(account)
+			remainingDuration, err := cd.getMaxSessionDuration(account, fltrS)
 			if err != nil && cd.GetDuration() > 0 {
 				return err
 			}
@@ -834,7 +834,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
 				cd.DurationIndex -= initialDuration - remainingDuration
 			}
-			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
+			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount, fltrS)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary(initialAcnt)
 			}
@@ -846,7 +846,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 
 // refundIncrements has no locks
 // returns the updated account referenced by the CallDescriptor
-func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
+func (cd *CallDescriptor) refundIncrements(fltrS *FilterS) (acnt *Account, err error) {
 	accountsCache := make(map[string]*Account)
 	for _, increment := range cd.Increments {
 		// work around for the refund from CDRServer:
@@ -879,7 +879,7 @@ func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 				continue
 			}
 			balance.AddValue(float64(increment.Duration.Nanoseconds()))
-			account.countUnits(-float64(increment.Duration.Nanoseconds()), unitType, cc, balance)
+			account.countUnits(-float64(increment.Duration.Nanoseconds()), unitType, cc, balance, fltrS)
 		}
 		// check money too
 		if increment.BalanceInfo.Monetary != nil && increment.BalanceInfo.Monetary.UUID != "" {
@@ -888,7 +888,7 @@ func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 				continue
 			}
 			balance.AddValue(increment.Cost)
-			account.countUnits(-increment.Cost, utils.MetaMonetary, cc, balance)
+			account.countUnits(-increment.Cost, utils.MetaMonetary, cc, balance, fltrS)
 		}
 	}
 	acnt = accountsCache[utils.ConcatenatedKey(cd.Tenant, cd.Account)]
@@ -896,7 +896,7 @@ func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 
 }
 
-func (cd *CallDescriptor) RefundIncrements() (acnt *Account, err error) {
+func (cd *CallDescriptor) RefundIncrements(fltrS *FilterS) (acnt *Account, err error) {
 	// get account list for locking
 	// all must be locked in order to use cache
 	cd.Increments.Decompress()
@@ -910,13 +910,13 @@ func (cd *CallDescriptor) RefundIncrements() (acnt *Account, err error) {
 		}
 	}
 	guardian.Guardian.Guard(func() (_ error) {
-		acnt, err = cd.refundIncrements()
+		acnt, err = cd.refundIncrements(fltrS)
 		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, accMap.Slice()...)
 	return
 }
 
-func (cd *CallDescriptor) refundRounding(old *Account) (accountsCache map[string]*Account, err error) {
+func (cd *CallDescriptor) refundRounding(old *Account, fltrS *FilterS) (accountsCache map[string]*Account, err error) {
 	// get account list for locking
 	// all must be locked in order to use cache
 	accountsCache = make(map[string]*Account)
@@ -945,20 +945,20 @@ func (cd *CallDescriptor) refundRounding(old *Account) (accountsCache map[string
 				return
 			}
 			balance.AddValue(-increment.Cost)
-			account.countUnits(increment.Cost, utils.MetaMonetary, cc, balance)
+			account.countUnits(increment.Cost, utils.MetaMonetary, cc, balance, fltrS)
 		}
 	}
 	return
 }
 
-func (cd *CallDescriptor) RefundRounding() (acc *Account, err error) {
+func (cd *CallDescriptor) RefundRounding(fltrS *FilterS) (acc *Account, err error) {
 	accMap := make(utils.StringMap)
 	for _, inc := range cd.Increments {
 		accMap[utils.AccountPrefix+inc.BalanceInfo.AccountID] = true
 	}
 	guardian.Guardian.Guard(func() (_ error) {
 		var accCache map[string]*Account
-		if accCache, err = cd.refundRounding(nil); err != nil {
+		if accCache, err = cd.refundRounding(nil, fltrS); err != nil {
 			return
 		}
 		acc = accCache[utils.ConcatenatedKey(cd.Tenant, cd.Account)]

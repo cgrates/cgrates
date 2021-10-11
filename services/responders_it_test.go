@@ -47,7 +47,7 @@ func TestResponderSReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	internalChan := make(chan rpcclient.ClientConnector, 1)
 	srv := NewResponderService(cfg, server, internalChan,
-		shdChan, anz, srvDep)
+		shdChan, anz, srvDep, filterSChan)
 
 	srvName := srv.ServiceName()
 	if srvName != utils.ResponderS {
@@ -104,7 +104,7 @@ func TestResponderSReload2(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	internalChan := make(chan rpcclient.ClientConnector, 1)
 	srv := NewResponderService(cfg, server, internalChan,
-		shdChan, anz, srvDep)
+		shdChan, anz, srvDep, filterSChan)
 
 	srvName := srv.ServiceName()
 	if srvName != utils.ResponderS {

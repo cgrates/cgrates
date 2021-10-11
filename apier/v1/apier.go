@@ -246,7 +246,7 @@ func (apierSv1 *APIerSv1) ExecuteAction(attr *utils.AttrExecuteAction, reply *st
 	if attr.Account != "" {
 		at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(tnt, attr.Account): true})
 	}
-	if err := at.Execute(nil, nil); err != nil {
+	if err := at.Execute(apierSv1.FilterS); err != nil {
 		*reply = err.Error()
 		return err
 	}

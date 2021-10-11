@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -46,7 +47,7 @@ type ActionTrigger struct {
 	LastExecutionTime time.Time
 }
 
-func (at *ActionTrigger) Execute(ub *Account) (err error) {
+func (at *ActionTrigger) Execute(ub *Account, fltrS *FilterS) (err error) {
 	// check for min sleep time
 	if at.Recurrent && !at.LastExecutionTime.IsZero() && time.Since(at.LastExecutionTime) < at.MinSleep {
 		return
@@ -69,11 +70,10 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 	for _, a := range aac {
 		// check action filter
 		if len(a.Filter) > 0 {
-			matched, err := ub.matchActionFilter(a.Filter)
-			if err != nil {
+			if pass, err := fltrS.Pass(utils.NewTenantID(a.Id).Tenant, strings.Split(a.Filter, utils.InfieldSep),
+				config.NewObjectDP(ub)); err != nil {
 				return err
-			}
-			if !matched {
+			} else if !pass {
 				continue
 			}
 		}
@@ -95,7 +95,7 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 			break
 		}
 		//go utils.Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
-		if err := actionFunction(ub, a, aac, nil); err != nil {
+		if err := actionFunction(ub, a, aac, fltrS, nil); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 			transactionFailed = false
 			break

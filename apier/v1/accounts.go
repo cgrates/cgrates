@@ -502,7 +502,7 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 		}}
 	}
 	at.SetActions(acts)
-	if err := at.Execute(nil, nil); err != nil {
+	if err := at.Execute(apierSv1.FilterS); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -580,7 +580,7 @@ func (apierSv1 *APIerSv1) SetBalance(attr *utils.AttrSetBalance, reply *string) 
 		}}
 	}
 	at.SetActions(acts)
-	if err = at.Execute(nil, nil); err != nil {
+	if err = at.Execute(apierSv1.FilterS); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -662,7 +662,7 @@ func (apierSv1 *APIerSv1) SetBalances(attr *utils.AttrSetBalances, reply *string
 			}}
 		}
 		at.SetActions(acts)
-		if err = at.Execute(nil, nil); err != nil {
+		if err = at.Execute(apierSv1.FilterS); err != nil {
 			return
 		}
 	}
@@ -702,7 +702,7 @@ func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *stri
 		Balance:    balance,
 	}
 	at.SetActions(engine.Actions{a})
-	if err := at.Execute(nil, nil); err != nil {
+	if err := at.Execute(apierSv1.FilterS); err != nil {
 		*reply = err.Error()
 		return err
 	}

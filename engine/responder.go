@@ -31,6 +31,7 @@ import (
 )
 
 type Responder struct {
+	FilterS               *FilterS
 	ShdChan               *utils.SyncedChan
 	Timeout               time.Duration
 	Timezone              string
@@ -201,7 +202,7 @@ func (rs *Responder) Debit(arg *CallDescriptorWithAPIOpts, reply *CallCost) (err
 		return
 	}
 	var r *CallCost
-	if r, err = arg.Debit(); err != nil {
+	if r, err = arg.Debit(rs.FilterS); err != nil {
 		return
 	}
 	if r != nil {
@@ -241,7 +242,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptorWithAPIOpts, reply *CallCost) (
 		return
 	}
 	var r *CallCost
-	if r, err = arg.MaxDebit(); err != nil {
+	if r, err = arg.MaxDebit(rs.FilterS); err != nil {
 		return
 	}
 	if r != nil {
@@ -282,7 +283,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptorWithAPIOpts, reply *Acc
 		return
 	}
 	var acnt *Account
-	if acnt, err = arg.RefundIncrements(); err != nil {
+	if acnt, err = arg.RefundIncrements(rs.FilterS); err != nil {
 		return
 	}
 	if acnt != nil {
@@ -322,7 +323,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptorWithAPIOpts, reply *Accou
 		return
 	}
 	var acc *Account
-	if acc, err = arg.RefundRounding(); err != nil || acc == nil {
+	if acc, err = arg.RefundRounding(rs.FilterS); err != nil || acc == nil {
 		return
 	}
 	*reply = *acc
@@ -339,7 +340,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithAPIOpts, reply *ti
 	if !rs.usageAllowed(arg.ToR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
-	*reply, err = arg.GetMaxSessionDuration()
+	*reply, err = arg.GetMaxSessionDuration(rs.FilterS)
 	return
 }
 
@@ -361,7 +362,7 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 			TimeEnd:       arg.SetupTime.Add(arg.Usage),
 			DurationIndex: arg.Usage,
 		}
-		if maxDur, err = cd.GetMaxSessionDuration(); err != nil {
+		if maxDur, err = cd.GetMaxSessionDuration(rs.FilterS); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
 					utils.Responder, anctID, err.Error()))

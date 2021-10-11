@@ -26,14 +26,15 @@ import (
 )
 
 // NewSchedulerSv1 retuns the API for SchedulerS
-func NewSchedulerSv1(cgrcfg *config.CGRConfig, dm *engine.DataManager) *SchedulerSv1 {
-	return &SchedulerSv1{cgrcfg: cgrcfg, dm: dm}
+func NewSchedulerSv1(cgrcfg *config.CGRConfig, dm *engine.DataManager, fltrS *engine.FilterS) *SchedulerSv1 {
+	return &SchedulerSv1{cgrcfg: cgrcfg, dm: dm, fltrS: fltrS}
 }
 
 // SchedulerSv1 is the RPC object implementing scheduler APIs
 type SchedulerSv1 struct {
 	cgrcfg *config.CGRConfig
 	dm     *engine.DataManager
+	fltrS  *engine.FilterS
 }
 
 // Reload reloads scheduler instructions
@@ -61,7 +62,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActions(attr *utils.AttrsExecuteActions, rep
 
 				at.SetAccountIDs(apl.AccountIDs) // copy the accounts
 				at.SetActionPlanID(apl.Id)
-				err := at.Execute(nil, nil)
+				err := at.Execute(schdSv1.fltrS)
 				if err != nil {
 					*reply = err.Error()
 					return err
@@ -106,7 +107,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActions(attr *utils.AttrsExecuteActions, rep
 			current = a0.GetNextStartTime(current)
 			if current.Before(attr.TimeEnd) || current.Equal(attr.TimeEnd) {
 				utils.Logger.Info(fmt.Sprintf("<Replay Scheduler> Executing action %s for time %v", a0.ActionsID, current))
-				err := a0.Execute(nil, nil)
+				err := a0.Execute(schdSv1.fltrS)
 				if err != nil {
 					*reply = err.Error()
 					return err
@@ -155,7 +156,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActionPlans(attr *utils.AttrsExecuteActionPl
 			engine.ActionTimingWeightOnlyPriorityList(apl.ActionTimings).Sort()
 			for _, at := range apl.ActionTimings {
 				at.SetAccountIDs(utils.NewStringMap(accID))
-				err := at.Execute(nil, nil)
+				err := at.Execute(schdSv1.fltrS)
 				if err != nil {
 					*reply = err.Error()
 					return err

@@ -27,7 +27,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
-	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -94,7 +93,7 @@ func (acc *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Durati
 }
 
 // sets all the fields of the balance
-func (acc *Account) setBalanceAction(a *Action) error {
+func (acc *Account) setBalanceAction(a *Action, fltrS *FilterS) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
@@ -183,13 +182,13 @@ func (acc *Account) setBalanceAction(a *Action) error {
 		}
 	}
 	acc.InitCounters()
-	acc.ExecuteActionTriggers(nil)
+	acc.ExecuteActionTriggers(nil, fltrS)
 	return nil
 }
 
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
-func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) error {
+func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool, fltrS *FilterS) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
@@ -275,7 +274,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) e
 		}
 	}
 	acc.InitCounters()
-	acc.ExecuteActionTriggers(nil)
+	acc.ExecuteActionTriggers(nil, fltrS)
 	return nil
 }
 
@@ -373,7 +372,7 @@ func (acc *Account) getAlldBalancesForPrefix(destination, category,
 	return
 }
 
-func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
+func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool, fltrS *FilterS) (cc *CallCost, err error) {
 	usefulUnitBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.ToR, cd.TimeStart)
 	usefulMoneyBalances := acc.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MetaMonetary, cd.TimeStart)
 	// intiValues map[UUID]float64 and pass them to publish updating initial value
@@ -393,7 +392,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			unitBalanceChecker = false
 			for _, balance := range usefulUnitBalances {
 				partCC, debitErr := balance.debit(cd, balance.account,
-					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0, true)
+					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0, true, fltrS)
 				if debitErr != nil {
 					return nil, debitErr
 				}
@@ -430,7 +429,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 			moneyBalanceChecker = false
 			for _, balance := range usefulMoneyBalances {
 				partCC, debitErr := balance.debit(cd, balance.account,
-					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0, false)
+					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0, false,fltrS)
 				if debitErr != nil {
 					return nil, debitErr
 				}
@@ -486,7 +485,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 
 		if initialLength == 0 {
 			// this is the first add, debit the connect fee
-			ok, debitedConnectFeeBalance = acc.DebitConnectionFee(cc, usefulMoneyBalances, count, true)
+			ok, debitedConnectFeeBalance = acc.DebitConnectionFee(cc, usefulMoneyBalances, count, true, fltrS)
 		}
 		// get the default money balance
 		// and go negative on it with the amount still unpaid
@@ -541,7 +540,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 						&Balance{
 							Value:          cost,
 							DestinationIDs: utils.NewStringMap(leftCC.Destination),
-						})
+						}, fltrS)
 				}
 			}
 		}
@@ -607,7 +606,7 @@ func (acc *Account) GetDefaultMoneyBalance() *Balance {
 }
 
 // ExecuteActionTriggers scans the action triggers and execute the actions for which trigger is met
-func (acc *Account) ExecuteActionTriggers(a *Action) {
+func (acc *Account) ExecuteActionTriggers(a *Action, fltrS *FilterS) {
 	if acc.executingTriggers {
 		return
 	}
@@ -647,11 +646,11 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 							if strings.HasPrefix(at.ThresholdType, "*max") {
 								if c.Filter.Equal(at.Balance) && c.Value >= at.ThresholdValue {
 									//log.Print("HERE")
-									at.Execute(acc)
+									at.Execute(acc, fltrS)
 								}
 							} else { //MIN
 								if c.Filter.Equal(at.Balance) && c.Value <= at.ThresholdValue {
-									at.Execute(acc)
+									at.Execute(acc, fltrS)
 								}
 							}
 						}
@@ -666,15 +665,15 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 				switch at.ThresholdType {
 				case utils.TriggerMaxBalance:
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
-						at.Execute(acc)
+						at.Execute(acc, fltrS)
 					}
 				case utils.TriggerMinBalance:
 					if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
-						at.Execute(acc)
+						at.Execute(acc, fltrS)
 					}
 				case utils.TriggerBalanceExpired:
 					if b.MatchActionTrigger(at) && b.IsExpiredAt(time.Now()) {
-						at.Execute(acc)
+						at.Execute(acc, fltrS)
 					}
 				}
 			}
@@ -685,14 +684,14 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 
 // ResetActionTriggers marks all action trigers as ready for execution
 // If the action is not nil it acts like a filter
-func (acc *Account) ResetActionTriggers(a *Action) {
+func (acc *Account) ResetActionTriggers(a *Action, fltrS *FilterS) {
 	for _, at := range acc.ActionTriggers {
 		if !at.Match(a) {
 			continue
 		}
 		at.Executed = false
 	}
-	acc.ExecuteActionTriggers(a)
+	acc.ExecuteActionTriggers(a, fltrS)
 }
 
 // SetRecurrent sets/unsets recurrent flag for action triggers
@@ -706,9 +705,9 @@ func (acc *Account) SetRecurrent(a *Action, recurrent bool) {
 }
 
 // Increments the counter for the type
-func (acc *Account) countUnits(amount float64, kind string, cc *CallCost, b *Balance) {
+func (acc *Account) countUnits(amount float64, kind string, cc *CallCost, b *Balance, fltrS *FilterS) {
 	acc.UnitCounters.addUnits(amount, kind, cc, b)
-	acc.ExecuteActionTriggers(nil)
+	acc.ExecuteActionTriggers(nil, fltrS)
 }
 
 // InitCounters creates counters for all triggered actions
@@ -858,7 +857,7 @@ func (acc *Account) Clone() *Account {
 }
 
 // DebitConnectionFee debits the connection fee
-func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, count bool, block bool) (bool, Balance) {
+func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, count bool, block bool, fltrS *FilterS) (bool, Balance) {
 	var debitedBalance Balance
 	if !cc.deductConnectFee {
 		return true, debitedBalance
@@ -871,7 +870,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 			b.SubstractValue(connectFee)
 			// the conect fee is not refundable!
 			if count {
-				acc.countUnits(connectFee, utils.MetaMonetary, cc, b)
+				acc.countUnits(connectFee, utils.MetaMonetary, cc, b, fltrS)
 			}
 			connectFeePaid = true
 			debitedBalance = *b
@@ -890,35 +889,10 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 		debitedBalance = *b
 		// the conect fee is not refundable!
 		if count {
-			acc.countUnits(connectFee, utils.MetaMonetary, cc, b)
+			acc.countUnits(connectFee, utils.MetaMonetary, cc, b, fltrS)
 		}
 	}
 	return true, debitedBalance
-}
-
-func (acc *Account) matchActionFilter(condition string) (bool, error) {
-	sm, err := structmatcher.NewStructMatcher(condition)
-	if err != nil {
-		return false, err
-	}
-	for balanceType, balanceChain := range acc.BalanceMap {
-		for _, b := range balanceChain {
-			check, err := sm.Match(&struct {
-				Type string
-				*Balance
-			}{
-				Type:    balanceType,
-				Balance: b,
-			})
-			if err != nil {
-				return false, err
-			}
-			if check {
-				return true, nil
-			}
-		}
-	}
-	return false, nil
 }
 
 // GetID returns the account ID

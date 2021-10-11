@@ -1240,7 +1240,7 @@ func TestThresholdsProcessEventAccountUpdateErrPartExec(t *testing.T) {
 		},
 	}
 	expLog := `[WARNING] <ThresholdS> failed executing actions: actPrf, error: NOT_FOUND`
-	if err := th.ProcessEvent(args, dm); err == nil ||
+	if err := th.ProcessEvent(args, dm, nil); err == nil ||
 		err != utils.ErrPartiallyExecuted {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
@@ -1289,7 +1289,7 @@ func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 		},
 	}
 	expLog := `[WARNING] <ThresholdS> failed executing actions: actPrf, error: NOT_FOUND`
-	if err := th.ProcessEvent(args, dm); err != nil {
+	if err := th.ProcessEvent(args, dm, nil); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -1330,7 +1330,7 @@ func TestThresholdsProcessEvent3(t *testing.T) {
 			},
 		},
 	}
-	if err := th.ProcessEvent(args, dm); err != nil {
+	if err := th.ProcessEvent(args, dm, nil); err != nil {
 		t.Error(err)
 	}
 }

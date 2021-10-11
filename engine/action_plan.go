@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -193,7 +194,7 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 
 // Execute will execute all actions in an action plan
 // Reports on success/fail via channel if != nil
-func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err error) {
+func (at *ActionTiming) Execute(fltrS *FilterS) (err error) {
 	at.ResetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
@@ -219,12 +220,10 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 			for _, a := range aac {
 				// check action filter
 				if len(a.Filter) > 0 {
-					matched, err := acc.matchActionFilter(a.Filter)
-					//log.Print("Checkng: ", a.Filter, matched)
-					if err != nil {
+					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant, strings.Split(a.Filter, utils.InfieldSep),
+						config.NewObjectDP(acc)); err != nil {
 						return err
-					}
-					if !matched {
+					} else if !pass {
 						continue
 					}
 				}
@@ -246,22 +245,13 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 					utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 					partialyExecuted = true
 					transactionFailed = true
-					if failedActions != nil {
-						go func(a *Action) { failedActions <- a }(a)
-					}
 					break
 				}
-				if err := actionFunction(acc, a, aac, at.ExtraData); err != nil {
+				if err := actionFunction(acc, a, aac, fltrS, at.ExtraData); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					partialyExecuted = true
 					transactionFailed = true
-					if failedActions != nil {
-						go func(a *Action) { failedActions <- a }(a)
-					}
 					break
-				}
-				if successActions != nil {
-					go func(a *Action) { successActions <- a }(a)
 				}
 				if a.ActionType == utils.MetaRemoveAccount {
 					removeAccountActionFound = true
@@ -290,21 +280,12 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				at.Timing = nil
 				utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 				partialyExecuted = true
-				if failedActions != nil {
-					go func(a *Action) { failedActions <- a }(a)
-				}
 				break
 			}
-			if err := actionFunction(nil, a, aac, at.ExtraData); err != nil {
+			if err := actionFunction(nil, a, aac, fltrS, at.ExtraData); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
 				partialyExecuted = true
-				if failedActions != nil {
-					go func(a *Action) { failedActions <- a }(a)
-				}
 				break
-			}
-			if successActions != nil {
-				go func(a *Action) { successActions <- a }(a)
 			}
 		}
 	}

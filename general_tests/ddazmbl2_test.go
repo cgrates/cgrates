@@ -150,7 +150,7 @@ func TestDebit2(t *testing.T) {
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 10, 0, time.UTC),
 	}
-	if cc, err := cd.Debit(); err != nil {
+	if cc, err := cd.Debit(nil); err != nil {
 		t.Error(err)
 	} else if cc.Cost != 0.01 {
 		t.Error("Wrong cost returned: ", cc.Cost)

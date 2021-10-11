@@ -297,7 +297,7 @@ func (b *Balance) SetDirty() {
 
 // debitUnits will debit units for call descriptor.
 // returns the amount debited within cc
-func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
+func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool, fltrS *FilterS) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -359,7 +359,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				inc.BalanceInfo.AccountID = ub.ID
 				inc.Cost = 0
 				if count {
-					ub.countUnits(amount, cc.ToR, cc, b)
+					ub.countUnits(amount, cc.ToR, cc, b, fltrS)
 				}
 			} else {
 				// delete the rest of the unpiad increments/timespans
@@ -386,7 +386,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		}
 		if debitConnectFee {
 			// this is the first add, debit the connect fee
-			if ok, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); !ok {
+			if ok, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true, fltrS); !ok {
 				// found blocker balance
 				return nil, nil
 			}
@@ -459,7 +459,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 					inc.BalanceInfo.AccountID = ub.ID
 					if count {
-						ub.countUnits(cost, utils.MetaMonetary, cc, b)
+						ub.countUnits(cost, utils.MetaMonetary, cc, b, fltrS)
 					}
 					// go to nextincrement
 					continue
@@ -497,9 +497,9 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						cd.MaxCostSoFar += cost
 					}
 					if count {
-						ub.countUnits(amount, cc.ToR, cc, b)
+						ub.countUnits(amount, cc.ToR, cc, b, fltrS)
 						if cost != 0 {
-							ub.countUnits(cost, utils.MetaMonetary, cc, moneyBal)
+							ub.countUnits(cost, utils.MetaMonetary, cc, moneyBal, fltrS)
 						}
 					}
 				} else {
@@ -522,7 +522,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	return
 }
 
-func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
+func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool, fltrS *FilterS) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -538,7 +538,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	//log.Print("cc: " + utils.ToJSON(cc))
 	if debitConnectFee {
 		// this is the first add, debit the connect fee
-		if ok, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); !ok {
+		if ok, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true, fltrS); !ok {
 			// balance is blocker
 			return nil, nil
 		}
@@ -625,7 +625,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
 				}
 				if count {
-					ub.countUnits(amount, utils.MetaMonetary, cc, b)
+					ub.countUnits(amount, utils.MetaMonetary, cc, b, fltrS)
 				}
 
 				//log.Printf("TS: %+v", cc.Cost)
@@ -646,7 +646,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
 				}
 				if count {
-					ub.countUnits(amount, utils.MetaMonetary, cc, b)
+					ub.countUnits(amount, utils.MetaMonetary, cc, b, fltrS)
 				}
 			} else {
 				// delete the rest of the unpiad increments/timespans
@@ -826,7 +826,7 @@ func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val interface{}, e
 // debitUnits will debit units for call descriptor.
 // returns the amount debited within cc
 func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
-	count, dryRun, debitConnectFee, isUnitBal bool) (cc *CallCost, err error) {
+	count, dryRun, debitConnectFee, isUnitBal bool, fltrS *FilterS) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -892,7 +892,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 				inc.BalanceInfo.AccountID = ub.ID
 				inc.Cost = 0
 				if count {
-					ub.countUnits(amount, tor, cc, b)
+					ub.countUnits(amount, tor, cc, b, fltrS)
 				}
 				continue
 			}
@@ -922,7 +922,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 	//log.Print("cc: " + utils.ToJSON(cc))
 	if debitConnectFee {
 		// this is the first add, debit the connect fee
-		if connectFeeDebited, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true); !connectFeeDebited {
+		if connectFeeDebited, debitedConnectFeeBalance = ub.DebitConnectionFee(cc, moneyBalances, count, true, fltrS); !connectFeeDebited {
 			// balance is blocker
 			return nil, nil
 		}
@@ -991,7 +991,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 						inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
 					}
 					if count {
-						ub.countUnits(inc.Cost, utils.MetaMonetary, cc, b)
+						ub.countUnits(inc.Cost, utils.MetaMonetary, cc, b, fltrS)
 					}
 
 					//log.Printf("TS: %+v", cc.Cost)
@@ -1069,9 +1069,9 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 					cd.MaxCostSoFar += cost
 				}
 				if count {
-					ub.countUnits(amount, cc.ToR, cc, b)
+					ub.countUnits(amount, cc.ToR, cc, b, fltrS)
 					if cost != 0 {
-						ub.countUnits(cost, utils.MetaMonetary, cc, moneyBal)
+						ub.countUnits(cost, utils.MetaMonetary, cc, moneyBal, fltrS)
 					}
 				}
 			} else { // monetary balance
@@ -1087,7 +1087,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
 				}
 				if count {
-					ub.countUnits(cost, utils.MetaMonetary, cc, b)
+					ub.countUnits(cost, utils.MetaMonetary, cc, b, fltrS)
 				}
 			}
 		}

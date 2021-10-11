@@ -33,8 +33,9 @@ import (
 func NewRalService(cfg *config.CGRConfig, cacheS *engine.CacheS, server *cores.Server,
 	internalRALsChan, internalResponderChan chan rpcclient.ClientConnector, shdChan *utils.SyncedChan,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) *RalService {
-	resp := NewResponderService(cfg, server, internalResponderChan, shdChan, anz, srvDep)
+	srvDep map[string]*sync.WaitGroup,
+	filtersCh chan *engine.FilterS) *RalService {
+	resp := NewResponderService(cfg, server, internalResponderChan, shdChan, anz, srvDep, filtersCh)
 
 	return &RalService{
 		connChan:  internalRALsChan,
