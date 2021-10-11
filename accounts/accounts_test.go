@@ -794,8 +794,7 @@ func TestV1DebitAbstracts1(t *testing.T) {
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment:    utils.NewDecimal(int64(time.Second), 0),
-						FixedFee:     utils.NewDecimal(0, 0),
-						RecurrentFee: utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -807,7 +806,7 @@ func TestV1DebitAbstracts1(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: utils.NewDecimal(213, 0),
+				Units: utils.NewDecimal(213, 0), // 213 - 27
 			},
 		},
 	}
@@ -823,7 +822,7 @@ func TestV1DebitAbstracts1(t *testing.T) {
 			utils.AccountField: "1004",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Usage: "27s",
+			utils.MetaUsage: "27s",
 		},
 	}
 	reply := utils.EventCharges{}
@@ -840,25 +839,66 @@ func TestV1DebitAbstracts1(t *testing.T) {
 	}
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
-	/*
-			exEvCh := utils.EventCharges{
-				Abstracts: utils.NewDecimal(int64(27*time.Second), 0),
-			}
-			if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(exEvCh, reply) {
-				t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
-			}
-
-
-		//now we'll check the debited account
-		accPrf.Balances["AbstractBalance1"].Units = &utils.Decimal{decimal.New(39999999973, 0)}
-		if debitedAcc, err := accnts.dm.GetAccount(context.Background(), accPrf.Tenant, accPrf.ID); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(accPrf, debitedAcc) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(accPrf), utils.ToJSON(debitedAcc))
+	exEvCh := utils.EventCharges{
+		Abstracts: utils.NewDecimal(int64(27*time.Second), 0),
+		Concretes: utils.NewDecimal(27, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "CHARGE1",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"CHARGE1": {
+				AccountID:       "TestV1MaxAbstracts",
+				BalanceID:       "AbstractBalance1",
+				Units:           utils.NewDecimal(int64(27*time.Second), 0),
+				BalanceLimit:    utils.NewDecimal(0, 0),
+				RatingID:        "RATING1",
+				JoinedChargeIDs: []string{"JoinedCh1"},
+			},
+			"JoinedCh1": {
+				AccountID:    "TestV1MaxAbstracts",
+				BalanceID:    "ConcreteBalance2",
+				BalanceLimit: utils.NewDecimal(0, 0),
+				Units:        utils.NewDecimal(27, 0),
+			},
+		},
+		UnitFactors: make(map[string]*utils.UnitFactor),
+		Rating: map[string]*utils.RateSInterval{
+			"RATING1": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateID:         "41ded73",
+						CompressFactor: 1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: make(map[string]*utils.IntervalRate),
+		Accounts: map[string]*utils.Account{
+			"TestV1MaxAbstracts": accPrf,
+		},
+	}
+	if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		exEvCh.Accounts["TestV1MaxAbstracts"].Balances["AbstractBalance1"].Units = utils.NewDecimal(int64(13*time.Second), 0)
+		exEvCh.Accounts["TestV1MaxAbstracts"].Balances["ConcreteBalance2"].Units = utils.NewDecimal(186, 0)
+		if !exEvCh.Equals(&reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
 		}
-	*/
+	}
+
+	//now we'll check the debited account
+	accPrf.Balances["AbstractBalance1"].Units = utils.NewDecimal(int64(13*time.Second), 0)
+	accPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(186, 0)
+	if debitedAcc, err := accnts.dm.GetAccount(context.Background(), accPrf.Tenant, accPrf.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(accPrf, debitedAcc) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(accPrf), utils.ToJSON(debitedAcc))
+	}
 }
 
 func TestV1MaxConcretes(t *testing.T) {
@@ -889,12 +929,12 @@ func TestV1MaxConcretes(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaAbstract,
-				Units: &utils.Decimal{decimal.New(int64(40*time.Second), 0)},
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -906,12 +946,12 @@ func TestV1MaxConcretes(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(int64(time.Minute), 0)},
+				Units: utils.NewDecimal(int64(time.Second), 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -923,12 +963,12 @@ func TestV1MaxConcretes(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(int64(30*time.Second), 0)},
+				Units: utils.NewDecimal(int64(30*time.Second), 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -944,7 +984,9 @@ func TestV1MaxConcretes(t *testing.T) {
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
 			utils.AccountField: "1004",
-			utils.Usage:        "3m",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "3m",
 		},
 	}
 	reply := utils.EventCharges{}
@@ -960,53 +1002,49 @@ func TestV1MaxConcretes(t *testing.T) {
 	}
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
-	accPrf.Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
-	accPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
-
-	/*
-		exEvCh := utils.EventCharges{
-			Concretes: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
-			Charges: []*utils.ChargeEntry{
-				{
-					ChargingID:     "GENUUID1",
-					CompressFactor: 1,
-				},
-				{
-					ChargingID:     "GENUUID2",
-					CompressFactor: 1,
-				},
+	exEvCh := utils.EventCharges{
+		Concretes: utils.NewDecimal(int64(31*time.Second), 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
 			},
-			Accounting: map[string]*utils.AccountCharge{
-				"GENUUID1": {
-					AccountID:    "TestV1DebitAbstracts",
-					BalanceID:    "ConcreteBalance1",
-					Units:        utils.NewDecimal(int64(time.Minute), 0),
-					BalanceLimit: utils.NewDecimal(0, 0),
-				},
-				"GENUUID2": {
-					AccountID:    "TestV1DebitAbstracts",
-					BalanceID:    "ConcreteBalance2",
-					Units:        utils.NewDecimal(int64(30*time.Second), 0),
-					BalanceLimit: utils.NewDecimal(0, 0),
-				},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
 			},
-			UnitFactors: map[string]*utils.UnitFactor{},
-			Rating:      map[string]*utils.RateSInterval{},
-			Rates:       map[string]*utils.IntervalRate{},
-			Accounts: map[string]*utils.Account{
-				"TestV1DebitAbstracts": accPrf,
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID1": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance1",
+				Units:        utils.NewDecimal(int64(time.Second), 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
 			},
+			"GENUUID2": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance2",
+				Units:        utils.NewDecimal(int64(30*time.Second), 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
+			"TestV1DebitAbstracts": accPrf,
+		},
+	}
+	if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
+		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
+		if !exEvCh.Equals(&reply) {
+			//if !reflect.DeepEqual(exEvCh, reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
 		}
-		if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err != nil {
-			t.Error(err)
-		} else {
-			exEvCh.Charges = reply.Charges
-			exEvCh.Accounting = reply.Accounting
-			if !reflect.DeepEqual(exEvCh, reply) {
-				t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
-			}
-		}
-	*/
+	}
 }
 
 func TestV1DebitConcretes(t *testing.T) {
@@ -1037,12 +1075,12 @@ func TestV1DebitConcretes(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaAbstract,
-				Units: &utils.Decimal{decimal.New(int64(40*time.Second), 0)},
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -1054,12 +1092,12 @@ func TestV1DebitConcretes(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(int64(time.Minute), 0)},
+				Units: utils.NewDecimal(int64(time.Minute), 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						Increment:    utils.NewDecimal(int64(time.Minute), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -1071,12 +1109,12 @@ func TestV1DebitConcretes(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: &utils.Decimal{decimal.New(int64(30*time.Second), 0)},
+				Units: utils.NewDecimal(int64(30*time.Second), 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
-						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
-						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
+						Increment:    utils.NewDecimal(int64(time.Minute), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -1092,7 +1130,9 @@ func TestV1DebitConcretes(t *testing.T) {
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
 			utils.AccountField: "1004",
-			utils.Usage:        "3m",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "3m",
 		},
 	}
 	reply := utils.EventCharges{}
@@ -1108,65 +1148,60 @@ func TestV1DebitConcretes(t *testing.T) {
 	}
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
-	accPrf.Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
-	accPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
-
-	/*
-		exEvCh := utils.EventCharges{
-			Concretes: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
-			Charges: []*utils.ChargeEntry{
-				{
-					ChargingID:     "GENUUID1",
-					CompressFactor: 1,
-				},
-				{
-					ChargingID:     "GENUUID2",
-					CompressFactor: 1,
-				},
+	exEvCh := utils.EventCharges{
+		Concretes: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
 			},
-			Accounting: map[string]*utils.AccountCharge{
-				"GENUUID1": {
-					AccountID:    "TestV1DebitAbstracts",
-					BalanceID:    "ConcreteBalance1",
-					Units:        utils.NewDecimal(60000000000, 0),
-					BalanceLimit: utils.NewDecimal(0, 0),
-				},
-				"GENUUID2": {
-					AccountID:    "TestV1DebitAbstracts",
-					BalanceID:    "ConcreteBalance2",
-					Units:        utils.NewDecimal(30000000000, 0),
-					BalanceLimit: utils.NewDecimal(0, 0),
-				},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
 			},
-			UnitFactors: map[string]*utils.UnitFactor{},
-			Rating:      map[string]*utils.RateSInterval{},
-			Rates:       map[string]*utils.IntervalRate{},
-			Accounts: map[string]*utils.Account{
-				"TestV1DebitAbstracts": accPrf,
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID1": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance1",
+				Units:        utils.NewDecimal(60000000000, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
 			},
+			"GENUUID2": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance2",
+				Units:        utils.NewDecimal(30000000000, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
+			"TestV1DebitAbstracts": accPrf,
+		},
+	}
+	if err := accnts.V1DebitConcretes(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
+		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
+		if !exEvCh.Equals(&reply) {
+			//if !reflect.DeepEqual(exEvCh, reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
 		}
-		if err := accnts.V1DebitConcretes(context.Background(), args, &reply); err != nil {
-			t.Error(err)
-		} else {
-			exEvCh.Accounting = reply.Accounting
-			exEvCh.Charges = reply.Charges
-			if !reflect.DeepEqual(exEvCh, reply) {
-				t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
-			}
-		}
+	}
 
-		//now we will check the debited account
-		rcv, err := accnts.dm.GetAccount(context.Background(), "cgrates.org", "TestV1DebitAbstracts")
-		if err != nil {
-			t.Error(err)
-		}
-		accPrf.Balances["ConcreteBalance1"].Units = &utils.Decimal{decimal.New(0, 0)}
-		accPrf.Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(0, 0)}
-		if !reflect.DeepEqual(rcv, accPrf) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcv))
-		}
-	*/
-
+	//now we will check the debited account
+	rcv, err := accnts.dm.GetAccount(context.Background(), "cgrates.org", "TestV1DebitAbstracts")
+	if err != nil {
+		t.Error(err)
+	}
+	accPrf.Balances["ConcreteBalance1"].Units = &utils.Decimal{decimal.New(0, 0)}
+	accPrf.Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(0, 0)}
+	if !reflect.DeepEqual(rcv, accPrf) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcv))
+	}
 }
 
 func TestMultipleAccountsErr(t *testing.T) {
@@ -1899,7 +1934,6 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	*/
 }
 
-/*
 func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -1912,7 +1946,7 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestV1DebitAbstractsWithRecurrentFeeNegative",
 		Balances: map[string]*utils.Balance{
-			"ab1": &utils.Balance{
+			"ab1": {
 				ID:   "ab1",
 				Type: utils.MetaAbstract,
 				Weights: utils.DynamicWeights{
@@ -1927,7 +1961,7 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 				},
 				Units: utils.NewDecimal(int64(40*time.Second), 0),
 			},
-			"cb1": &utils.Balance{
+			"cb1": {
 				ID:   "cb1",
 				Type: utils.MetaConcrete,
 				CostIncrements: []*utils.CostIncrement{
@@ -1940,40 +1974,105 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.SetAccount(acnt, true); err != nil {
+	if err := dm.SetAccount(context.Background(), acnt, true); err != nil {
 		t.Error(err)
 	}
-	args := &utils.ArgsAccountsForEvent{
-		CGREvent: &utils.CGREvent{
-			ID:     "TestV1DebitAbstractsWithRecurrentFeeNegative",
-			Tenant: "cgrates.org",
-			APIOpts: map[string]interface{}{
-				utils.MetaUsage: "72h",
-			},
+	args := &utils.CGREvent{
+		ID:     "TestV1DebitAbstractsWithRecurrentFeeNegative",
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "30s",
 		},
 	}
-	expEvCh := &utils.ExtEventCharges{
-		Abstracts:   utils.Float64Pointer(259200000000000),
-		Concretes:   utils.Float64Pointer(-259198),
-		Accounting:  map[string]*utils.ExtAccountCharge{},
-		UnitFactors: map[string]*utils.ExtUnitFactor{},
-		Rating:      map[string]*utils.ExtRateSInterval{}}
-	ev := &utils.ExtEventCharges{}
-	if err := accnts.V1DebitAbstracts(args, ev); err != nil {
+	expEvCh := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(int64(30*time.Second), 0),
+		Concretes: utils.NewDecimal(-28, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "CHARGE1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "CHARGE2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"CHARGE1": {
+				AccountID:       "TestV1DebitAbstractsWithRecurrentFeeNegative",
+				BalanceID:       "ab1",
+				Units:           utils.NewDecimal(int64(time.Second), 0),
+				BalanceLimit:    utils.NewDecimal(0, 0),
+				RatingID:        "RATING1",
+				JoinedChargeIDs: []string{"JOINED1"},
+			},
+			"JOINED1": {
+				AccountID:    "TestV1DebitAbstractsWithRecurrentFeeNegative",
+				BalanceID:    "cb1",
+				Units:        utils.NewDecimal(1, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+			"CHARGE2": {
+				AccountID:       "TestV1DebitAbstractsWithRecurrentFeeNegative",
+				BalanceID:       utils.MetaTransAbstract,
+				Units:           utils.NewDecimal(int64(29*time.Second), 0),
+				RatingID:        "RATING2",
+				JoinedChargeIDs: []string{"JOINED2"},
+			},
+			"JOINED2": {
+				AccountID:    "TestV1DebitAbstractsWithRecurrentFeeNegative",
+				BalanceID:    "cb1",
+				Units:        utils.NewDecimal(-29, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating: map[string]*utils.RateSInterval{
+			"RATING1": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "5772dd3",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			"RATING2": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "75a070c",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
+			"TestV1DebitAbstractsWithRecurrentFeeNegative": acnt,
+		},
+	}
+	ev := &utils.EventCharges{}
+	if err := accnts.V1DebitAbstracts(context.Background(), args, ev); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(ev, expEvCh) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expEvCh), utils.ToJSON(ev))
+	} else {
+		expEvCh.Accounts["TestV1DebitAbstractsWithRecurrentFeeNegative"].Balances["ab1"].Units = utils.NewDecimal(int64(39*time.Second), 0)
+		expEvCh.Accounts["TestV1DebitAbstractsWithRecurrentFeeNegative"].Balances["cb1"].Units = utils.NewDecimal(29, 0)
+		if !ev.Equals(expEvCh) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expEvCh), utils.ToJSON(ev))
+		}
 	}
 
 	acnt.Balances["ab1"].Units = utils.NewDecimal(int64(39*time.Second), 0)
-	acnt.Balances["cb1"].Units = utils.NewDecimal(259199, 0)
-	if rcv, err := dm.GetAccount(acnt.Tenant, acnt.ID); err != nil {
+	acnt.Balances["cb1"].Units = utils.NewDecimal(29, 0)
+	if rcv, err := dm.GetAccount(context.Background(), acnt.Tenant, acnt.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, acnt) {
-		t.Errorf("Expected %+v,received %+v", utils.ToJSON(acnt), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt), utils.ToJSON(rcv))
 	}
 }
-*/
 
 func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
 	// this test will call maxDebitAbstractsFromConcretes but without any concreteBal and not calling rates
