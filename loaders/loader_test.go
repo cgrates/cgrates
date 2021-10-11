@@ -3203,7 +3203,7 @@ cgrates.org,1001,MonetaryBalance,fltr1&fltr2;100;fltr3
 			},
 		},
 	}
-	expectedErr := "invlid key: <fltr1&fltr2;100;fltr3> for BalanceUnitFactors"
+	expectedErr := "invalid key: <fltr1&fltr2;100;fltr3> for BalanceUnitFactors"
 	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

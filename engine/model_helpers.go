@@ -2260,7 +2260,7 @@ func (apm AccountMdls) AsTPAccount() (result []*utils.TPAccount, err error) {
 				costIncrements := make([]*utils.TPBalanceCostIncrement, 0)
 				sls := strings.Split(tp.BalanceCostIncrements, utils.InfieldSep)
 				if len(sls)%4 != 0 {
-					return nil, fmt.Errorf("invlid key: <%s> for BalanceCostIncrements", tp.BalanceCostIncrements)
+					return nil, fmt.Errorf("invalid key: <%s> for BalanceCostIncrements", tp.BalanceCostIncrements)
 				}
 				for j := 0; j < len(sls); j = j + 4 {
 					costIncrement, err := utils.NewTPBalanceCostIncrement(sls[j], sls[j+1], sls[j+2], sls[j+3])
@@ -2285,7 +2285,7 @@ func (apm AccountMdls) AsTPAccount() (result []*utils.TPAccount, err error) {
 				unitFactors := make([]*utils.TPBalanceUnitFactor, 0)
 				sls := strings.Split(tp.BalanceUnitFactors, utils.InfieldSep)
 				if len(sls)%2 != 0 {
-					return nil, fmt.Errorf("invlid key: <%s> for BalanceUnitFactors", tp.BalanceUnitFactors)
+					return nil, fmt.Errorf("invalid key: <%s> for BalanceUnitFactors", tp.BalanceUnitFactors)
 				}
 
 				for j := 0; j < len(sls); j = j + 2 {
