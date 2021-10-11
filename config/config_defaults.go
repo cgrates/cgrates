@@ -1350,6 +1350,9 @@ const CGRATES_CFG_JSON = `
 		"*usage": {							//
 			"*default": "72h",			
 		},
+		"*profileIgnoreFilters": {			// if we should check the filters
+			"*default": false,
+		}	
 	},
 },
 
