@@ -799,6 +799,9 @@ func TestMapToDynamicBoolOpts(t *testing.T) {
 	}
 
 	rcv := MapToDynamicBoolOpts(in)
+	sort.Slice(rcv, func(i, j int) bool {
+		return len(rcv[i].FilterIDs) > len(rcv[j].FilterIDs)
+	})
 	if !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(rcv))
 	}
@@ -877,18 +880,21 @@ func TestMapToDynamicDecimalBigOpts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return len(rcv[i].FilterIDs) > len(rcv[j].FilterIDs)
+	})
 	if !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(rcv))
 	}
 
 	in = map[string]string{
-		"fltr1;fltr2": "21c",
-		"fltr2":       "3c",
+		"fltr1;fltr2": "3c",
+		"fltr2":       "21c",
 	}
-	errExp := "can't convert <21c> to decimal"
+	errExp := "can't convert <3c> to decimal"
 	_, err = MapToDynamicDecimalBigOpts(in)
 	if err == nil || err.Error() != errExp {
-		t.Errorf("Expected error: %s", errExp)
+		t.Errorf("Expected error: %s \n received \n %+v", errExp, err)
 	}
 }
 
@@ -909,6 +915,9 @@ func TestMapToDynamicDurationOpts(t *testing.T) {
 		"fltr2":       "8s",
 	}
 	rcv, err := MapToDynamicDurationOpts(in)
+	sort.Slice(rcv, func(i, j int) bool {
+		return len(rcv[i].FilterIDs) > len(rcv[j].FilterIDs)
+	})
 	if err != nil {
 		t.Error(err)
 	}
@@ -939,6 +948,9 @@ func TestMapToDynamicInterfaceOpts(t *testing.T) {
 		"fltr2":       2,
 	}
 	rcv := MapToDynamicInterfaceOpts(in)
+	sort.Slice(rcv, func(i, j int) bool {
+		return len(rcv[i].FilterIDs) > len(rcv[j].FilterIDs)
+	})
 	if !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(rcv))
 	}
