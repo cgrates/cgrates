@@ -41,7 +41,7 @@ func TestResponderCoverage(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan,
 		shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	srv := NewResponderService(cfg, server, internalChan,
-		shdChan, anz, srvDep)
+		shdChan, anz, srvDep, filterSChan)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
 	}

@@ -31,7 +31,7 @@ type Task struct {
 	ActionsID string
 }
 
-func (t *Task) Execute() error {
+func (t *Task) Execute(fltrS *FilterS) error {
 	at := &ActionTiming{
 		Uuid:      t.Uuid,
 		ActionsID: t.ActionsID,
@@ -39,7 +39,7 @@ func (t *Task) Execute() error {
 	if len(t.AccountID) != 0 {
 		at.accountIDs = utils.StringMap{t.AccountID: true}
 	}
-	return at.Execute(nil, nil)
+	return at.Execute(fltrS)
 }
 
 // String implements utils.DataProvider

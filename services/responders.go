@@ -32,7 +32,8 @@ import (
 func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 	internalRALsChan chan rpcclient.ClientConnector,
 	shdChan *utils.SyncedChan, anz *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) *ResponderService {
+	srvDep map[string]*sync.WaitGroup,
+	filterSCh chan *engine.FilterS) *ResponderService {
 	return &ResponderService{
 		connChan:  internalRALsChan,
 		cfg:       cfg,
@@ -40,6 +41,7 @@ func NewResponderService(cfg *config.CGRConfig, server *cores.Server,
 		shdChan:   shdChan,
 		anz:       anz,
 		srvDep:    srvDep,
+		filterSCh: filterSCh,
 		syncChans: make(map[string]chan *engine.Responder),
 	}
 }
@@ -57,6 +59,8 @@ type ResponderService struct {
 	anz       *AnalyzerService
 	srvDep    map[string]*sync.WaitGroup
 	syncChans map[string]chan *engine.Responder
+
+	filterSCh chan *engine.FilterS
 }
 
 // Start should handle the sercive start
@@ -65,10 +69,13 @@ func (resp *ResponderService) Start() (err error) {
 	if resp.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+	filterS := <-resp.filterSCh
+	resp.filterSCh <- filterS
 
 	resp.Lock()
 	defer resp.Unlock()
 	resp.resp = &engine.Responder{
+		FilterS:          filterS,
 		ShdChan:          resp.shdChan,
 		MaxComputedUsage: resp.cfg.RalsCfg().MaxComputedUsage,
 	}

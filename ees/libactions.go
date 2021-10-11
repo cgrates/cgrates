@@ -47,7 +47,7 @@ func getOneData(ub *engine.Account, extraData interface{}) ([]byte, error) {
 	return nil, nil
 }
 
-func callURL(ub *engine.Account, a *engine.Action, _ engine.Actions, extraData interface{}) error {
+func callURL(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.FilterS, extraData interface{}) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func callURL(ub *engine.Account, a *engine.Action, _ engine.Actions, extraData i
 }
 
 // Does not block for posts, no error reports
-func callURLAsync(ub *engine.Account, a *engine.Action, _ engine.Actions, extraData interface{}) error {
+func callURLAsync(ub *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.FilterS, extraData interface{}) error {
 	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func callURLAsync(ub *engine.Account, a *engine.Action, _ engine.Actions, extraD
 	return nil
 }
 
-func postEvent(_ *engine.Account, a *engine.Action, _ engine.Actions, extraData interface{}) error {
+func postEvent(_ *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.FilterS, extraData interface{}) error {
 	body, err := json.Marshal(extraData)
 	if err != nil {
 		return err

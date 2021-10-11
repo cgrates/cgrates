@@ -604,7 +604,7 @@ func main() {
 
 	rals := services.NewRalService(cfg, cacheS, server,
 		internalRALsChan, internalResponderChan,
-		shdChan, connManager, anz, srvDep)
+		shdChan, connManager, anz, srvDep, filterSChan)
 
 	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponder(),
 		internalAPIerSv1Chan, connManager, anz, srvDep)

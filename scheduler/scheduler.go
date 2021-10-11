@@ -40,7 +40,6 @@ type Scheduler struct {
 	fltrS                           *engine.FilterS
 	schedulerStarted                bool
 	actStatsInterval                time.Duration                 // How long time to keep the stats in memory
-	actSucessChan, actFailedChan    chan *engine.Action           // ActionPlan will pass actions via these channels
 	aSMux, aFMux                    sync.RWMutex                  // protect schedStats
 	actSuccessStats, actFailedStats map[string]map[time.Time]bool // keep here stats regarding executed actions, map[actionType]map[execTime]bool
 }
@@ -102,7 +101,7 @@ func (s *Scheduler) Loop() {
 		now := time.Now()
 		start := a0.GetNextStartTime(now)
 		if start.Equal(now) || start.Before(now) {
-			go a0.Execute(s.actSucessChan, s.actFailedChan)
+			go a0.Execute(s.fltrS)
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
 			a0.ResetStartTimeCache()
@@ -170,7 +169,7 @@ func (s *Scheduler) loadTasks() {
 		go func() {
 			utils.Logger.Info(fmt.Sprintf("<%s> executing task %s on account %s",
 				utils.SchedulerS, task.ActionsID, task.AccountID))
-			task.Execute()
+			task.Execute(s.fltrS)
 			<-limit
 		}()
 	}

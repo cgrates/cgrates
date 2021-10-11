@@ -143,7 +143,7 @@ func (t *Threshold) isLocked() bool {
 
 // ProcessEvent processes an ThresholdEvent
 // concurrentActions limits the number of simultaneous action sets executed
-func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManager) (err error) {
+func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManager, fltrS *FilterS) (err error) {
 	if t.Snooze.After(time.Now()) || // snoozed, not executing actions
 		t.Hits < t.tPrfl.MinHits || // number of hits was not met, will not execute actions
 		(t.tPrfl.MaxHits != -1 &&
@@ -172,11 +172,11 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 		}
 		if t.tPrfl.Async {
 			go func() {
-				if errExec := at.Execute(nil, nil); errExec != nil {
+				if errExec := at.Execute(fltrS); errExec != nil {
 					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
 				}
 			}()
-		} else if errExec := at.Execute(nil, nil); errExec != nil {
+		} else if errExec := at.Execute(fltrS); errExec != nil {
 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
 			err = utils.ErrPartiallyExecuted
 		}
@@ -453,7 +453,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcess
 	for _, t := range matchTs {
 		thresholdsIDs = append(thresholdsIDs, t.ID)
 		t.Hits++
-		if err = t.ProcessEvent(args, tS.dm); err != nil {
+		if err = t.ProcessEvent(args, tS.dm, tS.filterS); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
 					t.TenantID(), utils.ConcatenatedKey(tnt, args.CGREvent.ID), err.Error()))

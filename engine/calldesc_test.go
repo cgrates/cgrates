@@ -137,7 +137,7 @@ func debitTest(t *testing.T, wg *sync.WaitGroup) {
 		Account: "moneyp", Subject: "nt",
 		Destination: "49", TimeStart: t1,
 		TimeEnd: t2, LoopIndex: 0}
-	if _, err := cd.Debit(); err != nil {
+	if _, err := cd.Debit(nil); err != nil {
 		t.Errorf("Error debiting balance: %s", err)
 	}
 	wg.Done()
@@ -397,7 +397,7 @@ func TestDebitRounding(t *testing.T) {
 	cd := &CallDescriptor{Category: "call", Tenant: "cgrates.org",
 		Subject: "round", Destination: "49",
 		TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
-	result, _ := cd.Debit()
+	result, _ := cd.Debit(nil)
 	if result.Cost != 0.30006 || result.GetConnectFee() != 0 { // should be 0.3 :(
 		t.Error("bad cost", utils.ToJSON(result))
 	}
@@ -409,7 +409,7 @@ func TestDebitPerformRounding(t *testing.T) {
 	cd := &CallDescriptor{Category: "call",
 		Tenant: "cgrates.org", Subject: "round", Destination: "49",
 		TimeStart: t1, TimeEnd: t2, LoopIndex: 0, PerformRounding: true}
-	if result, err := cd.Debit(); err != nil {
+	if result, err := cd.Debit(nil); err != nil {
 		t.Error(err)
 	} else if result.Cost != 0.3001 || result.GetConnectFee() != 0 { // should be 0.3 :(
 		t.Error("bad cost", utils.ToIJSON(result))
@@ -661,7 +661,7 @@ func TestMaxSessionTimeNoAccount(t *testing.T) {
 		Tenant:      "vdf",
 		Subject:     "ttttttt",
 		Destination: "0723"}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	if result != 0 || err == nil {
 		t.Errorf("Expected %v was %v (%v)", 0, result, err)
 	}
@@ -676,7 +676,7 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 		Subject:     "minu",
 		Destination: "0723",
 	}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	expected := time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -690,7 +690,7 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 	}
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:12345": true, "cgrates.org:123456": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:    "call",
@@ -703,7 +703,7 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 		MaxRate:     1.0,
 		MaxRateUnit: time.Minute,
 	}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	expected := 40 * time.Second
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -714,7 +714,7 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -726,7 +726,7 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	expected := 10 * time.Second
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -737,7 +737,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 	ap, _ := dm.GetActionPlan("BLOCK_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:block": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	acc, err := dm.GetAccount("cgrates.org:block")
 	if err != nil {
@@ -760,7 +760,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	expected := 17 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
@@ -775,7 +775,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	result, err = cd.GetMaxSessionDuration()
+	result, err = cd.GetMaxSessionDuration(nil)
 	expected = 30 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
@@ -786,7 +786,7 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 	ap, _ := dm.GetActionPlan("BLOCK_EMPTY_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:block_empty": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	acc, err := dm.GetAccount("cgrates.org:block_empty")
 	if err != nil {
@@ -809,7 +809,7 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	expected := 0 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
@@ -824,7 +824,7 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	result, err = cd.GetMaxSessionDuration()
+	result, err = cd.GetMaxSessionDuration(nil)
 	expected = 30 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
@@ -835,7 +835,7 @@ func TestGetCostWithMaxCost(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -858,7 +858,7 @@ func TestGetCostRoundingIssue(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -882,7 +882,7 @@ func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -909,7 +909,7 @@ func TestDebitRatingInfoOnZeroTime(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -921,7 +921,7 @@ func TestDebitRatingInfoOnZeroTime(t *testing.T) {
 		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	cc, err := cd.Debit()
+	cc, err := cd.Debit(nil)
 	if err != nil ||
 		cc == nil ||
 		len(cc.Timespans) != 1 ||
@@ -937,7 +937,7 @@ func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -949,7 +949,7 @@ func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
 		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	cc, err := cd.MaxDebit()
+	cc, err := cd.MaxDebit(nil)
 	if err != nil ||
 		len(cc.Timespans) != 1 ||
 		cc.Timespans[0].MatchedDestId != "RET" ||
@@ -964,7 +964,7 @@ func TestMaxDebitUnknowDest(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -976,7 +976,7 @@ func TestMaxDebitUnknowDest(t *testing.T) {
 		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 29, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	cc, err := cd.MaxDebit()
+	cc, err := cd.MaxDebit(nil)
 	if err == nil || err != utils.ErrUnauthorizedDestination {
 		t.Errorf("Bad error reported %+v: %v", cc, err)
 	}
@@ -986,7 +986,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:        "call",
@@ -1004,7 +1004,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 
-	cc, err := cd.MaxDebit()
+	cc, err := cd.MaxDebit(nil)
 	expected := 0.17
 	if cc.Cost != expected || err != nil {
 		t.Log(utils.ToIJSON(cc))
@@ -1020,7 +1020,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:dy": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:        "call",
@@ -1038,7 +1038,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 
-	cc, err := cd.Debit()
+	cc, err := cd.Debit(nil)
 	expected := 0.3
 	if cc.Cost != expected || err != nil {
 		t.Log(utils.ToIJSON(cc))
@@ -1054,7 +1054,7 @@ func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -1066,7 +1066,7 @@ func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 		TimeEnd:      time.Date(2015, 3, 23, 19, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	expected := 30 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -1077,7 +1077,7 @@ func TestMaxDebitWithMaxCostFree(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -1089,7 +1089,7 @@ func TestMaxDebitWithMaxCostFree(t *testing.T) {
 		TimeEnd:      time.Date(2015, 3, 23, 19, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	cc, err := cd.MaxDebit()
+	cc, err := cd.MaxDebit(nil)
 	expected := 10.0
 	if cc.Cost != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, cc.Cost)
@@ -1100,7 +1100,7 @@ func TestGetCostWithMaxCostFree(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:max": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd := &CallDescriptor{
 		Category:     "call",
@@ -1124,12 +1124,12 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP_SHARED0_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"vdf:empty0": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	ap, _ = dm.GetActionPlan("TOPUP_SHARED10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"vdf:empty10": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 
 	cd0 := &CallDescriptor{
@@ -1152,8 +1152,8 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 		Destination: "0723",
 	}
 
-	result0, err := cd0.GetMaxSessionDuration()
-	result1, err := cd1.GetMaxSessionDuration()
+	result0, err := cd0.GetMaxSessionDuration(nil)
+	result1, err := cd1.GetMaxSessionDuration(nil)
 	if result0 != result1/2 || err != nil {
 		t.Errorf("Expected %v was %v, %v", result1/2, result0, err)
 	}
@@ -1163,12 +1163,12 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP_SHARED0_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"vdf:empty0": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	ap, _ = dm.GetActionPlan("TOPUP_SHARED10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"vdf:empty10": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 
 	cd := &CallDescriptor{
@@ -1181,7 +1181,7 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 		Destination: "0723",
 	}
 
-	cc, err := cd.MaxDebit()
+	cc, err := cd.MaxDebit(nil)
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Wrong callcost in shared debit: %+v, %v", cc, err)
 	}
@@ -1206,7 +1206,7 @@ func TestMaxSessionTimeWithAccountAccount(t *testing.T) {
 		Account:     "minu",
 		Destination: "0723",
 	}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	expected := time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -1223,7 +1223,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Destination: "0723",
 		ToR:         utils.MetaVoice,
 	}
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	if result != time.Minute || err != nil {
 		t.Errorf("Expected %v was %v", time.Minute, result)
 	}
@@ -1244,7 +1244,7 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		ToR:           utils.MetaVoice,
 	}
 	initial := cd.Clone()
-	_, err := cd.GetMaxSessionDuration()
+	_, err := cd.GetMaxSessionDuration(nil)
 	if err != nil {
 		t.Error("Got error from max duration: ", err)
 	}
@@ -1265,7 +1265,7 @@ func TestMaxDebitDurationNoGreatherThanInitialDuration(t *testing.T) {
 		Destination: "0723",
 	}
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
-	result, err := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration(nil)
 	if err != nil {
 		t.Error("Got error from max duration: ", err)
 	}
@@ -1285,8 +1285,8 @@ func TestDebitAndMaxDebit(t *testing.T) {
 		Destination: "0723",
 	}
 	cd2 := cd1.Clone()
-	cc1, err1 := cd1.Debit()
-	cc2, err2 := cd2.MaxDebit()
+	cc1, err1 := cd1.Debit(nil)
+	cc2, err2 := cd2.MaxDebit(nil)
 	if err1 != nil || err2 != nil {
 		t.Error("Error debiting and/or maxdebiting: ", err1, err2)
 	}
@@ -1318,7 +1318,7 @@ func TestMaxSesionTimeEmptyBalance(t *testing.T) {
 		Destination: "0723",
 	}
 	acc, _ := dm.GetAccount("vdf:luna")
-	allowedTime, err := cd.getMaxSessionDuration(acc)
+	allowedTime, err := cd.getMaxSessionDuration(acc, nil)
 	if err != nil || allowedTime != 0 {
 		t.Error("Error get max session for 0 acount", err)
 	}
@@ -1335,7 +1335,7 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 		Destination: "112",
 	}
 	acc, _ := dm.GetAccount("vdf:luna")
-	allowedTime, err := cd.getMaxSessionDuration(acc)
+	allowedTime, err := cd.getMaxSessionDuration(acc, nil)
 	if err != nil || allowedTime == 0 {
 		t.Error("Error get max session for 0 acount", err)
 	}
@@ -1351,7 +1351,7 @@ func TestMaxSesionTimeLong(t *testing.T) {
 		Destination: "0723",
 	}
 	acc, _ := dm.GetAccount("cgrates.org:money")
-	allowedTime, err := cd.getMaxSessionDuration(acc)
+	allowedTime, err := cd.getMaxSessionDuration(acc, nil)
 	if err != nil || allowedTime != cd.TimeEnd.Sub(cd.TimeStart) {
 		t.Error("Error get max session for acount:", allowedTime, err)
 	}
@@ -1367,7 +1367,7 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 		Destination: "0723",
 	}
 	acc, _ := dm.GetAccount("cgrates.org:money")
-	allowedTime, err := cd.getMaxSessionDuration(acc)
+	allowedTime, err := cd.getMaxSessionDuration(acc, nil)
 	expected, err := time.ParseDuration("9999s") // 1 is the connect fee
 	if err != nil || allowedTime != expected {
 		t.Log(utils.ToIJSON(acc))
@@ -1379,7 +1379,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP_SHARED10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"vdf:empty10": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 
 	cd := &CallDescriptor{
@@ -1391,7 +1391,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 		Account:     "empty10",
 		Destination: "0723",
 	}
-	cc, err := cd.MaxDebit()
+	cc, err := cd.MaxDebit(nil)
 	acc, _ := cd.getAccount()
 	balanceMap := acc.BalanceMap[utils.MetaMonetary]
 	if err != nil || cc.Cost != 2.5 {
@@ -1407,7 +1407,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP_EMPTY_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"vdf:emptyX": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 
 	cd := &CallDescriptor{
@@ -1420,7 +1420,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 		Destination: "0723",
 	}
 
-	cc, err := cd.MaxDebit()
+	cc, err := cd.MaxDebit(nil)
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
 	}
@@ -1435,7 +1435,7 @@ func TestDebitNegatve(t *testing.T) {
 	ap, _ := dm.GetActionPlan("POST_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"vdf:post": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 
 	cd := &CallDescriptor{
@@ -1447,7 +1447,7 @@ func TestDebitNegatve(t *testing.T) {
 		Account:     "post",
 		Destination: "0723",
 	}
-	cc, err := cd.MaxDebit()
+	cc, err := cd.MaxDebit(nil)
 	//utils.PrintFull(cc)
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
@@ -1458,7 +1458,7 @@ func TestDebitNegatve(t *testing.T) {
 	if len(balanceMap) != 1 || balanceMap[0].GetValue() != -2.5 {
 		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].GetValue())
 	}
-	cc, err = cd.MaxDebit()
+	cc, err = cd.MaxDebit(nil)
 	acc, _ = cd.getAccount()
 	balanceMap = acc.BalanceMap[utils.MetaMonetary]
 	//utils.LogFull(balanceMap)
@@ -1474,7 +1474,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:12345": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd1 := &CallDescriptor{
 		Category:      "call",
@@ -1486,7 +1486,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 0, 0, time.UTC),
 		LoopIndex:     0,
 		DurationIndex: 0}
-	cc, err := cd1.MaxDebit()
+	cc, err := cd1.MaxDebit(nil)
 	if err != nil {
 		t.Error("Error maxdebiting: ", err)
 	}
@@ -1503,7 +1503,7 @@ func TestMaxDebitForceDuration(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:12345": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd1 := &CallDescriptor{
 		Category:      "call",
@@ -1517,7 +1517,7 @@ func TestMaxDebitForceDuration(t *testing.T) {
 		DurationIndex: 0,
 		ForceDuration: true,
 	}
-	_, err := cd1.MaxDebit()
+	_, err := cd1.MaxDebit(nil)
 	if err != utils.ErrInsufficientCredit {
 		t.Fatal("Error forcing duration: ", err)
 	}
@@ -1527,7 +1527,7 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:12345": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd1 := &CallDescriptor{
 		Category:      "call",
@@ -1539,7 +1539,7 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 		TimeEnd:       time.Date(2014, 3, 4, 6, 0, 40, 0, time.UTC),
 		LoopIndex:     0,
 		DurationIndex: 0}
-	cc, err := cd1.MaxDebit()
+	cc, err := cd1.MaxDebit(nil)
 	if err != nil {
 		t.Fatal("Error maxdebiting: ", err)
 	}
@@ -1555,7 +1555,7 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = utils.StringMap{"cgrates.org:12345": true}
-		at.Execute(nil, nil)
+		at.Execute(nil)
 	}
 	cd1 := &CallDescriptor{
 		Category:      "call",
@@ -1567,7 +1567,7 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 		TimeEnd:       time.Date(2014, 3, 4, 6, 0, 5, 0, time.UTC),
 		LoopIndex:     0,
 		DurationIndex: 0}
-	cd1.MaxDebit()
+	cd1.MaxDebit(nil)
 	if cd1.account.BalanceMap[utils.MetaVoice][0].GetValue() != 20*float64(time.Second) {
 		t.Error("Error using minutes: ",
 			cd1.account.BalanceMap[utils.MetaVoice][0].GetValue())
@@ -1654,7 +1654,7 @@ func TestCDRefundIncrements(t *testing.T) {
 			Unit: &UnitInfo{UUID: "minuteb"}, AccountID: ub.ID}},
 	}
 	cd := &CallDescriptor{ToR: utils.MetaVoice, Increments: increments}
-	cd.RefundIncrements()
+	cd.RefundIncrements(nil)
 	ub, _ = dm.GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 104 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 13*float64(time.Second) ||
@@ -1683,7 +1683,7 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 		&Increment{Cost: 0, Duration: 4 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
 	}
 	cd := &CallDescriptor{ToR: utils.MetaVoice, Increments: increments}
-	cd.RefundIncrements()
+	cd.RefundIncrements(nil)
 	ub, _ = dm.GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 100 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 10 ||
@@ -1828,7 +1828,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		TimeEnd:     time.Date(2015, 01, 01, 9, 2, 0, 0, time.UTC),
 		ToR:         utils.MetaVoice,
 	}
-	if cc, err := cd.Debit(); err != nil {
+	if cc, err := cd.Debit(nil); err != nil {
 		t.Error(err)
 	} else if cc.Cost != 0.6 {
 		t.Errorf("CallCost: %v", cc)
@@ -1962,7 +1962,7 @@ func TestCalldescRefundIncrementsNoBalanceInfo(t *testing.T) {
 		},
 	}
 
-	rcv, err := cd.RefundIncrements()
+	rcv, err := cd.RefundIncrements(nil)
 
 	if err != nil {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -2439,7 +2439,7 @@ func BenchmarkStorageSingleGetSessionTime(b *testing.B) {
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723"}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionDuration()
+		cd.GetMaxSessionDuration(nil)
 	}
 }
 
@@ -2449,6 +2449,6 @@ func BenchmarkStorageMultipleGetSessionTime(b *testing.B) {
 		Subject: "minutosu", Destination: "0723"}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionDuration()
+		cd.GetMaxSessionDuration(nil)
 	}
 }

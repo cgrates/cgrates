@@ -215,7 +215,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 			utils.MetaMonetary: {&Balance{
 				Categories: utils.NewStringMap("0"), Value: 21}}}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Fatal("Error debiting balance: ", err)
 	}
@@ -262,7 +262,7 @@ func TestDebitCreditBlocker(t *testing.T) {
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{utils.MetaMonetary: {b1, b2}}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -308,7 +308,7 @@ func TestDebitFreeEmpty(t *testing.T) {
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{utils.MetaMonetary: {}}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, true, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -356,7 +356,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -411,7 +411,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -473,7 +473,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 			utils.MetaVoice: {b1},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err == nil {
 		t.Error("Showing no enough credit error ")
 	}
@@ -536,7 +536,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 		utils.MetaMonetary: {{Uuid: "moneya", Value: 110}},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -592,7 +592,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Uuid: "moneya", Value: 50}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -660,7 +660,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 			utils.MetaVoice: {b1},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -725,7 +725,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 			utils.MetaVoice: {b1, b2},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -789,7 +789,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 			utils.MetaVoice: {b1},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err == nil {
 		t.Error("Error showing debiting balance error: ", err)
 	}
@@ -845,7 +845,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Uuid: "money", Value: 50}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err == nil {
 		t.Error("Missing noy enough credit error ")
 	}
@@ -909,7 +909,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Uuid: "moneya", Value: 350}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -974,7 +974,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 					RatingSubject:  "minu"}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1012,7 +1012,7 @@ func TestAccountdebitBalance(t *testing.T) {
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NEW": true}),
 	}
 	a := &Action{Balance: newMb}
-	ub.debitBalanceAction(a, false, false)
+	ub.debitBalanceAction(a, false, false, nil)
 	if len(ub.BalanceMap[utils.MetaVoice]) != 3 ||
 		!ub.BalanceMap[utils.MetaVoice][2].DestinationIDs.Equal(*newMb.DestinationIDs) {
 		t.Errorf("Error adding minute bucket! %d %+v %+v",
@@ -1041,7 +1041,7 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
 	}
 	a := &Action{Balance: newMb}
-	ub.debitBalanceAction(a, false, false)
+	ub.debitBalanceAction(a, false, false, nil)
 	if len(ub.BalanceMap[utils.MetaVoice]) != 2 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 25 {
 		t.Error("Error adding minute bucket!")
@@ -1059,7 +1059,7 @@ func TestAccountAddMinuteNil(t *testing.T) {
 				&Balance{Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 	}
-	ub.debitBalanceAction(nil, false, false)
+	ub.debitBalanceAction(nil, false, false, nil)
 	if len(ub.BalanceMap[utils.MetaVoice]) != 2 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -1083,17 +1083,17 @@ func TestAccountAddMinutBucketEmpty(t *testing.T) {
 	}
 	ub := &Account{}
 	a := &Action{Balance: mb1}
-	ub.debitBalanceAction(a, false, false)
+	ub.debitBalanceAction(a, false, false, nil)
 	if len(ub.BalanceMap[utils.MetaVoice]) != 1 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.MetaVoice])
 	}
 	a = &Action{Balance: mb2}
-	ub.debitBalanceAction(a, false, false)
+	ub.debitBalanceAction(a, false, false, nil)
 	if len(ub.BalanceMap[utils.MetaVoice]) != 1 || ub.BalanceMap[utils.MetaVoice][0].GetValue() != 20 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.MetaVoice])
 	}
 	a = &Action{Balance: mb3}
-	ub.debitBalanceAction(a, false, false)
+	ub.debitBalanceAction(a, false, false, nil)
 	if len(ub.BalanceMap[utils.MetaVoice]) != 2 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.MetaVoice])
 	}
@@ -1124,7 +1124,7 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 				ThresholdValue: 2, ThresholdType: utils.TriggerMaxEventCounter,
 				ActionsID: "TEST_ACTIONS"}},
 	}
-	ub.countUnits(1, utils.MetaMonetary, new(CallCost), nil)
+	ub.countUnits(1, utils.MetaMonetary, new(CallCost), nil, nil)
 	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 110 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 20*float64(time.Second) {
 		t.Error("Error executing triggered actions",
@@ -1132,15 +1132,15 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 			ub.BalanceMap[utils.MetaVoice][0].GetValue())
 	}
 	// are set to executed
-	ub.countUnits(1, utils.MetaMonetary, nil, nil)
+	ub.countUnits(1, utils.MetaMonetary, nil, nil, nil)
 	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 110 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 20*float64(time.Second) {
 		t.Error("Error executing triggered actions",
 			ub.BalanceMap[utils.MetaMonetary][0].GetValue(), ub.BalanceMap[utils.MetaVoice][0].GetValue())
 	}
 	// we can reset them
-	ub.ResetActionTriggers(nil)
-	ub.countUnits(10, utils.MetaMonetary, nil, nil)
+	ub.ResetActionTriggers(nil, nil)
+	ub.countUnits(10, utils.MetaMonetary, nil, nil, nil)
 	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 120 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 30*float64(time.Second) {
 		t.Error("Error executing triggered actions",
@@ -1178,7 +1178,7 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 				ThresholdType:  utils.TriggerMinEventCounter,
 				ActionsID:      "TEST_ACTIONS"}},
 	}
-	ub.countUnits(1, utils.MetaMonetary, nil, nil)
+	ub.countUnits(1, utils.MetaMonetary, nil, nil, nil)
 	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 110 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 20*float64(time.Second) {
 		t.Error("Error executing triggered actions",
@@ -1208,7 +1208,7 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 				ActionsID:      "TEST_ACTIONS_ORDER"}},
 	}
 
-	ub.countUnits(1, utils.MetaMonetary, new(CallCost), nil)
+	ub.countUnits(1, utils.MetaMonetary, new(CallCost), nil, nil)
 	if len(ub.BalanceMap[utils.MetaMonetary]) != 1 ||
 		ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 10 {
 
@@ -1242,7 +1242,7 @@ func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
 		t.Error("Error initializing counters: ", ub.UnitCounters[utils.MetaMonetary][0].Counters[0])
 	}
 
-	ub.countUnits(1, utils.MetaMonetary, new(CallCost), nil)
+	ub.countUnits(1, utils.MetaMonetary, new(CallCost), nil, nil)
 	if ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 1 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[1].Value != 1 {
 		t.Error("Error incrementing both counters",
@@ -1253,7 +1253,7 @@ func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
 	// we can reset them
 	resetCountersAction(ub, &Action{
 		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MetaMonetary),
-			ID: utils.StringPointer("day_trigger")}}, nil, nil)
+			ID: utils.StringPointer("day_trigger")}}, nil, nil, nil)
 	if ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 0 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[1].Value != 1 {
 		t.Error("Error reseting both counters",
@@ -1281,7 +1281,7 @@ func TestAccountExpActionTrigger(t *testing.T) {
 				ActionsID: "TEST_ACTIONS"},
 		},
 	}
-	ub.ExecuteActionTriggers(nil)
+	ub.ExecuteActionTriggers(nil, nil)
 	if ub.BalanceMap[utils.MetaMonetary][0].IsExpiredAt(time.Now()) ||
 		ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 10 || // expired was cleaned
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 20*float64(time.Second) ||
@@ -1312,7 +1312,7 @@ func TestAccountExpActionTriggerNotActivated(t *testing.T) {
 				ActionsID: "TEST_ACTIONS"},
 		},
 	}
-	ub.ExecuteActionTriggers(nil)
+	ub.ExecuteActionTriggers(nil, nil)
 	if ub.BalanceMap[utils.MetaMonetary][0].IsExpiredAt(time.Now()) ||
 		ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 100 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 10 ||
@@ -1338,7 +1338,7 @@ func TestAccountExpActionTriggerExpired(t *testing.T) {
 				ActionsID: "TEST_ACTIONS"},
 		},
 	}
-	ub.ExecuteActionTriggers(nil)
+	ub.ExecuteActionTriggers(nil, nil)
 	if ub.BalanceMap[utils.MetaMonetary][0].IsExpiredAt(time.Now()) ||
 		ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 100 ||
 		ub.BalanceMap[utils.MetaVoice][0].GetValue() != 10 ||
@@ -1386,12 +1386,12 @@ func TestAccountUnitCounting(t *testing.T) {
 	ub := &Account{UnitCounters: UnitCounters{
 		utils.MetaMonetary: []*UnitCounter{{
 			Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
-	ub.countUnits(10, utils.MetaMonetary, &CallCost{}, nil)
+	ub.countUnits(10, utils.MetaMonetary, &CallCost{}, nil, nil)
 	if len(ub.UnitCounters[utils.MetaMonetary]) != 1 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 10 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MetaMonetary, &CallCost{}, nil)
+	ub.countUnits(10, utils.MetaMonetary, &CallCost{}, nil, nil)
 	if len(ub.UnitCounters[utils.MetaMonetary]) != 1 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
@@ -1401,17 +1401,17 @@ func TestAccountUnitCounting(t *testing.T) {
 func TestAccountUnitCountingOutbound(t *testing.T) {
 	ub := &Account{UnitCounters: UnitCounters{utils.MetaMonetary: []*UnitCounter{
 		{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
-	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil)
+	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil, nil)
 	if len(ub.UnitCounters[utils.MetaMonetary]) != 1 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 10 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil)
+	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil, nil)
 	if len(ub.UnitCounters[utils.MetaMonetary]) != 1 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil)
+	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil, nil)
 	if len(ub.UnitCounters[utils.MetaMonetary]) != 1 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 30 {
 		t.Error("Error counting units")
@@ -1422,13 +1422,13 @@ func TestAccountUnitCountingOutboundInbound(t *testing.T) {
 	ub := &Account{UnitCounters: UnitCounters{
 		utils.MetaMonetary: []*UnitCounter{
 			{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
-	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil)
+	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil, nil)
 	if len(ub.UnitCounters[utils.MetaMonetary]) != 1 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 10 {
 		t.Errorf("Error counting units: %+v",
 			ub.UnitCounters[utils.MetaMonetary][0].Counters[0])
 	}
-	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil)
+	ub.countUnits(10, utils.MetaMonetary, new(CallCost), nil, nil)
 	if len(ub.UnitCounters[utils.MetaMonetary]) != 1 ||
 		ub.UnitCounters[utils.MetaMonetary][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
@@ -1475,7 +1475,7 @@ func TestDebitShared(t *testing.T) {
 
 	dm.SetAccount(groupie)
 	dm.SetSharedGroup(sg)
-	cc, err := rif.debitCreditBalance(cd, false, false, true)
+	cc, err := rif.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1546,7 +1546,7 @@ func TestMaxDurationShared(t *testing.T) {
 
 	dm.SetAccount(groupie)
 	dm.SetSharedGroup(sg)
-	duration, err := cd.getMaxSessionDuration(rif)
+	duration, err := cd.getMaxSessionDuration(rif, nil)
 	if err != nil {
 		t.Error("Error getting max session duration from shared group: ", err)
 	}
@@ -1572,7 +1572,7 @@ func TestMaxDurationConnectFeeOnly(t *testing.T) {
 		utils.MetaMonetary: {&Balance{Uuid: "moneya", Value: 0.2}},
 	}}
 
-	duration, err := cd.getMaxSessionDuration(rif)
+	duration, err := cd.getMaxSessionDuration(rif, nil)
 	if err != nil {
 		t.Error("Error getting max session duration: ", err)
 	}
@@ -1620,7 +1620,7 @@ func TestDebitSMS(t *testing.T) {
 				&Balance{Value: 21}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1677,7 +1677,7 @@ func TestDebitGeneric(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1731,7 +1731,7 @@ func TestDebitGenericBalance(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1784,7 +1784,7 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1843,7 +1843,7 @@ func TestDebitDataUnits(t *testing.T) {
 			utils.MetaMonetary: {&Balance{Value: 21}},
 		}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true, nil)
 	// test rating information
 	ts := cc.Timespans[0]
 	if ts.MatchedSubject != "testm" || ts.MatchedPrefix != "0723" ||
@@ -1897,7 +1897,7 @@ func TestDebitDataMoney(t *testing.T) {
 		utils.MetaData:     {&Balance{Uuid: "testm", Value: 0, Weight: 5, DestinationIDs: utils.StringMap{"NAT": true}}},
 		utils.MetaMonetary: {&Balance{Value: 160}},
 	}}
-	if _, err := rifsBalance.debitCreditBalance(cd, false, false, true); err != nil {
+	if _, err := rifsBalance.debitCreditBalance(cd, false, false, true, nil); err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
 	if rifsBalance.BalanceMap[utils.MetaData][0].GetValue() != 0 ||

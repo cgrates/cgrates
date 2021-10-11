@@ -45,7 +45,7 @@ func TestRalsCoverage(t *testing.T) {
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		shdChan, nil, anz, srvDep,filterSChan)
 	if ralS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}

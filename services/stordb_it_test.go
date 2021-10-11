@@ -56,7 +56,7 @@ func TestStorDBReload(t *testing.T) {
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		shdChan, nil, anz, srvDep, filterSChan)
 	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		cdrsRPC, nil, anz, srvDep)

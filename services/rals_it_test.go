@@ -72,7 +72,7 @@ func TestRalsReload(t *testing.T) {
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		shdChan, nil, anz, srvDep, filterSChan)
 	srvMngr.AddServices(ralS, schS, tS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
@@ -162,7 +162,7 @@ func TestRalsReload2(t *testing.T) {
 	ralS := NewRalService(cfg, chS, server,
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
+		shdChan, nil, anz, srvDep, filterSChan)
 	ralS.responder.resp = &engine.Responder{
 		ShdChan:          shdChan,
 		Timeout:          0,
