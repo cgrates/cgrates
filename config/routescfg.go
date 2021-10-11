@@ -19,8 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+)
+
+const (
+	RoutesContextDftOpt      = "*routes"
+	RoutesIgnoreErrorsDftOpt = false
+	RoutesMaxCostDftOpt      = utils.EmptyString
+	RoutesLimitDftOpt        = 1
+	RoutesOffsetDftOpt       = 1
+	RoutesProfileCountDftOpt = 1
+	RoutesUsageDftOpt        = time.Minute
 )
 
 type RoutesOpts struct {
@@ -64,26 +76,26 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 		return
 	}
 	if jsnCfg.Context != nil {
-		rtsOpts.Context = append(rtsOpts.Context, utils.MapToDynamicStringOpts(jsnCfg.Context)...)
+		rtsOpts.Context = append(rtsOpts.Context, jsnCfg.Context...)
 	}
 	if jsnCfg.IgnoreErrors != nil {
-		rtsOpts.IgnoreErrors = append(rtsOpts.IgnoreErrors, utils.MapToDynamicBoolOpts(jsnCfg.IgnoreErrors)...)
+		rtsOpts.IgnoreErrors = append(rtsOpts.IgnoreErrors, jsnCfg.IgnoreErrors...)
 	}
 	if jsnCfg.MaxCost != nil {
-		rtsOpts.MaxCost = append(rtsOpts.MaxCost, utils.MapToDynamicInterfaceOpts(jsnCfg.MaxCost)...)
+		rtsOpts.MaxCost = append(rtsOpts.MaxCost, jsnCfg.MaxCost...)
 	}
 	if jsnCfg.Limit != nil {
-		rtsOpts.Limit = append(rtsOpts.Limit, utils.MapToDynamicIntOpts(jsnCfg.Limit)...)
+		rtsOpts.Limit = append(rtsOpts.Limit, jsnCfg.Limit...)
 	}
 	if jsnCfg.Offset != nil {
-		rtsOpts.Offset = append(rtsOpts.Offset, utils.MapToDynamicIntOpts(jsnCfg.Offset)...)
+		rtsOpts.Offset = append(rtsOpts.Offset, jsnCfg.Offset...)
 	}
 	if jsnCfg.ProfileCount != nil {
-		rtsOpts.ProfileCount = append(rtsOpts.ProfileCount, utils.MapToDynamicIntOpts(jsnCfg.ProfileCount)...)
+		rtsOpts.ProfileCount = append(rtsOpts.ProfileCount, jsnCfg.ProfileCount...)
 	}
 	if jsnCfg.Usage != nil {
 		var usage []*utils.DynamicDecimalBigOpt
-		if usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+		if usage, err = utils.StringToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
 			return
 		}
 		rtsOpts.Usage = append(rtsOpts.Usage, usage...)
@@ -180,13 +192,13 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (rts RouteSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.OptsContext:         utils.DynamicStringOptsToMap(rts.Opts.Context),
-		utils.MetaProfileCountCfg: utils.DynamicIntOptsToMap(rts.Opts.ProfileCount),
-		utils.MetaIgnoreErrorsCfg: utils.DynamicBoolOptsToMap(rts.Opts.IgnoreErrors),
-		utils.MetaMaxCostCfg:      utils.DynamicInterfaceOptsToMap(rts.Opts.MaxCost),
-		utils.MetaLimitCfg:        utils.DynamicIntOptsToMap(rts.Opts.Limit),
-		utils.MetaOffsetCfg:       utils.DynamicIntOptsToMap(rts.Opts.Offset),
-		utils.MetaUsage:           utils.DynamicDecimalBigOptsToMap(rts.Opts.Usage),
+		utils.OptsContext:         rts.Opts.Context,
+		utils.MetaProfileCountCfg: rts.Opts.ProfileCount,
+		utils.MetaIgnoreErrorsCfg: rts.Opts.IgnoreErrors,
+		utils.MetaMaxCostCfg:      rts.Opts.MaxCost,
+		utils.MetaLimitCfg:        rts.Opts.Limit,
+		utils.MetaOffsetCfg:       rts.Opts.Offset,
+		utils.MetaUsage:           rts.Opts.Usage,
 	}
 
 	mp := map[string]interface{}{
@@ -263,13 +275,13 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 }
 
 type RoutesOptsJson struct {
-	Context      map[string]string      `json:"*context"`
-	IgnoreErrors map[string]bool        `json:"*ignoreErrors"`
-	MaxCost      map[string]interface{} `json:"*maxCost"`
-	Limit        map[string]int         `json:"*limit"`
-	Offset       map[string]int         `json:"*offset"`
-	ProfileCount map[string]int         `json:"*profileCount"`
-	Usage        map[string]string      `json:"*usage"`
+	Context      []*utils.DynamicStringOpt    `json:"*context"`
+	IgnoreErrors []*utils.DynamicBoolOpt      `json:"*ignoreErrors"`
+	MaxCost      []*utils.DynamicInterfaceOpt `json:"*maxCost"`
+	Limit        []*utils.DynamicIntOpt       `json:"*limit"`
+	Offset       []*utils.DynamicIntOpt       `json:"*offset"`
+	ProfileCount []*utils.DynamicIntOpt       `json:"*profileCount"`
+	Usage        []*utils.DynamicStringOpt    `json:"*usage"`
 }
 
 // Route service config section
@@ -294,25 +306,25 @@ func diffRoutesOptsJsonCfg(d *RoutesOptsJson, v1, v2 *RoutesOpts) *RoutesOptsJso
 		d = new(RoutesOptsJson)
 	}
 	if !utils.DynamicStringOptEqual(v1.Context, v2.Context) {
-		d.Context = utils.DynamicStringOptsToMap(v2.Context)
+		d.Context = v2.Context
 	}
 	if !utils.DynamicIntOptEqual(v1.Limit, v2.Limit) {
-		d.Limit = utils.DynamicIntOptsToMap(v2.Limit)
+		d.Limit = v2.Limit
 	}
 	if !utils.DynamicIntOptEqual(v1.Offset, v2.Offset) {
-		d.Offset = utils.DynamicIntOptsToMap(v2.Offset)
+		d.Offset = v2.Offset
 	}
 	if !utils.DynamicInterfaceOptEqual(v1.MaxCost, v2.MaxCost) {
-		d.MaxCost = utils.DynamicInterfaceOptsToMap(v2.MaxCost)
+		d.MaxCost = v2.MaxCost
 	}
 	if !utils.DynamicBoolOptEqual(v1.IgnoreErrors, v2.IgnoreErrors) {
-		d.IgnoreErrors = utils.DynamicBoolOptsToMap(v2.IgnoreErrors)
+		d.IgnoreErrors = v2.IgnoreErrors
 	}
 	if !utils.DynamicIntOptEqual(v1.ProfileCount, v2.ProfileCount) {
-		d.ProfileCount = utils.DynamicIntOptsToMap(v2.ProfileCount)
+		d.ProfileCount = v2.ProfileCount
 	}
 	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
-		d.Usage = utils.DynamicDecimalBigOptsToMap(v2.Usage)
+		d.Usage = utils.DecimalBigToStringDynamicOpts(v2.Usage)
 	}
 	return d
 }
