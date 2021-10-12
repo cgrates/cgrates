@@ -322,7 +322,9 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 		aPaid = decimal.New(0, 0)
 		ec = utils.NewEventCharges()
 	}
-	// ec.Abstracts = &utils.Decimal{roundUnitsWithIncrements(aPaid, costIcrm.Increment.Big)}
+	/*
+		utils.Logger.Debug(fmt.Sprintf("aPaid %v, incr: %v, round: %v", aPaid, costIcrm.Increment.Big, roundUnitsWithIncrements(aPaid, costIcrm.Increment.Big)))
+	*/
 	ec.Abstracts = &utils.Decimal{aPaid}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
 	return

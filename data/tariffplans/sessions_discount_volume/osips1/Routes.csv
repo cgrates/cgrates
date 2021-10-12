@@ -1,5 +1,0 @@
-#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
-
-opensips.org,DEFAULT_ROUTES,,,*weight,,,,,,,,,,
-opensips.org,DEFAULT_ROUTES,,,,,carrier1,,,,,,;20,,
-opensips.org,DEFAULT_ROUTES,,,,,carrier2,,,,,,;10,,
