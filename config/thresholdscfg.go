@@ -25,6 +25,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var ThresholdsThresholdIDsDftOpt = []string{}
+
+const ThresholdsProfileIgnoreFiltersDftOpt = false
+
 type ThresholdsOpts struct {
 	ThresholdIDs         []*utils.DynamicStringSliceOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
@@ -57,10 +61,10 @@ func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) {
 		return
 	}
 	if jsnCfg.ThresholdIDs != nil {
-		thdOpts.ThresholdIDs = utils.MapToDynamicStringSliceOpts(jsnCfg.ThresholdIDs)
+		thdOpts.ThresholdIDs = append(thdOpts.ThresholdIDs, jsnCfg.ThresholdIDs...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		thdOpts.ProfileIgnoreFilters = append(thdOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
+		thdOpts.ProfileIgnoreFilters = append(thdOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
 	}
 }
 
@@ -103,8 +107,8 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (t ThresholdSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaThresholdIDsCfg:      utils.DynamicStringSliceOptsToMap(t.Opts.ThresholdIDs),
-		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(t.Opts.ProfileIgnoreFilters),
+		utils.MetaThresholdIDsCfg:      t.Opts.ThresholdIDs,
+		utils.MetaProfileIgnoreFilters: t.Opts.ProfileIgnoreFilters,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        t.Enabled,
@@ -176,8 +180,8 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 }
 
 type ThresholdsOptsJson struct {
-	ThresholdIDs         map[string][]string `json:"*thresholdIDs"`
-	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
+	ThresholdIDs         []*utils.DynamicStringSliceOpt `json:"*thresholdIDs"`
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
 // Threshold service config section
@@ -198,10 +202,10 @@ func diffThresholdsOptsJsonCfg(d *ThresholdsOptsJson, v1, v2 *ThresholdsOpts) *T
 		d = new(ThresholdsOptsJson)
 	}
 	if !utils.DynamicStringSliceOptEqual(v1.ThresholdIDs, v2.ThresholdIDs) {
-		d.ThresholdIDs = utils.DynamicStringSliceOptsToMap(v2.ThresholdIDs)
+		d.ThresholdIDs = v2.ThresholdIDs
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
+		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
 	return d
 }

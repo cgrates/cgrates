@@ -23,6 +23,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+const (
+	CDRsAccountsDftOpt   = false
+	CDRsAttributesDftOpt = false
+	CDRsChargersDftOpt   = false
+	CDRsExportDftOpt     = false
+	CDRsRatesDftOpt      = false
+	CDRsStatsDftOpt      = false
+	CDRsThresholdsDftOpt = false
+)
+
 type CdrsOpts struct {
 	Accounts   []*utils.DynamicBoolOpt
 	Attributes []*utils.DynamicBoolOpt
@@ -65,25 +75,25 @@ func (cdrsOpts *CdrsOpts) loadFromJSONCfg(jsnCfg *CdrsOptsJson) {
 		return
 	}
 	if jsnCfg.Accounts != nil {
-		cdrsOpts.Accounts = append(cdrsOpts.Accounts, utils.MapToDynamicBoolOpts(jsnCfg.Accounts)...)
+		cdrsOpts.Accounts = append(cdrsOpts.Accounts, jsnCfg.Accounts...)
 	}
 	if jsnCfg.Attributes != nil {
-		cdrsOpts.Attributes = append(cdrsOpts.Attributes, utils.MapToDynamicBoolOpts(jsnCfg.Attributes)...)
+		cdrsOpts.Attributes = append(cdrsOpts.Attributes, jsnCfg.Attributes...)
 	}
 	if jsnCfg.Chargers != nil {
-		cdrsOpts.Chargers = append(cdrsOpts.Chargers, utils.MapToDynamicBoolOpts(jsnCfg.Chargers)...)
+		cdrsOpts.Chargers = append(cdrsOpts.Chargers, jsnCfg.Chargers...)
 	}
 	if jsnCfg.Export != nil {
-		cdrsOpts.Export = append(cdrsOpts.Export, utils.MapToDynamicBoolOpts(jsnCfg.Export)...)
+		cdrsOpts.Export = append(cdrsOpts.Export, jsnCfg.Export...)
 	}
 	if jsnCfg.Rates != nil {
-		cdrsOpts.Rates = append(cdrsOpts.Rates, utils.MapToDynamicBoolOpts(jsnCfg.Rates)...)
+		cdrsOpts.Rates = append(cdrsOpts.Rates, jsnCfg.Rates...)
 	}
 	if jsnCfg.Stats != nil {
-		cdrsOpts.Stats = append(cdrsOpts.Stats, utils.MapToDynamicBoolOpts(jsnCfg.Stats)...)
+		cdrsOpts.Stats = append(cdrsOpts.Stats, jsnCfg.Stats...)
 	}
 	if jsnCfg.Thresholds != nil {
-		cdrsOpts.Thresholds = append(cdrsOpts.Thresholds, utils.MapToDynamicBoolOpts(jsnCfg.Thresholds)...)
+		cdrsOpts.Thresholds = append(cdrsOpts.Thresholds, jsnCfg.Thresholds...)
 	}
 }
 
@@ -142,13 +152,13 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (cdrscfg CdrsCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaAccountSCfg:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Accounts),
-		utils.MetaAttributeSCfg: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Attributes),
-		utils.MetaChargerSCfg:   utils.DynamicBoolOptsToMap(cdrscfg.Opts.Chargers),
-		utils.MetaEeSCfg:        utils.DynamicBoolOptsToMap(cdrscfg.Opts.Export),
-		utils.MetaRateSCfg:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Rates),
-		utils.MetaStatSCfg:      utils.DynamicBoolOptsToMap(cdrscfg.Opts.Stats),
-		utils.MetaThresholdSCfg: utils.DynamicBoolOptsToMap(cdrscfg.Opts.Thresholds),
+		utils.MetaAccountSCfg:   cdrscfg.Opts.Accounts,
+		utils.MetaAttributeSCfg: cdrscfg.Opts.Attributes,
+		utils.MetaChargerSCfg:   cdrscfg.Opts.Chargers,
+		utils.MetaEeSCfg:        cdrscfg.Opts.Export,
+		utils.MetaRateSCfg:      cdrscfg.Opts.Rates,
+		utils.MetaStatSCfg:      cdrscfg.Opts.Stats,
+		utils.MetaThresholdSCfg: cdrscfg.Opts.Thresholds,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:          cdrscfg.Enabled,
@@ -270,13 +280,13 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 }
 
 type CdrsOptsJson struct {
-	Accounts   map[string]bool `json:"*accountS"`
-	Attributes map[string]bool `json:"*attributeS"`
-	Chargers   map[string]bool `json:"*chargerS"`
-	Export     map[string]bool `json:"*eeS"`
-	Rates      map[string]bool `json:"*rateS"`
-	Stats      map[string]bool `json:"*statS"`
-	Thresholds map[string]bool `json:"*thresholdS"`
+	Accounts   []*utils.DynamicBoolOpt `json:"*accountS"`
+	Attributes []*utils.DynamicBoolOpt `json:"*attributeS"`
+	Chargers   []*utils.DynamicBoolOpt `json:"*chargerS"`
+	Export     []*utils.DynamicBoolOpt `json:"*eeS"`
+	Rates      []*utils.DynamicBoolOpt `json:"*rateS"`
+	Stats      []*utils.DynamicBoolOpt `json:"*statS"`
+	Thresholds []*utils.DynamicBoolOpt `json:"*thresholdS"`
 }
 
 // Cdrs config section
@@ -302,25 +312,25 @@ func diffCdrsOptsJsonCfg(d *CdrsOptsJson, v1, v2 *CdrsOpts) *CdrsOptsJson {
 		d = new(CdrsOptsJson)
 	}
 	if !utils.DynamicBoolOptEqual(v1.Accounts, v2.Accounts) {
-		d.Accounts = utils.DynamicBoolOptsToMap(v2.Accounts)
+		d.Accounts = v2.Accounts
 	}
 	if !utils.DynamicBoolOptEqual(v1.Attributes, v2.Attributes) {
-		d.Attributes = utils.DynamicBoolOptsToMap(v2.Attributes)
+		d.Attributes = v2.Attributes
 	}
 	if !utils.DynamicBoolOptEqual(v1.Chargers, v2.Chargers) {
-		d.Chargers = utils.DynamicBoolOptsToMap(v2.Chargers)
+		d.Chargers = v2.Chargers
 	}
 	if !utils.DynamicBoolOptEqual(v1.Export, v2.Export) {
-		d.Export = utils.DynamicBoolOptsToMap(v2.Export)
+		d.Export = v2.Export
 	}
 	if !utils.DynamicBoolOptEqual(v1.Rates, v2.Rates) {
-		d.Rates = utils.DynamicBoolOptsToMap(v2.Rates)
+		d.Rates = v2.Rates
 	}
 	if !utils.DynamicBoolOptEqual(v1.Stats, v2.Stats) {
-		d.Stats = utils.DynamicBoolOptsToMap(v2.Stats)
+		d.Stats = v2.Stats
 	}
 	if !utils.DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
-		d.Thresholds = utils.DynamicBoolOptsToMap(v2.Thresholds)
+		d.Thresholds = v2.Thresholds
 	}
 	return d
 }
