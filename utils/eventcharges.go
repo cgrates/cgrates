@@ -18,10 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"errors"
-)
-
 // NewEventChargers instantiates the EventChargers in a central place
 func NewEventCharges() (ec *EventCharges) {
 	ec = &EventCharges{
@@ -148,131 +144,6 @@ func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
 	}
 }
 
-// AsExtEventCharges converts EventCharges to ExtEventCharges
-func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
-	eEc = new(ExtEventCharges)
-	if ec.Abstracts != nil {
-		if flt, ok := ec.Abstracts.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal Abstracts to float64")
-		} else {
-			eEc.Abstracts = &flt
-		}
-	}
-	if ec.Concretes != nil {
-		if flt, ok := ec.Concretes.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal Concretes to float64")
-		} else {
-			eEc.Concretes = &flt
-		}
-	}
-	if ec.Charges != nil {
-		eEc.Charges = make([]*ChargeEntry, len(ec.Charges))
-		for idx, val := range ec.Charges {
-			eEc.Charges[idx] = val
-		}
-	}
-	if ec.Accounting != nil {
-		eEc.Accounting = make(map[string]*ExtAccountCharge, len(eEc.Accounting))
-		for key, val := range ec.Accounting {
-			if eEc.Accounting[key], err = val.AsExtAccountCharge(); err != nil {
-				return nil, err
-			}
-		}
-	}
-	if ec.UnitFactors != nil {
-		eEc.UnitFactors = make(map[string]*ExtUnitFactor, len(ec.UnitFactors))
-		for key, val := range ec.UnitFactors {
-			if eEc.UnitFactors[key], err = val.AsExtUnitFactor(); err != nil {
-				return nil, err
-			}
-		}
-	}
-	if ec.Rating != nil {
-		eEc.Rating = make(map[string]*ExtRateSInterval, len(ec.Rating))
-		for key, val := range ec.Rating {
-			if eEc.Rating[key], err = val.AsExtRateSInterval(); err != nil {
-				return nil, err
-			}
-		}
-	}
-	if ec.Rates != nil {
-		eEc.Rates = make(map[string]*ExtIntervalRate, len(ec.Rates))
-		for key, val := range ec.Rates {
-			if eEc.Rates[key], err = val.AsExtIntervalRate(); err != nil {
-				return nil, err
-			}
-		}
-	}
-	if ec.Accounts != nil {
-		eEc.Accounts = make(map[string]*ExtAccount, len(ec.Accounts))
-		for acntID, acnt := range ec.Accounts {
-			if eEc.Accounts[acntID], err = acnt.AsExtAccount(); err != nil {
-				return nil, err
-			}
-		}
-	}
-	return
-}
-
-// Equals returns the equality between two ExtEventCharges
-func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
-	if !((eEc.Abstracts == nil && exCh.Abstracts == nil) ||
-		(eEc.Abstracts != nil && exCh.Abstracts != nil &&
-			*eEc.Abstracts == *exCh.Abstracts)) ||
-		!((eEc.Concretes == nil && exCh.Concretes == nil) ||
-			(eEc.Concretes != nil && exCh.Concretes != nil &&
-				*eEc.Concretes == *exCh.Concretes)) ||
-		(eEc.Charges == nil && exCh.Charges != nil ||
-			eEc.Charges != nil && exCh.Charges == nil ||
-			len(eEc.Charges) != len(exCh.Charges)) ||
-		(eEc.Accounting == nil && exCh.Accounting != nil ||
-			eEc.Accounting != nil && exCh.Accounting == nil ||
-			len(eEc.Accounting) != len(exCh.Accounting)) ||
-		(eEc.UnitFactors == nil && exCh.UnitFactors != nil ||
-			eEc.UnitFactors != nil && exCh.UnitFactors == nil ||
-			len(eEc.UnitFactors) != len(exCh.UnitFactors)) ||
-		(eEc.Rating == nil && exCh.Rating != nil ||
-			eEc.Rating != nil && exCh.Rating == nil ||
-			len(eEc.Rating) != len(exCh.Rating)) ||
-		(eEc.Rates == nil && exCh.Rates != nil ||
-			eEc.Rates != nil && exCh.Rates == nil ||
-			len(eEc.Rates) != len(exCh.Rates)) ||
-		(eEc.Accounts == nil && exCh.Accounts != nil ||
-			eEc.Accounts != nil && exCh.Accounts == nil ||
-			len(eEc.Accounts) != len(exCh.Accounts)) {
-		return
-	}
-	/*
-		for idx, val := range exCh.Charges {
-			if ok := val.Equals(exCh.Charges[idx], eEc.Accounting, exCh.Accounting); !ok {
-				return
-			}
-		}
-		for key, val := range eEc.Accounting {
-			if ok := val.Equals(exCh.Accounting[key]); !ok {
-				return
-			}
-		}
-
-	*/
-	for key, val := range eEc.UnitFactors {
-		if ok := val.Equals(exCh.UnitFactors[key]); !ok {
-			return
-		}
-	}
-	for key, val := range eEc.Rating {
-		if ok := val.Equals(exCh.Rating[key], eEc.Rates, exCh.Rates); !ok {
-			return
-		}
-	}
-	for key, val := range eEc.Accounts {
-		if ok := val.Equals(exCh.Accounts[key]); !ok {
-			return
-		}
-	}
-	return true
-}
-
 // Equals returns the equality between two EventCharges
 func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
 	if eC == nil && evCh == nil {
@@ -376,26 +247,6 @@ func (ec *EventCharges) accountChargeID(ac *AccountCharge) (acID string) {
 	return
 }
 
-// ExtEventCharges is a generic EventCharges used in APIs
-type ExtEventCharges struct {
-	Abstracts *float64
-	Concretes *float64
-
-	Charges []*ChargeEntry
-
-	Accounting  map[string]*ExtAccountCharge
-	UnitFactors map[string]*ExtUnitFactor
-	Rating      map[string]*ExtRateSInterval
-	Rates       map[string]*ExtIntervalRate
-	Accounts    map[string]*ExtAccount
-}
-
-type ExtChargingIncrement struct {
-	Units           *float64
-	AccountChargeID string
-	CompressFactor  int
-}
-
 // AccountCharge represents one Account charge
 type AccountCharge struct {
 	AccountID       string
@@ -406,85 +257,6 @@ type AccountCharge struct {
 	AttributeIDs    []string // list of attribute profiles matched
 	RatingID        string   // identificator in cost increments
 	JoinedChargeIDs []string // identificator of extra account charges
-}
-
-type ExtAccountCharge struct {
-	AccountID       string
-	BalanceID       string
-	Units           *float64
-	BalanceLimit    *float64 // the minimum balance value accepted(float64 type)
-	UnitFactorID    string   // identificator in ChargingUnitFactors
-	AttributeIDs    []string // list of attribute profiles matched
-	RatingID        string   // identificator in cost increments
-	JoinedChargeIDs []string // identificator of extra account charges
-}
-
-// AsExtAccountCharge converts AccountCharge to ExtAccountCharge
-func (aC *AccountCharge) AsExtAccountCharge() (eAc *ExtAccountCharge, err error) {
-	eAc = &ExtAccountCharge{
-		AccountID:    aC.AccountID,
-		BalanceID:    aC.BalanceID,
-		UnitFactorID: aC.UnitFactorID,
-		RatingID:     aC.RatingID,
-	}
-	if aC.Units != nil {
-		if fltUnit, ok := aC.Units.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal Units to float64 ")
-		} else {
-			eAc.Units = &fltUnit
-		}
-	}
-	if aC.BalanceLimit != nil {
-		if fltBlUnit, ok := aC.BalanceLimit.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal BalanceLimit to float64 ")
-		} else {
-			eAc.BalanceLimit = &fltBlUnit
-		}
-	}
-	if aC.AttributeIDs != nil {
-		eAc.AttributeIDs = make([]string, len(aC.AttributeIDs))
-		for idx, val := range aC.AttributeIDs {
-			eAc.AttributeIDs[idx] = val
-		}
-	}
-	if aC.JoinedChargeIDs != nil {
-		eAc.JoinedChargeIDs = make([]string, len(aC.JoinedChargeIDs))
-		for idx, val := range aC.JoinedChargeIDs {
-			eAc.JoinedChargeIDs[idx] = val
-		}
-	}
-	return
-}
-
-// Equals compares two ExtAccountCharge
-func (eAc *ExtAccountCharge) Equals(extAc *ExtAccountCharge) (eq bool) {
-	if (eAc.AttributeIDs == nil && extAc.AttributeIDs != nil ||
-		eAc.AttributeIDs != nil && extAc.AttributeIDs == nil ||
-		len(eAc.AttributeIDs) != len(extAc.AttributeIDs)) ||
-		(eAc.JoinedChargeIDs == nil && extAc.JoinedChargeIDs != nil ||
-			eAc.JoinedChargeIDs != nil && extAc.JoinedChargeIDs == nil ||
-			len(eAc.JoinedChargeIDs) != len(extAc.JoinedChargeIDs)) ||
-		(eAc.AccountID != extAc.AccountID ||
-			eAc.BalanceID != extAc.BalanceID ||
-			eAc.UnitFactorID != extAc.UnitFactorID ||
-			eAc.RatingID != extAc.RatingID) ||
-		!((eAc.Units == nil && extAc.Units == nil) ||
-			(eAc.Units != nil && extAc.Units != nil && *eAc.Units == *extAc.Units)) ||
-		!((eAc.BalanceLimit == nil && extAc.BalanceLimit == nil) ||
-			(eAc.BalanceLimit != nil && extAc.BalanceLimit != nil && *eAc.BalanceLimit == *extAc.BalanceLimit)) {
-		return
-	}
-	for idx, val := range eAc.AttributeIDs {
-		if val != extAc.AttributeIDs[idx] {
-			return
-		}
-	}
-	for idx, val := range eAc.JoinedChargeIDs {
-		if val != extAc.JoinedChargeIDs[idx] {
-			return
-		}
-	}
-	return true
 }
 
 // Equals compares two AccountCharges

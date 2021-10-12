@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -67,86 +66,6 @@ type Rate struct {
 	uID   string
 }
 
-type ExtRate struct {
-	ID              string         // RateID
-	FilterIDs       []string       // RateFilterIDs
-	ActivationTimes string         // ActivationTimes is a cron formatted time interval
-	Weights         DynamicWeights // RateWeight will decide the winner per interval start
-	Blocker         bool           // RateBlocker will make this rate recurrent, deactivating further intervals
-	IntervalRates   []*ExtIntervalRate
-
-	sched cron.Schedule // compiled version of activation times as cron.Schedule interface
-	uID   string
-}
-
-// Equals returns the equality between two ExtRate
-func (eRt *ExtRate) Equals(extRT *ExtRate) (eq bool) {
-	if (eRt.ID != extRT.ID ||
-		eRt.ActivationTimes != extRT.ActivationTimes ||
-		eRt.Blocker != extRT.Blocker) ||
-		(eRt.FilterIDs == nil && extRT.FilterIDs != nil ||
-			eRt.FilterIDs != nil && extRT.FilterIDs == nil) ||
-		(eRt.Weights == nil && extRT.Weights != nil ||
-			eRt.Weights != nil && extRT.Weights == nil ||
-			len(eRt.Weights) != len(extRT.Weights)) ||
-		(eRt.IntervalRates == nil && extRT.IntervalRates != nil ||
-			eRt.IntervalRates != nil && extRT.IntervalRates == nil ||
-			len(eRt.IntervalRates) != len(extRT.IntervalRates)) {
-		return
-	}
-	for idx, val := range eRt.FilterIDs {
-		if val != extRT.FilterIDs[idx] {
-			return
-		}
-	}
-	if eRt.Weights != nil && extRT.Weights != nil {
-		for idx, val := range eRt.Weights {
-			if ok := val.Equals(extRT.Weights[idx]); !ok {
-				return
-			}
-		}
-	}
-	if eRt.IntervalRates != nil && extRT.IntervalRates != nil {
-		for idx, val := range eRt.IntervalRates {
-			if ok := val.Equals(extRT.IntervalRates[idx]); !ok {
-				return
-			}
-		}
-	}
-	return true
-}
-
-// AsExtRate converts Rate to ExtRate
-func (rT *Rate) AsExtRate() (eRt *ExtRate, err error) {
-	eRt = &ExtRate{
-		ID:              rT.ID,
-		ActivationTimes: rT.ActivationTimes,
-		sched:           rT.sched,
-		uID:             rT.uID,
-		Blocker:         rT.Blocker,
-	}
-	if rT.FilterIDs != nil {
-		eRt.FilterIDs = make([]string, len(rT.FilterIDs))
-		for idx, val := range rT.FilterIDs {
-			eRt.FilterIDs[idx] = val
-		}
-	}
-	if rT.Weights != nil {
-		eRt.Weights = rT.Weights
-	}
-	if rT.IntervalRates != nil {
-		eRt.IntervalRates = make([]*ExtIntervalRate, len(rT.IntervalRates))
-		for idx, val := range rT.IntervalRates {
-			if rcvIntv, err := val.AsExtIntervalRate(); err != nil {
-				return nil, err
-			} else {
-				eRt.IntervalRates[idx] = rcvIntv
-			}
-		}
-	}
-	return
-}
-
 // UID returns system wide unique identifier
 func (rt *Rate) UID() string {
 	return rt.uID
@@ -158,72 +77,6 @@ type IntervalRate struct {
 	RecurrentFee  *Decimal
 	Unit          *Decimal // RateUnit
 	Increment     *Decimal // RateIncrement
-}
-
-type ExtIntervalRate struct {
-	IntervalStart *float64 // Starting point when the Rate kicks in
-	FixedFee      *float64
-	RecurrentFee  *float64
-	Unit          *float64 // RateUnit
-	Increment     *float64 // RateIncrement
-}
-
-// AsExtIntervalRate converts IntervalRate to ExtIntervalRate
-func (iR *IntervalRate) AsExtIntervalRate() (eIr *ExtIntervalRate, err error) {
-	eIr = new(ExtIntervalRate)
-	if iR.IntervalStart != nil {
-		if fltIntSt, ok := iR.IntervalStart.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal IntervalStart to float64")
-		} else {
-			eIr.IntervalStart = &fltIntSt
-		}
-	}
-	if iR.FixedFee != nil {
-		if fltFxdFee, ok := iR.FixedFee.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal FixedFee to float64")
-		} else {
-			eIr.FixedFee = &fltFxdFee
-		}
-	}
-	if iR.RecurrentFee != nil {
-		if fltRecFee, ok := iR.RecurrentFee.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal RecurrentFee to float64")
-		} else {
-			eIr.RecurrentFee = &fltRecFee
-		}
-	}
-	if iR.Unit != nil {
-		if fltUnit, ok := iR.Unit.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal Unit to float64")
-		} else {
-			eIr.Unit = &fltUnit
-		}
-	}
-	if iR.Increment != nil {
-		if fltIncr, ok := iR.Increment.Big.Float64(); !ok {
-			return nil, errors.New("cannot convert decimal Increment to float64")
-		} else {
-			eIr.Increment = &fltIncr
-		}
-	}
-	return
-}
-
-// Equals returns the equality between two ExtIntervalRate
-func (eIr *ExtIntervalRate) Equals(extIr *ExtIntervalRate) (eq bool) {
-	if !((eIr.IntervalStart == nil && extIr.IntervalStart == nil) ||
-		(eIr.IntervalStart != nil && extIr.IntervalStart != nil && *eIr.IntervalStart == *extIr.IntervalStart)) ||
-		!((eIr.FixedFee == nil && extIr.FixedFee == nil) ||
-			(eIr.FixedFee != nil && extIr.FixedFee != nil && *eIr.FixedFee == *extIr.FixedFee)) ||
-		!((eIr.RecurrentFee == nil && extIr.RecurrentFee == nil) ||
-			(eIr.RecurrentFee != nil && extIr.RecurrentFee != nil && *eIr.RecurrentFee == *extIr.RecurrentFee)) ||
-		!((eIr.Unit == nil && extIr.Unit == nil) ||
-			(eIr.Unit != nil && extIr.Unit != nil && *eIr.Unit == *extIr.Unit)) ||
-		!((eIr.Increment == nil && extIr.Increment == nil) ||
-			(eIr.Increment != nil && extIr.Increment != nil && *eIr.Increment == *extIr.Increment)) {
-		return
-	}
-	return true
 }
 
 // Equals returns the equality between two IntervalRate
@@ -310,14 +163,6 @@ type RateSInterval struct {
 	cost *decimal.Big // unexported total interval cost
 }
 
-type ExtRateSInterval struct {
-	IntervalStart  *float64
-	Increments     []*ExtRateSIncrement
-	CompressFactor int64
-
-	cost *float64 // unexported total interval cost
-}
-
 // AsRatesIntervalsCost converts RateSInterval to RateSIntervalCost
 // The difference between this 2 is that RateSIntervalCost don't need IntervalStart
 func (rI *RateSInterval) AsRatesIntervalsCost() (rIc *RateSIntervalCost) {
@@ -333,56 +178,6 @@ func (rI *RateSInterval) AsRatesIntervalsCost() (rIc *RateSIntervalCost) {
 	return
 }
 
-// AsExtRateSInterval converts RateSInterval to ExtRateSInterval
-func (rI *RateSInterval) AsExtRateSInterval() (eRi *ExtRateSInterval, err error) {
-	eRi = &ExtRateSInterval{
-		CompressFactor: rI.CompressFactor,
-	}
-	if rI.Increments != nil {
-		eRi.Increments = make([]*ExtRateSIncrement, len(rI.Increments))
-		for idx, val := range rI.Increments {
-			if rcv, err := val.AsExtRateSIncrement(); err != nil {
-				return nil, err
-			} else {
-				eRi.Increments[idx] = rcv
-			}
-		}
-	}
-	if rI.IntervalStart != nil {
-		if fltIntStart, ok := rI.IntervalStart.Big.Float64(); !ok {
-			return nil, errors.New("Cannot convert decimal IntervalStart into float64 ")
-		} else {
-			eRi.IntervalStart = &fltIntStart
-		}
-	}
-	if rI.cost != nil {
-		if fltCost, ok := rI.cost.Float64(); !ok {
-			return nil, errors.New("Cannot convert decimal cost into float64 ")
-		} else {
-			eRi.cost = &fltCost
-		}
-	}
-	return
-}
-
-// Equals compares two ExtRateSInterval
-func (rIl *ExtRateSInterval) Equals(nRil *ExtRateSInterval, exInRt, exInRtRef map[string]*ExtIntervalRate) (eq bool) {
-	if !((rIl.IntervalStart == nil && nRil.IntervalStart == nil) ||
-		(rIl.IntervalStart != nil && nRil.IntervalStart != nil && *rIl.IntervalStart == *nRil.IntervalStart)) ||
-		(rIl.Increments == nil && nRil.Increments != nil ||
-			rIl.Increments != nil && nRil.Increments == nil ||
-			len(rIl.Increments) != len(nRil.Increments)) ||
-		(rIl.CompressFactor != nRil.CompressFactor) {
-		return
-	}
-	for i, rtIn := range rIl.Increments {
-		if !rtIn.Equals(nRil.Increments[i], exInRt, exInRtRef) {
-			return
-		}
-	}
-	return true
-}
-
 type RateSIncrement struct {
 	IncrementStart    *Decimal
 	RateIntervalIndex int
@@ -391,58 +186,6 @@ type RateSIncrement struct {
 	Usage             *Decimal
 
 	cost *decimal.Big // unexported total increment cost
-}
-
-type ExtRateSIncrement struct {
-	IncrementStart    *float64
-	IntervalRateIndex int
-	RateID            string
-	CompressFactor    int64
-	Usage             *float64
-
-	cost *float64 // unexported total increment cost
-}
-
-//AsExtRateSIncrement converts RateSIncrement to ExtRateSIncrement
-func (rI *RateSIncrement) AsExtRateSIncrement() (eRi *ExtRateSIncrement, err error) {
-	eRi = &ExtRateSIncrement{
-		IntervalRateIndex: rI.RateIntervalIndex,
-		CompressFactor:    rI.CompressFactor,
-		RateID:            rI.RateID,
-	}
-	if rI.IncrementStart != nil {
-		if fltIncrStart, ok := rI.IncrementStart.Big.Float64(); !ok {
-			return nil, errors.New("Cannot convert decimal IncrementStart into float64 ")
-		} else {
-			eRi.IncrementStart = &fltIncrStart
-		}
-	}
-	if rI.Usage != nil {
-		if fltUsage, ok := rI.Usage.Big.Float64(); !ok {
-			return nil, errors.New("Cannot convert decimal Usage into float64 ")
-		} else {
-			eRi.Usage = &fltUsage
-		}
-	}
-	if rI.cost != nil {
-		if fltCost, ok := rI.cost.Float64(); !ok {
-			return nil, errors.New("Cannot convert decimal cost into float64 ")
-		} else {
-			eRi.cost = &fltCost
-		}
-	}
-	return
-}
-
-// Equals returns the equality between twoExt RateSIncrement
-func (eRI *ExtRateSIncrement) Equals(extRI *ExtRateSIncrement, exInRt, exInRtRef map[string]*ExtIntervalRate) (eq bool) {
-	return ((eRI.Usage == nil && extRI.Usage == nil) ||
-		(eRI.Usage != nil && extRI.Usage != nil && *eRI.Usage == *extRI.Usage)) &&
-		((eRI.IncrementStart == nil && extRI.IncrementStart == nil) ||
-			(eRI.IncrementStart != nil && extRI.IncrementStart != nil && *eRI.IncrementStart == *extRI.IncrementStart)) &&
-		(eRI.CompressFactor == extRI.CompressFactor) &&
-		(eRI.IntervalRateIndex == extRI.IntervalRateIndex) &&
-		exInRt[eRI.RateID].Equals(exInRtRef[extRI.RateID])
 }
 
 // Equals compares two RateSIntervals
@@ -559,7 +302,7 @@ func (rIncrC *RateSIncrementCost) Equals(nRi *RateSIncrementCost, rIRef, rtInRef
 			!rIRef[rIncrC.RateID].Equals(rtInRef[nRi.RateID])))
 }
 
-/*rIncrC
+/*
 func (rpC *RateProfileCost) SynchronizeRateKeys(nRpCt *RateProfileCost) {
 	rts := make(map[string]*IntervalRate)
 	reverse := make(map[string]string)
