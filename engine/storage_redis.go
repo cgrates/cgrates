@@ -68,10 +68,11 @@ const (
 	redis_HMSET    = "HMSET"
 
 	redisLoadError = "Redis is loading the dataset in memory"
+	RedisLimit     = 524287 // https://github.com/StackExchange/StackExchange.Redis/issues/201#issuecomment-98639005
 )
 
 func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
-	maxConns,attempts int, sentinelName string, isCluster bool, clusterSync,
+	maxConns, attempts int, sentinelName string, isCluster bool, clusterSync,
 	clusterOnDownDelay time.Duration, tlsConn bool,
 	tlsClientCert, tlsClientKey, tlsCACert string) (_ *RedisStorage, err error) {
 	var ms Marshaler
@@ -1203,6 +1204,12 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 	for key, strMp := range indexes {
 		if len(strMp) == 0 { // remove with no more elements inside
 			deleteArgs = append(deleteArgs, key)
+			if len(deleteArgs) == RedisLimit+1 { // minus dbkey
+				if err = rs.Cmd(nil, redis_HDEL, deleteArgs...); err != nil {
+					return
+				}
+				deleteArgs = []string{dbKey} // the dbkey is necesary for the HDEL command
+			}
 			continue
 		}
 		var encodedMp []byte
@@ -1210,6 +1217,12 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 			return
 		}
 		mp[key] = string(encodedMp)
+		if len(mp) == RedisLimit {
+			if err = rs.FlatCmd(nil, redis_HMSET, dbKey, mp); err != nil {
+				return
+			}
+			mp = make(map[string]string)
+		}
 	}
 	if len(deleteArgs) != 1 {
 		if err = rs.Cmd(nil, redis_HDEL, deleteArgs...); err != nil {
