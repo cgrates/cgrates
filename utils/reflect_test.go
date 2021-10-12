@@ -1539,8 +1539,9 @@ func TestReflectFieldMethodInterfaceArrayError(t *testing.T) {
 	obj := []int{2, 3, 5, 7, 11, 13}
 	fldName := "test"
 	_, err := ReflectFieldMethodInterface(obj, fldName)
-	if err == nil || err.Error() != "strconv.Atoi: parsing \"test\": invalid syntax" {
-		t.Errorf("Expected <strconv.Atoi: parsing \"test\": invalid syntax> ,received: <%+v>", err)
+	expected := ErrNotFound.Error()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected <%s> ,received: <%+v>", expected, err)
 	}
 }
 

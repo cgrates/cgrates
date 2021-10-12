@@ -21,6 +21,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewObjectDP(t *testing.T) {
@@ -65,7 +67,7 @@ func TestFieldAsInterfaceObjDPInvalidSyntax(t *testing.T) {
 		obj:   []int{12, 13},
 		cache: make(map[string]interface{}),
 	}
-	expected := "strconv.Atoi: parsing \"1]\": invalid syntax"
+	expected := utils.ErrNotFound.Error()
 	if _, err := objDp.FieldAsInterface(object); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

@@ -173,6 +173,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [EEs] Added *log exporter
   * [AttributeS] Added profile_runs to control how many times a profile is proccessed for an event
   * [DNSAgent] Updated Msg handling from templates
+  * [ActionsS] Replaced structmatcher with normal filters
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

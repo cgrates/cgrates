@@ -1512,7 +1512,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 			},
 		},
 	}
-	err = at.Execute(nil)
+	at.Execute(nil)
 	acc, err := dm.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
@@ -1807,7 +1807,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
+		t.Error("transfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1868,7 +1868,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
+		t.Error("transfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1908,7 +1908,7 @@ func TestActionConditionalTopup(t *testing.T) {
 
 	a := &Action{
 		ActionType: utils.MetaTopUp,
-		Filter:     `{"Type":"*monetary","Value":1,"Weight":10}`,
+		Filter:     `*lt:~*req.BalanceMap.*monetary.GetTotalValue:30`,
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
@@ -1920,7 +1920,9 @@ func TestActionConditionalTopup(t *testing.T) {
 		accountIDs: utils.StringMap{"cgrates.org:cond": true},
 		actions:    Actions{a},
 	}
-	at.Execute(NewFilterS(config.CgrConfig(), nil, nil))
+	if err = at.Execute(NewFilterS(config.CgrConfig(), nil, nil)); err != nil {
+		t.Fatal(err)
+	}
 
 	afterUb, err := dm.GetAccount("cgrates.org:cond")
 	if err != nil {
@@ -1932,7 +1934,7 @@ func TestActionConditionalTopup(t *testing.T) {
 		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
+		t.Error("transfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -1972,7 +1974,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 
 	a := &Action{
 		ActionType: utils.MetaTopUp,
-		Filter:     `{"Type":"*monetary","Value":2,"Weight":10}`,
+		Filter:     `*lt:~*req.BalanceMap.*monetary.GetTotalValue:3`,
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
@@ -1995,7 +1997,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
+		t.Error("transfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -2036,7 +2038,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 
 	a := &Action{
 		ActionType: utils.MetaTopUp,
-		Filter:     `{"Type":"*voice","Value":{"*gte":100}}`,
+		Filter:     `*gte:~*req.BalanceMap.*voice.GetTotalValue:100`,
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
@@ -2059,7 +2061,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 		for _, b := range afterUb.BalanceMap[utils.MetaMonetary] {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
+		t.Error("transfer balance value: ", afterUb.BalanceMap[utils.MetaMonetary].GetTotalValue())
 	}
 }
 
@@ -2068,7 +2070,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 		&Account{
 			ID: "cgrates.org:af",
 			BalanceMap: map[string]Balances{
-				"*data": {
+				utils.MetaData: {
 					&Balance{
 						Uuid:          "fc927edb-1bd6-425e-a2a3-9fd8bafaa524",
 						ID:            "for_v3hsillmilld500m_data_500_m",
@@ -2080,14 +2082,14 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 						},
 					},
 				},
-				"*monetary": {
+				utils.MetaMonetary: {
 					&Balance{
 						Uuid:  "9fa1847a-f36a-41a7-8ec0-dfaab370141e",
 						ID:    utils.MetaDefault,
 						Value: -1.95001,
 					},
 				},
-				"*sms": {
+				utils.MetaSMS: {
 					&Balance{
 						Uuid:   "d348d15d-2988-4ee4-b847-6a552f94e2ec",
 						ID:     "for_v3hsillmilld500m_mms_ill",
@@ -2115,7 +2117,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 						},
 					},
 				},
-				"*voice": {
+				utils.MetaVoice: {
 					&Balance{
 						Uuid:   "079ab190-77f4-44f3-9c6f-3a0dd1a59dfd",
 						ID:     "for_v3hsillmilld500m_voice_3_h",
@@ -2137,7 +2139,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 
 	a1 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
+		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
 		Balance: &BalanceFilter{
 			Type:     utils.StringPointer("*sms"),
 			ID:       utils.StringPointer("for_v3hsillmilld500m_sms_ill"),
@@ -2147,7 +2149,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	a2 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
+		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*sms"),
 			ID:             utils.StringPointer("for_v3hsillmilld500m_mms_ill"),
@@ -2159,7 +2161,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	a3 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
+		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*sms"),
 			ID:             utils.StringPointer("for_v3hsillmilld500m_sms_ill"),
@@ -2171,7 +2173,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	a4 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
+		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
 		Balance: &BalanceFilter{
 			Type:          utils.StringPointer("*data"),
 			Uuid:          utils.StringPointer("fc927edb-1bd6-425e-a2a3-9fd8bafaa524"),
@@ -2183,7 +2185,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	a5 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
+		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*voice"),
 			ID:             utils.StringPointer("for_v3hsillmilld500m_voice_3_h"),
