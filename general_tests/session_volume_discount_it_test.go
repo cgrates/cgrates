@@ -360,7 +360,7 @@ func testSessVolDiscProcessCDRSupplier(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.MetaUsage: 15 * time.Minute,
+			utils.MetaUsage: 15 * time.Minute, // 179219039us
 		},
 	}
 
@@ -379,7 +379,7 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]interface{}{
-			utils.AccountField: "DIFFERENT_ACCOUNT1",
+			utils.AccountField: "sipp",
 			utils.Destination:  "1002",
 		},
 		APIOpts: map[string]interface{}{
@@ -401,32 +401,42 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 	expectedAcc := utils.Account{
 		Tenant:    "cgrates.org",
-		ID:        "ACCOUNT1",
+		ID:        "ACNT_VOL1",
 		FilterIDs: []string{},
 		Balances: map[string]*utils.Balance{
-			"ABS_BALANCE1": {
-				ID: "ABS_BALANCE1",
+			"ABS_VOLUME1": {
+				ID: "ABS_VOLUME1",
 				Weights: utils.DynamicWeights{
 					{
 						FilterIDs: nil,
 						Weight:    30,
 					},
 				},
-				Type:           "*abstract",
-				Units:          &utils.Decimal{utils.SumDecimalAsBig(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0))}, // this should be -0
-				RateProfileIDs: []string{"RP_ABS_BALANCE1"},
+				Type:  "*abstract",
+				Units: &utils.Decimal{utils.SumDecimalAsBig(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0))}, // this should be -0
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:  utils.NewDecimal(0, 0),
+					},
+				},
 			},
-			"ABS_BALANCE2": {
-				ID: "ABS_BALANCE2",
+			"ABS_VOLUME2": {
+				ID: "ABS_VOLUME2",
 				Weights: utils.DynamicWeights{
 					{
 						FilterIDs: nil,
 						Weight:    20,
 					},
 				},
-				Type:           "*abstract",
-				Units:          utils.NewDecimal(0, 0),
-				RateProfileIDs: []string{"RP_ABS_BALANCE2"},
+				Type:  "*abstract",
+				Units: &utils.Decimal{utils.SumDecimalAsBig(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0))},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+				RateProfileIDs: []string{"RP_ABS_VOLUME2"},
 			},
 			"CNCRT_BALANCE1": {
 				ID: "CNCRT_BALANCE1",
@@ -439,9 +449,14 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 				Opts: map[string]interface{}{
 					utils.MetaBalanceUnlimited: "true",
 				},
-				Type:           "*concrete",
-				Units:          utils.NewDecimal(98800, 2),
-				RateProfileIDs: []string{"RP_CNCRT_BALANCE1"},
+				Type:  "*concrete",
+				Units: utils.NewDecimal(9882400, 4),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+				RateProfileIDs: []string{"RP_SUPPLIER1"},
 			},
 		},
 		ThresholdIDs: []string{},
@@ -451,7 +466,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
-				ID:     "ACCOUNT1",
+				ID:     "ACNT_VOL1",
 			},
 		}, &result); err != nil {
 		t.Error(err)
