@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -440,7 +439,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 		for idx, tpact := range tpacts {
 			// check filter field
 			if len(tpact.Filter) > 0 {
-				if _, err := structmatcher.NewStructMatcher(tpact.Filter); err != nil {
+				if err = verifyInlineFilterS(strings.Split(tpact.Filter, utils.InfieldSep)); err != nil {
 					return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
 				}
 			}
@@ -911,7 +910,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				for idx, tpact := range tpacts {
 					// check filter field
 					if len(tpact.Filter) > 0 {
-						if _, err := structmatcher.NewStructMatcher(tpact.Filter); err != nil {
+						if err = verifyInlineFilterS(strings.Split(tpact.Filter, utils.InfieldSep)); err != nil {
 							return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
 						}
 					}

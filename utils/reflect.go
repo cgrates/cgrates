@@ -804,13 +804,12 @@ func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interfa
 	case reflect.Slice, reflect.Array:
 		//convert fldName to int
 		idx, err := strconv.Atoi(fldName)
-		if err != nil {
-			return nil, err
+		if err == nil {
+			if idx >= v.Len() {
+				return nil, fmt.Errorf("index out of range")
+			}
+			field = v.Index(idx)
 		}
-		if idx >= v.Len() {
-			return nil, fmt.Errorf("index out of range")
-		}
-		field = v.Index(idx)
 	default:
 		return nil, fmt.Errorf("unsupported field kind: %v", v.Kind())
 	}
