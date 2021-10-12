@@ -308,27 +308,55 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"opts": {								//
-		"*accountS": {						//
-			"*default": false,
-		},
-		"*attributeS": {					//
-			"*default": false,
-		},
-		"*chargerS": {						//
-			"*default": false,
-		},
-		"*eeS": {							//
-			"*default": false,	
-		},
-		"*rateS": {							//
-			"*default": false,
-		},
-		"*statS": {							//
-			"*default": false,
-		},
-		"*thresholdS": {					//
-			"*default": false,
-		},
+		"*accountS": [						//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*attributeS": [					//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*chargerS": [						//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*eeS": [							//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*rateS": [							//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*statS": [							//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*thresholdS": [					//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
 	},
 },
 
@@ -692,19 +720,35 @@ const CGRATES_CFG_JSON = `
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"opts":{								// 
-		"*attributeIDs": { 					//
-			"*default": [],
-		},				
-		"*processRuns": {					// number of run loops when processing event
-			"*default": 1,
-		},					
-		"*profileRuns": {					// number of runs a profile will process during the event
-			"*default": 0,
-		},	
-		"*profileIgnoreFilters": {			// if we should check the filters
-			"*default": false,
-		}				
+	"opts":{								//
+		"*attributeIDs": [					//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],
+		"*processRuns": [					// number of run loops when processing event
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": 1,
+			// },
+		],
+		"*profileRuns": [					// number of runs a profile will process during the event
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": 0,
+			// },
+		],
+		"*profileIgnoreFilters": [ 			// if we should check the filters
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],								
 	},
 },
 
@@ -729,16 +773,28 @@ const CGRATES_CFG_JSON = `
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"opts":{								//	
-		"*usageID": {						//
-			"*default": "",
-		},				
-		"*usageTTL": {						//
-			"*default": "72h",
-		},			
-		"*units": {							//
-			"*default": 1,
-		},					
+	"opts":{								//
+		"*usageID": [						//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "",
+			// },
+		],
+		"*usageTTL": [						//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "72h",
+			// },
+		],
+		"*units": [							//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": 1,
+			// },
+		],
 	},
 },
 
@@ -754,12 +810,20 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {								//
-		"*statIDs": {						//
-			"*default": [],
-		},
-		"*profileIgnoreFilters": {			// if we should check the filters
-			"*default": false,
-		}	
+		"*statIDs": [						//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],	
+		"*profileIgnoreFilters": [			// if we should ignore filters
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],	
 	},								
 },
 
@@ -774,12 +838,20 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"actions_conns": [],					// connections to ActionS to execute the actions
 	"opts":{								//
-		"*thresholdIDs": {					//	
-			"*default": [],
-		},
-		"*profileIgnoreFilters": {			// if we should check the filters
-			"*default": false,
-		}										
+		"*thresholdsIDs": [					//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],
+		"*profileIgnoreFilters": [			// if we should ignore filters
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],								
 	},								
 },
 
@@ -797,54 +869,54 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"default_ratio":1,						// default ratio used in case of *load strategy
-	"opts":{
-		"*context": [
+	"opts":{								//
+		"*context": [						//
 			// {
-			// 	Tenant: "*any",
-			// 	FilterIDs: [],
-			// 	Value: "*routes",
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "*routes",
 			// },
 		],			
-		"*profileCount": [
+		"*profileCount": [					//
 			// {
-			// 	Tenant: "*any",
-			// 	FilterIDs: [],
-			// 	Value: 1,
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": 1,
 			// },
 		],
-		"*ignoreErrors": [
+		"*ignoreErrors": [					//
 			// {
-			// 	Tenant: "*any",
-			// 	FilterIDs: [],
-			// 	Value: false,
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
 			// },
 		],
-		"*maxCost": [
+		"*maxCost": [						//
 			// {
-			// 	Tenant: "*any",
-			// 	FilterIDs: [],
-			// 	Value: "",
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "",
 			// },
 		],
-		// "*limit": [
+		// "*limit": [						//
 		// 	{
-		// 		Tenant: "*any",
-		// 		FilterIDs: [],
-		// 		Value: 1,
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 1,
 		// 	},
 		// ],
-		// "*offset": [
+		// "*offset": [						//
 		// 	{
-		// 		Tenant: "*any",
-		// 		FilterIDs: [],
-		// 		Value: 1,
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 1,
 		// 	},
 		// ],
-		"*usage": [
+		"*usage": [							//
 			// {
-			// 	Tenant: "*any",
-			// 	FilterIDs: [],
-			// 	Value: "1m",
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "1m",
 			// },
 		],
 	},
@@ -1208,22 +1280,42 @@ const CGRATES_CFG_JSON = `
 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "verbosity": 1000,                      // number of increment iterations allowed
-	"opts":{								//	
-		"*rateProfileIDs": {				// select the rate profiles used for cost calculation
-			"*default": [],
-		},			
-		"*startTime": {						// start time used for cost calculation
-			"*default": "*now",
-		},
-		"*usage": {							// usage used for cost calculation
-			"*default": "1m",
-		},
-		"*intervalStart": {					// event interval start
-			"*default": "0",
-		},
-		"*profileIgnoreFilters": {			// ignore the filters for rateProfileIDs
-			"*default": false,
-		}	
+	"opts":{								//
+		"*rateProfileIDs": [				// select the rate profiles used for cost calculation
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],	
+		"*startTime": [						// start time used for cost calculation
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "*now",
+			// },
+		],
+		"*usage": [							// usage used for cost calculation
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "1m",
+			// },
+		],
+		"*intervalStart": [					// event interval start
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "0",
+			// },
+		],
+		"*profileIgnoreFilters": [			// ignore the filters for rateProfileIDs 
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
 	},
 },
 
@@ -1357,13 +1449,21 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"dynaprepaid_actionprofile": [],		//
-	"opts":{								//	
-		"*actionProfileIDs": {				//
-			"*default": [],
-		},	
-		"*profileIgnoreFilters": {			// if we should check the filters
-			"*default": false,
-		}			
+	"opts":{								//
+		"*actionProfileIDs": [				//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],
+		"*profileIgnoreFilters": [			// if we should ignore filters
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],	
 	},
 },
 
@@ -1381,15 +1481,27 @@ const CGRATES_CFG_JSON = `
     "max_iterations": 1000,                 // maximum number of iterations
     "max_usage": "72h",                     // maximum time of usage
 	"opts":{								//	
-		"*accountIDs": {					//
-			"*default": [],
-		},				
-		"*usage": {							//
-			"*default": "72h",			
-		},
-		"*profileIgnoreFilters": {			// if we should check the filters
-			"*default": false,
-		}	
+		"*accountIDs": [					//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],
+		"*usage": [							//
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "72h",
+			// },
+		],
+		"*profileIgnoreFilters": [			// if we should ignore filters
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],	
 	},
 },
 

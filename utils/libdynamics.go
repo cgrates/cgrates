@@ -505,7 +505,7 @@ func StringToDurationDynamicOpts(strOpts []*DynamicStringOpt) (durOpts []*Dynami
 	return
 }
 
-func DurationToStringDynamicOpts(durOpts []*DynamicDurationOpt) (strOpts []*DynamicStringOpt, err error) {
+func DurationToStringDynamicOpts(durOpts []*DynamicDurationOpt) (strOpts []*DynamicStringOpt) {
 	strOpts = make([]*DynamicStringOpt, len(durOpts))
 	for index, opt := range durOpts {
 		strOpts[index].Tenant = opt.Tenant
