@@ -19,8 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
+)
+
+var (
+	RatesRateProfileIDsDftOpt []string = []string{}
+	RatesUsageDftOpt                   = decimal.New(int64(time.Minute), 0)
+	RatesIntervalStartDftOpt           = decimal.New(0, 0)
+)
+
+const (
+	RatesStartTimeDftOpt           = "*now"
+	RatesProfileIgnoreErrorsDftOpt = false
 )
 
 type RatesOpts struct {
@@ -62,27 +76,27 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 		return
 	}
 	if jsnCfg.RateProfileIDs != nil {
-		rateOpts.RateProfileIDs = append(rateOpts.RateProfileIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.RateProfileIDs)...)
+		rateOpts.RateProfileIDs = append(rateOpts.RateProfileIDs, jsnCfg.RateProfileIDs...)
 	}
 	if jsnCfg.StartTime != nil {
-		rateOpts.StartTime = append(rateOpts.StartTime, utils.MapToDynamicStringOpts(jsnCfg.StartTime)...)
+		rateOpts.StartTime = append(rateOpts.StartTime, jsnCfg.StartTime...)
 	}
 	if jsnCfg.Usage != nil {
 		var usage []*utils.DynamicDecimalBigOpt
-		if usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+		if usage, err = utils.StringToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
 			return
 		}
 		rateOpts.Usage = append(rateOpts.Usage, usage...)
 	}
 	if jsnCfg.IntervalStart != nil {
 		var intervalStart []*utils.DynamicDecimalBigOpt
-		if intervalStart, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.IntervalStart); err != nil {
+		if intervalStart, err = utils.StringToDecimalBigDynamicOpts(jsnCfg.IntervalStart); err != nil {
 			return
 		}
 		rateOpts.IntervalStart = append(rateOpts.IntervalStart, intervalStart...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		rateOpts.ProfileIgnoreFilters = append(rateOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
+		rateOpts.ProfileIgnoreFilters = append(rateOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
 	}
 	return
 }
@@ -137,11 +151,11 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaRateProfileIDsCfg:    utils.DynamicStringSliceOptsToMap(rCfg.Opts.RateProfileIDs),
-		utils.MetaStartTime:            utils.DynamicStringOptsToMap(rCfg.Opts.StartTime),
-		utils.MetaUsage:                utils.DynamicDecimalBigOptsToMap(rCfg.Opts.Usage),
-		utils.MetaIntervalStartCfg:     utils.DynamicDecimalBigOptsToMap(rCfg.Opts.IntervalStart),
-		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(rCfg.Opts.ProfileIgnoreFilters),
+		utils.MetaRateProfileIDsCfg:    rCfg.Opts.RateProfileIDs,
+		utils.MetaStartTime:            rCfg.Opts.StartTime,
+		utils.MetaUsage:                rCfg.Opts.Usage,
+		utils.MetaIntervalStartCfg:     rCfg.Opts.IntervalStart,
+		utils.MetaProfileIgnoreFilters: rCfg.Opts.ProfileIgnoreFilters,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:            rCfg.Enabled,
@@ -240,11 +254,11 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 }
 
 type RatesOptsJson struct {
-	RateProfileIDs       map[string][]string `json:"*rateProfileIDs"`
-	StartTime            map[string]string   `json:"*startTime"`
-	Usage                map[string]string   `json:"*usage"`
-	IntervalStart        map[string]string   `json:"*intervalStart"`
-	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
+	RateProfileIDs       []*utils.DynamicStringSliceOpt `json:"*rateProfileIDs"`
+	StartTime            []*utils.DynamicStringOpt      `json:"*startTime"`
+	Usage                []*utils.DynamicStringOpt      `json:"*usage"`
+	IntervalStart        []*utils.DynamicStringOpt      `json:"*intervalStart"`
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
 type RateSJsonCfg struct {
@@ -268,19 +282,19 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 		d = new(RatesOptsJson)
 	}
 	if !utils.DynamicStringSliceOptEqual(v1.RateProfileIDs, v2.RateProfileIDs) {
-		d.RateProfileIDs = utils.DynamicStringSliceOptsToMap(v2.RateProfileIDs)
+		d.RateProfileIDs = v2.RateProfileIDs
 	}
 	if !utils.DynamicStringOptEqual(v1.StartTime, v2.StartTime) {
-		d.StartTime = utils.DynamicStringOptsToMap(v2.StartTime)
+		d.StartTime = v2.StartTime
 	}
 	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
-		d.Usage = utils.DynamicDecimalBigOptsToMap(v2.Usage)
+		d.Usage = utils.DecimalBigToStringDynamicOpts(v2.Usage)
 	}
 	if !utils.DynamicDecimalBigOptEqual(v1.IntervalStart, v2.IntervalStart) {
-		d.IntervalStart = utils.DynamicDecimalBigOptsToMap(v2.IntervalStart)
+		d.IntervalStart = utils.DecimalBigToStringDynamicOpts(v2.IntervalStart)
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
+		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
 	return d
 }
