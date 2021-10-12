@@ -369,20 +369,6 @@ func TestCDRsNewMapEventFromReqForm(t *testing.T) {
 	}
 }
 
-func TestCDRsNewMapEventFromReqFormErr(t *testing.T) {
-	httpReq := &http.Request{
-		URL: &url.URL{
-			RawQuery: "%0x;",
-		},
-	}
-	_, err := newMapEventFromReqForm(httpReq)
-	errExpect := `invalid URL escape "%0x"`
-	if err == nil || err.Error() != errExpect {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", errExpect, err)
-	}
-
-}
-
 func TestCDRsAttrSProcessEventMock(t *testing.T) {
 	testCache := Cache
 	tmpC := config.CgrConfig()
@@ -1350,4 +1336,18 @@ func TestCDRsProcessEventMockStats(t *testing.T) {
 	if !reflect.DeepEqual(expected, cgrEv) {
 		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
 	}
+}
+
+func TestCDRsNewMapEventFromReqFormErr(t *testing.T) {
+	httpReq := &http.Request{
+		URL: &url.URL{
+			RawQuery: "%0x",
+		},
+	}
+	_, err := newMapEventFromReqForm(httpReq)
+	errExpect := `invalid URL escape "%0x"`
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", errExpect, err)
+	}
+
 }

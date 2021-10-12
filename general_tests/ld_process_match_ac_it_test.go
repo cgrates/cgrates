@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"net"
 	"path"
 	"reflect"
 	"testing"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -49,7 +51,34 @@ var (
 	}
 )
 
+type TestRPC1 struct {
+	Event *utils.CGREventWithEeIDs
+}
+
+var testRPC2 TestRPC
+
+func (rpc *TestRPC1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+	rpc.Event = cgrEv
+	return nil
+}
+
 func TestLdPrMatchAcChange(t *testing.T) {
+	birpc.RegisterName(utils.EeSv1, &testRPC2)
+	l, err := net.Listen(utils.TCP, ":22012")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+	go func() {
+		for {
+			c, err := l.Accept()
+			if err != nil {
+				return
+			}
+			go jsonrpc.ServeConn(c)
+		}
+	}()
+
 	switch *dbType {
 	case utils.MetaInternal:
 		testLdPrMatchAcCfgDir = "ld_process_match_rt_internal"
@@ -133,7 +162,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:      2 * time.Minute,
 			utils.OptsRateS:      false,
-			utils.OptsCDRsExport: false,
+			utils.OptsCDRsExport: true,
 			utils.OptsAccountS:   true,
 		},
 	}
@@ -144,6 +173,71 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 	expected := "OK"
 	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
+	}
+
+	expected2 := &utils.CGREventWithEeIDs{
+		EeIDs: nil,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestEv1",
+			Event: map[string]interface{}{
+				utils.MetaAccountSCost: map[string]interface{}{
+					"Abstracts":  0,
+					"Accounting": map[string]interface{}{},
+					"Accounts": map[string]interface{}{
+						"1001": map[string]interface{}{
+							"Balances": map[string]interface{}{
+								"VoiceBalance": map[string]interface{}{
+									"AttributeIDs":   nil,
+									"CostIncrements": nil,
+									"FilterIDs":      nil,
+									"ID":             "VoiceBalance",
+									"Opts":           nil,
+									"RateProfileIDs": nil,
+									"Type":           utils.MetaAbstract,
+									"UnitFactors":    nil,
+									"Units":          3600000000000,
+									"Weights": []map[string]interface{}{
+										{
+											"FilterIDs": nil,
+											"Weight":    10,
+										},
+									},
+								},
+							},
+							"FilterIDs":    []string{},
+							"ID":           "1001",
+							"Opts":         nil,
+							"Tenant":       "cgrates.org",
+							"ThresholdIDs": []string{},
+							"Weights":      nil,
+						},
+					},
+					"Charges":     nil,
+					"Concretes":   nil,
+					"Rates":       map[string]interface{}{},
+					"Rating":      map[string]interface{}{},
+					"UnitFactors": map[string]interface{}{},
+				},
+				"Account":     "1001",
+				"Destination": "1002",
+				"OriginID":    "TestEv1",
+				"RequestType": "*prepaid",
+				"Subject":     "1001",
+				"ToR":         "*voice",
+			},
+
+			APIOpts: map[string]interface{}{
+				utils.MetaUsage:      2 * time.Minute,
+				utils.OptsRateS:      false,
+				utils.OptsCDRsExport: true,
+				utils.OptsAccountS:   true,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(testRPC2.Event)) {
+		t.Errorf("\nExpecting : %+v\n,received: %+v", utils.ToJSON(expected2), utils.ToJSON(testRPC2.Event))
 	}
 
 }
