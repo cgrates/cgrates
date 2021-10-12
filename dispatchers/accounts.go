@@ -51,7 +51,7 @@ func (dS *DispatcherService) AccountsForEvent(args *utils.CGREvent, reply *[]*ut
 	return dS.Dispatch(context.TODO(), args, utils.MetaAccounts, utils.AccountSv1AccountsForEvent, args, reply)
 }
 
-func (dS *DispatcherService) MaxAbstracts(args *utils.CGREvent, reply *utils.ExtEventCharges) (err error) {
+func (dS *DispatcherService) MaxAbstracts(args *utils.CGREvent, reply *utils.EventCharges) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -65,7 +65,7 @@ func (dS *DispatcherService) MaxAbstracts(args *utils.CGREvent, reply *utils.Ext
 	return dS.Dispatch(context.TODO(), args, utils.MetaAccounts, utils.AccountSv1MaxAbstracts, args, reply)
 }
 
-func (dS *DispatcherService) DebitAbstracts(args *utils.CGREvent, reply *utils.ExtEventCharges) (err error) {
+func (dS *DispatcherService) DebitAbstracts(args *utils.CGREvent, reply *utils.EventCharges) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -79,7 +79,7 @@ func (dS *DispatcherService) DebitAbstracts(args *utils.CGREvent, reply *utils.E
 	return dS.Dispatch(context.TODO(), args, utils.MetaAccounts, utils.AccountSv1DebitAbstracts, args, reply)
 }
 
-func (dS *DispatcherService) MaxConcretes(args *utils.CGREvent, reply *utils.ExtEventCharges) (err error) {
+func (dS *DispatcherService) MaxConcretes(args *utils.CGREvent, reply *utils.EventCharges) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -93,7 +93,7 @@ func (dS *DispatcherService) MaxConcretes(args *utils.CGREvent, reply *utils.Ext
 	return dS.Dispatch(context.TODO(), args, utils.MetaAccounts, utils.AccountSv1MaxConcretes, args, reply)
 }
 
-func (dS *DispatcherService) DebitConcretes(args *utils.CGREvent, reply *utils.ExtEventCharges) (err error) {
+func (dS *DispatcherService) DebitConcretes(args *utils.CGREvent, reply *utils.EventCharges) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
