@@ -1758,7 +1758,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		t.Error(err)
 	}
 
-	// expected ExtEventCharges
+	// expected EventCharges
 	eEvChgs := &utils.EventCharges{
 		Abstracts: utils.NewDecimal(446000000000, 0),
 		Concretes: utils.NewDecimal(495, 2),
@@ -2139,4 +2139,136 @@ func TestDebitAbstractsMaxDebitAbstractFromConcreteNoConcrBal(t *testing.T) {
 	}
 
 	engine.Cache = cache
+}
+
+func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
+	// get the config
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Enabled = true
+	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
+	//cfg.AccountSCfg().IndexedSelects = false
+	cfg.RateSCfg().Enabled = true
+
+	// get the connMngr
+	connMngr := engine.NewConnManager(cfg)
+
+	// data manager
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), connMngr)
+
+	// configure filters
+	fltrs := engine.NewFilterS(cfg, connMngr, dm)
+
+	// add the internal connection between accounts and rates
+	ratesConns := make(chan birpc.ClientConnector, 1)
+	rateSrv, err := birpc.NewServiceWithMethodsRename(rates.NewRateS(cfg, fltrs, dm), utils.RateSv1, true, func(key string) (newKey string) {
+		return strings.TrimPrefix(key, utils.V1Prfx)
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	ratesConns <- rateSrv
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, ratesConns)
+
+	//create the accounts obj
+	acnts := NewAccountS(cfg, fltrs, connMngr, dm)
+
+	// set an AccountProfile with balances that contains connection with RateProfiles
+	accPrf := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "ACNT1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"ABS1": {
+				ID: "ABS1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(30*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:  utils.NewDecimal(0, 0),
+					},
+				},
+			},
+			"ABS2": {
+				ID: "ABS2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(15*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+				RateProfileIDs: []string{"RP1"},
+			},
+			"CNCRT1": {
+				ID: "CNCRT1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(100, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+				RateProfileIDs: []string{"RP1"},
+			},
+		},
+	}
+	if err := acnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	// set the rate profile which is used in accounts
+	rtPrf := &utils.RateProfile{
+		ID:        "RP1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Destination:1234"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						RecurrentFee: utils.NewDecimal(1, 2),
+						Unit:         utils.NewDecimal(int64(time.Second), 0),
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rtPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	// now we will try to debit account using rates instead for the second balance
+	cgrEv := &utils.CGREvent{
+		ID: "TestDebitAbstractUsingRatesWithRoundByIncrement",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  "1234",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "44425100us",
+		},
+	}
+	var reply utils.EventCharges
+	if err := acnts.V1DebitAbstracts(context.Background(), cgrEv, &reply); err == nil {
+		t.Error(err)
+	}
+
 }
