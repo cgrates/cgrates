@@ -177,7 +177,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	}
 	var usage *decimal.Big
 	if usage, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.Usage,
-		utils.OptsRatesUsage, utils.MetaUsage); err != nil {
+		config.RatesUsageDftOpt, utils.OptsRatesUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	var ordRts []*orderedRate
@@ -196,7 +196,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	}
 	var ivalStart *decimal.Big
 	if ivalStart, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.IntervalStart,
-		utils.OptsRatesIntervalStart); err != nil {
+		config.RatesIntervalStartDftOpt, utils.OptsRatesIntervalStart); err != nil {
 		return
 	}
 	var costIntervals []*utils.RateSInterval
@@ -217,12 +217,12 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string
 	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.RateProfileIDs,
-		utils.OptsRatesRateProfileIDs); err != nil {
+		config.RatesRateProfileIDsDftOpt, utils.OptsRatesRateProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.RatesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var rtPrl *utils.RateProfile

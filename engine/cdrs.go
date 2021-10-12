@@ -189,7 +189,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	// making the options
 	var attrS bool
 	if attrS, err = GetBoolOpts(ctx, ev.Tenant, ev, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Attributes,
-		utils.OptsAttributeS); err != nil {
+		config.CDRsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
 	if attrS {
@@ -205,7 +205,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var cgrEvs []*utils.CGREvent
 	var chrgS bool
 	if chrgS, err = GetBoolOpts(ctx, ev.Tenant, ev, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Chargers,
-		utils.OptsChargerS); err != nil {
+		config.CDRsChargersDftOpt, utils.OptsChargerS); err != nil {
 		return
 	}
 	if chrgS {
@@ -225,7 +225,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var rateS bool
 	for _, cgrEv := range cgrEvs {
 		if rateS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Rates,
-			utils.OptsRateS); err != nil {
+			config.CDRsRatesDftOpt, utils.OptsRateS); err != nil {
 			return
 		}
 		if rateS {
@@ -241,7 +241,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var acntS bool
 	for _, cgrEv := range cgrEvs {
 		if acntS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Accounts,
-			utils.OptsAccountS); err != nil {
+			config.CDRsAccountsDftOpt, utils.OptsAccountS); err != nil {
 			return
 		}
 		if acntS {
@@ -257,7 +257,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var export bool
 	for _, cgrEv := range cgrEvs {
 		if export, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Export,
-			utils.OptsCDRsExport); err != nil {
+			config.CDRsExportDftOpt, utils.OptsCDRsExport); err != nil {
 			return
 		}
 		if export {
@@ -277,7 +277,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var thdS bool
 	for _, cgrEv := range cgrEvs {
 		if thdS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
-			utils.OptsThresholdS); err != nil {
+			config.CDRsThresholdsDftOpt, utils.OptsThresholdS); err != nil {
 			return
 		}
 		if thdS {
@@ -293,7 +293,7 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 	var stS bool
 	for _, cgrEv := range cgrEvs {
 		if stS, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Stats,
-			utils.OptsStatS); err != nil {
+			config.CDRsStatsDftOpt, utils.OptsStatS); err != nil {
 			return
 		}
 		if stS {

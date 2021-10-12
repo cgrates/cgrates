@@ -136,7 +136,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	var usage *decimal.Big
 	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
-		utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
+		config.AccountsUsageDftOpt, utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	dbted := decimal.New(0, 0)
@@ -239,12 +239,12 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		utils.OptsAccountsAccountIDs); err != nil {
+		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -263,12 +263,12 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		utils.OptsAccountsAccountIDs); err != nil {
+		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -293,12 +293,12 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		utils.OptsAccountsAccountIDs); err != nil {
+		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -323,12 +323,12 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		utils.OptsAccountsAccountIDs); err != nil {
+		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -353,12 +353,12 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		utils.OptsAccountsAccountIDs); err != nil {
+		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight

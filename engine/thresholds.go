@@ -331,12 +331,12 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 	}
 	var thIDs []string
 	if thIDs, err = GetStringSliceOpts(ctx, tnt, args, tS.filterS, tS.cgrcfg.ThresholdSCfg().Opts.ThresholdIDs,
-		utils.OptsThresholdsThresholdIDs); err != nil {
+		config.ThresholdsThresholdIDsDftOpt, utils.OptsThresholdsThresholdIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = GetBoolOpts(ctx, tnt, args, tS.filterS, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 
