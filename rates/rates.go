@@ -172,7 +172,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	}
 	var sTime time.Time
 	if sTime, err = engine.GetTimeOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.StartTime,
-		rS.cfg.GeneralCfg().DefaultTimezone, utils.OptsRatesStartTime, utils.MetaStartTime); err != nil {
+		rS.cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime, utils.MetaStartTime); err != nil {
 		return
 	}
 	var usage *decimal.Big

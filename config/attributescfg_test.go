@@ -174,17 +174,23 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAttributeIDsCfg: map[string][]string{
-				utils.MetaDefault: {},
+			utils.MetaAttributeIDsCfg: []*utils.DynamicStringSliceOpt{
+				{},
 			},
-			utils.MetaProcessRunsCfg: map[string]int{
-				utils.MetaDefault: 3,
+			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+				{
+					Value: 3,
+				},
 			},
-			utils.MetaProfileRunsCfg: map[string]int{
-				utils.MetaDefault: 0,
+			utils.MetaProfileRunsCfg: []*utils.DynamicIntOpt{
+				{
+					Value: 0,
+				},
 			},
-			utils.MetaProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
+			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
 		},
 	}
@@ -218,17 +224,23 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAttributeIDsCfg: map[string][]string{
-				utils.MetaDefault: {},
+			utils.MetaAttributeIDsCfg: []*utils.DynamicStringSliceOpt{
+				{},
 			},
-			utils.MetaProcessRunsCfg: map[string]int{
-				utils.MetaDefault: 7,
+			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+				{
+					Value: 7,
+				},
 			},
-			utils.MetaProfileRunsCfg: map[string]int{
-				utils.MetaDefault: 0,
+			utils.MetaProfileRunsCfg: []*utils.DynamicIntOpt{
+				{
+					Value: 0,
+				},
 			},
-			utils.MetaProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
+			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
 		},
 	}

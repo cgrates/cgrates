@@ -290,8 +290,10 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Max_iterations:        utils.IntPointer(3),
 		Max_usage:             utils.StringPointer("60"),
 		Opts: &AccountsOptsJson{
-			AccountIDs: map[string][]string{
-				utils.EmptyString: {"ACC2"},
+			AccountIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"ACC2"},
+				},
 			},
 		},
 	}
@@ -336,8 +338,10 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Max_iterations:        utils.IntPointer(3),
 		Max_usage:             nil,
 		Opts: &AccountsOptsJson{
-			AccountIDs: map[string][]string{
-				utils.EmptyString: {"ACC2"},
+			AccountIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"ACC2"},
+				},
 			},
 		},
 	}

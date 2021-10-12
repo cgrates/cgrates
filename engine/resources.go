@@ -673,7 +673,7 @@ func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args *utils
 
 	var usageID string
 	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageID,
-		utils.OptsResourcesUsageID); err != nil {
+		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
@@ -731,7 +731,7 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *util
 
 	var usageID string
 	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageID,
-		utils.OptsResourcesUsageID); err != nil {
+		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
@@ -807,7 +807,7 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *utils
 
 	var usageID string
 	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageID,
-		utils.OptsResourcesUsageID); err != nil {
+		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
@@ -887,7 +887,7 @@ func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *utils.
 
 	var usageID string
 	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageID,
-		utils.OptsResourcesUsageID); err != nil {
+		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 

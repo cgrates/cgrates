@@ -223,9 +223,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		Prefix_indexed_fields:    &[]string{"*req.index22"},
 		Suffix_indexed_fields:    &[]string{"*req.index33"},
 		Nested_fields:            utils.BoolPointer(true),
-		Opts: &StatsOptsJson{
-			StatIDs: map[string][]string(nil),
-		},
+		Opts:                     &StatsOptsJson{},
 	}
 
 	rcv := diffStatServJsonCfg(d, v1, v2)
