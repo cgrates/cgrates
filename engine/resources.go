@@ -679,7 +679,7 @@ func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args *utils
 
 	var ttl time.Duration
 	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
-		utils.OptsResourcesUsageTTL); err != nil {
+		config.ResourcesUsageTTLDftOpt, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
 	usageTTL := utils.DurationPointer(ttl)
@@ -737,13 +737,13 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *util
 
 	var units float64
 	if units, err = GetFloat64Opts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.Units,
-		utils.OptsResourcesUnits); err != nil {
+		config.ResourcesUnitsDftOpt, utils.OptsResourcesUnits); err != nil {
 		return
 	}
 
 	var ttl time.Duration
 	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
-		utils.OptsResourcesUsageTTL); err != nil {
+		config.ResourcesUsageTTLDftOpt, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
 	usageTTL := utils.DurationPointer(ttl)
@@ -813,13 +813,13 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *utils
 
 	var units float64
 	if units, err = GetFloat64Opts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.Units,
-		utils.OptsResourcesUnits); err != nil {
+		config.ResourcesUnitsDftOpt, utils.OptsResourcesUnits); err != nil {
 		return
 	}
 
 	var ttl time.Duration
 	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
-		utils.OptsResourcesUsageTTL); err != nil {
+		config.ResourcesUsageTTLDftOpt, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
 	usageTTL := utils.DurationPointer(ttl)
@@ -893,7 +893,7 @@ func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *utils.
 
 	var ttl time.Duration
 	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
-		utils.OptsResourcesUsageTTL); err != nil {
+		config.ResourcesUsageTTLDftOpt, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
 	usageTTL := utils.DurationPointer(ttl)

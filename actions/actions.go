@@ -265,12 +265,12 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	var actPrfIDs []string
 	if actPrfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ActionProfileIDs,
-		utils.OptsActionsActionProfileIDs); err != nil {
+		config.ActionsActionProfileIDs, utils.OptsActionsActionProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.ActionsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args},
@@ -285,12 +285,12 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	var actPrfIDs []string
 	if actPrfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ActionProfileIDs,
-		utils.OptsActionsActionProfileIDs); err != nil {
+		config.ActionsActionProfileIDs, utils.OptsActionsActionProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
-		utils.MetaProfileIgnoreFilters); err != nil {
+		config.ActionsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var schedActSet []*scheduledActs
