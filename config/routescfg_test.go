@@ -341,23 +341,35 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Stats_conns:           &[]string{"*birpc"},
 		Default_ratio:         utils.IntPointer(3),
 		Opts: &RoutesOptsJson{
-			Context: map[string]string{
-				utils.EmptyString: utils.MetaRoutes,
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaRoutes,
+				},
 			},
-			IgnoreErrors: map[string]bool{
-				utils.EmptyString: false,
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
-			MaxCost: map[string]interface{}{
-				utils.EmptyString: utils.MetaEventCost,
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: utils.MetaEventCost,
+				},
 			},
-			Limit: map[string]int{
-				utils.EmptyString: 2,
+			Limit: []*utils.DynamicIntOpt{
+				{
+					Value: 2,
+				},
 			},
-			Offset: map[string]int{
-				utils.EmptyString: 2,
+			Offset: []*utils.DynamicIntOpt{
+				{
+					Value: 2,
+				},
 			},
-			ProfileCount: map[string]int{
-				utils.EmptyString: 2,
+			ProfileCount: []*utils.DynamicIntOpt{
+				{
+					Value: 2,
+				},
 			},
 		},
 	}

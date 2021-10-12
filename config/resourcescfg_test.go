@@ -46,24 +46,9 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		Opts: &ResourcesOpts{
-			UsageID: []*utils.DynamicStringOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.EmptyString,
-				},
-			},
-			UsageTTL: []*utils.DynamicDurationOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     72 * time.Hour,
-				},
-			},
-			Units: []*utils.DynamicFloat64Opt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     1,
-				},
-			},
+			UsageID:  []*utils.DynamicStringOpt{},
+			UsageTTL: []*utils.DynamicDurationOpt{},
+			Units:    []*utils.DynamicFloat64Opt{},
 		},
 	}
 	cfg := NewDefaultCGRConfig()
@@ -98,15 +83,9 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUsageIDCfg: map[string]string{
-				utils.MetaDefault: utils.EmptyString,
-			},
-			utils.MetaUsageTTLCfg: map[string]string{
-				utils.MetaDefault: "72h0m0s",
-			},
-			utils.MetaUnitsCfg: map[string]float64{
-				utils.MetaDefault: 1,
-			},
+			utils.MetaUsageIDCfg:  []*utils.DynamicStringOpt{},
+			utils.MetaUsageTTLCfg: []*utils.DynamicDurationOpt{},
+			utils.MetaUnitsCfg:    []*utils.DynamicFloat64Opt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -139,15 +118,9 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUsageIDCfg: map[string]string{
-				utils.MetaDefault: utils.EmptyString,
-			},
-			utils.MetaUsageTTLCfg: map[string]string{
-				utils.MetaDefault: "72h0m0s",
-			},
-			utils.MetaUnitsCfg: map[string]float64{
-				utils.MetaDefault: 1,
-			},
+			utils.MetaUsageIDCfg:  []*utils.DynamicStringOpt{},
+			utils.MetaUsageTTLCfg: []*utils.DynamicDurationOpt{},
+			utils.MetaUnitsCfg:    []*utils.DynamicFloat64Opt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -256,14 +229,20 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index33"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &ResourcesOptsJson{
-			UsageID: map[string]string{
-				utils.EmptyString: "usg2",
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: "usg2",
+				},
 			},
-			UsageTTL: map[string]string{
-				utils.EmptyString: "1m0s",
+			UsageTTL: []*utils.DynamicStringOpt{
+				{
+					Value: "1m0s",
+				},
 			},
-			Units: map[string]float64{
-				utils.EmptyString: float64(2),
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 2,
+				},
 			},
 		},
 	}

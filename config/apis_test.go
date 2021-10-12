@@ -56,14 +56,18 @@ func TestConfigV1SetConfigWithDB(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
-		AccountIDs: map[string][]string{
-			utils.MetaDefault: {},
+		AccountIDs: []*utils.DynamicStringSliceOpt{
+			{},
 		},
-		Usage: map[string]string{
-			utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
+		Usage: []*utils.DynamicStringOpt{
+			{
+				Value: decimal.New(int64(72*time.Hour), 0).String(),
+			},
 		},
-		ProfileIgnoreFilters: map[string]bool{
-			utils.MetaDefault: false,
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				Value: false,
+			},
 		},
 	}}
 	rpl2 := new(AccountSJsonCfg)
@@ -179,14 +183,18 @@ func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
 	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
-		AccountIDs: map[string][]string{
-			utils.MetaDefault: {},
+		AccountIDs: []*utils.DynamicStringSliceOpt{
+			{},
 		},
-		Usage: map[string]string{
-			utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
+		Usage: []*utils.DynamicStringOpt{
+			{
+				Value: decimal.New(int64(72*time.Hour), 0).String(),
+			},
 		},
-		ProfileIgnoreFilters: map[string]bool{
-			utils.MetaDefault: false,
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				Value: false,
+			},
 		},
 	}}
 	rpl2 := new(AccountSJsonCfg)

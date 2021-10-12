@@ -133,9 +133,10 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		},
 		dnsAgentCfg: new(DNSAgentCfg),
 		attributeSCfg: &AttributeSCfg{Opts: &AttributesOpts{
-			AttributeIDs: []*utils.DynamicStringSliceOpt{},
-			ProcessRuns:  []*utils.DynamicIntOpt{},
-			ProfileRuns:  []*utils.DynamicIntOpt{},
+			AttributeIDs:         []*utils.DynamicStringSliceOpt{},
+			ProcessRuns:          []*utils.DynamicIntOpt{},
+			ProfileRuns:          []*utils.DynamicIntOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		chargerSCfg: new(ChargerSCfg),
 		resourceSCfg: &ResourceSConfig{Opts: &ResourcesOpts{
@@ -144,10 +145,12 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Units:    []*utils.DynamicFloat64Opt{},
 		}},
 		statsCfg: &StatSCfg{Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{},
+			StatIDs:              []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		thresholdSCfg: &ThresholdSCfg{Opts: &ThresholdsOpts{
-			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
+			ThresholdIDs:         []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		routeSCfg: &RouteSCfg{Opts: &RoutesOpts{
 			Context:      []*utils.DynamicStringOpt{},
@@ -175,21 +178,24 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		ersCfg:       new(ERsCfg),
 		eesCfg:       &EEsCfg{Cache: make(map[string]*CacheParamCfg)},
 		rateSCfg: &RateSCfg{Opts: &RatesOpts{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{},
-			StartTime:      []*utils.DynamicStringOpt{},
-			Usage:          []*utils.DynamicDecimalBigOpt{},
-			IntervalStart:  []*utils.DynamicDecimalBigOpt{},
+			RateProfileIDs:       []*utils.DynamicStringSliceOpt{},
+			StartTime:            []*utils.DynamicStringOpt{},
+			Usage:                []*utils.DynamicDecimalBigOpt{},
+			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		actionSCfg: &ActionSCfg{Opts: &ActionsOpts{
-			ActionProfileIDs: []*utils.DynamicStringSliceOpt{},
+			ActionProfileIDs:     []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		sipAgentCfg: new(SIPAgentCfg),
 		configSCfg:  new(ConfigSCfg),
 		apiBanCfg:   new(APIBanCfg),
 		coreSCfg:    new(CoreSCfg),
 		accountSCfg: &AccountSCfg{Opts: &AccountsOpts{
-			AccountIDs: []*utils.DynamicStringSliceOpt{},
-			Usage:      []*utils.DynamicDecimalBigOpt{},
+			AccountIDs:           []*utils.DynamicStringSliceOpt{},
+			Usage:                []*utils.DynamicDecimalBigOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		configDBCfg: &ConfigDBCfg{
 			Opts: &DataDBOpts{},

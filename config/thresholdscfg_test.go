@@ -211,9 +211,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"req.index33"},
 		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
-		Opts: &ThresholdsOptsJson{
-			ThresholdIDs: map[string][]string(nil),
-		},
+		Opts:                  &ThresholdsOptsJson{},
 	}
 
 	rcv := diffThresholdSJsonCfg(d, v1, v2)

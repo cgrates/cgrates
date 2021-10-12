@@ -308,49 +308,49 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [],						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"opts": {								//
-		"*accountS": [						//
+		"*accountS": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
 		],
-		"*attributeS": [					//
+		"*attributeS": [					
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
 		],
-		"*chargerS": [						//
+		"*chargerS": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
 		],
-		"*eeS": [							//
+		"*eeS": [							
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
 		],
-		"*rateS": [							//
+		"*rateS": [							
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
 		],
-		"*statS": [							//
+		"*statS": [							
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
 		],
-		"*thresholdS": [					//
+		"*thresholdS": [					
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -721,7 +721,7 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								//
-		"*attributeIDs": [					//
+		"*attributeIDs": [					
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -734,21 +734,21 @@ const CGRATES_CFG_JSON = `
 			// 	"FilterIDs": [],
 			// 	"Value": 1,
 			// },
-		],
+		],									
 		"*profileRuns": [					// number of runs a profile will process during the event
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": 0,
 			// },
-		],
-		"*profileIgnoreFilters": [ 			// if we should check the filters
+		],									
+		"*profileIgnoreFilters": [ 			// if we should check the filters	
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
-		],								
+		],										
 	},
 },
 
@@ -774,21 +774,21 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								//
-		"*usageID": [						//
+		"*usageID": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": "",
 			// },
 		],
-		"*usageTTL": [						//
+		"*usageTTL": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": "72h",
 			// },
 		],
-		"*units": [							//
+		"*units": [							
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -810,20 +810,20 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {								//
-		"*statIDs": [						//
+		"*statIDs": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": [],
 			// },
 		],	
-		"*profileIgnoreFilters": [			// if we should ignore filters
+		"*profileIgnoreFilters": [			
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
-		],	
+		],									// if we should ignore filters
 	},								
 },
 
@@ -838,7 +838,7 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"actions_conns": [],					// connections to ActionS to execute the actions
 	"opts":{								//
-		"*thresholdsIDs": [					//
+		"*thresholdsIDs": [					
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -851,7 +851,7 @@ const CGRATES_CFG_JSON = `
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
-		],								
+		],									
 	},								
 },
 
@@ -870,49 +870,49 @@ const CGRATES_CFG_JSON = `
 	"accounts_conns": [],					// connections to AccountS
 	"default_ratio":1,						// default ratio used in case of *load strategy
 	"opts":{								//
-		"*context": [						//
+		"*context": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": "*routes",
 			// },
 		],			
-		"*profileCount": [					//
+		"*profileCount": [					
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": 1,
 			// },
 		],
-		"*ignoreErrors": [					//
+		"*ignoreErrors": [					
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
 		],
-		"*maxCost": [						//
+		"*maxCost": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": "",
 			// },
 		],
-		// "*limit": [						//
+		// "*limit": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": 1,
 		// 	},
 		// ],
-		// "*offset": [						//
+		// "*offset": [						
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": 1,
 		// 	},
 		// ],
-		"*usage": [							//
+		"*usage": [							
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -1315,7 +1315,7 @@ const CGRATES_CFG_JSON = `
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
-		],
+		],									
 	},
 },
 
@@ -1450,7 +1450,7 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"dynaprepaid_actionprofile": [],		//
 	"opts":{								//
-		"*actionProfileIDs": [				//
+		"*actionProfileIDs": [				
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -1463,7 +1463,7 @@ const CGRATES_CFG_JSON = `
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
-		],	
+		],									
 	},
 },
 

@@ -668,7 +668,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
-		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 
 	eFirstRouteProfile = SortedRoutesList{&SortedRoutes{
@@ -713,7 +713,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
-		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 
 	eFirstRouteProfile = SortedRoutesList{&SortedRoutes{
@@ -738,7 +738,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
-		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 }
 
@@ -987,7 +987,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
-		t.Errorf("Expecting: %+v, received: %+v", eFirstRouteProfile, sprf)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 }
 
@@ -1480,7 +1480,10 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
 		maxCost:      10.0,
-		paginator:    &utils.Paginator{},
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(1),
+			Offset: utils.IntPointer(1),
+		},
 	}
 	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
@@ -1502,7 +1505,10 @@ func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
-		paginator:    &utils.Paginator{},
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(1),
+			Offset: utils.IntPointer(1),
+		},
 	}
 	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
@@ -1521,7 +1527,10 @@ func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
-		paginator:    &utils.Paginator{},
+		paginator: &utils.Paginator{
+			Limit:  utils.IntPointer(1),
+			Offset: utils.IntPointer(1),
+		},
 	}
 	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {

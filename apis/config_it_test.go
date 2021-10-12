@@ -571,8 +571,10 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
 		Opts: &config.AttributesOptsJson{
-			ProcessRuns: map[string]int{
-				utils.MetaDefault: 2,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 2,
+				},
 			},
 		},
 	}
@@ -593,8 +595,10 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
 		Opts: &config.AttributesOptsJson{
-			ProcessRuns: map[string]int{
-				utils.MetaDefault: 2,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 2,
+				},
 			},
 		},
 	}

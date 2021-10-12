@@ -74,18 +74,10 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaProcessRunsCfg: map[string]int{
-					utils.MetaDefault: 1,
-				},
-				utils.MetaProfileRunsCfg: map[string]int{
-					utils.MetaDefault: 0,
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -119,8 +111,10 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				"stats_conns":           []string{"*internal"},
 				"suffix_indexed_fields": []string{},
 				utils.OptsCfg: map[string]interface{}{
-					utils.MetaProcessRunsCfg: map[string]int{
-						utils.EmptyString: 2,
+					utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+						{
+							Value: 2,
+						},
 					},
 				},
 			},
@@ -152,18 +146,10 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaProcessRunsCfg: map[string]int{
-					utils.MetaDefault: 1,
-				},
-				utils.MetaProfileRunsCfg: map[string]int{
-					utils.MetaDefault: 0,
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -204,18 +190,10 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaProcessRunsCfg: map[string]int{
-					utils.MetaDefault: 1,
-				},
-				utils.MetaProfileRunsCfg: map[string]int{
-					utils.MetaDefault: 0,
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -239,8 +217,32 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	args := &config.SetConfigFromJSONArgs{
 		APIOpts: nil,
 		Tenant:  utils.CGRateSorg,
-		Config:  "{\"attributes\":{\"accounts_conns\":[\"*localhost\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"opts\":{\"*attributeIDs\":{\"\":[]},\"*processRuns\":{\"\":2},\"*profileRuns\":{\"\":0}},\"prefix_indexed_fields\":[],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}",
-		DryRun:  true,
+		Config: `{
+"attributes":{
+	"accounts_conns":["*localhost"],
+	"enabled":true,
+	"indexed_selects":true,
+	"nested_fields":false,
+	"opts":{
+		"*attributeIDs": [],
+		"*processRuns": [
+			{
+				"Value": 2,
+			},
+		],
+		"*profileRuns": [
+			{
+				"Value": 0,
+			},
+		],
+	},
+	"prefix_indexed_fields":[],
+	"resources_conns":["*localhost"],
+	"stats_conns":["*localhost"],
+	"suffix_indexed_fields":[],
+	},
+}`,
+		DryRun: true,
 	}
 	var reply string
 	err = rlcCfg.SetConfigFromJSON(context.Background(), args, &reply)
@@ -259,7 +261,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
-	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":{"*default":[]},"*processRuns":{"*default":1},"*profileIgnoreFilters":{"*default":false},"*profileRuns":{"*default":0}},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":[],"*processRuns":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}

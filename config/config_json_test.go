@@ -520,26 +520,40 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Rates_conns:          &[]string{},
 		Accounts_conns:       &[]string{},
 		Opts: &CdrsOptsJson{
-			Accounts: map[string]bool{
-				utils.MetaDefault: false,
+			Accounts: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
-			Attributes: map[string]bool{
-				utils.MetaDefault: false,
+			Attributes: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
-			Chargers: map[string]bool{
-				utils.MetaDefault: false,
+			Chargers: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
-			Export: map[string]bool{
-				utils.MetaDefault: false,
+			Export: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
-			Rates: map[string]bool{
-				utils.MetaDefault: false,
+			Rates: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
-			Stats: map[string]bool{
-				utils.MetaDefault: false,
+			Stats: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
-			Thresholds: map[string]bool{
-				utils.MetaDefault: false,
+			Thresholds: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
 		},
 	}
@@ -794,17 +808,23 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &AttributesOptsJson{
-			AttributeIDs: map[string][]string{
-				utils.MetaDefault: {},
+			AttributeIDs: []*utils.DynamicStringSliceOpt{
+				{},
 			},
-			ProcessRuns: map[string]int{
-				utils.MetaDefault: 1,
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
 			},
-			ProfileRuns: map[string]int{
-				utils.MetaDefault: 0,
+			ProfileRuns: []*utils.DynamicIntOpt{
+				{
+					Value: 0,
+				},
 			},
-			ProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
 		},
 	}
@@ -871,14 +891,18 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &ResourcesOptsJson{
-			UsageID: map[string]string{
-				utils.MetaDefault: utils.EmptyString,
+			UsageID: []*utils.DynamicStringOpt{
+				{},
 			},
-			UsageTTL: map[string]string{
-				utils.MetaDefault: "72h",
+			UsageTTL: []*utils.DynamicStringOpt{
+				{
+					Value: "72h",
+				},
 			},
-			Units: map[string]float64{
-				utils.MetaDefault: 1,
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
 			},
 		},
 	}
@@ -906,11 +930,13 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
 		Opts: &StatsOptsJson{
-			StatIDs: map[string][]string{
-				utils.MetaDefault: {},
+			StatIDs: []*utils.DynamicStringSliceOpt{
+				{},
 			},
-			ProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
 		},
 	}
@@ -937,11 +963,13 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Nested_fields:         utils.BoolPointer(false),
 		Actions_conns:         &[]string{},
 		Opts: &ThresholdsOptsJson{
-			ThresholdIDs: map[string][]string{
-				utils.MetaDefault: {},
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{
+				{},
 			},
-			ProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
 		},
 	}
@@ -972,20 +1000,30 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &RoutesOptsJson{
-			Context: map[string]string{
-				utils.MetaDefault: utils.MetaRoutes,
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaRoutes,
+				},
 			},
-			ProfileCount: map[string]int{
-				utils.MetaDefault: 1,
+			ProfileCount: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
 			},
-			IgnoreErrors: map[string]bool{
-				utils.MetaDefault: false,
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
-			MaxCost: map[string]interface{}{
-				utils.MetaDefault: utils.EmptyString,
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: utils.EmptyString,
+				},
 			},
-			Usage: map[string]string{
-				utils.MetaDefault: "1m",
+			Usage: []*utils.DynamicStringOpt{
+				{
+					Value: "1m",
+				},
 			},
 		},
 	}
@@ -2041,20 +2079,28 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Rate_nested_fields:         utils.BoolPointer(false),
 		Verbosity:                  utils.IntPointer(1000),
 		Opts: &RatesOptsJson{
-			RateProfileIDs: map[string][]string{
-				utils.MetaDefault: {},
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+				{},
 			},
-			StartTime: map[string]string{
-				utils.MetaDefault: utils.MetaNow,
+			StartTime: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaNow,
+				},
 			},
-			Usage: map[string]string{
-				utils.MetaDefault: "1m",
+			Usage: []*utils.DynamicStringOpt{
+				{
+					Value: "1m",
+				},
 			},
-			IntervalStart: map[string]string{
-				utils.MetaDefault: "0",
+			IntervalStart: []*utils.DynamicStringOpt{
+				{
+					Value: "0",
+				},
 			},
-			ProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
 		},
 	}
@@ -2347,11 +2393,13 @@ func TestDfActionSJsonCfg(t *testing.T) {
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{},
 		Opts: &ActionsOptsJson{
-			ActionProfileIDs: map[string][]string{
-				utils.MetaDefault: {},
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+				{},
 			},
-			ProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Value: false,
+				},
 			},
 		},
 	}
