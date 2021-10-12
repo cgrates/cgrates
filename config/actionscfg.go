@@ -23,6 +23,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var ActionsActionProfileIDs = []string{}
+
+const ActionsProfileIgnoreFilters = false
+
 type ActionsOpts struct {
 	ActionProfileIDs     []*utils.DynamicStringSliceOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
@@ -60,10 +64,10 @@ func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) {
 		return
 	}
 	if jsnCfg.ActionProfileIDs != nil {
-		actOpts.ActionProfileIDs = append(actOpts.ActionProfileIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.ActionProfileIDs)...)
+		actOpts.ActionProfileIDs = append(actOpts.ActionProfileIDs, jsnCfg.ActionProfileIDs...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		actOpts.ProfileIgnoreFilters = append(actOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
+		actOpts.ProfileIgnoreFilters = append(actOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
 	}
 }
 
@@ -122,8 +126,8 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS ActionSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaActionProfileIDsCfg:  utils.DynamicStringSliceOptsToMap(acS.Opts.ActionProfileIDs),
-		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(acS.Opts.ProfileIgnoreFilters),
+		utils.MetaActionProfileIDsCfg:  acS.Opts.ActionProfileIDs,
+		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                acS.Enabled,
@@ -225,8 +229,8 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 }
 
 type ActionsOptsJson struct {
-	ActionProfileIDs     map[string][]string `json:"*actionProfileIDs"`
-	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
+	ActionProfileIDs     []*utils.DynamicStringSliceOpt `json:"*actionProfileIDs"`
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
 // Action service config section
@@ -252,10 +256,10 @@ func diffActionsOptsJsonCfg(d *ActionsOptsJson, v1, v2 *ActionsOpts) *ActionsOpt
 		d = new(ActionsOptsJson)
 	}
 	if !utils.DynamicStringSliceOptEqual(v1.ActionProfileIDs, v2.ActionProfileIDs) {
-		d.ActionProfileIDs = utils.DynamicStringSliceOptsToMap(v2.ActionProfileIDs)
+		d.ActionProfileIDs = v2.ActionProfileIDs
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
+		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
 	return d
 }

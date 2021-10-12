@@ -25,6 +25,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var StatsStatIDsDftOpt = []string{}
+
+const StatsProfileIgnoreFilters = false
+
 type StatsOpts struct {
 	StatIDs              []*utils.DynamicStringSliceOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
@@ -58,10 +62,10 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
 		return
 	}
 	if jsnCfg.StatIDs != nil {
-		sqOpts.StatIDs = append(sqOpts.StatIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.StatIDs)...)
+		sqOpts.StatIDs = append(sqOpts.StatIDs, jsnCfg.StatIDs...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		sqOpts.ProfileIgnoreFilters = append(sqOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
+		sqOpts.ProfileIgnoreFilters = append(sqOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
 	}
 }
 
@@ -107,8 +111,8 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (st StatSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaStatIDsCfg:           utils.DynamicStringSliceOptsToMap(st.Opts.StatIDs),
-		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(st.Opts.ProfileIgnoreFilters),
+		utils.MetaStatIDsCfg:           st.Opts.StatIDs,
+		utils.MetaProfileIgnoreFilters: st.Opts.ProfileIgnoreFilters,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
@@ -182,8 +186,8 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 }
 
 type StatsOptsJson struct {
-	StatIDs              map[string][]string `json:"*statIDs"`
-	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
+	StatIDs              []*utils.DynamicStringSliceOpt `json:"*statIDs"`
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
 // Stat service config section
@@ -205,10 +209,10 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 		d = new(StatsOptsJson)
 	}
 	if !utils.DynamicStringSliceOptEqual(v1.StatIDs, v2.StatIDs) {
-		d.StatIDs = utils.DynamicStringSliceOptsToMap(v2.StatIDs)
+		d.StatIDs = v2.StatIDs
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
+		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
 	return d
 }

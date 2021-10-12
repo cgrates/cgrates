@@ -33,8 +33,8 @@ var (
 )
 
 const (
-	RatesStartTimeDftOpt           = "*now"
-	RatesProfileIgnoreErrorsDftOpt = false
+	RatesStartTimeDftOpt            = "*now"
+	RatesProfileIgnoreFiltersDftOpt = false
 )
 
 type RatesOpts struct {

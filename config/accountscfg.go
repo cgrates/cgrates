@@ -19,9 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
+
+var (
+	AccountsAccountIDsDftOpt = []string{}
+	AccountsUsageDftOpt      = decimal.New(int64(time.Minute), 0)
+)
+
+const AccountsProfileIgnoreFiltersDftOpt = false
 
 type AccountsOpts struct {
 	AccountIDs           []*utils.DynamicStringSliceOpt
@@ -59,17 +69,17 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 		return
 	}
 	if jsnCfg.AccountIDs != nil {
-		accOpts.AccountIDs = append(accOpts.AccountIDs, utils.MapToDynamicStringSliceOpts(jsnCfg.AccountIDs)...)
+		accOpts.AccountIDs = append(accOpts.AccountIDs, jsnCfg.AccountIDs...)
 	}
 	if jsnCfg.Usage != nil {
 		var usage []*utils.DynamicDecimalBigOpt
-		if usage, err = utils.MapToDynamicDecimalBigOpts(jsnCfg.Usage); err != nil {
+		if usage, err = utils.StringToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
 			return
 		}
 		accOpts.Usage = append(accOpts.Usage, usage...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		accOpts.ProfileIgnoreFilters = append(accOpts.ProfileIgnoreFilters, utils.MapToDynamicBoolOpts(jsnCfg.ProfileIgnoreFilters)...)
+		accOpts.ProfileIgnoreFilters = append(accOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
 	}
 	return
 }
@@ -122,9 +132,9 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS AccountSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaAccountIDsCfg:        utils.DynamicStringSliceOptsToMap(acS.Opts.AccountIDs),
-		utils.MetaUsage:                utils.DynamicDecimalBigOptsToMap(acS.Opts.Usage),
-		utils.MetaProfileIgnoreFilters: utils.DynamicBoolOptsToMap(acS.Opts.ProfileIgnoreFilters),
+		utils.MetaAccountIDsCfg:        acS.Opts.AccountIDs,
+		utils.MetaUsage:                acS.Opts.Usage,
+		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:        acS.Enabled,
@@ -211,9 +221,9 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 }
 
 type AccountsOptsJson struct {
-	AccountIDs           map[string][]string `json:"*accountIDs"`
-	Usage                map[string]string   `json:"*usage"`
-	ProfileIgnoreFilters map[string]bool     `json:"*profileIgnoreFilters"`
+	AccountIDs           []*utils.DynamicStringSliceOpt `json:"*accountIDs"`
+	Usage                []*utils.DynamicStringOpt      `json:"*usage"`
+	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
 // Account service config section
@@ -237,13 +247,13 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 		d = new(AccountsOptsJson)
 	}
 	if !utils.DynamicStringSliceOptEqual(v1.AccountIDs, v2.AccountIDs) {
-		d.AccountIDs = utils.DynamicStringSliceOptsToMap(v2.AccountIDs)
+		d.AccountIDs = v2.AccountIDs
 	}
 	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
-		d.Usage = utils.DynamicDecimalBigOptsToMap(v2.Usage)
+		d.Usage = utils.DecimalBigToStringDynamicOpts(v2.Usage)
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = utils.DynamicBoolOptsToMap(v2.ProfileIgnoreFilters)
+		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
 	return d
 }
