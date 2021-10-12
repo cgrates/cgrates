@@ -44,7 +44,7 @@ type Action struct {
 	Id               string
 	ActionType       string
 	ExtraParameters  string
-	Filter           string
+	Filters          []string
 	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
 	Balance          *BalanceFilter
@@ -56,11 +56,15 @@ func (a *Action) Clone() (cln *Action) {
 	if a == nil {
 		return
 	}
+	var fltrs []string
+	if a.Filters != nil {
+		fltrs = utils.CloneStringSlice(a.Filters)
+	}
 	return &Action{
 		Id:               a.Id,
 		ActionType:       a.ActionType,
 		ExtraParameters:  a.ExtraParameters,
-		Filter:           a.Filter,
+		Filters:          fltrs,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
 		Balance:          a.Balance.Clone(),

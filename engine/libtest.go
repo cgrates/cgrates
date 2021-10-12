@@ -182,7 +182,7 @@ BLOCK,*topup,,,bblocker,*monetary,,NAT,,,*unlimited,,1,20,true,false,20
 BLOCK,*topup,,,bfree,*monetary,,,,,*unlimited,,20,10,false,false,10
 BLOCK_EMPTY,*topup,,,bblocker,*monetary,,NAT,,,*unlimited,,0,20,true,false,20
 BLOCK_EMPTY,*topup,,,bfree,*monetary,,,,,*unlimited,,20,10,false,false,10
-FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,,,,,*unlimited,,20,10,false,false,10
+FILTER,*topup,,*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0,bfree,*monetary,,,,,*unlimited,,20,10,false,false,10
 EXP,*topup,,,,*voice,,,,,*monthly,*any,300s,10,false,false,10
 NOEXP,*topup,,,,*voice,,,,,*unlimited,*any,50s,10,false,false,10
 VF,*debit,,,,*monetary,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10

@@ -438,10 +438,12 @@ func (tpr *TpReader) LoadActions() (err error) {
 		acts := make([]*Action, len(tpacts))
 		for idx, tpact := range tpacts {
 			// check filter field
-			if len(tpact.Filter) > 0 {
-				if err = verifyInlineFilterS(strings.Split(tpact.Filter, utils.InfieldSep)); err != nil {
-					return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
-				}
+			var fltrs []string
+			if len(tpact.Filters) > 0 {
+				fltrs = strings.Split(tpact.Filters, utils.InfieldSep)
+			}
+			if err = verifyInlineFilterS(fltrs); err != nil {
+				return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
 			}
 			acts[idx] = &Action{
 				Id:               tag,
@@ -449,7 +451,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				Weight:           tpact.Weight,
 				ExtraParameters:  tpact.ExtraParameters,
 				ExpirationString: tpact.ExpiryTime,
-				Filter:           tpact.Filter,
+				Filters:          fltrs,
 				Balance:          &BalanceFilter{},
 			}
 			if tpact.BalanceId != "" && tpact.BalanceId != utils.MetaAny {
@@ -909,10 +911,12 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				acts := make([]*Action, len(tpacts))
 				for idx, tpact := range tpacts {
 					// check filter field
-					if len(tpact.Filter) > 0 {
-						if err = verifyInlineFilterS(strings.Split(tpact.Filter, utils.InfieldSep)); err != nil {
-							return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
-						}
+					var fltrs []string
+					if len(tpact.Filters) > 0 {
+						fltrs = strings.Split(tpact.Filters, utils.InfieldSep)
+					}
+					if err = verifyInlineFilterS(fltrs); err != nil {
+						return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
 					}
 					acts[idx] = &Action{
 						Id:         tag,
@@ -921,7 +925,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 						Weight:           tpact.Weight,
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
-						Filter:           tpact.Filter,
+						Filters:          fltrs,
 						Balance:          &BalanceFilter{},
 					}
 					if tpact.BalanceId != "" && tpact.BalanceId != utils.MetaAny {

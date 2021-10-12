@@ -148,7 +148,7 @@ CREATE TABLE `tp_actions` (
   `tag` varchar(64) NOT NULL,
   `action` varchar(24) NOT NULL,
   `extra_parameters` varchar(256) NOT NULL,
-  `filter` varchar(256) NOT NULL,
+  `filters` varchar(256) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
   `categories` varchar(32) NOT NULL,

@@ -330,7 +330,9 @@ func (apiv2 *APIerSv2) SetActions(attrs *utils.AttrSetActions, reply *string) er
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
 			ExtraParameters:  apiAct.ExtraParameters,
-			Filter:           apiAct.Filter,
+		}
+		if apiAct.Filters != utils.EmptyString {
+			a.Filters = strings.Split(apiAct.Filters, utils.InfieldSep)
 		}
 		if apiAct.Identifier != utils.MetaResetTriggers { // add an exception for ResetTriggers
 			a.Balance = &engine.BalanceFilter{ // TODO: update this part

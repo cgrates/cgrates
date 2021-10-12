@@ -143,7 +143,7 @@ CREATE TABLE tp_actions (
   tag VARCHAR(64) NOT NULL,
   action VARCHAR(24) NOT NULL,
   extra_parameters VARCHAR(256) NOT NULL,
-  filter VARCHAR(256) NOT NULL,
+  filters VARCHAR(256) NOT NULL,
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
   categories VARCHAR(32) NOT NULL,

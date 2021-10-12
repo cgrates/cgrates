@@ -568,7 +568,7 @@ type V1TPAction struct {
 	BalanceType     string   // Type of balance the action will operate on
 	Units           float64  // Number of units to add/deduct
 	ExpiryTime      string   // Time when the units will expire
-	Filter          string   // The condition on balances that is checked before the action
+	Filters         []string // The condition on balances that is checked before the action
 	TimingTags      string   // Timing when balance is active
 	DestinationIds  string   // Destination profile id
 	RatingSubject   string   // Reference a rate subject defined in RatingProfiles
@@ -626,7 +626,7 @@ func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (er
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
 			ExtraParameters:  apiAct.ExtraParameters,
-			Filter:           apiAct.Filter,
+			Filters:          apiAct.Filters,
 			Balance: &engine.BalanceFilter{ // TODO: update this part
 				Uuid:           utils.StringPointer(apiAct.BalanceUuid),
 				ID:             utils.StringPointer(apiAct.BalanceId),
@@ -677,7 +677,7 @@ func (apierSv1 *APIerSv1) GetActions(actsId *string, reply *[]*utils.TPAction) e
 			Identifier:      engAct.ActionType,
 			ExpiryTime:      engAct.ExpirationString,
 			ExtraParameters: engAct.ExtraParameters,
-			Filter:          engAct.Filter,
+			Filters:         strings.Join(engAct.Filters, utils.InfieldSep),
 			Weight:          engAct.Weight,
 		}
 		bf := engAct.Balance
