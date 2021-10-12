@@ -67,7 +67,7 @@ func TestIdxCheckAfterLoad(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 	for _, stest := range idxLoadAccPrf {
-		t.Run(idxLoadConfigDIR, stest)
+		t.Run(idxLoadConfigDIR+"config", stest)
 	}
 }
 
@@ -122,10 +122,16 @@ func testIdxLoadTariffPlan(t *testing.T) {
 
 func testIdxLoadCheckIndexes(t *testing.T) {
 	expected := []string{
-		"*none:*any:*any:RP_ABS_BALANCE1",
-		"*none:*any:*any:RP_ABS_BALANCE2",
-		"*none:*any:*any:RP_CNCRT_BALANCE1",
-		"*none:*any:*any:RP_ROUTE2",
+		"*string:*req.RouteID:supplier1:RP_SUPPLIER1",
+		"*string:*req.RouteID:supplier2:RP_SUPPLIER2",
+		"*string:*req.RouteID:supplier3:RP_SUPPLIER3",
+		"*string:*req.RouteID:supplier4:RP_SUPPLIER4",
+		"*string:*req.RunID:balanceonly:RP_ABS_VOLUME2",
+		"*string:*req.RunID:customers:RP_CUSTOMER1",
+		"*string:*req.RunID:suppliers:RP_SUPPLIER1",
+		"*string:*req.RunID:suppliers:RP_SUPPLIER2",
+		"*string:*req.RunID:suppliers:RP_SUPPLIER3",
+		"*string:*req.RunID:suppliers:RP_SUPPLIER4",
 	}
 	//get indexes *rate_profiles
 	var reply []string
@@ -138,7 +144,7 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 		sort.Strings(expected)
 		sort.Strings(reply)
 		if !reflect.DeepEqual(expected, reply) && idxLoadConfigDIR != "session_volume_discount_internal" {
-			t.Errorf("Expected %+v, received %+v", expected, reply)
+			t.Errorf("Expected %+v \n, received %+v", expected, reply)
 		}
 	}
 
