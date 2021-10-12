@@ -1908,7 +1908,7 @@ func TestActionConditionalTopup(t *testing.T) {
 
 	a := &Action{
 		ActionType: utils.MetaTopUp,
-		Filter:     `*lt:~*req.BalanceMap.*monetary.GetTotalValue:30`,
+		Filters:    []string{`*lt:~*req.BalanceMap.*monetary.GetTotalValue:30`},
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
@@ -1974,7 +1974,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 
 	a := &Action{
 		ActionType: utils.MetaTopUp,
-		Filter:     `*lt:~*req.BalanceMap.*monetary.GetTotalValue:3`,
+		Filters:    []string{`*lt:~*req.BalanceMap.*monetary.GetTotalValue:3`},
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
@@ -2038,7 +2038,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 
 	a := &Action{
 		ActionType: utils.MetaTopUp,
-		Filter:     `*gte:~*req.BalanceMap.*voice.GetTotalValue:100`,
+		Filters:    []string{`*gte:~*req.BalanceMap.*voice.GetTotalValue:100`},
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MetaMonetary),
 			Value:  &utils.ValueFormula{Static: 11},
@@ -2139,7 +2139,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 
 	a1 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
+		Filters:    []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default", "*lt:~*req.BalanceMap.*monetary[0].Value:0"},
 		Balance: &BalanceFilter{
 			Type:     utils.StringPointer("*sms"),
 			ID:       utils.StringPointer("for_v3hsillmilld500m_sms_ill"),
@@ -2149,7 +2149,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	a2 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
+		Filters:    []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default", "*lt:~*req.BalanceMap.*monetary[0].Value:0"},
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*sms"),
 			ID:             utils.StringPointer("for_v3hsillmilld500m_mms_ill"),
@@ -2161,7 +2161,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	a3 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
+		Filters:    []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default", "*lt:~*req.BalanceMap.*monetary[0].Value:0"},
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*sms"),
 			ID:             utils.StringPointer("for_v3hsillmilld500m_sms_ill"),
@@ -2173,7 +2173,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	a4 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
+		Filters:    []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default", "*lt:~*req.BalanceMap.*monetary[0].Value:0"},
 		Balance: &BalanceFilter{
 			Type:          utils.StringPointer("*data"),
 			Uuid:          utils.StringPointer("fc927edb-1bd6-425e-a2a3-9fd8bafaa524"),
@@ -2185,7 +2185,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	a5 := &Action{
 		ActionType: utils.MetaSetBalance,
-		Filter:     "*string:~*req.BalanceMap.*monetary[0].ID:*default;*lt:~*req.BalanceMap.*monetary[0].Value:0",
+		Filters:    []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default", "*lt:~*req.BalanceMap.*monetary[0].Value:0"},
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*voice"),
 			ID:             utils.StringPointer("for_v3hsillmilld500m_voice_3_h"),
@@ -2292,8 +2292,8 @@ func TestActionCSVFilter(t *testing.T) {
 	if err != nil {
 		t.Error("error getting actions: ", err)
 	}
-	if len(act) != 1 || act[0].Filter != `{"*and":[{"Value":{"*lt":0}},{"Id":{"*eq":"*default"}}]}` {
-		t.Error("Error loading actions: ", act[0].Filter)
+	if len(act) != 1 || !reflect.DeepEqual(act[0].Filters, []string{"*string:~*req.BalanceMap.*monetary[0].ID:*default", "*lt:~*req.BalanceMap.*monetary[0].Value:0"}) {
+		t.Error("Error loading actions: ", act[0].Filters)
 	}
 }
 

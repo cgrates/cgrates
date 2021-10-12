@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -69,8 +68,8 @@ func (at *ActionTrigger) Execute(ub *Account, fltrS *FilterS) (err error) {
 	removeAccountActionFound := false
 	for _, a := range aac {
 		// check action filter
-		if len(a.Filter) > 0 {
-			if pass, err := fltrS.Pass(utils.NewTenantID(a.Id).Tenant, strings.Split(a.Filter, utils.InfieldSep),
+		if len(a.Filters) > 0 {
+			if pass, err := fltrS.Pass(utils.NewTenantID(a.Id).Tenant, a.Filters,
 				utils.MapStorage{utils.MetaReq: config.NewObjectDP(ub)}); err != nil {
 				return err
 			} else if !pass {

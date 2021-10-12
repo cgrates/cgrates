@@ -21,7 +21,6 @@ package engine
 import (
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -219,8 +218,8 @@ func (at *ActionTiming) Execute(fltrS *FilterS) (err error) {
 			removeAccountActionFound := false
 			for _, a := range aac {
 				// check action filter
-				if len(a.Filter) > 0 {
-					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant, strings.Split(a.Filter, utils.InfieldSep),
+				if len(a.Filters) > 0 {
+					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant, a.Filters,
 						utils.MapStorage{utils.MetaReq: config.NewObjectDP(acc)}); err != nil {
 						return err
 					} else if !pass {

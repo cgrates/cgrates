@@ -128,8 +128,8 @@ func TestActionTimindSetActions(t *testing.T) {
 	actionTiming := new(ActionTiming)
 
 	actions := Actions{
-		&Action{ActionType: "test", Filter: "test"},
-		&Action{ActionType: "test1", Filter: "test1"},
+		&Action{ActionType: "test"},
+		&Action{ActionType: "test1"},
 	}
 	actionTiming.SetActions(actions)
 	if !reflect.DeepEqual(actions, actionTiming.actions) {

@@ -127,7 +127,7 @@ type ActionMdl struct {
 	Tag             string  `index:"0" re:"\w+\s*"`
 	Action          string  `index:"1" re:"\*\w+\s*"`
 	ExtraParameters string  `index:"2" re:"\S+\s*"`
-	Filter          string  `index:"3" re:"\S+\s*"`
+	Filters         string  `index:"3" re:"\S+\s*"`
 	BalanceTag      string  `index:"4" re:"\w+\s*"`
 	BalanceType     string  `index:"5" re:"\*\w+\s*"`
 	Categories      string  `index:"6" re:""`
