@@ -100,7 +100,7 @@ func TestDspMaxAbstractsNil(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
-	var reply *utils.ExtEventCharges
+	var reply *utils.EventCharges
 	result := dspSrv.MaxAbstracts(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
@@ -115,7 +115,7 @@ func TestDspMaxAbstractsErrorNil(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
-	var reply *utils.ExtEventCharges
+	var reply *utils.EventCharges
 	result := dspSrv.MaxAbstracts(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
@@ -129,7 +129,7 @@ func TestDspDebitAbstractsNil(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
-	var reply *utils.ExtEventCharges
+	var reply *utils.EventCharges
 	result := dspSrv.DebitAbstracts(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
@@ -144,7 +144,7 @@ func TestDspDebitAbstractsErrorNil(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
-	var reply *utils.ExtEventCharges
+	var reply *utils.EventCharges
 	result := dspSrv.DebitAbstracts(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
@@ -158,7 +158,7 @@ func TestDspMaxConcretesNil(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
-	var reply *utils.ExtEventCharges
+	var reply *utils.EventCharges
 	result := dspSrv.MaxConcretes(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
@@ -173,7 +173,7 @@ func TestDspMaxConcretesErrorNil(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
-	var reply *utils.ExtEventCharges
+	var reply *utils.EventCharges
 	result := dspSrv.MaxConcretes(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
@@ -187,7 +187,7 @@ func TestDspDebitConcretesNil(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
-	var reply *utils.ExtEventCharges
+	var reply *utils.EventCharges
 	result := dspSrv.DebitConcretes(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
@@ -202,7 +202,7 @@ func TestDspDebitConcretesErrorNil(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
-	var reply *utils.ExtEventCharges
+	var reply *utils.EventCharges
 	result := dspSrv.DebitConcretes(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {

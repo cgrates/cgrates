@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -199,7 +198,6 @@ func TestLibratesRunTimes(t *testing.T) {
 
 /*
 func TestLibratesCorrectCost(t *testing.T) {
-
 	//CorrectCost does nothing
 	rPc := &RateProfileCost{
 		Cost:    NewDecimal(1234, 3),
@@ -222,7 +220,7 @@ func TestLibratesCorrectCost(t *testing.T) {
 
 	//CorrectCost rounds the cost
 	expected = &RateProfileCost{
-		Cost:    NewDecimal(124, 2),
+		Cost:    NewDecimal(12, 1),
 		MinCost: NewDecimal(1, 0),
 		MaxCost: NewDecimal(2, 0),
 		Altered: []string{RoundingDecimals},
@@ -235,7 +233,6 @@ func TestLibratesCorrectCost(t *testing.T) {
 	}
 
 	//CorrectCost assigns MaxCost to Cost when Cost > MaxCost
-
 	expected = &RateProfileCost{
 		Cost:    NewDecimal(2, 0),
 		MinCost: NewDecimal(1, 0),
@@ -264,7 +261,6 @@ func TestLibratesCorrectCost(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
 	}
 }
-
 */
 
 func TestRateProfileSort(t *testing.T) {
@@ -1279,107 +1275,6 @@ func TestRatesIncrementEquals(t *testing.T) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
 	}
 	incr2.CompressFactor = 2
-}
-
-func TestAsExtRateSInterval(t *testing.T) {
-	rI := &RateSInterval{
-		IntervalStart: NewDecimal(int64(time.Second), 0),
-		Increments: []*RateSIncrement{
-			{
-				IncrementStart:    NewDecimal(int64(time.Nanosecond), 0),
-				Usage:             NewDecimal(int64(time.Minute), 0),
-				RateIntervalIndex: 0,
-				CompressFactor:    1,
-				cost:              NewDecimal(1000, 0).Big,
-			},
-			{
-				IncrementStart:    NewDecimal(int64(time.Minute), 0),
-				Usage:             NewDecimal(int64(2*time.Minute), 0),
-				RateIntervalIndex: 2,
-				CompressFactor:    5,
-			},
-		},
-		CompressFactor: 1,
-		cost:           NewDecimal(1234, 1).Big,
-	}
-
-	expRi := &ExtRateSInterval{
-		IntervalStart: Float64Pointer(float64(time.Second)),
-		Increments: []*ExtRateSIncrement{
-			{
-				IncrementStart:    Float64Pointer(float64(time.Nanosecond)),
-				Usage:             Float64Pointer(float64(time.Minute)),
-				IntervalRateIndex: 0,
-				CompressFactor:    1,
-				cost:              Float64Pointer(1000),
-			},
-			{
-				IncrementStart:    Float64Pointer(float64(time.Minute)),
-				Usage:             Float64Pointer(float64(2 * time.Minute)),
-				IntervalRateIndex: 2,
-				CompressFactor:    5,
-			},
-		},
-		CompressFactor: 1,
-		cost:           Float64Pointer(123.4),
-	}
-
-	if rcv, err := rI.AsExtRateSInterval(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, expRi) {
-		t.Errorf("Expected %+v \n, received %+v", ToJSON(expRi), ToJSON(rcv))
-	}
-}
-
-func TestAsExtRateSIntervalErrorsCheck(t *testing.T) {
-	rI := &RateSInterval{
-		IntervalStart: NewDecimal(int64(math.Inf(1))-1, 0),
-		Increments: []*RateSIncrement{
-			{
-				IncrementStart:    NewDecimal(int64(time.Nanosecond), 0),
-				Usage:             NewDecimal(int64(time.Minute), 0),
-				RateIntervalIndex: 0,
-				CompressFactor:    1,
-				cost:              NewDecimal(1000, 0).Big,
-			},
-		},
-		CompressFactor: 1,
-		cost:           NewDecimal(1234, 1).Big,
-	}
-
-	expErr := "Cannot convert decimal IntervalStart into float64 "
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+v, received %+v", expErr, err)
-	}
-	rI.IntervalStart = NewDecimal(0, 0)
-
-	rI.cost = NewDecimal(int64(math.Inf(1))-1, 0).Big
-	expErr = "Cannot convert decimal cost into float64 "
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.cost = NewDecimal(0, 0).Big
-
-	rI.Increments[0].IncrementStart = NewDecimal(int64(math.Inf(1))-1, 0)
-	expErr = "Cannot convert decimal IncrementStart into float64 "
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.Increments[0].IncrementStart = NewDecimal(0, 0)
-
-	rI.Increments[0].Usage = NewDecimal(int64(math.Inf(1))-1, 0)
-	expErr = "Cannot convert decimal Usage into float64 "
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.Increments[0].Usage = NewDecimal(0, 0)
-
-	rI.Increments[0].cost = NewDecimal(int64(math.Inf(1))-1, 0).Big
-	expErr = "Cannot convert decimal cost into float64 "
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.Increments[0].cost = NewDecimal(0, 0).Big
 }
 
 func TestRateProfileCostEquals(t *testing.T) {

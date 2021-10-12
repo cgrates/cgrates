@@ -1168,12 +1168,12 @@ func TestAccountMaxAbstracts(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 
-	expRating := &utils.ExtRateSInterval{
+	expRating := &utils.RateSInterval{
 		IntervalStart: nil,
-		Increments: []*utils.ExtRateSIncrement{
+		Increments: []*utils.RateSIncrement{
 			{
 				IncrementStart:    nil,
-				IntervalRateIndex: 0,
+				RateIntervalIndex: 0,
 				RateID:            "id_for_Test",
 				CompressFactor:    1,
 				Usage:             nil,
@@ -1355,10 +1355,10 @@ func TestAccountDebitAbstracts(t *testing.T) {
 
 	}
 
-	expRating := &utils.ExtRateSInterval{
-		Increments: []*utils.ExtRateSIncrement{
+	expRating := &utils.RateSInterval{
+		Increments: []*utils.RateSIncrement{
 			{
-				IntervalRateIndex: 0,
+				RateIntervalIndex: 0,
 				RateID:            "id_for_test",
 				CompressFactor:    1,
 			},
@@ -1538,11 +1538,11 @@ func TestAccountActionSetBalance(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 
-	expRating := &utils.ExtRateSInterval{
+	expRating := &utils.RateSInterval{
 		IntervalStart: nil,
-		Increments: []*utils.ExtRateSIncrement{
+		Increments: []*utils.RateSIncrement{
 			{
-				IntervalRateIndex: 0,
+				RateIntervalIndex: 0,
 				RateID:            "id_for_test",
 				CompressFactor:    1,
 			},
@@ -1650,7 +1650,6 @@ func TestAccountActionRemoveBalance(t *testing.T) {
 	if err := accSv1.ActionRemoveBalance(context.Background(), args, &reply); err != nil {
 		t.Errorf("Expected %+v, received %+v", nil, err)
 	}
-
 }
 
 func TestAccountMaxConcretes(t *testing.T) {
@@ -1735,20 +1734,20 @@ func TestAccountMaxConcretes(t *testing.T) {
 	}
 	accPrf.Balances["AbstractBalance1"].Weights = ""
 
-	extAccPrf := &utils.ExtAccount{
+	extAccPrf := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "TestV1DebitAbstracts",
 		FilterIDs: []string{"*string:~*req.Account:1004"},
-		Balances: map[string]*utils.ExtBalance{
+		Balances: map[string]*utils.Balance{
 			"AbstractBalance1": {
 				ID:    "AbstractBalance1",
 				Type:  utils.MetaAbstract,
-				Units: utils.Float64Pointer(float64(40 * time.Second)),
-				CostIncrements: []*utils.ExtCostIncrement{
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    utils.Float64Pointer(float64(time.Second)),
-						FixedFee:     utils.Float64Pointer(float64(0)),
-						RecurrentFee: utils.Float64Pointer(float64(1)),
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -1760,12 +1759,12 @@ func TestAccountMaxConcretes(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: utils.Float64Pointer(float64(time.Minute)),
-				CostIncrements: []*utils.ExtCostIncrement{
+				Units: utils.NewDecimal(int64(time.Minute), 0),
+				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    utils.Float64Pointer(float64(time.Second)),
-						FixedFee:     utils.Float64Pointer(float64(0)),
-						RecurrentFee: utils.Float64Pointer(float64(1)),
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
@@ -1777,19 +1776,19 @@ func TestAccountMaxConcretes(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaConcrete,
-				Units: utils.Float64Pointer(float64(30 * time.Second)),
-				CostIncrements: []*utils.ExtCostIncrement{
+				Units: utils.NewDecimal(int64(30*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    utils.Float64Pointer(float64(time.Second)),
-						FixedFee:     utils.Float64Pointer(float64(0)),
-						RecurrentFee: utils.Float64Pointer(float64(1)),
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
 					},
 				},
 			},
 		},
 	}
-	extAccPrf.Balances["ConcreteBalance1"].Units = utils.Float64Pointer(0)
-	extAccPrf.Balances["ConcreteBalance2"].Units = utils.Float64Pointer(0)
+	extAccPrf.Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
+	extAccPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
 
 	exEvCh := utils.EventCharges{
 		Concretes: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),

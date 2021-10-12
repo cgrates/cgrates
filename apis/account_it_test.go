@@ -455,8 +455,8 @@ func testAccMaxAbstracts(t *testing.T) {
 						CostIncrements: []*utils.APICostIncrement{
 							{
 								Increment:    utils.Float64Pointer(float64(time.Second)),
-								FixedFee:     utils.Float64Pointer(0),
-								RecurrentFee: utils.Float64Pointer(0),
+								FixedFee:     utils.NewDecimal(int64(0, 0),
+								RecurrentFee: utils.NewDecimal(int64(0, 0),
 							},
 						},
 
@@ -473,7 +473,7 @@ func testAccMaxAbstracts(t *testing.T) {
 		t.Error(err)
 	}
 
-	var reply3 utils.ExtEventCharges
+	var reply3 utils.EventCharges
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
@@ -500,15 +500,11 @@ func testAccMaxAbstracts(t *testing.T) {
 		accKEy = key
 		rtID = val.RatingID
 	}
-	expRating := &utils.ExtRateSInterval{
-		IntervalStart: nil,
-		Increments: []*utils.ExtRateSIncrement{
+	expRating := &utils.RateSInterval{
+		Increments: []*utils.RateSIncrement{
 			{
-				IncrementStart:    nil,
-				IntervalRateIndex: 0,
-				RateID:            "",
+				RateIntervalIndex: 0,
 				CompressFactor:    1,
-				Usage:             nil,
 			},
 		},
 		CompressFactor: 1,
@@ -520,30 +516,28 @@ func testAccMaxAbstracts(t *testing.T) {
 			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
 		}
 	}
-	reply3.Rating = map[string]*utils.ExtRateSInterval{}
-	expected2 := utils.ExtEventCharges{
-		Abstracts: utils.Float64Pointer(27000000000),
+	reply3.Rating = map[string]*utils.RateSInterval{}
+	expected2 := utils.EventCharges{
+		Abstracts: utils.NewDecimal(int64(27*time.Second), 0),
 		Charges: []*utils.ChargeEntry{
 			{
 				ChargingID:     crgID,
 				CompressFactor: 1,
 			},
 		},
-		Accounting: map[string]*utils.ExtAccountCharge{
-			accKEy: &utils.ExtAccountCharge{
-				AccountID:       "TEST_ACC_IT_TEST4",
-				BalanceID:       "AbstractBalance1",
-				Units:           utils.Float64Pointer(27000000000),
-				BalanceLimit:    utils.Float64Pointer(0),
-				UnitFactorID:    "",
-				RatingID:        rtID,
-				JoinedChargeIDs: nil,
+		Accounting: map[string]*utils.AccountCharge{
+			accKEy: &utils.AccountCharge{
+				AccountID:    "TEST_ACC_IT_TEST4",
+				BalanceID:    "AbstractBalance1",
+				Units:        utils.NewDecimal(int64(27*time.Second), 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+				RatingID:     rtID,
 			},
 		},
-		UnitFactors: map[string]*utils.ExtUnitFactor{},
-		Rating:      map[string]*utils.ExtRateSInterval{},
-		Rates:       map[string]*utils.ExtIntervalRate{},
-		Accounts: map[string]*utils.ExtAccount{
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
 			"TEST_ACC_IT_TEST4": {
 				Tenant:    "cgrates.org",
 				ID:        "TEST_ACC_IT_TEST4",
@@ -553,7 +547,7 @@ func testAccMaxAbstracts(t *testing.T) {
 						Weight: 0,
 					},
 				},
-				Balances: map[string]*utils.ExtBalance{
+				Balances: map[string]*utils.Balance{
 					"AbstractBalance1": {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
@@ -562,14 +556,14 @@ func testAccMaxAbstracts(t *testing.T) {
 							},
 						},
 						Type: "*abstract",
-						CostIncrements: []*utils.ExtCostIncrement{
+						CostIncrements: []*utils.CostIncrement{
 							{
-								Increment:    utils.Float64Pointer(1000000000),
-								FixedFee:     utils.Float64Pointer(0),
-								RecurrentFee: utils.Float64Pointer(0),
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
 							},
 						},
-						Units: utils.Float64Pointer(13000000000),
+						Units: utils.NewDecimal(int64(13*time.Second), 0),
 					},
 					"ConcreteBalance2": {
 						ID:        "ConcreteBalance2",
@@ -580,7 +574,7 @@ func testAccMaxAbstracts(t *testing.T) {
 							},
 						},
 						Type:  "*concrete",
-						Units: utils.Float64Pointer(213),
+						Units: utils.NewDecimal(213, 0),
 					},
 				},
 			},
@@ -630,7 +624,7 @@ func testAccDebitAbstracts(t *testing.T) {
 		t.Error(err)
 	}
 
-	var reply3 utils.ExtEventCharges
+	var reply3 utils.EventCharges
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
@@ -657,12 +651,10 @@ func testAccDebitAbstracts(t *testing.T) {
 		accKEy = key
 		rtID = val.RatingID
 	}
-	expRating := &utils.ExtRateSInterval{
-		IntervalStart: nil,
-		Increments: []*utils.ExtRateSIncrement{
+	expRating := &utils.RateSInterval{
+		Increments: []*utils.RateSIncrement{
 			{
-				IntervalRateIndex: 0,
-				RateID:            "",
+				RateIntervalIndex: 0,
 				CompressFactor:    1,
 			},
 		},
@@ -675,30 +667,29 @@ func testAccDebitAbstracts(t *testing.T) {
 			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
 		}
 	}
-	reply3.Rating = map[string]*utils.ExtRateSInterval{}
-	expected2 := utils.ExtEventCharges{
-		Abstracts: utils.Float64Pointer(27000000000),
+	reply3.Rating = map[string]*utils.RateSInterval{}
+	expected2 := utils.EventCharges{
+		Abstracts: utils.NewDecimal(int64(27*time.Second), 0),
 		Charges: []*utils.ChargeEntry{
 			{
 				ChargingID:     crgID,
 				CompressFactor: 1,
 			},
 		},
-		Accounting: map[string]*utils.ExtAccountCharge{
-			accKEy: &utils.ExtAccountCharge{
+		Accounting: map[string]*utils.AccountCharge{
+			accKEy: &utils.AccountCharge{
 				AccountID:       "TEST_ACC_IT_TEST5",
 				BalanceID:       "AbstractBalance1",
-				Units:           utils.Float64Pointer(27000000000),
-				BalanceLimit:    utils.Float64Pointer(0),
-				UnitFactorID:    "",
+				Units:           utils.NewDecimal(int64(27*time.Second), 0),
+				BalanceLimit:    utils.NewDecimal(0, 0),
 				RatingID:        rtID,
 				JoinedChargeIDs: nil,
 			},
 		},
-		UnitFactors: map[string]*utils.ExtUnitFactor{},
-		Rating:      map[string]*utils.ExtRateSInterval{},
-		Rates:       map[string]*utils.ExtIntervalRate{},
-		Accounts: map[string]*utils.ExtAccount{
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
 			"TEST_ACC_IT_TEST5": {
 				Tenant:    "cgrates.org",
 				ID:        "TEST_ACC_IT_TEST5",
@@ -708,7 +699,7 @@ func testAccDebitAbstracts(t *testing.T) {
 						Weight: 0,
 					},
 				},
-				Balances: map[string]*utils.ExtBalance{
+				Balances: map[string]*utils.Balance{
 					"AbstractBalance1": {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
@@ -717,14 +708,14 @@ func testAccDebitAbstracts(t *testing.T) {
 							},
 						},
 						Type: "*abstract",
-						CostIncrements: []*utils.ExtCostIncrement{
+						CostIncrements: []*utils.CostIncrement{
 							{
-								Increment:    utils.Float64Pointer(1000000000),
-								FixedFee:     utils.Float64Pointer(0),
-								RecurrentFee: utils.Float64Pointer(0),
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
 							},
 						},
-						Units: utils.Float64Pointer(13000000000),
+						Units: utils.NewDecimal(int64(13*time.Second), 0),
 					},
 					"ConcreteBalance2": {
 						ID:        "ConcreteBalance2",
@@ -735,7 +726,7 @@ func testAccDebitAbstracts(t *testing.T) {
 							},
 						},
 						Type:  "*concrete",
-						Units: utils.Float64Pointer(213),
+						Units: utils.NewDecimal(213, 0),
 					},
 				},
 			},
@@ -785,7 +776,7 @@ func testAccMaxConcretes(t *testing.T) {
 		t.Error(err)
 	}
 
-	var reply3 utils.ExtEventCharges
+	var reply3 utils.EventCharges
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
@@ -812,11 +803,11 @@ func testAccMaxConcretes(t *testing.T) {
 		accKEy = key
 		rtID = val.RatingID
 	}
-	expRating := &utils.ExtRateSInterval{
+	expRating := &utils.RateSInterval{
 		IntervalStart: nil,
-		Increments: []*utils.ExtRateSIncrement{
+		Increments: []*utils.RateSIncrement{
 			{
-				IntervalRateIndex: 0,
+				RateIntervalIndex: 0,
 				RateID:            utils.EmptyString,
 				CompressFactor:    0,
 			},
@@ -828,29 +819,28 @@ func testAccMaxConcretes(t *testing.T) {
 			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
 		}
 	}
-	reply3.Rating = map[string]*utils.ExtRateSInterval{}
-	expected2 := utils.ExtEventCharges{
-		Concretes: utils.Float64Pointer(213),
+	reply3.Rating = map[string]*utils.RateSInterval{}
+	expected2 := utils.EventCharges{
+		Concretes: utils.NewDecimal(213, 0),
 		Charges: []*utils.ChargeEntry{
 			{
 				ChargingID:     crgID,
 				CompressFactor: 1,
 			},
 		},
-		Accounting: map[string]*utils.ExtAccountCharge{
-			accKEy: &utils.ExtAccountCharge{
+		Accounting: map[string]*utils.AccountCharge{
+			accKEy: &utils.AccountCharge{
 				AccountID:    "TEST_ACC_IT_TEST6",
 				BalanceID:    "ConcreteBalance2",
-				Units:        utils.Float64Pointer(213),
-				BalanceLimit: utils.Float64Pointer(0),
-				UnitFactorID: "",
+				Units:        utils.NewDecimal(213, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
 				RatingID:     rtID,
 			},
 		},
-		UnitFactors: map[string]*utils.ExtUnitFactor{},
-		Rating:      map[string]*utils.ExtRateSInterval{},
-		Rates:       map[string]*utils.ExtIntervalRate{},
-		Accounts: map[string]*utils.ExtAccount{
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
 			"TEST_ACC_IT_TEST6": {
 				Tenant:    "cgrates.org",
 				ID:        "TEST_ACC_IT_TEST6",
@@ -860,7 +850,7 @@ func testAccMaxConcretes(t *testing.T) {
 						Weight: 0,
 					},
 				},
-				Balances: map[string]*utils.ExtBalance{
+				Balances: map[string]*utils.Balance{
 					"AbstractBalance1": {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
@@ -869,14 +859,14 @@ func testAccMaxConcretes(t *testing.T) {
 							},
 						},
 						Type: "*abstract",
-						CostIncrements: []*utils.ExtCostIncrement{
+						CostIncrements: []*utils.CostIncrement{
 							{
-								Increment:    utils.Float64Pointer(1000000000),
-								FixedFee:     utils.Float64Pointer(0),
-								RecurrentFee: utils.Float64Pointer(0),
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
 							},
 						},
-						Units: utils.Float64Pointer(40000000000),
+						Units: utils.NewDecimal(int64(40*time.Second), 0),
 					},
 					"ConcreteBalance2": {
 						ID: "ConcreteBalance2",
@@ -886,7 +876,7 @@ func testAccMaxConcretes(t *testing.T) {
 							},
 						},
 						Type:  "*concrete",
-						Units: utils.Float64Pointer(0),
+						Units: utils.NewDecimal(0, 0),
 					},
 				},
 			},
@@ -936,7 +926,7 @@ func testAccDebitConcretes(t *testing.T) {
 		t.Error(err)
 	}
 
-	var reply3 utils.ExtEventCharges
+	var reply3 utils.EventCharges
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
@@ -963,12 +953,10 @@ func testAccDebitConcretes(t *testing.T) {
 		accKEy = key
 		rtID = val.RatingID
 	}
-	expRating := &utils.ExtRateSInterval{
-		IntervalStart: nil,
-		Increments: []*utils.ExtRateSIncrement{
+	expRating := &utils.RateSInterval{
+		Increments: []*utils.RateSIncrement{
 			{
-				IntervalRateIndex: 0,
-				RateID:            utils.EmptyString,
+				RateIntervalIndex: 0,
 				CompressFactor:    0,
 			},
 		},
@@ -979,29 +967,28 @@ func testAccDebitConcretes(t *testing.T) {
 			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
 		}
 	}
-	reply3.Rating = map[string]*utils.ExtRateSInterval{}
-	expected2 := utils.ExtEventCharges{
-		Concretes: utils.Float64Pointer(213),
+	reply3.Rating = map[string]*utils.RateSInterval{}
+	expected2 := utils.EventCharges{
+		Concretes: utils.NewDecimal(213, 0),
 		Charges: []*utils.ChargeEntry{
 			{
 				ChargingID:     crgID,
 				CompressFactor: 1,
 			},
 		},
-		Accounting: map[string]*utils.ExtAccountCharge{
-			accKEy: &utils.ExtAccountCharge{
+		Accounting: map[string]*utils.AccountCharge{
+			accKEy: &utils.AccountCharge{
 				AccountID:    "TEST_ACC_IT_TEST7",
 				BalanceID:    "ConcreteBalance2",
-				Units:        utils.Float64Pointer(213),
-				BalanceLimit: utils.Float64Pointer(0),
-				UnitFactorID: "",
+				Units:        utils.NewDecimal(213, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
 				RatingID:     rtID,
 			},
 		},
-		UnitFactors: map[string]*utils.ExtUnitFactor{},
-		Rating:      map[string]*utils.ExtRateSInterval{},
-		Rates:       map[string]*utils.ExtIntervalRate{},
-		Accounts: map[string]*utils.ExtAccount{
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
 			"TEST_ACC_IT_TEST7": {
 				Tenant:    "cgrates.org",
 				ID:        "TEST_ACC_IT_TEST7",
@@ -1011,7 +998,7 @@ func testAccDebitConcretes(t *testing.T) {
 						Weight: 0,
 					},
 				},
-				Balances: map[string]*utils.ExtBalance{
+				Balances: map[string]*utils.Balance{
 					"AbstractBalance1": {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
@@ -1020,14 +1007,14 @@ func testAccDebitConcretes(t *testing.T) {
 							},
 						},
 						Type: "*abstract",
-						CostIncrements: []*utils.ExtCostIncrement{
+						CostIncrements: []*utils.CostIncrement{
 							{
-								Increment:    utils.Float64Pointer(1000000000),
-								FixedFee:     utils.Float64Pointer(0),
-								RecurrentFee: utils.Float64Pointer(0),
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
 							},
 						},
-						Units: utils.Float64Pointer(40000000000),
+						Units: utils.NewDecimal(int64(40*time.Second), 0),
 					},
 					"ConcreteBalance2": {
 						ID: "ConcreteBalance2",
@@ -1037,7 +1024,7 @@ func testAccDebitConcretes(t *testing.T) {
 							},
 						},
 						Type:  "*concrete",
-						Units: utils.Float64Pointer(0),
+						Units: utils.NewDecimal(0, 0),
 					},
 				},
 			},
