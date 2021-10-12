@@ -52,6 +52,10 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.loaderCgrCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.loaderCgrCfg))
 	}
+	cfgJSON = nil
+	if err = jsnCfg.loaderCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
@@ -206,3 +210,32 @@ func TestDiffLoaderCfgJsonCase2(t *testing.T) {
 		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+// func TestLoaderCfgCloneSection(t *testing.T) {
+// 	ldrCfg := &LoaderCgrCfg{
+// 		TpID:            "loaderID",
+// 		DataPath:        "/data/path",
+// 		DisableReverse:  false,
+// 		FieldSeparator:  rune(22),
+// 		CachesConns:     []string{"*localhost"},
+// 		ActionSConns:    []string{"*localhost"},
+// 		GapiCredentials: nil,
+// 		GapiToken:       nil,
+// 	}
+
+// 	exp := &LoaderCgrCfg{
+// 		TpID:            "loaderID",
+// 		DataPath:        "/data/path",
+// 		DisableReverse:  false,
+// 		FieldSeparator:  rune(22),
+// 		CachesConns:     []string{"*localhost"},
+// 		ActionSConns:    []string{"*localhost"},
+// 		GapiCredentials: nil,
+// 		GapiToken:       nil,
+// 	}
+
+// 	rcv := ldrCfg.CloneSection()
+// 	if !reflect.DeepEqual(rcv, exp) {
+// 		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+// 	}
+// }

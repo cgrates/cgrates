@@ -50,6 +50,10 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.dispatcherSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.dispatcherSCfg))
 	}
+	jsonCfg = nil
+	if err = jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDispatcherSCfgAsMapInterface(t *testing.T) {
@@ -200,5 +204,32 @@ func TestDispatcherSJsonCfg(t *testing.T) {
 	rcv = diffDispatcherSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestDispatcherSCfgCloneTest(t *testing.T) {
+	dspCfg := &DispatcherSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.Field1"},
+		PrefixIndexedFields: nil,
+		SuffixIndexedFields: nil,
+		NestedFields:        true,
+		AttributeSConns:     []string{"*localhost"},
+	}
+
+	exp := &DispatcherSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.Field1"},
+		PrefixIndexedFields: nil,
+		SuffixIndexedFields: nil,
+		NestedFields:        true,
+		AttributeSConns:     []string{"*localhost"},
+	}
+
+	rcv := dspCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

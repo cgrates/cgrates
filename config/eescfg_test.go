@@ -704,10 +704,12 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				"PARAM_1": []string{"param1"},
 			},
 		},
-		AttributeSIDs: []string{"ATTR_PRF"},
-		AttributeSCtx: "*sessions",
-		Synchronous:   false,
-		Attempts:      2,
+		AttributeSIDs:      []string{"ATTR_PRF"},
+		AttributeSCtx:      "*sessions",
+		Synchronous:        false,
+		Attempts:           2,
+		ConcurrentRequests: 3,
+		FailedPostsDir:     "/tmp/failedPosts",
 		Fields: []*FCTemplate{
 			{
 				Type: "*string",
@@ -745,10 +747,12 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 				"PARAM_2": []string{"param2"},
 			},
 		},
-		AttributeSIDs: []string{"ATTR_PRF_2"},
-		AttributeSCtx: "*actions",
-		Synchronous:   true,
-		Attempts:      3,
+		AttributeSIDs:      []string{"ATTR_PRF_2"},
+		AttributeSCtx:      "*actions",
+		Synchronous:        true,
+		Attempts:           3,
+		ConcurrentRequests: 4,
+		FailedPostsDir:     "/tmp/failed",
 		Fields: []*FCTemplate{
 			{
 				Type: "*prefix",
@@ -778,13 +782,15 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		Opts: map[string]interface{}{
 			"OPT": "opt",
 		},
-		Timezone:          utils.StringPointer("EEST"),
-		Filters:           &[]string{"Filter2"},
-		Flags:             &[]string{"FLAG_2:PARAM_2:param2"},
-		Attribute_ids:     &[]string{"ATTR_PRF_2"},
-		Attribute_context: utils.StringPointer("*actions"),
-		Synchronous:       utils.BoolPointer(true),
-		Attempts:          utils.IntPointer(3),
+		Timezone:            utils.StringPointer("EEST"),
+		Filters:             &[]string{"Filter2"},
+		Flags:               &[]string{"FLAG_2:PARAM_2:param2"},
+		Attribute_ids:       &[]string{"ATTR_PRF_2"},
+		Attribute_context:   utils.StringPointer("*actions"),
+		Synchronous:         utils.BoolPointer(true),
+		Attempts:            utils.IntPointer(3),
+		Concurrent_requests: utils.IntPointer(4),
+		Failed_posts_dir:    utils.StringPointer("/tmp/failed"),
 		Fields: &[]*FcTemplateJsonCfg{
 			{
 				Type:   utils.StringPointer("*prefix"),
@@ -1105,5 +1111,32 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 	rcv = diffEEsJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestEeSCloneSection(t *testing.T) {
+	eeSCfg := &EEsCfg{
+		Enabled:         true,
+		AttributeSConns: []string{"*birpc"},
+		Cache: map[string]*CacheParamCfg{
+			"CACHE_1": {
+				Limit: 1,
+			},
+		},
+	}
+
+	exp := &EEsCfg{
+		Enabled:         true,
+		AttributeSConns: []string{"*birpc"},
+		Cache: map[string]*CacheParamCfg{
+			"CACHE_1": {
+				Limit: 1,
+			},
+		},
+	}
+	rcv := eeSCfg.CloneSection()
+	rcv.(*EEsCfg).Exporters = nil
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

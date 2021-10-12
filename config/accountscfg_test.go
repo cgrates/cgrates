@@ -84,6 +84,50 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.accountSCfg) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected), utils.ToJSON(jsnCfg.accountSCfg))
 	}
+
+	//test for empty config
+	jsonCfg = nil
+	if err = jsnCfg.accountSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
+	accOpts := &AccountsOpts{
+		AccountIDs: []*utils.DynamicStringSliceOpt{
+			{
+				Value: []string{"1001", "1002"},
+			},
+		},
+		Usage: []*utils.DynamicDecimalBigOpt{
+			{
+				Value: new(decimal.Big).SetUint64(2),
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				Value: false,
+			},
+		},
+	}
+
+	jsnCfg := &AccountsOptsJson{
+		AccountIDs: map[string][]string{},
+		Usage: map[string]string{
+			"Value": "error",
+		},
+		ProfileIgnoreFilters: map[string]bool{},
+	}
+	errExp := "can't convert <error> to decimal"
+	if err := accOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err)
+	}
+
+	//also test for empty json config
+	jsnCfg = nil
+	if err := accOpts.loadFromJSONCfg((jsnCfg)); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestAccountsCfLoadConfigError(t *testing.T) {
@@ -324,5 +368,33 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 	rcv = diffAccountSJsonCfg(d, v1, v2_3)
 	if !reflect.DeepEqual(rcv, expected3) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected3), utils.ToJSON(rcv))
+	}
+}
+
+func TestAccountSCloneSection(t *testing.T) {
+	acS := &AccountSCfg{
+		Enabled:             true,
+		AttributeSConns:     []string{"*localhost"},
+		RateSConns:          []string{},
+		ThresholdSConns:     []string{},
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"~*req.Index1"},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        true,
+		MaxIterations:       1,
+		MaxUsage:            nil,
+		Opts: &AccountsOpts{
+			AccountIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{"ACC1"},
+				},
+			},
+		},
+	}
+
+	rcv := acS.CloneSection()
+	if !reflect.DeepEqual(acS, rcv.(*AccountSCfg)) {
+		t.Errorf("Expected %v \n but received \n %v", acS, rcv.(*AccountSCfg))
 	}
 }

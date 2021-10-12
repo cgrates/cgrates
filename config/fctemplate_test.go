@@ -765,3 +765,68 @@ func TestDiffFcTemplatesJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+func TestFCTemplatecloneSection(t *testing.T) {
+	fctCfg := FCTemplates{
+		"T1": {
+			{
+				Tag:  "TenantID",
+				Type: utils.MetaVariable,
+				Path: utils.Tenant,
+				Value: RSRParsers{
+					{
+						Rules: "*req.0",
+					},
+				},
+				Filters:          []string{"*string:~*req.Account:1001"},
+				Width:            2,
+				Strip:            "strip",
+				Padding:          "padding",
+				Mandatory:        true,
+				AttributeID:      "ATTR_PRF_1001",
+				NewBranch:        true,
+				Timezone:         "UTC",
+				Blocker:          true,
+				Layout:           "string",
+				CostShiftDigits:  2,
+				RoundingDecimals: utils.IntPointer(3),
+				MaskDestID:       "MK_ID",
+				MaskLen:          2,
+			},
+		},
+	}
+
+	exp := FCTemplates{
+		"T1": {
+			{
+				Tag:  "TenantID",
+				Type: utils.MetaVariable,
+				Path: utils.Tenant,
+				Value: RSRParsers{
+					{
+						Rules: "*req.0",
+					},
+				},
+				Filters:          []string{"*string:~*req.Account:1001"},
+				Width:            2,
+				Strip:            "strip",
+				Padding:          "padding",
+				Mandatory:        true,
+				AttributeID:      "ATTR_PRF_1001",
+				NewBranch:        true,
+				Timezone:         "UTC",
+				Blocker:          true,
+				Layout:           "string",
+				CostShiftDigits:  2,
+				RoundingDecimals: utils.IntPointer(3),
+				MaskDestID:       "MK_ID",
+				MaskLen:          2,
+			},
+		},
+	}
+
+	rcv := fctCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}

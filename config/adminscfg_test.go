@@ -45,6 +45,11 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.admS) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.admS))
 	}
+
+	jsonCfg = nil
+	if err = jsnCfg.admS.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestApierCfgAsMapInterface1(t *testing.T) {
@@ -162,5 +167,28 @@ func TestApierCfgDiffAdminSJsonCfg(t *testing.T) {
 	rcv = diffAdminSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(expected2, rcv) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestAdminSCloneSection(t *testing.T) {
+	admCfg := &AdminSCfg{
+		Enabled:         false,
+		CachesConns:     []string{"*localhost"},
+		ActionSConns:    []string{"*localhost"},
+		AttributeSConns: []string{"*localhost"},
+		EEsConns:        []string{"*localhost"},
+	}
+
+	exp := &AdminSCfg{
+		Enabled:         false,
+		CachesConns:     []string{"*localhost"},
+		ActionSConns:    []string{"*localhost"},
+		AttributeSConns: []string{"*localhost"},
+		EEsConns:        []string{"*localhost"},
+	}
+
+	admCfg.CloneSection()
+	if !reflect.DeepEqual(admCfg, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(admCfg))
 	}
 }

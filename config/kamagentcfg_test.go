@@ -52,6 +52,11 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.kamAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.kamAgentCfg))
 	}
+
+	cfgJSON = nil
+	if err = jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
@@ -276,5 +281,40 @@ func TestDiffKamAgentJsonCfg(t *testing.T) {
 	rcv = diffKamAgentJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestKamAgentCloneSection(t *testing.T) {
+	kamCfg := &KamAgentCfg{
+		Enabled:       false,
+		SessionSConns: []string{"*localhost"},
+		CreateCdr:     false,
+		EvapiConns: []*KamConnCfg{
+			{
+				Alias:      "KAM_2",
+				Address:    "localhost:8037",
+				Reconnects: 5,
+			},
+		},
+		Timezone: "UTC",
+	}
+
+	exp := &KamAgentCfg{
+		Enabled:       false,
+		SessionSConns: []string{"*localhost"},
+		CreateCdr:     false,
+		EvapiConns: []*KamConnCfg{
+			{
+				Alias:      "KAM_2",
+				Address:    "localhost:8037",
+				Reconnects: 5,
+			},
+		},
+		Timezone: "UTC",
+	}
+
+	rcv := kamCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

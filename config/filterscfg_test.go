@@ -41,6 +41,10 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.filterSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.filterSCfg))
 	}
+	cfgJSONS = nil
+	if err = jsnCfg.filterSCfg.loadFromJSONCfg(cfgJSONS); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestFilterSCfgAsMapInterface(t *testing.T) {
@@ -132,5 +136,24 @@ func TestDiffFilterSJsonCfg(t *testing.T) {
 	rcv = diffFilterSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestFilterSCloneSection(t *testing.T) {
+	fltrSCfg := &FilterSCfg{
+		StatSConns:     []string{"*localhost"},
+		ResourceSConns: []string{"*localhost"},
+		AccountSConns:  []string{"*localhost"},
+	}
+
+	exp := &FilterSCfg{
+		StatSConns:     []string{"*localhost"},
+		ResourceSConns: []string{"*localhost"},
+		AccountSConns:  []string{"*localhost"},
+	}
+
+	rcv := fltrSCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

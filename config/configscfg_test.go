@@ -44,6 +44,11 @@ func TestConfigsloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(cgrCfg.configSCfg, expectedCfg) {
 		t.Errorf("Expected %+v, received %+v", expectedCfg, cgrCfg.configSCfg)
 	}
+
+	jsonCfgs = nil
+	if err := cgrCfg.configSCfg.loadFromJSONCfg(jsonCfgs); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestConfigsAsMapInterface(t *testing.T) {
@@ -146,5 +151,24 @@ func TestDiffConfigSCfgJson(t *testing.T) {
 	rcv = diffConfigSCfgJson(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestConfigSCloneSection(t *testing.T) {
+	cfgS := &ConfigSCfg{
+		Enabled: false,
+		URL:     "localhost:8080",
+		RootDir: "/usr/share/cgrates",
+	}
+
+	exp := &ConfigSCfg{
+		Enabled: false,
+		URL:     "localhost:8080",
+		RootDir: "/usr/share/cgrates",
+	}
+
+	rcv := cfgS.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

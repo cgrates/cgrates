@@ -295,3 +295,35 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}
 }
+
+func TestCacheCloneSection(t *testing.T) {
+	cacheCfg := &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			"CACHE_2": {
+				Limit:     2,
+				TTL:       2 * time.Minute,
+				StaticTTL: false,
+				Precache:  true,
+				Replicate: false,
+			},
+		},
+		ReplicationConns: []string{},
+	}
+
+	exp := &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			"CACHE_2": {
+				Limit:     2,
+				TTL:       2 * time.Minute,
+				StaticTTL: false,
+				Precache:  true,
+				Replicate: false,
+			},
+		},
+		ReplicationConns: []string{},
+	}
+	cacheCfg.CloneSection()
+	if !reflect.DeepEqual(cacheCfg, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cacheCfg))
+	}
+}

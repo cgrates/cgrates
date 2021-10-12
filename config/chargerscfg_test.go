@@ -49,6 +49,11 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsncfg.chargerSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsncfg.chargerSCfg))
 	}
+
+	jsonCfg = nil
+	if err = jsncfg.chargerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestChargerSCfgAsMapInterface(t *testing.T) {
@@ -176,5 +181,32 @@ func TestDiffChargerSJsonCfg(t *testing.T) {
 	rcv = diffChargerSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestChargerSCfgCloneSection(t *testing.T) {
+	chgrCfg := &ChargerSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		AttributeSConns:     []string{"*localhost"},
+		StringIndexedFields: &[]string{},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        true,
+	}
+
+	exp := &ChargerSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		AttributeSConns:     []string{"*localhost"},
+		StringIndexedFields: &[]string{},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        true,
+	}
+
+	chgrCfg.CloneSection()
+	if !reflect.DeepEqual(chgrCfg, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(chgrCfg))
 	}
 }
