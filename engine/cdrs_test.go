@@ -1416,6 +1416,70 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	}
 }
 
+func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributeS: time.Second,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	}
+}
+
 func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	testCache := Cache
 	tmpC := config.CgrConfig()
@@ -1477,6 +1541,71 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "CHARGERS_ERROR:MANDATORY_IE_MISSING: [connIDs]" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+
+}
+
+func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsChargerS: time.Second,
+			"*context":         utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
 	}
 
 }
@@ -1546,6 +1675,71 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 
 }
 
+func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRateS: time.Second,
+			"*context":      utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	}
+
+}
+
 func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	testCache := Cache
 	tmpC := config.CgrConfig()
@@ -1607,6 +1801,71 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+
+}
+
+func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAccountS: time.Second,
+			"*context":         utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
 	}
 
 }
@@ -1676,6 +1935,71 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 
 }
 
+func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrExists
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsCDRsExport: time.Second,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	}
+
+}
+
 func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	testCache := Cache
 	tmpC := config.CgrConfig()
@@ -1741,6 +2065,71 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 
 }
 
+func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsThresholdS: time.Second,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	}
+
+}
+
 func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	testCache := Cache
 	tmpC := config.CgrConfig()
@@ -1802,6 +2191,71 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
 	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+
+}
+
+func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrExists
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatS: time.Second,
+			"*context":      utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
 	}
 
 }
