@@ -44,11 +44,11 @@
                 "*notstring:~*req.Account:sipp": true,
             },
             "*rateS": {
-                "*notstring:~*req.Account:sipp|dan.bogos": true,
+                "*notstring:~*req.Account:sipp|1001": true,
                 "*string:~*req.RunID:customers": true,
             },
             "*accountS": {					
-                "*string:~*req.Account:dan.bogos;*string:~*req.RunID:suppliers": true,
+                "*string:~*req.Account:1001;*string:~*req.RunID:suppliers": true,
             },
             "*eeS": {
                 "*default": true,

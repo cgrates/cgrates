@@ -263,7 +263,7 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "dan.bogos",
+			utils.AccountField: "1001",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
@@ -330,7 +330,7 @@ func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "dan.bogos",
+			utils.AccountField: "1001",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
@@ -355,8 +355,9 @@ func testSessVolDiscProcessCDRSupplier(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]interface{}{
-			utils.AccountField: "dan.bogos",
+			utils.AccountField: "1001",
 			utils.Destination:  "1002",
+			utils.RouteID:      "supplier1",
 		},
 		APIOpts: map[string]interface{}{
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
@@ -379,8 +380,9 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]interface{}{
-			utils.AccountField: "sipp",
+			utils.AccountField: "DifferentAccount",
 			utils.Destination:  "1002",
+			utils.RouteID:      "supplier1",
 		},
 		APIOpts: map[string]interface{}{
 			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
@@ -522,7 +524,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "dan.bogos",
+			utils.AccountField: "1001",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
