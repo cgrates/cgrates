@@ -37,7 +37,7 @@ func GetFloat64Opts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fi
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
@@ -60,7 +60,7 @@ func GetDurationOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *F
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
@@ -83,7 +83,7 @@ func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fil
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
@@ -106,7 +106,7 @@ func GetTimeOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filte
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		var pass bool
@@ -130,7 +130,7 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
@@ -157,7 +157,7 @@ func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filter
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
@@ -180,7 +180,7 @@ func GetBoolOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filte
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
@@ -203,7 +203,7 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
@@ -226,7 +226,7 @@ func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *
 	}
 	evDP := ev.AsDataProvider()
 	for _, opt := range dynOpts { // iterate through the options
-		if tnt != opt.Tenant {
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
