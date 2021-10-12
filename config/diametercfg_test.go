@@ -76,6 +76,11 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.diameterAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.diameterAgentCfg))
 	}
+
+	jsonCFG = nil
+	if err = jsnCfg.diameterAgentCfg.loadFromJSONCfg(jsonCFG, jsnCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestRequestProcessorloadFromJsonCfg1(t *testing.T) {
@@ -344,5 +349,48 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 	rcv = diffDiameterAgentJsonCfg(d, v1, v2, "")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiameterAgentCloneSection(t *testing.T) {
+	dmtCfg := &DiameterAgentCfg{
+		Enabled:           false,
+		ListenNet:         "tcp",
+		Listen:            "localhost:8080",
+		DictionariesPath:  "/path/",
+		SessionSConns:     []string{"*localhost"},
+		OriginHost:        "originHost",
+		OriginRealm:       "originRealm",
+		VendorID:          2,
+		ProductName:       "productName",
+		ConcurrentReqs:    2,
+		SyncedConnReqs:    false,
+		ASRTemplate:       "ASRTemplate",
+		RARTemplate:       "RARTemplate",
+		ForcedDisconnect:  "ForcedDisconnect",
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	exp := &DiameterAgentCfg{
+		Enabled:           false,
+		ListenNet:         "tcp",
+		Listen:            "localhost:8080",
+		DictionariesPath:  "/path/",
+		SessionSConns:     []string{"*localhost"},
+		OriginHost:        "originHost",
+		OriginRealm:       "originRealm",
+		VendorID:          2,
+		ProductName:       "productName",
+		ConcurrentReqs:    2,
+		SyncedConnReqs:    false,
+		ASRTemplate:       "ASRTemplate",
+		RARTemplate:       "RARTemplate",
+		ForcedDisconnect:  "ForcedDisconnect",
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	rcv := dmtCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

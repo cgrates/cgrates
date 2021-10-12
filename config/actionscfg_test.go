@@ -76,6 +76,46 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.actionSCfg) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected), utils.ToJSON(jsnCfg.actionSCfg))
 	}
+
+	jsonCfg = nil
+	if err = jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
+	actOpts := &ActionsOpts{
+		ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     []string{},
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+	exp := &ActionsOpts{
+		ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     []string{},
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+	actOpts.loadFromJSONCfg(nil)
+	if !reflect.DeepEqual(actOpts, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, actOpts)
+	}
 }
 
 func TestActionSCfgAsMapInterface(t *testing.T) {
@@ -259,5 +299,56 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 	rcv = diffActionSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestActionSCloneSection(t *testing.T) {
+	actCfg := ActionSCfg{
+		Enabled:                  true,
+		CDRsConns:                []string{"*localhost"},
+		EEsConns:                 []string{"*localhost"},
+		ThresholdSConns:          []string{"*localhost"},
+		StatSConns:               []string{"*localhost"},
+		AccountSConns:            []string{"*localhost"},
+		Tenants:                  &[]string{"cgrates.org"},
+		IndexedSelects:           true,
+		StringIndexedFields:      &[]string{"*req.Index1"},
+		PrefixIndexedFields:      nil,
+		SuffixIndexedFields:      nil,
+		NestedFields:             false,
+		DynaprepaidActionProfile: []string{"dynaprepaid"},
+		Opts: &ActionsOpts{
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
+			},
+		},
+	}
+	exp := ActionSCfg{
+		Enabled:                  true,
+		CDRsConns:                []string{"*localhost"},
+		EEsConns:                 []string{"*localhost"},
+		ThresholdSConns:          []string{"*localhost"},
+		StatSConns:               []string{"*localhost"},
+		AccountSConns:            []string{"*localhost"},
+		Tenants:                  &[]string{"cgrates.org"},
+		IndexedSelects:           true,
+		StringIndexedFields:      &[]string{"*req.Index1"},
+		PrefixIndexedFields:      nil,
+		SuffixIndexedFields:      nil,
+		NestedFields:             false,
+		DynaprepaidActionProfile: []string{"dynaprepaid"},
+		Opts: &ActionsOpts{
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Value: []string{},
+				},
+			},
+		},
+	}
+	actCfg.CloneSection()
+	if !reflect.DeepEqual(exp, actCfg) {
+		t.Errorf("Expected %v \n but received \n %v", exp, actCfg)
 	}
 }

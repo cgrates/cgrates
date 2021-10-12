@@ -374,6 +374,10 @@ func TestERSloadFromJsonCfg(t *testing.T) {
 	if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
+	cfgJSON = nil
+	if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestEventReaderloadFromJsonCfgErr1(t *testing.T) {
@@ -1689,5 +1693,35 @@ func TestDiffERsJsonCfg(t *testing.T) {
 	rcv := diffERsJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestErSCloneSection(t *testing.T) {
+	erSCfg := &ERsCfg{
+		Enabled:       false,
+		SessionSConns: []string{"*birpc"},
+		Readers: []*EventReaderCfg{
+			{
+				ID: "ERS_ID",
+			},
+		},
+		PartialCacheTTL: 24 * time.Hour,
+	}
+
+	exp := &ERsCfg{
+		Enabled:       false,
+		SessionSConns: []string{"*birpc"},
+		Readers: []*EventReaderCfg{
+			{
+				ID: "ERS_ID",
+			},
+		},
+		PartialCacheTTL: 24 * time.Hour,
+	}
+
+	rcv := erSCfg.CloneSection()
+	rcv.(*ERsCfg).Readers[0].Opts = nil
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

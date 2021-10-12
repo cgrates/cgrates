@@ -386,12 +386,18 @@ func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 			ID: "RandomID",
 		},
 	}
-	if jsnCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
+	jsnCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
+	if err != nil {
 		t.Error(err)
 	} else if err = jsnCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(&expected, &jsnCfg.httpAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.httpAgentCfg))
+	}
+
+	cfgJSON = nil
+	if err = jsnCfg.httpAgentCfg.loadFromJSONCfg(cfgJSON, jsnCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -753,3 +759,31 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+// func TestHttpAgentCloneSection(t *testing.T) {
+// 	httpCfg := HTTPAgentCfgs{
+// 		{
+// 			ID:             "http_agent",
+// 			URL:            "http_url",
+// 			SessionSConns:  []string{"*localhost"},
+// 			RequestPayload: "request_payload",
+// 			ReplyPayload:   "reply_payload",
+// 		},
+// 	}
+
+// 	exp := HTTPAgentCfgs{
+// 		{
+// 			ID:             "http_agent",
+// 			URL:            "http_url",
+// 			SessionSConns:  []string{"*localhost"},
+// 			RequestPayload: "request_payload",
+// 			ReplyPayload:   "reply_payload",
+// 		},
+// 	}
+
+// 	rcv := httpCfg.CloneSection()
+// 	rcv.(*HTTPAgentCfgs)[0].RequestProcessors = nil
+// 	if !reflect.DeepEqual(rcv, exp) {
+// 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+// 	}
+// }

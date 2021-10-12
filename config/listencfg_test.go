@@ -47,6 +47,10 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.listenCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.listenCfg))
 	}
+	jsonCfg = nil
+	if err = jsnCfg.listenCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestListenCfgAsMapInterface(t *testing.T) {
@@ -152,5 +156,30 @@ func TestDiffListenJsonCfg(t *testing.T) {
 	rcv = diffListenJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestListenCfgCloneSection(t *testing.T) {
+	lstnCfg := &ListenCfg{
+		RPCJSONListen:    "localhost:8080",
+		RPCGOBListen:     "localhost:8081",
+		HTTPListen:       "localhost:8082",
+		RPCJSONTLSListen: "localhost:8083",
+		RPCGOBTLSListen:  "localhost:8084",
+		HTTPTLSListen:    "localhost:8085",
+	}
+
+	exp := &ListenCfg{
+		RPCJSONListen:    "localhost:8080",
+		RPCGOBListen:     "localhost:8081",
+		HTTPListen:       "localhost:8082",
+		RPCJSONTLSListen: "localhost:8083",
+		RPCGOBTLSListen:  "localhost:8084",
+		HTTPTLSListen:    "localhost:8085",
+	}
+
+	rcv := lstnCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

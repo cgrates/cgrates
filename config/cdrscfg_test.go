@@ -104,6 +104,108 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.cdrsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.cdrsCfg))
 	}
+
+	jsonCfg = nil
+	if err = jsnCfg.cdrsCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCdrsCfgloadFromJsonCfgOpt(t *testing.T) {
+	cdrsOpt := &CdrsOpts{
+		Accounts: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Attributes: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Chargers: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Export: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Rates: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Stats: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Thresholds: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+
+	exp := &CdrsOpts{
+		Accounts: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Attributes: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Chargers: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Export: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Rates: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Stats: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+		Thresholds: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+
+	cdrsOpt.loadFromJSONCfg(nil)
+	if !reflect.DeepEqual(exp, cdrsOpt) {
+		t.Errorf("Expected %+v, received %+v", exp, cdrsOpt)
+	}
 }
 
 func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
@@ -297,6 +399,8 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		OnlineCDRExports: []string{},
 		ActionSConns:     []string{"*localhost"},
 		EEsConns:         []string{"*localhost"},
+		RateSConns:       []string{"*localhost"},
+		AccountSConns:    []string{"*localhost"},
 		Opts:             &CdrsOpts{},
 	}
 
@@ -316,6 +420,8 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		OnlineCDRExports: []string{"val1"},
 		ActionSConns:     []string{"*birpc"},
 		EEsConns:         []string{"*birpc"},
+		RateSConns:       []string{"*birpc"},
+		AccountSConns:    []string{"*birpc"},
 		Opts:             &CdrsOpts{},
 	}
 
@@ -331,6 +437,8 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		Online_cdr_exports:   &[]string{"val1"},
 		Actions_conns:        &[]string{"*birpc"},
 		Ees_conns:            &[]string{"*birpc"},
+		Rates_conns:          &[]string{"*birpc"},
+		Accounts_conns:       &[]string{"*birpc"},
 		Opts:                 &CdrsOptsJson{},
 	}
 
@@ -347,5 +455,50 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 	rcv = diffCdrsJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestCdrsCfgCloneSection(t *testing.T) {
+	cdrsCfg := &CdrsCfg{
+		Enabled: false,
+		ExtraFields: RSRParsers{
+			{
+				Rules: "Rule1",
+			},
+		},
+		StoreCdrs:        false,
+		SMCostRetries:    2,
+		ChargerSConns:    []string{"*localhost"},
+		AttributeSConns:  []string{"*localhost"},
+		ThresholdSConns:  []string{"*localhost"},
+		StatSConns:       []string{"*localhost"},
+		OnlineCDRExports: []string{},
+		ActionSConns:     []string{"*localhost"},
+		EEsConns:         []string{"*localhost"},
+		Opts:             &CdrsOpts{},
+	}
+
+	exp := &CdrsCfg{
+		Enabled: false,
+		ExtraFields: RSRParsers{
+			{
+				Rules: "Rule1",
+			},
+		},
+		StoreCdrs:        false,
+		SMCostRetries:    2,
+		ChargerSConns:    []string{"*localhost"},
+		AttributeSConns:  []string{"*localhost"},
+		ThresholdSConns:  []string{"*localhost"},
+		StatSConns:       []string{"*localhost"},
+		OnlineCDRExports: []string{},
+		ActionSConns:     []string{"*localhost"},
+		EEsConns:         []string{"*localhost"},
+		Opts:             &CdrsOpts{},
+	}
+
+	cdrsCfg.CloneSection()
+	if !reflect.DeepEqual(exp, cdrsCfg) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cdrsCfg))
 	}
 }

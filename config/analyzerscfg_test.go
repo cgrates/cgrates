@@ -42,6 +42,10 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(jsnCfg.analyzerSCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected, jsnCfg.analyzerSCfg)
 	}
+	jsonCfg = nil
+	if err = jsnCfg.analyzerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
@@ -155,5 +159,27 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 	rcv = diffAnalyzerSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestAnalyzerSCloneSection(t *testing.T) {
+	anlCfg := &AnalyzerSCfg{
+		Enabled:         true,
+		DBPath:          "/var/spool/cgrates/analyzers",
+		IndexType:       utils.MetaString,
+		TTL:             3 * time.Minute,
+		CleanupInterval: 30 * time.Minute,
+	}
+
+	exp := &AnalyzerSCfg{
+		Enabled:         true,
+		DBPath:          "/var/spool/cgrates/analyzers",
+		IndexType:       utils.MetaString,
+		TTL:             3 * time.Minute,
+		CleanupInterval: 30 * time.Minute,
+	}
+	anlCfg.CloneSection()
+	if !reflect.DeepEqual(anlCfg, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(anlCfg))
 	}
 }

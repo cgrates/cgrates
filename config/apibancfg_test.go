@@ -124,3 +124,19 @@ func TestDiffAPIBanJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}
 }
+
+func TestAPIBanCloneSection(t *testing.T) {
+	apbCfg := &APIBanCfg{
+		Enabled: false,
+		Keys:    []string{"key1", "key2"},
+	}
+
+	exp := &APIBanCfg{
+		Enabled: false,
+		Keys:    []string{"key1", "key2"},
+	}
+	apbCfg.CloneSection()
+	if !reflect.DeepEqual(exp, apbCfg) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(apbCfg))
+	}
+}

@@ -73,6 +73,10 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(jsonCfg.dnsAgentCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.dnsAgentCfg))
 	}
+	jsnCfg = nil
+	if err = jsonCfg.dnsAgentCfg.loadFromJSONCfg(jsnCfg, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
@@ -380,5 +384,30 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 	rcv = diffDNSAgentJsonCfg(d, v1, v2_2, ";")
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestDnsAgentCloneSection(t *testing.T) {
+	dnsCfg := &DNSAgentCfg{
+		Enabled:           false,
+		Listen:            "localhost:8080",
+		ListenNet:         "tcp",
+		SessionSConns:     []string{"*localhost"},
+		Timezone:          "UTC",
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	exp := &DNSAgentCfg{
+		Enabled:           false,
+		Listen:            "localhost:8080",
+		ListenNet:         "tcp",
+		SessionSConns:     []string{"*localhost"},
+		Timezone:          "UTC",
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	rcv := dnsCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

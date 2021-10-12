@@ -163,3 +163,24 @@ func TestDiffCoreSJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}
 }
+
+func TestCoreSCloneSection(t *testing.T) {
+	coreSCfg := &CoreSCfg{
+		Caps:              2,
+		CapsStrategy:      utils.MetaTopUpReset,
+		CapsStatsInterval: 3 * time.Second,
+		ShutdownTimeout:   5 * time.Minute,
+	}
+
+	exp := &CoreSCfg{
+		Caps:              2,
+		CapsStrategy:      utils.MetaTopUpReset,
+		CapsStatsInterval: 3 * time.Second,
+		ShutdownTimeout:   5 * time.Minute,
+	}
+
+	rcv := coreSCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}

@@ -79,6 +79,72 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.attributeSCfg) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.attributeSCfg))
 	}
+
+	jsonCfg = nil
+	if err = jsnCfg.attributeSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
+	attrOpt := &AttributesOpts{
+		AttributeIDs: []*utils.DynamicStringSliceOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     []string{},
+			},
+		},
+		ProcessRuns: []*utils.DynamicIntOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     1,
+			},
+		},
+		ProfileRuns: []*utils.DynamicIntOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     0,
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+
+	exp := &AttributesOpts{
+		AttributeIDs: []*utils.DynamicStringSliceOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     []string{},
+			},
+		},
+		ProcessRuns: []*utils.DynamicIntOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     1,
+			},
+		},
+		ProfileRuns: []*utils.DynamicIntOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     0,
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+
+	attrOpt.loadFromJSONCfg(nil)
+	if !reflect.DeepEqual(attrOpt, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(attrOpt))
+	}
 }
 
 func TestAttributeSCfgAsMapInterface(t *testing.T) {
@@ -315,5 +381,52 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 	rcv = diffAttributeSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestAttributeSCloneSection(t *testing.T) {
+	attrCfg := &AttributeSCfg{
+		Enabled:             false,
+		StatSConns:          []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		AccountSConns:       []string{"*localhost"},
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        true,
+		Opts: &AttributesOpts{
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     1,
+				},
+			},
+		},
+	}
+
+	exp := &AttributeSCfg{
+		Enabled:             false,
+		StatSConns:          []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		AccountSConns:       []string{"*localhost"},
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        true,
+		Opts: &AttributesOpts{
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     1,
+				},
+			},
+		},
+	}
+
+	attrCfg.CloneSection()
+	if !reflect.DeepEqual(attrCfg, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(attrCfg))
 	}
 }

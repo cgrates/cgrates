@@ -76,6 +76,10 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.generalCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.generalCfg))
 	}
+	cfgJSON = nil
+	if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
@@ -342,5 +346,62 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 	rcv = diffGeneralJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestGeneralCfgCloneSection(t *testing.T) {
+	gnrCfg := &GeneralCfg{
+		NodeID:           "randomID2",
+		Logger:           utils.LoggerCfg,
+		LogLevel:         7,
+		RoundingDecimals: 1,
+		DBDataEncoding:   "msgpack2",
+		TpExportPath:     "/var/spool/cgrates/tpe/test",
+		PosterAttempts:   5,
+		FailedPostsDir:   "/var/spool/cgrates/failed_posts/test",
+		DefaultReqType:   utils.MetaPrepaid,
+		DefaultCategory:  utils.ForcedDisconnectCfg,
+		DefaultTenant:    "itsyscom.com",
+		DefaultTimezone:  "UTC",
+		ConnectAttempts:  5,
+		Reconnects:       2,
+		ConnectTimeout:   5 * time.Second,
+		ReplyTimeout:     1 * time.Second,
+		DigestSeparator:  "",
+		DigestEqual:      "",
+		MaxParallelConns: 50,
+		RSRSep:           "",
+		DefaultCaching:   utils.MetaClear,
+		FailedPostsTTL:   5,
+	}
+
+	exp := &GeneralCfg{
+		NodeID:           "randomID2",
+		Logger:           utils.LoggerCfg,
+		LogLevel:         7,
+		RoundingDecimals: 1,
+		DBDataEncoding:   "msgpack2",
+		TpExportPath:     "/var/spool/cgrates/tpe/test",
+		PosterAttempts:   5,
+		FailedPostsDir:   "/var/spool/cgrates/failed_posts/test",
+		DefaultReqType:   utils.MetaPrepaid,
+		DefaultCategory:  utils.ForcedDisconnectCfg,
+		DefaultTenant:    "itsyscom.com",
+		DefaultTimezone:  "UTC",
+		ConnectAttempts:  5,
+		Reconnects:       2,
+		ConnectTimeout:   5 * time.Second,
+		ReplyTimeout:     1 * time.Second,
+		DigestSeparator:  "",
+		DigestEqual:      "",
+		MaxParallelConns: 50,
+		RSRSep:           "",
+		DefaultCaching:   utils.MetaClear,
+		FailedPostsTTL:   5,
+	}
+
+	rcv := gnrCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
