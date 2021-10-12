@@ -1266,7 +1266,7 @@ func TestCDRsProcessEventMock(t *testing.T) {
 	}
 }
 
-func TestCDRsProcessEventMockStats(t *testing.T) {
+func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 	testCache := Cache
 	tmpC := config.CgrConfig()
 	tmpCM := connMgr
@@ -1348,6 +1348,460 @@ func TestCDRsNewMapEventFromReqFormErr(t *testing.T) {
 	errExpect := `invalid URL escape "%0x"`
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", errExpect, err)
+	}
+
+}
+
+func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributeS: true,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "ATTRIBUTES_ERROR:MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "ATTRIBUTES_ERROR:MANDATORY_IE_MISSING: [connIDs]", err)
+	}
+}
+
+func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsChargerS: true,
+			"*context":         utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "CHARGERS_ERROR:MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+
+}
+
+func TestCDRsProcessEventMockRateSErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRateS: true,
+			"*context":      utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+
+}
+
+func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAccountS: true,
+			"*context":         utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+
+}
+
+func TestCDRsProcessEventMockExportErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrExists
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsCDRsExport: true,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+
+}
+
+func TestCDRsProcessEventMockThdsErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsThresholdS: true,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
+	}
+
+}
+
+func TestCDRsProcessEventMockStatsErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+		{
+			FilterIDs: []string{utils.MetaDefault},
+			Value:     false,
+		},
+	}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrExists
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatS: true,
+			"*context":      utils.MetaCDRs,
+		},
+	}
+	_, err := newCDRSrv.processEvent(context.Background(), cgrEv)
+	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "PARTIALLY_EXECUTED", err)
 	}
 
 }
