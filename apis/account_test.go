@@ -53,7 +53,7 @@ func TestAccountSetGetAccount(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -135,7 +135,7 @@ func TestAccountGetAccountErrorMissingID(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -234,7 +234,7 @@ func TestAccountSetGetAccountNoTenant(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -314,7 +314,7 @@ func TestAccountSetGetAccountErrorMissingID(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -352,7 +352,7 @@ func TestAccountSetGetAccountErrorAsAccount(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: "10",
@@ -393,7 +393,7 @@ func TestAccountSetGetAccountErrorBadFilter(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			ThresholdIDs: nil,
@@ -448,7 +448,7 @@ func TestAccountSetGetAccountErrorSetLoadIDs(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			ThresholdIDs: nil,
@@ -508,7 +508,7 @@ func TestAccountSetGetAccountErrorCallCache(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			ThresholdIDs: nil,
@@ -548,7 +548,7 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -606,7 +606,7 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -937,7 +937,7 @@ func TestAccountAccountsForEvent(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -1079,10 +1079,10 @@ func TestAccountMaxAbstracts(t *testing.T) {
 					CostIncrements: []*utils.APICostIncrement{
 						{
 							RecurrentFee: utils.Float64Pointer(0.1),
-							Increment:    utils.Float64Pointer(0.1),
+							Increment:    "0.1",
 						},
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -1264,10 +1264,10 @@ func TestAccountDebitAbstracts(t *testing.T) {
 					CostIncrements: []*utils.APICostIncrement{
 						{
 							RecurrentFee: utils.Float64Pointer(1),
-							Increment:    utils.Float64Pointer(0.1),
+							Increment:    "0.1",
 						},
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -1448,10 +1448,10 @@ func TestAccountActionSetBalance(t *testing.T) {
 					CostIncrements: []*utils.APICostIncrement{
 						{
 							RecurrentFee: utils.Float64Pointer(0.1),
-							Increment:    utils.Float64Pointer(0.1),
+							Increment:    "0.1",
 						},
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -1672,10 +1672,10 @@ func TestAccountMaxConcretes(t *testing.T) {
 					ID:      "AbstractBalance1",
 					Weights: ";15",
 					Type:    utils.MetaAbstract,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(float64(0)),
 							RecurrentFee: utils.Float64Pointer(float64(1)),
 						},
@@ -1685,10 +1685,10 @@ func TestAccountMaxConcretes(t *testing.T) {
 					ID:      "ConcreteBalance1",
 					Weights: ";25",
 					Type:    utils.MetaConcrete,
-					Units:   float64(time.Minute),
+					Units:   "1m",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(float64(0)),
 							RecurrentFee: utils.Float64Pointer(float64(1)),
 						},
@@ -1698,10 +1698,10 @@ func TestAccountMaxConcretes(t *testing.T) {
 					ID:      "ConcreteBalance2",
 					Weights: ";5",
 					Type:    utils.MetaConcrete,
-					Units:   float64(30 * time.Second),
+					Units:   "30s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(float64(0)),
 							RecurrentFee: utils.Float64Pointer(float64(1)),
 						},
@@ -1913,10 +1913,10 @@ func TestAccountDebitConcretes(t *testing.T) {
 					ID:      "AbstractBalance1",
 					Weights: ";15",
 					Type:    utils.MetaAbstract,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(float64(0)),
 							RecurrentFee: utils.Float64Pointer(float64(1)),
 						},
@@ -1926,10 +1926,10 @@ func TestAccountDebitConcretes(t *testing.T) {
 					ID:      "ConcreteBalance1",
 					Weights: ";25",
 					Type:    utils.MetaConcrete,
-					Units:   float64(time.Minute),
+					Units:   "1m",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(float64(0)),
 							RecurrentFee: utils.Float64Pointer(float64(1)),
 						},
@@ -1939,10 +1939,10 @@ func TestAccountDebitConcretes(t *testing.T) {
 					ID:      "ConcreteBalance2",
 					Weights: ";5",
 					Type:    utils.MetaConcrete,
-					Units:   float64(30 * time.Second),
+					Units:   "30s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(float64(0)),
 							RecurrentFee: utils.Float64Pointer(float64(1)),
 						},

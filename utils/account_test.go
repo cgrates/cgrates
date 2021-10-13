@@ -148,7 +148,7 @@ func TestAPIAccountAsAccount(t *testing.T) {
 				Opts: map[string]interface{}{
 					"Destination": 10,
 				},
-				Units: 0,
+				Units: "0",
 			},
 		},
 		Weights: ";10",
@@ -217,11 +217,12 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 		CostIncrements: []*APICostIncrement{
 			{
 				FilterIDs:    []string{"*string:~*req.Account:1001"},
-				Increment:    Float64Pointer(1),
+				Increment:    "1",
 				FixedFee:     Float64Pointer(10),
 				RecurrentFee: Float64Pointer(35),
 			},
 		},
+		Units:   "0",
 		Weights: ";10",
 		UnitFactors: []*APIUnitFactor{
 			{

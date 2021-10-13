@@ -147,7 +147,7 @@ func testAccSetAccProfile(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": "10",
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -261,7 +261,7 @@ func testAccSetAcc2(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": "10",
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
@@ -437,10 +437,10 @@ func testAccMaxAbstracts(t *testing.T) {
 					ID:      "AbstractBalance1",
 					Weights: ";25",
 					Type:    utils.MetaAbstract,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(0),
 							RecurrentFee: utils.Float64Pointer(0),
 						},
@@ -450,10 +450,10 @@ func testAccMaxAbstracts(t *testing.T) {
 					ID:      "ConcreteBalance2",
 					Weights: ";20",
 					Type:    utils.MetaConcrete,
-					Units:   213,
+					Units:   "213",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(0),
 							RecurrentFee: utils.Float64Pointer(0),
 						},
@@ -602,10 +602,10 @@ func testAccDebitAbstracts(t *testing.T) {
 					ID:      "AbstractBalance1",
 					Weights: ";25",
 					Type:    utils.MetaAbstract,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(0),
 							RecurrentFee: utils.Float64Pointer(0),
 						},
@@ -615,7 +615,7 @@ func testAccDebitAbstracts(t *testing.T) {
 					ID:      "ConcreteBalance2",
 					Weights: ";20",
 					Type:    utils.MetaConcrete,
-					Units:   213,
+					Units:   "213",
 				},
 			},
 		},
@@ -754,10 +754,10 @@ func testAccMaxConcretes(t *testing.T) {
 					ID:      "AbstractBalance1",
 					Weights: ";25",
 					Type:    utils.MetaAbstract,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(0),
 							RecurrentFee: utils.Float64Pointer(0),
 						},
@@ -767,7 +767,7 @@ func testAccMaxConcretes(t *testing.T) {
 					ID:      "ConcreteBalance2",
 					Weights: ";20",
 					Type:    utils.MetaConcrete,
-					Units:   213,
+					Units:   "213",
 				},
 			},
 		},
@@ -904,10 +904,10 @@ func testAccDebitConcretes(t *testing.T) {
 					ID:      "AbstractBalance1",
 					Weights: ";25",
 					Type:    utils.MetaAbstract,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(0),
 							RecurrentFee: utils.Float64Pointer(0),
 						},
@@ -917,7 +917,7 @@ func testAccDebitConcretes(t *testing.T) {
 					ID:      "ConcreteBalance2",
 					Weights: ";20",
 					Type:    utils.MetaConcrete,
-					Units:   213,
+					Units:   "213",
 				},
 			},
 		},
@@ -1055,7 +1055,7 @@ func testAccActionSetRmvBalance(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": "10",
 					},
-					Units: 0,
+					Units: "0",
 				},
 			},
 			Weights: ";10",
