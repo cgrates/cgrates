@@ -520,41 +520,13 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Rates_conns:          &[]string{},
 		Accounts_conns:       &[]string{},
 		Opts: &CdrsOptsJson{
-			Accounts: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
-			Attributes: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
-			Chargers: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
-			Export: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
-			Rates: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
-			Stats: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
-			Thresholds: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
+			Accounts:   []*utils.DynamicBoolOpt{},
+			Attributes: []*utils.DynamicBoolOpt{},
+			Chargers:   []*utils.DynamicBoolOpt{},
+			Export:     []*utils.DynamicBoolOpt{},
+			Rates:      []*utils.DynamicBoolOpt{},
+			Stats:      []*utils.DynamicBoolOpt{},
+			Thresholds: []*utils.DynamicBoolOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -808,24 +780,10 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &AttributesOptsJson{
-			AttributeIDs: []*utils.DynamicStringSliceOpt{
-				{},
-			},
-			ProcessRuns: []*utils.DynamicIntOpt{
-				{
-					Value: 1,
-				},
-			},
-			ProfileRuns: []*utils.DynamicIntOpt{
-				{
-					Value: 0,
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
+			AttributeIDs:         []*utils.DynamicStringSliceOpt{},
+			ProcessRuns:          []*utils.DynamicIntOpt{},
+			ProfileRuns:          []*utils.DynamicIntOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -891,19 +849,9 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &ResourcesOptsJson{
-			UsageID: []*utils.DynamicStringOpt{
-				{},
-			},
-			UsageTTL: []*utils.DynamicStringOpt{
-				{
-					Value: "72h",
-				},
-			},
-			Units: []*utils.DynamicFloat64Opt{
-				{
-					Value: 1,
-				},
-			},
+			UsageID:  []*utils.DynamicStringOpt{},
+			UsageTTL: []*utils.DynamicStringOpt{},
+			Units:    []*utils.DynamicFloat64Opt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -930,14 +878,8 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
 		Opts: &StatsOptsJson{
-			StatIDs: []*utils.DynamicStringSliceOpt{
-				{},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
+			StatIDs:              []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -963,14 +905,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Nested_fields:         utils.BoolPointer(false),
 		Actions_conns:         &[]string{},
 		Opts: &ThresholdsOptsJson{
-			ThresholdIDs: []*utils.DynamicStringSliceOpt{
-				{},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -1000,31 +935,11 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &RoutesOptsJson{
-			Context: []*utils.DynamicStringOpt{
-				{
-					Value: utils.MetaRoutes,
-				},
-			},
-			ProfileCount: []*utils.DynamicIntOpt{
-				{
-					Value: 1,
-				},
-			},
-			IgnoreErrors: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
-			MaxCost: []*utils.DynamicInterfaceOpt{
-				{
-					Value: utils.EmptyString,
-				},
-			},
-			Usage: []*utils.DynamicStringOpt{
-				{
-					Value: "1m",
-				},
-			},
+			Context:      []*utils.DynamicStringOpt{},
+			ProfileCount: []*utils.DynamicIntOpt{},
+			IgnoreErrors: []*utils.DynamicBoolOpt{},
+			MaxCost:      []*utils.DynamicInterfaceOpt{},
+			Usage:        []*utils.DynamicStringOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -2079,29 +1994,11 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Rate_nested_fields:         utils.BoolPointer(false),
 		Verbosity:                  utils.IntPointer(1000),
 		Opts: &RatesOptsJson{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{
-				{},
-			},
-			StartTime: []*utils.DynamicStringOpt{
-				{
-					Value: utils.MetaNow,
-				},
-			},
-			Usage: []*utils.DynamicStringOpt{
-				{
-					Value: "1m",
-				},
-			},
-			IntervalStart: []*utils.DynamicStringOpt{
-				{
-					Value: "0",
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
+			RateProfileIDs:       []*utils.DynamicStringSliceOpt{},
+			StartTime:            []*utils.DynamicStringOpt{},
+			Usage:                []*utils.DynamicStringOpt{},
+			IntervalStart:        []*utils.DynamicStringOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -2393,14 +2290,8 @@ func TestDfActionSJsonCfg(t *testing.T) {
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{},
 		Opts: &ActionsOptsJson{
-			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
-				{},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					Value: false,
-				},
-			},
+			ActionProfileIDs:     []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

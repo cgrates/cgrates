@@ -21,7 +21,6 @@ package config
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -58,24 +57,9 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		MaxIterations:       1000,
 		MaxUsage:            usage,
 		Opts: &AccountsOpts{
-			AccountIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     decimal.New(int64(72*time.Hour), 0),
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			AccountIDs:           []*utils.DynamicStringSliceOpt{},
+			Usage:                []*utils.DynamicDecimalBigOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -179,15 +163,9 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.MaxIterations:          100,
 		utils.MaxUsage:               "259200000000000", // 72h in ns
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccountIDsCfg: map[string][]string{
-				utils.MetaDefault: {},
-			},
-			utils.MetaUsage: map[string]string{
-				utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
-			},
-			utils.MetaProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
-			},
+			utils.MetaAccountIDsCfg:        []*utils.DynamicStringSliceOpt{},
+			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
+			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

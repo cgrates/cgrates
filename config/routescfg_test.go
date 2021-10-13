@@ -20,10 +20,8 @@ package config
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
@@ -55,38 +53,13 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		DefaultRatio:        10,
 		NestedFields:        true,
 		Opts: &RoutesOpts{
-			Context: []*utils.DynamicStringOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.MetaRoutes,
-				},
-			},
-			ProfileCount: []*utils.DynamicIntOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     1,
-				},
-			},
-			IgnoreErrors: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			MaxCost: []*utils.DynamicInterfaceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.EmptyString,
-				},
-			},
-			Limit:  []*utils.DynamicIntPointerOpt{},
-			Offset: []*utils.DynamicIntPointerOpt{},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     decimal.New(int64(time.Minute), 0),
-				},
-			},
+			Context:      []*utils.DynamicStringOpt{},
+			ProfileCount: []*utils.DynamicIntOpt{},
+			IgnoreErrors: []*utils.DynamicBoolOpt{},
+			MaxCost:      []*utils.DynamicInterfaceOpt{},
+			Limit:        []*utils.DynamicIntPointerOpt{},
+			Offset:       []*utils.DynamicIntPointerOpt{},
+			Usage:        []*utils.DynamicDecimalBigOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -114,23 +87,13 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{},
 		utils.DefaultRatioCfg:        1,
 		utils.OptsCfg: map[string]interface{}{
-			utils.OptsContext: map[string]string{
-				utils.MetaDefault: utils.MetaRoutes,
-			},
-			utils.MetaLimitCfg:  map[string]int{},
-			utils.MetaOffsetCfg: map[string]int{},
-			utils.MetaProfileCountCfg: map[string]int{
-				utils.MetaDefault: 1,
-			},
-			utils.MetaIgnoreErrorsCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaMaxCostCfg: map[string]interface{}{
-				utils.MetaDefault: utils.EmptyString,
-			},
-			utils.MetaUsage: map[string]string{
-				utils.MetaDefault: decimal.New(int64(time.Minute), 0).String(),
-			},
+			utils.OptsContext:         []*utils.DynamicStringOpt{},
+			utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},
+			utils.MetaOffsetCfg:       []*utils.DynamicIntPointerOpt{},
+			utils.MetaProfileCountCfg: []*utils.DynamicIntOpt{},
+			utils.MetaIgnoreErrorsCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaMaxCostCfg:      []*utils.DynamicInterfaceOpt{},
+			utils.MetaUsage:           []*utils.DynamicDecimalBigOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -172,23 +135,13 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.AccountSConnsCfg:       []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
 		utils.OptsCfg: map[string]interface{}{
-			utils.OptsContext: map[string]string{
-				utils.MetaDefault: utils.MetaRoutes,
-			},
-			utils.MetaLimitCfg:  map[string]int{},
-			utils.MetaOffsetCfg: map[string]int{},
-			utils.MetaProfileCountCfg: map[string]int{
-				utils.MetaDefault: 1,
-			},
-			utils.MetaIgnoreErrorsCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaMaxCostCfg: map[string]interface{}{
-				utils.MetaDefault: utils.EmptyString,
-			},
-			utils.MetaUsage: map[string]string{
-				utils.MetaDefault: decimal.New(int64(time.Minute), 0).String(),
-			},
+			utils.OptsContext:         []*utils.DynamicStringOpt{},
+			utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},
+			utils.MetaOffsetCfg:       []*utils.DynamicIntPointerOpt{},
+			utils.MetaProfileCountCfg: []*utils.DynamicIntOpt{},
+			utils.MetaIgnoreErrorsCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaMaxCostCfg:      []*utils.DynamicInterfaceOpt{},
+			utils.MetaUsage:           []*utils.DynamicDecimalBigOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -338,16 +291,6 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 			MaxCost: []*utils.DynamicInterfaceOpt{
 				{
 					Value: utils.MetaEventCost,
-				},
-			},
-			Limit: []*utils.DynamicIntOpt{
-				{
-					Value: 2,
-				},
-			},
-			Offset: []*utils.DynamicIntOpt{
-				{
-					Value: 2,
 				},
 			},
 			ProfileCount: []*utils.DynamicIntOpt{

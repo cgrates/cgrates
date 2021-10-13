@@ -48,18 +48,8 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			StatIDs:              []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -95,12 +85,8 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg:    []string{},
 		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaStatIDsCfg: map[string][]string{
-				utils.MetaDefault: {},
-			},
-			utils.MetaProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
-			},
+			utils.MetaStatIDsCfg:           []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -135,12 +121,8 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.suffix_indexed_fields"},
 		utils.NestedFieldsCfg:           true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaStatIDsCfg: map[string][]string{
-				utils.MetaDefault: {},
-			},
-			utils.MetaProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
-			},
+			utils.MetaStatIDsCfg:           []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
