@@ -344,6 +344,7 @@ const (
 	MetaUnixTimestamp        = "*unixTimestamp"
 	MetaPostCDR              = "*post_cdr"
 	MetaDumpToFile           = "*dump_to_file"
+	MetaDumpToJSON           = "*dump_to_json"
 	NonTransactional         = ""
 	DataDB                   = "data_db"
 	StorDB                   = "stor_db"
