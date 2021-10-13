@@ -354,8 +354,10 @@ func CloneDecimalBig(in *decimal.Big) (cln *decimal.Big) {
 func StringToDecimalBigDynamicOpts(strOpts []*DynamicStringOpt) (decOpts []*DynamicDecimalBigOpt, err error) {
 	decOpts = make([]*DynamicDecimalBigOpt, len(strOpts))
 	for index, opt := range strOpts {
-		decOpts[index].Tenant = opt.Tenant
-		decOpts[index].FilterIDs = opt.FilterIDs
+		decOpts[index] = &DynamicDecimalBigOpt{
+			Tenant:    opt.Tenant,
+			FilterIDs: opt.FilterIDs,
+		}
 		if decOpts[index].Value, err = StringAsBig(opt.Value); err != nil {
 			return
 		}
@@ -366,9 +368,11 @@ func StringToDecimalBigDynamicOpts(strOpts []*DynamicStringOpt) (decOpts []*Dyna
 func DecimalBigToStringDynamicOpts(decOpts []*DynamicDecimalBigOpt) (strOpts []*DynamicStringOpt) {
 	strOpts = make([]*DynamicStringOpt, len(decOpts))
 	for index, opt := range decOpts {
-		strOpts[index].Tenant = opt.Tenant
-		strOpts[index].FilterIDs = opt.FilterIDs
-		strOpts[index].Value = opt.Value.String()
+		strOpts[index] = &DynamicStringOpt{
+			Tenant:    opt.Tenant,
+			FilterIDs: opt.FilterIDs,
+			Value:     opt.Value.String(),
+		}
 	}
 	return
 }
@@ -376,8 +380,10 @@ func DecimalBigToStringDynamicOpts(decOpts []*DynamicDecimalBigOpt) (strOpts []*
 func StringToDurationDynamicOpts(strOpts []*DynamicStringOpt) (durOpts []*DynamicDurationOpt, err error) {
 	durOpts = make([]*DynamicDurationOpt, len(strOpts))
 	for index, opt := range strOpts {
-		durOpts[index].Tenant = opt.Tenant
-		durOpts[index].FilterIDs = opt.FilterIDs
+		durOpts[index] = &DynamicDurationOpt{
+			Tenant:    opt.Tenant,
+			FilterIDs: opt.FilterIDs,
+		}
 		if durOpts[index].Value, err = ParseDurationWithNanosecs(opt.Value); err != nil {
 			return
 		}
@@ -388,9 +394,11 @@ func StringToDurationDynamicOpts(strOpts []*DynamicStringOpt) (durOpts []*Dynami
 func DurationToStringDynamicOpts(durOpts []*DynamicDurationOpt) (strOpts []*DynamicStringOpt) {
 	strOpts = make([]*DynamicStringOpt, len(durOpts))
 	for index, opt := range durOpts {
-		strOpts[index].Tenant = opt.Tenant
-		strOpts[index].FilterIDs = opt.FilterIDs
-		strOpts[index].Value = opt.Value.String()
+		strOpts[index] = &DynamicStringOpt{
+			Tenant:    opt.Tenant,
+			FilterIDs: opt.FilterIDs,
+			Value:     opt.Value.String(),
+		}
 	}
 	return
 }
@@ -398,9 +406,11 @@ func DurationToStringDynamicOpts(durOpts []*DynamicDurationOpt) (strOpts []*Dyna
 func IntToIntPointerDynamicOpts(intOpts []*DynamicIntOpt) (intPtOpts []*DynamicIntPointerOpt) {
 	intPtOpts = make([]*DynamicIntPointerOpt, len(intOpts))
 	for index, opt := range intOpts {
-		intPtOpts[index].Tenant = opt.Tenant
-		intPtOpts[index].FilterIDs = opt.FilterIDs
-		intPtOpts[index].Value = IntPointer(opt.Value)
+		intPtOpts[index] = &DynamicIntPointerOpt{
+			Tenant:    opt.Tenant,
+			FilterIDs: opt.FilterIDs,
+			Value:     IntPointer(opt.Value),
+		}
 	}
 	return
 }
@@ -408,9 +418,11 @@ func IntToIntPointerDynamicOpts(intOpts []*DynamicIntOpt) (intPtOpts []*DynamicI
 func IntPointerToIntDynamicOpts(intPtOpts []*DynamicIntPointerOpt) (intOpts []*DynamicIntOpt) {
 	intOpts = make([]*DynamicIntOpt, len(intPtOpts))
 	for index, opt := range intPtOpts {
-		intOpts[index].Tenant = opt.Tenant
-		intOpts[index].FilterIDs = opt.FilterIDs
-		intOpts[index].Value = *opt.Value
+		intOpts[index] = &DynamicIntOpt{
+			Tenant:    opt.Tenant,
+			FilterIDs: opt.FilterIDs,
+			Value:     *opt.Value,
+		}
 	}
 	return
 }
