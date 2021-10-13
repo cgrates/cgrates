@@ -54,48 +54,13 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		AccountSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
 		ExtraFields:      RSRParsers{},
 		Opts: &CdrsOpts{
-			Accounts: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Attributes: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Chargers: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Export: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Rates: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Stats: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Thresholds: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			Accounts:   []*utils.DynamicBoolOpt{},
+			Attributes: []*utils.DynamicBoolOpt{},
+			Chargers:   []*utils.DynamicBoolOpt{},
+			Export:     []*utils.DynamicBoolOpt{},
+			Rates:      []*utils.DynamicBoolOpt{},
+			Stats:      []*utils.DynamicBoolOpt{},
+			Thresholds: []*utils.DynamicBoolOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -253,27 +218,13 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccountSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaAttributeSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaChargerSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaEeSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaRateSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaStatSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaThresholdSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
+			utils.MetaAccountSCfg:   []*utils.DynamicBoolOpt{},
+			utils.MetaAttributeSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaChargerSCfg:   []*utils.DynamicBoolOpt{},
+			utils.MetaEeSCfg:        []*utils.DynamicBoolOpt{},
+			utils.MetaRateSCfg:      []*utils.DynamicBoolOpt{},
+			utils.MetaStatSCfg:      []*utils.DynamicBoolOpt{},
+			utils.MetaThresholdSCfg: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -307,27 +258,13 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.RateSConnsCfg:       []string{},
 		utils.AccountSConnsCfg:    []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccountSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaAttributeSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaChargerSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaEeSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaRateSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaStatSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
-			utils.MetaThresholdSCfg: map[string]bool{
-				utils.MetaDefault: false,
-			},
+			utils.MetaAccountSCfg:   []*utils.DynamicBoolOpt{},
+			utils.MetaAttributeSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaChargerSCfg:   []*utils.DynamicBoolOpt{},
+			utils.MetaEeSCfg:        []*utils.DynamicBoolOpt{},
+			utils.MetaRateSCfg:      []*utils.DynamicBoolOpt{},
+			utils.MetaStatSCfg:      []*utils.DynamicBoolOpt{},
+			utils.MetaThresholdSCfg: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

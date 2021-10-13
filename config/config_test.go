@@ -28,7 +28,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
-	"github.com/ericlagergren/decimal"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -407,48 +406,13 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 		AccountSConns:   []string{},
 		ExtraFields:     RSRParsers{},
 		Opts: &CdrsOpts{
-			Accounts: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Attributes: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Chargers: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Export: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Rates: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Stats: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			Thresholds: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			Accounts:   []*utils.DynamicBoolOpt{},
+			Attributes: []*utils.DynamicBoolOpt{},
+			Chargers:   []*utils.DynamicBoolOpt{},
+			Export:     []*utils.DynamicBoolOpt{},
+			Rates:      []*utils.DynamicBoolOpt{},
+			Stats:      []*utils.DynamicBoolOpt{},
+			Thresholds: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eCdrsCfg, cgrCfg.cdrsCfg) {
@@ -738,24 +702,9 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		Opts: &ResourcesOpts{
-			UsageID: []*utils.DynamicStringOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.EmptyString,
-				},
-			},
-			UsageTTL: []*utils.DynamicDurationOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     72 * time.Hour,
-				},
-			},
-			Units: []*utils.DynamicFloat64Opt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     1,
-				},
-			},
+			UsageID:  []*utils.DynamicStringOpt{},
+			UsageTTL: []*utils.DynamicDurationOpt{},
+			Units:    []*utils.DynamicFloat64Opt{},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
@@ -774,18 +723,8 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			StatIDs:              []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
@@ -803,18 +742,8 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		ActionSConns:        []string{},
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			ThresholdIDs:         []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
@@ -836,38 +765,13 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		AccountSConns:       []string{},
 		DefaultRatio:        1,
 		Opts: &RoutesOpts{
-			Context: []*utils.DynamicStringOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.MetaRoutes,
-				},
-			},
-			ProfileCount: []*utils.DynamicIntOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     1,
-				},
-			},
-			IgnoreErrors: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			MaxCost: []*utils.DynamicInterfaceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.EmptyString,
-				},
-			},
-			Limit:  []*utils.DynamicIntPointerOpt{},
-			Offset: []*utils.DynamicIntPointerOpt{},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     decimal.New(int64(time.Minute), 0),
-				},
-			},
+			Context:      []*utils.DynamicStringOpt{},
+			ProfileCount: []*utils.DynamicIntOpt{},
+			IgnoreErrors: []*utils.DynamicBoolOpt{},
+			MaxCost:      []*utils.DynamicInterfaceOpt{},
+			Limit:        []*utils.DynamicIntPointerOpt{},
+			Offset:       []*utils.DynamicIntPointerOpt{},
+			Usage:        []*utils.DynamicDecimalBigOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.routeSCfg) {
@@ -1952,30 +1856,10 @@ func TestAttributeSConfig(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 		Opts: &AttributesOpts{
-			AttributeIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			ProcessRuns: []*utils.DynamicIntOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     1,
-				},
-			},
-			ProfileRuns: []*utils.DynamicIntOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     0,
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			AttributeIDs:         []*utils.DynamicStringSliceOpt{},
+			ProcessRuns:          []*utils.DynamicIntOpt{},
+			ProfileRuns:          []*utils.DynamicIntOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -2017,24 +1901,9 @@ func TestResourceSConfig(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 		Opts: &ResourcesOpts{
-			UsageID: []*utils.DynamicStringOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.EmptyString,
-				},
-			},
-			UsageTTL: []*utils.DynamicDurationOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     72 * time.Hour,
-				},
-			},
-			Units: []*utils.DynamicFloat64Opt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     1,
-				},
-			},
+			UsageID:  []*utils.DynamicStringOpt{},
+			UsageTTL: []*utils.DynamicDurationOpt{},
+			Units:    []*utils.DynamicFloat64Opt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -2058,18 +1927,8 @@ func TestStatSConfig(t *testing.T) {
 		SuffixIndexedFields:    &[]string{},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			StatIDs:              []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -2092,18 +1951,8 @@ func TestThresholdSConfig(t *testing.T) {
 		NestedFields:        false,
 		ActionSConns:        []string{},
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			ThresholdIDs:         []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -2130,38 +1979,13 @@ func TestRouteSConfig(t *testing.T) {
 		DefaultRatio:        1,
 		NestedFields:        false,
 		Opts: &RoutesOpts{
-			Context: []*utils.DynamicStringOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.MetaRoutes,
-				},
-			},
-			ProfileCount: []*utils.DynamicIntOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     1,
-				},
-			},
-			IgnoreErrors: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
-			MaxCost: []*utils.DynamicInterfaceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.EmptyString,
-				},
-			},
-			Limit:  []*utils.DynamicIntPointerOpt{},
-			Offset: []*utils.DynamicIntPointerOpt{},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     decimal.New(int64(time.Minute), 0),
-				},
-			},
+			Context:      []*utils.DynamicStringOpt{},
+			ProfileCount: []*utils.DynamicIntOpt{},
+			IgnoreErrors: []*utils.DynamicBoolOpt{},
+			MaxCost:      []*utils.DynamicInterfaceOpt{},
+			Limit:        []*utils.DynamicIntPointerOpt{},
+			Offset:       []*utils.DynamicIntPointerOpt{},
+			Usage:        []*utils.DynamicDecimalBigOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -2486,36 +2310,11 @@ func TestRateSConfig(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               1000,
 		Opts: &RatesOpts{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			StartTime: []*utils.DynamicStringOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.MetaNow,
-				},
-			},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     decimal.New(int64(time.Minute), 0),
-				},
-			},
-			IntervalStart: []*utils.DynamicDecimalBigOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     decimal.New(0, 0),
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			RateProfileIDs:       []*utils.DynamicStringSliceOpt{},
+			StartTime:            []*utils.DynamicStringOpt{},
+			Usage:                []*utils.DynamicDecimalBigOpt{},
+			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -3786,36 +3585,11 @@ func TestCgrCfgJSONDefaultRateCfg(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               1000,
 		Opts: &RatesOpts{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			StartTime: []*utils.DynamicStringOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     utils.MetaNow,
-				},
-			},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     decimal.New(int64(time.Minute), 0),
-				},
-			},
-			IntervalStart: []*utils.DynamicDecimalBigOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     decimal.New(0, 0),
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			RateProfileIDs:       []*utils.DynamicStringSliceOpt{},
+			StartTime:            []*utils.DynamicStringOpt{},
+			Usage:                []*utils.DynamicDecimalBigOpt{},
+			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.rateSCfg, eCfg) {
@@ -4174,27 +3948,13 @@ func TestV1GetConfigCdrs(t *testing.T) {
 			utils.RateSConnsCfg:       []string{},
 			utils.AccountSConnsCfg:    []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAccountSCfg: map[string]bool{
-					utils.MetaDefault: false,
-				},
-				utils.MetaAttributeSCfg: map[string]bool{
-					utils.MetaDefault: false,
-				},
-				utils.MetaChargerSCfg: map[string]bool{
-					utils.MetaDefault: false,
-				},
-				utils.MetaEeSCfg: map[string]bool{
-					utils.MetaDefault: false,
-				},
-				utils.MetaRateSCfg: map[string]bool{
-					utils.MetaDefault: false,
-				},
-				utils.MetaStatSCfg: map[string]bool{
-					utils.MetaDefault: false,
-				},
-				utils.MetaThresholdSCfg: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaAccountSCfg:   []*utils.DynamicBoolOpt{},
+				utils.MetaAttributeSCfg: []*utils.DynamicBoolOpt{},
+				utils.MetaChargerSCfg:   []*utils.DynamicBoolOpt{},
+				utils.MetaEeSCfg:        []*utils.DynamicBoolOpt{},
+				utils.MetaRateSCfg:      []*utils.DynamicBoolOpt{},
+				utils.MetaStatSCfg:      []*utils.DynamicBoolOpt{},
+				utils.MetaThresholdSCfg: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4426,18 +4186,10 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaProcessRunsCfg: map[string]int{
-					utils.MetaDefault: 1,
-				},
-				utils.MetaProfileRunsCfg: map[string]int{
-					utils.MetaDefault: 0,
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4481,15 +4233,9 @@ func TestV1GetConfigResourceS(t *testing.T) {
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaUsageIDCfg: map[string]string{
-					utils.MetaDefault: utils.EmptyString,
-				},
-				utils.MetaUsageTTLCfg: map[string]string{
-					utils.MetaDefault: "72h0m0s",
-				},
-				utils.MetaUnitsCfg: map[string]float64{
-					utils.MetaDefault: 1,
-				},
+				utils.MetaUsageIDCfg:  []*utils.DynamicStringOpt{},
+				utils.MetaUsageTTLCfg: []*utils.DynamicDurationOpt{},
+				utils.MetaUnitsCfg:    []*utils.DynamicFloat64Opt{},
 			},
 		},
 	}
@@ -4514,12 +4260,8 @@ func TestV1GetConfigStats(t *testing.T) {
 			utils.SuffixIndexedFieldsCfg:    []string{},
 			utils.NestedFieldsCfg:           false,
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaStatIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaStatIDsCfg:           []*utils.DynamicStringSliceOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4543,12 +4285,8 @@ func TestV1GetConfigThresholds(t *testing.T) {
 			utils.NestedFieldsCfg:        false,
 			utils.ActionSConnsCfg:        []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaThresholdIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaThresholdIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4575,15 +4313,9 @@ func TestV1GetConfigAcounts(t *testing.T) {
 			utils.MaxIterations:          1000,
 			utils.MaxUsage:               "259200000000000", // 72h in ns
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAccountIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaUsage: map[string]string{
-					utils.MetaDefault: decimal.New(int64(72*time.Hour), 0).String(),
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaAccountIDsCfg:        []*utils.DynamicStringSliceOpt{},
+				utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4615,8 +4347,8 @@ func TestV1GetConfigRoutes(t *testing.T) {
 				utils.MetaProfileCountCfg: []*utils.DynamicIntOpt{},
 				utils.MetaIgnoreErrorsCfg: []*utils.DynamicBoolOpt{},
 				utils.MetaMaxCostCfg:      []*utils.DynamicInterfaceOpt{},
-				utils.MetaLimitCfg:        []*utils.DynamicIntOpt{},
-				utils.MetaOffsetCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},
+				utils.MetaOffsetCfg:       []*utils.DynamicIntPointerOpt{},
 				utils.MetaUsage:           []*utils.DynamicDecimalBigOpt{},
 			},
 		},

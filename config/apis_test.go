@@ -26,7 +26,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 func TestConfigV1SetConfigWithDB(t *testing.T) {
@@ -55,21 +54,7 @@ func TestConfigV1SetConfigWithDB(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
-	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
-		AccountIDs: []*utils.DynamicStringSliceOpt{
-			{},
-		},
-		Usage: []*utils.DynamicStringOpt{
-			{
-				Value: decimal.New(int64(72*time.Hour), 0).String(),
-			},
-		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-			{
-				Value: false,
-			},
-		},
-	}}
+	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
 		t.Fatal(err)
@@ -182,21 +167,7 @@ func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 	} else if !reflect.DeepEqual(exp, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
 	}
-	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{
-		AccountIDs: []*utils.DynamicStringSliceOpt{
-			{},
-		},
-		Usage: []*utils.DynamicStringOpt{
-			{
-				Value: decimal.New(int64(72*time.Hour), 0).String(),
-			},
-		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-			{
-				Value: false,
-			},
-		},
-	}}
+	exp2 := &AccountSJsonCfg{Opts: &AccountsOptsJson{}}
 	rpl2 := new(AccountSJsonCfg)
 	if err := db.GetSection(context.Background(), AccountSJSON, rpl2); err != nil {
 		t.Fatal(err)

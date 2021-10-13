@@ -47,18 +47,8 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		NestedFields:        true,
 		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			ThresholdIDs:         []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -93,12 +83,8 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.ActionSConnsCfg:        []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaThresholdIDsCfg: map[string][]string{
-				utils.MetaDefault: {},
-			},
-			utils.MetaProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
-			},
+			utils.MetaThresholdIDsCfg:      []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -131,12 +117,8 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.NestedFieldsCfg:        true,
 		utils.ActionSConnsCfg:        []string{utils.MetaInternal},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaThresholdIDsCfg: map[string][]string{
-				utils.MetaDefault: {},
-			},
-			utils.MetaProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
-			},
+			utils.MetaThresholdIDsCfg:      []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

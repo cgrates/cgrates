@@ -1480,10 +1480,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
 		maxCost:      10.0,
-		paginator: &utils.Paginator{
-			Limit:  utils.IntPointer(1),
-			Offset: utils.IntPointer(1),
-		},
+		paginator:    &utils.Paginator{},
 	}
 	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
@@ -1505,10 +1502,7 @@ func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
-		paginator: &utils.Paginator{
-			Limit:  utils.IntPointer(1),
-			Offset: utils.IntPointer(1),
-		},
+		paginator:    &utils.Paginator{},
 	}
 	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
@@ -1527,10 +1521,7 @@ func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 	}
 	spl := &optsGetRoutes{
 		ignoreErrors: true,
-		paginator: &utils.Paginator{
-			Limit:  utils.IntPointer(1),
-			Offset: utils.IntPointer(1),
-		},
+		paginator:    &utils.Paginator{},
 	}
 	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {

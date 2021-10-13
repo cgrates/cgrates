@@ -56,18 +56,8 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1", "val2"},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{},
-				},
-			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
-				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     false,
-				},
-			},
+			ActionProfileIDs:     []*utils.DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -87,28 +77,24 @@ func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 	actOpts := &ActionsOpts{
 		ActionProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     []string{},
+				Value: []string{},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 	}
 	exp := &ActionsOpts{
 		ActionProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     []string{},
+				Value: []string{},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 	}
@@ -152,12 +138,8 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.DynaprepaidActionplansCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaActionProfileIDsCfg: map[string][]string{
-				utils.MetaDefault: {},
-			},
-			utils.MetaProfileIgnoreFilters: map[string]bool{
-				utils.MetaDefault: false,
-			},
+			utils.MetaActionProfileIDsCfg:  []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

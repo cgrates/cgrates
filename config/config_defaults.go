@@ -817,13 +817,13 @@ const CGRATES_CFG_JSON = `
 			// 	"Value": [],
 			// },
 		],	
-		"*profileIgnoreFilters": [			
+		"*profileIgnoreFilters": [			// ignore the filters for statIDs
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
-		],									// if we should ignore filters
+		],									
 	},								
 },
 
@@ -845,7 +845,7 @@ const CGRATES_CFG_JSON = `
 			// 	"Value": [],
 			// },
 		],
-		"*profileIgnoreFilters": [			// if we should ignore filters
+		"*profileIgnoreFilters": [			// ignore the filters for thresholdIDs
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -1457,7 +1457,7 @@ const CGRATES_CFG_JSON = `
 			// 	"Value": [],
 			// },
 		],
-		"*profileIgnoreFilters": [			// if we should ignore filters
+		"*profileIgnoreFilters": [			// ignore the filters for actionProfileIDs
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -1495,7 +1495,7 @@ const CGRATES_CFG_JSON = `
 			// 	"Value": "72h",
 			// },
 		],
-		"*profileIgnoreFilters": [			// if we should ignore filters
+		"*profileIgnoreFilters": [			// ignore the filters for accountIDs
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
