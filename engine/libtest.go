@@ -288,7 +288,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		return err
 	}
@@ -310,7 +310,7 @@ func InitStorDb(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		return err
 	}
@@ -565,9 +565,6 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 func LoadAllDataDBToCache(dm *DataManager) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
-	}
-	if dm.DataDB().GetStorageType() == utils.INTERNAL {
-		return // all the data is in cache already
 	}
 	for key, ids := range map[string][]string{
 		utils.DestinationPrefix:        {utils.MetaAny},

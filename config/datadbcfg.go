@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -96,7 +97,9 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			if val == nil || !has {
 				val = new(ItemOpt)
 			}
-			val.loadFromJSONCfg(vJsn) //To review if the function signature changes
+			if err = val.loadFromJSONCfg(vJsn); err != nil {
+				return
+			}
 			dbcfg.Items[kJsn] = val
 		}
 	}
@@ -188,6 +191,9 @@ func (dbcfg *DataDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 
 // ItemOpt the options for the stored items
 type ItemOpt struct {
+	Limit     int
+	TTL       time.Duration
+	StaticTTL bool
 	Remote    bool
 	Replicate bool
 	// used for ArgDispatcher in case we send this to a dispatcher engine
@@ -200,6 +206,8 @@ func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
+		utils.LimitCfg:     itm.Limit,
+		utils.StaticTTLCfg: itm.StaticTTL,
 	}
 	if itm.APIKey != utils.EmptyString {
 		initialMP[utils.APIKeyCfg] = itm.APIKey
@@ -207,12 +215,21 @@ func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	if itm.RouteID != utils.EmptyString {
 		initialMP[utils.RouteIDCfg] = itm.RouteID
 	}
+	if itm.TTL != 0 {
+		initialMP[utils.TTLCfg] = itm.TTL.String()
+	}
 	return
 }
 
-func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) {
+func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) (err error) {
 	if jsonItm == nil {
 		return
+	}
+	if jsonItm.Limit != nil {
+		itm.Limit = *jsonItm.Limit
+	}
+	if jsonItm.Static_ttl != nil {
+		itm.StaticTTL = *jsonItm.Static_ttl
 	}
 	if jsonItm.Remote != nil {
 		itm.Remote = *jsonItm.Remote
@@ -226,11 +243,18 @@ func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) {
 	if jsonItm.Api_key != nil {
 		itm.APIKey = *jsonItm.Api_key
 	}
+	if jsonItm.Ttl != nil {
+		itm.TTL, err = utils.ParseDurationWithNanosecs(*jsonItm.Ttl)
+	}
+	return
 }
 
 // Clone returns a deep copy of ItemOpt
 func (itm *ItemOpt) Clone() *ItemOpt {
 	return &ItemOpt{
+		Limit:     itm.Limit,
+		TTL:       itm.TTL,
+		StaticTTL: itm.StaticTTL,
 		Remote:    itm.Remote,
 		Replicate: itm.Replicate,
 		APIKey:    itm.APIKey,

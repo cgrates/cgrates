@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,7 +32,8 @@ import (
 
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
-	pass, marshaler string, opts map[string]interface{}) (d DataDB, err error) {
+	pass, marshaler string, opts map[string]interface{},
+	itmsCfg map[string]*config.ItemOpt) (d DataDB, err error) {
 	switch dbType {
 	case utils.Redis:
 		var dbNo int
@@ -70,8 +72,8 @@ func NewDataDBConn(dbType, host, port, name, user,
 			return
 		}
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, ttl)
-	case utils.INTERNAL:
-		d = NewInternalDB(nil, nil, true)
+	case utils.Internal:
+		d = NewInternalDB(nil, nil, true, itmsCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
 	}
@@ -81,7 +83,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 // NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
 func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
-	opts map[string]interface{}) (db StorDB, err error) {
+	opts map[string]interface{}, itmsCfg map[string]*config.ItemOpt) (db StorDB, err error) {
 	switch dbType {
 	case utils.Mongo:
 		var ttl time.Duration
@@ -115,11 +117,11 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		}
 		db, err = NewMySQLStorage(host, port, name, user, pass, int(maxConn), int(maxIdleConn),
 			int(connMaxLifetime), utils.IfaceAsString(opts[utils.MysqlLocation]))
-	case utils.INTERNAL:
-		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false)
+	case utils.Internal:
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itmsCfg)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			dbType, utils.MySQL, utils.Mongo, utils.Postgres, utils.INTERNAL)
+			dbType, utils.MySQL, utils.Mongo, utils.Postgres, utils.Internal)
 	}
 	return
 }

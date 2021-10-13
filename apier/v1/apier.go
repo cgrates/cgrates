@@ -267,7 +267,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone, apierSv1.Config.ApierCfg().CachesConns,
 		apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -299,7 +299,7 @@ func (apierSv1 *APIerSv1) LoadRatingPlan(attrs *AttrLoadRatingPlan, reply *strin
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -323,7 +323,7 @@ func (apierSv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply 
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -353,7 +353,7 @@ func (apierSv1 *APIerSv1) LoadSharedGroup(attrs *AttrLoadSharedGroup, reply *str
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -380,7 +380,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1015,7 +1015,7 @@ func (apierSv1 *APIerSv1) LoadAccountActions(attrs *utils.TPAccountActions, repl
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1054,7 +1054,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath),
 		"", apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1120,7 +1120,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1174,7 +1174,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply 
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
+		apierSv1.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

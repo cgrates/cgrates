@@ -35,7 +35,7 @@ var (
 )
 
 func init() {
-	dm = NewDataManager(NewInternalDB(nil, nil, true), config.CgrConfig().CacheCfg(), connMgr)
+	dm = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items), config.CgrConfig().CacheCfg(), connMgr)
 	httpPstrTransport, _ = NewHTTPTransport(config.CgrConfig().HTTPCfg().ClientOpts)
 }
 

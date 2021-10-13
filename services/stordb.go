@@ -61,7 +61,7 @@ func (db *StorDBService) Start() (err error) {
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 		db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
 		db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
-		db.cfg.StorDbCfg().Opts)
+		db.cfg.StorDbCfg().Opts, db.cfg.StorDbCfg().Items)
 	if err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure storDB: %s exiting!", err))
 		return
@@ -86,7 +86,7 @@ func (db *StorDBService) Reload() (err error) {
 			db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 			db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
 			db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
-			db.cfg.StorDbCfg().Opts); err != nil {
+			db.cfg.StorDbCfg().Opts, db.cfg.StorDbCfg().Items); err != nil {
 			return
 		}
 		db.db.Close()
@@ -126,7 +126,7 @@ func (db *StorDBService) Reload() (err error) {
 		msql.Db.SetMaxOpenConns(int(maxConn))
 		msql.Db.SetMaxIdleConns(int(maxIdleConn))
 		msql.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
-	} else if db.cfg.StorDbCfg().Type == utils.INTERNAL {
+	} else if db.cfg.StorDbCfg().Type == utils.Internal {
 		idb, canCast := db.db.(*engine.InternalDB)
 		if !canCast {
 			return fmt.Errorf("can't conver StorDB of type %s to InternalDB",

@@ -269,7 +269,7 @@ func main() {
 		mgrCfg.DataDbCfg().Host, mgrCfg.DataDbCfg().Port,
 		mgrCfg.DataDbCfg().Name, mgrCfg.DataDbCfg().User,
 		mgrCfg.DataDbCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().Opts); err != nil {
+		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().Opts, mgrCfg.DataDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
 
@@ -279,7 +279,7 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutDataDBHost, mgrCfg.MigratorCgrCfg().OutDataDBPort,
 		mgrCfg.MigratorCgrCfg().OutDataDBName, mgrCfg.MigratorCgrCfg().OutDataDBUser,
 		mgrCfg.MigratorCgrCfg().OutDataDBPassword, mgrCfg.MigratorCgrCfg().OutDataDBEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrCfg().OutDataDBOpts); err != nil {
+		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrCfg().OutDataDBOpts, mgrCfg.DataDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
 
@@ -357,7 +357,7 @@ func main() {
 		mgrCfg.StorDbCfg().Name, mgrCfg.StorDbCfg().User,
 		mgrCfg.StorDbCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
 		mgrCfg.StorDbCfg().StringIndexedFields, mgrCfg.StorDbCfg().PrefixIndexedFields,
-		mgrCfg.StorDbCfg().Opts); err != nil {
+		mgrCfg.StorDbCfg().Opts, mgrCfg.StorDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
 
@@ -368,7 +368,7 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutStorDBName, mgrCfg.MigratorCgrCfg().OutStorDBUser,
 		mgrCfg.MigratorCgrCfg().OutStorDBPassword, mgrCfg.GeneralCfg().DBDataEncoding,
 		mgrCfg.StorDbCfg().StringIndexedFields, mgrCfg.StorDbCfg().PrefixIndexedFields,
-		mgrCfg.MigratorCgrCfg().OutStorDBOpts); err != nil {
+		mgrCfg.MigratorCgrCfg().OutStorDBOpts, mgrCfg.StorDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
 
