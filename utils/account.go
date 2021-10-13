@@ -537,7 +537,7 @@ type APIBalance struct {
 	FilterIDs      []string
 	Weights        string
 	Type           string
-	Units          float64
+	Units          string
 	UnitFactors    []*APIUnitFactor
 	Opts           map[string]interface{}
 	CostIncrements []*APICostIncrement
@@ -551,10 +551,14 @@ func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 		ID:             ext.ID,
 		FilterIDs:      ext.FilterIDs,
 		Type:           ext.Type,
-		Units:          NewDecimalFromFloat64(ext.Units),
 		Opts:           ext.Opts,
 		AttributeIDs:   ext.AttributeIDs,
 		RateProfileIDs: ext.RateProfileIDs,
+	}
+	if ext.Units != EmptyString {
+		if balance.Units, err = NewDecimalFromUsage(ext.Units); err != nil {
+			return nil, err
+		}
 	}
 	if ext.Weights != EmptyString {
 		if balance.Weights, err = NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {
@@ -570,7 +574,9 @@ func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 	if len(ext.CostIncrements) != 0 {
 		balance.CostIncrements = make([]*CostIncrement, len(ext.CostIncrements))
 		for i, cIncr := range ext.CostIncrements {
-			balance.CostIncrements[i] = cIncr.AsCostIncrement()
+			if balance.CostIncrements[i], err = cIncr.AsCostIncrement(); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return
@@ -579,18 +585,20 @@ func (ext *APIBalance) AsBalance() (balance *Balance, err error) {
 // APICostIncrement represent one CostIncrement inside an APIBalance
 type APICostIncrement struct {
 	FilterIDs    []string
-	Increment    *float64
+	Increment    string
 	FixedFee     *float64
 	RecurrentFee *float64
 }
 
 // AsCostIncrement convert APICostIncrement struct to CostIncrement struct
-func (ext *APICostIncrement) AsCostIncrement() (cIncr *CostIncrement) {
+func (ext *APICostIncrement) AsCostIncrement() (cIncr *CostIncrement, err error) {
 	cIncr = &CostIncrement{
 		FilterIDs: ext.FilterIDs,
 	}
-	if ext.Increment != nil {
-		cIncr.Increment = NewDecimalFromFloat64(*ext.Increment)
+	if ext.Increment != EmptyString {
+		if cIncr.Increment, err = NewDecimalFromUsage(ext.Increment); err != nil {
+			return nil, err
+		}
 	}
 	if ext.FixedFee != nil {
 		cIncr.FixedFee = NewDecimalFromFloat64(*ext.FixedFee)
