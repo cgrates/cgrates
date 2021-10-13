@@ -166,7 +166,7 @@ func testActPlnITConnect(t *testing.T) {
 		actPlnCfgIn.DataDbCfg().Host, actPlnCfgIn.DataDbCfg().Port,
 		actPlnCfgIn.DataDbCfg().Name, actPlnCfgIn.DataDbCfg().User,
 		actPlnCfgIn.DataDbCfg().Password, actPlnCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), actPlnCfgIn.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), actPlnCfgIn.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -174,7 +174,7 @@ func testActPlnITConnect(t *testing.T) {
 		actPlnCfgOut.DataDbCfg().Host, actPlnCfgOut.DataDbCfg().Port,
 		actPlnCfgOut.DataDbCfg().Name, actPlnCfgOut.DataDbCfg().User,
 		actPlnCfgOut.DataDbCfg().Password, actPlnCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), actPlnCfgOut.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), actPlnCfgOut.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

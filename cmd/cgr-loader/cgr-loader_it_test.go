@@ -295,7 +295,7 @@ func testLoadItConnectToDB(t *testing.T) {
 		ldrItCfg.DataDbCfg().Host, ldrItCfg.DataDbCfg().Port,
 		ldrItCfg.DataDbCfg().Name, ldrItCfg.DataDbCfg().User,
 		ldrItCfg.DataDbCfg().Password, ldrItCfg.GeneralCfg().DBDataEncoding,
-		ldrItCfg.DataDbCfg().Opts); err != nil {
+		ldrItCfg.DataDbCfg().Opts, ldrItCfg.DataDbCfg().Items); err != nil {
 		t.Fatal(err)
 	}
 }

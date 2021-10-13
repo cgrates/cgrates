@@ -28,8 +28,8 @@ import (
 
 func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 	Cache.Clear(nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &DataDBMock{
 		GetChargerProfileDrvF: func(s1, s2 string) (*ChargerProfile, error) {
@@ -47,14 +47,14 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dmFilter := NewDataManager(dbm, defaultCfg.CacheCfg(), nil)
+	dmFilter := NewDataManager(dbm, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmFilter,
 		filterS: &FilterS{
 			dm:  dmFilter,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEvTm := time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC)
 	cgrEv := &utils.CGREvent{
@@ -86,8 +86,8 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 
 func TestChargersmatchingChargerProfilesForEventNotActive(t *testing.T) {
 	Cache.Clear(nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &DataDBMock{
 		GetChargerProfileDrvF: func(s1, s2 string) (*ChargerProfile, error) {
@@ -108,14 +108,14 @@ func TestChargersmatchingChargerProfilesForEventNotActive(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dmFilter := NewDataManager(dbm, defaultCfg.CacheCfg(), nil)
+	dmFilter := NewDataManager(dbm, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmFilter,
 		filterS: &FilterS{
 			dm:  dmFilter,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEvTm := time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC)
 	cgrEv := &utils.CGREvent{
@@ -147,8 +147,8 @@ func TestChargersmatchingChargerProfilesForEventNotActive(t *testing.T) {
 
 func TestChargersprocessEventNoConnIDs(t *testing.T) {
 	Cache.Clear(nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &DataDBMock{
 		GetChargerProfileDrvF: func(s1, s2 string) (*ChargerProfile, error) {
@@ -169,14 +169,14 @@ func TestChargersprocessEventNoConnIDs(t *testing.T) {
 			}, nil
 		},
 	}
-	dmFilter := NewDataManager(dbm, defaultCfg.CacheCfg(), nil)
+	dmFilter := NewDataManager(dbm, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmFilter,
 		filterS: &FilterS{
 			dm:  dmFilter,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEvTm := time.Date(2021, 4, 19, 12, 0, 0, 0, time.UTC)
 	cgrEv := &utils.CGREvent{
@@ -222,13 +222,13 @@ func (ccM *ccMock) Call(serviceMethod string, args interface{}, reply interface{
 
 func TestChargersprocessEventCallNilErr(t *testing.T) {
 	Cache.Clear(nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().AttributeSConns = []string{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
-	data := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(data, defaultCfg.CacheCfg(), nil)
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "1001",
@@ -264,10 +264,10 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		dm: dm,
 		filterS: &FilterS{
 			dm:  dm,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+		cfg: cfg,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -312,12 +312,12 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 
 func TestChargersprocessEventCallErr(t *testing.T) {
 	Cache.Clear(nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
-	data := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(data, defaultCfg.CacheCfg(), nil)
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "1001",
@@ -342,10 +342,10 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 		dm: dm,
 		filterS: &FilterS{
 			dm:  dm,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+		cfg: cfg,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -393,12 +393,12 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 
 func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	Cache.Clear(nil)
-	dataDB := NewInternalDB(nil, nil, true)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().AttributeSConns = []string{
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	dm := NewDataManager(dataDB, defaultCfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -435,10 +435,10 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 		dm: dm,
 		filterS: &FilterS{
 			dm:  dm,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+		cfg: cfg,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -464,12 +464,12 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 
 func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	Cache.Clear(nil)
-	dataDB := NewInternalDB(nil, nil, true)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().AttributeSConns = []string{
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	dm := NewDataManager(dataDB, defaultCfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -506,10 +506,10 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 		dm: dm,
 		filterS: &FilterS{
 			dm:  dm,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+		cfg: cfg,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -541,12 +541,12 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 
 func TestChargersV1ProcessEvent(t *testing.T) {
 	Cache.Clear(nil)
-	dataDB := NewInternalDB(nil, nil, true)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().AttributeSConns = []string{
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	dm := NewDataManager(dataDB, defaultCfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -583,10 +583,10 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 		dm: dm,
 		filterS: &FilterS{
 			dm:  dm,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
-		connMgr: NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+		cfg: cfg,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): rpcInternal,
 		}),
 	}
@@ -629,12 +629,12 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 
 func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 	Cache.Clear(nil)
-	dataDB := NewInternalDB(nil, nil, true)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().AttributeSConns = []string{
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	dm := NewDataManager(dataDB, defaultCfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -650,9 +650,9 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 		dm: dm,
 		filterS: &FilterS{
 			dm:  dm,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",
@@ -688,23 +688,23 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 
 func TestChargersV1GetChargersForEventErr(t *testing.T) {
 	Cache.Clear(nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().IndexedSelects = false
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &DataDBMock{
 		GetKeysForPrefixF: func(s string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}
-	dm := NewDataManager(dbm, defaultCfg.CacheCfg(), nil)
+	dm := NewDataManager(dbm, cfg.CacheCfg(), nil)
 
 	cS := &ChargerService{
 		dm: dm,
 		filterS: &FilterS{
 			dm:  dm,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	args := &utils.CGREvent{
 		ID: "cgrEvID",

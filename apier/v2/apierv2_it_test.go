@@ -108,7 +108,7 @@ func testAPIerSv2itConnectDataDB(t *testing.T) {
 		apierCfg.DataDbCfg().Host, apierCfg.DataDbCfg().Port,
 		apierCfg.DataDbCfg().Name, apierCfg.DataDbCfg().User,
 		apierCfg.DataDbCfg().Password, apierCfg.GeneralCfg().DBDataEncoding,
-		apierCfg.DataDbCfg().Opts)
+		apierCfg.DataDbCfg().Opts, apierCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}

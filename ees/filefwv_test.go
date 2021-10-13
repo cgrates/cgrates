@@ -43,15 +43,15 @@ func TestFileFwvGetMetrics(t *testing.T) {
 }
 
 func TestFileFwvComposeHeader(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
 	fFwv := &FileFWVee{
-		cfg:     cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:  cgrCfg,
+		cfg:     cfg.EEsCfg().Exporters[0],
+		cgrCfg:  cfg,
 		filterS: filterS,
 		file:    nopCloser{byteBuff},
 		dc:      &utils.SafeMapStorage{},
@@ -105,15 +105,15 @@ func TestFileFwvComposeHeader(t *testing.T) {
 }
 
 func TestFileFwvComposeTrailer(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
 	fFwv := &FileFWVee{
-		cfg:     cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:  cgrCfg,
+		cfg:     cfg.EEsCfg().Exporters[0],
+		cgrCfg:  cfg,
 		filterS: filterS,
 		file:    nopCloser{byteBuff},
 		dc:      &utils.SafeMapStorage{},
@@ -167,10 +167,10 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 }
 
 func TestFileFwvExportEvent(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
 	dc, err := newEEMetrics("Local")
@@ -178,8 +178,8 @@ func TestFileFwvExportEvent(t *testing.T) {
 		t.Error(err)
 	}
 	fFwv := &FileFWVee{
-		cfg:     cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:  cgrCfg,
+		cfg:     cfg.EEsCfg().Exporters[0],
+		cgrCfg:  cfg,
 		filterS: filterS,
 		file:    nopCloser{byteBuff},
 		dc:      dc,
@@ -204,18 +204,18 @@ func (nopCloserWrite) Write(s []byte) (n int, err error) {
 }
 
 func TestFileFwvExportEventWriteError(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
 	}
 	fFwv := &FileFWVee{
-		cfg:     cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:  cgrCfg,
+		cfg:     cfg.EEsCfg().Exporters[0],
+		cgrCfg:  cfg,
 		filterS: filterS,
 		file:    nopCloserWrite{byteBuff},
 		dc:      dc,
@@ -226,14 +226,14 @@ func TestFileFwvExportEventWriteError(t *testing.T) {
 }
 
 func TestFileFwvComposeHeaderWriteError(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	fFwv := &FileFWVee{
-		cfg:     cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:  cgrCfg,
+		cfg:     cfg.EEsCfg().Exporters[0],
+		cgrCfg:  cfg,
 		filterS: filterS,
 		file:    nopCloserWrite{byteBuff},
 		dc:      &utils.SafeMapStorage{},
@@ -258,14 +258,14 @@ func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 }
 
 func TestFileFwvComposeTrailerWriteError(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	fFwv := &FileFWVee{
-		cfg:     cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:  cgrCfg,
+		cfg:     cfg.EEsCfg().Exporters[0],
+		cgrCfg:  cfg,
 		filterS: filterS,
 		file:    nopCloserWrite{byteBuff},
 		dc:      &utils.SafeMapStorage{},
@@ -289,14 +289,14 @@ func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 	}
 }
 func TestFileFwvOnEvictedTrailer(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	fFwv := &FileFWVee{
-		cfg:     cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:  cgrCfg,
+		cfg:     cfg.EEsCfg().Exporters[0],
+		cgrCfg:  cfg,
 		filterS: filterS,
 		file:    nopCloserWrite{byteBuff},
 		dc:      &utils.SafeMapStorage{},
@@ -327,14 +327,14 @@ func (nopCloserError) Write(s []byte) (n int, err error) {
 	return 0, utils.ErrNotImplemented
 }
 func TestFileFwvOnEvictedClose(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	fFwv := &FileFWVee{
-		cfg:     cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:  cgrCfg,
+		cfg:     cfg.EEsCfg().Exporters[0],
+		cgrCfg:  cfg,
 		filterS: filterS,
 		file:    nopCloserError{byteBuff},
 		dc:      &utils.SafeMapStorage{},

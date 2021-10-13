@@ -121,8 +121,8 @@ func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().Type != utils.INTERNAL {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.INTERNAL)
+	} else if cgrCfg.DataDbCfg().Type != utils.Internal {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.Internal)
 	} else if cgrCfg.DataDbCfg().Port != "6379" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "6379")
 	}
@@ -154,8 +154,8 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg); err != nil {
 		t.Error(err)
-	} else if cgrCfg.DataDbCfg().Type != utils.INTERNAL {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.INTERNAL)
+	} else if cgrCfg.DataDbCfg().Type != utils.Internal {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Type, utils.Internal)
 	} else if cgrCfg.DataDbCfg().Port != "internal" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbCfg().Port, "internal")
 	}
@@ -960,7 +960,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 func TestDbDefaultsMetaDynamic(t *testing.T) {
 	dbdf := newDbDefaults()
 	flagInput := utils.MetaDynamic
-	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.INTERNAL}
+	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.Internal}
 	for _, dbtype := range dbs {
 		port := dbdf.dbPort(dbtype, flagInput)
 		if port != dbdf[dbtype]["DbPort"] {
@@ -975,7 +975,7 @@ func TestDbDefaultsMetaDynamic(t *testing.T) {
 
 func TestDbDefaults(t *testing.T) {
 	dbdf := newDbDefaults()
-	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.INTERNAL, utils.Postgres}
+	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.Internal, utils.Postgres}
 	for _, dbtype := range dbs {
 		port := dbdf.dbPort(dbtype, "1234")
 		if port != "1234" {

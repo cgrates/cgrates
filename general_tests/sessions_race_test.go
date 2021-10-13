@@ -88,7 +88,7 @@ func TestSessionSRace(t *testing.T) {
 	})
 
 	// dataManager
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMgr)
 	engine.SetDataStorage(dm)
 

@@ -37,6 +37,7 @@ var (
 	storageDb         Storage
 	dm3               *DataManager
 	versionsConfigDIR string
+	versionCfg        *config.CGRConfig
 
 	sTestsITVersions = []func(t *testing.T){
 		testInitConfig,
@@ -91,28 +92,28 @@ func TestVersionsIT(t *testing.T) {
 }
 
 func testInitConfig(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
+	if versionCfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testInitDataDB(t *testing.T) {
-	dbConn, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+	dbConn, err := NewDataDBConn(versionCfg.DataDbCfg().Type,
+		versionCfg.DataDbCfg().Host, versionCfg.DataDbCfg().Port,
+		versionCfg.DataDbCfg().Name, versionCfg.DataDbCfg().User,
+		versionCfg.DataDbCfg().Password, versionCfg.GeneralCfg().DBDataEncoding,
+		versionCfg.DataDbCfg().Opts, versionCfg.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dm3 = NewDataManager(dbConn, cfg.CacheCfg(), nil)
+	dm3 = NewDataManager(dbConn, versionCfg.CacheCfg(), nil)
 
-	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
-		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+	storageDb, err = NewStorDBConn(versionCfg.StorDbCfg().Type,
+		versionCfg.StorDbCfg().Host, versionCfg.StorDbCfg().Port,
+		versionCfg.StorDbCfg().Name, versionCfg.StorDbCfg().User,
+		versionCfg.StorDbCfg().Password, versionCfg.GeneralCfg().DBDataEncoding,
+		versionCfg.StorDbCfg().StringIndexedFields, versionCfg.StorDbCfg().PrefixIndexedFields,
+		versionCfg.StorDbCfg().Opts, versionCfg.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -123,7 +124,7 @@ func testVersionsFlush(t *testing.T) {
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
 	}
-	if err := storageDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().Type)); err != nil {
+	if err := storageDb.Flush(path.Join(versionCfg.DataFolderPath, "storage", versionCfg.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 	SetDBVersions(storageDb)
@@ -146,7 +147,7 @@ func testVersion(t *testing.T) {
 
 	storType := dm3.DataDB().GetStorageType()
 	switch storType {
-	case utils.INTERNAL:
+	case utils.Internal:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
@@ -188,7 +189,7 @@ func testVersion(t *testing.T) {
 	}
 	storType = storageDb.GetStorageType()
 	switch storType {
-	case utils.INTERNAL:
+	case utils.Internal:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1

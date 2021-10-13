@@ -73,7 +73,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		return fmt.Errorf("testSMCosts #2 err: %v", err)
 	}
@@ -241,7 +241,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		return fmt.Errorf("testGetCDRs #2: %v", err)
 	}

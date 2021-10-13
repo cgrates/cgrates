@@ -20,11 +20,12 @@ package engine
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-	"testing"
-	"time"
 )
 
 type clMock func(_ string, _ interface{}, _ interface{}) error
@@ -71,12 +72,12 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanClnt,
 	})
-	db := NewInternalDB(nil, nil, true)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb:   NewInternalDB(nil, nil, true),
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		dm:      dm,
 	}
 	cdr := &CDRWithAPIOpts{ // no tenant, take the default
@@ -127,12 +128,12 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := NewInternalDB(nil, nil, true)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb:   NewInternalDB(nil, nil, true),
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		dm:      dm,
 	}
 	args := &ArgV1ProcessEvent{
@@ -181,12 +182,12 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 	connMngr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := NewInternalDB(nil, nil, true)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb:   NewInternalDB(nil, nil, true),
+		cdrDb:   NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 		dm:      dm,
 	}
 

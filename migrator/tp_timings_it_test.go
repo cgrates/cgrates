@@ -73,7 +73,7 @@ func testTpTimITConnect(t *testing.T) {
 		tpTimCfgIn.StorDbCfg().Name, tpTimCfgIn.StorDbCfg().User,
 		tpTimCfgIn.StorDbCfg().Password, tpTimCfgIn.GeneralCfg().DBDataEncoding,
 		tpTimCfgIn.StorDbCfg().StringIndexedFields, tpTimCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpTimCfgIn.StorDbCfg().Opts)
+		tpTimCfgIn.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func testTpTimITConnect(t *testing.T) {
 		tpTimCfgOut.StorDbCfg().Name, tpTimCfgOut.StorDbCfg().User,
 		tpTimCfgOut.StorDbCfg().Password, tpTimCfgOut.GeneralCfg().DBDataEncoding,
 		tpTimCfgIn.StorDbCfg().StringIndexedFields, tpTimCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpTimCfgOut.StorDbCfg().Opts)
+		tpTimCfgOut.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -206,7 +206,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -487,7 +487,7 @@ func TestDataDBStartVersion(t *testing.T) {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -547,7 +547,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -707,7 +707,7 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -989,7 +989,7 @@ func TestDataDBReloadError(t *testing.T) {
 				Remote:    false},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	db.dm = engine.NewDataManager(data, nil, nil)
 	err := db.Reload()
 	if err != nil {

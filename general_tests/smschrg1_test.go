@@ -27,10 +27,10 @@ import (
 )
 
 func TestSMSSetStorageSmsChrg1(t *testing.T) {
-	dflt := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(dflt)
+	cfg := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
 	config.CgrConfig().CacheCfg().Partitions[utils.CacheRatingPlans].Precache = true // precache rating plan
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dataDB)
 	engine.Cache.Clear(nil)

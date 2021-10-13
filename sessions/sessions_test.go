@@ -89,7 +89,7 @@ func TestIsIndexed(t *testing.T) {
 
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
@@ -119,7 +119,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
@@ -134,14 +134,14 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 }
 
 func TestSessionSIndexAndUnindexSessions(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"Tenant":  {},
 		"Account": {},
 		"Extra3":  {},
 		"Extra4":  {},
 	}
-	sS := NewSessionS(sSCfg, nil, nil)
+	sS := NewSessionS(cfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
@@ -460,8 +460,8 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 }
 
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	sS := NewSessionS(cfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
@@ -678,8 +678,8 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 }
 
 func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	sS := NewSessionS(cfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
@@ -1585,8 +1585,8 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 }
 
 func TestSessionStransitSState(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	sS := NewSessionS(cfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
@@ -1631,8 +1631,8 @@ func TestSessionStransitSState(t *testing.T) {
 }
 
 func TestSessionSrelocateSessionS(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	sS := NewSessionS(cfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
@@ -1771,9 +1771,9 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 }
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	mpStr := engine.NewInternalDB(nil, nil, true)
-	sS := NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	cfg := config.NewDefaultCGRConfig()
+	mpStr := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	sS := NewSessionS(cfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		{
@@ -1791,10 +1791,10 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
 	}
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx = map[string][]string{(utils.ToR): {utils.MetaVoice}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1811,7 +1811,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 			ExpiryTime:     time.Now().Add(-time.Hour),
 		},
 	})
-	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
@@ -1824,11 +1824,11 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 }
 
 func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS := NewSessionS(sSCfg, nil, nil)
+	sS := NewSessionS(cfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
@@ -1876,11 +1876,11 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
 	}
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR":    {},
 		"Extra3": {},
 	}
-	sS = NewSessionS(sSCfg, nil, nil)
+	sS = NewSessionS(cfg, nil, nil)
 	sS.indexSession(session, false)
 	indx = map[string][]string{
 		"ToR":    {utils.MetaVoice, utils.MetaData},
@@ -1910,11 +1910,11 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 			},
 		},
 	}
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR":    {},
 		"Extra2": {},
 	}
-	sS = NewSessionS(sSCfg, nil, nil)
+	sS = NewSessionS(cfg, nil, nil)
 	sS.indexSession(session, true)
 	indx = map[string][]string{
 		"ToR":    {utils.MetaVoice, utils.MetaData},
@@ -2134,8 +2134,8 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 }
 
 func TestSessionSgetSession(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	sS := NewSessionS(cfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
 		utils.ToR:          "*voice",
@@ -2178,11 +2178,11 @@ func TestSessionSgetSession(t *testing.T) {
 }
 
 func TestSessionSfilterSessions(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS := NewSessionS(sSCfg, nil, nil)
+	sS := NewSessionS(cfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
@@ -2260,7 +2260,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 			"PDD":             "300ms",
 			utils.Route:       "supplier1",
 		},
-		NodeID: sSCfg.GeneralCfg().NodeID,
+		NodeID: cfg.GeneralCfg().NodeID,
 	}
 	eses2 := &ExternalSession{
 		CGRID:       "cade401f46f046311ed7f62df3dfbb84adb98aad",
@@ -2285,7 +2285,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 			"PDD":             "300ms",
 			utils.Route:       "supplier1",
 		},
-		NodeID: sSCfg.GeneralCfg().NodeID,
+		NodeID: cfg.GeneralCfg().NodeID,
 	}
 	expSess := []*ExternalSession{
 		eses1,
@@ -2309,11 +2309,11 @@ func TestSessionSfilterSessions(t *testing.T) {
 	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
 	}
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR":    {},
 		"Extra3": {},
 	}
-	sS = NewSessionS(sSCfg, nil, nil)
+	sS = NewSessionS(cfg, nil, nil)
 	sS.registerSession(session, false)
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
 	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
@@ -2354,11 +2354,11 @@ func TestSessionSfilterSessions(t *testing.T) {
 }
 
 func TestSessionSfilterSessionsCount(t *testing.T) {
-	sSCfg := config.NewDefaultCGRConfig()
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS := NewSessionS(sSCfg, nil, nil)
+	sS := NewSessionS(cfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
@@ -2421,11 +2421,11 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 1 {
 		t.Errorf("Expected %v , received: %s", 1, utils.ToJSON(noSess))
 	}
-	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
+	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR":    {},
 		"Extra3": {},
 	}
-	sS = NewSessionS(sSCfg, nil, nil)
+	sS = NewSessionS(cfg, nil, nil)
 	sS.registerSession(session, false)
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
 	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 1 {
@@ -2443,7 +2443,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}
-	sS = NewSessionS(sSCfg, nil, nil)
+	sS = NewSessionS(cfg, nil, nil)
 	sS.registerSession(session, true)
 	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaData)}}
 	if noSess := sS.filterSessionsCount(fltrs, true); noSess != 2 {
@@ -2574,7 +2574,7 @@ func (mk *mockConnWarnDisconnect2) Call(method string, args interface{}, rply in
 func TestWarnSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	sessions := NewSessionS(cfg, dm, nil)
@@ -2673,7 +2673,7 @@ func TestSessionSAsBiRPC(t *testing.T) {
 func TestBiJClntID(t *testing.T) {
 	client := &mockConnWarnDisconnect1{}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 	sessions.biJClnts = map[rpcclient.ClientConnector]string{
@@ -2725,7 +2725,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2795,7 +2795,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2863,7 +2863,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2930,7 +2930,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2995,7 +2995,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3045,7 +3045,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3111,7 +3111,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3179,7 +3179,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true)
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 

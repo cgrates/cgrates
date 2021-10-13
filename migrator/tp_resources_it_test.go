@@ -74,7 +74,7 @@ func testTpResITConnect(t *testing.T) {
 		tpResCfgIn.StorDbCfg().Name, tpResCfgIn.StorDbCfg().User,
 		tpResCfgIn.StorDbCfg().Password, tpResCfgIn.GeneralCfg().DBDataEncoding,
 		tpResCfgIn.StorDbCfg().StringIndexedFields, tpResCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpResCfgIn.StorDbCfg().Opts)
+		tpResCfgIn.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func testTpResITConnect(t *testing.T) {
 		tpResCfgOut.StorDbCfg().Name, tpResCfgOut.StorDbCfg().User,
 		tpResCfgOut.StorDbCfg().Password, tpResCfgOut.GeneralCfg().DBDataEncoding,
 		tpResCfgIn.StorDbCfg().StringIndexedFields, tpResCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpResCfgOut.StorDbCfg().Opts)
+		tpResCfgOut.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

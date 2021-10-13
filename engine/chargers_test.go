@@ -68,7 +68,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			Weight:       20,
 		},
 	}
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 
 	fltrCP1 := &Filter{
@@ -213,11 +213,11 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		},
 	}
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	chargerSrv = NewChargerService(dmCharger,
-		&FilterS{dm: dmCharger, cfg: defaultCfg}, defaultCfg, nil)
+		&FilterS{dm: dmCharger, cfg: cfg}, cfg, nil)
 
 	fltrCP1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -380,11 +380,11 @@ func TestChargerProcessEvent(t *testing.T) {
 		},
 	}
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	chargerSrv = NewChargerService(dmCharger,
-		&FilterS{dm: dmCharger, cfg: defaultCfg}, defaultCfg, nil)
+		&FilterS{dm: dmCharger, cfg: cfg}, cfg, nil)
 
 	fltrCP1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -492,24 +492,24 @@ func TestChargerProcessEvent(t *testing.T) {
 }
 
 func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().StringIndexedFields = &[]string{
 		"string",
 	}
-	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
-	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().NestedFields = false
+	cfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	cfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().NestedFields = false
 
-	dataDB := NewInternalDB(nil, nil, true)
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
 		filterS: &FilterS{
 			dm:  dmCharger,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -538,24 +538,24 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 }
 
 func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().StringIndexedFields = &[]string{
 		"string",
 	}
-	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
-	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().NestedFields = false
+	cfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	cfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().NestedFields = false
 
-	dataDB := NewInternalDB(nil, nil, true)
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
 		filterS: &FilterS{
 			dm:  dmCharger,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -584,28 +584,28 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 }
 
 func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().StringIndexedFields = &[]string{
 		"string",
 	}
-	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
-	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().NestedFields = false
+	cfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	cfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().NestedFields = false
 
 	dbm := &DataDBMock{
 		GetKeysForPrefixF: func(s string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}
-	dmCharger := NewDataManager(dbm, defaultCfg.CacheCfg(), nil)
+	dmCharger := NewDataManager(dbm, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
 		filterS: &FilterS{
 			dm:  dmCharger,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -635,9 +635,9 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 }
 
 func TestChargersprocessEvent(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	cS := &ChargerService{
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",

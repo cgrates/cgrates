@@ -927,8 +927,8 @@ func TestGetLoadedIdsError(t *testing.T) {
 }
 
 func TestReloadCache(t *testing.T) {
-	data := NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, false, cfg.DataDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:               map[string]interface{}{},
 		Tenant:                "cgrates.org",
