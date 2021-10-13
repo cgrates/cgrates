@@ -783,10 +783,10 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 					ID:      "AbstractBalance1",
 					Weights: ";15",
 					Type:    utils.MetaAbstract,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(0),
 							RecurrentFee: utils.Float64Pointer(1),
 						},
@@ -884,10 +884,10 @@ func testVF1FIdxSetAccountMoreFltrsMoreIndexing(t *testing.T) {
 					ID:      "AbstractBalance1",
 					Weights: ";15",
 					Type:    utils.MetaAbstract,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 					CostIncrements: []*utils.APICostIncrement{
 						{
-							Increment:    utils.Float64Pointer(float64(time.Second)),
+							Increment:    "1s",
 							FixedFee:     utils.Float64Pointer(0),
 							RecurrentFee: utils.Float64Pointer(1),
 						},
@@ -995,7 +995,7 @@ func testV1FIdxAccountsMoreProfilesForFilters(t *testing.T) {
 					ID:      "ConcreteBalance1",
 					Weights: ";15",
 					Type:    utils.MetaConcrete,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 				},
 			},
 		},
@@ -1011,7 +1011,7 @@ func testV1FIdxAccountsMoreProfilesForFilters(t *testing.T) {
 					ID:      "ConcreteBalance1",
 					Weights: ";15",
 					Type:    utils.MetaConcrete,
-					Units:   float64(40 * time.Second),
+					Units:   "40s",
 				},
 			},
 		},

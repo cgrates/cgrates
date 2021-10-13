@@ -236,6 +236,44 @@ func TestNewDecimalFromUsage(t *testing.T) {
 	if _, err := NewDecimalFromUsage(dec); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
+
+	dec = "1000"
+	expected = NewDecimal(1000, 0)
+	if rcv, err := NewDecimalFromUsage(dec); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+
+	dec = "12m"
+	expected = NewDecimal(int64(12*time.Minute), 0)
+	if rcv, err := NewDecimalFromUsage(dec); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+
+	dec = "12m10s"
+	expected = NewDecimal(int64(12*time.Minute+10*time.Second), 0)
+	if rcv, err := NewDecimalFromUsage(dec); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+
+	dec = "12.44"
+	expected = NewDecimal(1244, 2)
+	if rcv, err := NewDecimalFromUsage(dec); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+
+	dec = "12.44.5"
+	expectedErr = "can't convert <12.44.5> to decimal"
+	if _, err := NewDecimalFromUsage(dec); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
 }
 
 func TestDecimalNewDecimalFromString(t *testing.T) {
