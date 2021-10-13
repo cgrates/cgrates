@@ -74,6 +74,10 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, cfg.migratorCgrCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.migratorCgrCfg))
 	}
+	cfgJSON = nil
+	if err = cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
@@ -346,5 +350,50 @@ func TestDiffMigratorCfgJson(t *testing.T) {
 	rcv = diffMigratorCfgJson(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestMigratorCloneSection(t *testing.T) {
+	mgrCfg := &MigratorCgrCfg{
+		OutDataDBType:     "postgres",
+		OutDataDBHost:     "127.0.0.1",
+		OutDataDBPort:     "8080",
+		OutDataDBName:     "cgrates",
+		OutDataDBUser:     "cgrates_user",
+		OutDataDBPassword: "CGRateS.org",
+		OutDataDBEncoding: "utf-8",
+		OutStorDBType:     "redis",
+		OutStorDBHost:     "127.0.0.1",
+		OutStorDBPort:     "4037",
+		OutStorDBName:     "cgrates_redis",
+		OutStorDBUser:     "cgrates_redis_user",
+		OutStorDBPassword: "CGRateS.org_redis",
+		OutDataDBOpts:     &DataDBOpts{},
+		OutStorDBOpts:     &StorDBOpts{},
+		UsersFilters:      []string{},
+	}
+
+	exp := &MigratorCgrCfg{
+		OutDataDBType:     "postgres",
+		OutDataDBHost:     "127.0.0.1",
+		OutDataDBPort:     "8080",
+		OutDataDBName:     "cgrates",
+		OutDataDBUser:     "cgrates_user",
+		OutDataDBPassword: "CGRateS.org",
+		OutDataDBEncoding: "utf-8",
+		OutStorDBType:     "redis",
+		OutStorDBHost:     "127.0.0.1",
+		OutStorDBPort:     "4037",
+		OutStorDBName:     "cgrates_redis",
+		OutStorDBUser:     "cgrates_redis_user",
+		OutStorDBPassword: "CGRateS.org_redis",
+		OutDataDBOpts:     &DataDBOpts{},
+		OutStorDBOpts:     &StorDBOpts{},
+		UsersFilters:      []string{},
+	}
+
+	rcv := mgrCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

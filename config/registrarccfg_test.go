@@ -168,6 +168,22 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsnCfg.registrarCCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.registrarCCfg))
 	}
+
+	jsonCfg.RPC.Hosts = append(jsonCfg.RPC.Hosts, &RemoteHostJsonWithTenant{
+		Tenant: utils.StringPointer(""),
+		RemoteHostJson: &RemoteHostJson{
+			Id:        utils.StringPointer("Host1"),
+			Transport: utils.StringPointer(utils.MetaJSON),
+		},
+	})
+	if err = jsnCfg.registrarCCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
+
+	jsonCfg = nil
+	if err = jsnCfg.registrarCCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDispatcherHCfgAsMapInterface(t *testing.T) {
@@ -550,5 +566,74 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 	rcv = diffRegistrarCJsonCfgs(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestRegristrarcCloneSection(t *testing.T) {
+	rgstCfg := &RegistrarCCfgs{
+		RPC: &RegistrarCCfg{
+			RegistrarSConns: []string{"*localhost"},
+			Hosts: map[string][]*RemoteHost{
+				"HOST_1": {
+					{
+						ID:        "host1_ID",
+						Address:   "127.0.0.1:8080",
+						Transport: "tcp",
+						TLS:       false,
+					},
+				},
+			},
+			RefreshInterval: 2 * time.Second,
+		},
+		Dispatchers: &RegistrarCCfg{
+			RegistrarSConns: []string{"*localhost"},
+			Hosts: map[string][]*RemoteHost{
+				"HOST_1": {
+					{
+						ID:        "host1_ID",
+						Address:   "127.0.0.1:8080",
+						Transport: "tcp",
+						TLS:       false,
+					},
+				},
+			},
+			RefreshInterval: 2 * time.Second,
+		},
+	}
+
+	exp := &RegistrarCCfgs{
+		RPC: &RegistrarCCfg{
+			RegistrarSConns: []string{"*localhost"},
+			Hosts: map[string][]*RemoteHost{
+				"HOST_1": {
+					{
+						ID:        "host1_ID",
+						Address:   "127.0.0.1:8080",
+						Transport: "tcp",
+						TLS:       false,
+					},
+				},
+			},
+			RefreshInterval: 2 * time.Second,
+		},
+		Dispatchers: &RegistrarCCfg{
+			RegistrarSConns: []string{"*localhost"},
+			Hosts: map[string][]*RemoteHost{
+				"HOST_1": {
+					{
+						ID:        "host1_ID",
+						Address:   "127.0.0.1:8080",
+						Transport: "tcp",
+						TLS:       false,
+					},
+				},
+			},
+			RefreshInterval: 2 * time.Second,
+		},
+	}
+
+	rcv := rgstCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

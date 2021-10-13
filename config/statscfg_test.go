@@ -68,6 +68,47 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.statsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.statsCfg))
 	}
+	cfgJSON = nil
+	if err = jsonCfg.statsCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
+	statsOpt := &StatsOpts{
+		StatIDs: []*utils.DynamicStringSliceOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     []string{},
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+
+	exp := &StatsOpts{
+		StatIDs: []*utils.DynamicStringSliceOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     []string{},
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+
+	statsOpt.loadFromJSONCfg(nil)
+	if !reflect.DeepEqual(statsOpt, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, statsOpt)
+	}
 }
 
 func TestStatSCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -240,5 +281,42 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 	rcv = diffStatServJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestStatSCloneSection(t *testing.T) {
+	statsCfg := &StatSCfg{
+		Enabled:                false,
+		IndexedSelects:         false,
+		StoreInterval:          1 * time.Second,
+		StoreUncompressedLimit: 2,
+		ThresholdSConns:        []string{"*localhost"},
+		StringIndexedFields:    &[]string{"*req.index1"},
+		PrefixIndexedFields:    &[]string{"*req.index2"},
+		SuffixIndexedFields:    &[]string{"*req.index3"},
+		NestedFields:           false,
+		Opts: &StatsOpts{
+			StatIDs: []*utils.DynamicStringSliceOpt{},
+		},
+	}
+
+	exp := &StatSCfg{
+		Enabled:                false,
+		IndexedSelects:         false,
+		StoreInterval:          1 * time.Second,
+		StoreUncompressedLimit: 2,
+		ThresholdSConns:        []string{"*localhost"},
+		StringIndexedFields:    &[]string{"*req.index1"},
+		PrefixIndexedFields:    &[]string{"*req.index2"},
+		SuffixIndexedFields:    &[]string{"*req.index3"},
+		NestedFields:           false,
+		Opts: &StatsOpts{
+			StatIDs: []*utils.DynamicStringSliceOpt{},
+		},
+	}
+
+	rcv := statsCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

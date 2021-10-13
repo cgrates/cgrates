@@ -749,3 +749,54 @@ func TestDiffRPCConnsJson(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+func TestRPCConnCloneSection(t *testing.T) {
+	rpcCfg := RPCConns{
+		"CONN_1": {
+			Strategy: utils.MetaTopUpReset,
+			PoolSize: 2,
+			Conns: []*RemoteHost{
+				{
+					ID:                "host1_ID",
+					Address:           "127.0.0.1:8080",
+					Transport:         "tcp",
+					ConnectAttempts:   2,
+					Reconnects:        5,
+					ConnectTimeout:    1 * time.Minute,
+					ReplyTimeout:      1 * time.Minute,
+					TLS:               false,
+					ClientKey:         "key1",
+					ClientCertificate: "path1",
+					CaCertificate:     "ca_path1",
+				},
+			},
+		},
+	}
+
+	exp := RPCConns{
+		"CONN_1": {
+			Strategy: utils.MetaTopUpReset,
+			PoolSize: 2,
+			Conns: []*RemoteHost{
+				{
+					ID:                "host1_ID",
+					Address:           "127.0.0.1:8080",
+					Transport:         "tcp",
+					ConnectAttempts:   2,
+					Reconnects:        5,
+					ConnectTimeout:    1 * time.Minute,
+					ReplyTimeout:      1 * time.Minute,
+					TLS:               false,
+					ClientKey:         "key1",
+					ClientCertificate: "path1",
+					CaCertificate:     "ca_path1",
+				},
+			},
+		},
+	}
+
+	rcv := rpcCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}

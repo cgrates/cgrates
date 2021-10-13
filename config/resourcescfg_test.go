@@ -72,6 +72,53 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, cfg.resourceSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.resourceSCfg))
 	}
+	cfgJSON = nil
+	if err = cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestResourceSLoadFromJSONOpts(t *testing.T) {
+	resOpts := &ResourcesOpts{
+		UsageID: []*utils.DynamicStringOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     utils.EmptyString,
+			},
+		},
+		UsageTTL: []*utils.DynamicDurationOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     72 * time.Hour,
+			},
+		},
+		Units: []*utils.DynamicFloat64Opt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     1,
+			},
+		},
+	}
+
+	resOptsJson := &ResourcesOptsJson{
+		UsageID: map[string]string{
+			utils.EmptyString: "usg2",
+		},
+		UsageTTL: map[string]string{
+			utils.EmptyString: "error",
+		},
+		Units: map[string]float64{
+			utils.EmptyString: float64(2),
+		},
+	}
+	errExp := `time: invalid duration "error"`
+	if err := resOpts.loadFromJSONCfg(resOptsJson); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err.Error())
+	}
+
+	if err := resOpts.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestResourceSConfigloadFromJsonCfgCase2(t *testing.T) {
@@ -280,5 +327,68 @@ func TestDiffResourceSJsonCfg(t *testing.T) {
 	rcv = diffResourceSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestResourcesCloneSection(t *testing.T) {
+	rsrCfg := &ResourceSConfig{
+		Enabled:             false,
+		IndexedSelects:      false,
+		ThresholdSConns:     []string{"*localhost"},
+		StoreInterval:       1 * time.Second,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index3"},
+		NestedFields:        false,
+		Opts: &ResourcesOpts{
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: "usg1",
+				},
+			},
+			UsageTTL: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
+			},
+		},
+	}
+
+	exp := &ResourceSConfig{
+		Enabled:             false,
+		IndexedSelects:      false,
+		ThresholdSConns:     []string{"*localhost"},
+		StoreInterval:       1 * time.Second,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index3"},
+		NestedFields:        false,
+		Opts: &ResourcesOpts{
+			UsageID: []*utils.DynamicStringOpt{
+				{
+					Value: "usg1",
+				},
+			},
+			UsageTTL: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			Units: []*utils.DynamicFloat64Opt{
+				{
+					Value: 1,
+				},
+			},
+		},
+	}
+
+	rcv := rsrCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

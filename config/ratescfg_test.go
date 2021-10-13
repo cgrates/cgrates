@@ -94,6 +94,10 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.rateSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rateSCfg))
 	}
+	cfgJSON = nil
+	if err = jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestRatesCfgAsMapInterface(t *testing.T) {
@@ -319,4 +323,120 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+}
+
+func TestRateSCloneSection(t *testing.T) {
+	rateSCfg := &RateSCfg{
+		Enabled:                 false,
+		IndexedSelects:          false,
+		StringIndexedFields:     &[]string{"*req.index1"},
+		PrefixIndexedFields:     &[]string{"*req.index2"},
+		SuffixIndexedFields:     &[]string{"*req.index3"},
+		NestedFields:            false,
+		RateIndexedSelects:      false,
+		RateStringIndexedFields: &[]string{"*req.rateIndex1"},
+		RatePrefixIndexedFields: &[]string{"*req.rateIndex2"},
+		RateSuffixIndexedFields: &[]string{"*req.rateIndex3"},
+		RateNestedFields:        false,
+		Verbosity:               2,
+		Opts: &RatesOpts{
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{"RP1"},
+				},
+			},
+		},
+	}
+
+	exp := &RateSCfg{
+		Enabled:                 false,
+		IndexedSelects:          false,
+		StringIndexedFields:     &[]string{"*req.index1"},
+		PrefixIndexedFields:     &[]string{"*req.index2"},
+		SuffixIndexedFields:     &[]string{"*req.index3"},
+		NestedFields:            false,
+		RateIndexedSelects:      false,
+		RateStringIndexedFields: &[]string{"*req.rateIndex1"},
+		RatePrefixIndexedFields: &[]string{"*req.rateIndex2"},
+		RateSuffixIndexedFields: &[]string{"*req.rateIndex3"},
+		RateNestedFields:        false,
+		Verbosity:               2,
+		Opts: &RatesOpts{
+			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					FilterIDs: []string{utils.MetaDefault},
+					Value:     []string{"RP1"},
+				},
+			},
+		},
+	}
+
+	rcv := rateSCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestRatesOptsLoadFromJSON(t *testing.T) {
+	rateOpts := &RatesOpts{
+		RateProfileIDs: []*utils.DynamicStringSliceOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     []string{},
+			},
+		},
+		StartTime: []*utils.DynamicStringOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     utils.MetaNow,
+			},
+		},
+		Usage: []*utils.DynamicDecimalBigOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     nil,
+			},
+		},
+		IntervalStart: []*utils.DynamicDecimalBigOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     nil,
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				FilterIDs: []string{utils.MetaDefault},
+				Value:     false,
+			},
+		},
+	}
+
+	//first check for empty cfg
+	if err := rateOpts.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
+
+	jsnCfg := &RatesOptsJson{
+		RateProfileIDs: map[string][]string{
+			utils.MetaDefault: {"RP2"},
+		},
+		Usage: map[string]string{
+			"Value": "error",
+		},
+	}
+	errExpect := "can't convert <error> to decimal"
+	if err := rateOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but  received \n %v", errExpect, err.Error())
+	}
+
+	jsnCfg = &RatesOptsJson{
+		IntervalStart: map[string]string{
+			"Value": "error",
+		},
+	}
+	if err := rateOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but  received \n %v", errExpect, err.Error())
+	}
+
 }

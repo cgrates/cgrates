@@ -40,6 +40,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Accounts_conns:        &[]string{utils.MetaInternal, "conn1"},
 		Default_ratio:         utils.IntPointer(10),
 		Nested_fields:         utils.BoolPointer(true),
+		Opts:                  &RoutesOptsJson{},
 	}
 	expected := &RouteSCfg{
 		Enabled:             true,
@@ -94,6 +95,26 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.routeSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg))
+	}
+
+	cfgJSON.Opts.Usage = map[string]string{
+		"Value": "error",
+	}
+	errExpect := "can't convert <error> to decimal"
+	if err = jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+
+	cfgJSON = nil
+	if err = jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRouteSCfgloadFromJsonCfgOpts(t *testing.T) {
+	routeSOpt := &RoutesOpts{}
+	if err := routeSOpt.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -249,6 +270,8 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		AttributeSConns:     []string{"*localhost"},
 		ResourceSConns:      []string{"*localhost"},
 		StatSConns:          []string{"*localhost"},
+		RateSConns:          []string{"*localhost"},
+		AccountSConns:       []string{"*localhost"},
 		DefaultRatio:        2,
 		Opts: &RoutesOpts{
 			Context: []*utils.DynamicStringOpt{
@@ -294,6 +317,8 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		AttributeSConns:     []string{"*birpc"},
 		ResourceSConns:      []string{"*birpc"},
 		StatSConns:          []string{"*birpc"},
+		RateSConns:          []string{"*birpc"},
+		AccountSConns:       []string{"*birpc"},
 		DefaultRatio:        3,
 		Opts: &RoutesOpts{
 			Context: []*utils.DynamicStringOpt{
@@ -339,6 +364,8 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{"*birpc"},
 		Resources_conns:       &[]string{"*birpc"},
 		Stats_conns:           &[]string{"*birpc"},
+		Rates_conns:           &[]string{"*birpc"},
+		Accounts_conns:        &[]string{"*birpc"},
 		Default_ratio:         utils.IntPointer(3),
 		Opts: &RoutesOptsJson{
 			Context: map[string]string{
@@ -374,5 +401,103 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 	rcv = diffRouteSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestRouteSCloneSection(t *testing.T) {
+	routeScfg := &RouteSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index3"},
+		NestedFields:        false,
+		AttributeSConns:     []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		StatSConns:          []string{"*localhost"},
+		DefaultRatio:        2,
+
+		Opts: &RoutesOpts{
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaAny,
+				},
+			},
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: true,
+				},
+			},
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: 5,
+				},
+			},
+			Limit: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
+			Offset: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
+			ProfileCount: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
+		},
+	}
+
+	exp := &RouteSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index3"},
+		NestedFields:        false,
+		AttributeSConns:     []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		StatSConns:          []string{"*localhost"},
+		DefaultRatio:        2,
+		Opts: &RoutesOpts{
+			Context: []*utils.DynamicStringOpt{
+				{
+					Value: utils.MetaAny,
+				},
+			},
+			IgnoreErrors: []*utils.DynamicBoolOpt{
+				{
+					Value: true,
+				},
+			},
+			MaxCost: []*utils.DynamicInterfaceOpt{
+				{
+					Value: 5,
+				},
+			},
+			Limit: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
+			Offset: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
+			ProfileCount: []*utils.DynamicIntOpt{
+				{
+					Value: 1,
+				},
+			},
+		},
+	}
+
+	rcv := routeScfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
