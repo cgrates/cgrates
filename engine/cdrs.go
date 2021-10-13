@@ -347,11 +347,13 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent,
 	return nil
 }
 
-/*
 // V1ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
 func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CGREvent, evs *[]*utils.EventWithFlags) (err error) {
-	if arg.ID == "" {
+	if arg.ID == utils.EmptyString {
 		arg.ID = utils.GenUUID()
+	}
+	if arg.Tenant == utils.EmptyString {
+		arg.Tenant = cdrS.cfg.GeneralCfg().DefaultTenant
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
@@ -373,80 +375,10 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 	}
 	// end of RPC caching
 
-	// processing options
-	argsDP := arg.AsDataProvider()
-	var acntS bool
-	if v, has := arg.APIOpts[utils.OptsAccountS]; !has {
-		if acntS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Accounts); err != nil {
-			return
-		}
-	} else if acntS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var attrS bool
-	if v, has := arg.APIOpts[utils.OptsAttributeS]; !has {
-		if attrS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Attributes); err != nil {
-			return
-		}
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var chrgS bool
-	if v, has := arg.APIOpts[utils.OptsChargerS]; !has {
-		if chrgS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Chargers); err != nil {
-			return
-		}
-	} else if chrgS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var export bool
-	if v, has := arg.APIOpts[utils.OptsCDRsExport]; !has {
-		if export, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Export); err != nil {
-			return
-		}
-	} else if export, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var rateS bool
-	if v, has := arg.APIOpts[utils.OptsRateS]; !has {
-		if rateS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Rates); err != nil {
-			return
-		}
-	} else if rateS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var stS bool
-	if v, has := arg.APIOpts[utils.OptsStatS]; !has {
-		if stS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Stats); err != nil {
-			return
-		}
-	} else if stS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	var thdS bool
-	if v, has := arg.APIOpts[utils.OptsThresholdS]; !has {
-		if thdS, err = FilterBoolCfgOpts(ctx, arg.Tenant, argsDP, cdrS.filterS,
-			cdrS.cfg.CdrsCfg().Opts.Thresholds); err != nil {
-			return
-		}
-	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
-		return
-	}
-	// end of processing options
-
 	var procEvs []*utils.EventWithFlags
-	if procEvs, err = cdrS.processEvent(ctx, arg,
-		chrgS, attrS, rateS, acntS, export, thdS, stS); err != nil {
+	if procEvs, err = cdrS.processEvent(ctx, arg); err != nil {
 		return
 	}
 	*evs = procEvs
 	return nil
 }
-
-*/

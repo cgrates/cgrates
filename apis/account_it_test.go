@@ -451,16 +451,13 @@ func testAccMaxAbstracts(t *testing.T) {
 					Weights: ";20",
 					Type:    utils.MetaConcrete,
 					Units:   213,
-					/*
-						CostIncrements: []*utils.APICostIncrement{
-							{
-								Increment:    utils.Float64Pointer(float64(time.Second)),
-								FixedFee:     utils.NewDecimal(int64(0, 0),
-								RecurrentFee: utils.NewDecimal(int64(0, 0),
-							},
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(0),
 						},
-
-					*/
+					},
 				},
 			},
 		},
@@ -573,7 +570,14 @@ func testAccMaxAbstracts(t *testing.T) {
 								Weight: 20,
 							},
 						},
-						Type:  "*concrete",
+						Type: "*concrete",
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
 						Units: utils.NewDecimal(213, 0),
 					},
 				},
