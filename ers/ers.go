@@ -20,9 +20,12 @@ package ers
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -413,25 +416,37 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 					utils.ERs, utils.ToJSON(eEvs.events), err.Error()))
 			return
 		}
-		// convert the event to record
-		eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
-			utils.MetaReq:  utils.MapStorage(cgrEv.Event),
-			utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
-			utils.MetaCfg:  erS.cfg.GetDataProvider(),
-		}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
-			erS.filterS, map[string]*utils.OrderedNavigableMap{
-				utils.MetaExp: utils.NewOrderedNavigableMap(),
-			})
+		var record []string
+		if len(eEvs.rdrCfg.CacheDumpFields) != 0 {
+			// convert the event to record
+			eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+				utils.MetaReq:  utils.MapStorage(cgrEv.Event),
+				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
+				utils.MetaCfg:  erS.cfg.GetDataProvider(),
+			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
+				erS.filterS, map[string]*utils.OrderedNavigableMap{
+					utils.MetaExp: utils.NewOrderedNavigableMap(),
+				})
 
-		if err = eeReq.SetFields(eEvs.rdrCfg.CacheDumpFields); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
-					utils.ERs, id, err.Error()))
-			return
+			if err = eeReq.SetFields(eEvs.rdrCfg.CacheDumpFields); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
+						utils.ERs, id, err.Error()))
+				return
+			}
+
+			record = eeReq.ExpData[utils.MetaExp].OrderedFieldsAsStrings()
+		} else {
+			keys := make([]string, 0, len(cgrEv.Event))
+			for k := range cgrEv.Event {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			record = make([]string, len(keys))
+			for i, k := range keys {
+				record[i] = utils.IfaceAsString(cgrEv.Event[k])
+			}
 		}
-
-		record := eeReq.ExpData[utils.MetaExp].OrderedFieldsAsStrings()
-
 		// open the file and write the record
 		dumpFilePath := path.Join(expPath, fmt.Sprintf("%s.%d%s",
 			id, time.Now().Unix(), utils.TmpSuffix))
@@ -452,6 +467,69 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 		}
 		csvWriter.Flush()
 		fileOut.Close()
+	case utils.MetaDumpToJSON: // apply the cacheDumpFields to the united events and write the record to file
+		expPath := eEvs.rdrCfg.ProcessedPath
+		if pathVal, has := eEvs.rdrCfg.Opts[utils.PartialPathOpt]; has {
+			expPath = utils.IfaceAsString(pathVal)
+		}
+		if expPath == utils.EmptyString { // do not write the partial event to file
+			return
+		}
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS, // merge the partial events
+			erS.cfg.GeneralCfg().DefaultTenant,
+			erS.cfg.GeneralCfg().DefaultTimezone,
+			erS.cfg.GeneralCfg().RSRSep)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> failed posting expired parial events <%s> due error <%s>",
+					utils.ERs, utils.ToJSON(eEvs.events), err.Error()))
+			return
+		}
+		var record map[string]interface{}
+		if len(eEvs.rdrCfg.CacheDumpFields) != 0 {
+			// convert the event to record
+			eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+				utils.MetaReq:  utils.MapStorage(cgrEv.Event),
+				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
+				utils.MetaCfg:  erS.cfg.GetDataProvider(),
+			}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
+				erS.filterS, map[string]*utils.OrderedNavigableMap{
+					utils.MetaExp: utils.NewOrderedNavigableMap(),
+				})
+
+			if err = eeReq.SetFields(eEvs.rdrCfg.CacheDumpFields); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
+						utils.ERs, id, err.Error()))
+				return
+			}
+
+			record = make(map[string]interface{})
+			for el := eeReq.ExpData[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
+				path := el.Value
+				nmIt, _ := eeReq.ExpData[utils.MetaExp].Field(path)
+				path = path[:len(path)-1] // remove the last index
+				record[strings.Join(path, utils.NestingSep)] = nmIt.Data
+			}
+		} else {
+			record = cgrEv.Event
+		}
+		// open the file and write the record
+		dumpFilePath := path.Join(expPath, fmt.Sprintf("%s.%d%s",
+			id, time.Now().Unix(), utils.TmpSuffix))
+		fileOut, err := os.Create(dumpFilePath)
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Failed creating %s, error: %s",
+				utils.ERs, dumpFilePath, err.Error()))
+			return
+		}
+
+		if err = json.NewEncoder(fileOut).Encode(record); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
+				utils.ERs, record, dumpFilePath, err.Error()))
+		}
+		fileOut.Close()
+
 	}
 
 }
