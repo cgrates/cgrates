@@ -183,9 +183,9 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt
 	return
 }
 
-func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def *config.RoutesOpts) (opts *optsGetRoutes, err error) {
+func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
 	var ignoreErrors bool
-	if ignoreErrors, err = GetBoolOpts(ctx, ev.Tenant, ev, fS, def.IgnoreErrors,
+	if ignoreErrors, err = GetBoolOpts(ctx, ev.Tenant, ev, fS, cfgOpts.IgnoreErrors,
 		config.RoutesIgnoreErrorsDftOpt, utils.OptsRoutesIgnoreErrors); err != nil {
 		return
 	}
@@ -193,27 +193,27 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, def
 		ignoreErrors: ignoreErrors,
 		paginator:    &utils.Paginator{},
 	}
-	var limit int
-	if limit, err = GetIntOpts(ctx, ev.Tenant, ev, fS, def.Limit, config.RoutesLimitDftOpt,
+	var limit *int
+	if limit, err = GetIntPointerOpts(ctx, ev.Tenant, ev, fS, cfgOpts.Limit,
 		utils.OptsRoutesLimit); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
 	} else {
-		opts.paginator.Limit = utils.IntPointer(limit)
+		opts.paginator.Limit = limit
 	}
-	var offset int
-	if offset, err = GetIntOpts(ctx, ev.Tenant, ev, fS, def.Offset, config.RoutesOffsetDftOpt,
+	var offset *int
+	if offset, err = GetIntPointerOpts(ctx, ev.Tenant, ev, fS, cfgOpts.Offset,
 		utils.OptsRoutesOffset); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
 	} else {
-		opts.paginator.Offset = utils.IntPointer(offset)
+		opts.paginator.Offset = offset
 	}
 
 	var maxCost interface{}
-	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, ev, fS, def.MaxCost, config.RoutesMaxCostDftOpt,
+	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, ev, fS, cfgOpts.MaxCost, config.RoutesMaxCostDftOpt,
 		utils.OptsRoutesMaxCost); err != nil {
 		return
 	}
