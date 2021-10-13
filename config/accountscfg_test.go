@@ -112,11 +112,19 @@ func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
 	}
 
 	jsnCfg := &AccountsOptsJson{
-		AccountIDs: map[string][]string{},
-		Usage: map[string]string{
-			"Value": "error",
+		AccountIDs: []*utils.DynamicStringSliceOpt{
+			{},
 		},
-		ProfileIgnoreFilters: map[string]bool{},
+		Usage: []*utils.DynamicStringOpt{
+			{
+				Value: "error",
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				Value: false,
+			},
+		},
 	}
 	errExp := "can't convert <error> to decimal"
 	if err := accOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExp {

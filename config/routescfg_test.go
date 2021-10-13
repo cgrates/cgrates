@@ -79,8 +79,8 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 					Value:     utils.EmptyString,
 				},
 			},
-			Limit:  []*utils.DynamicIntOpt{},
-			Offset: []*utils.DynamicIntOpt{},
+			Limit:  []*utils.DynamicIntPointerOpt{},
+			Offset: []*utils.DynamicIntPointerOpt{},
 			Usage: []*utils.DynamicDecimalBigOpt{
 				{
 					FilterIDs: []string{utils.MetaDefault},
@@ -266,16 +266,8 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value: 5,
 				},
 			},
-			Limit: []*utils.DynamicIntOpt{
-				{
-					Value: 1,
-				},
-			},
-			Offset: []*utils.DynamicIntOpt{
-				{
-					Value: 1,
-				},
-			},
+			Limit:  []*utils.DynamicIntPointerOpt{},
+			Offset: []*utils.DynamicIntPointerOpt{},
 			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 1,
@@ -311,16 +303,8 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value: utils.MetaEventCost,
 				},
 			},
-			Limit: []*utils.DynamicIntOpt{
-				{
-					Value: 2,
-				},
-			},
-			Offset: []*utils.DynamicIntOpt{
-				{
-					Value: 2,
-				},
-			},
+			Limit:  []*utils.DynamicIntPointerOpt{},
+			Offset: []*utils.DynamicIntPointerOpt{},
 			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 2,
