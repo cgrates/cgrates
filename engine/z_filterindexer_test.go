@@ -15,16 +15,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	//set 4 attr profiles with different filters to index them
 
@@ -133,7 +134,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 func TestFilterIndexesCheckingDynamicPathToNotIndexAsm(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// set 1 charger profile with different *asm filter to index
@@ -170,7 +171,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndexAsm(t *testing.T) {
 func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true)
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// set 1 charger profile with different *libphonenumber filter to index

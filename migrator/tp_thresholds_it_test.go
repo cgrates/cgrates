@@ -74,7 +74,7 @@ func testTpTresITConnect(t *testing.T) {
 		tpTresCfgIn.StorDbCfg().Name, tpTresCfgIn.StorDbCfg().User,
 		tpTresCfgIn.StorDbCfg().Password, tpTresCfgIn.GeneralCfg().DBDataEncoding,
 		tpTresCfgIn.StorDbCfg().StringIndexedFields, tpTresCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpTresCfgIn.StorDbCfg().Opts)
+		tpTresCfgIn.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func testTpTresITConnect(t *testing.T) {
 		tpTresCfgOut.StorDbCfg().Name, tpTresCfgOut.StorDbCfg().User,
 		tpTresCfgOut.StorDbCfg().Password, tpTresCfgOut.GeneralCfg().DBDataEncoding,
 		tpTresCfgIn.StorDbCfg().StringIndexedFields, tpTresCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpTresCfgOut.StorDbCfg().Opts)
+		tpTresCfgOut.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

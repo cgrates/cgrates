@@ -73,7 +73,7 @@ func testTpDstRtITConnect(t *testing.T) {
 		tpDstRtCfgIn.StorDbCfg().Name, tpDstRtCfgIn.StorDbCfg().User,
 		tpDstRtCfgIn.StorDbCfg().Password, tpDstRtCfgIn.GeneralCfg().DBDataEncoding,
 		tpDstRtCfgIn.StorDbCfg().StringIndexedFields, tpDstRtCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpDstRtCfgIn.StorDbCfg().Opts)
+		tpDstRtCfgIn.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func testTpDstRtITConnect(t *testing.T) {
 		tpDstRtCfgOut.StorDbCfg().Name, tpDstRtCfgOut.StorDbCfg().User,
 		tpDstRtCfgOut.StorDbCfg().Password, tpDstRtCfgOut.GeneralCfg().DBDataEncoding,
 		tpDstRtCfgIn.StorDbCfg().StringIndexedFields, tpDstRtCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpDstRtCfgOut.StorDbCfg().Opts)
+		tpDstRtCfgOut.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

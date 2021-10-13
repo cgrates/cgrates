@@ -70,7 +70,7 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgIn.DataDbCfg().Host, acc2CfgIn.DataDbCfg().Port,
 		acc2CfgIn.DataDbCfg().Name, acc2CfgIn.DataDbCfg().User,
 		acc2CfgIn.DataDbCfg().Password, acc2CfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), acc2CfgIn.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), acc2CfgIn.DataDbCfg().Opts, acc2CfgIn.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -78,7 +78,7 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgOut.DataDbCfg().Host, acc2CfgOut.DataDbCfg().Port,
 		acc2CfgOut.DataDbCfg().Name, acc2CfgOut.DataDbCfg().User,
 		acc2CfgOut.DataDbCfg().Password, acc2CfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), acc2CfgOut.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), acc2CfgOut.DataDbCfg().Opts, acc2CfgOut.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -88,7 +88,7 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgIn.StorDbCfg().Name, acc2CfgIn.StorDbCfg().User,
 		acc2CfgIn.StorDbCfg().Password, acc2CfgIn.GeneralCfg().DBDataEncoding,
 		acc2CfgIn.StorDbCfg().StringIndexedFields, acc2CfgIn.StorDbCfg().PrefixIndexedFields,
-		acc2CfgIn.StorDbCfg().Opts)
+		acc2CfgIn.StorDbCfg().Opts, acc2CfgIn.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,7 +97,7 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgOut.StorDbCfg().Name, acc2CfgOut.StorDbCfg().User,
 		acc2CfgOut.StorDbCfg().Password, acc2CfgIn.GeneralCfg().DBDataEncoding,
 		acc2CfgOut.StorDbCfg().StringIndexedFields, acc2CfgOut.StorDbCfg().PrefixIndexedFields,
-		acc2CfgOut.StorDbCfg().Opts)
+		acc2CfgOut.StorDbCfg().Opts, acc2CfgOut.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -127,10 +127,10 @@ func testAcc2ITFlush(t *testing.T) {
 	if acc2Migrator.dmOut.DataManager().DataDB().GetStorageType() != utils.Redis {
 		t.Errorf("Unexpected datadb type : %+v", acc2Migrator.dmOut.DataManager().DataDB().GetStorageType())
 	}
-	if acc2Migrator.storDBIn.StorDB().GetStorageType() != utils.INTERNAL {
+	if acc2Migrator.storDBIn.StorDB().GetStorageType() != utils.Internal {
 		t.Errorf("Unexpected datadb type : %+v", acc2Migrator.storDBIn.StorDB().GetStorageType())
 	}
-	if acc2Migrator.storDBOut.StorDB().GetStorageType() != utils.INTERNAL {
+	if acc2Migrator.storDBOut.StorDB().GetStorageType() != utils.Internal {
 		t.Errorf("Unexpected datadb type : %+v", acc2Migrator.storDBOut.StorDB().GetStorageType())
 	}
 }

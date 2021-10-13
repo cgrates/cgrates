@@ -90,12 +90,12 @@ var sTests = []func(t *testing.T){
 }
 
 func TestFilterIndexerIT(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	switch *dbType {
 	case utils.MetaInternal:
-		dataManager = NewDataManager(NewInternalDB(nil, nil, true),
+		dataManager = NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMySQL:
-		cfg := config.NewDefaultCGRConfig()
 		redisDB, err := NewRedisStorage(
 			fmt.Sprintf("%s:%s", cfg.DataDbCfg().Host, cfg.DataDbCfg().Port),
 			4, cfg.DataDbCfg().User, cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,

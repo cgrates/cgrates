@@ -129,7 +129,7 @@ func testRtPrfITConnect(t *testing.T) {
 		rtprflCfgIn.DataDbCfg().Host, rtprflCfgIn.DataDbCfg().Port,
 		rtprflCfgIn.DataDbCfg().Name, rtprflCfgIn.DataDbCfg().User,
 		rtprflCfgIn.DataDbCfg().Password, rtprflCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), rtprflCfgIn.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), rtprflCfgIn.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,7 +137,7 @@ func testRtPrfITConnect(t *testing.T) {
 		rtprflCfgOut.DataDbCfg().Host, rtprflCfgOut.DataDbCfg().Port,
 		rtprflCfgOut.DataDbCfg().Name, rtprflCfgOut.DataDbCfg().User,
 		rtprflCfgOut.DataDbCfg().Password, rtprflCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), rtplCfgOut.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), rtplCfgOut.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

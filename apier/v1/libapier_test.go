@@ -207,7 +207,7 @@ func TestCallCache(t *testing.T) {
 
 func TestCallCacheForFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 	tnt := "cgrates.org"
 	flt := &engine.Filter{
 		Tenant: tnt,

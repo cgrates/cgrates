@@ -73,7 +73,7 @@ func testTpAccActITConnect(t *testing.T) {
 		tpAccActCfgIn.StorDbCfg().Name, tpAccActCfgIn.StorDbCfg().User,
 		tpAccActCfgIn.StorDbCfg().Password, tpAccActCfgIn.GeneralCfg().DBDataEncoding,
 		tpAccActCfgIn.StorDbCfg().StringIndexedFields, tpAccActCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpAccActCfgIn.StorDbCfg().Opts)
+		tpAccActCfgIn.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func testTpAccActITConnect(t *testing.T) {
 		tpAccActCfgOut.StorDbCfg().Name, tpAccActCfgOut.StorDbCfg().User,
 		tpAccActCfgOut.StorDbCfg().Password, tpAccActCfgOut.GeneralCfg().DBDataEncoding,
 		tpAccActCfgIn.StorDbCfg().StringIndexedFields, tpAccActCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpAccActCfgOut.StorDbCfg().Opts)
+		tpAccActCfgOut.StorDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

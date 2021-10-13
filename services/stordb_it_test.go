@@ -119,7 +119,7 @@ func TestStorDBReload(t *testing.T) {
 	if err := stordb.Reload(); err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	cfg.StorDbCfg().Type = utils.INTERNAL
+	cfg.StorDbCfg().Type = utils.Internal
 	if err := stordb.Reload(); err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
@@ -162,7 +162,7 @@ func TestStorDBReloadVersion1(t *testing.T) {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -240,7 +240,7 @@ func TestStorDBReloadVersion2(t *testing.T) {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -317,7 +317,7 @@ func TestStorDBReloadVersion3(t *testing.T) {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -394,7 +394,7 @@ func TestStorDBReloadNewStorDBConnError(t *testing.T) {
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.oldDBCfg = &config.StorDbCfg{
-		Type:     utils.INTERNAL,
+		Type:     utils.Internal,
 		Host:     "test_host",
 		Port:     "test_port",
 		Name:     "test_name",

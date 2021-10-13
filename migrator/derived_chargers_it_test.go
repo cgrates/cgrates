@@ -83,7 +83,7 @@ func testDCITConnect(t *testing.T) {
 		dcCfgIn.DataDbCfg().Host, dcCfgIn.DataDbCfg().Port,
 		dcCfgIn.DataDbCfg().Name, dcCfgIn.DataDbCfg().User,
 		dcCfgIn.DataDbCfg().Password, dcCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), dcCfgIn.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), dcCfgIn.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func testDCITConnect(t *testing.T) {
 		dcCfgOut.DataDbCfg().Host, dcCfgOut.DataDbCfg().Port,
 		dcCfgOut.DataDbCfg().Name, dcCfgOut.DataDbCfg().User,
 		dcCfgOut.DataDbCfg().Password, dcCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), dcCfgOut.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), dcCfgOut.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

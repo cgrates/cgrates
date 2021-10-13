@@ -148,7 +148,7 @@ func testTrsITConnect(t *testing.T) {
 		trsCfgIn.DataDbCfg().Host, trsCfgIn.DataDbCfg().Port,
 		trsCfgIn.DataDbCfg().Name, trsCfgIn.DataDbCfg().User,
 		trsCfgIn.DataDbCfg().Password, trsCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), trsCfgIn.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), trsCfgIn.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func testTrsITConnect(t *testing.T) {
 		trsCfgOut.DataDbCfg().Host, trsCfgOut.DataDbCfg().Port,
 		trsCfgOut.DataDbCfg().Name, trsCfgOut.DataDbCfg().User,
 		trsCfgOut.DataDbCfg().Password, trsCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), trsCfgOut.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), trsCfgOut.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

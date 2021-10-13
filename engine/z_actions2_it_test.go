@@ -87,7 +87,7 @@ func testActionsInitCfg(t *testing.T) {
 func testActionsInitCdrsStore(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		actsCdrStore = NewInternalDB(actsCfg.StorDbCfg().StringIndexedFields, actsCfg.StorDbCfg().PrefixIndexedFields, true)
+		actsCdrStore = NewInternalDB(nil, nil, true, actsCfg.DataDbCfg().Items)
 	case utils.MetaMySQL:
 		if actsCdrStore, err = NewMySQLStorage(actsCfg.StorDbCfg().Host,
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,

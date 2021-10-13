@@ -35,9 +35,9 @@ import (
 )
 
 func TestListenAndServe(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Cache = make(map[string]*config.CacheParamCfg)
-	cgrCfg.EEsCfg().Cache = map[string]*config.CacheParamCfg{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Cache = make(map[string]*config.CacheParamCfg)
+	cfg.EEsCfg().Cache = map[string]*config.CacheParamCfg{
 		utils.MetaFileCSV: {
 			Limit: -1,
 			TTL:   5 * time.Second,
@@ -46,10 +46,10 @@ func TestListenAndServe(t *testing.T) {
 			Limit: 0,
 		},
 	}
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	stopChan := make(chan struct{}, 1)
 	cfgRld := make(chan struct{}, 1)
 	cfgRld <- struct{}{}
@@ -74,11 +74,11 @@ func TestListenAndServe(t *testing.T) {
 }
 
 func TestCall(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	errExpect := "UNSUPPORTED_SERVICE_METHOD"
 	if err := eeS.Call("test", 24532, 43643); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
@@ -114,17 +114,17 @@ func TestAttrSProcessEvent(t *testing.T) {
 			utils.OptsAttributesProcessRuns: "10",
 		},
 	}
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cgrCfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
-	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
+	eeS := NewEventExporterS(cfg, filterS, connMgr)
 	// cgrEv := &utils.CGREvent{}
 	exp := &utils.CGREvent{Event: map[string]interface{}{"testcase": 1}}
 	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
@@ -143,17 +143,17 @@ func TestAttrSProcessEvent2(t *testing.T) {
 			},
 		},
 	}
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	clientConn := make(chan rpcclient.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cgrCfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
-	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
+	eeS := NewEventExporterS(cfg, filterS, connMgr)
 	cgrEv := &utils.CGREvent{}
 	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -165,14 +165,14 @@ func TestV1ProcessEvent(t *testing.T) {
 	if err := os.MkdirAll(filePath, 0777); err != nil {
 		t.Error(err)
 	}
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
-	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
-	cgrCfg.EEsCfg().Exporters[0].ExportPath = filePath
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cfg.EEsCfg().Exporters[0].ExportPath = filePath
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	cgrEv := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
@@ -215,14 +215,14 @@ func TestV1ProcessEvent(t *testing.T) {
 }
 
 func TestV1ProcessEvent2(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
-	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
-	cgrCfg.EEsCfg().Exporters[0].Filters = []string{"*prefix:~*req.Subject:20"}
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cfg.EEsCfg().Exporters[0].Filters = []string{"*prefix:~*req.Subject:20"}
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	cgrEv := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
@@ -253,16 +253,16 @@ func TestV1ProcessEvent2(t *testing.T) {
 }
 
 func TestV1ProcessEvent3(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
-	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
-	cgrCfg.EEsCfg().Exporters[0].Flags = utils.FlagsWithParams{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cfg.EEsCfg().Exporters[0].Flags = utils.FlagsWithParams{
 		utils.MetaAttributes: utils.FlagParams{},
 	}
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	cgrEv := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
@@ -280,19 +280,19 @@ func TestV1ProcessEvent3(t *testing.T) {
 }
 
 func TestV1ProcessEvent4(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
-	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
-	cgrCfg.EEsCfg().Exporters[0].Synchronous = true
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cfg.EEsCfg().Exporters[0].Synchronous = true
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	eeS.eesChs = map[string]*ltcache.Cache{
 		utils.MetaHTTPPost: ltcache.NewCache(1,
 			time.Second, false, onCacheEvicted),
 	}
-	newEeS, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	newEeS, err := NewEventExporter(cfg.EEsCfg().Exporters[0], cfg, filterS)
 	if err != nil {
 		t.Error(err)
 	}
@@ -346,14 +346,14 @@ func (mockEventExporter) Close() error {
 
 func TestV1ProcessEventMockMetrics(t *testing.T) {
 	mEe := newMockEventExporter()
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
-	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
-	cgrCfg.EEsCfg().Exporters[0].Synchronous = true
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cfg.EEsCfg().Exporters[0].Synchronous = true
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	eeS.eesChs = map[string]*ltcache.Cache{
 		utils.MetaHTTPPost: ltcache.NewCache(1,
 			time.Second, false, onCacheEvicted),
@@ -378,8 +378,8 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	}
 }
 func TestV1ProcessEvent5(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters = []*config.EventExporterCfg{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters = []*config.EventExporterCfg{
 		{
 			Type: utils.MetaNone,
 		},
@@ -400,10 +400,10 @@ func TestV1ProcessEvent5(t *testing.T) {
 			},
 		},
 	}
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	var rply map[string]map[string]interface{}
 	errExpect := "unsupported exporter type: <invalid_type>"
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
@@ -412,13 +412,13 @@ func TestV1ProcessEvent5(t *testing.T) {
 }
 
 func TestV1ProcessEvent6(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
-	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	cgrEv := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},
 		CGREvent: &utils.CGREvent{
@@ -455,11 +455,11 @@ func TestOnCacheEvicted(t *testing.T) {
 	bufLog.Reset()
 }
 func TestShutdown(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := NewEventExporterS(cfg, filterS, nil)
 	logBuf := new(bytes.Buffer)
 	log.SetOutput(logBuf)
 	eeS.Shutdown()

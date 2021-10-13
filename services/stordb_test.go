@@ -36,13 +36,13 @@ func TestStorDBServiceCoverage(t *testing.T) {
 	if err == true {
 		t.Errorf("Expected service to be down")
 	}
-	srv.db = engine.NewInternalDB([]string{"test"}, []string{"test2"}, true)
+	srv.db = engine.NewInternalDB([]string{"test"}, []string{"test2"}, true, cfg.DataDbCfg().Items)
 	err = srv.IsRunning()
 	if err == false {
 		t.Errorf("Expected service to be running")
 	}
 	srv.oldDBCfg = &config.StorDbCfg{
-		Type:     utils.INTERNAL,
+		Type:     utils.Internal,
 		Host:     "test_host",
 		Port:     "test_port",
 		Name:     "test_name",

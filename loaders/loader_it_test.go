@@ -427,7 +427,7 @@ cgrates.org,NewRes1
 `))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "testProcessFile",
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -535,7 +535,7 @@ cgrates.org,NewRes1
 `))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "testProcessFile",
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -668,7 +668,7 @@ func testProcessFileRenameError(t *testing.T) {
 	if err := os.MkdirAll(flPath1, 0777); err != nil {
 		t.Error(err)
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, true, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "testProcessFileRenameError",
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),

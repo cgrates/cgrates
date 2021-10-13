@@ -1151,7 +1151,7 @@ func TestStatQueueaddStatEventPassErr(t *testing.T) {
 	filters := &FilterS{
 		cfg: config.CgrConfig(),
 		dm: &DataManager{
-			dataDB: NewInternalDB(nil, nil, true),
+			dataDB: NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
 		},
 		connMgr: &ConnManager{},
 	}
@@ -1190,7 +1190,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	filters := &FilterS{
 		cfg: config.CgrConfig(),
 		dm: &DataManager{
-			dataDB: NewInternalDB(nil, nil, true),
+			dataDB: NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
 		},
 		connMgr: &ConnManager{},
 	}

@@ -89,12 +89,12 @@ func testLoaderITInitDataDB(t *testing.T) {
 	dbConn, err := NewDataDBConn(lCfg.DataDbCfg().Type,
 		lCfg.DataDbCfg().Host, lCfg.DataDbCfg().Port, lCfg.DataDbCfg().Name,
 		lCfg.DataDbCfg().User, lCfg.DataDbCfg().Password, lCfg.GeneralCfg().DBDataEncoding,
-		lCfg.DataDbCfg().Opts)
+		lCfg.DataDbCfg().Opts, lCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	dataDbCsv = NewDataManager(dbConn, lCfg.CacheCfg(), nil)
-	if lCfg.DataDbCfg().Type == utils.INTERNAL {
+	if lCfg.DataDbCfg().Type == utils.Internal {
 		chIDs := []string{}
 		for dbKey := range utils.CacheInstanceToPrefix { // clear only the DataDB
 			chIDs = append(chIDs, dbKey)
@@ -119,7 +119,7 @@ func testLoaderITInitStoreDB(t *testing.T) {
 		lCfg.StorDbCfg().Host, lCfg.StorDbCfg().Port, lCfg.StorDbCfg().Name,
 		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password, lCfg.GeneralCfg().DBDataEncoding,
 		lCfg.StorDbCfg().StringIndexedFields, lCfg.StorDbCfg().PrefixIndexedFields,
-		lCfg.StorDbCfg().Opts)
+		lCfg.StorDbCfg().Opts, lCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on opening database connection: ", err)
 	}

@@ -120,8 +120,8 @@ func (mkL *mockListener) Close() error   { return mkL.p1.Close() }
 func (mkL *mockListener) Addr() net.Addr { return nil }
 
 func testHandleRequest(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
-	cfgDflt.CoreSCfg().CapsStatsInterval = 1
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CoreSCfg().CapsStatsInterval = 1
 	caps := engine.NewCaps(0, utils.MetaBusy)
 	rcv := NewServer(caps)
 
@@ -214,7 +214,7 @@ func testServeGOB(t *testing.T) {
 }
 
 func testServeHHTPPass(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -222,10 +222,10 @@ func testServeHHTPPass(t *testing.T) {
 
 	go server.ServeHTTP(
 		":6555",
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 
 	runtime.Gosched()
@@ -235,7 +235,7 @@ func testServeHHTPPass(t *testing.T) {
 }
 
 func testServeHHTPPassUseBasicAuth(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -243,10 +243,10 @@ func testServeHHTPPassUseBasicAuth(t *testing.T) {
 
 	go server.ServeHTTP(
 		":56432",
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		!cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		!cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 
 	runtime.Gosched()
@@ -256,7 +256,7 @@ func testServeHHTPPassUseBasicAuth(t *testing.T) {
 }
 
 func testServeHHTPEnableHttp(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -266,8 +266,8 @@ func testServeHHTPEnableHttp(t *testing.T) {
 		":45779",
 		utils.EmptyString,
 		utils.EmptyString,
-		!cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		!cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 
 	runtime.Gosched()
@@ -277,7 +277,7 @@ func testServeHHTPEnableHttp(t *testing.T) {
 }
 
 func testServeHHTPFail(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -285,10 +285,10 @@ func testServeHHTPFail(t *testing.T) {
 
 	go server.ServeHTTP(
 		"invalid_port_format",
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 
 	runtime.Gosched()
@@ -301,7 +301,7 @@ func testServeHHTPFail(t *testing.T) {
 }
 
 func testServeHHTPFailEnableRpc(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -309,10 +309,10 @@ func testServeHHTPFailEnableRpc(t *testing.T) {
 	server.rpcEnabled = false
 
 	go server.ServeHTTP(":1000",
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 
 	shdChan.CloseOnce()
@@ -320,16 +320,16 @@ func testServeHHTPFailEnableRpc(t *testing.T) {
 }
 
 func testServeBiJSON(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = rpc2.NewServer()
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
-	ss := sessions.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfg, dm, nil)
 
 	go func() {
 		if err := server.ServeBiRPC(":3434", "", ss.OnBiJSONConnect, ss.OnBiJSONDisconnect); err != nil {
@@ -340,15 +340,15 @@ func testServeBiJSON(t *testing.T) {
 }
 
 func testServeBiJSONEmptyBiRPCServer(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
-	ss := sessions.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfg, dm, nil)
 
 	expectedErr := "BiRPCServer should not be nil"
 	go func() {
@@ -361,16 +361,16 @@ func testServeBiJSONEmptyBiRPCServer(t *testing.T) {
 }
 
 func testServeBiJSONInvalidPort(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = rpc2.NewServer()
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
-	ss := sessions.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfg, dm, nil)
 
 	expectedErr := "listen tcp: address invalid_port_format: missing port in address"
 	if err := server.ServeBiRPC("invalid_port_format", "", ss.OnBiJSONConnect,
@@ -382,16 +382,16 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 }
 
 func testServeBiGoB(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = rpc2.NewServer()
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
-	ss := sessions.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfg, dm, nil)
 
 	go func() {
 		if err := server.ServeBiRPC("", ":9343", ss.OnBiJSONConnect, ss.OnBiJSONDisconnect); err != nil {
@@ -402,15 +402,15 @@ func testServeBiGoB(t *testing.T) {
 }
 
 func testServeBiGoBEmptyBiRPCServer(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
-	ss := sessions.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfg, dm, nil)
 
 	expectedErr := "BiRPCServer should not be nil"
 	go func() {
@@ -423,16 +423,16 @@ func testServeBiGoBEmptyBiRPCServer(t *testing.T) {
 }
 
 func testServeBiGoBInvalidPort(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = rpc2.NewServer()
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
-	ss := sessions.NewSessionS(cfgDflt, dm, nil)
+	ss := sessions.NewSessionS(cfg, dm, nil)
 
 	expectedErr := "listen tcp: address invalid_port_format: missing port in address"
 	if err := server.ServeBiRPC("", "invalid_port_format", ss.OnBiJSONConnect,
@@ -444,7 +444,7 @@ func testServeBiGoBInvalidPort(t *testing.T) {
 }
 
 func testServeGOBTLS(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -457,7 +457,7 @@ func testServeGOBTLS(t *testing.T) {
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
 		4,
-		cfgDflt.TLSCfg().ServerName,
+		cfg.TLSCfg().ServerName,
 		shdChan,
 	)
 	runtime.Gosched()
@@ -466,7 +466,7 @@ func testServeGOBTLS(t *testing.T) {
 }
 
 func testServeJSONTls(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -479,7 +479,7 @@ func testServeJSONTls(t *testing.T) {
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
 		4,
-		cfgDflt.TLSCfg().ServerName,
+		cfg.TLSCfg().ServerName,
 		shdChan,
 	)
 	runtime.Gosched()
@@ -521,7 +521,7 @@ func testServeGOBPortFail(t *testing.T) {
 }
 
 func testServeCodecTLSErr(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -536,7 +536,7 @@ func testServeCodecTLSErr(t *testing.T) {
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
 		4,
-		cfgDflt.TLSCfg().ServerName,
+		cfg.TLSCfg().ServerName,
 		newCapsGOBCodec,
 		shdChan)
 
@@ -548,7 +548,7 @@ func testServeCodecTLSErr(t *testing.T) {
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
 		4,
-		cfgDflt.TLSCfg().ServerName,
+		cfg.TLSCfg().ServerName,
 		newCapsGOBCodec,
 		shdChan)
 
@@ -603,7 +603,7 @@ TEST
 }
 
 func testServeHTTPTLS(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -617,12 +617,12 @@ func testServeHTTPTLS(t *testing.T) {
 		"/usr/share/cgrates/tls/server.crt",
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
-		cfgDflt.TLSCfg().ServerPolicy,
-		cfgDflt.TLSCfg().ServerName,
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.TLSCfg().ServerPolicy,
+		cfg.TLSCfg().ServerName,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 
 	//Invalid port address
@@ -632,12 +632,12 @@ func testServeHTTPTLS(t *testing.T) {
 		"/usr/share/cgrates/tls/server.crt",
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
-		cfgDflt.TLSCfg().ServerPolicy,
-		cfgDflt.TLSCfg().ServerName,
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.TLSCfg().ServerPolicy,
+		cfg.TLSCfg().ServerName,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 	runtime.Gosched()
 
@@ -648,7 +648,7 @@ func testServeHTTPTLS(t *testing.T) {
 }
 
 func testServeHTTPTLSWithBasicAuth(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -662,12 +662,12 @@ func testServeHTTPTLSWithBasicAuth(t *testing.T) {
 		"/usr/share/cgrates/tls/server.crt",
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
-		cfgDflt.TLSCfg().ServerPolicy,
-		cfgDflt.TLSCfg().ServerName,
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		!cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.TLSCfg().ServerPolicy,
+		cfg.TLSCfg().ServerName,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		!cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 	runtime.Gosched()
 
@@ -678,7 +678,7 @@ func testServeHTTPTLSWithBasicAuth(t *testing.T) {
 }
 
 func testServeHTTPTLSError(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -691,12 +691,12 @@ func testServeHTTPTLSError(t *testing.T) {
 		"/usr/share/cgrates/tls/inexisting_file",
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
-		cfgDflt.TLSCfg().ServerPolicy,
-		cfgDflt.TLSCfg().ServerName,
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		!cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.TLSCfg().ServerPolicy,
+		cfg.TLSCfg().ServerName,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		!cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 	runtime.Gosched()
 
@@ -707,7 +707,7 @@ func testServeHTTPTLSError(t *testing.T) {
 }
 
 func testServeHTTPTLSHttpNotEnabled(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
 	server = NewServer(caps)
 	server.RpcRegister(new(mockRegister))
@@ -720,12 +720,12 @@ func testServeHTTPTLSHttpNotEnabled(t *testing.T) {
 		"/usr/share/cgrates/tls/server.crt",
 		"/usr/share/cgrates/tls/server.key",
 		"/usr/share/cgrates/tls/ca.crt",
-		cfgDflt.TLSCfg().ServerPolicy,
-		cfgDflt.TLSCfg().ServerName,
+		cfg.TLSCfg().ServerPolicy,
+		cfg.TLSCfg().ServerName,
 		utils.EmptyString,
 		utils.EmptyString,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		shdChan)
 
 	shdChan.CloseOnce()

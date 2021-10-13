@@ -204,7 +204,7 @@ func testAttrITConnect(t *testing.T) {
 		attrCfgIn.DataDbCfg().Host, attrCfgIn.DataDbCfg().Port,
 		attrCfgIn.DataDbCfg().Name, attrCfgIn.DataDbCfg().User,
 		attrCfgIn.DataDbCfg().Password, attrCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), attrCfgIn.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), attrCfgIn.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -212,7 +212,7 @@ func testAttrITConnect(t *testing.T) {
 		attrCfgOut.DataDbCfg().Host, attrCfgOut.DataDbCfg().Port,
 		attrCfgOut.DataDbCfg().Name, attrCfgOut.DataDbCfg().User,
 		attrCfgOut.DataDbCfg().Password, attrCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), attrCfgOut.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), attrCfgOut.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

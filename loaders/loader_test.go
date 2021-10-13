@@ -34,8 +34,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var data = engine.NewInternalDB(nil, nil, false, config.CgrConfig().DataDbCfg().Items)
+
 func TestLoaderProcessContentSingleFile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -44,50 +45,39 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "Contexts",
-				Path:  "Contexts",
+			{Path: "Contexts",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "FilterIDs",
-				Path:  "FilterIDs",
+			{Path: "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "AttributeFilterIDs",
-				Path:  "AttributeFilterIDs",
+			{Path: "AttributeFilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "Path",
-				Path:  "Path",
+			{Path: "Path",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "Type",
-				Path:  "Type",
+			{Path: "Type",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "Value",
-				Path:  "Value",
+			{Path: "Value",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "Blocker",
-				Path:  "Blocker",
+			{Path: "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
+			{Path: "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
@@ -175,7 +165,6 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 func TestLoaderProcessContentMultiFiles(t *testing.T) {
 	file1CSV := `ignored,ignored,ignored,ignored,ignored,,*req.Subject,1001,ignored,ignored`
 	file2CSV := `ignored,TestLoader2`
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContentMultiFiles",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -184,30 +173,24 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaString,
 				Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "Contexts",
-				Path:  "Contexts",
+			{Path: "Contexts",
 				Type:  utils.MetaString,
 				Value: config.NewRSRParsersMustCompile("*any", utils.InfieldSep)},
-			{Tag: "Path",
-				Path:  "Path",
+			{Path: "Path",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
-			{Tag: "Value",
-				Path:  "Value",
+			{Path: "Value",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
+			{Path: "Weight",
 				Type:  utils.MetaString,
 				Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
 		},
@@ -254,7 +237,6 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 }
 
 func TestLoaderProcessResource(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessResources",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -263,50 +245,39 @@ func TestLoaderProcessResource(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaResources: {
-			{Tag: "Tenant",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
-				Path:  "FilterIDs",
+			{Path: "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "TTL",
-				Path:  "UsageTTL",
+			{Path: "UsageTTL",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "Limit",
-				Path:  "Limit",
+			{Path: "Limit",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "AllocationMessage",
-				Path:  "AllocationMessage",
+			{Path: "AllocationMessage",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "Blocker",
-				Path:  "Blocker",
+			{Path: "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "Stored",
-				Path:  "Stored",
+			{Path: "Stored",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
+			{Path: "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "Thresholds",
-				Path:  "Thresholds",
+			{Path: "Thresholds",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
@@ -372,7 +343,6 @@ func TestLoaderProcessResource(t *testing.T) {
 }
 
 func TestLoaderProcessFilters(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessFilters",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -381,30 +351,24 @@ func TestLoaderProcessFilters(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaFilters: {
-			{Tag: "Tenant",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "Type",
-				Path:  "Type",
+			{Path: "Type",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Element",
-				Path:  "Element",
+			{Path: "Element",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "Values",
-				Path:  "Values",
+			{Path: "Values",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 		},
@@ -515,7 +479,6 @@ func TestLoaderProcessFilters(t *testing.T) {
 }
 
 func TestLoaderProcessThresholds(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -524,50 +487,39 @@ func TestLoaderProcessThresholds(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaThresholds: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
-				Path:  "FilterIDs",
+			{Path: "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "MaxHits",
-				Path:  "MaxHits",
+			{Path: "MaxHits",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "MinHits",
-				Path:  "MinHits",
+			{Path: "MinHits",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "MinSleep",
-				Path:  "MinSleep",
+			{Path: "MinSleep",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "Blocker",
-				Path:  "Blocker",
+			{Path: "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
+			{Path: "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "ActionIDs",
-				Path:  "ActionIDs",
+			{Path: "ActionIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "Async",
-				Path:  "Async",
+			{Path: "Async",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
@@ -627,7 +579,6 @@ func TestLoaderProcessThresholds(t *testing.T) {
 }
 
 func TestLoaderProcessStats(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -636,59 +587,46 @@ func TestLoaderProcessStats(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaStats: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
-				Path:  "FilterIDs",
+			{Path: "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "QueueLength",
-				Path:  "QueueLength",
+			{Path: "QueueLength",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "TTL",
-				Path:  "TTL",
+			{Path: "TTL",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "MinItems",
-				Path:  "MinItems",
+			{Path: "MinItems",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "MetricIDs",
-				Path:  "MetricIDs",
+			{Path: "MetricIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "MetricFilterIDs",
-				Path:  "MetricFilterIDs",
+			{Path: "MetricFilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "Blocker",
-				Path:  "Blocker",
+			{Path: "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "Stored",
-				Path:  "Stored",
+			{Path: "Stored",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
+			{Path: "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
 
-			{Tag: "ThresholdIDs",
-				Path:  "ThresholdIDs",
+			{Path: "ThresholdIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
 		},
@@ -697,9 +635,7 @@ func TestLoaderProcessStats(t *testing.T) {
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{fileName: utils.StatsCsv,
-				rdr: rdr, csvRdr: csvRdr}},
+		utils.MetaStats: {utils.StatsCsv: &openedCSVFile{rdr: rdr, csvRdr: csvRdr}},
 	}
 	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -717,15 +653,9 @@ func TestLoaderProcessStats(t *testing.T) {
 		QueueLength: 100,
 		TTL:         time.Second,
 		Metrics: []*engine.MetricWithFilters{
-			{
-				MetricID: "*sum#~*req.Value",
-			},
-			{
-				MetricID: "*average#~*req.Value",
-			},
-			{
-				MetricID: "*sum#~*req.Usage",
-			},
+			{MetricID: "*sum#~*req.Value"},
+			{MetricID: "*average#~*req.Value"},
+			{MetricID: "*sum#~*req.Usage"},
 		},
 		ThresholdIDs: []string{"Th1", "Th2"},
 		Blocker:      true,
@@ -753,9 +683,7 @@ func TestLoaderProcessStats(t *testing.T) {
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			"Stats.csv": &openedCSVFile{fileName: "Stats.csv",
-				rdr: rdr, csvRdr: csvRdr}},
+		utils.MetaStats: {utils.StatsCsv: &openedCSVFile{rdr: rdr, csvRdr: csvRdr}},
 	}
 	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -763,7 +691,6 @@ func TestLoaderProcessStats(t *testing.T) {
 }
 
 func TestLoaderProcessStatsWrongMetrics(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessStatsWrongMetrics",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -771,12 +698,10 @@ func TestLoaderProcessStatsWrongMetrics(t *testing.T) {
 		timezone:      "UTC",
 		dataTpls: map[string][]*config.FCTemplate{
 			utils.MetaStats: {
-				{Tag: "MetricIDs",
-					Path:  "MetricIDs",
+				{Path: "MetricIDs",
 					Type:  utils.MetaComposed,
 					Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-				{Tag: "Stored",
-					Path:  "Stored",
+				{Path: "Stored",
 					Type:  utils.MetaComposed,
 					Value: config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep)},
 			},
@@ -818,7 +743,6 @@ not_a_valid_metric_type,true,`))
 }
 
 func TestLoaderProcessRoutes(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -827,70 +751,54 @@ func TestLoaderProcessRoutes(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRoutes: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
-				Path:  "FilterIDs",
+			{Path: "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "Sorting",
-				Path:  "Sorting",
+			{Path: "Sorting",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "SortingParameters",
-				Path:  "SortingParameters",
+			{Path: "SortingParameters",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "RouteID",
-				Path:  "RouteID",
+			{Path: "RouteID",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "RouteFilterIDs",
-				Path:  "RouteFilterIDs",
+			{Path: "RouteFilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "RouteAccountIDs",
-				Path:  "RouteAccountIDs",
+			{Path: "RouteAccountIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "RouteRatingPlanIDs",
-				Path:  "RouteRatingplanIDs",
+			{Path: "RouteRatingplanIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "RouteResourceIDs",
-				Path:  "RouteResourceIDs",
+			{Path: "RouteResourceIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{Tag: "RouteStatIDs",
-				Path:  "RouteStatIDs",
+			{Path: "RouteStatIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-			{Tag: "RouteWeight",
-				Path:  "RouteWeight",
+			{Path: "RouteWeight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
-			{Tag: "RouteBlocker",
-				Path:  "RouteBlocker",
+			{Path: "RouteBlocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
-			{Tag: "RouteParameters",
-				Path:  "RouteParameters",
+			{Path: "RouteParameters",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
+			{Path: "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
 		},
@@ -989,7 +897,6 @@ func TestLoaderProcessRoutes(t *testing.T) {
 }
 
 func TestLoaderProcessChargers(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -998,34 +905,27 @@ func TestLoaderProcessChargers(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaChargers: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
-				Path:  "FilterIDs",
+			{Path: "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "RunID",
-				Path:  "RunID",
+			{Path: "RunID",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "AttributeIDs",
-				Path:  "AttributeIDs",
+			{Path: "AttributeIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
+			{Path: "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 		},
@@ -1080,7 +980,6 @@ func TestLoaderProcessChargers(t *testing.T) {
 }
 
 func TestLoaderProcessDispatches(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1249,7 +1148,6 @@ func TestLoaderProcessDispatches(t *testing.T) {
 }
 
 func TestLoaderProcessDispatcheHosts(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1403,7 +1301,6 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 }
 
 func TestLoaderRemoveContentSingleFile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1412,13 +1309,11 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -1505,34 +1400,27 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 	}
 }
 func TestNewLoaderWithMultiFiles(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 
 	ldrCfg := config.CgrConfig().LoaderCfg()[0].Clone()
 	ldrCfg.Data[0].Fields = []*config.FCTemplate{
-		{Tag: "TenantID",
-			Path:      "Tenant",
+		{Path: "Tenant",
 			Type:      utils.MetaString,
 			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "ProfileID",
-			Path:      "ID",
+		{Path: "ID",
 			Type:      utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "Contexts",
-			Path:  "Contexts",
+		{Path: "Contexts",
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("*any", utils.InfieldSep)},
-		{Tag: "Path",
-			Path:  "Path",
+		{Path: "Path",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
-		{Tag: "Value",
-			Path:  "Value",
+		{Path: "Value",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
-		{Tag: "Weight",
-			Path:  "Weight",
+		{Path: "Weight",
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
 	}
@@ -1563,7 +1451,6 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 }
 
 func TestLoaderAttributesAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderAttributesAsStructErrType",
 		bufLoaderData: map[string][]LoaderData{},
@@ -1572,8 +1459,7 @@ func TestLoaderAttributesAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "Weight",
-				Path:  "Weight",
+			{Path: "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1597,7 +1483,6 @@ true
 }
 
 func TestLoaderAttributesAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderAttributesAsStructErrConversion",
 		bufLoaderData: map[string][]LoaderData{},
@@ -1606,8 +1491,7 @@ func TestLoaderAttributesAsStructErrConversion(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1631,7 +1515,6 @@ func TestLoaderAttributesAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadResourcesAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadResourcesAsStructErr",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1640,8 +1523,7 @@ func TestLoadResourcesAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaResources: {
-			{Tag: "Blocker",
-				Path:  "Blocker",
+			{Path: "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1665,7 +1547,6 @@ NOT_A_BOOLEAN
 }
 
 func TestLoadResourcesAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadResourcesAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1674,8 +1555,7 @@ func TestLoadResourcesAsStructErrConversion(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaResources: {
-			{Tag: "UsageTTL",
-				Path:  "UsageTTL",
+			{Path: "UsageTTL",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1699,7 +1579,6 @@ func TestLoadResourcesAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadFiltersAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadFiltersAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1708,8 +1587,7 @@ func TestLoadFiltersAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaFilters: {
-			{Tag: "PK",
-				Path:  "PK",
+			{Path: "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1737,7 +1615,6 @@ NOT_UINT
 }
 
 func TestLoadFiltersAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadFiltersAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1746,8 +1623,7 @@ func TestLoadFiltersAsStructErrConversion(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaFilters: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1775,7 +1651,6 @@ func TestLoadFiltersAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadStatsAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadStatsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1784,8 +1659,7 @@ func TestLoadStatsAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaStats: {
-			{Tag: "PK",
-				Path:  "PK",
+			{Path: "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1813,7 +1687,6 @@ NOT_UINT
 }
 
 func TestLoadStatsAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadStatsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1822,8 +1695,7 @@ func TestLoadStatsAsStructErrConversion(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaStats: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1851,7 +1723,6 @@ func TestLoadStatsAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadThresholdsAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadThresholdsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1860,8 +1731,7 @@ func TestLoadThresholdsAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaThresholds: {
-			{Tag: "PK",
-				Path:  "PK",
+			{Path: "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1889,7 +1759,6 @@ NOT_UINT
 }
 
 func TestLoadThresholdsAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadThresholdsAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1898,8 +1767,7 @@ func TestLoadThresholdsAsStructErrConversion(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaThresholds: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1927,7 +1795,6 @@ func TestLoadThresholdsAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadRoutesAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadRoutesAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1936,8 +1803,7 @@ func TestLoadRoutesAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRoutes: {
-			{Tag: "PK",
-				Path:  "PK",
+			{Path: "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -1965,7 +1831,6 @@ NOT_UINT
 }
 
 func TestLoadRoutesAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadRoutesAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -1974,8 +1839,7 @@ func TestLoadRoutesAsStructErrConversion(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRoutes: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -2003,7 +1867,6 @@ func TestLoadRoutesAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadChargersAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadChargersAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2012,8 +1875,7 @@ func TestLoadChargersAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaChargers: {
-			{Tag: "PK",
-				Path:  "PK",
+			{Path: "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -2041,7 +1903,6 @@ NOT_UINT
 }
 
 func TestLoadChargersAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadChargersAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2050,8 +1911,7 @@ func TestLoadChargersAsStructErrConversion(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaChargers: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -2079,7 +1939,6 @@ func TestLoadChargersAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadDispatchersAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadDispatchersAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2088,8 +1947,7 @@ func TestLoadDispatchersAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatchers: {
-			{Tag: "PK",
-				Path:  "PK",
+			{Path: "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -2117,7 +1975,6 @@ NOT_UINT
 }
 
 func TestLoadDispatcherAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadDispatcherHostsAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2126,8 +1983,7 @@ func TestLoadDispatcherAsStructErrConversion(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatchers: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Path: "ActivationInterval",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -2155,7 +2011,6 @@ func TestLoadDispatcherAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadDispatcherHostsAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadDispatcherHostsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2164,8 +2019,7 @@ func TestLoadDispatcherHostsAsStructErrType(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatcherHosts: {
-			{Tag: "PK",
-				Path:  "PK",
+			{Path: "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
 		},
@@ -2193,7 +2047,6 @@ NOT_UINT
 }
 
 func TestLoadAndRemoveResources(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadAndRemoveResources",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2203,13 +2056,11 @@ func TestLoadAndRemoveResources(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaResources: {
-			{Tag: "Tenant",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -2327,7 +2178,6 @@ cgrates.org,NewRes1
 }
 
 func TestRemoveFilterContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveFilterContents",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2336,13 +2186,11 @@ func TestRemoveFilterContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaFilters: {
-			{Tag: "Tenant",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -2420,7 +2268,6 @@ cgrates.org,FILTERS_REM_1
 }
 
 func TestRemoveStatsContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2429,13 +2276,11 @@ func TestRemoveStatsContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaStats: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -2513,7 +2358,6 @@ cgrates.org,REM_STATS_1
 }
 
 func TestRemoveThresholdsContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveThresholdsContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2522,13 +2366,11 @@ func TestRemoveThresholdsContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaThresholds: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -2606,7 +2448,6 @@ cgrates.org,REM_THRESHOLDS_1,
 }
 
 func TestRemoveRoutesContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveRoutesContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2615,13 +2456,11 @@ func TestRemoveRoutesContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRoutes: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -2699,7 +2538,6 @@ cgrates.org,ROUTES_REM_1
 }
 
 func TestRemoveChargersContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveChargersContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2708,13 +2546,11 @@ func TestRemoveChargersContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaChargers: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -2792,7 +2628,6 @@ cgrates.org,REM_ROUTES_1
 }
 
 func TestRemoveDispatchersContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveDispatchersContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2801,13 +2636,11 @@ func TestRemoveDispatchersContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatchers: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -2884,7 +2717,6 @@ cgrates.org,REM_DISPATCHERS_1
 }
 
 func TestRemoveDispatcherHostsContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveDispatcherHostsContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -2893,13 +2725,11 @@ func TestRemoveDispatcherHostsContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatcherHosts: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
+			{Path: "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
+			{Path: "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
@@ -3042,7 +2872,6 @@ func TestLoaderListenAndServe(t *testing.T) {
 }
 
 func TestRemoveThresholdsMockError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveThresholdsMockError",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -3050,13 +2879,11 @@ func TestRemoveThresholdsMockError(t *testing.T) {
 		timezone:      "UTC",
 		dataTpls: map[string][]*config.FCTemplate{
 			utils.MetaThresholds: {
-				{Tag: "TenantID",
-					Path:      "Tenant",
+				{Path: "Tenant",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 					Mandatory: true},
-				{Tag: "ID",
-					Path:      "ID",
+				{Path: "ID",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 					Mandatory: true},
@@ -3096,7 +2923,6 @@ func TestRemoveThresholdsMockError(t *testing.T) {
 }
 
 func TestRemoveStatQueueMockError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestRemoveStatQueueError",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -3104,13 +2930,11 @@ func TestRemoveStatQueueMockError(t *testing.T) {
 		timezone:      "UTC",
 		dataTpls: map[string][]*config.FCTemplate{
 			utils.MetaStats: {
-				{Tag: "TenantID",
-					Path:      "Tenant",
+				{Path: "Tenant",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 					Mandatory: true},
-				{Tag: "ProfileID",
-					Path:      "ID",
+				{Path: "ID",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 					Mandatory: true},
@@ -3146,7 +2970,6 @@ cgrates.org,REM_STATS_1`))
 }
 
 func TestRemoveResourcesMockError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestLoadAndRemoveResources",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -3154,13 +2977,11 @@ func TestRemoveResourcesMockError(t *testing.T) {
 		timezone:      "UTC",
 		dataTpls: map[string][]*config.FCTemplate{
 			utils.MetaResources: {
-				{Tag: "Tenant",
-					Path:      "Tenant",
+				{Path: "Tenant",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 					Mandatory: true},
-				{Tag: "ID",
-					Path:      "ID",
+				{Path: "ID",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 					Mandatory: true},
@@ -3223,7 +3044,6 @@ func (ccM *ccMock) Call(serviceMethod string, args interface{}, reply interface{
 
 func TestStoreLoadedDataAttributes(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
@@ -3273,7 +3093,6 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 
 func TestStoreLoadedDataResources(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:            nil,
@@ -3323,7 +3142,6 @@ func TestStoreLoadedDataResources(t *testing.T) {
 
 func TestStoreLoadedDataFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:   nil,
@@ -3372,7 +3190,6 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 
 func TestStoreLoadedDataStats(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:              nil,
@@ -3422,7 +3239,6 @@ func TestStoreLoadedDataStats(t *testing.T) {
 
 func TestStoreLoadedDataThresholds(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:             nil,
@@ -3472,7 +3288,6 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 
 func TestStoreLoadedDataRoutes(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:         nil,
@@ -3521,7 +3336,6 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 
 func TestStoreLoadedDataChargers(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:           nil,
@@ -3570,7 +3384,6 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 
 func TestStoreLoadedDataDispatchers(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:              nil,
@@ -3619,7 +3432,6 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 
 func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:           nil,

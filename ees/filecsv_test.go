@@ -52,15 +52,15 @@ type nopCloser struct {
 func (nopCloser) Close() error { return nil }
 
 func TestFileCsvComposeHeader(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
 	fCsv := &FileCSVee{
-		cfg:       cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:    cgrCfg,
+		cfg:       cfg.EEsCfg().Exporters[0],
+		cgrCfg:    cfg,
 		filterS:   filterS,
 		file:      nopCloser{byteBuff},
 		csvWriter: csvNW,
@@ -115,15 +115,15 @@ func TestFileCsvComposeHeader(t *testing.T) {
 }
 
 func TestFileCsvComposeTrailer(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
 	fCsv := &FileCSVee{
-		cfg:       cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:    cgrCfg,
+		cfg:       cfg.EEsCfg().Exporters[0],
+		cgrCfg:    cfg,
 		filterS:   filterS,
 		file:      nopCloser{byteBuff},
 		csvWriter: csvNW,
@@ -178,10 +178,10 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 }
 
 func TestFileCsvExportEvent(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
 	dc, err := newEEMetrics(utils.FirstNonEmpty(
@@ -192,8 +192,8 @@ func TestFileCsvExportEvent(t *testing.T) {
 		t.Error(err)
 	}
 	fCsv := &FileCSVee{
-		cfg:       cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:    cgrCfg,
+		cfg:       cfg.EEsCfg().Exporters[0],
+		cgrCfg:    cfg,
 		filterS:   filterS,
 		file:      nopCloser{byteBuff},
 		csvWriter: csvNW,
@@ -211,15 +211,15 @@ func TestFileCsvExportEvent(t *testing.T) {
 }
 
 func TestFileCsvOnEvictedTrailer(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
 	fCsv := &FileCSVee{
-		cfg:       cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:    cgrCfg,
+		cfg:       cfg.EEsCfg().Exporters[0],
+		cgrCfg:    cfg,
 		filterS:   filterS,
 		file:      nopCloserWrite{byteBuff},
 		csvWriter: csvNW,
@@ -245,15 +245,15 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 }
 
 func TestFileCsvOnEvictedClose(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	cfg := config.NewDefaultCGRConfig()
+	newIDb := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
 	fCsv := &FileCSVee{
-		cfg:       cgrCfg.EEsCfg().Exporters[0],
-		cgrCfg:    cgrCfg,
+		cfg:       cfg.EEsCfg().Exporters[0],
+		cgrCfg:    cfg,
 		filterS:   filterS,
 		file:      nopCloserError{byteBuff},
 		csvWriter: csvNW,
