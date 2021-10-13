@@ -2183,7 +2183,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 				ID: "ABS1",
 				Weights: utils.DynamicWeights{
 					{
-						Weight: 10,
+						Weight: 15,
 					},
 				},
 				Type:  utils.MetaAbstract,
@@ -2199,7 +2199,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 				ID: "ABS2",
 				Weights: utils.DynamicWeights{
 					{
-						Weight: 5,
+						Weight: 10,
 					},
 				},
 				Type:  utils.MetaAbstract,
@@ -2215,7 +2215,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 				ID: "CNCRT1",
 				Weights: utils.DynamicWeights{
 					{
-						Weight: 10,
+						Weight: 5,
 					},
 				},
 				Type:  utils.MetaConcrete,
@@ -2243,9 +2243,10 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 				ID: "RT1",
 				IntervalRates: []*utils.IntervalRate{
 					{
-						RecurrentFee: utils.NewDecimal(1, 2),
-						Unit:         utils.NewDecimal(int64(time.Second), 0),
-						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
 					},
 				},
 			},
@@ -2257,18 +2258,205 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 
 	// now we will try to debit account using rates instead for the second balance
 	cgrEv := &utils.CGREvent{
-		ID: "TestDebitAbstractUsingRatesWithRoundByIncrement",
+		ID:     "TestDebitAbstractUsingRatesWithRoundByIncrement",
+		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			utils.Destination:  "1234",
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaUsage: "44425100us",
+			utils.StartTime: time.Date(2020, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.MetaUsage: "44825100us",
 		},
 	}
 	var reply utils.EventCharges
-	if err := acnts.V1DebitAbstracts(context.Background(), cgrEv, &reply); err == nil {
+	if err := acnts.V1DebitAbstracts(context.Background(), cgrEv, &reply); err != nil {
 		t.Error(err)
+	}
+
+	// verify the EvChargers
+	expEvCHargers := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(44825100000, 0),
+		Concretes: utils.NewDecimal(15, 2),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "CHARGER1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "CHARGER2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"CHARGER1": {
+				AccountID:    "ACNT1",
+				BalanceID:    "ABS1",
+				Units:        utils.NewDecimal(int64(30*time.Second), 0), // 30 seconds from *abstract ABS1
+				BalanceLimit: utils.NewDecimal(0, 0),
+				RatingID:     "Rating1",
+			},
+			"CHARGER2": {
+				AccountID:       "ACNT1",
+				BalanceID:       "ABS2",
+				Units:           utils.NewDecimal(14825100000, 0), // 14.8251 seconds from *abstract ABS2 ((it should be debited all 15s from the entire balance))
+				BalanceLimit:    utils.NewDecimal(0, 0),
+				RatingID:        "Rating2",
+				JoinedChargeIDs: []string{"Joined1"},
+			},
+			"Joined1": {
+				AccountID:    "ACNT1",
+				BalanceID:    "CNCRT1",
+				Units:        utils.NewDecimal(15, 2), // 15s seconds from *concrete
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
+		UnitFactors: make(map[string]*utils.UnitFactor),
+		Rating: map[string]*utils.RateSInterval{
+			"Rating1": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RateID1",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			"Rating2": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RateID2",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: make(map[string]*utils.IntervalRate),
+		Accounts: map[string]*utils.Account{
+			"ACNT1": {
+				Tenant:    "cgrates.org",
+				ID:        "ACNT1",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Balances: map[string]*utils.Balance{
+					"ABS1": {
+						ID: "ABS1",
+						Weights: utils.DynamicWeights{
+							{
+								Weight: 15,
+							},
+						},
+						Type:  utils.MetaAbstract,
+						Units: utils.NewDecimal(0, 0),
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment: utils.NewDecimal(int64(time.Second), 0),
+								FixedFee:  utils.NewDecimal(0, 0),
+							},
+						},
+					},
+					"ABS2": {
+						ID: "ABS2",
+						Weights: utils.DynamicWeights{
+							{
+								Weight: 10,
+							},
+						},
+						Type:  utils.MetaAbstract,
+						Units: utils.NewDecimal(174900000, 0), // 0.17.. s available
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment: utils.NewDecimal(int64(time.Second), 0),
+							},
+						},
+						RateProfileIDs: []string{"RP1"},
+					},
+					"CNCRT1": {
+						ID: "CNCRT1",
+						Weights: utils.DynamicWeights{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  utils.MetaConcrete,
+						Units: utils.NewDecimal(9985, 2), // 99.85 available
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment: utils.NewDecimal(int64(time.Second), 0),
+							},
+						},
+						RateProfileIDs: []string{"RP1"},
+					},
+				},
+			},
+		},
+	}
+	if !expEvCHargers.Equals(&reply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToIJSON(expEvCHargers), utils.ToJSON(reply))
+	}
+
+	// as we checked the EventCharges, we should check if the debit in our account was correct
+	expAcc := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "ACNT1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"ABS1": {
+				ID: "ABS1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 15,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: &utils.Decimal{utils.SumDecimalAsBig(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0))}, // this should be -0
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:  utils.NewDecimal(0, 0),
+					},
+				},
+			},
+			"ABS2": {
+				ID: "ABS2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(174900000, 0), // 0.17.. s available (should be 0 because of Increment of 1s)
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+				RateProfileIDs: []string{"RP1"},
+			},
+			"CNCRT1": {
+				ID: "CNCRT1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(9985, 2), // 99.85 available
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+				RateProfileIDs: []string{"RP1"},
+			},
+		},
+	}
+	if accRPly, err := acnts.dm.GetAccount(context.Background(), "cgrates.org", "ACNT1"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(accRPly, expAcc) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expAcc), utils.ToJSON(accRPly))
 	}
 
 }
