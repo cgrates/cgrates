@@ -93,6 +93,11 @@ func TestSureTaxCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.sureTaxCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sureTaxCfg))
 	}
+
+	cfgJSON = nil
+	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestSureTaxCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -489,5 +494,75 @@ func TestDiffSureTaxJson(t *testing.T) {
 	rcv = diffSureTaxJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestSureTaxCloneSection(t *testing.T) {
+	tLocal2, err := time.LoadLocation("UTC")
+	if err != nil {
+		t.Error(err)
+	}
+
+	stCfg := &SureTaxCfg{
+		URL:                  "randomURL",
+		ClientNumber:         "randomClient",
+		ValidationKey:        "randomKey",
+		BusinessUnit:         "randomUnit",
+		Timezone:             tLocal2,
+		IncludeLocalCost:     true,
+		ReturnFileCode:       "1",
+		ResponseGroup:        "06",
+		ResponseType:         "A3",
+		RegulatoryCode:       "06",
+		ClientTracking:       NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
+		CustomerNumber:       NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
+		OrigNumber:           NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
+		TermNumber:           NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+		BillToNumber:         NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		Zipcode:              NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		Plus4:                NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		P2PZipcode:           NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		P2PPlus4:             NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		Units:                NewRSRParsersMustCompile("1", utils.InfieldSep),
+		UnitType:             NewRSRParsersMustCompile("00", utils.InfieldSep),
+		TaxIncluded:          NewRSRParsersMustCompile("0", utils.InfieldSep),
+		TaxSitusRule:         NewRSRParsersMustCompile("04", utils.InfieldSep),
+		TransTypeCode:        NewRSRParsersMustCompile("010101", utils.InfieldSep),
+		SalesTypeCode:        NewRSRParsersMustCompile("R", utils.InfieldSep),
+		TaxExemptionCodeList: NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+	}
+
+	exp := &SureTaxCfg{
+		URL:                  "randomURL",
+		ClientNumber:         "randomClient",
+		ValidationKey:        "randomKey",
+		BusinessUnit:         "randomUnit",
+		Timezone:             tLocal2,
+		IncludeLocalCost:     true,
+		ReturnFileCode:       "1",
+		ResponseGroup:        "06",
+		ResponseType:         "A3",
+		RegulatoryCode:       "06",
+		ClientTracking:       NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
+		CustomerNumber:       NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
+		OrigNumber:           NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
+		TermNumber:           NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+		BillToNumber:         NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		Zipcode:              NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		Plus4:                NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		P2PZipcode:           NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		P2PPlus4:             NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+		Units:                NewRSRParsersMustCompile("1", utils.InfieldSep),
+		UnitType:             NewRSRParsersMustCompile("00", utils.InfieldSep),
+		TaxIncluded:          NewRSRParsersMustCompile("0", utils.InfieldSep),
+		TaxSitusRule:         NewRSRParsersMustCompile("04", utils.InfieldSep),
+		TransTypeCode:        NewRSRParsersMustCompile("010101", utils.InfieldSep),
+		SalesTypeCode:        NewRSRParsersMustCompile("R", utils.InfieldSep),
+		TaxExemptionCodeList: NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
+	}
+
+	rcv := stCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

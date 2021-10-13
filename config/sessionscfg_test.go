@@ -137,6 +137,10 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.sessionSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sessionSCfg))
 	}
+	cfgJSON = nil
+	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -1330,6 +1334,8 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		CDRsConns:           []string{"*localhost"},
 		ReplicationConns:    []string{"*localhost"},
 		AttributeSConns:     []string{"*localhost"},
+		RateSConns:          []string{"*localhost"},
+		AccountSConns:       []string{"*localhost"},
 		DebitInterval:       1 * time.Second,
 		StoreSCosts:         false,
 		SessionTTL:          1 * time.Second,
@@ -1369,6 +1375,8 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		CDRsConns:           []string{"*birpc"},
 		ReplicationConns:    []string{"*birpc"},
 		AttributeSConns:     []string{"*birpc"},
+		RateSConns:          []string{"*birpc"},
+		AccountSConns:       []string{"*birpc"},
 		DebitInterval:       2 * time.Second,
 		StoreSCosts:         true,
 		SessionTTL:          2 * time.Second,
@@ -1411,6 +1419,8 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		Cdrs_conns:             &[]string{"*birpc"},
 		Replication_conns:      &[]string{"*birpc"},
 		Attributes_conns:       &[]string{"*birpc"},
+		Rates_conns:            &[]string{"*birpc"},
+		Accounts_conns:         &[]string{"*birpc"},
 		Debit_interval:         utils.StringPointer("2s"),
 		Store_session_costs:    utils.BoolPointer(true),
 		Session_ttl:            utils.StringPointer("2s"),
@@ -1455,5 +1465,90 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 	rcv = diffSessionSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestSessionSCloneSection(t *testing.T) {
+	sessCfg := &SessionSCfg{
+		Enabled:             false,
+		ListenBijson:        "*bijson_rpc",
+		ListenBigob:         "*bigob_rpc",
+		ChargerSConns:       []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		ThresholdSConns:     []string{"*localhost"},
+		StatSConns:          []string{"*localhost"},
+		RouteSConns:         []string{"*localhost"},
+		CDRsConns:           []string{"*localhost"},
+		ReplicationConns:    []string{"*localhost"},
+		AttributeSConns:     []string{"*localhost"},
+		DebitInterval:       1 * time.Second,
+		StoreSCosts:         false,
+		SessionTTL:          1 * time.Second,
+		SessionTTLMaxDelay:  utils.DurationPointer(1 * time.Second),
+		SessionTTLLastUsed:  utils.DurationPointer(1 * time.Second),
+		SessionTTLLastUsage: utils.DurationPointer(1 * time.Second),
+		SessionIndexes:      nil,
+		ClientProtocol:      12.2,
+		ChannelSyncInterval: 1 * time.Second,
+		TerminateAttempts:   3,
+		AlterableFields:     nil,
+		MinDurLowBalance:    1 * time.Second,
+		ActionSConns:        []string{"*localhost"},
+		DefaultUsage: map[string]time.Duration{
+			"DFLT_1": 1 * time.Second,
+		},
+		STIRCfg: &STIRcfg{
+			AllowedAttest: utils.StringSet{
+				"A_TEST1": {},
+			},
+			PayloadMaxduration: 2 * time.Second,
+			DefaultAttest:      "default_attest",
+			PublicKeyPath:      "/public/key/path",
+			PrivateKeyPath:     "/private/key/path",
+		},
+	}
+
+	exp := &SessionSCfg{
+		Enabled:             false,
+		ListenBijson:        "*bijson_rpc",
+		ListenBigob:         "",
+		ChargerSConns:       []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		ThresholdSConns:     []string{"*localhost"},
+		StatSConns:          []string{"*localhost"},
+		RouteSConns:         []string{"*localhost"},
+		CDRsConns:           []string{"*localhost"},
+		ReplicationConns:    []string{"*localhost"},
+		AttributeSConns:     []string{"*localhost"},
+		DebitInterval:       1 * time.Second,
+		StoreSCosts:         false,
+		SessionTTL:          1 * time.Second,
+		SessionTTLMaxDelay:  utils.DurationPointer(1 * time.Second),
+		SessionTTLLastUsed:  utils.DurationPointer(1 * time.Second),
+		SessionTTLLastUsage: utils.DurationPointer(1 * time.Second),
+		SessionIndexes:      nil,
+		ClientProtocol:      12.2,
+		ChannelSyncInterval: 1 * time.Second,
+		TerminateAttempts:   3,
+		AlterableFields:     nil,
+		MinDurLowBalance:    1 * time.Second,
+		ActionSConns:        []string{"*localhost"},
+		DefaultUsage: map[string]time.Duration{
+			"DFLT_1": 1 * time.Second,
+		},
+		STIRCfg: &STIRcfg{
+			AllowedAttest: utils.StringSet{
+				"A_TEST1": {},
+			},
+			PayloadMaxduration: 2 * time.Second,
+			DefaultAttest:      "default_attest",
+			PublicKeyPath:      "/public/key/path",
+			PrivateKeyPath:     "/private/key/path",
+		},
+	}
+
+	rcv := sessCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

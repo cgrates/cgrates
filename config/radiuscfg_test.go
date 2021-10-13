@@ -94,6 +94,10 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, cfg.radiusAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.radiusAgentCfg))
 	}
+	cfgJSON = nil
+	if err = cfg.radiusAgentCfg.loadFromJSONCfg(cfgJSON, cfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -346,5 +350,52 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 	rcv = diffRadiusAgentJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestRadiusAgentCloneSection(t *testing.T) {
+	rdagCfg := &RadiusAgentCfg{
+		Enabled:    true,
+		ListenNet:  "udp",
+		ListenAuth: "radius_auth2",
+		ListenAcct: "radius_account2",
+		ClientSecrets: map[string]string{
+			"radius_user": "radius_pass",
+		},
+		ClientDictionaries: map[string]string{
+			"radius_dict1": "radius_val1",
+		},
+		SessionSConns: []string{"*birpc"},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:      "REQ_PROC1",
+				Filters: []string{"filter1"},
+			},
+		},
+	}
+
+	exp := &RadiusAgentCfg{
+		Enabled:    true,
+		ListenNet:  "udp",
+		ListenAuth: "radius_auth2",
+		ListenAcct: "radius_account2",
+		ClientSecrets: map[string]string{
+			"radius_user": "radius_pass",
+		},
+		ClientDictionaries: map[string]string{
+			"radius_dict1": "radius_val1",
+		},
+		SessionSConns: []string{"*birpc"},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:      "REQ_PROC1",
+				Filters: []string{"filter1"},
+			},
+		},
+	}
+
+	rcv := rdagCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

@@ -1344,7 +1344,28 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 // 		t.Errorf("Expected %+v, received %+v", expected, err)
 // 	}
 // }
+func TestLoaderDataTypeLoadFromJSONNil(t *testing.T) {
+	lData := &LoaderDataType{
+		Type:     "*attributes",
+		Filename: "Attributes.csv",
+		Flags:    utils.FlagsWithParams{},
+		Fields: []*FCTemplate{
+			{
+				Tag:       "TenantID",
+				Path:      "Tenant",
+				pathSlice: []string{"Tenant"},
+				Type:      utils.MetaComposed,
+				Value:     NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+				Mandatory: true,
+				Layout:    time.RFC3339,
+			},
+		},
+	}
 
+	if err := lData.loadFromJSONCfg(nil, nil, ""); err != nil {
+		t.Error(err)
+	}
+}
 func TestLoaderSCfgloadFromJsonCfgCase3(t *testing.T) {
 	cfg := &LoaderJsonCfg{
 		Data: &[]*LoaderJsonDataType{
@@ -2908,3 +2929,47 @@ func TestLockFolderIsDir(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
 	}
 }
+
+// func TestLoaderSCloneSection(t *testing.T) {
+// 	ldrsCfg := LoaderSCfgs{
+// 		{
+// 			ID:             "LoaderID",
+// 			Enabled:        false,
+// 			Tenant:         "cgrates.org",
+// 			DryRun:         false,
+// 			RunDelay:       1 * time.Millisecond,
+// 			LockFilePath:   "lockFileName",
+// 			CacheSConns:    []string{"*localhost"},
+// 			FieldSeparator: ";",
+// 			TpInDir:        "/tp/in/dir",
+// 			TpOutDir:       "/tp/out/dir",
+// 			Data:           nil,
+// 		},
+// 	}
+
+// 	exp := LoaderSCfgs{
+// 		{
+// 			ID:             "LoaderID",
+// 			Enabled:        false,
+// 			Tenant:         "cgrates.org",
+// 			DryRun:         false,
+// 			RunDelay:       1 * time.Millisecond,
+// 			LockFilePath:   "lockFileName",
+// 			CacheSConns:    []string{"*localhost"},
+// 			FieldSeparator: ";",
+// 			TpInDir:        "/tp/in/dir",
+// 			TpOutDir:       "/tp/out/dir",
+// 			Data:           nil,
+// 		},
+// 	}
+
+// 	rcv := ldrsCfg.CloneSection()
+// 	idk, ok := rcv.(*LoaderSCfgs)
+// 	if !ok {
+// 		t.Error("Err")
+// 	}
+// 	(*idk)[0].Data = nil
+// 	if !reflect.DeepEqual(rcv, exp) {
+// 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+// 	}
+// }

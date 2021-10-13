@@ -86,6 +86,30 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected.RmtConns, jsonCfg.storDbCfg.RmtConns) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.RmtConns), utils.ToJSON(jsonCfg.storDbCfg.RmtConns))
 	}
+
+	newCfgJSON := cfgJSON
+
+	cfgJSON = nil
+	if err = jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
+
+	newCfgJSON.Opts = &DBOptsJson{
+		SQLConnMaxLifetime: utils.StringPointer("error"),
+	}
+
+	if err = jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err != nil {
+		t.Error(err)
+	}
+
+	newCfgJSON.Opts = &DBOptsJson{
+		MongoQueryTimeout: utils.StringPointer("error"),
+	}
+
+	if err = jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -378,5 +402,91 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 	rcv = diffStorDBDbJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffStorDBOptsJsonCfg(t *testing.T) {
+	var d *DBOptsJson
+
+	v1 := &StorDBOpts{
+		SQLConnMaxLifetime: 10 * time.Second,
+		SQLMaxOpenConns:    100,
+		SQLMaxIdleConns:    10,
+		MongoQueryTimeout:  10 * time.Second,
+		SSLMode:            "disable",
+		MySQLLocation:      "UTC",
+	}
+
+	v2 := &StorDBOpts{
+		SQLConnMaxLifetime: 11 * time.Second,
+		SQLMaxOpenConns:    101,
+		SQLMaxIdleConns:    11,
+		MongoQueryTimeout:  11 * time.Second,
+		SSLMode:            "enable",
+		MySQLLocation:      "/usr/share/db",
+	}
+
+	exp := &DBOptsJson{
+		SQLConnMaxLifetime: utils.StringPointer("11s"),
+		SQLMaxOpenConns:    utils.IntPointer(101),
+		SQLMaxIdleConns:    utils.IntPointer(11),
+		MongoQueryTimeout:  utils.StringPointer("11s"),
+		SSLMode:            utils.StringPointer("enable"),
+		MySQLLocation:      utils.StringPointer("/usr/share/db"),
+	}
+
+	rcv := diffStorDBOptsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestStorDbCloneSection(t *testing.T) {
+	storDbCfg := &StorDbCfg{
+		Type:                "mysql",
+		Host:                "localhost",
+		Port:                "8080",
+		Name:                "cgrates",
+		User:                "cgrates_user",
+		Password:            "cgrates_password",
+		StringIndexedFields: []string{"*req.index1"},
+		PrefixIndexedFields: []string{"*req.index2"},
+		RmtConns:            []string{"*rmt_conn"},
+		RplConns:            []string{"*rpl_conns"},
+		Items: map[string]*ItemOpt{
+			"ITEM_1": {
+				Remote: false,
+			},
+		},
+		Opts: &StorDBOpts{
+			SQLMaxOpenConns: 50,
+		},
+	}
+
+	exp := &StorDbCfg{
+		Type:                "mysql",
+		Host:                "localhost",
+		Port:                "8080",
+		Name:                "cgrates",
+		User:                "cgrates_user",
+		Password:            "cgrates_password",
+		StringIndexedFields: []string{"*req.index1"},
+		PrefixIndexedFields: []string{"*req.index2"},
+		RmtConns:            []string{"*rmt_conn"},
+		RplConns:            []string{"*rpl_conns"},
+		Items: map[string]*ItemOpt{
+			"ITEM_1": {
+				Remote: false,
+			},
+		},
+		Opts: &StorDBOpts{
+			SQLMaxOpenConns: 50,
+		},
+	}
+
+	rcv := storDbCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

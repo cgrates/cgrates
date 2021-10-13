@@ -86,6 +86,10 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.sipAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sipAgentCfg))
 	}
+	cfgJSONS = nil
+	if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestSIPAgentCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -376,5 +380,40 @@ func TestDiffSIPAgentJsonCfg(t *testing.T) {
 	rcv = diffSIPAgentJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestSipAgentCloneSection(t *testing.T) {
+	sipCfg := &SIPAgentCfg{
+		Enabled:             false,
+		Listen:              "localhost:8080",
+		ListenNet:           "tcp",
+		SessionSConns:       []string{"*localhost"},
+		Timezone:            "UTC",
+		RetransmissionTimer: 1 * time.Second,
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "reqID",
+			},
+		},
+	}
+
+	exp := &SIPAgentCfg{
+		Enabled:             false,
+		Listen:              "localhost:8080",
+		ListenNet:           "tcp",
+		SessionSConns:       []string{"*localhost"},
+		Timezone:            "UTC",
+		RetransmissionTimer: 1 * time.Second,
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "reqID",
+			},
+		},
+	}
+
+	rcv := sipCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

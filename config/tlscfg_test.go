@@ -49,6 +49,11 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.tlsCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.tlsCfg))
 	}
+
+	cfgJSON = nil
+	if err = jsonCfg.tlsCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestTlsCfgAsMapInterface(t *testing.T) {
@@ -161,5 +166,32 @@ func TestDiffTlsJsonCfg(t *testing.T) {
 	rcv = diffTlsJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestTlsCloneSection(t *testing.T) {
+	tlsCfg := &TLSCfg{
+		ServerCerificate: "server_certificate",
+		ServerKey:        "server_key",
+		ServerPolicy:     1,
+		ServerName:       "server_name",
+		ClientCerificate: "client_certificate",
+		ClientKey:        "client_key",
+		CaCertificate:    "ca_certificate",
+	}
+
+	exp := &TLSCfg{
+		ServerCerificate: "server_certificate",
+		ServerKey:        "server_key",
+		ServerPolicy:     1,
+		ServerName:       "server_name",
+		ClientCerificate: "client_certificate",
+		ClientKey:        "client_key",
+		CaCertificate:    "ca_certificate",
+	}
+
+	rcv := tlsCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
