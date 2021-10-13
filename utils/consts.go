@@ -33,26 +33,26 @@ var (
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
-		CacheCapsEvents, CacheVersions, CacheReplicationHosts})
+		CacheCapsEvents, CacheReplicationHosts})
 
-	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
+	DataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
 		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
 		CacheRatingProfilesTmp, CacheReverseFilterIndexes,
-		CacheActionPlans, CacheAccountActionPlans, CacheAccounts})
+		CacheActionPlans, CacheAccountActionPlans, CacheAccounts, CacheVersions})
 
-	storDBPartition = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
+	StorDBPartitions = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
 		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
 		CacheTBLTPActionPlans, CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
 		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
-		CacheTBLTPDispatcherHosts})
+		CacheTBLTPDispatcherHosts, CacheVersions})
 
 	// CachePartitions enables creation of cache partitions
-	CachePartitions = JoinStringSet(extraDBPartition, dataDBPartition, storDBPartition)
+	CachePartitions = JoinStringSet(extraDBPartition, DataDBPartitions, StorDBPartitions)
 
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:            DestinationPrefix,
@@ -162,7 +162,7 @@ const (
 	MySQL                    = "mysql"
 	Mongo                    = "mongo"
 	Redis                    = "redis"
-	INTERNAL                 = "internal"
+	Internal                 = "internal"
 	DataManager              = "DataManager"
 	Localhost                = "127.0.0.1"
 	Prepaid                  = "prepaid"

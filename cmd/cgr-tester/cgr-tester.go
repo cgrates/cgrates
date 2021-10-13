@@ -83,7 +83,7 @@ func durInternalRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, erro
 		tstCfg.DataDbCfg().Host, tstCfg.DataDbCfg().Port,
 		tstCfg.DataDbCfg().Name, tstCfg.DataDbCfg().User,
 		tstCfg.DataDbCfg().Password, tstCfg.GeneralCfg().DBDataEncoding,
-		tstCfg.DataDbCfg().Opts)
+		tstCfg.DataDbCfg().Opts, tstCfg.DataDbCfg().Items)
 	if err != nil {
 		return 0, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}

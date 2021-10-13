@@ -33,10 +33,10 @@ var (
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	marshaler string, cacheCfg *config.CacheCfg,
-	opts map[string]interface{}) (db MigratorDataDB, err error) {
+	opts map[string]interface{}, itmsCfg map[string]*config.ItemOpt) (db MigratorDataDB, err error) {
 	var dbCon engine.DataDB
 	if dbCon, err = engine.NewDataDBConn(db_type, host,
-		port, name, user, pass, marshaler, opts); err != nil {
+		port, name, user, pass, marshaler, opts, nil); err != nil {
 		return
 	}
 	dm := engine.NewDataManager(dbCon, cacheCfg, nil)
@@ -45,21 +45,21 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 		db = newRedisMigrator(dm)
 	case utils.Mongo:
 		db = newMongoMigrator(dm)
-	case utils.INTERNAL:
+	case utils.Internal:
 		db = newInternalMigrator(dm)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
-			db_type, utils.Redis, utils.Mongo, utils.INTERNAL)
+			db_type, utils.Redis, utils.Mongo, utils.Internal)
 	}
 	return
 }
 
 func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
-	opts map[string]interface{}) (db MigratorStorDB, err error) {
+	opts map[string]interface{}, itmsCfg map[string]*config.ItemOpt) (db MigratorStorDB, err error) {
 	var storDb engine.StorDB
 	if storDb, err = engine.NewStorDBConn(db_type, host, port, name, user,
-		pass, marshaler, stringIndexedFields, prefixIndexedFields, opts); err != nil {
+		pass, marshaler, stringIndexedFields, prefixIndexedFields, opts, itmsCfg); err != nil {
 		return
 	}
 	switch db_type {
@@ -69,11 +69,11 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
 		db = newMigratorSQL(storDb)
 	case utils.Postgres:
 		db = newMigratorSQL(storDb)
-	case utils.INTERNAL:
+	case utils.Internal:
 		db = newInternalStorDBMigrator(storDb)
 	default:
 		err = fmt.Errorf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MySQL, utils.Mongo, utils.Postgres, utils.INTERNAL)
+			db_type, utils.MySQL, utils.Mongo, utils.Postgres, utils.Internal)
 	}
 	return
 }

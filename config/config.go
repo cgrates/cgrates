@@ -66,7 +66,7 @@ func newDbDefaults() dbDefaults {
 			"DbName": "10",
 			"DbPort": "6379",
 		},
-		utils.INTERNAL: map[string]string{
+		utils.Internal: map[string]string{
 			"DbName": "internal",
 			"DbPort": "internal",
 		},
@@ -476,6 +476,16 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 	if err = cfg.dataDbCfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		return
+	}
+	// in case of internalDB we need to disable the cache
+	// so we enforce it here
+	if cfg.dataDbCfg.Type == utils.Internal {
+		// overwrite only DataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
+		for key := range utils.DataDBPartitions {
+			if _, has := cfg.cacheCfg.Partitions[key]; has {
+				cfg.cacheCfg.Partitions[key] = &CacheParamCfg{}
+			}
+		}
 	}
 	return
 
