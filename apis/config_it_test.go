@@ -25,14 +25,12 @@ import (
 	"path"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 var (
@@ -156,18 +154,10 @@ func testCfgGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaProcessRunsCfg: map[string]int{
-					utils.MetaDefault: 1,
-				},
-				utils.MetaProfileRunsCfg: map[string]int{
-					utils.MetaDefault: 0,
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -204,8 +194,10 @@ func testCfgSetGetConfig(t *testing.T) {
 					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
-						utils.MetaProcessRunsCfg: map[string]int{
-							utils.MetaDefault: 2,
+						utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+							{
+								Value: 2,
+							},
 						},
 					},
 				},
@@ -229,18 +221,14 @@ func testCfgSetGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
+				utils.MetaAttributeIDsCfg: []*utils.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+					{
+						Value: 2,
+					},
 				},
-				utils.MetaProcessRunsCfg: map[string]int{
-					utils.MetaDefault: 2,
-				},
-				utils.MetaProfileRunsCfg: map[string]int{
-					utils.MetaDefault: 0,
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -306,21 +294,11 @@ func testCfgSetEmptyReload(t *testing.T) {
 			"suffix_indexed_fields":      []string{},
 			"verbosity":                  1000,
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaRateProfileIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaStartTime: map[string]string{
-					utils.MetaDefault: utils.MetaNow,
-				},
-				utils.MetaUsage: map[string]string{
-					utils.MetaDefault: decimal.New(int64(time.Minute), 0).String(),
-				},
-				utils.MetaIntervalStartCfg: map[string]string{
-					utils.MetaDefault: decimal.New(0, 0).String(),
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaRateProfileIDsCfg:    []*utils.DynamicStringSliceOpt{},
+				utils.MetaStartTime:            []*utils.DynamicStringOpt{},
+				utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
+				utils.MetaIntervalStartCfg:     []*utils.DynamicDecimalBigOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -346,8 +324,26 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 		&config.SetConfigFromJSONArgs{
 			APIOpts: nil,
 			Tenant:  "",
-			Config:  "{\"attributes\":{\"accounts_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[],\"opts\":{\"*processRuns\":{\"\":2}}}}",
-			DryRun:  false,
+			Config: `{
+"attributes":{
+	"accounts_conns":["*internal"],
+	"enabled":true,
+	"indexed_selects":false,
+	"nested_fields":false,
+	"prefix_indexed_fields":[],
+	"resources_conns":["*internal"],
+	"stats_conns":["*localhost"],
+	"suffix_indexed_fields":[],
+	"opts":{
+		"*processRuns": [
+			{
+				"Value": 2,
+			},
+		],
+		},
+	},
+}`,
+			DryRun: false,
 		},
 		&reply); err != nil {
 		t.Error(err)
@@ -355,7 +351,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*attributeIDs":{"*default":[]},"*processRuns":{"":2,"*default":2},"*profileIgnoreFilters":{"*default":false},"*profileRuns":{"*default":0}},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*attributeIDs":[],"*processRuns":[{"Tenant":"","FilterIDs":null,"Value":2},{"Tenant":"","FilterIDs":null,"Value":2}],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -500,9 +496,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
-						utils.MetaProcessRunsCfg: map[string]int{
-							utils.MetaDefault: 2,
-						},
+						utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{},
 					},
 				},
 			},
@@ -525,18 +519,10 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
-				},
-				utils.MetaProcessRunsCfg: map[string]int{
-					utils.MetaDefault: 2,
-				},
-				utils.MetaProfileRunsCfg: map[string]int{
-					utils.MetaDefault: 0,
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -570,13 +556,7 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
-		Opts: &config.AttributesOptsJson{
-			ProcessRuns: []*utils.DynamicIntOpt{
-				{
-					Value: 2,
-				},
-			},
-		},
+		Opts:                  &config.AttributesOptsJson{},
 	}
 	if !reflect.DeepEqual(attr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(attr))
@@ -638,18 +618,14 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: map[string][]string{
-					utils.MetaDefault: {},
+				utils.MetaAttributeIDsCfg: []*utils.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+					{
+						Value: 2,
+					},
 				},
-				utils.MetaProcessRunsCfg: map[string]int{
-					utils.MetaDefault: 2,
-				},
-				utils.MetaProfileRunsCfg: map[string]int{
-					utils.MetaDefault: 0,
-				},
-				utils.MetaProfileIgnoreFilters: map[string]bool{
-					utils.MetaDefault: false,
-				},
+				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -663,7 +639,7 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 		&replyGet); err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(utils.ToJSON(expectedGet), utils.ToJSON(replyGet)) {
+	if !reflect.DeepEqual(expectedGet, replyGet) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(replyGet))
 	}
 }
