@@ -46,7 +46,7 @@ func GetFloat64Opts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fi
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options or none of the filters pass
+	return dftOpt, nil // return the default value if there are no options and none of the filters pass
 }
 
 // GetDurationOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Duration, otherwise it
@@ -69,7 +69,7 @@ func GetDurationOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *F
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options or none of the filters pass
+	return dftOpt, nil // return the default value if there are no options and none of the filters pass
 }
 
 // GetStringOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as string, otherwise it
@@ -92,7 +92,7 @@ func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fil
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options or none of the filters pass
+	return dftOpt, nil // return the default value if there are no options and none of the filters pass
 }
 
 // GetTimeOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Time, otherwise it
@@ -116,7 +116,7 @@ func GetTimeOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filte
 			return utils.ParseTimeDetectLayout(opt.Value, tmz)
 		}
 	}
-	return utils.ParseTimeDetectLayout(dftOpt, tmz) // return the default value if there are no options or none of the filters pass
+	return utils.ParseTimeDetectLayout(dftOpt, tmz) // return the default value if there are no options and none of the filters pass
 }
 
 // GetStringSliceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as []string, otherwise it
@@ -139,7 +139,7 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options or none of the filters pass
+	return dftOpt, nil // return the default value if there are no options and none of the filters pass
 }
 
 // GetIntOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as int, otherwise it
@@ -166,7 +166,7 @@ func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filter
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options or none of the filters pass
+	return dftOpt, nil // return the default value if there are no options and none of the filters pass
 }
 
 // GetBoolOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as bool, otherwise it
@@ -189,7 +189,7 @@ func GetBoolOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filte
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options or none of the filters pass
+	return dftOpt, nil // return the default value if there are no options and none of the filters pass
 }
 
 // GetDecimalBigOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *decimal.Big, otherwise it
@@ -212,7 +212,7 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options or none of the filters pass
+	return dftOpt, nil // return the default value if there are no options and none of the filters pass
 }
 
 // GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as interface{}, otherwise it
@@ -235,5 +235,32 @@ func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options or none of the filters pass
+	return dftOpt, nil // return the default value if there are no options and none of the filters pass
+}
+
+// GetIntPointerOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *int, otherwise it
+// returns the config option if at least one filter passes or NOT_FOUND if none of them do
+func GetIntPointerOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicIntPointerOpt,
+	optNames ...string) (cfgOpt *int, err error) {
+	for _, optName := range optNames {
+		if opt, has := ev.APIOpts[optName]; has {
+			var value int64
+			if value, err = utils.IfaceAsTInt64(opt); err != nil {
+				return nil, err
+			}
+			return utils.IntPointer(int(value)), nil
+		}
+	}
+	evDP := ev.AsDataProvider()
+	for _, opt := range dynOpts { // iterate through the options
+		if opt.Tenant != utils.MetaAny && tnt != opt.Tenant {
+			continue
+		}
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+			return nil, err
+		} else if pass {
+			return opt.Value, nil
+		}
+	}
+	return nil, utils.ErrNotFound // return NOT_FOUND if there are no options and none of the filters pass
 }
