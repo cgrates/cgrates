@@ -29,8 +29,6 @@ const (
 	RoutesContextDftOpt      = "*routes"
 	RoutesIgnoreErrorsDftOpt = false
 	RoutesMaxCostDftOpt      = utils.EmptyString
-	RoutesLimitDftOpt        = 1
-	RoutesOffsetDftOpt       = 1
 	RoutesProfileCountDftOpt = 1
 	RoutesUsageDftOpt        = time.Minute
 )
@@ -39,8 +37,8 @@ type RoutesOpts struct {
 	Context      []*utils.DynamicStringOpt
 	IgnoreErrors []*utils.DynamicBoolOpt
 	MaxCost      []*utils.DynamicInterfaceOpt
-	Limit        []*utils.DynamicIntOpt
-	Offset       []*utils.DynamicIntOpt
+	Limit        []*utils.DynamicIntPointerOpt
+	Offset       []*utils.DynamicIntPointerOpt
 	ProfileCount []*utils.DynamicIntOpt
 	Usage        []*utils.DynamicDecimalBigOpt
 }
@@ -85,10 +83,10 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 		rtsOpts.MaxCost = append(rtsOpts.MaxCost, jsnCfg.MaxCost...)
 	}
 	if jsnCfg.Limit != nil {
-		rtsOpts.Limit = append(rtsOpts.Limit, jsnCfg.Limit...)
+		rtsOpts.Limit = append(rtsOpts.Limit, utils.IntToIntPointerDynamicOpts(jsnCfg.Limit)...)
 	}
 	if jsnCfg.Offset != nil {
-		rtsOpts.Offset = append(rtsOpts.Offset, jsnCfg.Offset...)
+		rtsOpts.Offset = append(rtsOpts.Offset, utils.IntToIntPointerDynamicOpts(jsnCfg.Offset)...)
 	}
 	if jsnCfg.ProfileCount != nil {
 		rtsOpts.ProfileCount = append(rtsOpts.ProfileCount, jsnCfg.ProfileCount...)
@@ -165,13 +163,13 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 	if rts.ProfileCount != nil {
 		profileCount = utils.CloneDynamicIntOpt(rts.ProfileCount)
 	}
-	var limit []*utils.DynamicIntOpt
+	var limit []*utils.DynamicIntPointerOpt
 	if rts.Limit != nil {
-		limit = utils.CloneDynamicIntOpt(rts.Limit)
+		limit = utils.CloneDynamicIntPointerOpt(rts.Limit)
 	}
-	var offset []*utils.DynamicIntOpt
+	var offset []*utils.DynamicIntPointerOpt
 	if rts.Offset != nil {
-		offset = utils.CloneDynamicIntOpt(rts.Offset)
+		offset = utils.CloneDynamicIntPointerOpt(rts.Offset)
 	}
 	var usage []*utils.DynamicDecimalBigOpt
 	if rts.Usage != nil {
@@ -308,11 +306,11 @@ func diffRoutesOptsJsonCfg(d *RoutesOptsJson, v1, v2 *RoutesOpts) *RoutesOptsJso
 	if !utils.DynamicStringOptEqual(v1.Context, v2.Context) {
 		d.Context = v2.Context
 	}
-	if !utils.DynamicIntOptEqual(v1.Limit, v2.Limit) {
-		d.Limit = v2.Limit
+	if !utils.DynamicIntPointerOptEqual(v1.Limit, v2.Limit) {
+		d.Limit = utils.IntPointerToIntDynamicOpts(v2.Limit)
 	}
-	if !utils.DynamicIntOptEqual(v1.Offset, v2.Offset) {
-		d.Offset = v2.Offset
+	if !utils.DynamicIntPointerOptEqual(v1.Offset, v2.Offset) {
+		d.Offset = utils.IntPointerToIntDynamicOpts(v2.Offset)
 	}
 	if !utils.DynamicInterfaceOptEqual(v1.MaxCost, v2.MaxCost) {
 		d.MaxCost = v2.MaxCost
