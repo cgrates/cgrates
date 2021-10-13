@@ -72,6 +72,12 @@ type DynamicInterfaceOpt struct {
 	Value     interface{}
 }
 
+type DynamicIntPointerOpt struct {
+	Tenant    string
+	FilterIDs []string
+	Value     *int
+}
+
 func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) (cl []*DynamicStringSliceOpt) {
 	cl = make([]*DynamicStringSliceOpt, len(in))
 	copy(cl, in)
@@ -150,6 +156,17 @@ func CloneDynamicDecimalBigOpt(in []*DynamicDecimalBigOpt) (cl []*DynamicDecimal
 		cl[i] = &DynamicDecimalBigOpt{
 			FilterIDs: CloneStringSlice(val.FilterIDs),
 			Value:     CloneDecimalBig(val.Value),
+		}
+	}
+	return
+}
+
+func CloneDynamicIntPointerOpt(in []*DynamicIntPointerOpt) (cl []*DynamicIntPointerOpt) {
+	cl = make([]*DynamicIntPointerOpt, len(in))
+	for i, val := range in {
+		cl[i] = &DynamicIntPointerOpt{
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     IntPointer(*val.Value),
 		}
 	}
 	return
@@ -267,6 +284,21 @@ func DynamicInterfaceOptEqual(v1, v2 []*DynamicInterfaceOpt) bool {
 			return false
 		}
 		if v1[i].Value != v2[i].Value {
+			return false
+		}
+	}
+	return true
+}
+
+func DynamicIntPointerOptEqual(v1, v2 []*DynamicIntPointerOpt) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v1 {
+		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+			return false
+		}
+		if *v1[i].Value != *v2[i].Value {
 			return false
 		}
 	}
@@ -511,6 +543,26 @@ func DurationToStringDynamicOpts(durOpts []*DynamicDurationOpt) (strOpts []*Dyna
 		strOpts[index].Tenant = opt.Tenant
 		strOpts[index].FilterIDs = opt.FilterIDs
 		strOpts[index].Value = opt.Value.String()
+	}
+	return
+}
+
+func IntToIntPointerDynamicOpts(intOpts []*DynamicIntOpt) (intPtOpts []*DynamicIntPointerOpt) {
+	intPtOpts = make([]*DynamicIntPointerOpt, len(intOpts))
+	for index, opt := range intOpts {
+		intPtOpts[index].Tenant = opt.Tenant
+		intPtOpts[index].FilterIDs = opt.FilterIDs
+		intPtOpts[index].Value = IntPointer(opt.Value)
+	}
+	return
+}
+
+func IntPointerToIntDynamicOpts(intPtOpts []*DynamicIntPointerOpt) (intOpts []*DynamicIntOpt) {
+	intOpts = make([]*DynamicIntOpt, len(intPtOpts))
+	for index, opt := range intPtOpts {
+		intOpts[index].Tenant = opt.Tenant
+		intOpts[index].FilterIDs = opt.FilterIDs
+		intOpts[index].Value = *opt.Value
 	}
 	return
 }
