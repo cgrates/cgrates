@@ -117,6 +117,10 @@ func NewDecimalFromUsage(u string) (d *Decimal, err error) {
 			return
 		}
 		d = NewDecimal(int64(tm), 0)
+	case strings.Contains(u, NestingSep):
+		if d, err = NewDecimalFromString(u); err != nil {
+			return nil, err
+		}
 	default:
 		var i int64
 		if i, err = strconv.ParseInt(u, 10, 64); err != nil {
