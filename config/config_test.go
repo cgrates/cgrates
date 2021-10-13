@@ -860,8 +860,8 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 					Value:     utils.EmptyString,
 				},
 			},
-			Limit:  []*utils.DynamicIntOpt{},
-			Offset: []*utils.DynamicIntOpt{},
+			Limit:  []*utils.DynamicIntPointerOpt{},
+			Offset: []*utils.DynamicIntPointerOpt{},
 			Usage: []*utils.DynamicDecimalBigOpt{
 				{
 					FilterIDs: []string{utils.MetaDefault},
@@ -2154,8 +2154,8 @@ func TestRouteSConfig(t *testing.T) {
 					Value:     utils.EmptyString,
 				},
 			},
-			Limit:  []*utils.DynamicIntOpt{},
-			Offset: []*utils.DynamicIntOpt{},
+			Limit:  []*utils.DynamicIntPointerOpt{},
+			Offset: []*utils.DynamicIntPointerOpt{},
 			Usage: []*utils.DynamicDecimalBigOpt{
 				{
 					FilterIDs: []string{utils.MetaDefault},
