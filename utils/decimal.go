@@ -110,23 +110,14 @@ func NewDecimalFromUsage(u string) (d *Decimal, err error) {
 	case u == EmptyString:
 		d = NewDecimal(0, 0)
 	//"ns", "us" (or "µs"), "ms", "s", "m", "h"
-	case strings.HasSuffix(u, NsSuffix), strings.HasSuffix(u, UsSuffix), strings.HasSuffix(u, µSuffix), strings.HasSuffix(u, MsSuffix),
-		strings.HasSuffix(u, SSuffix), strings.HasSuffix(u, MSuffix), strings.HasSuffix(u, HSuffix):
+	case strings.HasSuffix(u, SSuffix), strings.HasSuffix(u, MSuffix), strings.HasSuffix(u, HSuffix):
 		var tm time.Duration
 		if tm, err = time.ParseDuration(u); err != nil {
 			return
 		}
 		d = NewDecimal(int64(tm), 0)
-	case strings.Contains(u, NestingSep):
-		if d, err = NewDecimalFromString(u); err != nil {
-			return nil, err
-		}
 	default:
-		var i int64
-		if i, err = strconv.ParseInt(u, 10, 64); err != nil {
-			return
-		}
-		d = NewDecimal(i, 0)
+		d, err = NewDecimalFromString(u)
 	}
 	return
 }

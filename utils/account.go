@@ -595,16 +595,14 @@ func (ext *APICostIncrement) AsCostIncrement() (cIncr *CostIncrement, err error)
 	cIncr = &CostIncrement{
 		FilterIDs: ext.FilterIDs,
 	}
-	if ext.Increment != EmptyString {
-		if cIncr.Increment, err = NewDecimalFromUsage(ext.Increment); err != nil {
-			return nil, err
-		}
-	}
 	if ext.FixedFee != nil {
 		cIncr.FixedFee = NewDecimalFromFloat64(*ext.FixedFee)
 	}
 	if ext.RecurrentFee != nil {
 		cIncr.RecurrentFee = NewDecimalFromFloat64(*ext.RecurrentFee)
+	}
+	if ext.Increment != EmptyString {
+		cIncr.Increment, err = NewDecimalFromUsage(ext.Increment)
 	}
 	return
 }
