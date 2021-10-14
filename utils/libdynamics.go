@@ -24,56 +24,56 @@ import (
 )
 
 type DynamicStringSliceOpt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     []string
 }
 
 type DynamicStringOpt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     string
 }
 
 type DynamicIntOpt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     int
 }
 
 type DynamicFloat64Opt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     float64
 }
 
 type DynamicBoolOpt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     bool
 }
 
 type DynamicDurationOpt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     time.Duration
 }
 
 type DynamicDecimalBigOpt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     *decimal.Big
 }
 
 type DynamicInterfaceOpt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     interface{}
 }
 
 type DynamicIntPointerOpt struct {
+	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	FilterIDs []string
 	Value     *int
 }
 
