@@ -127,7 +127,7 @@ func TestAccountsCfLoadConfigError(t *testing.T) {
 		Max_usage: utils.StringPointer("invalid_Decimal"),
 	}
 	actsCfg := new(AccountSCfg)
-	expected := "strconv.ParseInt: parsing \"invalid_Decimal\": invalid syntax"
+	expected := "can't convert <invalid_Decimal> to decimal"
 	if err := actsCfg.loadFromJSONCfg(accountsJson); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
