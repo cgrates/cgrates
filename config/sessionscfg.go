@@ -27,6 +27,28 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+const (
+	SessionsAttributesDftOpt = false
+	SessionsChargersDftOpt   = false
+	SessionsStatsDftOpt      = false
+	SessionsThresholdsDftOpt = false
+	SessionsInitiateDftOpt   = false
+	SessionsUpdateDftOpt     = false
+	SessionsTerminateDftOpt  = false
+	SessionsMessageDftOpt    = false
+)
+
+type SessionsOpts struct {
+	Attributes []*utils.DynamicBoolOpt
+	Chargers   []*utils.DynamicBoolOpt
+	Stats      []*utils.DynamicBoolOpt
+	Thresholds []*utils.DynamicBoolOpt
+	Initiate   []*utils.DynamicBoolOpt
+	Update     []*utils.DynamicBoolOpt
+	Terminate  []*utils.DynamicBoolOpt
+	Message    []*utils.DynamicBoolOpt
+}
+
 // SessionSCfg is the config section for SessionS
 type SessionSCfg struct {
 	Enabled             bool
@@ -58,6 +80,7 @@ type SessionSCfg struct {
 	ActionSConns        []string
 	STIRCfg             *STIRcfg
 	DefaultUsage        map[string]time.Duration
+	Opts                *SessionsOpts
 }
 
 // loadSessionSCfg loads the SessionS section of the configuration
@@ -67,6 +90,37 @@ func (scfg *SessionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfi
 		return
 	}
 	return scfg.loadFromJSONCfg(jsnSessionSCfg)
+}
+
+func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Attributes != nil {
+		sesOpts.Attributes = append(sesOpts.Attributes, jsnCfg.Attributes...)
+	}
+	if jsnCfg.Chargers != nil {
+		sesOpts.Chargers = append(sesOpts.Chargers, jsnCfg.Chargers...)
+	}
+	if jsnCfg.Stats != nil {
+		sesOpts.Stats = append(sesOpts.Stats, jsnCfg.Stats...)
+	}
+	if jsnCfg.Thresholds != nil {
+		sesOpts.Thresholds = append(sesOpts.Thresholds, jsnCfg.Thresholds...)
+	}
+	if jsnCfg.Initiate != nil {
+		sesOpts.Initiate = append(sesOpts.Initiate, jsnCfg.Initiate...)
+	}
+	if jsnCfg.Update != nil {
+		sesOpts.Update = append(sesOpts.Update, jsnCfg.Update...)
+	}
+	if jsnCfg.Terminate != nil {
+		sesOpts.Terminate = append(sesOpts.Terminate, jsnCfg.Terminate...)
+	}
+	if jsnCfg.Message != nil {
+		sesOpts.Message = append(sesOpts.Message, jsnCfg.Message...)
+	}
+	return
 }
 
 func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -191,8 +245,17 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-
-	return scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir)
+	if jsnCfg.Stir != nil {
+		if err = scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir); err != nil {
+			return
+		}
+	}
+	if jsnCfg.Opts != nil {
+		if err = scfg.Opts.loadFromJSONCfg(jsnCfg.Opts); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (scfg SessionSCfg) GetDefaultUsage(tor string) time.Duration {
@@ -212,6 +275,16 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 			maxComputed[key] = strconv.Itoa(int(item))
 		}
 	}
+	opts := map[string]interface{}{
+		utils.MetaAttributeSCfg: scfg.Opts.Attributes,
+		utils.MetaChargerSCfg:   scfg.Opts.Chargers,
+		utils.MetaStatSCfg:      scfg.Opts.Stats,
+		utils.MetaThresholdSCfg: scfg.Opts.Thresholds,
+		utils.MetaInitiate:      scfg.Opts.Initiate,
+		utils.MetaUpdate:        scfg.Opts.Update,
+		utils.MetaTerminate:     scfg.Opts.Terminate,
+		utils.MetaMessage:       scfg.Opts.Message,
+	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBijson,
@@ -228,6 +301,7 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 		utils.DebitIntervalCfg:       "0",
 		utils.SessionTTLCfg:          "0",
 		utils.DefaultUsageCfg:        maxComputed,
+		utils.OptsCfg:                opts,
 	}
 	if scfg.DebitInterval != 0 {
 		mp[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
@@ -289,6 +363,51 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 func (SessionSCfg) SName() string              { return SessionSJSON }
 func (scfg SessionSCfg) CloneSection() Section { return scfg.Clone() }
 
+func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
+	var attrS []*utils.DynamicBoolOpt
+	if sesOpts.Attributes != nil {
+		attrS = utils.CloneDynamicBoolOpt(sesOpts.Attributes)
+	}
+	var chrgS []*utils.DynamicBoolOpt
+	if sesOpts.Chargers != nil {
+		chrgS = utils.CloneDynamicBoolOpt(sesOpts.Chargers)
+	}
+	var stS []*utils.DynamicBoolOpt
+	if sesOpts.Stats != nil {
+		stS = utils.CloneDynamicBoolOpt(sesOpts.Stats)
+	}
+	var thdS []*utils.DynamicBoolOpt
+	if sesOpts.Thresholds != nil {
+		thdS = utils.CloneDynamicBoolOpt(sesOpts.Thresholds)
+	}
+	var initS []*utils.DynamicBoolOpt
+	if sesOpts.Initiate != nil {
+		initS = utils.CloneDynamicBoolOpt(sesOpts.Initiate)
+	}
+	var updS []*utils.DynamicBoolOpt
+	if sesOpts.Update != nil {
+		updS = utils.CloneDynamicBoolOpt(sesOpts.Update)
+	}
+	var termS []*utils.DynamicBoolOpt
+	if sesOpts.Terminate != nil {
+		termS = utils.CloneDynamicBoolOpt(sesOpts.Terminate)
+	}
+	var msg []*utils.DynamicBoolOpt
+	if sesOpts.Message != nil {
+		msg = utils.CloneDynamicBoolOpt(sesOpts.Message)
+	}
+	return &SessionsOpts{
+		Attributes: attrS,
+		Chargers:   chrgS,
+		Stats:      stS,
+		Thresholds: thdS,
+		Initiate:   initS,
+		Update:     updS,
+		Terminate:  termS,
+		Message:    msg,
+	}
+}
+
 // Clone returns a deep copy of SessionSCfg
 func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
@@ -306,6 +425,7 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		AlterableFields: scfg.AlterableFields.Clone(),
 		STIRCfg:         scfg.STIRCfg.Clone(),
 		DefaultUsage:    make(map[string]time.Duration),
+		Opts:            scfg.Opts.Clone(),
 	}
 	for k, v := range scfg.DefaultUsage {
 		cln.DefaultUsage[k] = v
@@ -454,6 +574,17 @@ func diffSTIRJsonCfg(d *STIRJsonCfg, v1, v2 *STIRcfg) *STIRJsonCfg {
 	return d
 }
 
+type SessionsOptsJson struct {
+	Attributes []*utils.DynamicBoolOpt `json:"*attributeS"`
+	Chargers   []*utils.DynamicBoolOpt `json:"*chargerS"`
+	Stats      []*utils.DynamicBoolOpt `json:"*statS"`
+	Thresholds []*utils.DynamicBoolOpt `json:"*thresholdS"`
+	Initiate   []*utils.DynamicBoolOpt `json:"*initiate"`
+	Update     []*utils.DynamicBoolOpt `json:"*update"`
+	Terminate  []*utils.DynamicBoolOpt `json:"*terminate"`
+	Message    []*utils.DynamicBoolOpt `json:"*message"`
+}
+
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
 	Enabled                *bool
@@ -485,6 +616,38 @@ type SessionSJsonCfg struct {
 	Min_dur_low_balance    *string
 	Stir                   *STIRJsonCfg
 	Default_usage          map[string]string
+	Opts                   *SessionsOptsJson
+}
+
+func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *SessionsOptsJson {
+	if d == nil {
+		d = new(SessionsOptsJson)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Attributes, v2.Attributes) {
+		d.Attributes = v2.Attributes
+	}
+	if !utils.DynamicBoolOptEqual(v1.Chargers, v2.Chargers) {
+		d.Chargers = v2.Chargers
+	}
+	if !utils.DynamicBoolOptEqual(v1.Stats, v2.Stats) {
+		d.Stats = v2.Stats
+	}
+	if !utils.DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
+		d.Thresholds = v2.Thresholds
+	}
+	if !utils.DynamicBoolOptEqual(v1.Initiate, v2.Initiate) {
+		d.Initiate = v2.Initiate
+	}
+	if !utils.DynamicBoolOptEqual(v1.Update, v2.Update) {
+		d.Update = v2.Update
+	}
+	if !utils.DynamicBoolOptEqual(v1.Terminate, v2.Terminate) {
+		d.Terminate = v2.Terminate
+	}
+	if !utils.DynamicBoolOptEqual(v1.Message, v2.Message) {
+		d.Message = v2.Message
+	}
+	return d
 }
 
 func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonCfg {
@@ -601,5 +764,6 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 			d.Default_usage[tor] = usage2.String()
 		}
 	}
+	d.Opts = diffSessionsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }

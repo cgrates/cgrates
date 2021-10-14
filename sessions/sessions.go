@@ -1569,14 +1569,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	}
 	// end of RPC caching
 	var attrS bool
-	if v, has := args.APIOpts[utils.OptsAttributeS]; !has {
-		/*
-			if attrS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.CGREvent.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Attributes); err != nil {
-				return
-			}
-		*/
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Attributes,
+		config.SessionsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
 	if !(attrS || utils.OptAsBool(args.APIOpts, utils.OptsSesMaxUsage) ||
@@ -1602,14 +1596,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	runEvents := make(map[string]*utils.CGREvent)
 
 	var chrgS bool
-	if v, has := args.APIOpts[utils.OptsChargerS]; !has {
-		/*
-			if chrgS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.CGREvent.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.SessionSCfg().Opts.Chargers); err != nil {
-				return
-			}
-		*/
-	} else if chrgS, err = utils.IfaceAsBool(v); err != nil {
+	if chrgS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargers,
+		config.SessionsChargersDftOpt, utils.OptsChargerS); err != nil {
 		return
 	}
 	if chrgS {
@@ -1667,14 +1655,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		}
 	}
 	var thdS bool
-	if v, has := args.APIOpts[utils.OptsThresholdS]; !has {
-		/*
-			if thdS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.CGREvent.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Thresholds); err != nil {
-				return
-			}
-		*/
-	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Thresholds,
+		config.SessionsThresholdsDftOpt, utils.OptsThresholdS); err != nil {
 		return
 	}
 	if thdS {
@@ -1724,14 +1706,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 		return
 	}
 	var attrS bool
-	if v, has := args.APIOpts[utils.OptsAttributeS]; !has {
-		/*
-			if attrS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.CGREvent.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Attributes); err != nil {
-				return
-			}
-		*/
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Attributes,
+		config.SessionsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
 	if attrS && initAuthRply.Attributes != nil {
@@ -1759,14 +1735,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 		authReply.RoutesDigest = utils.StringPointer(initAuthRply.RouteProfiles.Digest())
 	}
 	var thdS bool
-	if v, has := args.APIOpts[utils.OptsThresholdS]; !has {
-		/*
-			if thdS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.CGREvent.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Thresholds); err != nil {
-				return
-			}
-		*/
-	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Thresholds,
+		config.SessionsThresholdsDftOpt, utils.OptsThresholdS); err != nil {
 		return
 	}
 	if thdS {
@@ -1830,14 +1800,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	rply.MaxUsage = utils.DurationPointer(time.Duration(utils.InvalidUsage)) // temp
 
 	var attrS bool
-	if v, has := args.APIOpts[utils.OptsAttributeS]; !has {
-		/*
-			if attrS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Attributes); err != nil {
-				return
-			}
-		*/
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Attributes,
+		config.SessionsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
 	initS := utils.OptAsBool(args.APIOpts, utils.OptsSesInitiate)
@@ -1908,14 +1872,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		}
 	}
 	var thdS bool
-	if v, has := args.APIOpts[utils.OptsThresholdS]; !has {
-		/*
-			if thdS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Thresholds); err != nil {
-				return
-			}
-		*/
-	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Thresholds,
+		config.SessionsThresholdsDftOpt, utils.OptsThresholdS); err != nil {
 		return
 	}
 	if thdS {
@@ -2022,14 +1980,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 	}
 	// end of RPC caching
 	var attrS bool
-	if v, has := args.APIOpts[utils.OptsAttributeS]; !has {
-		/*
-			if attrS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Attributes); err != nil {
-				return
-			}
-		*/
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Attributes,
+		config.SessionsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
 	updS := utils.OptAsBool(args.APIOpts, utils.OptsSesUpdate)
@@ -2192,14 +2144,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		}
 	}
 	var thdS bool
-	if v, has := args.APIOpts[utils.OptsThresholdS]; !has {
-		/*
-			if thdS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Thresholds); err != nil {
-				return
-			}
-		*/
-	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Thresholds,
+		config.SessionsThresholdsDftOpt, utils.OptsThresholdS); err != nil {
 		return
 	}
 	if thdS {
@@ -2321,14 +2267,8 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	originID := me.GetStringIgnoreErrors(utils.OriginID)
 
 	var attrS bool
-	if v, has := args.APIOpts[utils.OptsAttributeS]; !has {
-		/*
-			if attrS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Attributes); err != nil {
-				return
-			}
-		*/
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Attributes,
+		config.SessionsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
 	if attrS {
@@ -2373,14 +2313,8 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 		rply.MaxUsage = &maxUsage
 	}
 	var thdS bool
-	if v, has := args.APIOpts[utils.OptsThresholdS]; !has {
-		/*
-			if thdS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Thresholds); err != nil {
-				return
-			}
-		*/
-	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Thresholds,
+		config.SessionsThresholdsDftOpt, utils.OptsThresholdS); err != nil {
 		return
 	}
 	if thdS {
@@ -2464,14 +2398,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		utils.MetaRaw: args,
 	}
 	var chrgS bool
-	if v, has := args.APIOpts[utils.OptsChargerS]; !has {
-		/*
-			if chrgS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Chargers); err != nil {
-				return
-			}
-		*/
-	} else if chrgS, err = utils.IfaceAsBool(v); err != nil {
+	if chrgS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargers,
+		config.SessionsChargersDftOpt, utils.OptsChargerS); err != nil {
 		return
 	}
 	if chrgS {
@@ -2486,14 +2414,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 
 	// check for *attribute
 	var attrS bool
-	if v, has := args.APIOpts[utils.OptsAttributeS]; !has {
-		/*
-			if attrS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Attributes); err != nil {
-				return
-			}
-		*/
-	} else if attrS, err = utils.IfaceAsBool(v); err != nil {
+	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Attributes,
+		config.SessionsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
 	if attrS {
@@ -2530,14 +2452,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 
 	// process thresholds if required
 	var thdS bool
-	if v, has := args.APIOpts[utils.OptsThresholdS]; !has {
-		/*
-			if thdS, err = engine.FilterBoolCfgOpts(ctx, args.Tenant, args.AsDataProvider(), sS.filterS,
-				sS.cgrCfg.CdrsCfg().Opts.Thresholds); err != nil {
-				return
-			}
-		*/
-	} else if thdS, err = utils.IfaceAsBool(v); err != nil {
+	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Thresholds,
+		config.SessionsThresholdsDftOpt, utils.OptsThresholdS); err != nil {
 		return
 	}
 	if thdS {
