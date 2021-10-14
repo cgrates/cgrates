@@ -1108,3 +1108,232 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 	}
 
 }
+
+func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{}
+	conMng := &ConnManager{}
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, nil, conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	attr := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_CHANGE_TENANT_FROM_USER",
+		FilterIDs: []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*req.Account",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*composed",
+				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+	err := dm.SetAttributeProfile(context.Background(), attr, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	attr2 := &AttributeProfile{
+		Tenant: "adrian.itsyscom.com.co.uk",
+		ID:     "ATTR_MATCH_TENANT",
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*req.Password",
+				Type:      utils.MetaConstant,
+				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+
+	err = dm.SetAttributeProfile(context.Background(), attr2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	alS := NewAttributeService(dm, filterS, cfg)
+	rply := &APIAttributeProfile{}
+
+	err = alS.V1GetAttributeForEvent(context.Background(), nil, rply)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [CGREvent]" {
+		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [CGREvent]>, \nReceived <%+v>", err)
+	}
+
+}
+
+func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{}
+	conMng := &ConnManager{}
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, nil, conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	attr := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_CHANGE_TENANT_FROM_USER",
+		FilterIDs: []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*req.Account",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*composed",
+				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+	err := dm.SetAttributeProfile(context.Background(), attr, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	attr2 := &AttributeProfile{
+		Tenant: "adrian.itsyscom.com.co.uk",
+		ID:     "ATTR_MATCH_TENANT",
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*req.Password",
+				Type:      utils.MetaConstant,
+				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+
+	err = dm.SetAttributeProfile(context.Background(), attr2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	alS := NewAttributeService(dm, filterS, cfg)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "123",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns:  2,
+			utils.OptsAttributesAttributeIDs: time.Second,
+		},
+	}
+	rply := &APIAttributeProfile{}
+
+	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
+	if err == nil || err.Error() != "cannot convert field: 1s to []string" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cannot convert field: 1s to []string", err)
+	}
+
+}
+
+// func TestAttributesV1GetAttributeForEventAPFE(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.FilterSCfg().ResourceSConns = []string{}
+// 	conMng := &ConnManager{}
+// 	db := NewInternalDB(nil, nil, true)
+// 	dm := NewDataManager(db, nil, conMng)
+// 	filterS := NewFilterS(cfg, conMng, dm)
+// 	attr := &AttributeProfile{
+// 		Tenant:    "cgrates.org",
+// 		ID:        "ATTR_CHANGE_TENANT_FROM_USER",
+// 		FilterIDs: []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
+// 		Attributes: []*Attribute{
+// 			{
+// 				FilterIDs: nil,
+// 				Path:      "*tenant",
+// 				Type:      "*variable",
+// 				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+// 			},
+// 			{
+// 				FilterIDs: nil,
+// 				Path:      "*req.Account",
+// 				Type:      "*variable",
+// 				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
+// 			},
+// 			{
+// 				FilterIDs: nil,
+// 				Path:      "*tenant",
+// 				Type:      "*composed",
+// 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
+// 			},
+// 		},
+// 		Blocker: false,
+// 		Weight:  20,
+// 	}
+// 	err := dm.SetAttributeProfile(context.Background(), attr, true)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	attr2 := &AttributeProfile{
+// 		Tenant: "adrian.itsyscom.com.co.uk",
+// 		ID:     "ATTR_MATCH_TENANT",
+// 		Attributes: []*Attribute{
+// 			{
+// 				FilterIDs: nil,
+// 				Path:      "*req.Password",
+// 				Type:      utils.MetaConstant,
+// 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
+// 			},
+// 		},
+// 		Blocker: false,
+// 		Weight:  20,
+// 	}
+
+// 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	alS := NewAttributeService(dm, filterS, cfg)
+// 	ev := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "123",
+// 		Event: map[string]interface{}{
+// 			utils.AccountField: "adrian@itsyscom.com",
+// 		},
+// 		APIOpts: map[string]interface{}{
+// 			utils.OptsAttributesProcessRuns:  2,
+// 			utils.OptsAttributesAttributeIDs: []string{},
+// 		},
+// 	}
+// 	rply := &APIAttributeProfile{}
+
+// 	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
+// 	if err == nil || err != utils.ErrNotFound {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
+// 	}
+
+// }
