@@ -130,6 +130,16 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
+		Opts: &SessionsOpts{
+			Attributes: []*utils.DynamicBoolOpt{},
+			Chargers:   []*utils.DynamicBoolOpt{},
+			Stats:      []*utils.DynamicBoolOpt{},
+			Thresholds: []*utils.DynamicBoolOpt{},
+			Initiate:   []*utils.DynamicBoolOpt{},
+			Update:     []*utils.DynamicBoolOpt{},
+			Terminate:  []*utils.DynamicBoolOpt{},
+			Message:    []*utils.DynamicBoolOpt{},
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -277,6 +287,16 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
+		Opts: &SessionsOpts{
+			Attributes: []*utils.DynamicBoolOpt{},
+			Chargers:   []*utils.DynamicBoolOpt{},
+			Stats:      []*utils.DynamicBoolOpt{},
+			Thresholds: []*utils.DynamicBoolOpt{},
+			Initiate:   []*utils.DynamicBoolOpt{},
+			Update:     []*utils.DynamicBoolOpt{},
+			Terminate:  []*utils.DynamicBoolOpt{},
+			Message:    []*utils.DynamicBoolOpt{},
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -388,6 +408,16 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaData:  "1048576",
 			utils.MetaSMS:   "1",
 		},
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaAttributeSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaChargerSCfg:   []*utils.DynamicBoolOpt{},
+			utils.MetaStatSCfg:      []*utils.DynamicBoolOpt{},
+			utils.MetaThresholdSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaInitiate:      []*utils.DynamicBoolOpt{},
+			utils.MetaUpdate:        []*utils.DynamicBoolOpt{},
+			utils.MetaTerminate:     []*utils.DynamicBoolOpt{},
+			utils.MetaMessage:       []*utils.DynamicBoolOpt{},
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -464,6 +494,16 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaVoice: "3h0m0s",
 			utils.MetaData:  "1048576",
 			utils.MetaSMS:   "1",
+		},
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaAttributeSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaChargerSCfg:   []*utils.DynamicBoolOpt{},
+			utils.MetaStatSCfg:      []*utils.DynamicBoolOpt{},
+			utils.MetaThresholdSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaInitiate:      []*utils.DynamicBoolOpt{},
+			utils.MetaUpdate:        []*utils.DynamicBoolOpt{},
+			utils.MetaTerminate:     []*utils.DynamicBoolOpt{},
+			utils.MetaMessage:       []*utils.DynamicBoolOpt{},
 		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
@@ -1241,6 +1281,7 @@ func TestSessionSCfgClone(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
+		Opts: &SessionsOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -1361,6 +1402,7 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
+		Opts: &SessionsOpts{},
 	}
 
 	v2 := &SessionSCfg{
@@ -1405,6 +1447,7 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			PublicKeyPath:      "/public/key/path/2",
 			PrivateKeyPath:     "/private/key/path/2",
 		},
+		Opts: &SessionsOpts{},
 	}
 
 	expected := &SessionSJsonCfg{
@@ -1445,6 +1488,7 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			Publickey_path:      utils.StringPointer("/public/key/path/2"),
 			Privatekey_path:     utils.StringPointer("/private/key/path/2"),
 		},
+		Opts: &SessionsOptsJson{},
 	}
 
 	rcv := diffSessionSJsonCfg(d, v1, v2)
@@ -1506,6 +1550,7 @@ func TestSessionSCloneSection(t *testing.T) {
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
+		Opts: &SessionsOpts{},
 	}
 
 	exp := &SessionSCfg{
@@ -1545,6 +1590,7 @@ func TestSessionSCloneSection(t *testing.T) {
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
+		Opts: &SessionsOpts{},
 	}
 
 	rcv := sessCfg.CloneSection()

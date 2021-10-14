@@ -68,14 +68,12 @@ func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 	statsOpt := &StatsOpts{
 		StatIDs: []*utils.DynamicStringSliceOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     []string{},
+				Value: []string{},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 	}
@@ -83,14 +81,12 @@ func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 	exp := &StatsOpts{
 		StatIDs: []*utils.DynamicStringSliceOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     []string{},
+				Value: []string{},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 	}

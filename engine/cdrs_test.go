@@ -1368,8 +1368,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1432,8 +1431,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1496,8 +1494,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1561,8 +1558,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1626,8 +1622,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1691,8 +1686,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1756,8 +1750,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1821,8 +1814,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1886,8 +1878,8 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -1951,8 +1943,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -2016,8 +2007,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -2081,8 +2071,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -2146,8 +2135,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
@@ -2211,8 +2199,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
 		{
-			FilterIDs: []string{utils.MetaDefault},
-			Value:     false,
+			Value: false,
 		},
 	}
 	storDBChan := make(chan StorDB, 1)
