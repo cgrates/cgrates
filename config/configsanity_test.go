@@ -204,6 +204,13 @@ func TestConfigSanityLoaders(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.loaderCfg[0].Data[0].Fields[0].Filters = []string{"~req.Valid.Field"}
+
+	expected = "<LoaderS> nonexistent folder: /test///////"
+	cfg.loaderCfg[0].LockFilePath = "/test///////"
+	// cfg.loaderCfg[0].TpInDir = "c"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanitySessionS(t *testing.T) {
@@ -1496,7 +1503,17 @@ func TestConfigSanityRegistrarCDispatcher(t *testing.T) {
 		RPC: &RegistrarCCfg{},
 	}
 
-	expected := "<RegistrarC> the register imterval needs to be bigger than 0"
+	cfg.registrarCCfg.Dispatchers.Hosts = nil
+	expected := "<RegistrarC> missing dispatcher host IDs"
+	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.registrarCCfg.Dispatchers.Hosts = map[string][]*RemoteHost{
+		"hosts": {},
+	}
+
+	expected = "<RegistrarC> the register imterval needs to be bigger than 0"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

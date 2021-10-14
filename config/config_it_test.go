@@ -71,6 +71,7 @@ var (
 		testLoadConfigFromFolderFileNotFound,
 		testLoadConfigFromFolderNoConfigFound,
 		testLoadConfigFromFolderOpenError,
+		testApisLoadFromPath,
 		testHandleConfigSFolderError,
 		testHandleConfigSFilesError,
 		testHandleConfigSFileErrorWrite,
@@ -1106,6 +1107,163 @@ func testLoadConfigFromPathFile(t *testing.T) {
 	}
 	if err = os.RemoveAll(newDir); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testApisLoadFromPath(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	// pathL := "/tmp/test.json"
+	if err := os.Mkdir(path.Join("/tmp", "TestApisLoadFromPath"), 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join("/tmp", "TestApisLoadFromPath", "test.json"))
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+	data := `
+	{
+		// CGRateS Configuration file
+		//
+		
+		
+		"general": {
+			"log_level": 7,
+			"reply_timeout": "50s"
+		},
+		
+		
+		"listen": {
+			"rpc_json": ":2012",
+			"rpc_gob": ":2013",
+			"http": ":2080"
+		},
+		
+		
+		"data_db": {
+			"db_type": "*internal"
+		},
+		
+		
+		"stor_db": {
+			"db_type": "*internal"
+		},
+		
+		
+		"rals": {
+			"enabled": true,
+			"thresholds_conns": ["*internal"],
+			"max_increments":3000000
+		},
+		
+		
+		"schedulers": {
+			"enabled": true,
+			"cdrs_conns": ["*internal"],
+			"stats_conns": ["*localhost"]
+		},
+		
+		
+		"cdrs": {
+			"enabled": true,
+			"chargers_conns":["*internal"]
+		},
+		
+		
+		"attributes": {
+			"enabled": true,
+			"stats_conns": ["*localhost"],
+			"resources_conns": ["*localhost"],
+			"accounts_conns": ["*localhost"]
+		},
+		
+		
+		"chargers": {
+			"enabled": true,
+			"attributes_conns": ["*internal"]
+		},
+		
+		
+		"resources": {
+			"enabled": true,
+			"store_interval": "-1",
+			"thresholds_conns": ["*internal"]
+		},
+		
+		
+		"stats": {
+			"enabled": true,
+			"store_interval": "-1",
+			"thresholds_conns": ["*internal"]
+		},
+		
+		"thresholds": {
+			"enabled": true,
+			"store_interval": "-1"
+		},
+		
+		
+		"routes": {
+			"enabled": true,
+			"prefix_indexed_fields":["*req.Destination"],
+			"stats_conns": ["*internal"],
+			"resources_conns": ["*internal"],
+			"rals_conns": ["*internal"]
+		},
+		
+		
+		"sessions": {
+			"enabled": true,
+			"routes_conns": ["*internal"],
+			"resources_conns": ["*internal"],
+			"attributes_conns": ["*internal"],
+			"rals_conns": ["*internal"],
+			"cdrs_conns": ["*internal"],
+			"chargers_conns": ["*internal"]
+		},
+		
+		
+		"admins": {
+			"enabled": true,
+			"scheduler_conns": ["*internal"]
+		},
+		
+		
+		"rates": {
+			"enabled": true
+		},
+		
+		
+		"actions": {
+			"enabled": true,
+			"accounts_conns": ["*localhost"]
+		},
+		
+		
+		"accounts": {
+			"enabled": true
+		},
+		
+		
+		"filters": {
+			"stats_conns": ["*internal"],
+			"resources_conns": ["*internal"],
+			"accounts_conns": ["*internal"],
+		},
+		
+		}
+	`
+	_, err = file.Write([]byte(data))
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := cfg.LoadFromPath(context.Background(), path.Join("/tmp", "TestApisLoadFromPath")); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.RemoveAll(path.Join("/tmp", "TestApisLoadFromPath")); err != nil {
+		t.Error(err)
 	}
 }
 
