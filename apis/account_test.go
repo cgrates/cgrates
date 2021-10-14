@@ -1721,74 +1721,12 @@ func TestAccountMaxConcretes(t *testing.T) {
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
 			utils.AccountField: "1004",
-			utils.Usage:        "3m",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "3m",
 		},
 	}
 	reply := utils.EventCharges{}
-	if err := accSv1.MaxConcretes(context.Background(), ev, &reply); err != nil {
-		t.Errorf("Expected %+v, received %+v", nil, err)
-	}
-
-	if err := accSv1.MaxConcretes(context.Background(), ev, &reply); err != nil {
-		t.Errorf("Expected %+v, received %+v", nil, err)
-	}
-	accPrf.Balances["AbstractBalance1"].Weights = ""
-
-	extAccPrf := &utils.Account{
-		Tenant:    "cgrates.org",
-		ID:        "TestV1DebitAbstracts",
-		FilterIDs: []string{"*string:~*req.Account:1004"},
-		Balances: map[string]*utils.Balance{
-			"AbstractBalance1": {
-				ID:    "AbstractBalance1",
-				Type:  utils.MetaAbstract,
-				Units: utils.NewDecimal(int64(40*time.Second), 0),
-				CostIncrements: []*utils.CostIncrement{
-					{
-						Increment:    utils.NewDecimal(int64(time.Second), 0),
-						FixedFee:     utils.NewDecimal(0, 0),
-						RecurrentFee: utils.NewDecimal(1, 0),
-					},
-				},
-			},
-			"ConcreteBalance1": {
-				ID: "ConcreteBalance1",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 25,
-					},
-				},
-				Type:  utils.MetaConcrete,
-				Units: utils.NewDecimal(int64(time.Minute), 0),
-				CostIncrements: []*utils.CostIncrement{
-					{
-						Increment:    utils.NewDecimal(int64(time.Second), 0),
-						FixedFee:     utils.NewDecimal(0, 0),
-						RecurrentFee: utils.NewDecimal(1, 0),
-					},
-				},
-			},
-			"ConcreteBalance2": {
-				ID: "ConcreteBalance2",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 5,
-					},
-				},
-				Type:  utils.MetaConcrete,
-				Units: utils.NewDecimal(int64(30*time.Second), 0),
-				CostIncrements: []*utils.CostIncrement{
-					{
-						Increment:    utils.NewDecimal(int64(time.Second), 0),
-						FixedFee:     utils.NewDecimal(0, 0),
-						RecurrentFee: utils.NewDecimal(1, 0),
-					},
-				},
-			},
-		},
-	}
-	extAccPrf.Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
-	extAccPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
 
 	exEvCh := utils.EventCharges{
 		Concretes: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
@@ -1880,15 +1818,77 @@ func TestAccountMaxConcretes(t *testing.T) {
 			},
 		},
 	}
-
 	if err := accSv1.MaxConcretes(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else {
-		exEvCh.Charges = reply.Charges
-		exEvCh.Accounting = reply.Accounting
-		if !reflect.DeepEqual(exEvCh, reply) {
+		if !exEvCh.Equals(&reply) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
 		}
+	}
+
+	// check the account was not debited
+	extAccPrf := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "TestV1DebitAbstracts",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:   "AbstractBalance1",
+				Type: utils.MetaAbstract,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 15,
+					},
+				},
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"ConcreteBalance1": {
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(int64(time.Minute), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"ConcreteBalance2": {
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(int64(30*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+	if rplyAcc, err := dm.GetAccount(context.Background(), "cgrates.org", "TestV1DebitAbstracts"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyAcc, extAccPrf) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(extAccPrf), utils.ToJSON(rplyAcc))
 	}
 }
 
