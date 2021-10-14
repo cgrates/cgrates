@@ -212,7 +212,7 @@ func TestDiffLoaderCfgJsonCase2(t *testing.T) {
 }
 
 // func TestLoaderCfgCloneSection(t *testing.T) {
-// 	ldrCfg := &LoaderCgrCfg{
+// 	ldrCfg := LoaderCgrCfg{
 // 		TpID:            "loaderID",
 // 		DataPath:        "/data/path",
 // 		DisableReverse:  false,
@@ -235,7 +235,8 @@ func TestDiffLoaderCfgJsonCase2(t *testing.T) {
 // 	}
 
 // 	rcv := ldrCfg.CloneSection()
-// 	if !reflect.DeepEqual(rcv, exp) {
-// 		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+// 	fmt.Println(utils.ToJSON(rcv))
+// 	if !reflect.DeepEqual(rcv.(*LoaderCgrCfg), exp) {
+// 		t.Errorf("Expected %+v \n but received \n %v", exp, rcv)
 // 	}
 // }

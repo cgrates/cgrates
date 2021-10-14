@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -80,6 +81,37 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 			t.Errorf("Expected %+v \n, received %+v", expected.RplConns, jsnCfg.dataDbCfg.RplConns)
 		}
 	}
+}
+
+func TestDataDbLoadFromJsonCfgOpt(t *testing.T) {
+	dbOpts := &DataDBOpts{}
+	if err := dbOpts.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
+	errExpect := `time: unknown unit "c" in duration "2c"`
+	jsnCfg := &DBOptsJson{
+		RedisClusterSync: utils.StringPointer("2c"),
+	}
+
+	if err := dbOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %v \n but received \n %v", errExpect, err.Error())
+	}
+
+	jsnCfg = &DBOptsJson{
+		RedisClusterOndownDelay: utils.StringPointer("2c"),
+	}
+
+	if err := dbOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %v \n but received \n %v", errExpect, err.Error())
+	}
+	jsnCfg = &DBOptsJson{
+		MongoQueryTimeout: utils.StringPointer("2c"),
+	}
+
+	if err := dbOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %v \n but received \n %v", errExpect, err.Error())
+	}
+
 }
 
 func TestConnsloadFromJsonCfg(t *testing.T) {
@@ -718,5 +750,99 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 	rcv = diffDataDbJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestDataDbDiffOptsJson(t *testing.T) {
+	var d *DBOptsJson
+
+	v1 := &DataDBOpts{
+		RedisSentinel:           "sentinel",
+		RedisCluster:            false,
+		RedisClusterSync:        1 * time.Second,
+		RedisClusterOndownDelay: 1 * time.Second,
+		MongoQueryTimeout:       1 * time.Second,
+		RedisTLS:                false,
+		RedisClientCertificate:  "",
+		RedisClientKey:          "",
+		RedisCACertificate:      "",
+	}
+
+	v2 := &DataDBOpts{
+		RedisSentinel:           "sentinel2",
+		RedisCluster:            true,
+		RedisClusterSync:        2 * time.Second,
+		RedisClusterOndownDelay: 2 * time.Second,
+		MongoQueryTimeout:       2 * time.Second,
+		RedisTLS:                true,
+		RedisClientCertificate:  "1",
+		RedisClientKey:          "1",
+		RedisCACertificate:      "1",
+	}
+
+	exp := &DBOptsJson{
+		RedisSentinel:           utils.StringPointer("sentinel2"),
+		RedisCluster:            utils.BoolPointer(true),
+		RedisClusterSync:        utils.StringPointer("2s"),
+		RedisClusterOndownDelay: utils.StringPointer("2s"),
+		MongoQueryTimeout:       utils.StringPointer("2s"),
+		RedisTLS:                utils.BoolPointer(true),
+		RedisClientCertificate:  utils.StringPointer("1"),
+		RedisClientKey:          utils.StringPointer("1"),
+		RedisCACertificate:      utils.StringPointer("1"),
+	}
+
+	rcv := diffDataDBOptsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+func TestDataDbDefaultDBPort(t *testing.T) {
+	port := defaultDBPort(utils.Postgres, utils.MetaDynamic)
+	if port != "5432" {
+		t.Errorf("Expected %v \n but received \n %v", "5432", port)
+	}
+}
+
+func TestDataDbDiff(t *testing.T) {
+	dataDbCfg := &DataDbCfg{
+		Type:        "mysql",
+		Host:        "/host",
+		Port:        "8080",
+		Name:        "cgrates.org",
+		User:        "cgrates",
+		Password:    "CGRateSPassword",
+		RmtConns:    []string{"itsyscom.com"},
+		RmtConnID:   "connID",
+		RplConns:    []string{},
+		RplFiltered: true,
+		RplCache:    "RplCache",
+		Items:       map[string]*ItemOpt{},
+		Opts: &DataDBOpts{
+			RedisSentinel: "sentinel1",
+		},
+	}
+
+	exp := &DataDbCfg{
+		Type:        "mysql",
+		Host:        "/host",
+		Port:        "8080",
+		Name:        "cgrates.org",
+		User:        "cgrates",
+		Password:    "CGRateSPassword",
+		RmtConns:    []string{"itsyscom.com"},
+		RmtConnID:   "connID",
+		RplConns:    []string{},
+		RplFiltered: true,
+		RplCache:    "RplCache",
+		Items:       map[string]*ItemOpt{},
+		Opts: &DataDBOpts{
+			RedisSentinel: "sentinel1",
+		},
+	}
+
+	rcv := dataDbCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

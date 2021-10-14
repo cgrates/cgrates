@@ -6115,3 +6115,140 @@ func TestReloadCfgInDb(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+func TestAsteriskAgentLoadFromJSONCfgNil(t *testing.T) {
+	acCfg := &AsteriskAgentCfg{}
+	if err := acCfg.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestAsteriskAgentCloneSection(t *testing.T) {
+	astCfg := AsteriskAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"*internal"},
+		CreateCDR:     false,
+		AsteriskConns: []*AsteriskConnCfg{
+			{
+				Alias:           "asterisk",
+				Address:         ":8080",
+				User:            "ast_user",
+				Password:        "ast_pass",
+				ConnectAttempts: 2,
+				Reconnects:      3,
+			},
+		},
+	}
+
+	exp := &AsteriskAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"*internal"},
+		CreateCDR:     false,
+		AsteriskConns: []*AsteriskConnCfg{
+			{
+				Alias:           "asterisk",
+				Address:         ":8080",
+				User:            "ast_user",
+				Password:        "ast_pass",
+				ConnectAttempts: 2,
+				Reconnects:      3,
+			},
+		},
+	}
+
+	rcv := astCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestConfigAddSection(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	coreSCfg := &CoreSCfg{
+		Caps:         2,
+		CapsStrategy: utils.MetaReload,
+	}
+	cfg.AddSection(coreSCfg)
+
+	_, has := cfg.sections.Get("cores")
+	if !has {
+		t.Error(err)
+	}
+}
+
+func TestConfigLoadConfigDBCfg(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	jsnCfg := make(CgrJsonCfg)
+	if err := cfg.loadConfigDBCfg(context.Background(), jsnCfg); err != nil {
+		t.Error(err)
+	}
+	exp := &ConfigDBCfg{
+		Type: "internal",
+		Port: "0",
+		Opts: &DataDBOpts{
+			RedisCluster:            false,
+			RedisClusterSync:        5 * time.Second,
+			RedisClusterOndownDelay: 0,
+			MongoQueryTimeout:       10 * time.Second,
+			RedisTLS:                false,
+		},
+	}
+	if !reflect.DeepEqual(exp, cfg.configDBCfg) {
+		t.Errorf("Expected %v \n but received \n %v", exp, cfg.configDBCfg)
+	}
+}
+
+func TestConfigDBCfg(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	rcv := cfg.ConfigDBCfg()
+	exp := &ConfigDBCfg{
+		Type: "internal",
+		Port: "0",
+		Opts: &DataDBOpts{
+			RedisCluster:            false,
+			RedisClusterSync:        5 * time.Second,
+			RedisClusterOndownDelay: 0,
+			MongoQueryTimeout:       10 * time.Second,
+			RedisTLS:                false,
+		},
+	}
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestFreeSwitchAgentCloneSection(t *testing.T) {
+	fsAgCfg := FsAgentCfg{
+		Enabled:             true,
+		SessionSConns:       []string{"*json"},
+		SubscribePark:       true,
+		CreateCdr:           false,
+		ExtraFields:         nil,
+		LowBalanceAnnFile:   "lwb_file",
+		EmptyBalanceContext: "eb_ctx",
+		MaxWaitConnection:   1 * time.Second,
+	}
+
+	exp := &FsAgentCfg{
+		Enabled:             true,
+		SessionSConns:       []string{"*json"},
+		SubscribePark:       true,
+		CreateCdr:           false,
+		ExtraFields:         nil,
+		LowBalanceAnnFile:   "lwb_file",
+		EmptyBalanceContext: "eb_ctx",
+		MaxWaitConnection:   1 * time.Second,
+	}
+
+	rcv := fsAgCfg.CloneSection()
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestFreewitchLoadFromJsonNil(t *testing.T) {
+	fsAgCfg := FsAgentCfg{}
+	if err := fsAgCfg.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
+}

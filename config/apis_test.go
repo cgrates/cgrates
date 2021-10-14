@@ -1104,3 +1104,12 @@ func TestV1GetConfig(t *testing.T) {
 	}
 
 }
+
+func TestApisLoadFromPathErr(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	path := "/tmp/test.json"
+	errExpect := `path:"/tmp/test.json" is not reachable`
+	if err := cfg.LoadFromPath(context.Background(), path); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+}
