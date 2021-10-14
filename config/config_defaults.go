@@ -618,6 +618,36 @@ const CGRATES_CFG_JSON = `
 	"actions_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
 	"rates_conns": [], 						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
+	"opts": {
+		"*attributeS": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*chargerS": [						
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*statS": [							
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*thresholdS": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+	},
 },
 
 
@@ -742,7 +772,7 @@ const CGRATES_CFG_JSON = `
 			// 	"Value": 0,
 			// },
 		],									
-		"*profileIgnoreFilters": [ 			// if we should check the filters	
+		"*profileIgnoreFilters": [ 			// ignore the filters for attributeIDs	
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],

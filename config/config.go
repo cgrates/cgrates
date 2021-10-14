@@ -122,6 +122,16 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		sessionSCfg: &SessionSCfg{
 			STIRCfg:      new(STIRcfg),
 			DefaultUsage: make(map[string]time.Duration),
+			Opts: &SessionsOpts{
+				Attributes: []*utils.DynamicBoolOpt{},
+				Chargers:   []*utils.DynamicBoolOpt{},
+				Stats:      []*utils.DynamicBoolOpt{},
+				Thresholds: []*utils.DynamicBoolOpt{},
+				Initiate:   []*utils.DynamicBoolOpt{},
+				Update:     []*utils.DynamicBoolOpt{},
+				Terminate:  []*utils.DynamicBoolOpt{},
+				Message:    []*utils.DynamicBoolOpt{},
+			},
 		},
 		fsAgentCfg:       new(FsAgentCfg),
 		kamAgentCfg:      new(KamAgentCfg),
