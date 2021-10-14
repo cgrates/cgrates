@@ -191,7 +191,6 @@ func testCfgSetGetConfig(t *testing.T) {
 					"prefix_indexed_fields": []string{},
 					"resources_conns":       []string{"*internal"},
 					"stats_conns":           []string{"*internal"},
-					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]interface{}{
 						utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
@@ -207,28 +206,30 @@ func testCfgSetGetConfig(t *testing.T) {
 		&reply); err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
+	if reply != utils.OK {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []string{"*internal"},
+			"accounts_conns":        []interface{}{"*internal"},
 			"enabled":               true,
 			"indexed_selects":       false,
 			"nested_fields":         false,
-			"prefix_indexed_fields": []string{},
-			"resources_conns":       []string{"*internal"},
-			"stats_conns":           []string{"*internal"},
-			"suffix_indexed_fields": []string{},
+			"prefix_indexed_fields": []interface{}{},
+			"resources_conns":       []interface{}{"*internal"},
+			"stats_conns":           []interface{}{"*internal"},
+			"suffix_indexed_fields": []interface{}{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: []*utils.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
-					{
-						Value: 2,
+				utils.MetaAttributeIDsCfg: []interface{}{},
+				utils.MetaProcessRunsCfg: []interface{}{
+					map[string]interface{}{
+						"FilterIDs": nil,
+						"Value":     2.,
+						"Tenant":    utils.EmptyString,
 					},
 				},
-				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileRunsCfg:       []interface{}{},
+				utils.MetaProfileIgnoreFilters: []interface{}{},
 			},
 		},
 	}
@@ -242,7 +243,7 @@ func testCfgSetGetConfig(t *testing.T) {
 		&replyGet); err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(utils.ToJSON(expectedGet), utils.ToJSON(replyGet)) {
+	if !reflect.DeepEqual(expectedGet, replyGet) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(replyGet))
 	}
 }
@@ -609,23 +610,25 @@ func testCfgReloadConfigStore(t *testing.T) {
 func testCfgGetAfterReloadStore(t *testing.T) {
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []string{"*internal"},
+			"accounts_conns":        []interface{}{"*internal"},
 			"enabled":               true,
 			"indexed_selects":       true,
 			"nested_fields":         false,
-			"prefix_indexed_fields": []string{},
-			"resources_conns":       []string{"*internal"},
-			"stats_conns":           []string{"*internal"},
-			"suffix_indexed_fields": []string{},
+			"prefix_indexed_fields": []interface{}{},
+			"resources_conns":       []interface{}{"*internal"},
+			"stats_conns":           []interface{}{"*internal"},
+			"suffix_indexed_fields": []interface{}{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: []*utils.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
-					{
-						Value: 2,
+				utils.MetaAttributeIDsCfg: []interface{}{},
+				utils.MetaProcessRunsCfg: []interface{}{
+					map[string]interface{}{
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
+						"Value":     2.,
 					},
 				},
-				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileRunsCfg:       []interface{}{},
+				utils.MetaProfileIgnoreFilters: []interface{}{},
 			},
 		},
 	}
