@@ -2757,7 +2757,7 @@ func TestAPIToRateProfileError(t *testing.T) {
 		},
 	}
 
-	expectedErr := "strconv.ParseInt: parsing \"NOT_A_TIME\": invalid syntax"
+	expectedErr := "can't convert <NOT_A_TIME> to decimal"
 	if _, err := APItoRateProfile(tpRprf, "UTC"); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+q", expectedErr, err)
 	}
@@ -4563,7 +4563,7 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 		BalanceWeights:        "10",
 		BalanceRateProfileIDs: "rt1;rt2",
 		BalanceType:           utils.MetaVoice,
-		BalanceUnits:          3600000000000,
+		BalanceUnits:          "1h",
 		ThresholdIDs:          "WARN_RES1",
 	},
 	}
@@ -4581,7 +4581,7 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 					Weights:        "10",
 					Type:           utils.MetaVoice,
 					RateProfileIDs: []string{"rt1", "rt2"},
-					Units:          3600000000000,
+					Units:          "1h",
 				},
 			},
 			ThresholdIDs: []string{"WARN_RES1"},
@@ -4611,7 +4611,7 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 		BalanceFilterIDs: "FLTR_RES_GR2",
 		BalanceWeights:   "10",
 		BalanceType:      utils.MetaVoice,
-		BalanceUnits:     3600000000000,
+		BalanceUnits:     "1h",
 		ThresholdIDs:     "WARN_RES1",
 	},
 	}
@@ -4628,7 +4628,7 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 					FilterIDs: []string{"FLTR_RES_GR2"},
 					Weights:   "10",
 					Type:      utils.MetaVoice,
-					Units:     3600000000000,
+					Units:     "1h",
 				},
 			},
 			ThresholdIDs: []string{"WARN_RES1"},
@@ -4694,7 +4694,7 @@ func TestAPItoModelTPAccount(t *testing.T) {
 				FilterIDs:     []string{"FLTR_RES_GR2"},
 				Weights:       "10",
 				Type:          utils.MetaVoice,
-				Units:         3600000000000,
+				Units:         "1h",
 				CostIncrement: []*utils.TPBalanceCostIncrement{},
 			},
 		},
@@ -4710,7 +4710,7 @@ func TestAPItoModelTPAccount(t *testing.T) {
 		BalanceFilterIDs: "FLTR_RES_GR2",
 		BalanceWeights:   "10",
 		BalanceType:      utils.MetaVoice,
-		BalanceUnits:     3600000000000,
+		BalanceUnits:     "1h",
 		ThresholdIDs:     "WARN_RES1",
 	}}
 	result := APItoModelTPAccount(testStruct)
@@ -4748,17 +4748,17 @@ func TestAPItoModelTPAccountCase2(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2"},
 				Weights:   "10",
 				Type:      utils.MetaVoice,
-				Units:     3600000000000,
+				Units:     "1h",
 				CostIncrement: []*utils.TPBalanceCostIncrement{
 					{
 						FilterIDs:    []string{"*string:*~req.Account:100"},
-						Increment:    utils.Float64Pointer(1),
+						Increment:    "1",
 						FixedFee:     utils.Float64Pointer(20),
 						RecurrentFee: utils.Float64Pointer(5),
 					},
 					{
 						FilterIDs:    []string{"*string:*~req.Destination:10"},
-						Increment:    utils.Float64Pointer(2),
+						Increment:    "2",
 						FixedFee:     utils.Float64Pointer(10),
 						RecurrentFee: utils.Float64Pointer(7),
 					},
@@ -4793,7 +4793,7 @@ func TestAPItoModelTPAccountCase2(t *testing.T) {
 		BalanceAttributeIDs:   "20;30",
 		BalanceUnitFactors:    "*string:*~req.Account:100;21;*string:*~req.Destination:10;27",
 		BalanceRateProfileIDs: "rt1;rt2",
-		BalanceUnits:          3600000000000,
+		BalanceUnits:          "1h",
 		ThresholdIDs:          "WARN_RES1;WARN_RES2",
 	}}
 	sort.Strings(testStruct.FilterIDs)
@@ -4818,7 +4818,7 @@ func TestApitoAccountCase2(t *testing.T) {
 				Weights:        ";10",
 				Type:           utils.MetaVoice,
 				RateProfileIDs: []string{"RTPRF1"},
-				Units:          3600000000000,
+				Units:          "1h",
 				Opts:           "key1:val1",
 			},
 		},
@@ -4895,7 +4895,7 @@ func TestApitoAccountCaseTimeError2(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weights:   ";10",
 				Type:      utils.MetaVoice,
-				Units:     3600000000000,
+				Units:     "1h",
 				Opts:      "22:22:4fs",
 			},
 		},
@@ -4991,7 +4991,7 @@ func TestModelHelpersAccountToAPI(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaVoice,
-				Units: &utils.Decimal{decimal.New(3600000000000, 0)},
+				Units: utils.NewDecimal(int64(time.Hour), 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
 						FilterIDs:    []string{"*string:*~req.Account:100"},
@@ -5025,12 +5025,12 @@ func TestModelHelpersAccountToAPI(t *testing.T) {
 				FilterIDs: []string{"FLTR_RES_GR2"},
 				Weights:   ";10",
 				Type:      utils.MetaVoice,
-				Units:     3600000000000,
+				Units:     "3600000000000",
 				Opts:      "key1:val1",
 				CostIncrement: []*utils.TPBalanceCostIncrement{
 					{
 						FilterIDs:    []string{"*string:*~req.Account:100"},
-						Increment:    utils.Float64Pointer(1),
+						Increment:    "1",
 						FixedFee:     utils.Float64Pointer(20),
 						RecurrentFee: utils.Float64Pointer(5),
 					},

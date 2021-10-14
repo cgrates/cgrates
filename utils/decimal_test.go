@@ -232,7 +232,7 @@ func TestNewDecimalFromUsage(t *testing.T) {
 	}
 
 	dec = "invalid_decimal_format"
-	expectedErr = "strconv.ParseInt: parsing \"invalid_decimal_format\": invalid syntax"
+	expectedErr = "can't convert <invalid_decimal_format> to decimal"
 	if _, err := NewDecimalFromUsage(dec); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

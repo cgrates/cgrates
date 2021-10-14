@@ -511,7 +511,7 @@ func TestNewTPBalanceCostIncrement(t *testing.T) {
 	filterStr := "*string:*Account:1001"
 	expected := &TPBalanceCostIncrement{
 		FilterIDs:    []string{"*string:*Account:1001"},
-		Increment:    Float64Pointer(20),
+		Increment:    "20",
 		FixedFee:     Float64Pointer(10),
 		RecurrentFee: Float64Pointer(0.4),
 	}
@@ -525,9 +525,6 @@ func TestNewTPBalanceCostIncrement(t *testing.T) {
 func TestNewTPBalanceCostIncrementErrors(t *testing.T) {
 	invalidStr := "not_float64"
 	expectedErr := "strconv.ParseFloat: parsing \"not_float64\": invalid syntax"
-	if _, err := NewTPBalanceCostIncrement(EmptyString, invalidStr, EmptyString, EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
 	if _, err := NewTPBalanceCostIncrement(EmptyString, EmptyString, invalidStr, EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -539,7 +536,7 @@ func TestNewTPBalanceCostIncrementErrors(t *testing.T) {
 func TestTPBalanceCostIncrementAsString(t *testing.T) {
 	costIncr := &TPBalanceCostIncrement{
 		FilterIDs:    []string{"*string:*Account:1001"},
-		Increment:    Float64Pointer(20),
+		Increment:    "20",
 		FixedFee:     Float64Pointer(10),
 		RecurrentFee: Float64Pointer(0.4),
 	}

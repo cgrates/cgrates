@@ -876,7 +876,7 @@ func TestRatesSetRateProfileError2(t *testing.T) {
 			},
 		},
 	}
-	expected := "strconv.ParseInt: parsing \"error\": invalid syntax"
+	expected := "can't convert <error> to decimal"
 	var rtRply string
 	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
 	if err == nil || err.Error() != expected {
@@ -1123,12 +1123,11 @@ func TestRatesSetRateProfileRatesErr2(t *testing.T) {
 		},
 	}
 	var rtRply string
-	expected := ""
+	expected := "can't convert <error> to decimal"
 	err := admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
-	if err == nil || err.Error() != "strconv.ParseInt: parsing \"error\": invalid syntax" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
-	}
-	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	} else if rtRply != utils.EmptyString {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
 	}
 
