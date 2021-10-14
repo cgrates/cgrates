@@ -5920,8 +5920,7 @@ func TestSetCfgInDb(t *testing.T) {
 		Opts: &AttributesOpts{
 			ProcessRuns: []*utils.DynamicIntOpt{
 				&utils.DynamicIntOpt{
-					FilterIDs: []string{},
-					Value:     2,
+					Value: 2,
 				},
 			},
 		},
@@ -5963,8 +5962,7 @@ func TestSetCfgInDb(t *testing.T) {
 		Opts: &AttributesOptsJson{
 			ProcessRuns: []*utils.DynamicIntOpt{
 				{
-					FilterIDs: []string{},
-					Value:     2,
+					Value: 2,
 				},
 				{
 					Value: 3,
