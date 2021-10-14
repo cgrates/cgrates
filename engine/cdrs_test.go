@@ -2502,3 +2502,150 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
 	}
 }
+func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsCDRsExport: true,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	defaultConf := config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses]
+	config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	defer func() {
+		config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
+	}()
+	var rply []*utils.EventWithFlags
+	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &rply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+	expected := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsCDRsExport: true,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	cgrEv.ID = "testID"
+	if !reflect.DeepEqual(expected, cgrEv) {
+		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
+	}
+}
+func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	var sent StorDB
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- sent
+	data := NewInternalDB(nil, nil, true)
+	connMng := NewConnManager(cfg)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				*reply.(*map[string]map[string]interface{}) = map[string]map[string]interface{}{}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			"Resources":      "ResourceProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			utils.Weight:     "20.0",
+			utils.Usage:      135 * time.Second,
+			utils.Cost:       123.0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsCDRsExport: true,
+			utils.OptsAttributeS: time.Second,
+			"*context":           utils.MetaCDRs,
+		},
+	}
+	defaultConf := config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses]
+	config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	defer func() {
+		config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
+	}()
+	var rply []*utils.EventWithFlags
+	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &rply)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
+	}
+
+}
