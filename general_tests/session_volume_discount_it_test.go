@@ -529,8 +529,9 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T)
 			utils.ToR:          "*voice",
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaUsage:  time.Minute + 30*time.Second,
-			utils.OptsRouteS: true,
+			utils.MetaUsage:                time.Minute + 30*time.Second,
+			utils.OptsRouteS:               true,
+			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
 	// authorize the session for 1m30s

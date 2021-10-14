@@ -32,6 +32,7 @@
         "opts":{								// 			
             "*processRuns": [
                 {
+                    "Tenant": "*any",
                     "Value": 2,
                 },
             ],										
@@ -47,28 +48,33 @@
         "opts": {								
             "*chargerS": [
                 {
+                    "Tenant": "*any",
                     "FilterIDs": ["*notstring:~*req.Account:sipp"],
                     "Value": true,
                 },
             ],
             "*rateS": [
                 {
+                    "Tenant": "*any",
                     "FilterIDs": ["*notstring:~*req.Account:sipp|1001"],
                     "Value": true,
                 },
                 {
+                    "Tenant": "*any",
                     "FilterIDs": ["*string:~*req.RunID:customers"],
                     "Value": true,
                 },
             ],	
             "*accountS": [
                 {
+                    "Tenant": "*any",
                     "FilterIDs": ["*string:~*req.Account:1001", "*string:~*req.RunID:suppliers"],
                     "Value": true,
                 },
             ],		
             "*eeS": [
                 {
+                    "Tenant": "*any",
                     "Value": true,
                 },
             ],
@@ -98,7 +104,8 @@
         "opts":{
             "*profileIgnoreFilters": [
                 {
-                    "Value": "true",
+                    "Tenant": "*any",
+                    "Value": true,
                 },
             ],	
         },
@@ -110,6 +117,7 @@
         "opts":{				
             "*usage": [
                 {
+                    "Tenant": "*any",
                     "Value": "1m",
                 },
             ],
@@ -133,6 +141,7 @@
         "rates_conns": ["*localhost"],
         "*ignoreErrors": [						
             {
+                "Tenant": "*any",
                 "Value": true,
             },
         ],
