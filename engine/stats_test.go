@@ -651,9 +651,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := Cache
-	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.StatSCfg().StoreInterval = 1
@@ -700,9 +698,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := Cache
-	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.StatSCfg().StoreInterval = 1
@@ -763,9 +759,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocksBlocker(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := Cache
-	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.StatSCfg().StoreInterval = 1
@@ -822,9 +816,7 @@ func TestStatQueueMatchingStatQueuesForEventLocksBlocker(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocksActivationInterval(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := Cache
-	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.StatSCfg().StoreInterval = 1
@@ -877,9 +869,7 @@ func TestStatQueueMatchingStatQueuesForEventLocksActivationInterval(t *testing.T
 func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	prfs := make([]*StatQueueProfile, 0)
-	tmp := Cache
-	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 	db := &DataDBMock{
 		GetStatQueueProfileDrvF: func(tnt, id string) (*StatQueueProfile, error) {
 			if id == "STS1" {
@@ -927,9 +917,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 
 func TestStatQueueMatchingStatQueuesForEventLocks4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := Cache
-	defer func() { Cache = tmp }()
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.StatSCfg().StoreInterval = 1
@@ -1155,51 +1143,6 @@ func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 	Cache.Remove(utils.CacheStatQueues, "SQ2", true, utils.NonTransactional)
 }
 
-func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
-
-	tmpC := config.CgrConfig()
-	tmpCM := connMgr
-	defer func() {
-		log.SetOutput(os.Stderr)
-		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
-	}()
-
-	cfg := config.NewDefaultCGRConfig()
-	cfg.CacheCfg().ReplicationConns = []string{"test"}
-	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
-	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
-	Cache = NewCacheS(cfg, dm, nil)
-	filterS := NewFilterS(cfg, connMgr, dm)
-	sS := NewStatService(dm, cfg, filterS, connMgr)
-	sq := &StatQueue{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		SQMetrics: make(map[string]StatMetric),
-		dirty:     utils.BoolPointer(true),
-	}
-
-	Cache.SetWithoutReplicate(utils.CacheStatQueues, sq.TenantID(), nil, nil, true, utils.NonTransactional)
-	expLog := `[WARNING] <StatS> failed caching StatQueue with ID: cgrates.org:SQ1, error: DISCONNECTED`
-	if err := sS.StoreStatQueue(sq); err == nil ||
-		err.Error() != utils.ErrDisconnected.Error() {
-		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrDisconnected, err)
-	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
-		t.Errorf("expected log <%+v> to be included in <%+v>", expLog, rcv)
-	}
-
-	utils.Logger.SetLogLevel(0)
-}
-
 func TestStatQueueStoreThresholdNilDirtyField(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
@@ -1337,6 +1280,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	if err := dm.SetStatQueueProfile(sqPrf, true); err != nil {
@@ -1502,17 +1446,15 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 }
 
 func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -1573,17 +1515,15 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 }
 
 func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -1671,17 +1611,15 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -1754,17 +1692,15 @@ func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueIDsGetKeysForPrefixErr(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -1776,17 +1712,15 @@ func TestStatQueueV1GetQueueIDsGetKeysForPrefixErr(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueueOK(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -1843,17 +1777,15 @@ func TestStatQueueV1GetStatQueueOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueueNotFound(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -1868,17 +1800,15 @@ func TestStatQueueV1GetStatQueueNotFound(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -1931,17 +1861,15 @@ func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2012,17 +1940,15 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2066,17 +1992,15 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 }
 
 func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2146,10 +2070,8 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2157,7 +2079,7 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2232,10 +2154,8 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 }
 
 func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2243,7 +2163,7 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2296,10 +2216,8 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 }
 
 func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2307,7 +2225,7 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2360,10 +2278,8 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2371,7 +2287,7 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2426,11 +2342,9 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 }
 
 func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	tmpCM := connMgr
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 		connMgr = tmpCM
 	}()
@@ -2439,7 +2353,7 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
@@ -2494,11 +2408,9 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 }
 
 func TestStatQueueProcessThresholdsOK(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	tmpCM := connMgr
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 		connMgr = tmpCM
 	}()
@@ -2507,7 +2419,7 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 
 	ccM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2594,11 +2506,9 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 }
 
 func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	tmpCM := connMgr
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 		connMgr = tmpCM
 	}()
@@ -2619,7 +2529,7 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 
 	ccM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
@@ -2691,10 +2601,8 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2702,7 +2610,7 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2760,10 +2668,8 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2771,7 +2677,7 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2824,10 +2730,8 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2835,7 +2739,7 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2888,16 +2792,14 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, nil)
 	sS := NewStatService(nil, cfg, filterS, nil)
 
@@ -2911,10 +2813,8 @@ func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2922,7 +2822,7 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -2980,10 +2880,8 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -2991,7 +2889,7 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -3044,10 +2942,8 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -3055,7 +2951,7 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -3108,16 +3004,14 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 }
 
 func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 1
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, nil)
 	sS := NewStatService(nil, cfg, filterS, nil)
 
@@ -3131,11 +3025,9 @@ func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
 }
 
 func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	tmpCM := connMgr
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 		connMgr = tmpCM
 	}()
@@ -3146,7 +3038,7 @@ func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, connMgr)
 
@@ -3164,10 +3056,8 @@ func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 }
 
 func TestStatQueueGetStatQueueOK(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
@@ -3175,7 +3065,7 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -3234,17 +3124,15 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 }
 
 func TestStatQueueCall(t *testing.T) {
-	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
-		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 
@@ -3302,4 +3190,51 @@ func TestStatQueueCall(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>",
 			utils.ToJSON(*sq), utils.ToJSON(reply))
 	}
+}
+
+func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = tmp
+		log.SetOutput(os.Stderr)
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	connMgr = NewConnManager(cfg, make(map[string]chan rpcclient.ClientConnector))
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, connMgr, dm)
+	sS := NewStatService(dm, cfg, filterS, connMgr)
+	sq := &StatQueue{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		SQMetrics: make(map[string]StatMetric),
+		dirty:     utils.BoolPointer(true),
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheStatQueues, sq.TenantID(), nil, nil, true, utils.NonTransactional)
+	expLog := `[WARNING] <StatS> failed caching StatQueue with ID: cgrates.org:SQ1, error: DISCONNECTED`
+	if err := sS.StoreStatQueue(sq); err == nil ||
+		err.Error() != utils.ErrDisconnected.Error() {
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrDisconnected, err)
+	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
+		t.Errorf("expected log <%+v> to be included in <%+v>", expLog, rcv)
+	}
+
+	utils.Logger.SetLogLevel(0)
 }

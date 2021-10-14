@@ -386,15 +386,11 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -472,15 +468,10 @@ func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventAnyCtxFalseFound(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -549,15 +540,10 @@ func TestAttributesattributeProfileForEventAnyCtxFalseFound(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventAnyCtxTrueBothFound(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -638,15 +624,10 @@ func TestAttributesattributeProfileForEventAnyCtxTrueBothFound(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventAnyCtxTrueErrMatching(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -722,15 +703,10 @@ func TestAttributesattributeProfileForEventAnyCtxTrueErrMatching(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventAnyCtxTrueNotFound(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -798,15 +774,10 @@ func TestAttributesattributeProfileForEventAnyCtxTrueNotFound(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -875,15 +846,10 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -915,15 +881,10 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventNotActive(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -976,15 +937,10 @@ func TestAttributesattributeProfileForEventNotActive(t *testing.T) {
 }
 
 func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := &AttributeService{
 		cgrcfg:  cfg,
 		dm:      dm,
@@ -1157,17 +1113,12 @@ func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
 }
 
 func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := NewAttributeService(dm, filterS, cfg)
 
 	postpaid := config.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)
@@ -1248,17 +1199,12 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 }
 
 func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	Cache = NewCacheS(cfg, dm, nil)
+	Cache.Clear(nil)
 	alS := NewAttributeService(dm, filterS, cfg)
 
 	postpaid := config.NewRSRParsersMustCompile(utils.MetaPostpaid, utils.InfieldSep)

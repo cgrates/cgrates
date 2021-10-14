@@ -33,16 +33,15 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func TestCallCacheNoCaching(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+func TestTPReaderCallCacheNoCaching(t *testing.T) {
+	tmp := connMgr
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		connMgr = tmp
 	}()
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
-	cM := NewConnManager(defaultCfg, nil)
+	cfg := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
+	cM := NewConnManager(cfg, nil)
 	args := map[string][]string{
 		utils.CacheFilters:   {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
 		utils.CacheResources: {},
@@ -59,15 +58,14 @@ func TestCallCacheNoCaching(t *testing.T) {
 
 }
 
-func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
+	tmp := connMgr
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		connMgr = tmp
 	}()
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan rpcclient.ClientConnector, 1)
 	ccM := &ccMock{
@@ -93,7 +91,7 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaReload
@@ -125,15 +123,14 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	}
 }
 
-func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
+	tmp := connMgr
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		connMgr = tmp
 	}()
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan rpcclient.ClientConnector, 1)
 	ccM := &ccMock{
@@ -162,7 +159,7 @@ func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaReload
@@ -206,15 +203,14 @@ func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	}
 }
 
-func TestCallCacheLoadCache(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+func TestTPReaderCallCacheLoadCache(t *testing.T) {
+	tmp := connMgr
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		connMgr = tmp
 	}()
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan rpcclient.ClientConnector, 1)
 	ccM := &ccMock{
@@ -257,7 +253,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaLoad
@@ -276,15 +272,14 @@ func TestCallCacheLoadCache(t *testing.T) {
 	}
 }
 
-func TestCallCacheRemoveItems(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+func TestTPReaderCallCacheRemoveItems(t *testing.T) {
+	tmp := connMgr
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		connMgr = tmp
 	}()
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan rpcclient.ClientConnector, 1)
 	ccM := &ccMock{
@@ -327,7 +322,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaRemove
@@ -346,15 +341,14 @@ func TestCallCacheRemoveItems(t *testing.T) {
 	}
 }
 
-func TestCallCacheClear(t *testing.T) {
-	tmp1, tmp2 := connMgr, Cache
+func TestTPReaderCallCacheClear(t *testing.T) {
+	tmp := connMgr
 	defer func() {
-		connMgr = tmp1
-		Cache = tmp2
+		connMgr = tmp
 	}()
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	Cache = NewCacheS(defaultCfg, nil, nil)
+	cfg := config.NewDefaultCGRConfig()
+	Cache.Clear(nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan rpcclient.ClientConnector, 1)
 	ccM := &ccMock{
@@ -379,7 +373,7 @@ func TestCallCacheClear(t *testing.T) {
 	}
 	client <- ccM
 
-	cM := NewConnManager(defaultCfg, map[string]chan rpcclient.ClientConnector{
+	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		"cacheConn1": client,
 	})
 	caching := utils.MetaClear
@@ -398,7 +392,7 @@ func TestCallCacheClear(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsDestinations(t *testing.T) {
+func TestTPReaderGetLoadedIdsDestinations(t *testing.T) {
 	tpr := &TpReader{
 		destinations: map[string]*Destination{
 			"1001": {
@@ -423,7 +417,7 @@ func TestGetLoadedIdsDestinations(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsReverseDestinations(t *testing.T) {
+func TestTPReaderGetLoadedIdsReverseDestinations(t *testing.T) {
 	tpr := &TpReader{
 		destinations: map[string]*Destination{
 			"1001": {
@@ -447,7 +441,7 @@ func TestGetLoadedIdsReverseDestinations(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsRatingPlans(t *testing.T) {
+func TestTPReaderGetLoadedIdsRatingPlans(t *testing.T) {
 	tpr := &TpReader{
 		ratingPlans: map[string]*RatingPlan{
 			"RP_RETAIL1": {
@@ -505,7 +499,7 @@ func TestGetLoadedIdsRatingPlans(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsRatingProfiles(t *testing.T) {
+func TestTPReaderGetLoadedIdsRatingProfiles(t *testing.T) {
 	tpr := &TpReader{
 		ratingProfiles: map[string]*RatingProfile{
 			"1001": {
@@ -539,7 +533,7 @@ func TestGetLoadedIdsRatingProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsActions(t *testing.T) {
+func TestTPReaderGetLoadedIdsActions(t *testing.T) {
 	tpr := &TpReader{
 		actions: map[string][]*Action{
 			"TOPUP_RST_10": {
@@ -575,7 +569,7 @@ func TestGetLoadedIdsActions(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsActionPlans(t *testing.T) {
+func TestTPReaderGetLoadedIdsActionPlans(t *testing.T) {
 	tpr := &TpReader{
 		actionPlans: map[string]*ActionPlan{
 			"PACKAGE_1001": {
@@ -605,7 +599,7 @@ func TestGetLoadedIdsActionPlans(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsSharedGroup(t *testing.T) {
+func TestTPReaderGetLoadedIdsSharedGroup(t *testing.T) {
 	tpr := &TpReader{
 		sharedGroups: map[string]*SharedGroup{
 			"SHARED_A": {
@@ -647,7 +641,7 @@ func TestGetLoadedIdsSharedGroup(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsResourceProfiles(t *testing.T) {
+func TestTPReaderGetLoadedIdsResourceProfiles(t *testing.T) {
 	tpr := &TpReader{
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "ResGroup1"}: {
@@ -677,7 +671,7 @@ func TestGetLoadedIdsResourceProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsActionTriggers(t *testing.T) {
+func TestTPReaderGetLoadedIdsActionTriggers(t *testing.T) {
 	tpr := &TpReader{
 		actionsTriggers: map[string]ActionTriggers{
 			"STANDARD_TRIGGERS": {
@@ -704,7 +698,7 @@ func TestGetLoadedIdsActionTriggers(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsStatQueueProfiles(t *testing.T) {
+func TestTPReaderGetLoadedIdsStatQueueProfiles(t *testing.T) {
 	tpr := &TpReader{
 		sqProfiles: map[utils.TenantID]*utils.TPStatProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
@@ -731,7 +725,7 @@ func TestGetLoadedIdsStatQueueProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsThresholdProfiles(t *testing.T) {
+func TestTPReaderGetLoadedIdsThresholdProfiles(t *testing.T) {
 	tpr := &TpReader{
 		thProfiles: map[utils.TenantID]*utils.TPThresholdProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
@@ -760,7 +754,7 @@ func TestGetLoadedIdsThresholdProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsFilters(t *testing.T) {
+func TestTPReaderGetLoadedIdsFilters(t *testing.T) {
 	tpr := &TpReader{
 		filters: map[utils.TenantID]*utils.TPFilterProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
@@ -790,7 +784,7 @@ func TestGetLoadedIdsFilters(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsRouteProfiles(t *testing.T) {
+func TestTPReaderGetLoadedIdsRouteProfiles(t *testing.T) {
 	tpr := &TpReader{
 		routeProfiles: map[utils.TenantID]*utils.TPRouteProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
@@ -813,7 +807,7 @@ func TestGetLoadedIdsRouteProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsAttributeProfiles(t *testing.T) {
+func TestTPReaderGetLoadedIdsAttributeProfiles(t *testing.T) {
 	tpr := &TpReader{
 		attributeProfiles: map[utils.TenantID]*utils.TPAttributeProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
@@ -838,7 +832,7 @@ func TestGetLoadedIdsAttributeProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsChargerProfiles(t *testing.T) {
+func TestTPReaderGetLoadedIdsChargerProfiles(t *testing.T) {
 	tpr := &TpReader{
 		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
@@ -862,7 +856,7 @@ func TestGetLoadedIdsChargerProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsDispatcherProfiles(t *testing.T) {
+func TestTPReaderGetLoadedIdsDispatcherProfiles(t *testing.T) {
 	tpr := &TpReader{
 		dispatcherProfiles: map[utils.TenantID]*utils.TPDispatcherProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
@@ -886,7 +880,7 @@ func TestGetLoadedIdsDispatcherProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsEmptyObject(t *testing.T) {
+func TestTPReaderGetLoadedIdsEmptyObject(t *testing.T) {
 	tpr := &TpReader{}
 	rcv, err := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
 	if err != nil {
@@ -898,7 +892,7 @@ func TestGetLoadedIdsEmptyObject(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsDispatcherHosts(t *testing.T) {
+func TestTPReaderGetLoadedIdsDispatcherHosts(t *testing.T) {
 	tpr := &TpReader{
 		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
@@ -918,7 +912,7 @@ func TestGetLoadedIdsDispatcherHosts(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsError(t *testing.T) {
+func TestTPReaderGetLoadedIdsError(t *testing.T) {
 	tpr := &TpReader{}
 	errExpect := "Unsupported load category"
 	if _, err := tpr.GetLoadedIds(""); err == nil || err.Error() != errExpect {
@@ -926,9 +920,8 @@ func TestGetLoadedIdsError(t *testing.T) {
 	}
 }
 
-func TestReloadCache(t *testing.T) {
+func TestTPReaderReloadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, false, cfg.DataDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:               map[string]interface{}{},
 		Tenant:                "cgrates.org",
@@ -955,7 +948,8 @@ func TestReloadCache(t *testing.T) {
 		AccountActionPlanIDs:  []string{"AccountActionPlansID"},
 		ReverseDestinationIDs: []string{},
 	}
-	cM := &ccMock{
+	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal <- &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
 				if !reflect.DeepEqual(args, argExpect) {
@@ -968,9 +962,9 @@ func TestReloadCache(t *testing.T) {
 			},
 		},
 	}
-	rpcInternal := make(chan rpcclient.ClientConnector, 1)
-	rpcInternal <- cM
-	cnMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	tmp := connMgr
+	defer func() { connMgr = tmp }()
+	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
 	})
 	tpr := &TpReader{
@@ -1028,8 +1022,9 @@ func TestReloadCache(t *testing.T) {
 		acntActionPlans: map[string][]string{
 			"AccountActionPlansID": {},
 		},
-		dm: NewDataManager(data, config.CgrConfig().CacheCfg(), cnMgr),
+		dm: NewDataManager(NewInternalDB(nil, nil, false, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), connMgr),
 	}
+	tpr.dm.SetLoadIDs(make(map[string]int64))
 	tpr.cacheConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	if err := tpr.ReloadCache(utils.MetaReload, false, make(map[string]interface{}), "cgrates.org"); err != nil {
 		t.Error(err)

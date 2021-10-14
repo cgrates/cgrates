@@ -156,7 +156,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
-	Cache = NewCacheS(cfg, dmAtr, nil)
+	Cache.Clear(nil)
 }
 
 func TestAttributeAddFilters(t *testing.T) {

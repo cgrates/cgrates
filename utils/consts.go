@@ -52,7 +52,7 @@ var (
 		CacheTBLTPDispatcherHosts, CacheVersions})
 
 	// CachePartitions enables creation of cache partitions
-	CachePartitions = JoinStringSet(extraDBPartition, DataDBPartitions, StorDBPartitions)
+	CachePartitions = JoinStringSet(extraDBPartition, DataDBPartitions)
 
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:            DestinationPrefix,
@@ -2692,4 +2692,6 @@ func buildCacheInstRevPrefixes() {
 
 func init() {
 	buildCacheInstRevPrefixes()
+	CachePartitions.Remove(CacheAccounts)
+	CachePartitions.Remove(CacheVersions)
 }
