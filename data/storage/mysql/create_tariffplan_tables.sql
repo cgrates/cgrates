@@ -312,7 +312,7 @@ CREATE TABLE tp_accounts (
   `balance_filter_ids` varchar(64) NOT NULL,
   `balance_weights` varchar(64) NOT NULL,
   `balance_type` varchar(64) NOT NULL,
-  `balance_units` decimal(16,4) NOT NULL,
+  `balance_units` varchar(64) NOT NULL,
   `balance_unit_factors` varchar(64) NOT NULL,
   `balance_opts` varchar(256) NOT NULL,
   `balance_cost_increments` varchar(64) NOT NULL,

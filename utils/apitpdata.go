@@ -997,20 +997,15 @@ type TPAccountBalance struct {
 	AttributeIDs   []string
 	RateProfileIDs []string
 	UnitFactors    []*TPBalanceUnitFactor
-	Units          float64
+	Units          string
 }
 
 func NewTPBalanceCostIncrement(filtersStr, incrementStr, fixedFeeStr, recurrentFeeStr string) (costIncrement *TPBalanceCostIncrement, err error) {
-	costIncrement = new(TPBalanceCostIncrement)
+	costIncrement = &TPBalanceCostIncrement{
+		Increment: incrementStr,
+	}
 	if filtersStr != EmptyString {
 		costIncrement.FilterIDs = strings.Split(filtersStr, ANDSep)
-	}
-	if incrementStr != EmptyString {
-		incr, err := strconv.ParseFloat(incrementStr, 64)
-		if err != nil {
-			return nil, err
-		}
-		costIncrement.Increment = Float64Pointer(incr)
 	}
 	if fixedFeeStr != EmptyString {
 		fixedFee, err := strconv.ParseFloat(fixedFeeStr, 64)
@@ -1031,7 +1026,7 @@ func NewTPBalanceCostIncrement(filtersStr, incrementStr, fixedFeeStr, recurrentF
 
 type TPBalanceCostIncrement struct {
 	FilterIDs    []string
-	Increment    *float64
+	Increment    string
 	FixedFee     *float64
 	RecurrentFee *float64
 }
@@ -1041,8 +1036,8 @@ func (costIncr *TPBalanceCostIncrement) AsString() (s string) {
 		s = s + strings.Join(costIncr.FilterIDs, ANDSep)
 	}
 	s = s + InfieldSep
-	if costIncr.Increment != nil {
-		s = s + strconv.FormatFloat(*costIncr.Increment, 'f', -1, 64)
+	if costIncr.Increment != EmptyString {
+		s = s + costIncr.Increment
 	}
 	s = s + InfieldSep
 	if costIncr.FixedFee != nil {

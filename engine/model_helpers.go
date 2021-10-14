@@ -2402,7 +2402,13 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 			ID:        bal.ID,
 			FilterIDs: bal.FilterIDs,
 			Type:      bal.Type,
-			Units:     utils.NewDecimalFromFloat64(bal.Units),
+		}
+		if bal.Units != utils.EmptyString {
+			units, err := utils.NewDecimalFromUsage(bal.Units)
+			if err != nil {
+				return nil, err
+			}
+			ap.Balances[id].Units = units
 		}
 		if bal.Weights != utils.EmptyString {
 			weight, err := utils.NewDynamicWeightsFromString(bal.Weights, utils.InfieldSep, utils.ANDSep)
@@ -2437,8 +2443,8 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 				ap.Balances[id].CostIncrements[j] = &utils.CostIncrement{
 					FilterIDs: costIncrement.FilterIDs,
 				}
-				if costIncrement.Increment != nil {
-					ap.Balances[id].CostIncrements[j].Increment = utils.NewDecimalFromFloat64(*costIncrement.Increment)
+				if costIncrement.Increment != utils.EmptyString {
+					ap.Balances[id].CostIncrements[j].Increment, err = utils.NewDecimalFromUsage(costIncrement.Increment)
 				}
 				if costIncrement.FixedFee != nil {
 					ap.Balances[id].CostIncrements[j].FixedFee = utils.NewDecimalFromFloat64(*costIncrement.FixedFee)
@@ -2485,6 +2491,7 @@ func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 			FilterIDs:      make([]string, len(bal.FilterIDs)),
 			Weights:        bal.Weights.String(utils.InfieldSep, utils.ANDSep),
 			Type:           bal.Type,
+			Units:          bal.Units.String(),
 			CostIncrement:  make([]*utils.TPBalanceCostIncrement, len(bal.CostIncrements)),
 			AttributeIDs:   make([]string, len(bal.AttributeIDs)),
 			RateProfileIDs: make([]string, len(bal.RateProfileIDs)),
@@ -2494,7 +2501,6 @@ func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 			tpAp.Balances[i].FilterIDs[k] = fli
 		}
 		//there should not be an invalid value of converting into float64
-		tpAp.Balances[i].Units, _ = bal.Units.Float64()
 		elems := make([]string, 0, len(bal.Opts))
 		for k, v := range bal.Opts {
 			elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
@@ -2502,14 +2508,10 @@ func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 		for k, cIncrement := range bal.CostIncrements {
 			tpAp.Balances[i].CostIncrement[k] = &utils.TPBalanceCostIncrement{
 				FilterIDs: make([]string, len(cIncrement.FilterIDs)),
+				Increment: cIncrement.Increment.String(),
 			}
 			for kk, fli := range cIncrement.FilterIDs {
 				tpAp.Balances[i].CostIncrement[k].FilterIDs[kk] = fli
-			}
-			if cIncrement.Increment != nil {
-				//there should not be an invalid value of converting from Decimal into float64
-				incr, _ := cIncrement.Increment.Float64()
-				tpAp.Balances[i].CostIncrement[k].Increment = &incr
 			}
 			if cIncrement.FixedFee != nil {
 				//there should not be an invalid value of converting from Decimal into float64
