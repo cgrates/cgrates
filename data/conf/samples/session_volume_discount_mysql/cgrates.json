@@ -8,16 +8,16 @@
         "reply_timeout": "10s",
     },
         
-   "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	    "db_type": "redis",						// data_db type: <redis|mongo>
-	    "db_port": 6379, 						// data_db port to reach the database
-	    "db_name": "10", 						// data_db database name to connect to
+    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+        "db_type": "redis",						// data_db type: <redis|mongo>
+        "db_port": 6379, 						// data_db port to reach the database
+        "db_name": "10", 						// data_db database name to connect to
     },
-
+    
     "stor_db": {
-	    "db_password": "CGRateS.org",
+        "db_password": "CGRateS.org",
     },
-        
+          
     "sessions": {
         "enabled": true,
         "routes_conns": ["*localhost"],
@@ -29,6 +29,7 @@
         "opts":{								// 			
             "*processRuns": [
                 {
+                    "Tenant": "*any",
                     "Value": 2,
                 },
             ],										
@@ -44,28 +45,33 @@
         "opts": {								
             "*chargerS": [
                 {
+                    "Tenant": "*any",
                     "FilterIDs": ["*notstring:~*req.Account:sipp"],
                     "Value": true,
                 },
             ],
             "*rateS": [
                 {
+                    "Tenant": "*any",
                     "FilterIDs": ["*notstring:~*req.Account:sipp|1001"],
                     "Value": true,
                 },
                 {
+                    "Tenant": "*any",
                     "FilterIDs": ["*string:~*req.RunID:customers"],
                     "Value": true,
                 },
             ],	
             "*accountS": [
                 {
+                    "Tenant": "*any",
                     "FilterIDs": ["*string:~*req.Account:1001", "*string:~*req.RunID:suppliers"],
                     "Value": true,
                 },
             ],		
             "*eeS": [
                 {
+                    "Tenant": "*any",
                     "Value": true,
                 },
             ],
@@ -93,9 +99,10 @@
         "rate_string_indexed_fields": [],
         "rate_prefix_indexed_fields": ["*req.Destination"],
         "opts":{
-            "*usage": [
+            "*profileIgnoreFilters": [
                 {
-                    "Value": "1m",
+                    "Tenant": "*any",
+                    "Value": true,
                 },
             ],	
         },
@@ -107,6 +114,7 @@
         "opts":{				
             "*usage": [
                 {
+                    "Tenant": "*any",
                     "Value": "1m",
                 },
             ],
@@ -130,6 +138,7 @@
         "rates_conns": ["*localhost"],
         "*ignoreErrors": [						
             {
+                "Tenant": "*any",
                 "Value": true,
             },
         ],
