@@ -67,33 +67,36 @@ func TestResourceSLoadFromJSONOpts(t *testing.T) {
 	resOpts := &ResourcesOpts{
 		UsageID: []*utils.DynamicStringOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     utils.EmptyString,
+				Value: utils.EmptyString,
 			},
 		},
 		UsageTTL: []*utils.DynamicDurationOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     72 * time.Hour,
+				Value: 72 * time.Hour,
 			},
 		},
 		Units: []*utils.DynamicFloat64Opt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     1,
+				Value: 1,
 			},
 		},
 	}
 
 	resOptsJson := &ResourcesOptsJson{
-		UsageID: map[string]string{
-			utils.EmptyString: "usg2",
+		UsageID: []*utils.DynamicStringOpt{
+			{
+				Value: "usg2",
+			},
 		},
-		UsageTTL: map[string]string{
-			utils.EmptyString: "error",
+		UsageTTL: []*utils.DynamicStringOpt{
+			{
+				Value: "error",
+			},
 		},
-		Units: map[string]float64{
-			utils.EmptyString: float64(2),
+		Units: []*utils.DynamicFloat64Opt{
+			{
+				Value: 2,
+			},
 		},
 	}
 	errExp := `time: invalid duration "error"`

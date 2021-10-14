@@ -578,6 +578,12 @@ func TestSmgJsonCfg(t *testing.T) {
 			Privatekey_path:     utils.StringPointer(""),
 			Publickey_path:      utils.StringPointer(""),
 		},
+		Opts: &SessionsOptsJson{
+			Attributes: []*utils.DynamicBoolOpt{},
+			Chargers:   []*utils.DynamicBoolOpt{},
+			Stats:      []*utils.DynamicBoolOpt{},
+			Thresholds: []*utils.DynamicBoolOpt{},
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

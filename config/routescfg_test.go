@@ -70,8 +70,10 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg))
 	}
 
-	cfgJSON.Opts.Usage = map[string]string{
-		"Value": "error",
+	cfgJSON.Opts.Usage = []*utils.DynamicStringOpt{
+		{
+			Value: "error",
+		},
 	}
 	errExpect := "can't convert <error> to decimal"
 	if err = jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
@@ -372,14 +374,14 @@ func TestRouteSCloneSection(t *testing.T) {
 					Value: 5,
 				},
 			},
-			Limit: []*utils.DynamicIntOpt{
+			Limit: []*utils.DynamicIntPointerOpt{
 				{
-					Value: 1,
+					Value: utils.IntPointer(1),
 				},
 			},
-			Offset: []*utils.DynamicIntOpt{
+			Offset: []*utils.DynamicIntPointerOpt{
 				{
-					Value: 1,
+					Value: utils.IntPointer(1),
 				},
 			},
 			ProfileCount: []*utils.DynamicIntOpt{
@@ -417,14 +419,14 @@ func TestRouteSCloneSection(t *testing.T) {
 					Value: 5,
 				},
 			},
-			Limit: []*utils.DynamicIntOpt{
+			Limit: []*utils.DynamicIntPointerOpt{
 				{
-					Value: 1,
+					Value: utils.IntPointer(1),
 				},
 			},
-			Offset: []*utils.DynamicIntOpt{
+			Offset: []*utils.DynamicIntPointerOpt{
 				{
-					Value: 1,
+					Value: utils.IntPointer(1),
 				},
 			},
 			ProfileCount: []*utils.DynamicIntOpt{

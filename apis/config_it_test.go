@@ -223,9 +223,8 @@ func testCfgSetGetConfig(t *testing.T) {
 				utils.MetaAttributeIDsCfg: []interface{}{},
 				utils.MetaProcessRunsCfg: []interface{}{
 					map[string]interface{}{
-						"FilterIDs": nil,
-						"Value":     2.,
-						"Tenant":    utils.EmptyString,
+						"Value":  2.,
+						"Tenant": utils.EmptyString,
 					},
 				},
 				utils.MetaProfileRunsCfg:       []interface{}{},
@@ -352,7 +351,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*attributeIDs":[],"*processRuns":[{"Tenant":"","FilterIDs":null,"Value":2},{"Tenant":"","FilterIDs":null,"Value":2}],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*attributeIDs":[],"*processRuns":[{"Tenant":"","Value":2},{"Tenant":"","Value":2}],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -622,9 +621,8 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 				utils.MetaAttributeIDsCfg: []interface{}{},
 				utils.MetaProcessRunsCfg: []interface{}{
 					map[string]interface{}{
-						"Tenant":    utils.EmptyString,
-						"FilterIDs": nil,
-						"Value":     2.,
+						"Tenant": utils.EmptyString,
+						"Value":  2.,
 					},
 				},
 				utils.MetaProfileRunsCfg:       []interface{}{},

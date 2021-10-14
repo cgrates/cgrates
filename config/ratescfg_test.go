@@ -295,8 +295,7 @@ func TestRateSCloneSection(t *testing.T) {
 		Opts: &RatesOpts{
 			RateProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{"RP1"},
+					Value: []string{"RP1"},
 				},
 			},
 		},
@@ -318,8 +317,7 @@ func TestRateSCloneSection(t *testing.T) {
 		Opts: &RatesOpts{
 			RateProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					FilterIDs: []string{utils.MetaDefault},
-					Value:     []string{"RP1"},
+					Value: []string{"RP1"},
 				},
 			},
 		},
@@ -335,32 +333,27 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	rateOpts := &RatesOpts{
 		RateProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     []string{},
+				Value: []string{},
 			},
 		},
 		StartTime: []*utils.DynamicStringOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     utils.MetaNow,
+				Value: utils.MetaNow,
 			},
 		},
 		Usage: []*utils.DynamicDecimalBigOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     nil,
+				Value: nil,
 			},
 		},
 		IntervalStart: []*utils.DynamicDecimalBigOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     nil,
+				Value: nil,
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 	}
@@ -371,11 +364,15 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	}
 
 	jsnCfg := &RatesOptsJson{
-		RateProfileIDs: map[string][]string{
-			utils.MetaDefault: {"RP2"},
+		RateProfileIDs: []*utils.DynamicStringSliceOpt{
+			{
+				Value: []string{"RP2"},
+			},
 		},
-		Usage: map[string]string{
-			"Value": "error",
+		Usage: []*utils.DynamicStringOpt{
+			{
+				Value: "error",
+			},
 		},
 	}
 	errExpect := "can't convert <error> to decimal"
@@ -384,8 +381,10 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	}
 
 	jsnCfg = &RatesOptsJson{
-		IntervalStart: map[string]string{
-			"Value": "error",
+		IntervalStart: []*utils.DynamicStringOpt{
+			{
+				Value: "error",
+			},
 		},
 	}
 	if err := rateOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {

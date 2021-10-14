@@ -80,44 +80,37 @@ func TestCdrsCfgloadFromJsonCfgOpt(t *testing.T) {
 	cdrsOpt := &CdrsOpts{
 		Accounts: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Attributes: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Chargers: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Export: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Rates: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Stats: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Thresholds: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 	}
@@ -125,44 +118,37 @@ func TestCdrsCfgloadFromJsonCfgOpt(t *testing.T) {
 	exp := &CdrsOpts{
 		Accounts: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Attributes: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Chargers: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Export: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Rates: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Stats: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 		Thresholds: []*utils.DynamicBoolOpt{
 			{
-				FilterIDs: []string{utils.MetaDefault},
-				Value:     false,
+				Value: false,
 			},
 		},
 	}
