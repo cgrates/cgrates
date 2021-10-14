@@ -61,13 +61,16 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		RplConns: []string{"*conn1"},
 		Items: map[string]*ItemOpt{
 			utils.MetaAccounts: {
+				Limit:     -1,
 				Replicate: true,
 				Remote:    true,
 			},
 			utils.MetaReverseDestinations: {
+				Limit:     -1,
 				Replicate: true,
 			},
 			utils.MetaDestinations: {
+				Limit:     -1,
 				Replicate: false,
 			},
 		},
@@ -501,8 +504,8 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},
 		utils.ItemsCfg: map[string]interface{}{
-			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
-			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
+			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false},
+			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

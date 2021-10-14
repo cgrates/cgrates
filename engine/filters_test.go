@@ -1929,10 +1929,6 @@ func TestFiltersPassTimingsParseDPErr(t *testing.T) {
 }
 
 func TestFiltersPassTimingsCallSuccessful(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
 	tmp1, tmp2 := connMgr, config.CgrConfig()
 	defer func() {
 		connMgr = tmp1
@@ -1942,7 +1938,7 @@ func TestFiltersPassTimingsCallSuccessful(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
 	config.SetCgrConfig(cfg)
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 
 	client := make(chan rpcclient.ClientConnector, 1)
 	ccM := &ccMock{
@@ -2072,11 +2068,6 @@ func TestFiltersPassDestinationsCallErr(t *testing.T) {
 }
 
 func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
 	tmp1, tmp2 := connMgr, config.CgrConfig()
 	defer func() {
 		connMgr = tmp1
@@ -2086,7 +2077,7 @@ func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
 	config.SetCgrConfig(cfg)
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 
 	client := make(chan rpcclient.ClientConnector, 1)
 	ccM := &ccMock{
@@ -2126,10 +2117,6 @@ func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
 }
 
 func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
 	tmp1, tmp2 := connMgr, config.CgrConfig()
 	defer func() {
 		connMgr = tmp1
@@ -2139,7 +2126,7 @@ func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
 	config.SetCgrConfig(cfg)
-	Cache = NewCacheS(cfg, nil, nil)
+	Cache.Clear(nil)
 
 	client := make(chan rpcclient.ClientConnector, 1)
 	ccM := &ccMock{

@@ -2301,7 +2301,6 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	if len(flrIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheReverseFilterIndexes)
 	}
-
 	if err = CallCache(connMgr, tpr.cacheConns, caching, cacheArgs, cacheIDs, opts, verbose, tenant); err != nil {
 		return
 	}

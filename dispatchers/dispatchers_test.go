@@ -733,6 +733,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundTime(t *testing.T)
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
+	engine.Cache.Clear(nil)
 	dsp := &engine.DispatcherProfile{
 		Tenant:     "cgrates.org",
 		ID:         "123",
@@ -784,6 +785,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
+	engine.Cache.Clear(nil)
 	dsp := &engine.DispatcherProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "123",
@@ -830,6 +832,7 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 	rpcCl := map[string]chan rpcclient.ClientConnector{}
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	engine.Cache.Clear(nil)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:             "cgrates.org",
@@ -929,6 +932,7 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
+	engine.Cache.Clear(nil)
 	dsp := &engine.DispatcherProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "123",
@@ -1033,6 +1037,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
+	engine.Cache.Clear(nil)
 	dsp := &engine.DispatcherProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "123",
@@ -1366,6 +1371,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalses(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp2, rcv)
 	}
 
+	dataDB.Flush("")
 	engine.Cache.Clear(nil)
 	dsp1.FilterIDs = []string{"*string:~*req.Account:1001"}
 	err = dS.dm.SetDispatcherProfile(dsp1, true)
@@ -1385,7 +1391,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalses(t *testing.T) {
 	} else if len(rcv) != 1 {
 		t.Errorf("Unexpected number of profiles:%v", len(rcv))
 	} else if !reflect.DeepEqual(rcv[0], dsp1) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp1, rcv)
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(dsp1), utils.ToJSON(rcv[0]))
 	}
 }
 

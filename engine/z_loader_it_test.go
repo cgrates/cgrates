@@ -106,7 +106,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 		}
 	}
 	cacheChan := make(chan rpcclient.ClientConnector, 1)
-	cacheChan <- NewCacheS(lCfg, dataDbCsv, nil)
+	cacheChan <- Cache
 	connMgr = NewConnManager(lCfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): cacheChan,
 	})
