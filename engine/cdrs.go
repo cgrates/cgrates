@@ -146,9 +146,6 @@ func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREv
 	var tIDs []string
 	// we clone the CGREvent so we can add EventType without being propagated
 	cgrEv = cgrEv.Clone()
-	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = make(map[string]interface{})
-	}
 	cgrEv.APIOpts[utils.MetaEventType] = utils.CDR
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().ThresholdSConns,
 		utils.ThresholdSv1ProcessEvent,
