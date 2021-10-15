@@ -228,7 +228,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *utils.CGREvent,
 	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsAttributeS) && procEvReply.Attributes != nil {
 		kar.Attributes = procEvReply.Attributes.Digest()
 	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesResourceSAlocate) {
+	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesResourceSAllocate) {
 		kar.ResourceAllocation = *procEvReply.ResourceAllocation
 	}
 	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesMessage) {
