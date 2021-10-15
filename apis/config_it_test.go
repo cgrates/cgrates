@@ -154,7 +154,7 @@ func testCfgGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaIDs:                  []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -220,7 +220,7 @@ func testCfgSetGetConfig(t *testing.T) {
 			"stats_conns":           []interface{}{"*internal"},
 			"suffix_indexed_fields": []interface{}{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: []interface{}{},
+				utils.MetaIDs: []interface{}{},
 				utils.MetaProcessRunsCfg: []interface{}{
 					map[string]interface{}{
 						"Value":  2.,
@@ -519,7 +519,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaIDs:                  []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -618,7 +618,7 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"stats_conns":           []interface{}{"*internal"},
 			"suffix_indexed_fields": []interface{}{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg: []interface{}{},
+				utils.MetaIDs: []interface{}{},
 				utils.MetaProcessRunsCfg: []interface{}{
 					map[string]interface{}{
 						"Tenant": utils.EmptyString,

@@ -36,7 +36,7 @@ func TestMapStringToInt64(t *testing.T) {
 }
 
 func TestMapSubsystemIDsFromSlice(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*ids:ID1&ID2&ID3", "*thresholds:*derived_reply", "*attributes:*disabled", "*stats:*ids:ID"}
+	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*thresholds:*derived_reply", "*attributes:*disabled", "*stats:*IDs:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
@@ -49,7 +49,7 @@ func TestMapSubsystemIDsFromSlice(t *testing.T) {
 }
 
 func TestMapSubsystemIDsHasKey(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*ids:ID1&ID2&ID3", "*attributes", "*stats:*ids:ID"}
+	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
@@ -72,7 +72,7 @@ func TestMapSubsystemIDsHasKey(t *testing.T) {
 }
 
 func TestMapSubsystemIDsGetIDs(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*ids:ID1&ID2&ID3", "*attributes", "*stats:*ids:ID"}
+	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
@@ -97,7 +97,7 @@ func TestMapSubsystemIDsGetIDs(t *testing.T) {
 }
 
 func TestFlagsToSlice(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*ids:ID1&ID2&ID3", "*attributes", "*stats:*ids:ID", "*routes:*derived_reply"}
+	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID", "*routes:*derived_reply"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
@@ -196,7 +196,7 @@ func TestFlagParamsAdd(t *testing.T) {
 }
 
 func TestFlagsToSlice2(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*ids:ID1&ID2&ID3", "*attributes", "*stats:*ids:ID", "*routes:*derived_reply", "*cdrs:*attributes", "*cdrs:*stats:ID"}
+	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID", "*routes:*derived_reply", "*cdrs:*attributes", "*cdrs:*stats:ID"}
 	eMp := FlagsWithParams{
 		"*event":      map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},

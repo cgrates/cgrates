@@ -159,7 +159,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		},
 		dnsAgentCfg: new(DNSAgentCfg),
 		attributeSCfg: &AttributeSCfg{Opts: &AttributesOpts{
-			AttributeIDs:         []*utils.DynamicStringSliceOpt{},
+			IDs:                  []*utils.DynamicStringSliceOpt{},
 			ProcessRuns:          []*utils.DynamicIntOpt{},
 			ProfileRuns:          []*utils.DynamicIntOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},

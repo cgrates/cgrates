@@ -74,7 +74,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaIDs:                  []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -146,7 +146,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaIDs:                  []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -190,7 +190,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaAttributeIDsCfg:      []*utils.DynamicStringSliceOpt{},
+				utils.MetaIDs:                  []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -261,7 +261,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
-	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*attributeIDs":[],"*processRuns":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*IDs":[],"*processRuns":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}

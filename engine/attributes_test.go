@@ -715,8 +715,8 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 			"Password": "passwd",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns:  4,
-			utils.OptsAttributesAttributeIDs: []string{"ATTR1", "ATTR2"},
+			utils.OptsAttributesProcessRuns: 4,
+			utils.OptsAttributesIDs:         []string{"ATTR1", "ATTR2"},
 		},
 	}
 	reply := &AttrSProcessEventReply{}
@@ -731,8 +731,8 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 				utils.RequestType: utils.MetaPostpaid,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesAttributeIDs: []string{"ATTR1", "ATTR2"},
-				utils.OptsAttributesProcessRuns:  4,
+				utils.OptsAttributesIDs:         []string{"ATTR1", "ATTR2"},
+				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
 	}
@@ -1245,8 +1245,8 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 			utils.AccountField: "adrian@itsyscom.com",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns:  2,
-			utils.OptsAttributesAttributeIDs: time.Second,
+			utils.OptsAttributesProcessRuns: 2,
+			utils.OptsAttributesIDs:         time.Second,
 		},
 	}
 	rply := &APIAttributeProfile{}

@@ -106,7 +106,7 @@ func (eeS *EventExporterS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.
 		attributeSCtx,
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaEEs)
-	cgrEv.APIOpts[utils.OptsAttributesAttributeIDs] = attrIDs
+	cgrEv.APIOpts[utils.OptsAttributesIDs] = attrIDs
 
 	if err = eeS.connMgr.Call(ctx,
 		eeS.cfg.EEsNoLksCfg().AttributeSConns,
