@@ -3520,3 +3520,76 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, sS.storedStatQueues)
 	}
 }
+
+func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
+		t.Error(err)
+	}
+	//should match the stat queue for event because the option is false but the filter matches
+	args2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsStatIDs:         []string{"SQ1"},
+			utils.MetaProfileIgnoreFilters: false,
+		},
+	}
+
+	expIDs2 := []string{"SQ1"}
+	if rcvIDs2, err := sS.processEvent(context.Background(), args2.Tenant, args2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDs2, expIDs2) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs2, rcvIDs2)
+	}
+	//should match the stat queue for event because the option is true even if the filter doesn't match
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsStatIDs:         []string{"SQ1"},
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+
+	expIDs := []string{"SQ1"}
+	if rcvIDs, err := sS.processEvent(context.Background(), args.Tenant, args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDs, expIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rcvIDs)
+	}
+}
