@@ -3535,7 +3535,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 	sqPrf := &StatQueueProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Stat:testStatValue"},
 	}
 	sq := &StatQueue{
 		sqPrfl: sqPrf,
@@ -3559,7 +3559,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event: map[string]interface{}{
-			utils.AccountField: "1001",
+			"Stat": "testStatValue",
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsStatsStatIDs:         []string{"SQ1"},
@@ -3578,7 +3578,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "SqProcessEvent",
 		Event: map[string]interface{}{
-			utils.AccountField: "1002",
+			"Stat": "testStatValue2",
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsStatsStatIDs:         []string{"SQ1"},
