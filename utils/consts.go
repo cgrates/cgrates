@@ -1920,12 +1920,11 @@ const (
 	MetaActionProfileIDsCfg = "*actionProfileIDs"
 
 	// AttributeSCfg
-	IndexedSelectsCfg   = "indexed_selects"
-	ProfileRunsCfg      = "profile_runs"
-	NestedFieldsCfg     = "nested_fields"
-	MetaAttributeIDsCfg = "*attributeIDs"
-	MetaProcessRunsCfg  = "*processRuns"
-	MetaProfileRunsCfg  = "*profileRuns"
+	IndexedSelectsCfg  = "indexed_selects"
+	ProfileRunsCfg     = "profile_runs"
+	NestedFieldsCfg    = "nested_fields"
+	MetaProcessRunsCfg = "*processRuns"
+	MetaProfileRunsCfg = "*profileRuns"
 
 	// ChargerSCfg
 	StoreIntervalCfg = "store_interval"
@@ -2179,7 +2178,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsSesTTLMaxDelay, OptsSesTTLLastUsed, OptsSesTTLLastUsage, OptsSesTTLUsage,
 	OptsSesDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
-	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesAttributeIDs,
+	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
 	RemoteHostOpt, CacheOpt, OptsThresholdsThresholdIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
 	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
@@ -2243,9 +2242,9 @@ const (
 	OptsActionsActionProfileIDs = "*actionProfileIDs"
 
 	// Attributes
-	OptsAttributesAttributeIDs = "*attributeIDs"
-	OptsAttributesProfileRuns  = "*attrProfileRuns"
-	OptsAttributesProcessRuns  = "*attrProcessRuns"
+	OptsAttributesIDs         = "*attributeIDs"
+	OptsAttributesProfileRuns = "*attrProfileRuns"
+	OptsAttributesProcessRuns = "*attrProcessRuns"
 
 	// CDRs
 	OptsCDRsExport = "*cdrsExport"
@@ -2314,7 +2313,7 @@ const (
 const (
 	MetaDerivedReply = "*derived_reply"
 
-	MetaIDs = "*ids"
+	MetaIDs = "*IDs"
 
 	TrueStr  = "true"
 	FalseStr = "false"

@@ -103,7 +103,7 @@ cgrates (0.11.0) UNRELEASED; urgency=medium
   * [SessionS] Rename from ResourceMessage to ResourceAllocation
   * [LoaderS] Updated file selector from *req<FileName> to *file(FileName)
   * [SessionS] Added *chargers flag to ProcessEvent to proccess the events from ChargerS with other subsystems
-  * [SessionS] Updated the ids handling in flags by adding *ids as a new flag
+  * [SessionS] Updated the ids handling in flags by adding *IDs as a new flag
   * [SessionS] Added *derived_reply sub flag to ProcessEvent to specify if a subsystem needs to process the events from ChargerS
   * [Templates] Added new dataconverter: *string2hex
   * [AttributeS] Updated AttributeProfile matching to match the second AttributeProfile with the same weight
