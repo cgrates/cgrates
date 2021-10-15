@@ -2167,7 +2167,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	RemoteHostOpt, CacheOpt, OptsThresholdsThresholdIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
 	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
 	OptsCDRs, OptsSesCDRsDerivedReply, OptsChargerS, OptsResourceS, OptsSesResourceSAuthorize,
-	OptsSesResourceSAlocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
+	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
 	OptsSesRouteSDerivedReply, OptsStatS, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
 	OptsSesSTIRInitiate, OptsThresholdS, OptsSesThresholdSDerivedReply,
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
@@ -2201,7 +2201,7 @@ const (
 	OptsSesBlockerError           = "*sesBlockerError"
 	OptsSesCDRsDerivedReply       = "*sesCDRsDerivedReply"
 	OptsSesResourceSAuthorize     = "*sesResourceSAuthorize"
-	OptsSesResourceSAlocate       = "*sesResourceSAlocate"
+	OptsSesResourceSAllocate      = "*sesResourceSAllocate"
 	OptsSesResourceSRelease       = "*sesResourceSRelease"
 	OptsSesResourceSDerivedReply  = "*sesResourceSDerivedReply"
 	OptsSesRouteSDerivedReply     = "*sesRouteSDerivedReply"

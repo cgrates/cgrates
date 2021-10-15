@@ -1809,7 +1809,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		config.SessionsInitiateDftOpt, utils.OptsSesInitiate); err != nil {
 		return
 	}
-	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAlocate)
+	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAllocate)
 	if !(attrS || initS || resS) {
 		return // nothing to do
 	}
@@ -2292,7 +2292,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 			return utils.NewErrAttributeS(err)
 		}
 	}
-	if utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAlocate) {
+	if utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAllocate) {
 		if len(sS.cgrCfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
