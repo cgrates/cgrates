@@ -1,7 +1,7 @@
 #Tenant,ID,FilterIDs,Weights,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeights,RouteBlocker,RouteParameters
 
 cgrates.org,ROUTE_ACNT_1001,*string:~*req.Account:1001,,*weight,,vendor1,FLTR_DEST_1003,,,,,;10,,,
-cgrates.org,ROUTE_ACNT_1001,,,,,vendor2,*gte:~*accounts.1001.BalanceMap.*monetary[0].Value:10,,,,,;20,,,
+cgrates.org,ROUTE_ACNT_1001,,,,,vendor2,*gte:~*accounts.1001.Balance[Concrete1].Units:10,,,,,;20,,,
 cgrates.org,ROUTE_ACNT_1001,,,,,vendor3,FLTR_DEST_1003;*prefix:~*req.Account:10,,,,,;40,,,
 cgrates.org,ROUTE_ACNT_1001,,,,,vendor4,,,,,,;35,,,
 
