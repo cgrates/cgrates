@@ -222,7 +222,14 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Opts: &ActionsOpts{
 			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					Tenant: "cgrates.org",
+					Value:  []string{"prf1"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
 				},
 			},
 		},
@@ -245,7 +252,14 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Opts: &ActionsOpts{
 			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					Tenant: "cgrates.net",
+					Value:  []string{"prf2"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.nett",
+					Value:  true,
 				},
 			},
 		},
@@ -265,7 +279,20 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:     nil,
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{"dynaprepaid"},
-		Opts:                      &ActionsOptsJson{},
+		Opts: &ActionsOptsJson{
+			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"prf2"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.nett",
+					Value:  true,
+				},
+			},
+		},
 	}
 
 	rcv := diffActionSJsonCfg(d, v1, v2)

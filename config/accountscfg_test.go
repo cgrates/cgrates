@@ -236,7 +236,20 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Opts: &AccountsOpts{
 			AccountIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"ACC1"},
+					Tenant: "cgrates.org",
+					Value:  []string{"ACC1"},
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  new(decimal.Big).SetUint64(1),
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  true,
 				},
 			},
 		},
@@ -257,7 +270,20 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Opts: &AccountsOpts{
 			AccountIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"ACC2"},
+					Tenant: "cgrates.net",
+					Value:  []string{"ACC2"},
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  new(decimal.Big).SetUint64(2),
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  false,
 				},
 			},
 		},
@@ -278,7 +304,20 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Opts: &AccountsOptsJson{
 			AccountIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"ACC2"},
+					Tenant: "cgrates.net",
+					Value:  []string{"ACC2"},
+				},
+			},
+			Usage: []*utils.DynamicStringOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  "2",
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  false,
 				},
 			},
 		},
@@ -287,54 +326,6 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 	rcv := diffAccountSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected1) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected1), utils.ToJSON(rcv))
-	}
-
-	//MaxUsage is nil in v2
-	v2_2 := &AccountSCfg{
-		Enabled:             false,
-		AttributeSConns:     []string{"*localhost", "*birpc"},
-		RateSConns:          []string{"*localhost"},
-		ThresholdSConns:     []string{"*localhost"},
-		IndexedSelects:      false,
-		StringIndexedFields: &[]string{"~*req.Index1"},
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		NestedFields:        false,
-		MaxIterations:       3,
-		MaxUsage:            nil,
-		Opts: &AccountsOpts{
-			AccountIDs: []*utils.DynamicStringSliceOpt{
-				{
-					Value: []string{"ACC2"},
-				},
-			},
-		},
-	}
-
-	expected2 := &AccountSJsonCfg{
-		Enabled:               utils.BoolPointer(false),
-		Indexed_selects:       utils.BoolPointer(false),
-		Attributes_conns:      &[]string{"*localhost", "*birpc"},
-		Rates_conns:           &[]string{"*localhost"},
-		Thresholds_conns:      &[]string{"*localhost"},
-		String_indexed_fields: nil,
-		Prefix_indexed_fields: nil,
-		Suffix_indexed_fields: nil,
-		Nested_fields:         utils.BoolPointer(false),
-		Max_iterations:        utils.IntPointer(3),
-		Max_usage:             nil,
-		Opts: &AccountsOptsJson{
-			AccountIDs: []*utils.DynamicStringSliceOpt{
-				{
-					Value: []string{"ACC2"},
-				},
-			},
-		},
-	}
-
-	rcv = diffAccountSJsonCfg(d, v1, v2_2)
-	if !reflect.DeepEqual(rcv, expected2) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}
 
 	//Make the two Accounts equal in order to get a nil "d"

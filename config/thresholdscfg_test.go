@@ -57,6 +57,46 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, jsonCfg.thresholdSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.thresholdSCfg))
 	}
+
+	cfgJSON = nil
+	if err = jsonCfg.thresholdSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestThresholdSLoadFromJsonOpts(t *testing.T) {
+	thrsOpt := &ThresholdsOpts{
+		ThresholdIDs: []*utils.DynamicStringSliceOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  []string{"thsd_p1"},
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  true,
+			},
+		},
+	}
+	exp := &ThresholdsOpts{
+		ThresholdIDs: []*utils.DynamicStringSliceOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  []string{"thsd_p1"},
+			},
+		},
+		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  true,
+			},
+		},
+	}
+	thrsOpt.loadFromJSONCfg(nil)
+	if !reflect.DeepEqual(exp, thrsOpt) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(thrsOpt))
+	}
 }
 
 func TestThresholdSCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -166,7 +206,18 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		ActionSConns:        []string{},
 		NestedFields:        false,
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  []string{"thsr_p1"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
 		},
 	}
 
@@ -180,7 +231,18 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		ActionSConns:        []string{"*internal"},
 		NestedFields:        true,
 		Opts: &ThresholdsOpts{
-			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"thsr_p2"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
 		},
 	}
 
@@ -193,7 +255,20 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"req.index33"},
 		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
-		Opts:                  &ThresholdsOptsJson{},
+		Opts: &ThresholdsOptsJson{
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"thsr_p2"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+		},
 	}
 
 	rcv := diffThresholdSJsonCfg(d, v1, v2)
@@ -208,5 +283,40 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 	rcv = diffThresholdSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestThresholdSCloneSection(t *testing.T) {
+	thrsCfg := &ThresholdSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StoreInterval:       1 * time.Second,
+		StringIndexedFields: &[]string{"req.index1"},
+		PrefixIndexedFields: &[]string{"req.index2"},
+		SuffixIndexedFields: &[]string{"req.index3"},
+		ActionSConns:        []string{},
+		NestedFields:        false,
+		Opts: &ThresholdsOpts{
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
+		},
+	}
+
+	exp := &ThresholdSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StoreInterval:       1 * time.Second,
+		StringIndexedFields: &[]string{"req.index1"},
+		PrefixIndexedFields: &[]string{"req.index2"},
+		SuffixIndexedFields: &[]string{"req.index3"},
+		ActionSConns:        []string{},
+		NestedFields:        false,
+		Opts: &ThresholdsOpts{
+			ThresholdIDs: []*utils.DynamicStringSliceOpt{},
+		},
+	}
+
+	rcv := thrsCfg.CloneSection()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestRateSConfigloadFromJsonCfg(t *testing.T) {
@@ -213,7 +214,32 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Opts: &RatesOpts{
 			RateProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"RP1"},
+					Tenant: "cgrates.org",
+					Value:  []string{"RP1"},
+				},
+			},
+			StartTime: []*utils.DynamicStringOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  "",
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  new(decimal.Big).SetUint64(2),
+				},
+			},
+			IntervalStart: []*utils.DynamicDecimalBigOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  new(decimal.Big).SetUint64(2),
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
 				},
 			},
 		},
@@ -235,7 +261,32 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Opts: &RatesOpts{
 			RateProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"RP2"},
+					Tenant: "cgrates.net",
+					Value:  []string{"RP2"},
+				},
+			},
+			StartTime: []*utils.DynamicStringOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  utils.MetaNow,
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  new(decimal.Big).SetUint64(3),
+				},
+			},
+			IntervalStart: []*utils.DynamicDecimalBigOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  new(decimal.Big).SetUint64(3),
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
 				},
 			},
 		},
@@ -257,7 +308,32 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Opts: &RatesOptsJson{
 			RateProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"RP2"},
+					Tenant: "cgrates.net",
+					Value:  []string{"RP2"},
+				},
+			},
+			StartTime: []*utils.DynamicStringOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  utils.MetaNow,
+				},
+			},
+			Usage: []*utils.DynamicStringOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  "3",
+				},
+			},
+			IntervalStart: []*utils.DynamicStringOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  "3",
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
 				},
 			},
 		},
@@ -366,12 +442,14 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	jsnCfg := &RatesOptsJson{
 		RateProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{"RP2"},
+				Tenant: "cgrates.org",
+				Value:  []string{"RP2"},
 			},
 		},
 		Usage: []*utils.DynamicStringOpt{
 			{
-				Value: "error",
+				Tenant: "cgrates.org",
+				Value:  "error",
 			},
 		},
 	}
@@ -383,7 +461,8 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	jsnCfg = &RatesOptsJson{
 		IntervalStart: []*utils.DynamicStringOpt{
 			{
-				Value: "error",
+				Tenant: "cgrates.org",
+				Value:  "error",
 			},
 		},
 	}
