@@ -1257,83 +1257,99 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 	}
 
 }
-
-// func TestAttributesV1GetAttributeForEventAPFE(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.FilterSCfg().ResourceSConns = []string{}
-// 	conMng := &ConnManager{}
-// 	db := NewInternalDB(nil, nil, true)
-// 	dm := NewDataManager(db, nil, conMng)
-// 	filterS := NewFilterS(cfg, conMng, dm)
-// 	attr := &AttributeProfile{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "ATTR_CHANGE_TENANT_FROM_USER",
-// 		FilterIDs: []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
-// 		Attributes: []*Attribute{
-// 			{
-// 				FilterIDs: nil,
-// 				Path:      "*tenant",
-// 				Type:      "*variable",
-// 				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
-// 			},
-// 			{
-// 				FilterIDs: nil,
-// 				Path:      "*req.Account",
-// 				Type:      "*variable",
-// 				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
-// 			},
-// 			{
-// 				FilterIDs: nil,
-// 				Path:      "*tenant",
-// 				Type:      "*composed",
-// 				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
-// 			},
-// 		},
-// 		Blocker: false,
-// 		Weight:  20,
-// 	}
-// 	err := dm.SetAttributeProfile(context.Background(), attr, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-
-// 	attr2 := &AttributeProfile{
-// 		Tenant: "adrian.itsyscom.com.co.uk",
-// 		ID:     "ATTR_MATCH_TENANT",
-// 		Attributes: []*Attribute{
-// 			{
-// 				FilterIDs: nil,
-// 				Path:      "*req.Password",
-// 				Type:      utils.MetaConstant,
-// 				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
-// 			},
-// 		},
-// 		Blocker: false,
-// 		Weight:  20,
-// 	}
-
-// 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-
-// 	alS := NewAttributeService(dm, filterS, cfg)
-// 	ev := &utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		ID:     "123",
-// 		Event: map[string]interface{}{
-// 			utils.AccountField: "adrian@itsyscom.com",
-// 		},
-// 		APIOpts: map[string]interface{}{
-// 			utils.OptsAttributesProcessRuns:  2,
-// 			utils.OptsAttributesAttributeIDs: []string{},
-// 		},
-// 	}
-// 	rply := &APIAttributeProfile{}
-
-// 	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
-// 	if err == nil || err != utils.ErrNotFound {
-// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
-// 	}
-
-// }
+func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	aA := NewAttributeService(dm, filterS, cfg)
+	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	acPrf := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AC1",
+		FilterIDs: []string{"*string:~*req.Attribute:testAttrValue"},
+	}
+	if err := dm.SetAttributeProfile(context.Background(), acPrf, true); err != nil {
+		t.Error(err)
+	}
+	//should match the attr profile for event because the option is false but the filter matches
+	args2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AcProcessEvent",
+		Event: map[string]interface{}{
+			"Attribute": "testAttrValue",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesAttributeIDs: []string{"AC1"},
+			utils.MetaProfileIgnoreFilters:   false,
+		},
+	}
+	eNM := utils.MapStorage{
+		utils.MetaReq:  args2.Event,
+		utils.MetaOpts: args2.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+	exp2 := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:AC1"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "AcProcessEvent",
+			Event: map[string]interface{}{
+				"Attribute": "testAttrValue",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesAttributeIDs: []string{"AC1"},
+				utils.MetaProfileIgnoreFilters:   false,
+			},
+		},
+	}
+	if rcv2, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv2, exp2) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp2), utils.ToJSON(rcv2))
+	}
+	//should match the attr profile for event because the option is true even if the filter doesn't match
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AcProcessEvent2",
+		Event: map[string]interface{}{
+			"Attribute": "testAttrValue2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesAttributeIDs: []string{"AC1"},
+			utils.MetaProfileIgnoreFilters:   true,
+		},
+	}
+	eNM2 := utils.MapStorage{
+		utils.MetaReq:  args.Event,
+		utils.MetaOpts: args.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+	exp := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:AC1"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "AcProcessEvent2",
+			Event: map[string]interface{}{
+				"Attribute": "testAttrValue2",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesAttributeIDs: []string{"AC1"},
+				utils.MetaProfileIgnoreFilters:   true,
+			},
+		},
+	}
+	if rcv, err := aA.processEvent(context.Background(), args.Tenant, args, eNM2, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM2), utils.EmptyString, make(map[string]int), 0); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
