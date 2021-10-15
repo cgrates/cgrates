@@ -647,6 +647,34 @@ const CGRATES_CFG_JSON = `
 			// 	"Value": false,
 			// },
 		],
+		"*initiate": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*update": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*terminate": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*message": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
 	},
 },
 

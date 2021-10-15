@@ -1804,7 +1804,11 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		config.SessionsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
-	initS := utils.OptAsBool(args.APIOpts, utils.OptsSesInitiate)
+	var initS bool
+	if initS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Initiate,
+		config.SessionsInitiateDftOpt, utils.OptsSesInitiate); err != nil {
+		return
+	}
 	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSAlocate)
 	if !(attrS || initS || resS) {
 		return // nothing to do
@@ -1984,7 +1988,11 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 		config.SessionsAttributesDftOpt, utils.OptsAttributeS); err != nil {
 		return
 	}
-	updS := utils.OptAsBool(args.APIOpts, utils.OptsSesUpdate)
+	var updS bool
+	if updS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Update,
+		config.SessionsUpdateDftOpt, utils.OptsSesUpdate); err != nil {
+		return
+	}
 	if !(attrS || updS) {
 		return // nothing to do
 	}
@@ -2071,7 +2079,11 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	}
 	// end of RPC caching
 	resS := utils.OptAsBool(args.APIOpts, utils.OptsSesResourceSRelease)
-	termS := utils.OptAsBool(args.APIOpts, utils.OptsSesTerminate)
+	var termS bool
+	if termS, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Terminate,
+		config.SessionsTerminateDftOpt, utils.OptsSesTerminate); err != nil {
+		return
+	}
 	if !(resS || termS) {
 		return // nothing to do
 	}
@@ -2305,7 +2317,12 @@ func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 			rply.RouteProfiles = routesReply
 		}
 	}
-	if utils.OptAsBool(args.APIOpts, utils.OptsSesMessage) {
+	var message bool
+	if message, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Message,
+		config.SessionsMessageDftOpt, utils.OptsSesMessage); err != nil {
+		return
+	}
+	if message {
 		var maxUsage time.Duration
 		if maxUsage, err = sS.chargeEvent(ctx, args, utils.OptAsBool(args.APIOpts, utils.OptsSesForceDuration)); err != nil {
 			return err
