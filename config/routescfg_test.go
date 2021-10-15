@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
@@ -72,7 +73,8 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 
 	cfgJSON.Opts.Usage = []*utils.DynamicStringOpt{
 		{
-			Value: "error",
+			Tenant: "cgrates.org",
+			Value:  "error",
 		},
 	}
 	errExpect := "can't convert <error> to decimal"
@@ -244,11 +246,25 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value: 5,
 				},
 			},
-			Limit:  []*utils.DynamicIntPointerOpt{},
-			Offset: []*utils.DynamicIntPointerOpt{},
+			Limit: []*utils.DynamicIntPointerOpt{
+				{
+					Value: utils.IntPointer(2),
+				},
+			},
+			Offset: []*utils.DynamicIntPointerOpt{
+				{
+					Value: utils.IntPointer(2),
+				},
+			},
 			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 1,
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  new(decimal.Big).SetUint64(3),
 				},
 			},
 		},
@@ -270,7 +286,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Opts: &RoutesOpts{
 			Context: []*utils.DynamicStringOpt{
 				{
-					Value: utils.MetaRoutes,
+					Value: utils.MetaSessionS,
 				},
 			},
 			IgnoreErrors: []*utils.DynamicBoolOpt{
@@ -280,14 +296,28 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 			},
 			MaxCost: []*utils.DynamicInterfaceOpt{
 				{
-					Value: utils.MetaEventCost,
+					Value: 6,
 				},
 			},
-			Limit:  []*utils.DynamicIntPointerOpt{},
-			Offset: []*utils.DynamicIntPointerOpt{},
+			Limit: []*utils.DynamicIntPointerOpt{
+				{
+					Value: utils.IntPointer(3),
+				},
+			},
+			Offset: []*utils.DynamicIntPointerOpt{
+				{
+					Value: utils.IntPointer(3),
+				},
+			},
 			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 2,
+				},
+			},
+			Usage: []*utils.DynamicDecimalBigOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  new(decimal.Big).SetUint64(2),
 				},
 			},
 		},
@@ -309,7 +339,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Opts: &RoutesOptsJson{
 			Context: []*utils.DynamicStringOpt{
 				{
-					Value: utils.MetaRoutes,
+					Value: utils.MetaSessionS,
 				},
 			},
 			IgnoreErrors: []*utils.DynamicBoolOpt{
@@ -319,12 +349,28 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 			},
 			MaxCost: []*utils.DynamicInterfaceOpt{
 				{
-					Value: utils.MetaEventCost,
+					Value: 6,
+				},
+			},
+			Limit: []*utils.DynamicIntOpt{
+				{
+					Value: 3,
+				},
+			},
+			Offset: []*utils.DynamicIntOpt{
+				{
+					Value: 3,
 				},
 			},
 			ProfileCount: []*utils.DynamicIntOpt{
 				{
 					Value: 2,
+				},
+			},
+			Usage: []*utils.DynamicStringOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  "2",
 				},
 			},
 		},

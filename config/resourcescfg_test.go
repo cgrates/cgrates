@@ -85,17 +85,20 @@ func TestResourceSLoadFromJSONOpts(t *testing.T) {
 	resOptsJson := &ResourcesOptsJson{
 		UsageID: []*utils.DynamicStringOpt{
 			{
-				Value: "usg2",
+				Tenant: "cgrates.org",
+				Value:  "usg2",
 			},
 		},
 		UsageTTL: []*utils.DynamicStringOpt{
 			{
-				Value: "error",
+				Tenant: "cgrates.org",
+				Value:  "error",
 			},
 		},
 		Units: []*utils.DynamicFloat64Opt{
 			{
-				Value: 2,
+				Tenant: "cgrates.org",
+				Value:  2.5,
 			},
 		},
 	}

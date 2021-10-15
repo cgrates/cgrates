@@ -287,10 +287,28 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
+			AttributeIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  []string{"prf1"},
+				},
+			},
 			ProcessRuns: []*utils.DynamicIntOpt{
-				&utils.DynamicIntOpt{
+				{
 					FilterIDs: []string{},
 					Value:     1,
+				},
+			},
+			ProfileRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     1,
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
 				},
 			},
 		},
@@ -307,10 +325,28 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: nil,
 		NestedFields:        false,
 		Opts: &AttributesOpts{
+			AttributeIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"prf2"},
+				},
+			},
 			ProcessRuns: []*utils.DynamicIntOpt{
-				&utils.DynamicIntOpt{
+				{
 					FilterIDs: []string{},
-					Value:     1,
+					Value:     2,
+				},
+			},
+			ProfileRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
 				},
 			},
 		},
@@ -326,7 +362,32 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
 		Nested_fields:         utils.BoolPointer(false),
-		Opts:                  &AttributesOptsJson{},
+		Opts: &AttributesOptsJson{
+			AttributeIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"prf2"},
+				},
+			},
+			ProcessRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
+			ProfileRuns: []*utils.DynamicIntOpt{
+				{
+					FilterIDs: []string{},
+					Value:     2,
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+		},
 	}
 
 	rcv := diffAttributeSJsonCfg(d, v1, v2)

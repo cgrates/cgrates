@@ -112,6 +112,21 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 
 }
 
+func TestStoreDbloadFromJsonOpts(t *testing.T) {
+	strDbOpts := &StorDBOpts{
+		SQLMaxOpenConns: 1,
+	}
+
+	exp := &StorDBOpts{
+		SQLMaxOpenConns: 1,
+	}
+
+	strDbOpts.loadFromJSONCfg(nil)
+	if !reflect.DeepEqual(exp, strDbOpts) {
+		t.Errorf("Expected %v \n but received \n %v", exp, strDbOpts)
+	}
+}
+
 func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {
 	storDbJSON := &DbJsonCfg{
 		Replication_conns: &[]string{utils.MetaInternal},

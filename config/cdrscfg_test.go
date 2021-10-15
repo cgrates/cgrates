@@ -324,7 +324,50 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		EEsConns:         []string{"*localhost"},
 		RateSConns:       []string{"*localhost"},
 		AccountSConns:    []string{"*localhost"},
-		Opts:             &CdrsOpts{},
+		Opts: &CdrsOpts{
+			Accounts: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
+			Attributes: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
+			Chargers: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
+			Export: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
+			Rates: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
+			Stats: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
+			Thresholds: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
+		},
 	}
 
 	v2 := &CdrsCfg{
@@ -345,7 +388,50 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		EEsConns:         []string{"*birpc"},
 		RateSConns:       []string{"*birpc"},
 		AccountSConns:    []string{"*birpc"},
-		Opts:             &CdrsOpts{},
+		Opts: &CdrsOpts{
+			Accounts: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Attributes: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Chargers: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Export: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Rates: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Stats: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Thresholds: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+		},
 	}
 
 	expected := &CdrsJsonCfg{
@@ -362,7 +448,50 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		Ees_conns:            &[]string{"*birpc"},
 		Rates_conns:          &[]string{"*birpc"},
 		Accounts_conns:       &[]string{"*birpc"},
-		Opts:                 &CdrsOptsJson{},
+		Opts: &CdrsOptsJson{
+			Accounts: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Attributes: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Chargers: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Export: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Rates: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Stats: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Thresholds: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+		},
 	}
 
 	rcv := diffCdrsJsonCfg(d, v1, v2)

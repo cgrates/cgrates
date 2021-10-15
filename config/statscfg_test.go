@@ -213,7 +213,18 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{},
+			StatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  []string{"statsid1"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  false,
+				},
+			},
 		},
 	}
 
@@ -228,7 +239,18 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index33"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{},
+			StatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"statsid2"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
 		},
 	}
 
@@ -242,7 +264,20 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		Prefix_indexed_fields:    &[]string{"*req.index22"},
 		Suffix_indexed_fields:    &[]string{"*req.index33"},
 		Nested_fields:            utils.BoolPointer(true),
-		Opts:                     &StatsOptsJson{},
+		Opts: &StatsOptsJson{
+			StatIDs: []*utils.DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  []string{"statsid2"},
+				},
+			},
+			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+		},
 	}
 
 	rcv := diffStatServJsonCfg(d, v1, v2)
