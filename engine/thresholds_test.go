@@ -2974,3 +2974,69 @@ func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 }
+
+func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH",
+		FilterIDs: []string{"*string:~*req.Threshold:testThresholdValue"},
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH",
+		tPrfl:  thPrf,
+	}
+
+	if err := dm.SetThresholdProfile(context.Background(), thPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetThreshold(context.Background(), th); err != nil {
+		t.Error(err)
+	}
+	// testing if the profile matches wtih profile ignore filters on false
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ThdProcessEvent",
+		Event: map[string]interface{}{
+			"Threshold": "testThresholdValue",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsThresholdsThresholdIDs: []string{"TH"},
+			utils.MetaProfileIgnoreFilters:   false,
+		},
+	}
+	exp := []string{"TH"}
+	if rcv, err := tS.processEvent(context.Background(), args.Tenant, args); err != nil {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+	// testing if the profile matches with wtih profile ignore filters on true
+	args2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ThdProcessEvent",
+		Event: map[string]interface{}{
+			"Threshold": "testThresholdValue2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsThresholdsThresholdIDs: []string{"TH"},
+			utils.MetaProfileIgnoreFilters:   true,
+		},
+	}
+	exp2 := []string{"TH"}
+	if rcv2, err := tS.processEvent(context.Background(), args2.Tenant, args2); err != nil {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv2, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp2, rcv2)
+	}
+}
