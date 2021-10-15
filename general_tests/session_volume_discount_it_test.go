@@ -195,7 +195,7 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testSessVolDiscAuthorizeEvent1",
 		Event: map[string]interface{}{
-			utils.AccountField: "sipp",
+			utils.AccountField: "1001",
 			utils.Category:     "call",
 			utils.ToR:          "*voice",
 		},
@@ -211,7 +211,6 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 		args, &rplyFirst); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rplyFirst) {
-		t.Errorf(" %T si %T", expected.RouteProfiles[0].Routes[1].SortingData["Weight"], rplyFirst.RouteProfiles[0].Routes[1].SortingData["Weight"])
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
 	}
 }

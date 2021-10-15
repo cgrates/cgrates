@@ -62,6 +62,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
 							utils.RouteS, route.ID, err.Error()))
+					err = nil
 					continue
 				}
 				err = utils.NewErrAccountS(err)
@@ -86,6 +87,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
 							utils.RouteS, route.ID, err.Error()))
+					err = nil
 					continue
 				}
 				err = utils.NewErrRateS(err)

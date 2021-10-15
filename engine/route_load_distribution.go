@@ -74,6 +74,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
 						utils.RouteS, route.ID, err.Error()))
+				err = nil
 				continue
 			}
 			return

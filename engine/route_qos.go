@@ -64,6 +64,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring route with ID: %s, err: %s",
 						utils.RouteS, route.ID, err.Error()))
+				err = nil
 				continue
 			}
 			return
