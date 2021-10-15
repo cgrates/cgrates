@@ -374,7 +374,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			"remote_conns":["Conn1"],
 			"items":{
 				"*dispatcher_hosts":{"remote":true, "replicate":true}, 
-				"*indexes" :{"remote":true, "replicate":true}, 
 				"*load_ids":{"remote":true, "replicate":true}, 
 			
 			  }	
@@ -394,10 +393,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpt{
 			utils.MetaDispatcherHosts: {
-				Remote:    true,
-				Replicate: true,
-			},
-			utils.MetaIndexes: {
 				Remote:    true,
 				Replicate: true,
 			},

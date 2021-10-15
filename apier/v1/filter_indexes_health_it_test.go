@@ -447,7 +447,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 		sort.Strings(result)
 		sort.Strings(expIdx)
 		if !reflect.DeepEqual(expIdx, result) {
-			t.Errorf("Expecting: %+v, received: %+v", expIdx, result)
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expIdx), utils.ToJSON(result))
 		}
 	}
 

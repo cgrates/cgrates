@@ -50,7 +50,14 @@
       "*dispatcher_profiles":{"remote":true},
       "*dispatcher_hosts":{"remote":true},
       "*load_ids":{"remote":true},
-      "*indexes":{"remote":true}
+      "*resource_filter_indexes" : {"remote":true},
+		  "*stat_filter_indexes" : {"remote":true},
+		  "*threshold_filter_indexes" : {"remote":true},
+		  "*route_filter_indexes" : {"remote":true},
+		  "*attribute_filter_indexes" : {"remote":true},
+		  "*charger_filter_indexes" : {"remote":true},
+		  "*dispatcher_filter_indexes" : {"remote":true},
+		  "*reverse_filter_indexes" : {"remote":true},
     }
   },
 

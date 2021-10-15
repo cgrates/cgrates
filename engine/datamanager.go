@@ -3087,7 +3087,7 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 		}
 	}
 	if indexes, err = dm.DataDB().GetIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
 				utils.ReplicatorSv1GetIndexes,
 				&utils.GetIndexesArg{
@@ -3134,7 +3134,7 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 		indexes, commit, transactionID); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache
@@ -3157,7 +3157,7 @@ func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err err
 	if err = dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; itm.Replicate {
 		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache
