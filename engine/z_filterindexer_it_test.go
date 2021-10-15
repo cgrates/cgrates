@@ -220,12 +220,6 @@ func testITGetFilterIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(eIdxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 	}
-	//invalid tnt:context or index key
-	if _, err := dataManager.GetIndexes(
-		"unknown_key", "unkonwn_tenant",
-		utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
-	}
 }
 
 func testITMatchFilterIndex(t *testing.T) {
@@ -264,10 +258,6 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 				Element: "~*req.EventType",
 				Values:  []string{"Event1", "Event2"},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := dataManager.SetFilter(fp, true); err != nil {
@@ -330,18 +320,14 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 				Values:  []string{"1001", "1002"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 	}
 	if err := dataManager.SetFilter(fp2, true); err != nil {
 		t.Error(err)
 	}
-	cloneTh1 := new(ThresholdProfile)
-	*cloneTh1 = *th
+	// cloneTh1 := new(ThresholdProfile)
+	cloneTh1 := *th
 	cloneTh1.FilterIDs = []string{"Filter2"}
-	if err := dataManager.SetThresholdProfile(cloneTh1, true); err != nil {
+	if err := dataManager.SetThresholdProfile(&cloneTh1, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -363,7 +349,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
-		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 	}
 	//replace old filter with two different filters
 	fp3 := &Filter{
@@ -1440,10 +1426,10 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 		t.Error(err)
 	}
 	//verify if old key was deleted
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.DataDB().GetIndexesDrv(
 		"tmp_"+utils.CacheResourceFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", transID),
-		utils.EmptyString, false, false); err != utils.ErrNotFound {
+		utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//verify new key and check if data was moved
@@ -1458,26 +1444,20 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 
 func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	th := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{},
-		MaxHits:            12,
-		MinSleep:           0,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test",
+		FilterIDs: []string{},
+		MaxHits:   12,
+		Blocker:   true,
+		Weight:    1.4,
 	}
 	th2 := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test2",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{},
-		MaxHits:            12,
-		MinSleep:           0,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test2",
+		FilterIDs: []string{},
+		MaxHits:   12,
+		Blocker:   true,
+		Weight:    1.4,
 	}
 
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
@@ -1496,10 +1476,8 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	eMp := map[string]utils.StringSet{
 		"*none:*any:*any": {
@@ -1522,46 +1500,22 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "SPL_Weight",
 		FilterIDs: []string{},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Sorting:           "*weight",
-		SortingParameters: []string{},
-		Routes: []*Route{
-			{
-				ID:              "supplier1",
-				FilterIDs:       []string{""},
-				AccountIDs:      []string{""},
-				RatingPlanIDs:   []string{""},
-				ResourceIDs:     []string{""},
-				StatIDs:         []string{""},
-				Weight:          10,
-				RouteParameters: "",
-			},
-		},
+		Sorting:   "*weight",
+		Routes: []*Route{{
+			ID:     "supplier1",
+			Weight: 10,
+		}},
 		Weight: 20,
 	}
 	splProfile2 := &RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPL_Weight2",
 		FilterIDs: []string{},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Sorting:           "*weight",
-		SortingParameters: []string{},
-		Routes: []*Route{
-			{
-				ID:              "supplier1",
-				FilterIDs:       []string{""},
-				AccountIDs:      []string{""},
-				RatingPlanIDs:   []string{""},
-				ResourceIDs:     []string{""},
-				StatIDs:         []string{""},
-				Weight:          10,
-				RouteParameters: "",
-			},
-		},
+		Sorting:   "*weight",
+		Routes: []*Route{{
+			ID:     "supplier1",
+			Weight: 10,
+		}},
 		Weight: 20,
 	}
 
@@ -1581,10 +1535,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		utils.CacheRouteFilterIndexes, splProfile.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 	}
 	eMp := map[string]utils.StringSet{
 		"*none:*any:*any": {
@@ -1726,10 +1678,8 @@ func testITTestIndexingThresholds(t *testing.T) {
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	eMp := map[string]utils.StringSet{
 		"*string:*req.Account:1001": {
@@ -1787,10 +1737,8 @@ func testITTestIndexingMetaNot(t *testing.T) {
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	eMp := map[string]utils.StringSet{
 		"*string:*req.Account:1001": {
@@ -1860,9 +1808,7 @@ func testITTestIndexingMetaSuffix(t *testing.T) {
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v,\n received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v,\n received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 	}
 }

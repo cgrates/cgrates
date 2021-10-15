@@ -56,7 +56,14 @@
       "*dispatcher_profiles":{"replicate":false},
       "*dispatcher_hosts":{"replicate":false},
       "*load_ids":{"replicate":false},
-      "*indexes":{"replicate":false}
+      "*resource_filter_indexes" : {"replicate":false},
+		  "*stat_filter_indexes" : {"replicate":false},
+		  "*threshold_filter_indexes" : {"replicate":false},
+		  "*route_filter_indexes" : {"replicate":false},
+		  "*attribute_filter_indexes" : {"replicate":false},
+		  "*charger_filter_indexes" : {"replicate":false},
+		  "*dispatcher_filter_indexes" : {"replicate":false},
+		  "*reverse_filter_indexes" : {"replicate":false},
     }
   },
 

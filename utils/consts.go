@@ -33,7 +33,7 @@ var (
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
-		CacheCapsEvents, CacheReplicationHosts})
+		CacheRatingProfilesTmp, CacheCapsEvents, CacheReplicationHosts})
 
 	DataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
 		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
@@ -41,8 +41,7 @@ var (
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
-		CacheRatingProfilesTmp, CacheReverseFilterIndexes,
-		CacheActionPlans, CacheAccountActionPlans, CacheAccounts, CacheVersions})
+		CacheReverseFilterIndexes, CacheActionPlans, CacheAccountActionPlans, CacheAccounts, CacheVersions})
 
 	StorDBPartitions = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
 		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
@@ -925,7 +924,6 @@ const (
 	MetaThresholdProfiles   = "*threshold_profiles"
 	MetaRouteProfiles       = "*route_profiles"
 	MetaAttributeProfiles   = "*attribute_profiles"
-	MetaIndexes             = "*indexes"
 	MetaDispatcherProfiles  = "*dispatcher_profiles"
 	MetaChargerProfiles     = "*charger_profiles"
 	MetaSharedGroups        = "*shared_groups"

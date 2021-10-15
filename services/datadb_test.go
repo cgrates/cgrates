@@ -138,9 +138,6 @@ func TestDataDBCoverage(t *testing.T) {
 			utils.MetaLoadIDs: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
 		},
 	}
 	db.oldDBCfg = oldcfg

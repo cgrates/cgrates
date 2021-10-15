@@ -174,9 +174,6 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaLoadIDs: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
 		},
 	}
 	if !reflect.DeepEqual(oldcfg, db.oldDBCfg) {
@@ -341,9 +338,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 			utils.MetaLoadIDs: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
 		},
 	}
 	cfg.DataDbCfg().Type = "dbtype"
@@ -462,9 +456,6 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaIndexes: {
 				Replicate: false,
 				Remote:    false},
 		},
@@ -682,9 +673,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 			utils.MetaLoadIDs: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
 		},
 	}
 
@@ -842,9 +830,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 			utils.MetaLoadIDs: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
 		},
 	}
 	cfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg] = true
@@ -982,9 +967,6 @@ func TestDataDBReloadError(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaIndexes: {
 				Replicate: false,
 				Remote:    false},
 		},

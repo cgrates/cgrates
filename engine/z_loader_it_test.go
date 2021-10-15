@@ -119,7 +119,7 @@ func testLoaderITInitStoreDB(t *testing.T) {
 		lCfg.StorDbCfg().Host, lCfg.StorDbCfg().Port, lCfg.StorDbCfg().Name,
 		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password, lCfg.GeneralCfg().DBDataEncoding,
 		lCfg.StorDbCfg().StringIndexedFields, lCfg.StorDbCfg().PrefixIndexedFields,
-		lCfg.StorDbCfg().Opts, lCfg.DataDbCfg().Items)
+		lCfg.StorDbCfg().Opts, lCfg.StorDbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on opening database connection: ", err)
 	}
