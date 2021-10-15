@@ -619,6 +619,13 @@ const CGRATES_CFG_JSON = `
 	"rates_conns": [], 						// connections to RateS
 	"accounts_conns": [],					// connections to AccountS
 	"opts": {
+		"*accounts": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
 		"*attributeS": [					
 			// {
 			// 	"Tenant": "*any",
@@ -626,7 +633,28 @@ const CGRATES_CFG_JSON = `
 			// 	"Value": false,
 			// },
 		],
+		"*cdrS": [						
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
 		"*chargerS": [						
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*resourceS": [						
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*routeS": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -669,6 +697,90 @@ const CGRATES_CFG_JSON = `
 			// },
 		],
 		"*message": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*attributesDerivedReply": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*blockerError": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*cdrsDerivedReply": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*resourcesAuthorize": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*resourcesAllocate": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*resourcesRelease": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*resourcesDerivedReply": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*routesDerivedReply": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*statsDerivedReply": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*thresholdsDerivedReply": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*maxUsage": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*forceDuration": [					
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
