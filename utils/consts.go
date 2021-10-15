@@ -1944,7 +1944,10 @@ const (
 	// CdrsCfg
 	MetaAccountSCfg     = "*accountS"
 	MetaAttributeSCfg   = "*attributeS"
+	MetaCDRsCfg         = "*cdrS"
 	MetaChargerSCfg     = "*chargerS"
+	MetaResourceSCfg    = "*resourceS"
+	MetaRouteSCfg       = "*routeS"
 	MetaEeSCfg          = "*eeS"
 	MetaRateSCfg        = "*rateS"
 	MetaStatSCfg        = "*statS"
@@ -1994,6 +1997,20 @@ const (
 	MetaUsageIDCfg  = "*usageID"
 	MetaUsageTTLCfg = "*usageTTL"
 	MetaUnitsCfg    = "*units"
+
+	// SessionsCfg
+	MetaAttributesDerivedReplyCfg = "*attributesDerivedReply"
+	MetaBlockerErrorCfg           = "*blockerError"
+	MetaCDRsDerivedReplyCfg       = "*cdrsDerivedReply"
+	MetaResourcesAuthorizeCfg     = "*resourcesAuthorize"
+	MetaResourcesAllocateCfg      = "*resourcesAllocate"
+	MetaResourcesReleaseCfg       = "*resourcesRelease"
+	MetaResourcesDerivedReplyCfg  = "*resourcesDerivedReply"
+	MetaRoutesDerivedReplyCfg     = "*routesDerivedReply"
+	MetaStatsDerivedReplyCfg      = "*statsDerivedReply"
+	MetaThresholdsDerivedReplyCfg = "*thresholdsDerivedReply"
+	MetaMaxUsageCfg               = "*maxUsage"
+	MetaForceDurationCfg          = "*forceDuration"
 
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"
@@ -2179,6 +2196,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 const (
 
 	//CDRS and Sessions Opts
+	OptsAccountS   = "*accountS"
 	OptsCDRs       = "*cdrS"
 	OptsRouteS     = "*routeS"
 	OptsResourceS  = "*resourceS"
@@ -2219,7 +2237,6 @@ const (
 
 	// Accounts
 	OptsAccountsUsage      = "*accountsUsage"
-	OptsAccountS           = "*accountS"
 	OptsAccountsAccountIDs = "*accountIDs"
 
 	// Actions
