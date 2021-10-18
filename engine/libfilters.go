@@ -264,3 +264,40 @@ func GetIntPointerOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 	}
 	return nil, utils.ErrNotFound // return NOT_FOUND if there are no options and none of the filters pass
 }
+
+func GetDurationPointerOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicDurationPointerOpt,
+	startOpts MapEvent, optNames ...string) {
+
+}
+
+// GetDurationPointerOptsFromMultipleMaps checks the specified option names in order among the keys in APIOpts, then in startOpts, returning the first value it finds as *time.Duration,
+// otherwise it returns the config option if at least one filter passes or NOT_FOUND if none of them do
+func GetDurationPointerOptsFromMultipleMaps(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicDurationPointerOpt,
+	startOpts MapEvent, optNames ...string) (cfgOpt *time.Duration, err error) {
+	for _, optName := range optNames {
+		var value time.Duration
+		if opt, has := ev.APIOpts[optName]; has {
+			if value, err = utils.IfaceAsDuration(opt); err != nil {
+				return nil, err
+			}
+			return utils.DurationPointer(value), nil
+		} else if opt, has = startOpts[optName]; has {
+			if value, err = utils.IfaceAsDuration(opt); err != nil {
+				return nil, err
+			}
+			return utils.DurationPointer(value), nil
+		}
+	}
+	evDP := ev.AsDataProvider()
+	for _, opt := range dynOpts { // iterate through the options
+		if !utils.IsSliceMember([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
+			continue
+		}
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+			return nil, err
+		} else if pass {
+			return opt.Value, nil
+		}
+	}
+	return nil, utils.ErrNotFound // return NOT_FOUND if there are no options and none of the filters pass
+}
