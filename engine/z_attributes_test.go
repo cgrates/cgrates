@@ -4358,7 +4358,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 	}
 }
 
-// doesn't work as intended need to discuss with pufi
+// doesn't work as intended need to discuss
 // func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 // 	cfg := config.NewDefaultCGRConfig()
 // 	cfg.FilterSCfg().ResourceSConns = []string{}
