@@ -77,6 +77,12 @@ type DynamicIntPointerOpt struct {
 	Value     *int
 }
 
+type DynamicDurationPointerOpt struct {
+	FilterIDs []string `json:",omitempty"`
+	Tenant    string
+	Value     *time.Duration
+}
+
 func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) (cl []*DynamicStringSliceOpt) {
 	cl = make([]*DynamicStringSliceOpt, len(in))
 	for i, val := range in {
@@ -180,6 +186,18 @@ func CloneDynamicIntPointerOpt(in []*DynamicIntPointerOpt) (cl []*DynamicIntPoin
 			Tenant:    val.Tenant,
 			FilterIDs: CloneStringSlice(val.FilterIDs),
 			Value:     IntPointer(*val.Value),
+		}
+	}
+	return
+}
+
+func CloneDynamicDurationPointerOpt(in []*DynamicDurationPointerOpt) (cl []*DynamicDurationPointerOpt) {
+	cl = make([]*DynamicDurationPointerOpt, len(in))
+	for i, val := range in {
+		cl[i] = &DynamicDurationPointerOpt{
+			Tenant:    val.Tenant,
+			FilterIDs: CloneStringSlice(val.FilterIDs),
+			Value:     DurationPointer(*val.Value),
 		}
 	}
 	return
@@ -345,6 +363,24 @@ func DynamicIntPointerOptEqual(v1, v2 []*DynamicIntPointerOpt) bool {
 	return true
 }
 
+func DynamicDurationPointerOptEqual(v1, v2 []*DynamicDurationPointerOpt) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v1 {
+		if v1[i].Tenant != v2[i].Tenant {
+			return false
+		}
+		if !SliceStringEqual(v1[i].FilterIDs, v2[i].FilterIDs) {
+			return false
+		}
+		if *v1[i].Value != *v2[i].Value {
+			return false
+		}
+	}
+	return true
+}
+
 func CloneDecimalBig(in *decimal.Big) (cln *decimal.Big) {
 	cln = new(decimal.Big)
 	cln.Copy(in)
@@ -422,6 +458,34 @@ func IntPointerToIntDynamicOpts(intPtOpts []*DynamicIntPointerOpt) (intOpts []*D
 			Tenant:    opt.Tenant,
 			FilterIDs: opt.FilterIDs,
 			Value:     *opt.Value,
+		}
+	}
+	return
+}
+
+func StringToDurationPointerDynamicOpts(strOpts []*DynamicStringOpt) (durPtOpts []*DynamicDurationPointerOpt, err error) {
+	durPtOpts = make([]*DynamicDurationPointerOpt, len(strOpts))
+	for index, opt := range strOpts {
+		var durOpt time.Duration
+		if durOpt, err = ParseDurationWithNanosecs(opt.Value); err != nil {
+			return
+		}
+		durPtOpts[index] = &DynamicDurationPointerOpt{
+			Tenant:    opt.Tenant,
+			FilterIDs: opt.FilterIDs,
+			Value:     DurationPointer(durOpt),
+		}
+	}
+	return
+}
+
+func DurationPointerToStringDynamicOpts(durPtOpts []*DynamicDurationPointerOpt) (strOpts []*DynamicStringOpt) {
+	strOpts = make([]*DynamicStringOpt, len(durPtOpts))
+	for index, opt := range durPtOpts {
+		strOpts[index] = &DynamicStringOpt{
+			FilterIDs: opt.FilterIDs,
+			Tenant:    opt.Tenant,
+			Value:     (*opt.Value).String(),
 		}
 	}
 	return
