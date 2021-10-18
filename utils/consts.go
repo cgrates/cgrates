@@ -2010,6 +2010,12 @@ const (
 	MetaThresholdsDerivedReplyCfg = "*thresholdsDerivedReply"
 	MetaMaxUsageCfg               = "*maxUsage"
 	MetaForceDurationCfg          = "*forceDuration"
+	MetaTTLCfg                    = "*ttl"
+	MetaChargeableCfg             = "*chargeable"
+	MetaDebitIntervalCfg          = "*debitInterval"
+	MetaLastUsageCfg              = "*lastUsage"
+	MetaLastUsedCfg               = "*lastUsed"
+	MetaMaxDelayCfg               = "*maxDelay"
 
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"
