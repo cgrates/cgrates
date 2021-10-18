@@ -392,7 +392,7 @@ func TestV1ScheduleActions(t *testing.T) {
 		t.Errorf("Unexpected reply %+v", reply)
 	}
 
-	ev.APIOpts[utils.OptsActionsActionProfileIDs] = []string{"invalid_id"}
+	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{"invalid_id"}
 	if err := acts.V1ScheduleActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
@@ -447,7 +447,7 @@ func TestV1ExecuteActions(t *testing.T) {
 		t.Errorf("Unexpected reply %+v", reply)
 	}
 
-	ev.APIOpts[utils.OptsActionsActionProfileIDs] = []string{"invalid_id"}
+	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{"invalid_id"}
 	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -455,7 +455,7 @@ func TestV1ExecuteActions(t *testing.T) {
 	newData := &dataDBMockError{}
 	newDm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	newActs := NewActionS(defaultCfg, filters, newDm, nil)
-	ev.APIOpts[utils.OptsActionsActionProfileIDs] = []string{}
+	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{}
 	if err := newActs.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}

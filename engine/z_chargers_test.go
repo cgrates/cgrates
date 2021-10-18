@@ -230,9 +230,9 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 					"RunID":            utils.MetaDefault,
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsAttributesIDs: []string(nil),
-					utils.Subsys:            utils.MetaChargers,
-					utils.OptsContext:       utils.MetaChargers,
+					utils.OptsAttributesProfileIDs: []string(nil),
+					utils.Subsys:                   utils.MetaChargers,
+					utils.OptsContext:              utils.MetaChargers,
 				},
 			},
 		},

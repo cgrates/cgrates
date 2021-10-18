@@ -960,7 +960,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sqPrf, tempStat)
 	}
 	statsEvs[0].APIOpts = make(map[string]interface{})
-	statsEvs[0].APIOpts[utils.OptsStatsStatIDs] = []string{"StatQueueProfile1", "StatQueueProfile2", "StatQueueProfile3"}
+	statsEvs[0].APIOpts[utils.OptsStatsProfileIDs] = []string{"StatQueueProfile1", "StatQueueProfile2", "StatQueueProfile3"}
 	ev := statsEvs[0]
 	reply := []string{}
 	expected := []string{"StatQueueProfile1", "StatQueueProfile3"}
@@ -1739,7 +1739,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs: []string{"SQ1"},
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -1860,7 +1860,7 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs: []string{"SQ1"},
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -1936,7 +1936,7 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs: []string{"SQ1"},
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -2011,7 +2011,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs: []string{"SQ1"},
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -2026,7 +2026,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 		ID:     "SqProcessEvent",
 		Event:  nil,
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs: []string{"SQ1"},
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -2840,8 +2840,8 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 						"testMetricType": time.Duration(time.Hour),
 					},
 					APIOpts: map[string]interface{}{
-						utils.MetaEventType:              utils.StatUpdate,
-						utils.OptsThresholdsThresholdIDs: []string{"TH1"},
+						utils.MetaEventType:            utils.StatUpdate,
+						utils.OptsThresholdsProfileIDs: []string{"TH1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -3561,7 +3561,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 			"Stat": "testStatValue",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs:         []string{"SQ1"},
+			utils.OptsStatsProfileIDs:      []string{"SQ1"},
 			utils.MetaProfileIgnoreFilters: false,
 		},
 	}
@@ -3580,7 +3580,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 			"Stat": "testStatValue2",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs:         []string{"SQ1"},
+			utils.OptsStatsProfileIDs:      []string{"SQ1"},
 			utils.MetaProfileIgnoreFilters: true,
 		},
 	}

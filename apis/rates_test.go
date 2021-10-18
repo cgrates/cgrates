@@ -594,7 +594,7 @@ func TestRatesCostForEvent(t *testing.T) {
 		ID:     "ID",
 		Event:  nil,
 		APIOpts: map[string]interface{}{
-			utils.OptsRatesRateProfileIDs: []string{"rtID"},
+			utils.OptsRatesProfileIDs: []string{"rtID"},
 		},
 	}
 

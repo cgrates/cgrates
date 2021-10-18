@@ -224,7 +224,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	"indexed_selects":true,
 	"nested_fields":false,
 	"opts":{
-		"*attributeIDs": [],
+		"*profileIDs": [],
 		"*processRuns": [
 			{
 				"Value": 2,

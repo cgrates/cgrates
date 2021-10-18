@@ -1443,7 +1443,7 @@ func TestThresholdsRPCClone(t *testing.T) {
 		ID:     "EventTest",
 		Event:  make(map[string]interface{}),
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"THD_ID"},
+			utils.OptsThresholdsProfileIDs: []string{"THD_ID"},
 		},
 	}
 	args.SetCloneable(true)
@@ -1453,7 +1453,7 @@ func TestThresholdsRPCClone(t *testing.T) {
 		ID:     "EventTest",
 		Event:  make(map[string]interface{}),
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"THD_ID"},
+			utils.OptsThresholdsProfileIDs: []string{"THD_ID"},
 		},
 	}
 
@@ -1494,7 +1494,7 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"TH2"},
+			utils.OptsThresholdsProfileIDs: []string{"TH2"},
 		},
 	}
 	exp := &Threshold{
@@ -1580,7 +1580,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"TH3"},
+			utils.OptsThresholdsProfileIDs: []string{"TH3"},
 		},
 	}
 
@@ -1639,7 +1639,7 @@ func TestThresholdsProcessEventNotFound(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"TH6"},
+			utils.OptsThresholdsProfileIDs: []string{"TH6"},
 		},
 	}
 
@@ -1964,7 +1964,7 @@ func TestThresholdMatchingThresholdForEventLocks(t *testing.T) {
 	dm.RemoveThreshold(context.Background(), "cgrates.org", "TH1")
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: ids.AsSlice(),
+			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
 	mth, err := rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
@@ -2032,7 +2032,7 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	ids.Add(rPrf.ID)
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: ids.AsSlice(),
+			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
 	_, err := rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
@@ -2084,7 +2084,7 @@ func TestThresholdMatchingThresholdForEventLocksBlocker(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: ids.AsSlice(),
+			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
 	mres, err := rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
@@ -2155,7 +2155,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: ids.AsSlice(),
+			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
 	_, err := rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
@@ -2199,7 +2199,7 @@ func TestThresholdMatchingThresholdForEventLocks4(t *testing.T) {
 	ids.Add("TH20")
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: ids.AsSlice(),
+			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
 	mres, err := rS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
@@ -2256,7 +2256,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: ids.AsSlice(),
+			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
 		},
 	}
 	dm.RemoveThreshold(context.Background(), "cgrates.org", "TH1")
@@ -2966,7 +2966,7 @@ func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
 			utils.AccountField: "1002",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"TH1"},
+			utils.OptsThresholdsProfileIDs: []string{"TH1"},
 		},
 	}
 	if _, err := tS.matchingThresholdsForEvent(context.Background(), "cgrates.org",
@@ -3011,8 +3011,8 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 			"Threshold": "testThresholdValue",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"TH"},
-			utils.MetaProfileIgnoreFilters:   false,
+			utils.OptsThresholdsProfileIDs: []string{"TH"},
+			utils.MetaProfileIgnoreFilters: false,
 		},
 	}
 	exp := []string{"TH"}
@@ -3029,8 +3029,8 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 			"Threshold": "testThresholdValue2",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"TH"},
-			utils.MetaProfileIgnoreFilters:   true,
+			utils.OptsThresholdsProfileIDs: []string{"TH"},
+			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
 	exp2 := []string{"TH"}

@@ -287,7 +287,7 @@ func TestAttributeCache(t *testing.T) {
 }
 
 func TestAttributeProfileForEvent(t *testing.T) {
-	attrIDs, err := utils.OptAsStringSlice(attrEvs[0].APIOpts, utils.OptsAttributesIDs)
+	attrIDs, err := utils.OptAsStringSlice(attrEvs[0].APIOpts, utils.OptsAttributesProfileIDs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -306,7 +306,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[0]), utils.ToJSON(atrp))
 	}
 
-	attrIDs, err = utils.OptAsStringSlice(attrEvs[1].APIOpts, utils.OptsAttributesIDs)
+	attrIDs, err = utils.OptAsStringSlice(attrEvs[1].APIOpts, utils.OptsAttributesProfileIDs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -325,7 +325,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[1]), utils.ToJSON(atrp))
 	}
 
-	attrIDs, err = utils.OptAsStringSlice(attrEvs[2].APIOpts, utils.OptsAttributesIDs)
+	attrIDs, err = utils.OptAsStringSlice(attrEvs[2].APIOpts, utils.OptsAttributesProfileIDs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -385,7 +385,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 
 func TestAttributeProcessEventWithIDs(t *testing.T) {
 	attrEvs[3].Event["Account"] = "1010" //Field added in event after process
-	attrEvs[3].APIOpts[utils.OptsAttributesIDs] = []string{"AttributeIDMatch"}
+	attrEvs[3].APIOpts[utils.OptsAttributesProfileIDs] = []string{"AttributeIDMatch"}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"cgrates.org:AttributeIDMatch"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Account"},

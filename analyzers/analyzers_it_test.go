@@ -206,9 +206,9 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 					"Subject":     "Something_inter",
 				},
 				APIOpts: map[string]interface{}{
-					"*attributeIDs": []interface{}{"*constant:*req.RequestType:*none"},
-					"*context":      "*chargers",
-					"*subsys":       "*chargers",
+					"*attrProfileIDs": []interface{}{"*constant:*req.RequestType:*none"},
+					"*context":        "*chargers",
+					"*subsys":         "*chargers",
 				},
 			},
 		},

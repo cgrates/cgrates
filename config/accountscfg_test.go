@@ -57,7 +57,7 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		MaxIterations:       1000,
 		MaxUsage:            usage,
 		Opts: &AccountsOpts{
-			AccountIDs:           []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			Usage:                []*utils.DynamicDecimalBigOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
@@ -78,7 +78,7 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 
 func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
 	accOpts := &AccountsOpts{
-		AccountIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Value: []string{"1001", "1002"},
 			},
@@ -96,7 +96,7 @@ func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
 	}
 
 	jsnCfg := &AccountsOptsJson{
-		AccountIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{},
 		},
 		Usage: []*utils.DynamicStringOpt{
@@ -163,7 +163,7 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.MaxIterations:          100,
 		utils.MaxUsage:               "259200000000000", // 72h in ns
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaAccountIDsCfg:        []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
@@ -234,7 +234,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       1,
 		MaxUsage:            nil,
 		Opts: &AccountsOpts{
-			AccountIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  []string{"ACC1"},
@@ -268,7 +268,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       3,
 		MaxUsage:            utils.NewDecimal(60, 0),
 		Opts: &AccountsOpts{
-			AccountIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"ACC2"},
@@ -302,7 +302,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Max_iterations:        utils.IntPointer(3),
 		Max_usage:             utils.StringPointer("60"),
 		Opts: &AccountsOptsJson{
-			AccountIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"ACC2"},
@@ -366,7 +366,7 @@ func TestAccountSCloneSection(t *testing.T) {
 		MaxIterations:       1,
 		MaxUsage:            nil,
 		Opts: &AccountsOpts{
-			AccountIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Value: []string{"ACC1"},
 				},

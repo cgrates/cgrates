@@ -312,7 +312,7 @@ func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *util
 	evNm := args.AsDataProvider()
 	var sqIDs []string
 	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
-		config.StatsProfileIDsDftOpt, utils.OptsStatsStatIDs); err != nil {
+		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
@@ -383,7 +383,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils
 	}
 	var sqIDs []string
 	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
-		config.StatsProfileIDsDftOpt, utils.OptsStatsStatIDs); err != nil {
+		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool

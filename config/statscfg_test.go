@@ -48,7 +48,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			StatIDs:              []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
@@ -66,7 +66,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 	statsOpt := &StatsOpts{
-		StatIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Value: []string{},
 			},
@@ -79,7 +79,7 @@ func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 	}
 
 	exp := &StatsOpts{
-		StatIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Value: []string{},
 			},
@@ -122,7 +122,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg:    []string{},
 		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaStatIDsCfg:           []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
@@ -158,7 +158,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.suffix_indexed_fields"},
 		utils.NestedFieldsCfg:           true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaStatIDsCfg:           []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
@@ -213,7 +213,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  []string{"statsid1"},
@@ -239,7 +239,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index33"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"statsid2"},
@@ -265,7 +265,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{"*req.index33"},
 		Nested_fields:            utils.BoolPointer(true),
 		Opts: &StatsOptsJson{
-			StatIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"statsid2"},
@@ -307,7 +307,7 @@ func TestStatSCloneSection(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{},
+			ProfileIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}
 
@@ -322,7 +322,7 @@ func TestStatSCloneSection(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			StatIDs: []*utils.DynamicStringSliceOpt{},
+			ProfileIDs: []*utils.DynamicStringSliceOpt{},
 		},
 	}
 
