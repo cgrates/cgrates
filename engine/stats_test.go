@@ -3592,3 +3592,55 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rcvIDs)
 	}
 }
+
+func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SQ1",
+		FilterIDs: []string{"*string:~*req.Stat:testStatValue"},
+	}
+	sq := &StatQueue{
+		sqPrfl: sqPrf,
+		Tenant: "cgrates.org",
+		ID:     "SQ1",
+		SQItems: []SQItem{
+			{
+				EventID: "SqProcessEvent",
+			},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
+		t.Error(err)
+	}
+
+	args2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			"Stat": "testStatValue",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsStatIDs:         []string{"SQ1"},
+			utils.MetaProfileIgnoreFilters: time.Second,
+		},
+	}
+
+	if _, err := sS.processEvent(context.Background(), args2.Tenant, args2); err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cannot convert field: 1s to bool", err)
+	}
+
+}
