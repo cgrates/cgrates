@@ -134,7 +134,7 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *AttrSProcessEventReply, err error) {
 	var attrIDs []string
 	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs,
-		config.AttributesIDsDftOpt, utils.OptsAttributesIDs); err != nil {
+		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
@@ -214,7 +214,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 	}
 	var attrIDs []string
 	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs,
-		config.AttributesIDsDftOpt, utils.OptsAttributesIDs); err != nil {
+		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool

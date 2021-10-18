@@ -216,8 +216,8 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 // V1CostForEvent will be called to calculate the cost for an event
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string
-	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.RateProfileIDs,
-		config.RatesRateProfileIDsDftOpt, utils.OptsRatesRateProfileIDs); err != nil {
+	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.ProfileIDs,
+		config.RatesProfileIDsDftOpt, utils.OptsRatesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool

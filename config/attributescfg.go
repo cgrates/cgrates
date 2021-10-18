@@ -23,7 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var AttributesIDsDftOpt = []string{}
+var AttributesProfileIDsDftOpt = []string{}
 
 const (
 	AttributesProcessRunsDftOpt          = 1

@@ -1029,7 +1029,7 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {								//
-		"*statIDs": [						
+		"*profileIDs": [						
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -1500,7 +1500,7 @@ const CGRATES_CFG_JSON = `
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "verbosity": 1000,                      // number of increment iterations allowed
 	"opts":{								//
-		"*rateProfileIDs": [				// select the rate profiles used for cost calculation
+		"*profileIDs": [					// select the rate profiles used for cost calculation
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -1669,7 +1669,7 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"dynaprepaid_actionprofile": [],		//
 	"opts":{								//
-		"*actionProfileIDs": [				
+		"*profileIDs": [				
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],
@@ -1700,7 +1700,7 @@ const CGRATES_CFG_JSON = `
     "max_iterations": 1000,                 // maximum number of iterations
     "max_usage": "72h",                     // maximum time of usage
 	"opts":{								//	
-		"*accountIDs": [					//
+		"*profileIDs": [					//
 			// {
 			// 	"Tenant": "*any",
 			// 	"FilterIDs": [],

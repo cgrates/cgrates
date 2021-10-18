@@ -25,12 +25,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var StatsStatIDsDftOpt = []string{}
+var StatsProfileIDsDftOpt = []string{}
 
 const StatsProfileIgnoreFilters = false
 
 type StatsOpts struct {
-	StatIDs              []*utils.DynamicStringSliceOpt
+	ProfileIDs           []*utils.DynamicStringSliceOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
 }
 
@@ -61,8 +61,8 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.StatIDs != nil {
-		sqOpts.StatIDs = append(sqOpts.StatIDs, jsnCfg.StatIDs...)
+	if jsnCfg.ProfileIDs != nil {
+		sqOpts.ProfileIDs = append(sqOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
 		sqOpts.ProfileIgnoreFilters = append(sqOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
@@ -111,7 +111,7 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (st StatSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaStatIDsCfg:           st.Opts.StatIDs,
+		utils.MetaProfileIDs:           st.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFilters: st.Opts.ProfileIgnoreFilters,
 	}
 	mp := map[string]interface{}{
@@ -146,15 +146,15 @@ func (st StatSCfg) CloneSection() Section { return st.Clone() }
 
 func (sqOpts *StatsOpts) Clone() *StatsOpts {
 	var sqIDs []*utils.DynamicStringSliceOpt
-	if sqOpts.StatIDs != nil {
-		sqIDs = utils.CloneDynamicStringSliceOpt(sqOpts.StatIDs)
+	if sqOpts.ProfileIDs != nil {
+		sqIDs = utils.CloneDynamicStringSliceOpt(sqOpts.ProfileIDs)
 	}
 	var profileIgnoreFilters []*utils.DynamicBoolOpt
 	if sqOpts.ProfileIgnoreFilters != nil {
 		profileIgnoreFilters = utils.CloneDynamicBoolOpt(sqOpts.ProfileIgnoreFilters)
 	}
 	return &StatsOpts{
-		StatIDs:              sqIDs,
+		ProfileIDs:           sqIDs,
 		ProfileIgnoreFilters: profileIgnoreFilters,
 	}
 }
@@ -186,7 +186,7 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 }
 
 type StatsOptsJson struct {
-	StatIDs              []*utils.DynamicStringSliceOpt `json:"*statIDs"`
+	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
@@ -208,8 +208,8 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 	if d == nil {
 		d = new(StatsOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.StatIDs, v2.StatIDs) {
-		d.StatIDs = v2.StatIDs
+	if !utils.DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
+		d.ProfileIDs = v2.ProfileIDs
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters

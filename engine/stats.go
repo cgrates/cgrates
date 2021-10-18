@@ -277,7 +277,7 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 			sq.sqPrfl.ThresholdIDs[0] == utils.MetaNone {
 			continue
 		}
-		opts[utils.OptsThresholdsThresholdIDs] = sq.sqPrfl.ThresholdIDs
+		opts[utils.OptsThresholdsProfileIDs] = sq.sqPrfl.ThresholdIDs
 		thEv := &utils.CGREvent{
 			Tenant: sq.Tenant,
 			ID:     utils.GenUUID(),
@@ -311,8 +311,8 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
 	evNm := args.AsDataProvider()
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.StatIDs,
-		config.StatsStatIDsDftOpt, utils.OptsStatsStatIDs); err != nil {
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
+		config.StatsProfileIDsDftOpt, utils.OptsStatsStatIDs); err != nil {
 		return
 	}
 	var ignFilters bool
@@ -382,8 +382,8 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.StatIDs,
-		config.StatsStatIDsDftOpt, utils.OptsStatsStatIDs); err != nil {
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
+		config.StatsProfileIDsDftOpt, utils.OptsStatsStatIDs); err != nil {
 		return
 	}
 	var ignFilters bool

@@ -238,8 +238,8 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 // V1AccountsForEvent returns the matching Accounts for Event
 func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
+		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
@@ -262,8 +262,8 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 // V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
+		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
@@ -292,8 +292,8 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 // V1DebitAbstracts performs debit for the provided event
 func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
+		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
@@ -322,8 +322,8 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 // V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
+		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
@@ -352,8 +352,8 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 // V1DebitConcretes performs debit of concrete units for the provided event
 func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
-	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.AccountIDs,
-		config.AccountsAccountIDsDftOpt, utils.OptsAccountsAccountIDs); err != nil {
+	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
+		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool

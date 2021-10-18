@@ -178,11 +178,11 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Units:    []*utils.DynamicFloat64Opt{},
 		}},
 		statsCfg: &StatSCfg{Opts: &StatsOpts{
-			StatIDs:              []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		thresholdSCfg: &ThresholdSCfg{Opts: &ThresholdsOpts{
-			ThresholdIDs:         []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		routeSCfg: &RouteSCfg{Opts: &RoutesOpts{
@@ -211,14 +211,14 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		ersCfg:       new(ERsCfg),
 		eesCfg:       &EEsCfg{Cache: make(map[string]*CacheParamCfg)},
 		rateSCfg: &RateSCfg{Opts: &RatesOpts{
-			RateProfileIDs:       []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			StartTime:            []*utils.DynamicStringOpt{},
 			Usage:                []*utils.DynamicDecimalBigOpt{},
 			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		actionSCfg: &ActionSCfg{Opts: &ActionsOpts{
-			ActionProfileIDs:     []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
 		sipAgentCfg: new(SIPAgentCfg),
@@ -226,7 +226,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		apiBanCfg:   new(APIBanCfg),
 		coreSCfg:    new(CoreSCfg),
 		accountSCfg: &AccountSCfg{Opts: &AccountsOpts{
-			AccountIDs:           []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			Usage:                []*utils.DynamicDecimalBigOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		}},
