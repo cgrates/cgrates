@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -579,30 +580,14 @@ func TestSmgJsonCfg(t *testing.T) {
 			Publickey_path:      utils.StringPointer(""),
 		},
 		Opts: &SessionsOptsJson{
-			Accounts:               []*utils.DynamicBoolOpt{},
-			Attributes:             []*utils.DynamicBoolOpt{},
-			CDRs:                   []*utils.DynamicBoolOpt{},
-			Chargers:               []*utils.DynamicBoolOpt{},
-			Resources:              []*utils.DynamicBoolOpt{},
-			Routes:                 []*utils.DynamicBoolOpt{},
-			Stats:                  []*utils.DynamicBoolOpt{},
-			Thresholds:             []*utils.DynamicBoolOpt{},
-			Initiate:               []*utils.DynamicBoolOpt{},
-			Update:                 []*utils.DynamicBoolOpt{},
-			Terminate:              []*utils.DynamicBoolOpt{},
-			Message:                []*utils.DynamicBoolOpt{},
-			AttributesDerivedReply: []*utils.DynamicBoolOpt{},
-			BlockerError:           []*utils.DynamicBoolOpt{},
-			CDRsDerivedReply:       []*utils.DynamicBoolOpt{},
-			ResourcesAuthorize:     []*utils.DynamicBoolOpt{},
-			ResourcesAllocate:      []*utils.DynamicBoolOpt{},
-			ResourcesRelease:       []*utils.DynamicBoolOpt{},
-			ResourcesDerivedReply:  []*utils.DynamicBoolOpt{},
-			RoutesDerivedReply:     []*utils.DynamicBoolOpt{},
-			StatsDerivedReply:      []*utils.DynamicBoolOpt{},
-			ThresholdsDerivedReply: []*utils.DynamicBoolOpt{},
-			MaxUsage:               []*utils.DynamicBoolOpt{},
-			ForceDuration:          []*utils.DynamicBoolOpt{},
+			Attributes: []*utils.DynamicBoolOpt{},
+			Chargers:   []*utils.DynamicBoolOpt{},
+			Stats:      []*utils.DynamicBoolOpt{},
+			Thresholds: []*utils.DynamicBoolOpt{},
+			Initiate:   []*utils.DynamicBoolOpt{},
+			Update:     []*utils.DynamicBoolOpt{},
+			Terminate:  []*utils.DynamicBoolOpt{},
+			Message:    []*utils.DynamicBoolOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -613,7 +598,7 @@ func TestSmgJsonCfg(t *testing.T) {
 	if err := dfCgrJSONCfg.GetSection(context.Background(), SessionSJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Errorf("Expected %v \n but Received \n %v ", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 
@@ -2348,5 +2333,30 @@ func TestSetSection(t *testing.T) {
 	errExpect := "json: unsupported type: chan struct {}"
 	if err := jsnCfg.SetSection(&context.Context{}, "general", payload); err == nil || err.Error() != errExpect {
 		t.Error(err)
+	}
+}
+
+func TestConfigJsonCloneSection(t *testing.T) {
+	s := Sections{
+		&CoreSCfg{
+			Caps:              2,
+			CapsStrategy:      "*busy",
+			CapsStatsInterval: 2 * time.Second,
+			ShutdownTimeout:   3 * time.Second,
+		},
+	}
+
+	exp := []Section{
+		&CoreSCfg{
+			Caps:              2,
+			CapsStrategy:      "*busy",
+			CapsStatsInterval: 2 * time.Second,
+			ShutdownTimeout:   3 * time.Second,
+		},
+	}
+
+	c := s.Clone()
+	if !reflect.DeepEqual(exp[0], c[0]) {
+		t.Errorf("Expected %v \n bu received \n %v", exp, c)
 	}
 }

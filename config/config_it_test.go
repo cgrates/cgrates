@@ -1418,3 +1418,38 @@ func (responseTest) Write([]byte) (int, error) {
 }
 
 func (responseTest) WriteHeader(int) {}
+
+func TestGetLockFilePath(t *testing.T) {
+	l := LoaderSCfg{
+		ID:           "file",
+		LockFilePath: "../tmp/file.txt",
+		TpInDir:      "/home",
+	}
+
+	exp := "/tmp/file.txt"
+	pathL := l.GetLockFilePath()
+	if pathL != exp {
+		t.Errorf("Expected %s \n but received \n %s", exp, pathL)
+	}
+
+	l.LockFilePath = "file.txt"
+	pathL = l.GetLockFilePath()
+	exp = "/home/file.txt"
+	if pathL != exp {
+		t.Errorf("Expected %s \n but received \n %s", exp, pathL)
+	}
+
+	if err := os.Mkdir(path.Join("/tmp", "TestGetLockFilePath"), 0777); err != nil {
+		t.Error(err)
+	}
+	l.LockFilePath = "TestGetLockFilePath"
+	l.TpInDir = "/tmp"
+	pathL = l.GetLockFilePath()
+	exp = "/tmp/TestGetLockFilePath/file.lck"
+	if pathL != exp {
+		t.Errorf("Expected %s \n but received \n %s", exp, pathL)
+	}
+	if err := os.RemoveAll(path.Join("/tmp", "TestGetLockFilePath")); err != nil {
+		t.Error(err)
+	}
+}

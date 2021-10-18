@@ -167,6 +167,14 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
+
+	if err := expected.Opts.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
+
+	if err := expected.STIRCfg.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -1660,5 +1668,167 @@ func TestSessionSCloneSection(t *testing.T) {
 	rcv := sessCfg.CloneSection()
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffSessionsOptsJsonCfg(t *testing.T) {
+	var d *SessionsOptsJson
+
+	v1 := &SessionsOpts{
+		Attributes: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  false,
+			},
+		},
+		Chargers: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  false,
+			},
+		},
+		Stats: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  false,
+			},
+		},
+		Thresholds: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  false,
+			},
+		},
+		Initiate: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  false,
+			},
+		},
+		Update: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  false,
+			},
+		},
+		Terminate: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  false,
+			},
+		},
+		Message: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				Value:  false,
+			},
+		},
+	}
+
+	v2 := &SessionsOpts{
+		Attributes: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Chargers: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Stats: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Thresholds: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Initiate: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Update: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Terminate: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Message: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+	}
+
+	expected := &SessionsOptsJson{
+		Attributes: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Chargers: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Stats: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Thresholds: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Initiate: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Update: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Terminate: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Message: []*utils.DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+	}
+
+	rcv := diffSessionsOptsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", expected, rcv)
 	}
 }
