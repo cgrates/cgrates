@@ -3790,7 +3790,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: 4,
-			utils.OptsAttributesIDs:         []string{"ATTR1", "ATTR2"},
+			utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
 		},
 	}
 	reply := &AttrSProcessEventReply{}
@@ -3805,7 +3805,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 				utils.RequestType: utils.MetaPostpaid,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesIDs:         []string{"ATTR1", "ATTR2"},
+				utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
 				utils.OptsAttributesProcessRuns: 4,
 			},
 		},
@@ -4250,7 +4250,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: 2,
-			utils.OptsAttributesIDs:         time.Second,
+			utils.OptsAttributesProfileIDs:  time.Second,
 		},
 	}
 	rply := &APIAttributeProfile{}
@@ -4288,7 +4288,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 			"Attribute": "testAttrValue",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributesIDs:        []string{"AC1"},
+			utils.OptsAttributesProfileIDs: []string{"AC1"},
 			utils.MetaProfileIgnoreFilters: false,
 		},
 	}
@@ -4308,7 +4308,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 				"Attribute": "testAttrValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesIDs:        []string{"AC1"},
+				utils.OptsAttributesProfileIDs: []string{"AC1"},
 				utils.MetaProfileIgnoreFilters: false,
 			},
 		},
@@ -4326,7 +4326,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 			"Attribute": "testAttrValue2",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributesIDs:        []string{"AC1"},
+			utils.OptsAttributesProfileIDs: []string{"AC1"},
 			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
@@ -4346,7 +4346,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 				"Attribute": "testAttrValue2",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesIDs:        []string{"AC1"},
+				utils.OptsAttributesProfileIDs: []string{"AC1"},
 				utils.MetaProfileIgnoreFilters: true,
 			},
 		},
