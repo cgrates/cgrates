@@ -287,7 +287,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
-			AttributeIDs: []*utils.DynamicStringSliceOpt{
+			IDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  []string{"prf1"},
@@ -325,7 +325,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: nil,
 		NestedFields:        false,
 		Opts: &AttributesOpts{
-			AttributeIDs: []*utils.DynamicStringSliceOpt{
+			IDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"prf2"},
@@ -363,7 +363,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &AttributesOptsJson{
-			AttributeIDs: []*utils.DynamicStringSliceOpt{
+			IDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"prf2"},

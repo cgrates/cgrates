@@ -1284,8 +1284,8 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 			"Attribute": "testAttrValue",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributesAttributeIDs: []string{"AC1"},
-			utils.MetaProfileIgnoreFilters:   false,
+			utils.OptsAttributesIDs:        []string{"AC1"},
+			utils.MetaProfileIgnoreFilters: false,
 		},
 	}
 	eNM := utils.MapStorage{
@@ -1304,8 +1304,8 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 				"Attribute": "testAttrValue",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesAttributeIDs: []string{"AC1"},
-				utils.MetaProfileIgnoreFilters:   false,
+				utils.OptsAttributesIDs:        []string{"AC1"},
+				utils.MetaProfileIgnoreFilters: false,
 			},
 		},
 	}
@@ -1322,8 +1322,8 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 			"Attribute": "testAttrValue2",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributesAttributeIDs: []string{"AC1"},
-			utils.MetaProfileIgnoreFilters:   true,
+			utils.OptsAttributesIDs:        []string{"AC1"},
+			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
 	eNM2 := utils.MapStorage{
@@ -1342,8 +1342,8 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 				"Attribute": "testAttrValue2",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesAttributeIDs: []string{"AC1"},
-				utils.MetaProfileIgnoreFilters:   true,
+				utils.OptsAttributesIDs:        []string{"AC1"},
+				utils.MetaProfileIgnoreFilters: true,
 			},
 		},
 	}
