@@ -159,7 +159,7 @@ func testStorDBitCRUDTPAccounts(t *testing.T) {
 					CostIncrement: []*utils.TPBalanceCostIncrement{
 						{
 							FilterIDs:    []string{"fltr1", "fltr2"},
-							Increment:    utils.Float64Pointer(1.3),
+							Increment:    "1.3",
 							FixedFee:     utils.Float64Pointer(2.3),
 							RecurrentFee: utils.Float64Pointer(3.3),
 						},
@@ -175,7 +175,7 @@ func testStorDBitCRUDTPAccounts(t *testing.T) {
 							Factor:    200,
 						},
 					},
-					Units: 14,
+					Units: "14",
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
