@@ -98,16 +98,17 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		SQLConnMaxLifetime: utils.StringPointer("error"),
 	}
 
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err != nil {
-		t.Error(err)
+	experr := `time: invalid duration "error"`
+	if err = jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	newCfgJSON.Opts = &DBOptsJson{
 		MongoQueryTimeout: utils.StringPointer("error"),
 	}
 
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err != nil {
-		t.Error(err)
+	if err = jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 }
