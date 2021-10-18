@@ -63,6 +63,10 @@ func TestStorDBReload(t *testing.T) {
 	srvMngr.AddServices(cdrS, ralS, schS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server,
 			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
+	if err := engine.InitStorDb(cfg); err != nil {
+		t.Fatal(err)
+	}
+
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -209,6 +213,10 @@ func TestStorDBReloadVersion1(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
+	if err := engine.InitStorDb(cfg); err != nil {
+		t.Fatal(err)
+	}
+
 	err = stordb.Start()
 	if err != nil {
 		t.Fatal(err)
@@ -288,6 +296,9 @@ func TestStorDBReloadVersion2(t *testing.T) {
 	cfg.StorDbCfg().Password = "CGRateS.org"
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
+	if err := engine.InitStorDb(cfg); err != nil {
+		t.Fatal(err)
+	}
 	err = stordb.Start()
 	if err != nil {
 		t.Fatal(err)
@@ -357,7 +368,7 @@ func TestStorDBReloadVersion3(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	shdChan := utils.NewSyncedChan()
+	// shdChan := utils.NewSyncedChan()
 	cfg.ChargerSCfg().Enabled = true
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.StorDbCfg().Password = "CGRateS.org"
@@ -368,6 +379,7 @@ func TestStorDBReloadVersion3(t *testing.T) {
 	if err == nil || err.Error() != "can't conver StorDB of type internal to InternalDB" {
 		t.Fatal(err)
 	}
+	/* the internal now uses its own cache
 	err = stordb.Start()
 	if err == nil {
 		t.Fatal(err)
@@ -380,6 +392,7 @@ func TestStorDBReloadVersion3(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	shdChan.CloseOnce()
 	time.Sleep(10 * time.Millisecond)
+	*/
 }
 
 func TestStorDBReloadNewStorDBConnError(t *testing.T) {

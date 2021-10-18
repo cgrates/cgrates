@@ -102,78 +102,40 @@ func TestDataDBReload(t *testing.T) {
 		RmtConns: []string{},
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
-			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAccountActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionTriggers: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaSharedGroups: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaTimings: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResourceProfile: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueues: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResources: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueueProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholds: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholdProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaFilters: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRouteProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAttributeProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherHosts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaChargerProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
+			utils.MetaAccounts:            {Limit: -1},
+			utils.MetaReverseDestinations: {Limit: -1},
+			utils.MetaDestinations:        {Limit: -1},
+			utils.MetaRatingPlans:         {Limit: -1},
+			utils.MetaRatingProfiles:      {Limit: -1},
+			utils.MetaActions:             {Limit: -1},
+			utils.MetaActionPlans:         {Limit: -1},
+			utils.MetaAccountActionPlans:  {Limit: -1},
+			utils.MetaActionTriggers:      {Limit: -1},
+			utils.MetaSharedGroups:        {Limit: -1},
+			utils.MetaTimings:             {Limit: -1},
+			utils.MetaResourceProfile:     {Limit: -1},
+			utils.MetaStatQueues:          {Limit: -1},
+			utils.MetaResources:           {Limit: -1},
+			utils.MetaStatQueueProfiles:   {Limit: -1},
+			utils.MetaThresholds:          {Limit: -1},
+			utils.MetaThresholdProfiles:   {Limit: -1},
+			utils.MetaFilters:             {Limit: -1},
+			utils.MetaRouteProfiles:       {Limit: -1},
+			utils.MetaAttributeProfiles:   {Limit: -1},
+			utils.MetaDispatcherHosts:     {Limit: -1},
+			utils.MetaChargerProfiles:     {Limit: -1},
+			utils.MetaDispatcherProfiles:  {Limit: -1},
+			utils.MetaLoadIDs:             {Limit: -1},
+			utils.CacheVersions:           {Limit: -1},
+
+			utils.CacheResourceFilterIndexes:   {Limit: -1},
+			utils.CacheStatFilterIndexes:       {Limit: -1},
+			utils.CacheThresholdFilterIndexes:  {Limit: -1},
+			utils.CacheRouteFilterIndexes:      {Limit: -1},
+			utils.CacheAttributeFilterIndexes:  {Limit: -1},
+			utils.CacheChargerFilterIndexes:    {Limit: -1},
+			utils.CacheDispatcherFilterIndexes: {Limit: -1},
+			utils.CacheReverseFilterIndexes:    {Limit: -1},
 		},
 	}
 	if !reflect.DeepEqual(oldcfg, db.oldDBCfg) {
