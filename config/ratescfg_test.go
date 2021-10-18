@@ -55,7 +55,7 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		RateNestedFields:        true,
 		Verbosity:               20,
 		Opts: &RatesOpts{
-			RateProfileIDs:       []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			StartTime:            []*utils.DynamicStringOpt{},
 			Usage:                []*utils.DynamicDecimalBigOpt{},
 			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
@@ -90,7 +90,7 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.RateNestedFieldsCfg:        false,
 		utils.Verbosity:                  1000,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaRateProfileIDsCfg:    []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaStartTime:            []*utils.DynamicStringOpt{},
 			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
 			utils.MetaIntervalStartCfg:     []*utils.DynamicDecimalBigOpt{},
@@ -134,7 +134,7 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.RateNestedFieldsCfg:        true,
 		utils.Verbosity:                  1000,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaRateProfileIDsCfg:    []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaStartTime:            []*utils.DynamicStringOpt{},
 			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
 			utils.MetaIntervalStartCfg:     []*utils.DynamicDecimalBigOpt{},
@@ -212,7 +212,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               2,
 		Opts: &RatesOpts{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  []string{"RP1"},
@@ -259,7 +259,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateNestedFields:        true,
 		Verbosity:               3,
 		Opts: &RatesOpts{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"RP2"},
@@ -306,7 +306,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Rate_nested_fields:         utils.BoolPointer(true),
 		Verbosity:                  utils.IntPointer(3),
 		Opts: &RatesOptsJson{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"RP2"},
@@ -369,7 +369,7 @@ func TestRateSCloneSection(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               2,
 		Opts: &RatesOpts{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Value: []string{"RP1"},
 				},
@@ -391,7 +391,7 @@ func TestRateSCloneSection(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               2,
 		Opts: &RatesOpts{
-			RateProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Value: []string{"RP1"},
 				},
@@ -407,7 +407,7 @@ func TestRateSCloneSection(t *testing.T) {
 
 func TestRatesOptsLoadFromJSON(t *testing.T) {
 	rateOpts := &RatesOpts{
-		RateProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Value: []string{},
 			},
@@ -440,7 +440,7 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	}
 
 	jsnCfg := &RatesOptsJson{
-		RateProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  []string{"RP2"},

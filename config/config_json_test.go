@@ -912,7 +912,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
 		Opts: &StatsOptsJson{
-			StatIDs:              []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
@@ -2028,7 +2028,7 @@ func TestDfRateSJsonCfg(t *testing.T) {
 		Rate_nested_fields:         utils.BoolPointer(false),
 		Verbosity:                  utils.IntPointer(1000),
 		Opts: &RatesOptsJson{
-			RateProfileIDs:       []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			StartTime:            []*utils.DynamicStringOpt{},
 			Usage:                []*utils.DynamicStringOpt{},
 			IntervalStart:        []*utils.DynamicStringOpt{},
@@ -2324,7 +2324,7 @@ func TestDfActionSJsonCfg(t *testing.T) {
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{},
 		Opts: &ActionsOptsJson{
-			ActionProfileIDs:     []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}

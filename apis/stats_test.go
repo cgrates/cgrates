@@ -482,9 +482,9 @@ func TestStatsAPIs(t *testing.T) {
 			utils.StatID:    "sq2",
 		},
 		APIOpts: map[string]interface{}{
-			utils.MetaEventType:              utils.StatUpdate,
-			utils.OptsThresholdsThresholdIDs: []string{"thdID"},
-			utils.OptsStatsStatIDs:           []string{"sq1", "sq2"},
+			utils.MetaEventType:            utils.StatUpdate,
+			utils.OptsThresholdsProfileIDs: []string{"thdID"},
+			utils.OptsStatsProfileIDs:      []string{"sq1", "sq2"},
 		},
 	}
 	mCC := &mockClientConn{
@@ -628,7 +628,7 @@ func TestStatsAPIs(t *testing.T) {
 			utils.Usage:        3000,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs: []string{"sq1", "sq2"},
+			utils.OptsStatsProfileIDs: []string{"sq1", "sq2"},
 		},
 	}
 

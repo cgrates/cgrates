@@ -56,7 +56,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1", "val2"},
 		Opts: &ActionsOpts{
-			ActionProfileIDs:     []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
@@ -75,7 +75,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 
 func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 	actOpts := &ActionsOpts{
-		ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Value: []string{},
 			},
@@ -87,7 +87,7 @@ func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 		},
 	}
 	exp := &ActionsOpts{
-		ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Value: []string{},
 			},
@@ -138,7 +138,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.DynaprepaidActionplansCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaActionProfileIDsCfg:  []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 		},
 	}
@@ -220,7 +220,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  []string{"prf1"},
@@ -250,7 +250,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"prf2"},
@@ -280,7 +280,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{"dynaprepaid"},
 		Opts: &ActionsOptsJson{
-			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"prf2"},
@@ -327,7 +327,7 @@ func TestActionSCloneSection(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Value: []string{},
 				},
@@ -349,7 +349,7 @@ func TestActionSCloneSection(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
 		Opts: &ActionsOpts{
-			ActionProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Value: []string{},
 				},

@@ -461,7 +461,7 @@ func TestV1CostForEventError(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1001"},
 		APIOpts: map[string]interface{}{
-			utils.OptsRatesRateProfileIDs: []string{"RATE_1"},
+			utils.OptsRatesProfileIDs: []string{"RATE_1"},
 		},
 	}, rcv); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
@@ -476,7 +476,7 @@ func TestV1CostForEventError(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Destination: "10"},
 		APIOpts: map[string]interface{}{
-			utils.OptsRatesRateProfileIDs: []string{"RATE_1"},
+			utils.OptsRatesProfileIDs: []string{"RATE_1"},
 		}}, rcv); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

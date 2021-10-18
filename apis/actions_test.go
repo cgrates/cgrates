@@ -509,7 +509,7 @@ func TestActionsAPIs(t *testing.T) {
 		},
 		ID: "EventTest",
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 
@@ -540,7 +540,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 			ID:     "THD_ID",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 	var executed bool
@@ -603,7 +603,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 
@@ -635,7 +635,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 			ID:     "SQ_ID",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 	var executed bool
@@ -698,7 +698,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 
@@ -771,7 +771,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 
@@ -783,7 +783,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	}
 
 	// Check if the log action was executed
-	expected := `{"*opts":{"*actionProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
+	expected := `{"*opts":{"*actProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
 	if rcv := buf.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected log: %s to be included in %s", expected, rcv)
 	}
@@ -864,7 +864,7 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 			utils.ActionType:   utils.MetaTopUp,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 
@@ -957,7 +957,7 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 
@@ -1049,7 +1049,7 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 
@@ -1142,7 +1142,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 

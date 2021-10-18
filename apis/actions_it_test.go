@@ -373,11 +373,11 @@ func testActionsExecuteActionsHTTPPost(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 
-	expBody := `{"*opts":{"*actionProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
+	expBody := `{"*opts":{"*actProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
 	var reply string
 	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions,
 		ev, &reply); err != nil {
@@ -452,7 +452,7 @@ func testActionsStatProcessEvent(t *testing.T) {
 			utils.Usage:        30 * time.Second,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs: []string{"SQ_ID"},
+			utils.OptsStatsProfileIDs: []string{"SQ_ID"},
 		},
 	}
 	expected := []string{"SQ_ID"}
@@ -520,7 +520,7 @@ func testActionsScheduleActionsResetSQ(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
 

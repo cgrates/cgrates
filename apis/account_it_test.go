@@ -414,7 +414,7 @@ func testAccGetAccountsForEvent(t *testing.T) {
 			utils.Usage: 20 * time.Second,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST",
+			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST",
 		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1AccountsForEvent,
@@ -479,7 +479,7 @@ func testAccMaxAbstracts(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:              "27s",
-			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST4",
+			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST4",
 		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxAbstracts,
@@ -637,7 +637,7 @@ func testAccDebitAbstracts(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:              "27s",
-			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST5",
+			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST5",
 		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitAbstracts,
@@ -789,7 +789,7 @@ func testAccMaxConcretes(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsRatesIntervalStart: "27s",
-			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST6",
+			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST6",
 		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxConcretes,
@@ -939,7 +939,7 @@ func testAccDebitConcretes(t *testing.T) {
 		},
 		APIOpts: map[string]interface{}{
 			utils.OptsAccountsUsage:      "27s",
-			utils.OptsAccountsAccountIDs: "TEST_ACC_IT_TEST7",
+			utils.OptsAccountsProfileIDs: "TEST_ACC_IT_TEST7",
 		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitConcretes,

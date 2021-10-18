@@ -480,8 +480,8 @@ func TestThresholdsAPIs(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs:  []string{"thd1", "thd2"},
-			utils.OptsActionsActionProfileIDs: []string{"actPrfID"},
+			utils.OptsThresholdsProfileIDs: []string{"thd1", "thd2"},
+			utils.OptsActionsProfileIDs:    []string{"actPrfID"},
 		},
 	}
 	mCC := &mockClientConn{
@@ -564,7 +564,7 @@ func TestThresholdsAPIs(t *testing.T) {
 		},
 		ID: "EventTest",
 		APIOpts: map[string]interface{}{
-			utils.OptsThresholdsThresholdIDs: []string{"thd1", "thd2"},
+			utils.OptsThresholdsProfileIDs: []string{"thd1", "thd2"},
 		},
 	}
 
