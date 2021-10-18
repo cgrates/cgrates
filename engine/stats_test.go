@@ -3634,7 +3634,7 @@ func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
 			"Stat": "testStatValue",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsStatsStatIDs:         []string{"SQ1"},
+			utils.OptsStatsProfileIDs:      []string{"SQ1"},
 			utils.MetaProfileIgnoreFilters: time.Second,
 		},
 	}
