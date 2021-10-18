@@ -787,6 +787,55 @@ const CGRATES_CFG_JSON = `
 			// 	"Value": false,
 			// },
 		],
+		"*ttl": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "",
+			// },
+		],
+		"*chargeable": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": false,
+			// },
+		],
+		"*lastUsage": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "",
+			// },
+		],
+		"*lastUsed": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "",
+			// },
+		],
+		"*debitInterval": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "",
+			// },
+		],
+		"*maxDelay": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "",
+			// },
+		],
+		"*usage": [					
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": "",
+			// },
+		],
 	},
 },
 
