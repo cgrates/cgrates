@@ -27,6 +27,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var (
+// SessionsLastUsageDftOpt = utils.DurationPointer(time.Minute)
+// SessionsLastUsedDftOpt  = utils.DurationPointer(time.Minute)
+// SessionsUsageDftOpt     = utils.DurationPointer(time.Minute)
+)
+
 const (
 	SessionsAccountsDftOpt               = false
 	SessionsAttributesDftOpt             = false
@@ -52,6 +58,10 @@ const (
 	SessionsThresholdsDerivedReplyDftOpt = false
 	SessionsMaxUsageDftOpt               = false
 	SessionsForceDurationDftOpt          = false
+	SessionsTTLDftOpt                    = time.Minute
+	SessionsChargeableDftOpt             = false
+	SessionsDebitIntervalDftOpt          = time.Minute
+	SessionsMaxDelayDftOpt               = time.Minute
 )
 
 type SessionsOpts struct {
@@ -79,6 +89,13 @@ type SessionsOpts struct {
 	ThresholdsDerivedReply []*utils.DynamicBoolOpt
 	MaxUsage               []*utils.DynamicBoolOpt
 	ForceDuration          []*utils.DynamicBoolOpt
+	TTL                    []*utils.DynamicDurationOpt
+	Chargeable             []*utils.DynamicBoolOpt
+	LastUsage              []*utils.DynamicDurationPointerOpt
+	LastUsed               []*utils.DynamicDurationPointerOpt
+	DebitInterval          []*utils.DynamicDurationOpt
+	MaxDelay               []*utils.DynamicDurationOpt
+	Usage                  []*utils.DynamicDurationPointerOpt
 }
 
 // SessionSCfg is the config section for SessionS
@@ -197,8 +214,53 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err erro
 	if jsnCfg.MaxUsage != nil {
 		sesOpts.MaxUsage = append(sesOpts.MaxUsage, jsnCfg.MaxUsage...)
 	}
-	if jsnCfg.MaxUsage != nil {
-		sesOpts.MaxUsage = append(sesOpts.MaxUsage, jsnCfg.MaxUsage...)
+	if jsnCfg.ForceDuration != nil {
+		sesOpts.ForceDuration = append(sesOpts.ForceDuration, jsnCfg.ForceDuration...)
+	}
+	if jsnCfg.TTL != nil {
+		var ttl []*utils.DynamicDurationOpt
+		if ttl, err = utils.StringToDurationDynamicOpts(jsnCfg.TTL); err != nil {
+			return
+		}
+		sesOpts.TTL = append(sesOpts.TTL, ttl...)
+	}
+	if jsnCfg.Chargeable != nil {
+		sesOpts.Chargeable = append(sesOpts.Chargeable, jsnCfg.Chargeable...)
+	}
+	if jsnCfg.LastUsage != nil {
+		var lastUsage []*utils.DynamicDurationPointerOpt
+		if lastUsage, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.LastUsage); err != nil {
+			return
+		}
+		sesOpts.LastUsage = append(sesOpts.LastUsage, lastUsage...)
+	}
+	if jsnCfg.LastUsed != nil {
+		var lastUsed []*utils.DynamicDurationPointerOpt
+		if lastUsed, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.LastUsed); err != nil {
+			return
+		}
+		sesOpts.LastUsed = append(sesOpts.LastUsed, lastUsed...)
+	}
+	if jsnCfg.DebitInterval != nil {
+		var debitInterval []*utils.DynamicDurationOpt
+		if debitInterval, err = utils.StringToDurationDynamicOpts(jsnCfg.DebitInterval); err != nil {
+			return
+		}
+		sesOpts.DebitInterval = append(sesOpts.DebitInterval, debitInterval...)
+	}
+	if jsnCfg.MaxDelay != nil {
+		var maxDelay []*utils.DynamicDurationOpt
+		if maxDelay, err = utils.StringToDurationDynamicOpts(jsnCfg.MaxDelay); err != nil {
+			return
+		}
+		sesOpts.MaxDelay = append(sesOpts.MaxDelay, maxDelay...)
+	}
+	if jsnCfg.Usage != nil {
+		var usage []*utils.DynamicDurationPointerOpt
+		if usage, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.Usage); err != nil {
+			return
+		}
+		sesOpts.Usage = append(sesOpts.Usage, usage...)
 	}
 	return
 }
@@ -380,6 +442,13 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 		utils.MetaThresholdsDerivedReplyCfg: scfg.Opts.ThresholdsDerivedReply,
 		utils.MetaMaxUsageCfg:               scfg.Opts.MaxUsage,
 		utils.MetaForceDurationCfg:          scfg.Opts.ForceDuration,
+		utils.MetaTTLCfg:                    scfg.Opts.TTL,
+		utils.MetaChargeableCfg:             scfg.Opts.Chargeable,
+		utils.MetaDebitIntervalCfg:          scfg.Opts.DebitInterval,
+		utils.MetaLastUsageCfg:              scfg.Opts.LastUsage,
+		utils.MetaLastUsedCfg:               scfg.Opts.LastUsed,
+		utils.MetaMaxDelayCfg:               scfg.Opts.MaxDelay,
+		utils.MetaUsage:                     scfg.Opts.Usage,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
@@ -556,6 +625,34 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 	if sesOpts.ForceDuration != nil {
 		forceDuration = utils.CloneDynamicBoolOpt(sesOpts.ForceDuration)
 	}
+	var ttl []*utils.DynamicDurationOpt
+	if sesOpts.TTL != nil {
+		ttl = utils.CloneDynamicDurationOpt(sesOpts.TTL)
+	}
+	var chargeable []*utils.DynamicBoolOpt
+	if sesOpts.Chargeable != nil {
+		chargeable = utils.CloneDynamicBoolOpt(sesOpts.Chargeable)
+	}
+	var debitIvl []*utils.DynamicDurationOpt
+	if sesOpts.DebitInterval != nil {
+		debitIvl = utils.CloneDynamicDurationOpt(sesOpts.DebitInterval)
+	}
+	var lastUsg []*utils.DynamicDurationPointerOpt
+	if sesOpts.LastUsage != nil {
+		lastUsg = utils.CloneDynamicDurationPointerOpt(sesOpts.LastUsage)
+	}
+	var lastUsed []*utils.DynamicDurationPointerOpt
+	if sesOpts.LastUsed != nil {
+		lastUsed = utils.CloneDynamicDurationPointerOpt(sesOpts.LastUsed)
+	}
+	var maxDelay []*utils.DynamicDurationOpt
+	if sesOpts.MaxDelay != nil {
+		maxDelay = utils.CloneDynamicDurationOpt(sesOpts.MaxDelay)
+	}
+	var usg []*utils.DynamicDurationPointerOpt
+	if sesOpts.Usage != nil {
+		usg = utils.CloneDynamicDurationPointerOpt(sesOpts.Usage)
+	}
 	return &SessionsOpts{
 		Accounts:               acntS,
 		Attributes:             attrS,
@@ -581,6 +678,13 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 		ThresholdsDerivedReply: thdsDerivedReply,
 		MaxUsage:               maxUsage,
 		ForceDuration:          forceDuration,
+		TTL:                    ttl,
+		Chargeable:             chargeable,
+		DebitInterval:          debitIvl,
+		LastUsage:              lastUsg,
+		LastUsed:               lastUsed,
+		MaxDelay:               maxDelay,
+		Usage:                  usg,
 	}
 }
 
@@ -751,30 +855,37 @@ func diffSTIRJsonCfg(d *STIRJsonCfg, v1, v2 *STIRcfg) *STIRJsonCfg {
 }
 
 type SessionsOptsJson struct {
-	Accounts               []*utils.DynamicBoolOpt `json:"*accountS"`
-	Attributes             []*utils.DynamicBoolOpt `json:"*attributeS"`
-	CDRs                   []*utils.DynamicBoolOpt `json:"*cdrS"`
-	Chargers               []*utils.DynamicBoolOpt `json:"*chargerS"`
-	Resources              []*utils.DynamicBoolOpt `json:"*resourceS"`
-	Routes                 []*utils.DynamicBoolOpt `json:"*routeS"`
-	Stats                  []*utils.DynamicBoolOpt `json:"*statS"`
-	Thresholds             []*utils.DynamicBoolOpt `json:"*thresholdS"`
-	Initiate               []*utils.DynamicBoolOpt `json:"*initiate"`
-	Update                 []*utils.DynamicBoolOpt `json:"*update"`
-	Terminate              []*utils.DynamicBoolOpt `json:"*terminate"`
-	Message                []*utils.DynamicBoolOpt `json:"*message"`
-	AttributesDerivedReply []*utils.DynamicBoolOpt `json:"*attributesDerivedReply"`
-	BlockerError           []*utils.DynamicBoolOpt `json:"*blockerError"`
-	CDRsDerivedReply       []*utils.DynamicBoolOpt `json:"*cdrsDerivedReply"`
-	ResourcesAuthorize     []*utils.DynamicBoolOpt `json:"*resourcesAuthorize"`
-	ResourcesAllocate      []*utils.DynamicBoolOpt `json:"*resourcesAllocate"`
-	ResourcesRelease       []*utils.DynamicBoolOpt `json:"*resourcesRelease"`
-	ResourcesDerivedReply  []*utils.DynamicBoolOpt `json:"*resourcesDerivedReply"`
-	RoutesDerivedReply     []*utils.DynamicBoolOpt `json:"*routesDerivedReply"`
-	StatsDerivedReply      []*utils.DynamicBoolOpt `json:"*statsDerivedReply"`
-	ThresholdsDerivedReply []*utils.DynamicBoolOpt `json:"*thresholdsDerivedReply"`
-	MaxUsage               []*utils.DynamicBoolOpt `json:"*maxUsage"`
-	ForceDuration          []*utils.DynamicBoolOpt `json:"*forceDuration"`
+	Accounts               []*utils.DynamicBoolOpt   `json:"*accountS"`
+	Attributes             []*utils.DynamicBoolOpt   `json:"*attributeS"`
+	CDRs                   []*utils.DynamicBoolOpt   `json:"*cdrS"`
+	Chargers               []*utils.DynamicBoolOpt   `json:"*chargerS"`
+	Resources              []*utils.DynamicBoolOpt   `json:"*resourceS"`
+	Routes                 []*utils.DynamicBoolOpt   `json:"*routeS"`
+	Stats                  []*utils.DynamicBoolOpt   `json:"*statS"`
+	Thresholds             []*utils.DynamicBoolOpt   `json:"*thresholdS"`
+	Initiate               []*utils.DynamicBoolOpt   `json:"*initiate"`
+	Update                 []*utils.DynamicBoolOpt   `json:"*update"`
+	Terminate              []*utils.DynamicBoolOpt   `json:"*terminate"`
+	Message                []*utils.DynamicBoolOpt   `json:"*message"`
+	AttributesDerivedReply []*utils.DynamicBoolOpt   `json:"*attributesDerivedReply"`
+	BlockerError           []*utils.DynamicBoolOpt   `json:"*blockerError"`
+	CDRsDerivedReply       []*utils.DynamicBoolOpt   `json:"*cdrsDerivedReply"`
+	ResourcesAuthorize     []*utils.DynamicBoolOpt   `json:"*resourcesAuthorize"`
+	ResourcesAllocate      []*utils.DynamicBoolOpt   `json:"*resourcesAllocate"`
+	ResourcesRelease       []*utils.DynamicBoolOpt   `json:"*resourcesRelease"`
+	ResourcesDerivedReply  []*utils.DynamicBoolOpt   `json:"*resourcesDerivedReply"`
+	RoutesDerivedReply     []*utils.DynamicBoolOpt   `json:"*routesDerivedReply"`
+	StatsDerivedReply      []*utils.DynamicBoolOpt   `json:"*statsDerivedReply"`
+	ThresholdsDerivedReply []*utils.DynamicBoolOpt   `json:"*thresholdsDerivedReply"`
+	MaxUsage               []*utils.DynamicBoolOpt   `json:"*maxUsage"`
+	ForceDuration          []*utils.DynamicBoolOpt   `json:"*forceDuration"`
+	TTL                    []*utils.DynamicStringOpt `json:"*ttl"`
+	Chargeable             []*utils.DynamicBoolOpt   `json:"*chargeable"`
+	DebitInterval          []*utils.DynamicStringOpt `json:"*debitInterval"`
+	LastUsage              []*utils.DynamicStringOpt `json:"*lastUsage"`
+	LastUsed               []*utils.DynamicStringOpt `json:"*lastUsed"`
+	MaxDelay               []*utils.DynamicStringOpt `json:"*maxDelay"`
+	Usage                  []*utils.DynamicStringOpt `json:"*usage"`
 }
 
 // SessionSJsonCfg config section
@@ -886,6 +997,27 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !utils.DynamicBoolOptEqual(v1.ForceDuration, v2.ForceDuration) {
 		d.ForceDuration = v2.ForceDuration
+	}
+	if !utils.DynamicDurationOptEqual(v1.TTL, v2.TTL) {
+		d.TTL = utils.DurationToStringDynamicOpts(v2.TTL)
+	}
+	if !utils.DynamicBoolOptEqual(v1.Chargeable, v2.Chargeable) {
+		d.Chargeable = v2.Chargeable
+	}
+	if !utils.DynamicDurationPointerOptEqual(v1.LastUsage, v2.LastUsage) {
+		d.LastUsage = utils.DurationPointerToStringDynamicOpts(v2.LastUsage)
+	}
+	if !utils.DynamicDurationPointerOptEqual(v1.LastUsed, v2.LastUsed) {
+		d.LastUsed = utils.DurationPointerToStringDynamicOpts(v2.LastUsed)
+	}
+	if !utils.DynamicDurationOptEqual(v1.DebitInterval, v2.DebitInterval) {
+		d.DebitInterval = utils.DurationToStringDynamicOpts(v2.DebitInterval)
+	}
+	if !utils.DynamicDurationOptEqual(v1.MaxDelay, v2.MaxDelay) {
+		d.MaxDelay = utils.DurationToStringDynamicOpts(v2.MaxDelay)
+	}
+	if !utils.DynamicDurationPointerOptEqual(v1.Usage, v2.Usage) {
+		d.Usage = utils.DurationPointerToStringDynamicOpts(v2.Usage)
 	}
 	return d
 }
