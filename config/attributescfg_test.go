@@ -47,7 +47,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
-			IDs:                  []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProcessRuns:          []*utils.DynamicIntOpt{},
 			ProfileRuns:          []*utils.DynamicIntOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -68,7 +68,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 
 func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
 	attrOpt := &AttributesOpts{
-		IDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Value: []string{},
 			},
@@ -91,7 +91,7 @@ func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
 	}
 
 	exp := &AttributesOpts{
-		IDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Value: []string{},
 			},
@@ -148,7 +148,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaIDs: []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
 				{
 					Value: 3,
@@ -190,7 +190,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaIDs: []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
 				{
 					Value: 7,
@@ -223,7 +223,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaIDs:                  []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 			utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -287,7 +287,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
-			IDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  []string{"prf1"},
@@ -325,7 +325,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: nil,
 		NestedFields:        false,
 		Opts: &AttributesOpts{
-			IDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"prf2"},
@@ -363,7 +363,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &AttributesOptsJson{
-			IDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  []string{"prf2"},
