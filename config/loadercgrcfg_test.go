@@ -19,6 +19,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -211,32 +212,32 @@ func TestDiffLoaderCfgJsonCase2(t *testing.T) {
 	}
 }
 
-// func TestLoaderCfgCloneSection(t *testing.T) {
-// 	ldrCfg := LoaderCgrCfg{
-// 		TpID:            "loaderID",
-// 		DataPath:        "/data/path",
-// 		DisableReverse:  false,
-// 		FieldSeparator:  rune(22),
-// 		CachesConns:     []string{"*localhost"},
-// 		ActionSConns:    []string{"*localhost"},
-// 		GapiCredentials: nil,
-// 		GapiToken:       nil,
-// 	}
+func TestLoaderCfgCloneSection(t *testing.T) {
+	ldrCfg := &LoaderCgrCfg{
+		TpID:            "loaderID",
+		DataPath:        "/data/path",
+		DisableReverse:  false,
+		FieldSeparator:  rune(22),
+		CachesConns:     []string{"*localhost"},
+		ActionSConns:    []string{"*localhost"},
+		GapiCredentials: json.RawMessage{},
+		GapiToken:       json.RawMessage{},
+	}
 
-// 	exp := &LoaderCgrCfg{
-// 		TpID:            "loaderID",
-// 		DataPath:        "/data/path",
-// 		DisableReverse:  false,
-// 		FieldSeparator:  rune(22),
-// 		CachesConns:     []string{"*localhost"},
-// 		ActionSConns:    []string{"*localhost"},
-// 		GapiCredentials: nil,
-// 		GapiToken:       nil,
-// 	}
+	exp := &LoaderCgrCfg{
+		TpID:            "loaderID",
+		DataPath:        "/data/path",
+		DisableReverse:  false,
+		FieldSeparator:  rune(22),
+		CachesConns:     []string{"*localhost"},
+		ActionSConns:    []string{"*localhost"},
+		GapiCredentials: json.RawMessage{},
+		GapiToken:       json.RawMessage{},
+	}
 
-// 	rcv := ldrCfg.CloneSection()
-// 	fmt.Println(utils.ToJSON(rcv))
-// 	if !reflect.DeepEqual(rcv.(*LoaderCgrCfg), exp) {
-// 		t.Errorf("Expected %+v \n but received \n %v", exp, rcv)
-// 	}
-// }
+	rcv := ldrCfg.CloneSection()
+	fmt.Println(utils.ToJSON(rcv))
+	if !reflect.DeepEqual(rcv.(*LoaderCgrCfg), exp) {
+		t.Errorf("Expected %+v \n but received \n %v", exp, rcv)
+	}
+}

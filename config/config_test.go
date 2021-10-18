@@ -6293,6 +6293,45 @@ func TestConfigDBCfg(t *testing.T) {
 	}
 }
 
+func TestConfigDBLoadFromJson(t *testing.T) {
+	dbCfg := &ConfigDBCfg{}
+	jsonCfg := &DbJsonCfg{
+		Db_port: utils.IntPointer(-1),
+	}
+	if err := dbCfg.loadFromJSONCfg(jsonCfg); err != nil {
+		t.Error(err)
+	}
+	if err := dbCfg.loadFromJSONCfg(nil); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestConfigDBCloneSection(t *testing.T) {
+	dbCfg := ConfigDBCfg{
+		Type:     "*internal",
+		Host:     "localhost",
+		Port:     "2013",
+		Name:     "dbname",
+		User:     "cgrates",
+		Password: "superSecretPassword",
+		Opts:     &DataDBOpts{},
+	}
+
+	exp := &ConfigDBCfg{
+		Type:     "*internal",
+		Host:     "localhost",
+		Port:     "2013",
+		Name:     "dbname",
+		User:     "cgrates",
+		Password: "superSecretPassword",
+		Opts:     &DataDBOpts{},
+	}
+
+	rcv := dbCfg.CloneSection()
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but recevived \n %v", exp, rcv)
+	}
+}
 func TestFreeSwitchAgentCloneSection(t *testing.T) {
 	fsAgCfg := FsAgentCfg{
 		Enabled:             true,

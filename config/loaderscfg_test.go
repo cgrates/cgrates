@@ -1467,6 +1467,12 @@ func TestLoaderSCfgloadFromJsonCfgCase6(t *testing.T) {
 	}
 }
 
+func TestLoaderSCfgloadFromJsonCfgCase7(t *testing.T) {
+	cfg := &LoaderSCfg{}
+	if err := cfg.loadFromJSONCfg(nil, nil, ""); err != nil {
+		t.Error(err)
+	}
+}
 func TestEnabledCase1(t *testing.T) {
 	jsonCfg := NewDefaultCGRConfig()
 
@@ -2930,46 +2936,71 @@ func TestLockFolderIsDir(t *testing.T) {
 	}
 }
 
-// func TestLoaderSCloneSection(t *testing.T) {
-// 	ldrsCfg := LoaderSCfgs{
-// 		{
-// 			ID:             "LoaderID",
-// 			Enabled:        false,
-// 			Tenant:         "cgrates.org",
-// 			DryRun:         false,
-// 			RunDelay:       1 * time.Millisecond,
-// 			LockFilePath:   "lockFileName",
-// 			CacheSConns:    []string{"*localhost"},
-// 			FieldSeparator: ";",
-// 			TpInDir:        "/tp/in/dir",
-// 			TpOutDir:       "/tp/out/dir",
-// 			Data:           nil,
-// 		},
-// 	}
+func TestLoaderSCloneSection(t *testing.T) {
+	ldrsCfg := LoaderSCfgs{
+		{
+			ID:             "LoaderID",
+			Enabled:        false,
+			Tenant:         "cgrates.org",
+			DryRun:         false,
+			RunDelay:       1 * time.Millisecond,
+			LockFilePath:   "lockFileName",
+			CacheSConns:    []string{"*localhost"},
+			FieldSeparator: ";",
+			TpInDir:        "/tp/in/dir",
+			TpOutDir:       "/tp/out/dir",
+			Data: []*LoaderDataType{
+				{
+					Type:     "*csv",
+					Filename: "test",
+					Flags: utils.FlagsWithParams{
+						"k1": map[string][]string{
+							"k2": {"f1", "f2"},
+						},
+					},
+					Fields: []*FCTemplate{
+						{Tag: "Tenant",
+							Path: utils.MetaRep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+							Value: NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
+					},
+				},
+			},
+		},
+	}
 
-// 	exp := LoaderSCfgs{
-// 		{
-// 			ID:             "LoaderID",
-// 			Enabled:        false,
-// 			Tenant:         "cgrates.org",
-// 			DryRun:         false,
-// 			RunDelay:       1 * time.Millisecond,
-// 			LockFilePath:   "lockFileName",
-// 			CacheSConns:    []string{"*localhost"},
-// 			FieldSeparator: ";",
-// 			TpInDir:        "/tp/in/dir",
-// 			TpOutDir:       "/tp/out/dir",
-// 			Data:           nil,
-// 		},
-// 	}
+	exp := LoaderSCfgs{
+		{
+			ID:             "LoaderID",
+			Enabled:        false,
+			Tenant:         "cgrates.org",
+			DryRun:         false,
+			RunDelay:       1 * time.Millisecond,
+			LockFilePath:   "lockFileName",
+			CacheSConns:    []string{"*localhost"},
+			FieldSeparator: ";",
+			TpInDir:        "/tp/in/dir",
+			TpOutDir:       "/tp/out/dir",
+			Data: []*LoaderDataType{
+				{
+					Type:     "*csv",
+					Filename: "test",
+					Flags: utils.FlagsWithParams{
+						"k1": map[string][]string{
+							"k2": {"f1", "f2"},
+						},
+					},
+					Fields: []*FCTemplate{
+						{Tag: "Tenant",
+							Path: utils.MetaRep + utils.NestingSep + utils.Tenant, Type: utils.MetaVariable,
+							Value: NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)},
+					},
+				},
+			},
+		},
+	}
 
-// 	rcv := ldrsCfg.CloneSection()
-// 	idk, ok := rcv.(*LoaderSCfgs)
-// 	if !ok {
-// 		t.Error("Err")
-// 	}
-// 	(*idk)[0].Data = nil
-// 	if !reflect.DeepEqual(rcv, exp) {
-// 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
-// 	}
-// }
+	rcv := ldrsCfg.CloneSection()
+	if !reflect.DeepEqual((*rcv.(*LoaderSCfgs))[0], exp[0]) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp[0]), utils.ToJSON((*rcv.(*LoaderSCfgs))[0]))
+	}
+}

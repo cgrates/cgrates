@@ -165,6 +165,60 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 	}
 }
 
+func TestRemoteHostLoadFromJSONCfg(t *testing.T) {
+	rh := &RemoteHost{}
+	jsnCfg := &RemoteHostJson{
+		Connect_timeout: utils.StringPointer("2c"),
+		// Reply_timeout: utils.StringPointer("2c"),
+	}
+	errExpect := `time: unknown unit "c" in duration "2c"`
+	if err := rh.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+
+	jsnCfg = &RemoteHostJson{
+		Connect_timeout: utils.StringPointer("2s"),
+		Reply_timeout:   utils.StringPointer("2c"),
+	}
+	if err := rh.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+}
+
+func TestRemoteHostAsMapInterface(t *testing.T) {
+	rh := &RemoteHost{
+		ID:                "rh_id1",
+		Address:           "localhost",
+		Transport:         "*json",
+		ConnectAttempts:   2,
+		Reconnects:        2,
+		ConnectTimeout:    3 * time.Nanosecond,
+		ReplyTimeout:      2 * time.Nanosecond,
+		TLS:               true,
+		ClientKey:         "ck",
+		ClientCertificate: "cc",
+		CaCertificate:     "ca",
+	}
+
+	eMap := map[string]interface{}{
+		utils.IDCfg:              "rh_id1",
+		utils.AddressCfg:         "localhost",
+		utils.TransportCfg:       "*json",
+		utils.ConnectAttemptsCfg: 2,
+		utils.ReconnectsCfg:      2,
+		utils.ConnectTimeoutCfg:  3 * time.Nanosecond,
+		utils.ReplyTimeoutCfg:    2 * time.Nanosecond,
+		utils.TLSNoCaps:          true,
+		utils.KeyPathCgr:         "ck",
+		utils.CertPathCgr:        "cc",
+		utils.CAPathCgr:          "ca",
+	}
+
+	rcv := rh.AsMapInterface()
+	if !reflect.DeepEqual(eMap, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+	}
+}
 func TestRPCConnsAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"rpc_conns": {
