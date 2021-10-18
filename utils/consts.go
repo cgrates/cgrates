@@ -2319,7 +2319,8 @@ const (
 const (
 	MetaDerivedReply = "*derived_reply"
 
-	MetaIDs = "*IDs"
+	MetaIDs        = "*IDs"
+	MetaProfileIDs = "*profileIDs"
 
 	TrueStr  = "true"
 	FalseStr = "false"

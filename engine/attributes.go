@@ -133,7 +133,7 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *AttrSProcessEventReply, err error) {
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.IDs,
+	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesIDsDftOpt, utils.OptsAttributesIDs); err != nil {
 		return
 	}
@@ -213,7 +213,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.IDs,
+	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesIDsDftOpt, utils.OptsAttributesIDs); err != nil {
 		return
 	}

@@ -155,7 +155,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		Opts: &AttributesOpts{
-			IDs:                  []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProcessRuns:          []*utils.DynamicIntOpt{},
 			ProfileRuns:          []*utils.DynamicIntOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -194,7 +194,7 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		Opts: &AttributesOpts{
-			IDs:                  []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProcessRuns:          []*utils.DynamicIntOpt{},
 			ProfileRuns:          []*utils.DynamicIntOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},

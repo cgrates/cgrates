@@ -154,7 +154,7 @@ func testCfgGetConfig(t *testing.T) {
 			"stats_conns":           []string{"*localhost"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaIDs:                  []*utils.DynamicStringSliceOpt{},
+				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -220,7 +220,7 @@ func testCfgSetGetConfig(t *testing.T) {
 			"stats_conns":           []interface{}{"*internal"},
 			"suffix_indexed_fields": []interface{}{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaIDs: []interface{}{},
+				utils.MetaProfileIDs: []interface{}{},
 				utils.MetaProcessRunsCfg: []interface{}{
 					map[string]interface{}{
 						"Value":  2.,
@@ -351,7 +351,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*IDs":[],"*processRuns":[{"Tenant":"","Value":2},{"Tenant":"","Value":2}],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*profileIDs":[],"*processRuns":[{"Tenant":"","Value":2},{"Tenant":"","Value":2}],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -519,7 +519,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"stats_conns":           []string{"*internal"},
 			"suffix_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaIDs:                  []*utils.DynamicStringSliceOpt{},
+				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
 				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -618,7 +618,7 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 			"stats_conns":           []interface{}{"*internal"},
 			"suffix_indexed_fields": []interface{}{},
 			utils.OptsCfg: map[string]interface{}{
-				utils.MetaIDs: []interface{}{},
+				utils.MetaProfileIDs: []interface{}{},
 				utils.MetaProcessRunsCfg: []interface{}{
 					map[string]interface{}{
 						"Tenant": utils.EmptyString,
