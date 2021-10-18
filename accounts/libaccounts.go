@@ -96,7 +96,7 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	if len(attrSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.AttributeS)
 	}
-	cgrEv.APIOpts[utils.OptsAttributesIDs] = attrIDs
+	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaAccounts)
@@ -114,12 +114,12 @@ func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
-	tmp := cgrEv.APIOpts[utils.OptsRatesRateProfileIDs]
-	cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] = utils.CloneStringSlice(rpIDs)
+	tmp := cgrEv.APIOpts[utils.OptsRatesProfileIDs]
+	cgrEv.APIOpts[utils.OptsRatesProfileIDs] = utils.CloneStringSlice(rpIDs)
 	var tmpReply utils.RateProfileCost
 	err = connMgr.Call(ctx, rateSConns, utils.RateSv1CostForEvent,
 		cgrEv, &tmpReply)
-	cgrEv.APIOpts[utils.OptsRatesRateProfileIDs] = tmp
+	cgrEv.APIOpts[utils.OptsRatesProfileIDs] = tmp
 	if err != nil {
 		return
 	}

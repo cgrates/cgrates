@@ -1916,9 +1916,6 @@ const (
 	ClientSecretsCfg      = "client_secrets"
 	ClientDictionariesCfg = "client_dictionaries"
 
-	// ActionSCfg
-	MetaActionProfileIDsCfg = "*actionProfileIDs"
-
 	// AttributeSCfg
 	IndexedSelectsCfg  = "indexed_selects"
 	ProfileRunsCfg     = "profile_runs"
@@ -1930,11 +1927,7 @@ const (
 	StoreIntervalCfg = "store_interval"
 
 	// StatSCfg
-	MetaStatIDsCfg            = "*statIDs"
 	StoreUncompressedLimitCfg = "store_uncompressed_limit"
-
-	//ThresholdSCfg
-	MetaThresholdIDsCfg = "*thresholdIDs"
 
 	// Cache
 	PartitionsCfg = "partitions"
@@ -1983,7 +1976,6 @@ const (
 	MetaOffsetCfg       = "*offset"
 
 	// RateSCfg
-	MetaRateProfileIDsCfg      = "*rateProfileIDs"
 	MetaIntervalStartCfg       = "*intervalStart"
 	RateIndexedSelectsCfg      = "rate_indexed_selects"
 	RateNestedFieldsCfg        = "rate_nested_fields"
@@ -2029,9 +2021,8 @@ const (
 	ShutdownTimeoutCfg   = "shutdown_timeout"
 
 	// AccountSCfg
-	MetaAccountIDsCfg = "*accountIDs"
-	MaxIterations     = "max_iterations"
-	MaxUsage          = "max_usage"
+	MaxIterations = "max_iterations"
+	MaxUsage      = "max_usage"
 )
 
 // FC Template
@@ -2180,13 +2171,13 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStartTime, OptsRatesUsage, OptsSesTTL,
+var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTime, OptsRatesUsage, OptsSesTTL,
 	OptsSesTTLMaxDelay, OptsSesTTLLastUsed, OptsSesTTLLastUsage, OptsSesTTLUsage,
 	OptsSesDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
-	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesIDs,
+	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProfileIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
-	RemoteHostOpt, CacheOpt, OptsThresholdsThresholdIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
+	RemoteHostOpt, CacheOpt, OptsThresholdsProfileIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
 	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
 	OptsCDRs, OptsSesCDRsDerivedReply, OptsChargerS, OptsResourceS, OptsSesResourceSAuthorize,
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
@@ -2195,7 +2186,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesRateProfileIDs, OptsRatesStar
 	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, OptsAttributeS, OptsChargerS, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, OptsStatS, OptsCDRsStore, OptsThresholdS, OptsRateS, OptsAccountS,
-	OptsAccountsUsage, OptsStatsStatIDs, OptsActionsActionProfileIDs, MetaProfileIgnoreFilters})
+	OptsAccountsUsage, OptsStatsStatIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters})
 
 // Event Opts
 const (
@@ -2241,14 +2232,14 @@ const (
 	OptsSesMessage                = "*sesMessage"
 
 	// Accounts
-	OptsAccountsUsage      = "*accountsUsage"
-	OptsAccountsAccountIDs = "*accountIDs"
+	OptsAccountsUsage      = "*acntUsage"
+	OptsAccountsProfileIDs = "*acntProfileIDs"
 
 	// Actions
-	OptsActionsActionProfileIDs = "*actionProfileIDs"
+	OptsActionsProfileIDs = "*actProfileIDs"
 
 	// Attributes
-	OptsAttributesIDs         = "*attributeIDs"
+	OptsAttributesProfileIDs  = "*attrProfileIDs"
 	OptsAttributesProfileRuns = "*attrProfileRuns"
 	OptsAttributesProcessRuns = "*attrProcessRuns"
 
@@ -2267,10 +2258,10 @@ const (
 	OptsEEsVerbose = "*eesVerbose"
 
 	// Rates
-	OptsRatesRateProfileIDs = "*rateProfileIDs"
-	OptsRatesStartTime      = "*ratesStartTime"
-	OptsRatesUsage          = "*ratesUsage"
-	OptsRatesIntervalStart  = "*ratesIntervalStart"
+	OptsRatesProfileIDs    = "*rtsProfileIDs"
+	OptsRatesStartTime     = "*rtsStartTime"
+	OptsRatesUsage         = "*rtsUsage"
+	OptsRatesIntervalStart = "*rtsIntervalStart"
 
 	// Resources
 	OptsResourcesUnits    = "*rsUnits"
@@ -2289,7 +2280,7 @@ const (
 	OptsStatsStatIDs = "*statIDs"
 
 	// Thresholds
-	OptsThresholdsThresholdIDs = "*thresholdIDs"
+	OptsThresholdsProfileIDs = "*thdProfileIDs"
 
 	// STIR
 	OptsStirATest              = "*stirATest"

@@ -27,9 +27,9 @@ import (
 )
 
 var (
-	RatesRateProfileIDsDftOpt []string = []string{}
-	RatesUsageDftOpt                   = decimal.New(int64(time.Minute), 0)
-	RatesIntervalStartDftOpt           = decimal.New(0, 0)
+	RatesProfileIDsDftOpt    []string = []string{}
+	RatesUsageDftOpt                  = decimal.New(int64(time.Minute), 0)
+	RatesIntervalStartDftOpt          = decimal.New(0, 0)
 )
 
 const (
@@ -38,7 +38,7 @@ const (
 )
 
 type RatesOpts struct {
-	RateProfileIDs       []*utils.DynamicStringSliceOpt
+	ProfileIDs           []*utils.DynamicStringSliceOpt
 	StartTime            []*utils.DynamicStringOpt
 	Usage                []*utils.DynamicDecimalBigOpt
 	IntervalStart        []*utils.DynamicDecimalBigOpt
@@ -75,8 +75,8 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.RateProfileIDs != nil {
-		rateOpts.RateProfileIDs = append(rateOpts.RateProfileIDs, jsnCfg.RateProfileIDs...)
+	if jsnCfg.ProfileIDs != nil {
+		rateOpts.ProfileIDs = append(rateOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.StartTime != nil {
 		rateOpts.StartTime = append(rateOpts.StartTime, jsnCfg.StartTime...)
@@ -151,7 +151,7 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaRateProfileIDsCfg:    rCfg.Opts.RateProfileIDs,
+		utils.MetaProfileIDs:           rCfg.Opts.ProfileIDs,
 		utils.MetaStartTime:            rCfg.Opts.StartTime,
 		utils.MetaUsage:                rCfg.Opts.Usage,
 		utils.MetaIntervalStartCfg:     rCfg.Opts.IntervalStart,
@@ -192,8 +192,8 @@ func (rCfg RateSCfg) CloneSection() Section { return rCfg.Clone() }
 
 func (rateOpts *RatesOpts) Clone() *RatesOpts {
 	var ratePrfIDs []*utils.DynamicStringSliceOpt
-	if rateOpts.RateProfileIDs != nil {
-		ratePrfIDs = utils.CloneDynamicStringSliceOpt(rateOpts.RateProfileIDs)
+	if rateOpts.ProfileIDs != nil {
+		ratePrfIDs = utils.CloneDynamicStringSliceOpt(rateOpts.ProfileIDs)
 	}
 	var startTime []*utils.DynamicStringOpt
 	if rateOpts.StartTime != nil {
@@ -212,7 +212,7 @@ func (rateOpts *RatesOpts) Clone() *RatesOpts {
 		profileIgnoreFilters = utils.CloneDynamicBoolOpt(rateOpts.ProfileIgnoreFilters)
 	}
 	return &RatesOpts{
-		RateProfileIDs:       ratePrfIDs,
+		ProfileIDs:           ratePrfIDs,
 		StartTime:            startTime,
 		Usage:                usage,
 		IntervalStart:        intervalStart,
@@ -254,7 +254,7 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 }
 
 type RatesOptsJson struct {
-	RateProfileIDs       []*utils.DynamicStringSliceOpt `json:"*rateProfileIDs"`
+	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
 	StartTime            []*utils.DynamicStringOpt      `json:"*startTime"`
 	Usage                []*utils.DynamicStringOpt      `json:"*usage"`
 	IntervalStart        []*utils.DynamicStringOpt      `json:"*intervalStart"`
@@ -281,8 +281,8 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 	if d == nil {
 		d = new(RatesOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.RateProfileIDs, v2.RateProfileIDs) {
-		d.RateProfileIDs = v2.RateProfileIDs
+	if !utils.DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
+		d.ProfileIDs = v2.ProfileIDs
 	}
 	if !utils.DynamicStringOptEqual(v1.StartTime, v2.StartTime) {
 		d.StartTime = v2.StartTime

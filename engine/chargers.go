@@ -123,7 +123,7 @@ func (cS *ChargerService) processEvent(ctx *context.Context, tnt string, cgrEv *
 		clonedEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 			utils.IfaceAsString(clonedEv.APIOpts[utils.OptsContext]),
 			utils.MetaChargers)
-		clonedEv.APIOpts[utils.OptsAttributesIDs] = cP.AttributeIDs
+		clonedEv.APIOpts[utils.OptsAttributesProfileIDs] = cP.AttributeIDs
 		var evReply AttrSProcessEventReply
 		if err = cS.connMgr.Call(ctx, cS.cfg.ChargerSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, clonedEv, &evReply); err != nil {

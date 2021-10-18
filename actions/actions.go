@@ -264,13 +264,13 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 // V1ScheduleActions will be called to schedule actions matching the arguments
 func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	var actPrfIDs []string
-	if actPrfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ActionProfileIDs,
-		config.ActionsActionProfileIDs, utils.OptsActionsActionProfileIDs); err != nil {
+	if actPrfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIDs,
+		config.ActionsProfileIDsDftOpt, utils.OptsActionsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
-		config.ActionsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
+		config.ActionsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args},
@@ -284,13 +284,13 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
 func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	var actPrfIDs []string
-	if actPrfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ActionProfileIDs,
-		config.ActionsActionProfileIDs, utils.OptsActionsActionProfileIDs); err != nil {
+	if actPrfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIDs,
+		config.ActionsProfileIDsDftOpt, utils.OptsActionsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
-		config.ActionsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
+		config.ActionsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var schedActSet []*scheduledActs

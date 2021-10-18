@@ -27,14 +27,14 @@ import (
 )
 
 var (
-	AccountsAccountIDsDftOpt = []string{}
+	AccountsProfileIDsDftOpt = []string{}
 	AccountsUsageDftOpt      = decimal.New(int64(time.Minute), 0)
 )
 
 const AccountsProfileIgnoreFiltersDftOpt = false
 
 type AccountsOpts struct {
-	AccountIDs           []*utils.DynamicStringSliceOpt
+	ProfileIDs           []*utils.DynamicStringSliceOpt
 	Usage                []*utils.DynamicDecimalBigOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
 }
@@ -68,8 +68,8 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.AccountIDs != nil {
-		accOpts.AccountIDs = append(accOpts.AccountIDs, jsnCfg.AccountIDs...)
+	if jsnCfg.ProfileIDs != nil {
+		accOpts.ProfileIDs = append(accOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.Usage != nil {
 		var usage []*utils.DynamicDecimalBigOpt
@@ -132,7 +132,7 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS AccountSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
-		utils.MetaAccountIDsCfg:        acS.Opts.AccountIDs,
+		utils.MetaProfileIDs:           acS.Opts.ProfileIDs,
 		utils.MetaUsage:                acS.Opts.Usage,
 		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
 	}
@@ -169,8 +169,8 @@ func (acS AccountSCfg) AsMapInterface(string) interface{} {
 
 func (accOpts *AccountsOpts) Clone() *AccountsOpts {
 	var accIDs []*utils.DynamicStringSliceOpt
-	if accOpts.AccountIDs != nil {
-		accIDs = utils.CloneDynamicStringSliceOpt(accOpts.AccountIDs)
+	if accOpts.ProfileIDs != nil {
+		accIDs = utils.CloneDynamicStringSliceOpt(accOpts.ProfileIDs)
 	}
 	var usage []*utils.DynamicDecimalBigOpt
 	if accOpts.Usage != nil {
@@ -181,7 +181,7 @@ func (accOpts *AccountsOpts) Clone() *AccountsOpts {
 		profileIgnoreFilters = utils.CloneDynamicBoolOpt(accOpts.ProfileIgnoreFilters)
 	}
 	return &AccountsOpts{
-		AccountIDs:           accIDs,
+		ProfileIDs:           accIDs,
 		Usage:                usage,
 		ProfileIgnoreFilters: profileIgnoreFilters,
 	}
@@ -221,7 +221,7 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 }
 
 type AccountsOptsJson struct {
-	AccountIDs           []*utils.DynamicStringSliceOpt `json:"*accountIDs"`
+	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
 	Usage                []*utils.DynamicStringOpt      `json:"*usage"`
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
@@ -246,8 +246,8 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 	if d == nil {
 		d = new(AccountsOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.AccountIDs, v2.AccountIDs) {
-		d.AccountIDs = v2.AccountIDs
+	if !utils.DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
+		d.ProfileIDs = v2.ProfileIDs
 	}
 	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
 		d.Usage = utils.DecimalBigToStringDynamicOpts(v2.Usage)

@@ -156,7 +156,7 @@ func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actio
 		args.APIOpts = make(map[string]interface{})
 	}
 
-	args.APIOpts[utils.OptsActionsActionProfileIDs] = t.tPrfl.ActionProfileIDs
+	args.APIOpts[utils.OptsActionsProfileIDs] = t.tPrfl.ActionProfileIDs
 
 	// var tntAcnt string
 	// var acnt string
@@ -330,8 +330,8 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 		utils.MetaOpts: args.APIOpts,
 	}
 	var thIDs []string
-	if thIDs, err = GetStringSliceOpts(ctx, tnt, args, tS.filterS, tS.cgrcfg.ThresholdSCfg().Opts.ThresholdIDs,
-		config.ThresholdsThresholdIDsDftOpt, utils.OptsThresholdsThresholdIDs); err != nil {
+	if thIDs, err = GetStringSliceOpts(ctx, tnt, args, tS.filterS, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIDs,
+		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
