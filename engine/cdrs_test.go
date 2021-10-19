@@ -2637,100 +2637,98 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 
 }
 
-// func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
-// 	Cache.Clear(nil)
-// 	testCache := Cache
-// 	tmpC := config.CgrConfig()
-// 	tmpCM := connMgr
-// 	defer func() {
-// 		Cache = testCache
-// 		config.SetCgrConfig(tmpC)
-// 		connMgr = tmpCM
-// 	}()
+func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
 
-// 	var sent StorDB
-// 	cfg := config.NewDefaultCGRConfig()
-// 	storDBChan := make(chan StorDB, 1)
-// 	storDBChan <- sent
-// 	data := NewInternalDB(nil, nil, true)
-// 	//connMng := NewConnManager(cfg)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	Cache = NewCacheS(cfg, dm, nil)
-// 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
-// 	cgrEv := &utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		ID:     "testID",
-// 		Event: map[string]interface{}{
-// 			utils.Cost: 123,
-// 		},
-// 	}
-// 	config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- nil
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			utils.Cost: 123,
+		},
+	}
 
-// 	rply := "string"
-// 	Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
-// 		&utils.CachedRPCResponse{Result: &rply, Error: nil},
-// 		nil, true, utils.NonTransactional)
+	rply := "string"
+	Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
+		&utils.CachedRPCResponse{Result: &rply, Error: nil},
+		nil, true, utils.NonTransactional)
 
-// 	expected := &utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		ID:     "testID",
-// 		Event: map[string]interface{}{
-// 			utils.Cost: 123,
-// 		},
-// 	}
-// 	if !reflect.DeepEqual(expected, cgrEv) {
-// 		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
-// 	}
-// }
+	err := newCDRSrv.V1ProcessEvent(context.Background(), cgrEv, &rply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+	expected := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			utils.Cost: 123,
+		},
+	}
+	if !reflect.DeepEqual(expected, cgrEv) {
+		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
+	}
+}
 
-// func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
-// 	testCache := Cache
-// 	tmpC := config.CgrConfig()
-// 	tmpCM := connMgr
-// 	defer func() {
-// 		Cache = testCache
-// 		config.SetCgrConfig(tmpC)
-// 		connMgr = tmpCM
-// 	}()
+func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
+	testCache := Cache
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		Cache = testCache
+		config.SetCgrConfig(tmpC)
+		connMgr = tmpCM
+	}()
 
-// 	var sent StorDB
-// 	cfg := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	storDBChan := make(chan StorDB, 1)
+	storDBChan <- nil
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, nil)
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			utils.Cost: 123,
+		},
+	}
 
-// 	storDBChan := make(chan StorDB, 1)
-// 	storDBChan <- sent
-// 	data := NewInternalDB(nil, nil, true)
-// 	connMng := NewConnManager(cfg)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	Cache = NewCacheS(cfg, dm, nil)
-// 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
+	rply := []*utils.EventWithFlags{}
+	Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
+		&utils.CachedRPCResponse{Result: &rply, Error: nil},
+		nil, true, utils.NonTransactional)
 
-// 	cgrEv := &utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		ID:     "testID",
-// 		Event: map[string]interface{}{
-// 			utils.Cost: 123,
-// 		},
-// 	}
-// 	config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-// 	var rply []*utils.EventWithFlags
-// 	rplySet := "string"
-// 	Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
-// 		&utils.CachedRPCResponse{Result: &rplySet, Error: nil},
-// 		nil, true, utils.NonTransactional)
-// 	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &rply)
-// 	if err != nil {
-// 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
-// 	}
-// 	expected := &utils.CGREvent{
-// 		Tenant: "cgrates.org",
-// 		ID:     "testID",
-// 		Event: map[string]interface{}{
-// 			utils.Cost: 123,
-// 		},
-// 	}
-// 	if !reflect.DeepEqual(expected, cgrEv) {
-// 		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
-// 	}
-// }
+	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &rply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
+	}
+	expected := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+		Event: map[string]interface{}{
+			utils.Cost: 123,
+		},
+	}
+	if !reflect.DeepEqual(expected, cgrEv) {
+		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
+	}
+}
