@@ -413,8 +413,6 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
 		utils.MinDurLowBalanceCfg:    "0",
 		utils.ChannelSyncIntervalCfg: "0",
-		utils.DebitIntervalCfg:       "0",
-		utils.SessionTTLCfg:          "0",
 		utils.DefaultUsageCfg:        maxComputed,
 		utils.OptsCfg:                opts,
 	}

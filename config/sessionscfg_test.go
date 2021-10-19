@@ -77,9 +77,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Rates_conns:           &[]string{utils.MetaInternal, "*conn1"},
 		Accounts_conns:        &[]string{utils.MetaInternal, "*conn1"},
 		Replication_conns:     &[]string{"*conn1"},
-		Debit_interval:        utils.StringPointer("2"),
 		Store_session_costs:   utils.BoolPointer(true),
-		Session_ttl:           utils.StringPointer("0"),
 		Session_indexes:       &[]string{},
 		Client_protocol:       utils.Float64Pointer(2.5),
 		Channel_sync_interval: utils.StringPointer("10"),
@@ -92,6 +90,13 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			Default_attest:      utils.StringPointer("A"),
 			Publickey_path:      utils.StringPointer("randomPath"),
 			Privatekey_path:     utils.StringPointer("randomPath"),
+		},
+		Opts: &SessionsOptsJson{
+			DebitInterval: []*utils.DynamicStringOpt{
+				{
+					Value: (2 * time.Second).String(),
+				},
+			},
 		},
 	}
 	expected := &SessionSCfg{
@@ -108,9 +113,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		RateSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), "*conn1"},
 		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
 		ReplicationConns:    []string{"*conn1"},
-		DebitInterval:       2,
 		StoreSCosts:         true,
-		SessionTTL:          0,
 		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      2.5,
 		ChannelSyncInterval: 10,
@@ -157,11 +160,15 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			ForceDuration:          []*utils.DynamicBoolOpt{},
 			TTL:                    []*utils.DynamicDurationOpt{},
 			Chargeable:             []*utils.DynamicBoolOpt{},
-			DebitInterval:          []*utils.DynamicDurationOpt{},
-			LastUsage:              []*utils.DynamicDurationPointerOpt{},
-			LastUsed:               []*utils.DynamicDurationPointerOpt{},
-			MaxDelay:               []*utils.DynamicDurationOpt{},
-			Usage:                  []*utils.DynamicDurationPointerOpt{},
+			DebitInterval: []*utils.DynamicDurationOpt{
+				{
+					Value: 2 * time.Second,
+				},
+			},
+			TTLLastUsage: []*utils.DynamicDurationPointerOpt{},
+			TTLLastUsed:  []*utils.DynamicDurationPointerOpt{},
+			TTLMaxDelay:  []*utils.DynamicDurationOpt{},
+			TTLUsage:     []*utils.DynamicDurationPointerOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -274,28 +281,6 @@ func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
 	}
 }
 
-func TestSessionSCfgloadFromJsonCfgCase3(t *testing.T) {
-	cfgJSON := &SessionSJsonCfg{
-		Debit_interval: utils.StringPointer("1ss"),
-	}
-	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestSessionSCfgloadFromJsonCfgCase5(t *testing.T) {
-	cfgJSON := &SessionSJsonCfg{
-		Session_ttl: utils.StringPointer("1ss"),
-	}
-	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestSessionSCfgloadFromJsonCfgCase7(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
 		Channel_sync_interval: utils.StringPointer("1ss"),
@@ -318,44 +303,30 @@ func TestSessionSCfgloadFromJsonCfgCase8(t *testing.T) {
 	}
 }
 
-func TestSessionSCfgloadFromJsonCfgCase9(t *testing.T) {
-	cfgJSON := &SessionSJsonCfg{
-		Session_ttl_last_usage: utils.StringPointer("1ss"),
-	}
-	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-	cfgJSON1 := &SessionSJsonCfg{
-		Session_ttl_last_used: utils.StringPointer("1ss"),
-	}
-	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-	cfgJSON2 := &SessionSJsonCfg{
-		Session_ttl_max_delay: utils.StringPointer("1ss"),
-	}
-	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON2); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-	cfgJSON3 := &SessionSJsonCfg{
-		Session_ttl_usage: utils.StringPointer("1ss"),
-	}
-	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Session_ttl_last_usage: utils.StringPointer("1"),
-		Session_ttl_last_used:  utils.StringPointer("10"),
-		Session_ttl_max_delay:  utils.StringPointer("100"),
-		Session_ttl_usage:      utils.StringPointer("1"),
+		Opts: &SessionsOptsJson{
+			TTLLastUsage: []*utils.DynamicStringOpt{
+				{
+					Value: "1",
+				},
+			},
+			TTLLastUsed: []*utils.DynamicStringOpt{
+				{
+					Value: "10",
+				},
+			},
+			TTLMaxDelay: []*utils.DynamicStringOpt{
+				{
+					Value: "100",
+				},
+			},
+			TTLUsage: []*utils.DynamicStringOpt{
+				{
+					Value: "1",
+				},
+			},
+		},
 	}
 	expected := &SessionSCfg{
 		Enabled:             false,
@@ -371,9 +342,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		ActionSConns:        []string{},
 		RateSConns:          []string{},
 		AccountSConns:       []string{},
-		DebitInterval:       0,
 		StoreSCosts:         false,
-		SessionTTL:          0,
 		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      1.0,
 		ChannelSyncInterval: 0,
@@ -387,10 +356,6 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			PrivateKeyPath:     "",
 			PublicKeyPath:      "",
 		},
-		SessionTTLMaxDelay:  utils.DurationPointer(100),
-		SessionTTLLastUsage: utils.DurationPointer(1),
-		SessionTTLLastUsed:  utils.DurationPointer(10),
-		SessionTTLUsage:     utils.DurationPointer(1),
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -425,10 +390,26 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			TTL:                    []*utils.DynamicDurationOpt{},
 			Chargeable:             []*utils.DynamicBoolOpt{},
 			DebitInterval:          []*utils.DynamicDurationOpt{},
-			LastUsage:              []*utils.DynamicDurationPointerOpt{},
-			LastUsed:               []*utils.DynamicDurationPointerOpt{},
-			MaxDelay:               []*utils.DynamicDurationOpt{},
-			Usage:                  []*utils.DynamicDurationPointerOpt{},
+			TTLLastUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(1),
+				},
+			},
+			TTLLastUsed: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(10),
+				},
+			},
+			TTLMaxDelay: []*utils.DynamicDurationOpt{
+				{
+					Value: 100,
+				},
+			},
+			TTLUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(1),
+				},
+			},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -515,13 +496,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ActionSConnsCfg:        []string{},
 		utils.RateSConnsCfg:          []string{},
 		utils.AccountSConnsCfg:       []string{},
-		utils.DebitIntervalCfg:       "0",
 		utils.StoreSCostsCfg:         false,
-		utils.SessionTTLCfg:          "0",
-		utils.SessionTTLMaxDelayCfg:  "3h0m0s",
-		utils.SessionTTLLastUsedCfg:  "0s",
-		utils.SessionTTLUsageCfg:     "1s",
-		utils.SessionTTLLastUsageCfg: "10s",
 		utils.SessionIndexesCfg:      []string{},
 		utils.ClientProtocolCfg:      1.0,
 		utils.ChannelSyncIntervalCfg: "1s",
@@ -569,10 +544,10 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaTTLCfg:                    []*utils.DynamicDurationOpt{},
 			utils.MetaChargeableCfg:             []*utils.DynamicBoolOpt{},
 			utils.MetaDebitIntervalCfg:          []*utils.DynamicDurationOpt{},
-			utils.MetaLastUsageCfg:              []*utils.DynamicDurationPointerOpt{},
-			utils.MetaLastUsedCfg:               []*utils.DynamicDurationPointerOpt{},
-			utils.MetaMaxDelayCfg:               []*utils.DynamicDurationOpt{},
-			utils.MetaUsage:                     []*utils.DynamicDurationPointerOpt{},
+			utils.MetaTTLLastUsageCfg:           []*utils.DynamicDurationPointerOpt{},
+			utils.MetaTTLLastUsedCfg:            []*utils.DynamicDurationPointerOpt{},
+			utils.MetaTTLMaxDelayCfg:            []*utils.DynamicDurationOpt{},
+			utils.MetaTTLUsageCfg:               []*utils.DynamicDurationPointerOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -599,9 +574,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			"rates_conns": ["*internal:*rates", "*conn1"],
 			"accounts_conns": ["*internal:*accounts", "*conn1"],
 			"replication_conns": ["*localhost"],
-			"debit_interval": "8s",
 			"store_session_costs": true,
-			"session_ttl": "1s",
             "min_dur_low_balance": "1s",
 			"client_protocol": 2.0,
 			"terminate_attempts": 10,
@@ -611,6 +584,18 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 				"default_attest": "B",
 				"publickey_path": "",
 				"privatekey_path": "",
+			},
+			"opts": {
+				"*ttl": [
+					{
+						"Value": "1s",
+					},
+				],
+				"*debitInterval": [
+					{
+						"Value": "8s",
+					},
+				],
 			},
 		},
 	}`
@@ -629,10 +614,8 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.RateSConnsCfg:          []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.ReplicationConnsCfg:    []string{utils.MetaLocalHost},
-		utils.DebitIntervalCfg:       "8s",
 		utils.StoreSCostsCfg:         true,
 		utils.MinDurLowBalanceCfg:    "1s",
-		utils.SessionTTLCfg:          "1s",
 		utils.SessionIndexesCfg:      []string{},
 		utils.ClientProtocolCfg:      2.0,
 		utils.ChannelSyncIntervalCfg: "0",
@@ -676,13 +659,21 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaThresholdsDerivedReplyCfg: []*utils.DynamicBoolOpt{},
 			utils.MetaMaxUsageCfg:               []*utils.DynamicBoolOpt{},
 			utils.MetaForceDurationCfg:          []*utils.DynamicBoolOpt{},
-			utils.MetaTTLCfg:                    []*utils.DynamicDurationOpt{},
-			utils.MetaChargeableCfg:             []*utils.DynamicBoolOpt{},
-			utils.MetaDebitIntervalCfg:          []*utils.DynamicDurationOpt{},
-			utils.MetaLastUsageCfg:              []*utils.DynamicDurationPointerOpt{},
-			utils.MetaLastUsedCfg:               []*utils.DynamicDurationPointerOpt{},
-			utils.MetaMaxDelayCfg:               []*utils.DynamicDurationOpt{},
-			utils.MetaUsage:                     []*utils.DynamicDurationPointerOpt{},
+			utils.MetaTTLCfg: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			utils.MetaChargeableCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaDebitIntervalCfg: []*utils.DynamicDurationOpt{
+				{
+					Value: 8 * time.Second,
+				},
+			},
+			utils.MetaTTLLastUsageCfg: []*utils.DynamicDurationPointerOpt{},
+			utils.MetaTTLLastUsedCfg:  []*utils.DynamicDurationPointerOpt{},
+			utils.MetaTTLMaxDelayCfg:  []*utils.DynamicDurationOpt{},
+			utils.MetaTTLUsageCfg:     []*utils.DynamicDurationPointerOpt{},
 		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
@@ -1433,9 +1424,7 @@ func TestSessionSCfgClone(t *testing.T) {
 		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
 		ReplicationConns:    []string{"*conn1"},
-		DebitInterval:       2,
 		StoreSCosts:         true,
-		SessionTTL:          0,
 		SessionIndexes:      utils.StringSet{},
 		ClientProtocol:      2.5,
 		ChannelSyncInterval: 10,
@@ -1443,10 +1432,6 @@ func TestSessionSCfgClone(t *testing.T) {
 		AlterableFields:     utils.StringSet{},
 		MinDurLowBalance:    1,
 		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
-		SessionTTLMaxDelay:  utils.DurationPointer(time.Second),
-		SessionTTLLastUsed:  utils.DurationPointer(time.Second),
-		SessionTTLUsage:     utils.DurationPointer(time.Second),
-		SessionTTLLastUsage: utils.DurationPointer(time.Second),
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -1460,7 +1445,38 @@ func TestSessionSCfgClone(t *testing.T) {
 			utils.MetaData:  1048576,
 			utils.MetaSMS:   1,
 		},
-		Opts: &SessionsOpts{},
+		Opts: &SessionsOpts{
+			DebitInterval: []*utils.DynamicDurationOpt{
+				{
+					Value: 2,
+				},
+			},
+			TTL: []*utils.DynamicDurationOpt{
+				{
+					Value: 0,
+				},
+			},
+			TTLMaxDelay: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTLLastUsed: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+			TTLLastUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+			TTLUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -1556,12 +1572,7 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		AttributeSConns:     []string{"*localhost"},
 		RateSConns:          []string{"*localhost"},
 		AccountSConns:       []string{"*localhost"},
-		DebitInterval:       1 * time.Second,
 		StoreSCosts:         false,
-		SessionTTL:          1 * time.Second,
-		SessionTTLMaxDelay:  utils.DurationPointer(1 * time.Second),
-		SessionTTLLastUsed:  utils.DurationPointer(1 * time.Second),
-		SessionTTLLastUsage: utils.DurationPointer(1 * time.Second),
 		SessionIndexes:      nil,
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
@@ -1581,30 +1592,55 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
-		Opts: &SessionsOpts{},
+		Opts: &SessionsOpts{
+			DebitInterval: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTL: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTLMaxDelay: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTLLastUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+			TTLLastUsed: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+			TTLUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+		},
 	}
 
 	v2 := &SessionSCfg{
-		Enabled:             true,
-		ListenBijson:        "*bijson",
-		ListenBigob:         "*bigob",
-		ChargerSConns:       []string{"*birpc"},
-		ResourceSConns:      []string{"*birpc"},
-		ThresholdSConns:     []string{"*birpc"},
-		StatSConns:          []string{"*birpc"},
-		RouteSConns:         []string{"*birpc"},
-		CDRsConns:           []string{"*birpc"},
-		ReplicationConns:    []string{"*birpc"},
-		AttributeSConns:     []string{"*birpc"},
-		RateSConns:          []string{"*birpc"},
-		AccountSConns:       []string{"*birpc"},
-		DebitInterval:       2 * time.Second,
-		StoreSCosts:         true,
-		SessionTTL:          2 * time.Second,
-		SessionTTLMaxDelay:  utils.DurationPointer(2 * time.Second),
-		SessionTTLLastUsed:  utils.DurationPointer(2 * time.Second),
-		SessionTTLLastUsage: utils.DurationPointer(2 * time.Second),
-		SessionTTLUsage:     utils.DurationPointer(2 * time.Second),
+		Enabled:          true,
+		ListenBijson:     "*bijson",
+		ListenBigob:      "*bigob",
+		ChargerSConns:    []string{"*birpc"},
+		ResourceSConns:   []string{"*birpc"},
+		ThresholdSConns:  []string{"*birpc"},
+		StatSConns:       []string{"*birpc"},
+		RouteSConns:      []string{"*birpc"},
+		CDRsConns:        []string{"*birpc"},
+		ReplicationConns: []string{"*birpc"},
+		AttributeSConns:  []string{"*birpc"},
+		RateSConns:       []string{"*birpc"},
+		AccountSConns:    []string{"*birpc"},
+		StoreSCosts:      true,
 		SessionIndexes: utils.StringSet{
 			"index1": struct{}{},
 		},
@@ -1626,37 +1662,62 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			PublicKeyPath:      "/public/key/path/2",
 			PrivateKeyPath:     "/private/key/path/2",
 		},
-		Opts: &SessionsOpts{},
+		Opts: &SessionsOpts{
+			DebitInterval: []*utils.DynamicDurationOpt{
+				{
+					Value: 2 * time.Second,
+				},
+			},
+			TTL: []*utils.DynamicDurationOpt{
+				{
+					Value: 2 * time.Second,
+				},
+			},
+			TTLMaxDelay: []*utils.DynamicDurationOpt{
+				{
+					Value: 2 * time.Second,
+				},
+			},
+			TTLLastUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(2 * time.Second),
+				},
+			},
+			TTLLastUsed: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(2 * time.Second),
+				},
+			},
+			TTLUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(2 * time.Second),
+				},
+			},
+		},
 	}
 
 	expected := &SessionSJsonCfg{
-		Enabled:                utils.BoolPointer(true),
-		Listen_bijson:          utils.StringPointer("*bijson"),
-		Listen_bigob:           utils.StringPointer("*bigob"),
-		Chargers_conns:         &[]string{"*birpc"},
-		Resources_conns:        &[]string{"*birpc"},
-		Thresholds_conns:       &[]string{"*birpc"},
-		Stats_conns:            &[]string{"*birpc"},
-		Routes_conns:           &[]string{"*birpc"},
-		Cdrs_conns:             &[]string{"*birpc"},
-		Replication_conns:      &[]string{"*birpc"},
-		Attributes_conns:       &[]string{"*birpc"},
-		Rates_conns:            &[]string{"*birpc"},
-		Accounts_conns:         &[]string{"*birpc"},
-		Debit_interval:         utils.StringPointer("2s"),
-		Store_session_costs:    utils.BoolPointer(true),
-		Session_ttl:            utils.StringPointer("2s"),
-		Session_ttl_max_delay:  utils.StringPointer("2s"),
-		Session_ttl_last_used:  utils.StringPointer("2s"),
-		Session_ttl_last_usage: utils.StringPointer("2s"),
-		Session_ttl_usage:      utils.StringPointer("2s"),
-		Session_indexes:        &[]string{"index1"},
-		Client_protocol:        utils.Float64Pointer(13.2),
-		Channel_sync_interval:  utils.StringPointer("2s"),
-		Terminate_attempts:     utils.IntPointer(5),
-		Alterable_fields:       &[]string{"index1"},
-		Min_dur_low_balance:    utils.StringPointer("2s"),
-		Actions_conns:          &[]string{"*birpc"},
+		Enabled:               utils.BoolPointer(true),
+		Listen_bijson:         utils.StringPointer("*bijson"),
+		Listen_bigob:          utils.StringPointer("*bigob"),
+		Chargers_conns:        &[]string{"*birpc"},
+		Resources_conns:       &[]string{"*birpc"},
+		Thresholds_conns:      &[]string{"*birpc"},
+		Stats_conns:           &[]string{"*birpc"},
+		Routes_conns:          &[]string{"*birpc"},
+		Cdrs_conns:            &[]string{"*birpc"},
+		Replication_conns:     &[]string{"*birpc"},
+		Attributes_conns:      &[]string{"*birpc"},
+		Rates_conns:           &[]string{"*birpc"},
+		Accounts_conns:        &[]string{"*birpc"},
+		Store_session_costs:   utils.BoolPointer(true),
+		Session_indexes:       &[]string{"index1"},
+		Client_protocol:       utils.Float64Pointer(13.2),
+		Channel_sync_interval: utils.StringPointer("2s"),
+		Terminate_attempts:    utils.IntPointer(5),
+		Alterable_fields:      &[]string{"index1"},
+		Min_dur_low_balance:   utils.StringPointer("2s"),
+		Actions_conns:         &[]string{"*birpc"},
 		Default_usage: map[string]string{
 			"DFLT_1": "2s",
 		},
@@ -1667,7 +1728,38 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			Publickey_path:      utils.StringPointer("/public/key/path/2"),
 			Privatekey_path:     utils.StringPointer("/private/key/path/2"),
 		},
-		Opts: &SessionsOptsJson{},
+		Opts: &SessionsOptsJson{
+			DebitInterval: []*utils.DynamicStringOpt{
+				{
+					Value: (2 * time.Second).String(),
+				},
+			},
+			TTL: []*utils.DynamicStringOpt{
+				{
+					Value: (2 * time.Second).String(),
+				},
+			},
+			TTLMaxDelay: []*utils.DynamicStringOpt{
+				{
+					Value: (2 * time.Second).String(),
+				},
+			},
+			TTLLastUsage: []*utils.DynamicStringOpt{
+				{
+					Value: (2 * time.Second).String(),
+				},
+			},
+			TTLLastUsed: []*utils.DynamicStringOpt{
+				{
+					Value: (2 * time.Second).String(),
+				},
+			},
+			TTLUsage: []*utils.DynamicStringOpt{
+				{
+					Value: (2 * time.Second).String(),
+				},
+			},
+		},
 	}
 
 	rcv := diffSessionSJsonCfg(d, v1, v2)
@@ -1675,15 +1767,15 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
-	v2.SessionTTLMaxDelay = nil
-	v2.SessionTTLLastUsed = nil
-	v2.SessionTTLLastUsage = nil
-	v2.SessionTTLUsage = nil
+	v2.Opts.TTLMaxDelay = nil
+	v2.Opts.TTLLastUsed = nil
+	v2.Opts.TTLLastUsage = nil
+	v2.Opts.TTLUsage = nil
 
-	expected.Session_ttl_max_delay = nil
-	expected.Session_ttl_last_used = nil
-	expected.Session_ttl_last_usage = nil
-	expected.Session_ttl_usage = nil
+	expected.Opts.TTLMaxDelay = []*utils.DynamicStringOpt{}
+	expected.Opts.TTLLastUsed = []*utils.DynamicStringOpt{}
+	expected.Opts.TTLLastUsage = []*utils.DynamicStringOpt{}
+	expected.Opts.TTLUsage = []*utils.DynamicStringOpt{}
 
 	rcv = diffSessionSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
@@ -1704,12 +1796,7 @@ func TestSessionSCloneSection(t *testing.T) {
 		CDRsConns:           []string{"*localhost"},
 		ReplicationConns:    []string{"*localhost"},
 		AttributeSConns:     []string{"*localhost"},
-		DebitInterval:       1 * time.Second,
 		StoreSCosts:         false,
-		SessionTTL:          1 * time.Second,
-		SessionTTLMaxDelay:  utils.DurationPointer(1 * time.Second),
-		SessionTTLLastUsed:  utils.DurationPointer(1 * time.Second),
-		SessionTTLLastUsage: utils.DurationPointer(1 * time.Second),
 		SessionIndexes:      nil,
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
@@ -1729,7 +1816,33 @@ func TestSessionSCloneSection(t *testing.T) {
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
-		Opts: &SessionsOpts{},
+		Opts: &SessionsOpts{
+			DebitInterval: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTL: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTLMaxDelay: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTLLastUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+			TTLLastUsed: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+		},
 	}
 
 	exp := &SessionSCfg{
@@ -1744,12 +1857,7 @@ func TestSessionSCloneSection(t *testing.T) {
 		CDRsConns:           []string{"*localhost"},
 		ReplicationConns:    []string{"*localhost"},
 		AttributeSConns:     []string{"*localhost"},
-		DebitInterval:       1 * time.Second,
 		StoreSCosts:         false,
-		SessionTTL:          1 * time.Second,
-		SessionTTLMaxDelay:  utils.DurationPointer(1 * time.Second),
-		SessionTTLLastUsed:  utils.DurationPointer(1 * time.Second),
-		SessionTTLLastUsage: utils.DurationPointer(1 * time.Second),
 		SessionIndexes:      nil,
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
@@ -1769,7 +1877,33 @@ func TestSessionSCloneSection(t *testing.T) {
 			PublicKeyPath:      "/public/key/path",
 			PrivateKeyPath:     "/private/key/path",
 		},
-		Opts: &SessionsOpts{},
+		Opts: &SessionsOpts{
+			DebitInterval: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTL: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTLMaxDelay: []*utils.DynamicDurationOpt{
+				{
+					Value: time.Second,
+				},
+			},
+			TTLLastUsage: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+			TTLLastUsed: []*utils.DynamicDurationPointerOpt{
+				{
+					Value: utils.DurationPointer(time.Second),
+				},
+			},
+		},
 	}
 
 	rcv := sessCfg.CloneSection()
