@@ -453,11 +453,11 @@ func TestChargerProcessEvent(t *testing.T) {
 	rpl := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CPP_1",
-			AlteredFields:   []string{utils.MetaReqRunID},
+			AlteredFields:   []string{utils.MetaOptsRunID},
 			CGREvent:        chargerEvents[0],
 		},
 	}
-	rpl[0].CGREvent.Event[utils.RunID] = cPPs[0].RunID
+	rpl[0].CGREvent.APIOpts[utils.MetaRunID] = cPPs[0].RunID
 	rcv, err := chargerSrv.processEvent(context.Background(), rpl[0].CGREvent.Tenant, chargerEvents[0])
 	if err != nil {
 		t.Fatalf("Error: %+v", err)

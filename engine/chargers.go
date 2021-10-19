@@ -106,16 +106,17 @@ func (cS *ChargerService) processEvent(ctx *context.Context, tnt string, cgrEv *
 	if cPs, err = cS.matchingChargerProfilesForEvent(ctx, tnt, cgrEv); err != nil {
 		return nil, err
 	}
+
 	rply = make([]*ChrgSProcessEventReply, len(cPs))
 	for i, cP := range cPs {
 		clonedEv := cgrEv.Clone()
 		clonedEv.Tenant = tnt
-		clonedEv.Event[utils.RunID] = cP.RunID
+		clonedEv.APIOpts[utils.MetaRunID] = cP.RunID
 		clonedEv.APIOpts[utils.Subsys] = utils.MetaChargers
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,
-			AlteredFields:   []string{utils.MetaReqRunID},
+			AlteredFields:   []string{utils.MetaOptsRunID},
 		}
 		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.MetaNone {
 			continue // AttributeS disabled

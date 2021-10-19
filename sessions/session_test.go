@@ -192,7 +192,6 @@ func TestSessionAsCGREvents(t *testing.T) {
 		utils.Subject:      "1001",
 		utils.Destination:  "1004",
 		utils.Category:     "call",
-		utils.RunID:        utils.MetaDefault,
 		utils.Tenant:       "cgrates.org",
 		utils.RequestType:  utils.MetaPrepaid,
 		utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
@@ -214,8 +213,8 @@ func TestSessionAsCGREvents(t *testing.T) {
 	if len(cgrEvs) != 1 {
 		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
 	}
-	if cgrEvs[0].Event[utils.RunID] != utils.MetaDefault {
-		t.Errorf("Expecting: %+v, received: %+v", utils.MetaDefault, cgrEvs[1].Event[utils.RunID])
+	if cgrEvs[0].Event[utils.RequestType] != utils.MetaPrepaid {
+		t.Errorf("Expecting: %+v, received: %+v", utils.MetaPrepaid, cgrEvs[1].Event[utils.RequestType])
 	} else if cgrEvs[0].Event[utils.Cost] != 12.13 {
 		t.Errorf("Expecting: %+v, received: %+v", 12.13, cgrEvs[1].Event[utils.Cost])
 	}
@@ -245,7 +244,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		utils.Subject:      "1001",
 		utils.Destination:  "1004",
 		utils.Category:     "call",
-		utils.RunID:        utils.MetaDefault,
+		utils.MetaRunID:    utils.MetaDefault,
 		utils.Tenant:       "cgrates.org",
 		utils.RequestType:  utils.MetaPrepaid,
 		utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
@@ -267,7 +266,6 @@ func TestSessionAsExternalSessions(t *testing.T) {
 	}
 	exp := []*ExternalSession{{
 		CGRID:    "RandomCGRID",
-		RunID:    utils.MetaDefault,
 		ToR:      utils.MetaVoice,
 		OriginID: "123451",
 		// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
@@ -283,7 +281,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		Usage:       2 * time.Second,
 		ExtraFields: map[string]string{
 			utils.EventName: "TEST_EVENT2",
-		},
+			utils.MetaRunID: utils.MetaDefault},
 		NodeID:        "ALL",
 		DebitInterval: time.Second,
 		NextAutoDebit: tTime,
@@ -554,7 +552,7 @@ func TestUpdateSRuns(t *testing.T) {
 		utils.Subject:      "1001",
 		utils.Destination:  "1004",
 		utils.Category:     "call",
-		utils.RunID:        utils.MetaDefault,
+		utils.MetaRunID:    utils.MetaDefault,
 		utils.Tenant:       "cgrates.org",
 		utils.RequestType:  utils.MetaPrepaid,
 		utils.SetupTime:    time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),

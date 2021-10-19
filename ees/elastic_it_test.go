@@ -138,10 +138,13 @@ func testElasticExportEvents(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Second,
-				utils.RunID:        utils.MetaDefault,
+				
 				utils.Cost:         1.01,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID:        utils.MetaDefault,
 			},
 		},
 	}
@@ -165,10 +168,13 @@ func testElasticExportEvents(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Nanosecond,
-				utils.RunID:        utils.MetaDefault,
+				
 				utils.Cost:         0.012,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID:        utils.MetaDefault,
 			},
 		},
 	}
@@ -192,10 +198,13 @@ func testElasticExportEvents(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        time.Duration(1),
-				utils.RunID:        utils.MetaDefault,
+			
 				utils.Cost:         0.15,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID:        utils.MetaDefault,
 			},
 		},
 	}
@@ -213,10 +222,11 @@ func testElasticExportEvents(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
-				utils.RunID:        utils.MetaDefault,
+				
 			},
 			APIOpts: map[string]interface{}{
 				"ExporterUsed": "ElasticExporterWithNoFields",
+				utils.MetaRunID:utils.MetaDefault,
 			},
 		},
 	}
@@ -289,7 +299,7 @@ func testElasticVerifyExports(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.OriginID:     "sdfwer",
 				utils.RequestType:  "*rated",
-				utils.RunID:        "*default",
+				utils.MetaRunID:        "*default",
 				utils.SetupTime:    "2013-11-07T08:42:25Z",
 				utils.Subject:      "1001",
 				utils.Tenant:       "cgrates.org",
@@ -309,7 +319,7 @@ func testElasticVerifyExports(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.OriginID:     "dsafdsaf",
 				utils.RequestType:  "*rated",
-				utils.RunID:        "*default",
+				utils.MetaRunID:        "*default",
 				utils.SetupTime:    "2013-11-07T08:42:25Z",
 				utils.Subject:      "1001",
 				utils.Tenant:       "cgrates.org",
@@ -328,8 +338,9 @@ func testElasticVerifyExports(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
-				utils.RunID:        utils.MetaDefault,
+				utils.MetaRunID:        utils.MetaDefault,
 			}
+			
 			if !reflect.DeepEqual(eMp, hit.(map[string]interface{})["_source"]) {
 				t.Errorf("Expected %+v, received: %+v", eMp, hit.(map[string]interface{})["_source"])
 			}

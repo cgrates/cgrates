@@ -124,8 +124,11 @@ func testCsvExportEvent(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Second,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         1.01,
+
+				utils.Cost: 1.01,
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}
@@ -149,8 +152,10 @@ func testCsvExportEvent(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Nanosecond,
-				utils.RunID:        utils.MetaDefault,
 				utils.Cost:         0.012,
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}
@@ -174,8 +179,11 @@ func testCsvExportEvent(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        1,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         0.15,
+
+				utils.Cost: 0.15,
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}
@@ -241,10 +249,13 @@ func testCsvExportComposedEvent(t *testing.T) {
 				utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
 				utils.Usage:         10 * time.Second,
-				utils.RunID:         utils.MetaDefault,
-				utils.Cost:          1.016374,
+
+				utils.Cost: 1.016374,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}
@@ -269,10 +280,13 @@ func testCsvExportComposedEvent(t *testing.T) {
 				utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
 				utils.Usage:         1,
-				utils.RunID:         utils.MetaDefault,
-				utils.Cost:          0.155462,
+
+				utils.Cost: 0.155462,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}
@@ -331,10 +345,13 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Second,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         1.01,
+
+				utils.Cost: 1.01,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}
@@ -358,10 +375,13 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Nanosecond,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         0.012,
+
+				utils.Cost: 0.012,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}
@@ -385,10 +405,13 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        1,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         0.15,
+
+				utils.Cost: 0.15,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}
@@ -452,10 +475,13 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Second,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         1.01,
+
+				utils.Cost: 1.01,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}

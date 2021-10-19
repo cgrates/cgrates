@@ -132,13 +132,14 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Second,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         1.01,
+
+				utils.Cost: 1.01,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
+				utils.RunID:         utils.MetaDefault,
 			},
 		},
 	}
@@ -162,13 +163,14 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Nanosecond,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         0.012,
+
+				utils.Cost: 0.012,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
+				utils.RunID:         utils.MetaDefault,
 			},
 		},
 	}
@@ -192,14 +194,15 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        1,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         0.15,
-				utils.OrderID:      10,
+
+				utils.Cost:    0.15,
+				utils.OrderID: 10,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
+				utils.RunID:         utils.MetaDefault,
 			},
 		},
 	}
@@ -216,7 +219,9 @@ func testHTTPJsonMapExportEvent(t *testing.T) {
 				utils.Category:     "call",
 				utils.AccountField: "1001",
 				utils.Destination:  "1002",
-				utils.RunID:        utils.MetaDefault,
+			},
+			APIOpts: map[string]interface{}{
+				utils.RunID: utils.MetaDefault,
 			},
 		},
 	}

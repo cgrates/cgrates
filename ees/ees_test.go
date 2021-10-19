@@ -176,10 +176,13 @@ func TestV1ProcessEvent(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Second,
-				utils.RunID:        utils.MetaDefault,
+				utils.MetaRunID:    utils.MetaDefault,
 				utils.Cost:         1.01,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaRunID: utils.MetaDefault,
 			},
 		},
 	}

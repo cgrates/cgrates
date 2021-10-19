@@ -958,6 +958,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent, resI
 		me := engine.MapEvent(chrgr.CGREvent.Event)
 		s.SRuns[i] = &SRun{
 			Event: me,
+			RunID: chrgr.CGREvent.APIOpts[utils.MetaRunID].(string),
 		}
 	}
 	return
@@ -2448,7 +2449,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			return
 		}
 		for _, chrgr := range chrgrs {
-			events[utils.IfaceAsString(chrgr.CGREvent.Event[utils.RunID])] = chrgr.CGREvent
+			events[utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID])] = chrgr.CGREvent
 		}
 	}
 
