@@ -86,7 +86,7 @@ func testLoaderITInitConfig(t *testing.T) {
 
 func testLoaderITInitDataDB(t *testing.T) {
 	var err error
-	dataDbCsv, err := NewDataDBConn(lCfg.DataDbCfg().Type,
+	dataDbCsv, err = NewDataDBConn(lCfg.DataDbCfg().Type,
 		lCfg.DataDbCfg().Host, lCfg.DataDbCfg().Port, lCfg.DataDbCfg().Name,
 		lCfg.DataDbCfg().User, lCfg.DataDbCfg().Password, lCfg.GeneralCfg().DBDataEncoding,
 		lCfg.DataDbCfg().Opts, lCfg.DataDbCfg().Items)
@@ -97,10 +97,10 @@ func testLoaderITInitDataDB(t *testing.T) {
 		t.Fatal("Error when flushing datadb")
 	}
 	cacheChan := make(chan rpcclient.ClientConnector, 1)
-	cacheChan <- Cache
 	connMgr = NewConnManager(lCfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): cacheChan,
 	})
+	cacheChan <- NewCacheS(lCfg, NewDataManager(dataDbCsv, lCfg.CacheCfg(), connMgr), nil)
 }
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
