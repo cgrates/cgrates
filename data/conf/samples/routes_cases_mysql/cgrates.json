@@ -68,7 +68,7 @@
         "prefix_indexed_fields":["*req.Destination"],
         "stats_conns": ["*internal"],
         "resources_conns": ["*internal"],
-        "accounts_conns": ["*internal"],
+        "accounts_conns": ["*localhost"],
         "rates_conns": ["*internal"]
     },
     
@@ -108,7 +108,7 @@
     "filters": {
         "stats_conns": ["*internal"],
         "resources_conns": ["*internal"],
-        "accounts_conns": ["*internal"],
+        "accounts_conns": ["*localhost"],
     },
     
     }

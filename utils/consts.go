@@ -925,6 +925,7 @@ const (
 	MetaUnlimited          = "*unlimited"
 	CDRLog                 = "*cdrlog"
 	MetaCgrRpc             = "*cgr_rpc"
+	MetaRpc                = "*rpc"
 	MetaRemoveSessionCosts = "*remove_session_costs"
 	MetaPostEvent          = "*post_event"
 	MetaCDRAccount         = "*reset_account_cdr"
@@ -2433,6 +2434,16 @@ const (
 	NatsCertificateAuthority = "natsCertificateAuthority"
 	NatsJetStream            = "natsJetStream"
 	NatsJetStreamMaxWait     = "natsJetStreamMaxWait"
+
+	// rpc
+	RpcCodec        = "rpcCodec"
+	ServiceMethod   = "serviceMethod"
+	KeyPath         = "keyPath"
+	CertPath        = "certPath"
+	CaPath          = "caPath"
+	Tls             = "tls"
+	RpcConnTimeout  = "rpcConnTimeout"
+	RpcReplyTimeout = "rpcReplyTimeout"
 )
 
 // Analyzers constants

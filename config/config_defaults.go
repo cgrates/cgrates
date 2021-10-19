@@ -562,7 +562,17 @@ const CGRATES_CFG_JSON = `
 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
 				// "natsClientKey": "",							// the path to a client key( used by tls)
 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
-			},													// extra options for exporter
+
+				//RPC
+				// "rpcCodec": "",  // for compression, encoding and decoding <internalRPC | BIRPC | JSON/HTTP/GOB>
+				// "serviceMethod": "" // the method that should be called trough RPC
+                // "keyPath": "" , // path to server key 
+				// "certPath": "", // path to client certificate
+				// "caPath": "",  // path to CA certificate
+				// "tls": false, //
+				// "rpcConnTimeout" : 1s, // connection unsuccesfull on timeout
+				// "rpcReplyTimeout":"2s", // connection down at replies if taking longer that this value
+			},												// extra options for exporter
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
