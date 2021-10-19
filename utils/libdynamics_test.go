@@ -549,3 +549,297 @@ func TestDynamicInterfaceOptEqual(t *testing.T) {
 		t.Error("Expected slices to differ")
 	}
 }
+
+func TestStringToDecimalBigDynamicOpts(t *testing.T) {
+	dsOpt := []*DynamicStringOpt{
+		{
+			FilterIDs: []string{"fld1", "fld2"},
+			Tenant:    "cgrates.org",
+			Value:     "200",
+		},
+	}
+
+	exp := []*DynamicDecimalBigOpt{
+		{
+			FilterIDs: []string{"fld1", "fld2"},
+			Tenant:    "cgrates.org",
+			Value:     new(decimal.Big).SetUint64(200),
+		},
+	}
+
+	rcv, err := StringToDecimalBigDynamicOpts(dsOpt)
+	if err != nil {
+		t.Error(err)
+	}
+	// fmt.Println(rcv[0].Value)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestDynamicIntPointerOptEqual(t *testing.T) {
+	v1 := []*DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"fld1", "fld2"},
+			Tenant:    "cgrates.org",
+			Value:     IntPointer(200),
+		},
+	}
+
+	v2 := []*DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"fld3"},
+			Tenant:    "cgrates.net",
+			Value:     IntPointer(300),
+		},
+	}
+
+	if DynamicIntPointerOptEqual(v1, v2) {
+		t.Error("Expected items to be different")
+	}
+
+	v1 = v2
+	if !DynamicIntPointerOptEqual(v1, v2) {
+		t.Error("Expected items to be the same")
+	}
+}
+
+func TestDynamicDurationPointerOptEqual(t *testing.T) {
+	v1 := []*DynamicDurationPointerOpt{
+		{
+			FilterIDs: []string{"fld3"},
+			Tenant:    "cgrates.org",
+			Value:     DurationPointer(3 * time.Second),
+		},
+	}
+
+	v2 := []*DynamicDurationPointerOpt{
+		{
+			FilterIDs: []string{"fltr4"},
+			Tenant:    "cgrates.net",
+			Value:     DurationPointer(5 * time.Second),
+		},
+	}
+
+	if DynamicDurationPointerOptEqual(v1, v2) {
+		t.Error("Expected items to be different")
+	}
+
+	v1 = v2
+	if !DynamicDurationPointerOptEqual(v1, v2) {
+		t.Error("Expected items to be the same")
+	}
+}
+
+func TestDecimalBigToStringDynamicOpts(t *testing.T) {
+	dbOpt := []*DynamicDecimalBigOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     new(decimal.Big).SetUint64(300),
+		},
+	}
+
+	exp := []*DynamicStringOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     "300",
+		},
+	}
+
+	rcv := DecimalBigToStringDynamicOpts(dbOpt)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestStringToDurationDynamicOpts(t *testing.T) {
+	sOpts := []*DynamicStringOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     "50s",
+		},
+	}
+
+	exp := []*DynamicDurationOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     50 * time.Second,
+		},
+	}
+
+	rcv, err := StringToDurationDynamicOpts(sOpts)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestDurationToStringDynamicOpts(t *testing.T) {
+	exp := []*DynamicStringOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     "50s",
+		},
+	}
+
+	sOpts := []*DynamicDurationOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     50 * time.Second,
+		},
+	}
+
+	rcv := DurationToStringDynamicOpts(sOpts)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIntToIntPointerDynamicOpts(t *testing.T) {
+	iOpts := []*DynamicIntOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     50,
+		},
+	}
+
+	exp := []*DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     IntPointer(50),
+		},
+	}
+
+	rcv := IntToIntPointerDynamicOpts(iOpts)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestIntPointerToIntDynamicOpts(t *testing.T) {
+	exp := []*DynamicIntOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     50,
+		},
+	}
+
+	iOpts := []*DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     IntPointer(50),
+		},
+	}
+
+	rcv := IntPointerToIntDynamicOpts(iOpts)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestStringToDurationPointerDynamicOpts(t *testing.T) {
+	sOpts := []*DynamicStringOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     "50s",
+		},
+	}
+
+	exp := []*DynamicDurationPointerOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     DurationPointer(50 * time.Second),
+		},
+	}
+
+	rcv, err := StringToDurationPointerDynamicOpts(sOpts)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+func TestDurationPointerToStringDynamicOpts(t *testing.T) {
+	exp := []*DynamicStringOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     "50s",
+		},
+	}
+
+	dpOpts := []*DynamicDurationPointerOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     DurationPointer(50 * time.Second),
+		},
+	}
+
+	rcv := DurationPointerToStringDynamicOpts(dpOpts)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestCloneDynamicIntPointerOpt(t *testing.T) {
+	ipOpt := []*DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"fld1", "fld2"},
+			Tenant:    "cgrates.org",
+			Value:     IntPointer(200),
+		},
+	}
+
+	exp := []*DynamicIntPointerOpt{
+		{
+			FilterIDs: []string{"fld1", "fld2"},
+			Tenant:    "cgrates.org",
+			Value:     IntPointer(200),
+		},
+	}
+
+	rcv := CloneDynamicIntPointerOpt(ipOpt)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestCloneDynamicDurationPointerOpt(t *testing.T) {
+	dpOpts := []*DynamicDurationPointerOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     DurationPointer(50 * time.Second),
+		},
+	}
+
+	exp := []*DynamicDurationPointerOpt{
+		{
+			FilterIDs: []string{"test_filter", "test_filter2"},
+			Tenant:    "cgrates.org",
+			Value:     DurationPointer(50 * time.Second),
+		},
+	}
+
+	rcv := CloneDynamicDurationPointerOpt(dpOpts)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
