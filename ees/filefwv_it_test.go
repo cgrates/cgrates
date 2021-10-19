@@ -118,9 +118,12 @@ func testFwvExportEvent(t *testing.T) {
 				utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 				utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 				utils.Usage:        10 * time.Second,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         2.34567,
-				"ExtraFields":      map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+
+				utils.Cost:    2.34567,
+				"ExtraFields": map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+			},
+			APIOpts: map[string]interface{}{
+				utils.RunID: utils.MetaDefault,
 			},
 		},
 	}

@@ -139,7 +139,7 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 	for i, sr := range s.SRuns {
 		aSs[i] = &ExternalSession{
 			CGRID:         s.CGRID,
-			RunID:         sr.Event.GetStringIgnoreErrors(utils.RunID),
+			RunID:         sr.RunID,
 			ToR:           sr.Event.GetStringIgnoreErrors(utils.ToR),
 			OriginID:      s.EventStart.GetStringIgnoreErrors(utils.OriginID),
 			OriginHost:    s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
@@ -169,7 +169,7 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalSession) {
 	aS = &ExternalSession{
 		CGRID:         s.CGRID,
-		RunID:         sr.Event.GetStringIgnoreErrors(utils.RunID),
+		RunID:         sr.RunID,
 		ToR:           sr.Event.GetStringIgnoreErrors(utils.ToR),
 		OriginID:      s.EventStart.GetStringIgnoreErrors(utils.OriginID),
 		OriginHost:    s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
@@ -249,6 +249,7 @@ type SRun struct {
 	LastUsage     time.Duration // last requested Duration
 	TotalUsage    time.Duration // sum of lastUsage
 	NextAutoDebit *time.Time
+	RunID         string
 }
 
 // Clone returns the cloned version of SRun

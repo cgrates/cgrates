@@ -145,7 +145,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	exp := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields:   []string{utils.MetaReqRunID, utils.AccountField},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.AccountField},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
@@ -221,15 +221,15 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	exp := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields:   []string{utils.MetaReqRunID},
+			AlteredFields:   []string{utils.MetaOptsRunID},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
 				Event: map[string]interface{}{
 					utils.AccountField: "1001",
-					"RunID":            utils.MetaDefault,
 				},
 				APIOpts: map[string]interface{}{
+					utils.MetaRunID:                utils.MetaDefault,
 					utils.OptsAttributesProfileIDs: []string(nil),
 					utils.Subsys:                   utils.MetaChargers,
 					utils.OptsContext:              utils.MetaChargers,
@@ -460,7 +460,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	exp := &[]*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields:   []string{utils.MetaReqRunID, utils.AccountField},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.AccountField},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",

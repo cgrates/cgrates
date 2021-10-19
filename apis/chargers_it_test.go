@@ -486,17 +486,17 @@ func testChgrsProcessEvent(t *testing.T) {
 	expected := &[]*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "TEST_CHARGERS_IT_TEST",
-			AlteredFields:   []string{"*req.RunID"},
+			AlteredFields:   []string{"*opts.*runID"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "eventCharger",
 				Event: map[string]interface{}{
 					utils.AccountField: "1001",
 					utils.Destination:  "1002",
-					utils.RunID:        utils.MetaDefault,
 				},
 				APIOpts: map[string]interface{}{
-					"*subsys": "*chargers",
+					"*subsys":       "*chargers",
+					utils.MetaRunID: utils.MetaDefault,
 				},
 			},
 		},
