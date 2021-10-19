@@ -215,16 +215,10 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	var err error
 	// TTL
 	var ttl time.Duration
-	if opts.HasField(utils.OptsSesTTL) {
-		ttl, err = opts.GetDuration(utils.OptsSesTTL)
-	} else if s.OptsStart.HasField(utils.OptsSesTTL) {
-		ttl, err = s.OptsStart.GetDuration(utils.OptsSesTTL)
-	} else {
-		ttl = sS.cgrCfg.SessionSCfg().SessionTTL
-	}
-	if err != nil {
+	if ttl, err = engine.GetDurationOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+		sS.cgrCfg.SessionSCfg().Opts.TTL, config.SessionsTTLDftOpt, utils.OptsSesTTL); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
+			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
 				utils.SessionS, utils.OptsSesTTL, s.CGRID, opts, err))
 		return
 	}
@@ -233,16 +227,10 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// random delay computation
 	var maxDelay time.Duration
-	if opts.HasField(utils.OptsSesTTLMaxDelay) {
-		maxDelay, err = opts.GetDuration(utils.OptsSesTTLMaxDelay)
-	} else if s.OptsStart.HasField(utils.OptsSesTTLMaxDelay) {
-		maxDelay, err = s.OptsStart.GetDuration(utils.OptsSesTTLMaxDelay)
-	} else if sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay != nil {
-		maxDelay = *sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay
-	}
-	if err != nil {
+	if maxDelay, err = engine.GetDurationOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+		sS.cgrCfg.SessionSCfg().Opts.TTLMaxDelay, config.SessionsTTLMaxDelayDftOpt, utils.OptsSesTTLMaxDelay); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
+			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
 				utils.SessionS, utils.OptsSesTTLMaxDelay, s.CGRID, opts.String(), err.Error()))
 		return
 	}
@@ -253,48 +241,36 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// LastUsed
 	var ttlLastUsed *time.Duration
-	if opts.HasField(utils.OptsSesTTLLastUsed) {
-		ttlLastUsed, err = opts.GetDurationPtr(utils.OptsSesTTLLastUsed)
-	} else if s.OptsStart.HasField(utils.OptsSesTTLLastUsed) {
-		ttlLastUsed, err = s.OptsStart.GetDurationPtr(utils.OptsSesTTLLastUsed)
-	} else {
-		ttlLastUsed = sS.cgrCfg.SessionSCfg().SessionTTLLastUsed
-	}
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTLLastUsed, s.CGRID, opts.String(), err.Error()))
-		return
+	if ttlLastUsed, err = engine.GetDurationPointerOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+		sS.cgrCfg.SessionSCfg().Opts.TTLLastUsed, utils.OptsSesTTLLastUsed); err != nil {
+		if err != utils.ErrNotFound {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
+					utils.SessionS, utils.OptsSesTTLLastUsed, s.CGRID, opts.String(), err.Error()))
+			return
+		}
 	}
 	// LastUsage
 	var ttlLastUsage *time.Duration
-	if opts.HasField(utils.OptsSesTTLLastUsage) {
-		ttlLastUsage, err = opts.GetDurationPtr(utils.OptsSesTTLLastUsage)
-	} else if s.OptsStart.HasField(utils.OptsSesTTLLastUsage) {
-		ttlLastUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSesTTLLastUsage)
-	} else {
-		ttlLastUsage = sS.cgrCfg.SessionSCfg().SessionTTLLastUsage
-	}
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTLLastUsage, s.CGRID, opts.String(), err.Error()))
-		return
+	if ttlLastUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+		sS.cgrCfg.SessionSCfg().Opts.TTLLastUsage, utils.OptsSesTTLLastUsage); err != nil {
+		if err != utils.ErrNotFound {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
+					utils.SessionS, utils.OptsSesTTLLastUsage, s.CGRID, opts.String(), err.Error()))
+			return
+		}
 	}
 	// TTLUsage
 	var ttlUsage *time.Duration
-	if opts.HasField(utils.OptsSesTTLUsage) {
-		ttlUsage, err = opts.GetDurationPtr(utils.OptsSesTTLUsage)
-	} else if s.OptsStart.HasField(utils.OptsSesTTLUsage) {
-		ttlUsage, err = s.OptsStart.GetDurationPtr(utils.OptsSesTTLUsage)
-	} else {
-		ttlUsage = sS.cgrCfg.SessionSCfg().SessionTTLUsage
-	}
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from it's options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTLUsage, s.CGRID, opts.String(), err.Error()))
-		return
+	if ttlUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+		sS.cgrCfg.SessionSCfg().Opts.TTLUsage, utils.OptsSesTTLUsage); err != nil {
+		if err != utils.ErrNotFound {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
+					utils.SessionS, utils.OptsSesTTLUsage, s.CGRID, opts.String(), err.Error()))
+			return
+		}
 	}
 	// previously defined, reset
 	if s.sTerminator != nil {
@@ -944,7 +920,10 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent, resI
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 	}
-	s.chargeable = s.OptsStart.GetBoolOrDefault(utils.OptsSesChargeable, true)
+	if s.chargeable, err = engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
+		config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
+		return
+	}
 	if !isMsg && sS.isIndexed(s, false) { // check if already exists
 		return nil, utils.ErrExists
 	}
@@ -1844,12 +1823,10 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 	if initS {
 		var err error
-		opts := engine.MapEvent(args.APIOpts)
-		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.OptsSesDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.OptsSesDebitInterval); err != nil {
-				return err //utils.NewErrRALs(err)
-			}
+		var dbtItvl time.Duration
+		if dbtItvl, err = engine.GetDurationOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.DebitInterval,
+			config.SessionsDebitIntervalDftOpt, utils.OptsSesDebitInterval); err != nil {
+			return err
 		}
 		var forceDuration bool
 		if forceDuration, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.ForceDuration,
@@ -2010,12 +1987,10 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 	}
 	if updS {
 		ev := engine.MapEvent(args.Event)
-		opts := engine.MapEvent(args.APIOpts)
-		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.OptsSesDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.OptsSesDebitInterval); err != nil {
-				return err //utils.NewErrRALs(err)
-			}
+		var dbtItvl time.Duration
+		if dbtItvl, err = engine.GetDurationOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.DebitInterval,
+			config.SessionsDebitIntervalDftOpt, utils.OptsSesDebitInterval); err != nil {
+			return err
 		}
 		cgrID := GetSetCGRID(ev)
 		s := sS.getRelocateSession(ctx, cgrID,
@@ -2107,11 +2082,10 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
-		if opts.HasField(utils.OptsSesDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = opts.GetDuration(utils.OptsSesDebitInterval); err != nil {
-				return err //utils.NewErrRALs(err)
-			}
+		var dbtItvl time.Duration
+		if dbtItvl, err = engine.GetDurationOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.DebitInterval,
+			config.SessionsDebitIntervalDftOpt, utils.OptsSesDebitInterval); err != nil {
+			return err
 		}
 		var s *Session
 		fib := utils.FibDuration(time.Millisecond)
@@ -2146,7 +2120,10 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
 		}
 		s.Lock()
-		s.chargeable = opts.GetBoolOrDefault(utils.OptsSesChargeable, true)
+		if s.chargeable, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
+			config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
+			return
+		}
 		s.Unlock()
 		if err = sS.terminateSession(ctx, s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
