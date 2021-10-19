@@ -819,11 +819,11 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			ForceDuration:          []*utils.DynamicBoolOpt{},
 			TTL:                    []*utils.DynamicDurationOpt{},
 			Chargeable:             []*utils.DynamicBoolOpt{},
-			LastUsage:              []*utils.DynamicDurationPointerOpt{},
-			LastUsed:               []*utils.DynamicDurationPointerOpt{},
+			TTLLastUsage:           []*utils.DynamicDurationPointerOpt{},
+			TTLLastUsed:            []*utils.DynamicDurationPointerOpt{},
 			DebitInterval:          []*utils.DynamicDurationOpt{},
-			MaxDelay:               []*utils.DynamicDurationOpt{},
-			Usage:                  []*utils.DynamicDurationPointerOpt{},
+			TTLMaxDelay:            []*utils.DynamicDurationOpt{},
+			TTLUsage:               []*utils.DynamicDurationPointerOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -907,11 +907,11 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			ForceDuration:          []*utils.DynamicBoolOpt{},
 			TTL:                    []*utils.DynamicDurationOpt{},
 			Chargeable:             []*utils.DynamicBoolOpt{},
-			LastUsage:              []*utils.DynamicDurationPointerOpt{},
-			LastUsed:               []*utils.DynamicDurationPointerOpt{},
+			TTLLastUsage:           []*utils.DynamicDurationPointerOpt{},
+			TTLLastUsed:            []*utils.DynamicDurationPointerOpt{},
 			DebitInterval:          []*utils.DynamicDurationOpt{},
-			MaxDelay:               []*utils.DynamicDurationOpt{},
-			Usage:                  []*utils.DynamicDurationPointerOpt{},
+			TTLMaxDelay:            []*utils.DynamicDurationOpt{},
+			TTLUsage:               []*utils.DynamicDurationPointerOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -998,11 +998,11 @@ func testCGRConfigReloadAll(t *testing.T) {
 			ForceDuration:          []*utils.DynamicBoolOpt{},
 			TTL:                    []*utils.DynamicDurationOpt{},
 			Chargeable:             []*utils.DynamicBoolOpt{},
-			LastUsage:              []*utils.DynamicDurationPointerOpt{},
-			LastUsed:               []*utils.DynamicDurationPointerOpt{},
+			TTLLastUsage:           []*utils.DynamicDurationPointerOpt{},
+			TTLLastUsed:            []*utils.DynamicDurationPointerOpt{},
 			DebitInterval:          []*utils.DynamicDurationOpt{},
-			MaxDelay:               []*utils.DynamicDurationOpt{},
-			Usage:                  []*utils.DynamicDurationPointerOpt{},
+			TTLMaxDelay:            []*utils.DynamicDurationOpt{},
+			TTLUsage:               []*utils.DynamicDurationPointerOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {

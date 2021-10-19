@@ -558,9 +558,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Rates_conns:           &[]string{},
 		Accounts_conns:        &[]string{},
 		Replication_conns:     &[]string{},
-		Debit_interval:        utils.StringPointer("0s"),
 		Store_session_costs:   utils.BoolPointer(false),
-		Session_ttl:           utils.StringPointer("0s"),
 		Session_indexes:       &[]string{},
 		Client_protocol:       utils.Float64Pointer(1.0),
 		Channel_sync_interval: utils.StringPointer("0"),
@@ -607,10 +605,6 @@ func TestSmgJsonCfg(t *testing.T) {
 			TTL:                    []*utils.DynamicStringOpt{},
 			Chargeable:             []*utils.DynamicBoolOpt{},
 			DebitInterval:          []*utils.DynamicStringOpt{},
-			LastUsage:              []*utils.DynamicStringOpt{},
-			LastUsed:               []*utils.DynamicStringOpt{},
-			MaxDelay:               []*utils.DynamicStringOpt{},
-			Usage:                  []*utils.DynamicStringOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
