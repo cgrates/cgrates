@@ -78,6 +78,8 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, fi
 		return NewSQLEe(cfg, dc)
 	case utils.MetaLog:
 		return NewLogEE(cfg, dc), nil
+	case utils.MetaRpc:
+		return NewRpcEE(cfg, dc)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cfg.Type)
 	}

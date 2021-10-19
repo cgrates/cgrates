@@ -421,14 +421,12 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 						utils.Weight: 35.,
 					},
 				},
-				/*
-					{
-						RouteID: "vendor2",
-						SortingData: map[string]interface{}{
-							utils.Weight: 20.,
-						},
+				{
+					RouteID: "vendor2",
+					SortingData: map[string]interface{}{
+						utils.Weight: 20.,
 					},
-				*/
+				},
 			},
 		},
 	}
