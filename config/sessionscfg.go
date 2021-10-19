@@ -27,12 +27,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-// SessionsLastUsageDftOpt = utils.DurationPointer(time.Minute)
-// SessionsLastUsedDftOpt  = utils.DurationPointer(time.Minute)
-// SessionsUsageDftOpt     = utils.DurationPointer(time.Minute)
-)
-
 const (
 	SessionsAccountsDftOpt               = false
 	SessionsAttributesDftOpt             = false
@@ -58,10 +52,10 @@ const (
 	SessionsThresholdsDerivedReplyDftOpt = false
 	SessionsMaxUsageDftOpt               = false
 	SessionsForceDurationDftOpt          = false
-	SessionsTTLDftOpt                    = time.Minute
-	SessionsChargeableDftOpt             = false
-	SessionsDebitIntervalDftOpt          = time.Minute
-	SessionsMaxDelayDftOpt               = time.Minute
+	SessionsTTLDftOpt                    = 0
+	SessionsChargeableDftOpt             = true
+	SessionsTTLMaxDelayDftOpt            = 0
+	SessionsDebitIntervalDftOpt          = 0
 )
 
 type SessionsOpts struct {
@@ -91,11 +85,11 @@ type SessionsOpts struct {
 	ForceDuration          []*utils.DynamicBoolOpt
 	TTL                    []*utils.DynamicDurationOpt
 	Chargeable             []*utils.DynamicBoolOpt
-	LastUsage              []*utils.DynamicDurationPointerOpt
-	LastUsed               []*utils.DynamicDurationPointerOpt
+	TTLLastUsage           []*utils.DynamicDurationPointerOpt
+	TTLLastUsed            []*utils.DynamicDurationPointerOpt
 	DebitInterval          []*utils.DynamicDurationOpt
-	MaxDelay               []*utils.DynamicDurationOpt
-	Usage                  []*utils.DynamicDurationPointerOpt
+	TTLMaxDelay            []*utils.DynamicDurationOpt
+	TTLUsage               []*utils.DynamicDurationPointerOpt
 }
 
 // SessionSCfg is the config section for SessionS
@@ -113,13 +107,7 @@ type SessionSCfg struct {
 	ReplicationConns    []string
 	RateSConns          []string
 	AccountSConns       []string
-	DebitInterval       time.Duration
 	StoreSCosts         bool
-	SessionTTL          time.Duration
-	SessionTTLMaxDelay  *time.Duration
-	SessionTTLLastUsed  *time.Duration
-	SessionTTLUsage     *time.Duration
-	SessionTTLLastUsage *time.Duration
 	SessionIndexes      utils.StringSet
 	ClientProtocol      float64
 	ChannelSyncInterval time.Duration
@@ -227,19 +215,19 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err erro
 	if jsnCfg.Chargeable != nil {
 		sesOpts.Chargeable = append(sesOpts.Chargeable, jsnCfg.Chargeable...)
 	}
-	if jsnCfg.LastUsage != nil {
+	if jsnCfg.TTLLastUsage != nil {
 		var lastUsage []*utils.DynamicDurationPointerOpt
-		if lastUsage, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.LastUsage); err != nil {
+		if lastUsage, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.TTLLastUsage); err != nil {
 			return
 		}
-		sesOpts.LastUsage = append(sesOpts.LastUsage, lastUsage...)
+		sesOpts.TTLLastUsage = append(sesOpts.TTLLastUsage, lastUsage...)
 	}
-	if jsnCfg.LastUsed != nil {
+	if jsnCfg.TTLLastUsed != nil {
 		var lastUsed []*utils.DynamicDurationPointerOpt
-		if lastUsed, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.LastUsed); err != nil {
+		if lastUsed, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.TTLLastUsed); err != nil {
 			return
 		}
-		sesOpts.LastUsed = append(sesOpts.LastUsed, lastUsed...)
+		sesOpts.TTLLastUsed = append(sesOpts.TTLLastUsed, lastUsed...)
 	}
 	if jsnCfg.DebitInterval != nil {
 		var debitInterval []*utils.DynamicDurationOpt
@@ -248,19 +236,19 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err erro
 		}
 		sesOpts.DebitInterval = append(sesOpts.DebitInterval, debitInterval...)
 	}
-	if jsnCfg.MaxDelay != nil {
+	if jsnCfg.TTLMaxDelay != nil {
 		var maxDelay []*utils.DynamicDurationOpt
-		if maxDelay, err = utils.StringToDurationDynamicOpts(jsnCfg.MaxDelay); err != nil {
+		if maxDelay, err = utils.StringToDurationDynamicOpts(jsnCfg.TTLMaxDelay); err != nil {
 			return
 		}
-		sesOpts.MaxDelay = append(sesOpts.MaxDelay, maxDelay...)
+		sesOpts.TTLMaxDelay = append(sesOpts.TTLMaxDelay, maxDelay...)
 	}
-	if jsnCfg.Usage != nil {
+	if jsnCfg.TTLUsage != nil {
 		var usage []*utils.DynamicDurationPointerOpt
-		if usage, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.Usage); err != nil {
+		if usage, err = utils.StringToDurationPointerDynamicOpts(jsnCfg.TTLUsage); err != nil {
 			return
 		}
-		sesOpts.Usage = append(sesOpts.Usage, usage...)
+		sesOpts.TTLUsage = append(sesOpts.TTLUsage, usage...)
 	}
 	return
 }
@@ -317,46 +305,8 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Accounts_conns != nil {
 		scfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
-	if jsnCfg.Debit_interval != nil {
-		if scfg.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
-			return err
-		}
-	}
 	if jsnCfg.Store_session_costs != nil {
 		scfg.StoreSCosts = *jsnCfg.Store_session_costs
-	}
-	if jsnCfg.Session_ttl != nil {
-		if scfg.SessionTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Session_ttl_max_delay != nil {
-		var maxTTLDelay time.Duration
-		if maxTTLDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_max_delay); err != nil {
-			return err
-		}
-		scfg.SessionTTLMaxDelay = &maxTTLDelay
-	}
-	if jsnCfg.Session_ttl_last_used != nil {
-		var sessionTTLLastUsed time.Duration
-		if sessionTTLLastUsed, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_used); err != nil {
-			return err
-		}
-		scfg.SessionTTLLastUsed = &sessionTTLLastUsed
-	}
-	if jsnCfg.Session_ttl_usage != nil {
-		var sessionTTLUsage time.Duration
-		if sessionTTLUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_usage); err != nil {
-			return err
-		}
-		scfg.SessionTTLUsage = &sessionTTLUsage
-	}
-	if jsnCfg.Session_ttl_last_usage != nil {
-		var sessionTTLLastUsage time.Duration
-		if sessionTTLLastUsage, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_usage); err != nil {
-			return err
-		}
-		scfg.SessionTTLLastUsage = &sessionTTLLastUsage
 	}
 	if jsnCfg.Session_indexes != nil {
 		scfg.SessionIndexes = utils.NewStringSet(*jsnCfg.Session_indexes)
@@ -445,10 +395,10 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 		utils.MetaTTLCfg:                    scfg.Opts.TTL,
 		utils.MetaChargeableCfg:             scfg.Opts.Chargeable,
 		utils.MetaDebitIntervalCfg:          scfg.Opts.DebitInterval,
-		utils.MetaLastUsageCfg:              scfg.Opts.LastUsage,
-		utils.MetaLastUsedCfg:               scfg.Opts.LastUsed,
-		utils.MetaMaxDelayCfg:               scfg.Opts.MaxDelay,
-		utils.MetaUsage:                     scfg.Opts.Usage,
+		utils.MetaTTLLastUsageCfg:           scfg.Opts.TTLLastUsage,
+		utils.MetaTTLLastUsedCfg:            scfg.Opts.TTLLastUsed,
+		utils.MetaTTLMaxDelayCfg:            scfg.Opts.TTLMaxDelay,
+		utils.MetaTTLUsageCfg:               scfg.Opts.TTLUsage,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:             scfg.Enabled,
@@ -467,24 +417,6 @@ func (scfg SessionSCfg) AsMapInterface(string) interface{} {
 		utils.SessionTTLCfg:          "0",
 		utils.DefaultUsageCfg:        maxComputed,
 		utils.OptsCfg:                opts,
-	}
-	if scfg.DebitInterval != 0 {
-		mp[utils.DebitIntervalCfg] = scfg.DebitInterval.String()
-	}
-	if scfg.SessionTTL != 0 {
-		mp[utils.SessionTTLCfg] = scfg.SessionTTL.String()
-	}
-	if scfg.SessionTTLMaxDelay != nil {
-		mp[utils.SessionTTLMaxDelayCfg] = scfg.SessionTTLMaxDelay.String()
-	}
-	if scfg.SessionTTLLastUsed != nil {
-		mp[utils.SessionTTLLastUsedCfg] = scfg.SessionTTLLastUsed.String()
-	}
-	if scfg.SessionTTLUsage != nil {
-		mp[utils.SessionTTLUsageCfg] = scfg.SessionTTLUsage.String()
-	}
-	if scfg.SessionTTLLastUsage != nil {
-		mp[utils.SessionTTLLastUsageCfg] = scfg.SessionTTLLastUsage.String()
 	}
 	if scfg.ChannelSyncInterval != 0 {
 		mp[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
@@ -638,20 +570,20 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 		debitIvl = utils.CloneDynamicDurationOpt(sesOpts.DebitInterval)
 	}
 	var lastUsg []*utils.DynamicDurationPointerOpt
-	if sesOpts.LastUsage != nil {
-		lastUsg = utils.CloneDynamicDurationPointerOpt(sesOpts.LastUsage)
+	if sesOpts.TTLLastUsage != nil {
+		lastUsg = utils.CloneDynamicDurationPointerOpt(sesOpts.TTLLastUsage)
 	}
 	var lastUsed []*utils.DynamicDurationPointerOpt
-	if sesOpts.LastUsed != nil {
-		lastUsed = utils.CloneDynamicDurationPointerOpt(sesOpts.LastUsed)
+	if sesOpts.TTLLastUsed != nil {
+		lastUsed = utils.CloneDynamicDurationPointerOpt(sesOpts.TTLLastUsed)
 	}
 	var maxDelay []*utils.DynamicDurationOpt
-	if sesOpts.MaxDelay != nil {
-		maxDelay = utils.CloneDynamicDurationOpt(sesOpts.MaxDelay)
+	if sesOpts.TTLMaxDelay != nil {
+		maxDelay = utils.CloneDynamicDurationOpt(sesOpts.TTLMaxDelay)
 	}
 	var usg []*utils.DynamicDurationPointerOpt
-	if sesOpts.Usage != nil {
-		usg = utils.CloneDynamicDurationPointerOpt(sesOpts.Usage)
+	if sesOpts.TTLUsage != nil {
+		usg = utils.CloneDynamicDurationPointerOpt(sesOpts.TTLUsage)
 	}
 	return &SessionsOpts{
 		Accounts:               acntS,
@@ -681,10 +613,10 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 		TTL:                    ttl,
 		Chargeable:             chargeable,
 		DebitInterval:          debitIvl,
-		LastUsage:              lastUsg,
-		LastUsed:               lastUsed,
-		MaxDelay:               maxDelay,
-		Usage:                  usg,
+		TTLLastUsage:           lastUsg,
+		TTLLastUsed:            lastUsed,
+		TTLMaxDelay:            maxDelay,
+		TTLUsage:               usg,
 	}
 }
 
@@ -693,9 +625,7 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
 		Enabled:             scfg.Enabled,
 		ListenBijson:        scfg.ListenBijson,
-		DebitInterval:       scfg.DebitInterval,
 		StoreSCosts:         scfg.StoreSCosts,
-		SessionTTL:          scfg.SessionTTL,
 		ClientProtocol:      scfg.ClientProtocol,
 		ChannelSyncInterval: scfg.ChannelSyncInterval,
 		TerminateAttempts:   scfg.TerminateAttempts,
@@ -710,19 +640,6 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	for k, v := range scfg.DefaultUsage {
 		cln.DefaultUsage[k] = v
 	}
-	if scfg.SessionTTLMaxDelay != nil {
-		cln.SessionTTLMaxDelay = utils.DurationPointer(*scfg.SessionTTLMaxDelay)
-	}
-	if scfg.SessionTTLLastUsed != nil {
-		cln.SessionTTLLastUsed = utils.DurationPointer(*scfg.SessionTTLLastUsed)
-	}
-	if scfg.SessionTTLUsage != nil {
-		cln.SessionTTLUsage = utils.DurationPointer(*scfg.SessionTTLUsage)
-	}
-	if scfg.SessionTTLLastUsage != nil {
-		cln.SessionTTLLastUsage = utils.DurationPointer(*scfg.SessionTTLLastUsage)
-	}
-
 	if scfg.ChargerSConns != nil {
 		cln.ChargerSConns = utils.CloneStringSlice(scfg.ChargerSConns)
 	}
@@ -882,44 +799,38 @@ type SessionsOptsJson struct {
 	TTL                    []*utils.DynamicStringOpt `json:"*ttl"`
 	Chargeable             []*utils.DynamicBoolOpt   `json:"*chargeable"`
 	DebitInterval          []*utils.DynamicStringOpt `json:"*debitInterval"`
-	LastUsage              []*utils.DynamicStringOpt `json:"*lastUsage"`
-	LastUsed               []*utils.DynamicStringOpt `json:"*lastUsed"`
-	MaxDelay               []*utils.DynamicStringOpt `json:"*maxDelay"`
-	Usage                  []*utils.DynamicStringOpt `json:"*usage"`
+	TTLLastUsage           []*utils.DynamicStringOpt `json:"*ttlLastUsage"`
+	TTLLastUsed            []*utils.DynamicStringOpt `json:"*ttlLastUsed"`
+	TTLMaxDelay            []*utils.DynamicStringOpt `json:"*ttlMaxDelay"`
+	TTLUsage               []*utils.DynamicStringOpt `json:"*ttlUsage"`
 }
 
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
-	Enabled                *bool
-	Listen_bijson          *string
-	Listen_bigob           *string
-	Chargers_conns         *[]string
-	Resources_conns        *[]string
-	Thresholds_conns       *[]string
-	Stats_conns            *[]string
-	Routes_conns           *[]string
-	Cdrs_conns             *[]string
-	Replication_conns      *[]string
-	Attributes_conns       *[]string
-	Actions_conns          *[]string
-	Rates_conns            *[]string
-	Accounts_conns         *[]string
-	Debit_interval         *string
-	Store_session_costs    *bool
-	Session_ttl            *string
-	Session_ttl_max_delay  *string
-	Session_ttl_last_used  *string
-	Session_ttl_usage      *string
-	Session_ttl_last_usage *string
-	Session_indexes        *[]string
-	Client_protocol        *float64
-	Channel_sync_interval  *string
-	Terminate_attempts     *int
-	Alterable_fields       *[]string
-	Min_dur_low_balance    *string
-	Stir                   *STIRJsonCfg
-	Default_usage          map[string]string
-	Opts                   *SessionsOptsJson
+	Enabled               *bool
+	Listen_bijson         *string
+	Listen_bigob          *string
+	Chargers_conns        *[]string
+	Resources_conns       *[]string
+	Thresholds_conns      *[]string
+	Stats_conns           *[]string
+	Routes_conns          *[]string
+	Cdrs_conns            *[]string
+	Replication_conns     *[]string
+	Attributes_conns      *[]string
+	Actions_conns         *[]string
+	Rates_conns           *[]string
+	Accounts_conns        *[]string
+	Store_session_costs   *bool
+	Session_indexes       *[]string
+	Client_protocol       *float64
+	Channel_sync_interval *string
+	Terminate_attempts    *int
+	Alterable_fields      *[]string
+	Min_dur_low_balance   *string
+	Stir                  *STIRJsonCfg
+	Default_usage         map[string]string
+	Opts                  *SessionsOptsJson
 }
 
 func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *SessionsOptsJson {
@@ -1004,20 +915,20 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !utils.DynamicBoolOptEqual(v1.Chargeable, v2.Chargeable) {
 		d.Chargeable = v2.Chargeable
 	}
-	if !utils.DynamicDurationPointerOptEqual(v1.LastUsage, v2.LastUsage) {
-		d.LastUsage = utils.DurationPointerToStringDynamicOpts(v2.LastUsage)
+	if !utils.DynamicDurationPointerOptEqual(v1.TTLLastUsage, v2.TTLLastUsage) {
+		d.TTLLastUsage = utils.DurationPointerToStringDynamicOpts(v2.TTLLastUsage)
 	}
-	if !utils.DynamicDurationPointerOptEqual(v1.LastUsed, v2.LastUsed) {
-		d.LastUsed = utils.DurationPointerToStringDynamicOpts(v2.LastUsed)
+	if !utils.DynamicDurationPointerOptEqual(v1.TTLLastUsed, v2.TTLLastUsed) {
+		d.TTLLastUsed = utils.DurationPointerToStringDynamicOpts(v2.TTLLastUsed)
 	}
 	if !utils.DynamicDurationOptEqual(v1.DebitInterval, v2.DebitInterval) {
 		d.DebitInterval = utils.DurationToStringDynamicOpts(v2.DebitInterval)
 	}
-	if !utils.DynamicDurationOptEqual(v1.MaxDelay, v2.MaxDelay) {
-		d.MaxDelay = utils.DurationToStringDynamicOpts(v2.MaxDelay)
+	if !utils.DynamicDurationOptEqual(v1.TTLMaxDelay, v2.TTLMaxDelay) {
+		d.TTLMaxDelay = utils.DurationToStringDynamicOpts(v2.TTLMaxDelay)
 	}
-	if !utils.DynamicDurationPointerOptEqual(v1.Usage, v2.Usage) {
-		d.Usage = utils.DurationPointerToStringDynamicOpts(v2.Usage)
+	if !utils.DynamicDurationPointerOptEqual(v1.TTLUsage, v2.TTLUsage) {
+		d.TTLUsage = utils.DurationPointerToStringDynamicOpts(v2.TTLUsage)
 	}
 	return d
 }
@@ -1065,46 +976,8 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
 		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
-	if v1.DebitInterval != v2.DebitInterval {
-		d.Debit_interval = utils.StringPointer(v2.DebitInterval.String())
-	}
 	if v1.StoreSCosts != v2.StoreSCosts {
 		d.Store_session_costs = utils.BoolPointer(v2.StoreSCosts)
-	}
-	if v1.SessionTTL != v2.SessionTTL {
-		d.Session_ttl = utils.StringPointer(v2.SessionTTL.String())
-	}
-	if v2.SessionTTLMaxDelay != nil {
-		if v1.SessionTTLMaxDelay == nil ||
-			*v1.SessionTTLMaxDelay != *v2.SessionTTLMaxDelay {
-			d.Session_ttl_max_delay = utils.StringPointer(v2.SessionTTLMaxDelay.String())
-		}
-	} else {
-		d.Session_ttl_max_delay = nil
-	}
-	if v2.SessionTTLLastUsed != nil {
-		if v1.SessionTTLLastUsed == nil ||
-			*v1.SessionTTLLastUsed != *v2.SessionTTLLastUsed {
-			d.Session_ttl_last_used = utils.StringPointer(v2.SessionTTLLastUsed.String())
-		}
-	} else {
-		d.Session_ttl_last_used = nil
-	}
-	if v2.SessionTTLUsage != nil {
-		if v1.SessionTTLUsage == nil ||
-			*v1.SessionTTLUsage != *v2.SessionTTLUsage {
-			d.Session_ttl_usage = utils.StringPointer(v2.SessionTTLUsage.String())
-		}
-	} else {
-		d.Session_ttl_usage = nil
-	}
-	if v2.SessionTTLLastUsage != nil {
-		if v1.SessionTTLLastUsage == nil ||
-			*v1.SessionTTLLastUsage != *v2.SessionTTLLastUsage {
-			d.Session_ttl_last_usage = utils.StringPointer(v2.SessionTTLLastUsage.String())
-		}
-	} else {
-		d.Session_ttl_last_usage = nil
 	}
 	if !v1.SessionIndexes.Equals(v2.SessionIndexes) {
 		d.Session_indexes = utils.SliceStringPointer(v2.SessionIndexes.AsSlice())

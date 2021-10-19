@@ -2008,9 +2008,10 @@ const (
 	MetaTTLCfg                    = "*ttl"
 	MetaChargeableCfg             = "*chargeable"
 	MetaDebitIntervalCfg          = "*debitInterval"
-	MetaLastUsageCfg              = "*lastUsage"
-	MetaLastUsedCfg               = "*lastUsed"
-	MetaMaxDelayCfg               = "*maxDelay"
+	MetaTTLLastUsageCfg           = "*ttlLastUsage"
+	MetaTTLLastUsedCfg            = "*ttlLastUsed"
+	MetaTTLMaxDelayCfg            = "*ttlMaxDelay"
+	MetaTTLUsageCfg               = "*ttlUsage"
 
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"
