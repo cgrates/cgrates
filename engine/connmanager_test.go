@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -590,5 +591,47 @@ func TestCMReload(t *testing.T) {
 
 	if !reflect.DeepEqual(rcv2, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv2)
+	}
+}
+
+func TestCMDeadLock(t *testing.T) {
+	// to not break the next tests reset the values
+	tCh := Cache
+	tCfg := config.CgrConfig()
+	tCM := connMgr
+	defer func() {
+		Cache = tCh
+		config.SetCgrConfig(tCfg)
+		connMgr = tCM
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	// define a dummy replication conn
+	cfg.CacheCfg().ReplicationConns = []string{"test"}
+	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	config.SetCgrConfig(cfg)
+
+	Cache = NewCacheS(cfg, nil, nil)
+
+	iCh := make(chan rpcclient.ClientConnector, 1)
+	iCn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
+	iCh <- Cache
+	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{iCn: iCh})
+
+	var reply string
+	connMgr.Call([]string{iCn}, nil, utils.CacheSv1Clear,
+		new(utils.AttrCacheIDsWithAPIOpts), &reply) // just cache a connection
+
+	done := make(chan struct{}) // signal
+
+	go func() {
+		Cache.Clear(nil)
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("Deadlock on cache")
 	}
 }
