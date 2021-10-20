@@ -119,6 +119,10 @@ func (cgr *CGREngine) GetServDeps() map[string]*sync.WaitGroup {
 	return cgr.srvDep
 }
 
+func (cgr *CGREngine) GetDbService() *DataDBService {
+	return cgr.dmS
+}
+
 func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefix string,
 	iConnCh chan birpc.ClientConnector) {
 	cgr.srvManager.AddServices(service)
