@@ -2460,3 +2460,673 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 	}
 
 }
+
+func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	//inactive MetaProfileIgnoreFilters opt but correct filter
+	accPrf := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "AC1",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+	}
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAccountsProfileIDs:   []string{"AC1"},
+			utils.MetaProfileIgnoreFilters: false,
+		},
+	}
+	rply := make([]*utils.Account, 0)
+	if err := dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	} else if err := accnts.V1AccountsForEvent(context.Background(), ev, &rply); err != nil {
+		t.Errorf("Expected %+v, received %+v", nil, err)
+	} else if !reflect.DeepEqual(rply[0], accPrf) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rply[0]), utils.ToJSON(accPrf))
+	}
+	//active MetaProfileIgnoreFilters opt
+	ev2 := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAccountsProfileIDs:   []string{"AC1"},
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+	rply2 := make([]*utils.Account, 0)
+	if err := dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	} else if err := accnts.V1AccountsForEvent(context.Background(), ev2, &rply2); err != nil {
+		t.Errorf("Expected %+v, received %+v", nil, err)
+	} else if !reflect.DeepEqual(rply2[0], accPrf) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rply2[0]), utils.ToJSON(accPrf))
+	}
+	//for error case
+	ev3 := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAccountsProfileIDs:   []string{"AC1"},
+			utils.MetaProfileIgnoreFilters: time.Second,
+		},
+	}
+	rply3 := make([]*utils.Account, 0)
+	if err := dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	} else if err := accnts.V1AccountsForEvent(context.Background(), ev3, &rply3); err == nil || err.Error() != "received cannot convert field: 1s to bool" {
+		t.Errorf("Expected %+v, received %+v", nil, err)
+	}
+}
+
+func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accPrf := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1MaxAbstracts",
+		Weights: []*utils.DynamicWeight{
+			{
+				FilterIDs: []string{"invalid_filter"},
+				Weight:    0,
+			},
+		},
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+			"ConcreteBalance2": {
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight:    20,
+						FilterIDs: []string{"invalid_filter"},
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(213, 0),
+			},
+		},
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                "210ns",
+			utils.OptsAccountsProfileIDs:   []string{"TestV1MaxAbstracts"},
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+	reply := utils.EventCharges{}
+	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter"
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	accPrf.Weights[0].FilterIDs = []string{}
+
+	expected = "NOT_FOUND:invalid_filter"
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	delete(accPrf.Balances, "ConcreteBalance2")
+
+	exEvCh := utils.EventCharges{
+		Abstracts: utils.NewDecimal(210, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID1": {
+				AccountID:    "TestV1MaxAbstracts",
+				BalanceID:    "AbstractBalance1",
+				Units:        utils.NewDecimal(210, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+				RatingID:     "GENUUID_RATING",
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating: map[string]*utils.RateSInterval{
+			"GENUUID_RATING": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: make(map[string]*utils.IntervalRate),
+		Accounts: map[string]*utils.Account{
+			"TestV1MaxAbstracts": accPrf,
+		},
+	}
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		exEvCh.Accounts["TestV1MaxAbstracts"].Balances["AbstractBalance1"].Units = utils.NewDecimal(int64(40*time.Second-210), 0)
+		if !reply.Equals(&exEvCh) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
+		}
+	}
+}
+
+func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accPrf := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1MaxAbstracts",
+		Weights: []*utils.DynamicWeight{
+			{
+				FilterIDs: []string{"invalid_filter"},
+				Weight:    0,
+			},
+		},
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight:    25,
+						FilterIDs: []string{"invalid_filter"},
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"ConcreteBalance2": {
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(213, 0), // 213 - 27
+			},
+		},
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                "27s",
+			utils.OptsAccountsProfileIDs:   []string{"TestV1MaxAbstracts"},
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+	reply := utils.EventCharges{}
+
+	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter"
+	if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	accPrf.Weights[0].FilterIDs = []string{}
+
+	expected = "NOT_FOUND:invalid_filter"
+	if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
+
+	exEvCh := utils.EventCharges{
+		Abstracts: utils.NewDecimal(int64(27*time.Second), 0),
+		Concretes: utils.NewDecimal(27, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "CHARGE1",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"CHARGE1": {
+				AccountID:       "TestV1MaxAbstracts",
+				BalanceID:       "AbstractBalance1",
+				Units:           utils.NewDecimal(int64(27*time.Second), 0),
+				BalanceLimit:    utils.NewDecimal(0, 0),
+				RatingID:        "RATING1",
+				JoinedChargeIDs: []string{"JoinedCh1"},
+			},
+			"JoinedCh1": {
+				AccountID:    "TestV1MaxAbstracts",
+				BalanceID:    "ConcreteBalance2",
+				BalanceLimit: utils.NewDecimal(0, 0),
+				Units:        utils.NewDecimal(27, 0),
+			},
+		},
+		UnitFactors: make(map[string]*utils.UnitFactor),
+		Rating: map[string]*utils.RateSInterval{
+			"RATING1": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateID:         "41ded73",
+						CompressFactor: 1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: make(map[string]*utils.IntervalRate),
+		Accounts: map[string]*utils.Account{
+			"TestV1MaxAbstracts": accPrf,
+		},
+	}
+	if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		exEvCh.Accounts["TestV1MaxAbstracts"].Balances["AbstractBalance1"].Units = utils.NewDecimal(int64(13*time.Second), 0)
+		exEvCh.Accounts["TestV1MaxAbstracts"].Balances["ConcreteBalance2"].Units = utils.NewDecimal(186, 0)
+		if !exEvCh.Equals(&reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
+		}
+	}
+
+	//now we'll check the debited account
+	accPrf.Balances["AbstractBalance1"].Units = utils.NewDecimal(int64(13*time.Second), 0)
+	accPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(186, 0)
+	if debitedAcc, err := accnts.dm.GetAccount(context.Background(), accPrf.Tenant, accPrf.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(accPrf, debitedAcc) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(accPrf), utils.ToJSON(debitedAcc))
+	}
+}
+
+func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accPrf := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1DebitAbstracts",
+		Weights: []*utils.DynamicWeight{
+			{
+				FilterIDs: []string{"invalid_filter"},
+				Weight:    0,
+			},
+		},
+		FilterIDs: []string{"*string:~*req.TestFieldAcccount:testValue"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight:    15,
+						FilterIDs: []string{"invalid_filter"},
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"ConcreteBalance1": {
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(int64(time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"ConcreteBalance2": {
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(int64(30*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField:  "1004",
+			"TestFieldAcccount": "testValue1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                "3m",
+			utils.OptsAccountsProfileIDs:   []string{"TestV1DebitAbstracts"},
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+	reply := utils.EventCharges{}
+	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter"
+	if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	accPrf.Weights[0].FilterIDs = []string{}
+
+	expected = "NOT_FOUND:invalid_filter"
+	if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
+
+	exEvCh := utils.EventCharges{
+		Concretes: utils.NewDecimal(int64(31*time.Second), 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID1": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance1",
+				Units:        utils.NewDecimal(int64(time.Second), 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+			"GENUUID2": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance2",
+				Units:        utils.NewDecimal(int64(30*time.Second), 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
+			"TestV1DebitAbstracts": accPrf,
+		},
+	}
+	if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err != nil {
+		t.Error(err)
+	} else {
+		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
+		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
+		if !exEvCh.Equals(&reply) {
+			//if !reflect.DeepEqual(exEvCh, reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
+		}
+	}
+}
+
+func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accPrf := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1DebitAbstracts",
+		Weights: []*utils.DynamicWeight{
+			{
+				FilterIDs: []string{"invalid_filter"},
+				Weight:    0,
+			},
+		},
+		FilterIDs: []string{"*string:~*req.TestFieldAcccount: testValue"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight:    15,
+						FilterIDs: []string{"invalid_filter"},
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"ConcreteBalance1": {
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(int64(time.Minute), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Minute), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"ConcreteBalance2": {
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(int64(30*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Minute), 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField:  "1004",
+			"TestFieldAcccount": "testValue1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                "3m",
+			utils.OptsAccountsProfileIDs:   []string{"TestV1DebitAbstracts"},
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+	reply := utils.EventCharges{}
+	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter"
+	if err := accnts.V1DebitConcretes(context.Background(), args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	accPrf.Weights[0].FilterIDs = []string{}
+
+	expected = "NOT_FOUND:invalid_filter"
+	if err := accnts.V1DebitConcretes(context.Background(), args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
+
+	exEvCh := utils.EventCharges{
+		Concretes: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID1": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance1",
+				Units:        utils.NewDecimal(60000000000, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+			"GENUUID2": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance2",
+				Units:        utils.NewDecimal(30000000000, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
+			"TestV1DebitAbstracts": accPrf,
+		},
+	}
+	if err := accnts.V1DebitConcretes(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
+		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
+		if !exEvCh.Equals(&reply) {
+			//if !reflect.DeepEqual(exEvCh, reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
+		}
+	}
+
+	//now we will check the debited account
+	rcv, err := accnts.dm.GetAccount(context.Background(), "cgrates.org", "TestV1DebitAbstracts")
+	if err != nil {
+		t.Error(err)
+	}
+	accPrf.Balances["ConcreteBalance1"].Units = &utils.Decimal{decimal.New(0, 0)}
+	accPrf.Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(0, 0)}
+	if !reflect.DeepEqual(rcv, accPrf) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcv))
+	}
+}
