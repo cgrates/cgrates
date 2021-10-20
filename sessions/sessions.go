@@ -1237,7 +1237,15 @@ func (sS *SessionS) updateSession(ctx *context.Context, s *Session, updtEv, opts
 		s.updateSRuns(updtEv, sS.cgrCfg.SessionSCfg().AlterableFields)
 		sS.setSTerminator(s, opts) // reset the terminator
 	}
-	s.chargeable = opts.GetBoolOrDefault(utils.OptsSesChargeable, true)
+	event := &utils.CGREvent{
+		Tenant:  s.Tenant,
+		Event:   updtEv,
+		APIOpts: opts,
+	}
+	if s.chargeable, err = engine.GetBoolOpts(ctx, event.Tenant, event, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
+		config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
+		return
+	}
 	//init has no updtEv
 	if updtEv == nil {
 		updtEv = engine.MapEvent(s.EventStart.Clone())
@@ -1823,21 +1831,21 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		rply.ResourceAllocation = &allocMessage
 	}
 	if initS {
-		var err error
 		var dbtItvl time.Duration
 		if dbtItvl, err = engine.GetDurationOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.DebitInterval,
 			config.SessionsDebitIntervalDftOpt, utils.OptsSesDebitInterval); err != nil {
-			return err
+			return
 		}
 		var forceDuration bool
 		if forceDuration, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.ForceDuration,
 			config.SessionsForceDurationDftOpt, utils.OptsSesForceDuration); err != nil {
-			return err
+			return
 		}
-		s, err := sS.initSession(ctx, args, sS.biJClntID(ctx.Client), originID, dbtItvl,
+		var s *Session
+		s, err = sS.initSession(ctx, args, sS.biJClntID(ctx.Client), originID, dbtItvl,
 			false, forceDuration)
 		if err != nil {
-			return err
+			return
 		}
 		s.RLock() // avoid concurrency with activeDebit
 		isPrepaid := s.debitStop != nil
@@ -1847,7 +1855,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		} else {
 			var sRunsUsage map[string]time.Duration
 			if sRunsUsage, err = sS.updateSession(ctx, s, nil, args.APIOpts, false); err != nil {
-				return err //utils.NewErrRALs(err)
+				return //utils.NewErrRALs(err)
 			}
 
 			var maxUsage time.Duration
