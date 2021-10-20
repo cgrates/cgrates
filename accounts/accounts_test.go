@@ -2533,8 +2533,8 @@ func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
 	rply3 := make([]*utils.Account, 0)
 	if err := dm.SetAccount(context.Background(), accPrf, true); err != nil {
 		t.Error(err)
-	} else if err := accnts.V1AccountsForEvent(context.Background(), ev3, &rply3); err == nil || err.Error() != "received cannot convert field: 1s to bool" {
-		t.Errorf("Expected %+v, received %+v", nil, err)
+	} else if err := accnts.V1AccountsForEvent(context.Background(), ev3, &rply3); err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("Expected %+v, received %+v", "cannot convert field: 1s to bool", err)
 	}
 }
 
