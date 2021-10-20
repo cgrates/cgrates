@@ -43,7 +43,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		UseBasicAuth:      false,
 		AuthUsers:         map[string]string{},
 		ClientOpts: map[string]interface{}{
-			utils.HTTPClientTLSClientConfigCfg:       false,
+			utils.HTTPClientSkipTLSVerificationCfg:   false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 			utils.HTTPClientDisableKeepAlivesCfg:     false,
 			utils.HTTPClientDisableCompressionCfg:    false,
@@ -85,7 +85,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 		utils.HTTPUseBasicAuthCfg:      false,
 		utils.HTTPAuthUsersCfg:         map[string]string{},
 		utils.HTTPClientOptsCfg: map[string]interface{}{
-			utils.HTTPClientTLSClientConfigCfg:       false,
+			utils.HTTPClientSkipTLSVerificationCfg:   false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 			utils.HTTPClientDisableKeepAlivesCfg:     false,
 			utils.HTTPClientDisableCompressionCfg:    false,
@@ -129,7 +129,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 			"user2": "authenticated",
 		},
 		utils.HTTPClientOptsCfg: map[string]interface{}{
-			utils.HTTPClientTLSClientConfigCfg:       false,
+			utils.HTTPClientSkipTLSVerificationCfg:   false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 			utils.HTTPClientDisableKeepAlivesCfg:     false,
 			utils.HTTPClientDisableCompressionCfg:    false,
@@ -164,14 +164,14 @@ func TestHTTPCfgClone(t *testing.T) {
 			"user": "pass",
 		},
 		ClientOpts: map[string]interface{}{
-			utils.HTTPClientTLSClientConfigCfg: false,
+			utils.HTTPClientSkipTLSVerificationCfg: false,
 		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.ClientOpts[utils.HTTPClientTLSClientConfigCfg] = ""; ban.ClientOpts[utils.HTTPClientTLSClientConfigCfg] != false {
+	if rcv.ClientOpts[utils.HTTPClientSkipTLSVerificationCfg] = ""; ban.ClientOpts[utils.HTTPClientSkipTLSVerificationCfg] != false {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.AuthUsers["user"] = ""; ban.AuthUsers["user"] != "pass" {

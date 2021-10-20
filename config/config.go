@@ -104,10 +104,12 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Items: make(map[string]*ItemOpt),
 			Opts:  &StorDBOpts{},
 		},
-		tlsCfg:     new(TLSCfg),
-		cacheCfg:   &CacheCfg{Partitions: make(map[string]*CacheParamCfg)},
-		listenCfg:  new(ListenCfg),
-		httpCfg:    &HTTPCfg{ClientOpts: make(map[string]interface{})},
+		tlsCfg:    new(TLSCfg),
+		cacheCfg:  &CacheCfg{Partitions: make(map[string]*CacheParamCfg)},
+		listenCfg: new(ListenCfg),
+		httpCfg: &HTTPCfg{
+			ClientOpts: &HTTPClientOpts{},
+		},
 		filterSCfg: new(FilterSCfg),
 		cdrsCfg: &CdrsCfg{Opts: &CdrsOpts{
 			Accounts:   []*utils.DynamicBoolOpt{},

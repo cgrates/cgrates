@@ -1786,7 +1786,7 @@ const (
 	HTTPAuthUsersCfg         = "auth_users"
 	HTTPClientOptsCfg        = "client_opts"
 
-	HTTPClientTLSClientConfigCfg       = "skipTlsVerify"
+	HTTPClientSkipTLSVerificationCfg   = "skipTLSVerification"
 	HTTPClientTLSHandshakeTimeoutCfg   = "tlsHandshakeTimeout"
 	HTTPClientDisableKeepAlivesCfg     = "disableKeepAlives"
 	HTTPClientDisableCompressionCfg    = "disableCompression"

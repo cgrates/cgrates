@@ -3956,7 +3956,7 @@ func TestV1GetConfigHTTP(t *testing.T) {
 			utils.HTTPUseBasicAuthCfg:      false,
 			utils.HTTPAuthUsersCfg:         map[string]string{},
 			utils.HTTPClientOptsCfg: map[string]interface{}{
-				utils.HTTPClientTLSClientConfigCfg:       false,
+				utils.HTTPClientSkipTLSVerificationCfg:   false,
 				utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 				utils.HTTPClientDisableKeepAlivesCfg:     false,
 				utils.HTTPClientDisableCompressionCfg:    false,
@@ -5080,7 +5080,7 @@ func TestV1GetConfigAsJSONAccounts(t *testing.T) {
 
 func TestV1GetConfigAsJSONHTTP(t *testing.T) {
 	var reply string
-	expected := `{"http":{"auth_users":{},"client_opts":{"dialFallbackDelay":"300ms","dialKeepAlive":"30s","dialTimeout":"30s","disableCompression":false,"disableKeepAlives":false,"expectContinueTimeout":"0","forceAttemptHttp2":true,"idleConnTimeout":"90s","maxConnsPerHost":0,"maxIdleConns":100,"maxIdleConnsPerHost":2,"responseHeaderTimeout":"0","skipTlsVerify":false,"tlsHandshakeTimeout":"10s"},"freeswitch_cdrs_url":"/freeswitch_json","http_cdrs":"/cdr_http","json_rpc_url":"/jsonrpc","registrars_url":"/registrar","use_basic_auth":false,"ws_url":"/ws"}}`
+	expected := `{"http":{"auth_users":{},"client_opts":{"dialFallbackDelay":"300ms","dialKeepAlive":"30s","dialTimeout":"30s","disableCompression":false,"disableKeepAlives":false,"expectContinueTimeout":"0","forceAttemptHttp2":true,"idleConnTimeout":"90s","maxConnsPerHost":0,"maxIdleConns":100,"maxIdleConnsPerHost":2,"responseHeaderTimeout":"0","skipTLSVerification":false,"tlsHandshakeTimeout":"10s"},"freeswitch_cdrs_url":"/freeswitch_json","http_cdrs":"/cdr_http","json_rpc_url":"/jsonrpc","registrars_url":"/registrar","use_basic_auth":false,"ws_url":"/ws"}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{HTTPJSON}}, &reply); err != nil {
 		t.Error(err)
