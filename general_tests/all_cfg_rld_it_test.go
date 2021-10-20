@@ -155,7 +155,7 @@ package general_tests
 // 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl4))
 // 	}
 
-// 	cfgStr = "{\"http\":{\"auth_users\":{},\"client_opts\":{\"dialFallbackDelay\":\"300ms\",\"dialKeepAlive\":\"30s\",\"dialTimeout\":\"30s\",\"disableCompression\":false,\"disableKeepAlives\":false,\"expectContinueTimeout\":\"0\",\"forceAttemptHttp2\":true,\"idleConnTimeout\":\"90s\",\"maxConnsPerHost\":0,\"maxIdleConns\":100,\"maxIdleConnsPerHost\":2,\"responseHeaderTimeout\":\"0\",\"skipTlsVerify\":false,\"tlsHandshakeTimeout\":\"10s\"},\"freeswitch_cdrs_url\":\"/freeswitch_json\",\"http_cdrs\":\"/cdr_http\",\"json_rpc_url\":\"/jsonrpc\",\"registrars_url\":\"/registrar\",\"use_basic_auth\":false,\"ws_url\":\"/ws\"}}"
+// 	cfgStr = "{\"http\":{\"auth_users\":{},\"client_opts\":{\"dialFallbackDelay\":\"300ms\",\"dialKeepAlive\":\"30s\",\"dialTimeout\":\"30s\",\"disableCompression\":false,\"disableKeepAlives\":false,\"expectContinueTimeout\":\"0\",\"forceAttemptHttp2\":true,\"idleConnTimeout\":\"90s\",\"maxConnsPerHost\":0,\"maxIdleConns\":100,\"maxIdleConnsPerHost\":2,\"responseHeaderTimeout\":\"0\",\"skipTLSVerification\":false,\"tlsHandshakeTimeout\":\"10s\"},\"freeswitch_cdrs_url\":\"/freeswitch_json\",\"http_cdrs\":\"/cdr_http\",\"json_rpc_url\":\"/jsonrpc\",\"registrars_url\":\"/registrar\",\"use_basic_auth\":false,\"ws_url\":\"/ws\"}}"
 
 // 	var rpl5 string
 // 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{

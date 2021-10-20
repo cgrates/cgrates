@@ -29,7 +29,7 @@ import (
 
 func TestNewHTTPTransport(t *testing.T) {
 	opts := map[string]interface{}{
-		utils.HTTPClientTLSClientConfigCfg:       false,
+		utils.HTTPClientSkipTLSVerificationCfg:   false,
 		utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 		utils.HTTPClientDisableKeepAlivesCfg:     false,
 		utils.HTTPClientDisableCompressionCfg:    false,
@@ -138,7 +138,7 @@ func TestNewHTTPTransport(t *testing.T) {
 	if _, err := NewHTTPTransport(opts); err == nil {
 		t.Error("Expected error but the transport was builded succesfully")
 	}
-	opts[utils.HTTPClientTLSClientConfigCfg] = "string"
+	opts[utils.HTTPClientSkipTLSVerificationCfg] = "string"
 	if _, err := NewHTTPTransport(opts); err == nil {
 		t.Error("Expected error but the transport was builded succesfully")
 	}

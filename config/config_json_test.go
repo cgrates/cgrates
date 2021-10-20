@@ -1719,7 +1719,7 @@ func TestDfHttpJsonCfg(t *testing.T) {
 		Use_basic_auth:      utils.BoolPointer(false),
 		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
 		Client_opts: map[string]interface{}{
-			utils.HTTPClientTLSClientConfigCfg:       false,
+			utils.HTTPClientSkipTLSVerificationCfg:   false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 			utils.HTTPClientDisableKeepAlivesCfg:     false,
 			utils.HTTPClientDisableCompressionCfg:    false,

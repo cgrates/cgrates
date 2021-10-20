@@ -176,7 +176,7 @@
 // 	"use_basic_auth": false,								// use basic authentication
 // 	"auth_users": {},										// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 // 	"client_opts":{
-// 		"skipTlsVerify": false, 							// if enabled Http Client will accept any TLS certificate
+// 		"skipTLSVerification": false, 							// if enabled Http Client will accept any TLS certificate
 // 		// the options to configure the http.Transport
 // 		"tlsHandshakeTimeout": "10s",
 // 		"disableKeepAlives": false,
