@@ -62,8 +62,13 @@ func (e *RPCee) Cfg() (eCfg *config.EventExporterCfg) {
 
 func (e *RPCee) Connect() (err error) {
 	e.Lock()
-	if e.conn, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, e.cfg.ExportPath, e.tls, e.keyPath, e.certPath, e.caPath, 1, 1, e.connTimeout, e.replyTimeout, e.codec, nil, false, nil); err != nil {
-		return err
+	if e.conn != nil {
+		var conn *rpcclient.RPCClient
+		conn, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, e.cfg.ExportPath, e.tls,
+			e.keyPath, e.certPath, e.caPath, 1, 1, e.connTimeout, e.replyTimeout, e.codec, nil, false, nil)
+		if err == nil {
+			e.conn = conn
+		}
 	}
 	e.Unlock()
 	return
