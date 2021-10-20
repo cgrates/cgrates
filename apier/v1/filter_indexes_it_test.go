@@ -113,6 +113,7 @@ var (
 
 // Test start here
 func TestFIdxV1IT(t *testing.T) {
+	tSv1InternalRestart = false
 	switch *dbType {
 	case utils.MetaInternal:
 		tSv1ConfDIR = "tutinternal"
@@ -139,6 +140,13 @@ func testV1FIdxLoadConfig(t *testing.T) {
 }
 
 func testV1FIdxdxInitDataDb(t *testing.T) {
+	if *dbType == utils.MetaInternal && tSv1InternalRestart {
+		testV1FIdxHStopEngine(t)
+		testV1FIdxStartEngine(t)
+		testV1FIdxRpcConn(t)
+		return
+	}
+	tSv1InternalRestart = true
 	if err := engine.InitDataDb(tSv1Cfg); err != nil {
 		t.Fatal(err)
 	}

@@ -36,11 +36,12 @@ import (
 )
 
 var (
-	fltrCfgPath string
-	fltrCfg     *config.CGRConfig
-	fltrRpc     *rpc.Client
-	fltrConfDIR string //run tests for specific configuration
-	fltrDelay   int
+	fltrCfgPath         string
+	fltrCfg             *config.CGRConfig
+	fltrRpc             *rpc.Client
+	fltrConfDIR         string //run tests for specific configuration
+	fltrDelay           int
+	fltrInternalRestart bool // to reset db on internal restart engine
 
 	sTestsFltr = []func(t *testing.T){
 		testV1FltrLoadConfig,
@@ -98,6 +99,13 @@ func testV1FltrLoadConfig(t *testing.T) {
 }
 
 func testV1FltrInitDataDb(t *testing.T) {
+	if *dbType == utils.MetaInternal && fltrInternalRestart {
+		testV1FltrStopEngine(t)
+		testV1FltrStartEngine(t)
+		testV1FltrRpcConn(t)
+		return
+	}
+	fltrInternalRestart = true
 	if err := engine.InitDataDb(fltrCfg); err != nil {
 		t.Fatal(err)
 	}

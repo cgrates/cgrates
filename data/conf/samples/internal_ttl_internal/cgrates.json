@@ -20,14 +20,11 @@
 
 "stor_db": {
 	"db_type": "*internal",	
-},
-
-
-"caches":{
-	"partitions": {
+	"items":{
 		"*cdrs": {"limit": -1, "ttl": "1s"}, 		
-	},
+	}
 },
+
 
 "rals": {
 	"enabled": true,

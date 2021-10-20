@@ -236,7 +236,6 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	} else if !reflect.DeepEqual(alsPrf.Attributes[0].Value[0].Rules, cdrs[0].Subject) {
 		t.Errorf("Expecting: %+v, received: %+v", alsPrf.Attributes[0].Value[0].Rules, cdrs[0].Subject)
 	}
-	return
 }
 
 func testV1CDRsProcessEventChrgS(t *testing.T) {
@@ -580,7 +579,7 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()
-		if strings.HasPrefix(fileName, "EventExporterS|") {
+		if strings.HasPrefix(fileName, "EEs|") {
 			foundFile = true
 			filePath := path.Join(pecdrsCfg.GeneralCfg().FailedPostsDir, fileName)
 			ev, err := ees.NewExportEventsFromFile(filePath)
