@@ -20,6 +20,7 @@ package ees
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -37,8 +38,8 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 
 func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(5 * time.Second)
-	AddFailedPost("", "path1", "format1", "module1", "1", make(map[string]interface{}))
-	x, ok := failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1", "module1"))
+	AddFailedPost("", "path1", "format1", "1", make(map[string]interface{}))
+	x, ok := failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1"))
 	if !ok {
 		t.Error("Error reading from cache")
 	}
@@ -53,16 +54,15 @@ func TestAddFldPost(t *testing.T) {
 	eOut := &ExportEvents{
 		Path:   "path1",
 		Format: "format1",
-		module: "module1",
 		Events: []interface{}{"1"},
 		Opts:   make(map[string]interface{}),
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	AddFailedPost("", "path1", "format1", "module1", "2", make(map[string]interface{}))
-	AddFailedPost("", "path2", "format2", "module2", "3", map[string]interface{}{utils.SQSQueueID: "qID"})
-	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1", "module1"))
+	AddFailedPost("", "path1", "format1", "2", make(map[string]interface{}))
+	AddFailedPost("", "path2", "format2", "3", map[string]interface{}{utils.SQSQueueID: "qID"})
+	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1"))
 	if !ok {
 		t.Error("Error reading from cache")
 	}
@@ -76,14 +76,13 @@ func TestAddFldPost(t *testing.T) {
 	eOut = &ExportEvents{
 		Path:   "path1",
 		Format: "format1",
-		module: "module1",
 		Events: []interface{}{"1", "2"},
 		Opts:   make(map[string]interface{}),
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path2", "format2", "module2", "qID"))
+	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path2", "format2", "qID"))
 	if !ok {
 		t.Error("Error reading from cache")
 	}
@@ -97,7 +96,6 @@ func TestAddFldPost(t *testing.T) {
 	eOut = &ExportEvents{
 		Path:   "path2",
 		Format: "format2",
-		module: "module2",
 		Events: []interface{}{"3"},
 		Opts:   map[string]interface{}{utils.SQSQueueID: "qID"},
 	}
@@ -112,32 +110,15 @@ func TestAddFldPost(t *testing.T) {
 func TestFilePath(t *testing.T) {
 	exportEvent := &ExportEvents{}
 	rcv := exportEvent.FilePath()
-	if rcv[0] != '|' {
-		t.Errorf("Expecting: '|', received: %+v", rcv[0])
-	} else if rcv[8:] != ".gob" {
-		t.Errorf("Expecting: '.gob', received: %+v", rcv[8:])
+	if !strings.HasSuffix(rcv, ".gob") || !strings.HasPrefix(rcv, utils.EEs) {
+		t.Errorf("Unexpected fileName: %q", rcv) // EEs|sha1.gob
 	}
-	exportEvent = &ExportEvents{
-		module: "module",
-	}
+	exportEvent = &ExportEvents{}
 	rcv = exportEvent.FilePath()
-	if rcv[:7] != "module|" {
-		t.Errorf("Expecting: 'module|', received: %+v", rcv[:7])
-	} else if rcv[14:] != ".gob" {
-		t.Errorf("Expecting: '.gob', received: %+v", rcv[14:])
+	if !strings.HasSuffix(rcv, ".gob") || !strings.HasPrefix(rcv, utils.EEs) {
+		t.Errorf("Unexpected fileName: %q", rcv) // EEs|sha1.gob
 	}
 
-}
-
-func TestSetModule(t *testing.T) {
-	exportEvent := &ExportEvents{}
-	eOut := &ExportEvents{
-		module: "module",
-	}
-	exportEvent.SetModule("module")
-	if !reflect.DeepEqual(eOut, exportEvent) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, exportEvent)
-	}
 }
 
 func TestAddEvent(t *testing.T) {

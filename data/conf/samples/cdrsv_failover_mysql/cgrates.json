@@ -86,6 +86,7 @@
 				// "awsToken": "sessionToken",
 			},
 			"attempts": 1,
+			"failed_posts_dir": "/tmp/failed_posts",
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 			],

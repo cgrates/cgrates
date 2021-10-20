@@ -39,7 +39,6 @@ func TestWriteFldPosts(t *testing.T) {
 	dir := "/tmp/engine/libcdre_test/"
 	exportEvent := &ExportEvents{
 		failedPostsDir: dir,
-		module:         "module",
 	}
 	if err := os.RemoveAll(dir); err != nil {
 		t.Fatal("Error removing folder: ", dir, err)
@@ -50,7 +49,7 @@ func TestWriteFldPosts(t *testing.T) {
 	config.CgrConfig().GeneralCfg().FailedPostsDir = dir
 	writeFailedPosts("itmID", exportEvent)
 
-	if filename, err := filepath.Glob(filepath.Join(dir, "module|*.gob")); err != nil {
+	if filename, err := filepath.Glob(filepath.Join(dir, "EEs|*.gob")); err != nil {
 		t.Error(err)
 	} else if len(filename) == 0 {
 		t.Error("Expecting one file")

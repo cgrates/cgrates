@@ -6,7 +6,6 @@
 "general": {
 	"log_level": 7,
 	"poster_attempts": 1,
-	"failed_posts_dir": "/var/spool/cgrates/failed_posts2",	
 	"failed_posts_ttl": "1s"
 },
 
@@ -56,6 +55,8 @@
 			"type": "*http_post",
 			"export_path": "http://127.0.0.1:12081/cdr_http",
 			"attempts": 1,
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+			"synchronous": true,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
@@ -71,6 +72,8 @@
 				"amqpRoutingKey": "cgr_cdrs",
 			},
 			"attempts": 20,
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+			"synchronous": true,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
@@ -83,6 +86,8 @@
 				"amqpQueueID": "cgrates_cdrs",
 			},
 			"attempts": 1,
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+			"synchronous": true,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
@@ -99,6 +104,8 @@
 				"sqsQueueID": "cgrates-cdrs",
 			},
 			"attempts": 1,
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+			"synchronous": true,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
@@ -111,6 +118,8 @@
 				"kafkaTopic": "cgrates_cdrs",
 			},
 			"attempts": 10,
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+			"synchronous": true,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],
@@ -127,6 +136,8 @@
 				"s3BucketID": "cgrates-cdrs",
 			},
 			"attempts": 1,
+			"failed_posts_dir": "/var/spool/cgrates/failed_posts2",
+			"synchronous": true,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
 			],

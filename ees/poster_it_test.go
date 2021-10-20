@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"flag"
 	"net/http"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -79,9 +80,9 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, "test1", jsn, make(map[string]interface{}))
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, jsn, make(map[string]interface{}))
 	time.Sleep(5 * time.Millisecond)
-	fs, err := filepath.Glob("/tmp/test1*")
+	fs, err := filepath.Glob("/tmp/EEs*")
 	if err != nil {
 		t.Fatal(err)
 	} else if len(fs) == 0 {
@@ -97,6 +98,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	if !reflect.DeepEqual(jsn, ev.Events[0]) {
 		t.Errorf("Expecting: %q, received: %q", string(jsn), ev.Events[0])
 	}
+	os.Remove(fs[0])
 }
 
 func TestHttpBytesPoster(t *testing.T) {
@@ -115,7 +117,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err = ExportWithAttempts(pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, "test2", content, make(map[string]interface{}))
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, content, make(map[string]interface{}))
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test2*")
 	if err != nil {
@@ -132,6 +134,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if !reflect.DeepEqual(content, ev.Events[0]) {
 		t.Errorf("Expecting: %q, received: %q", string(content), ev.Events[0])
 	}
+	os.Remove(fs[0])
 }
 
 func TestSQSPoster(t *testing.T) {

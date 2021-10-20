@@ -336,12 +336,15 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		Items: map[string]*ItemOpt{
 			utils.MetaAccounts: {
 				Replicate: true,
+				Limit:     -1,
 			},
 			utils.MetaReverseDestinations: {
 				Replicate: false,
+				Limit:     -1,
 			},
 			utils.MetaDestinations: {
 				Replicate: false,
+				Limit:     -1,
 			},
 		},
 		Opts: map[string]interface{}{
@@ -395,10 +398,12 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			utils.MetaDispatcherHosts: {
 				Remote:    true,
 				Replicate: true,
+				Limit:     -1,
 			},
 			utils.MetaLoadIDs: {
 				Remote:    true,
 				Replicate: true,
+				Limit:     -1,
 			},
 		},
 	}
@@ -446,10 +451,10 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		},
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaTimings:           {},
-			utils.MetaResourceProfile:   {},
-			utils.MetaResources:         {},
-			utils.MetaStatQueueProfiles: {},
+			utils.MetaTimings:           {Limit: -1},
+			utils.MetaResourceProfile:   {Limit: -1},
+			utils.MetaResources:         {Limit: -1},
+			utils.MetaStatQueueProfiles: {Limit: -1},
 		},
 	}
 	dbcfg.Items = make(map[string]*ItemOpt)

@@ -9,7 +9,7 @@
 	"node_id": "TestFailCDRS",
 	"poster_attempts": 1,					// number of attempts before considering post request failed (eg: *http_post, CDR exports)
 	"failed_posts_ttl": "1s",				// time to wait before writing the failed posts in a single file
-	"failed_posts_dir": "/tmp/failed_posts"	// directory path where we store failed requests
+	"failed_posts_dir": "/tmp/failed_posts",
 },
 
 "stor_db": {
@@ -80,6 +80,7 @@
 				// "awsToken": "sessionToken",
 			},
 			"attempts": 1,
+			"failed_posts_dir": "/tmp/failed_posts",
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
 			],

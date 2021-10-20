@@ -34,7 +34,8 @@ import (
 )
 
 var (
-	tFIdxHRpc *rpc.Client
+	tFIdxHRpc           *rpc.Client
+	tSv1InternalRestart bool
 
 	sTestsFilterIndexesSHealth = []func(t *testing.T){
 		testV1FIdxHLoadConfig,
@@ -69,6 +70,7 @@ var (
 
 // Test start here
 func TestFIdxHealthIT(t *testing.T) {
+	tSv1InternalRestart = false
 	switch *dbType {
 	case utils.MetaInternal:
 		tSv1ConfDIR = "tutinternal"
@@ -95,6 +97,13 @@ func testV1FIdxHLoadConfig(t *testing.T) {
 }
 
 func testV1FIdxHdxInitDataDb(t *testing.T) {
+	if *dbType == utils.MetaInternal && tSv1InternalRestart {
+		testV1FIdxStopEngine(t)
+		testV1FIdxHStartEngine(t)
+		testV1FIdxHRpcConn(t)
+		return
+	}
+	tSv1InternalRestart = true
 	if err := engine.InitDataDb(tSv1Cfg); err != nil {
 		t.Fatal(err)
 	}

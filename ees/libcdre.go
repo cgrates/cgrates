@@ -44,7 +44,7 @@ func SetFailedPostCacheTTL(ttl time.Duration) {
 	failedPostCache = ltcache.NewCache(-1, ttl, false, writeFailedPosts)
 }
 
-func writeFailedPosts(itmID string, value interface{}) {
+func writeFailedPosts(_ string, value interface{}) {
 	expEv, canConvert := value.(*ExportEvents)
 	if !canConvert {
 		return
@@ -56,8 +56,8 @@ func writeFailedPosts(itmID string, value interface{}) {
 	}
 }
 
-func AddFailedPost(failedPostsDir, expPath, format, module string, ev interface{}, opts map[string]interface{}) {
-	key := utils.ConcatenatedKey(failedPostsDir, expPath, format, module)
+func AddFailedPost(failedPostsDir, expPath, format string, ev interface{}, opts map[string]interface{}) {
+	key := utils.ConcatenatedKey(failedPostsDir, expPath, format)
 	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
 	if qID := utils.FirstNonEmpty(
 		utils.IfaceAsString(opts[utils.AMQPQueueID]),
@@ -77,7 +77,6 @@ func AddFailedPost(failedPostsDir, expPath, format, module string, ev interface{
 			Path:           expPath,
 			Format:         format,
 			Opts:           opts,
-			module:         module,
 			failedPostsDir: failedPostsDir,
 		}
 	}
@@ -112,17 +111,11 @@ type ExportEvents struct {
 	Format         string
 	Events         []interface{}
 	failedPostsDir string
-	module         string
 }
 
 // FilePath returns the file path it should use for saving the failed events
 func (expEv *ExportEvents) FilePath() string {
-	return path.Join(expEv.failedPostsDir, expEv.module+utils.PipeSep+utils.UUIDSha1Prefix()+utils.GOBSuffix)
-}
-
-// SetModule sets the module for this event
-func (expEv *ExportEvents) SetModule(mod string) {
-	expEv.module = mod
+	return path.Join(expEv.failedPostsDir, utils.EEs+utils.PipeSep+utils.UUIDSha1Prefix()+utils.GOBSuffix)
 }
 
 // WriteToFile writes the events to file

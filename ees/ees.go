@@ -299,8 +299,7 @@ func ExportWithAttempts(exp EventExporter, eEv interface{}, key string) (err err
 		defer func() {
 			if err != nil {
 				AddFailedPost(exp.Cfg().FailedPostsDir, exp.Cfg().ExportPath,
-					exp.Cfg().Type, utils.EEs,
-					eEv, exp.Cfg().Opts)
+					exp.Cfg().Type, eEv, exp.Cfg().Opts)
 			}
 		}()
 	}
