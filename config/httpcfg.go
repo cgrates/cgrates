@@ -27,11 +27,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type HTTPClientOpts struct {
-	Transport *http.Transport
-	Dialer    *net.Dialer
-}
-
 // HTTPCfg is the HTTP config section
 type HTTPCfg struct {
 	JsonRPCURL        string            // JSON RPC relative URL ("" to disable)
@@ -41,7 +36,8 @@ type HTTPCfg struct {
 	CDRsURL           string            // CDRS relative URL ("" to disable)
 	UseBasicAuth      bool              // Use basic auth for HTTP API
 	AuthUsers         map[string]string // Basic auth user:password map (base64 passwords)
-	ClientOpts        *HTTPClientOpts
+	ClientOpts        *http.Transport
+	dialer            *net.Dialer
 }
 
 // loadHTTPCfg loads the Http section of the configuration
@@ -53,13 +49,11 @@ func (httpcfg *HTTPCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig
 	return httpcfg.loadFromJSONCfg(jsnHTTPCfg)
 }
 
-func newDialer(jsnCfg *HTTPClientOptsJson) (dialer *net.Dialer, err error) {
+func newDialer(dialer *net.Dialer, jsnCfg *HTTPClientOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	dialer = &net.Dialer{
-		DualStack: true,
-	}
+	dialer.DualStack = true
 	if jsnCfg.DialTimeout != nil {
 		if dialer.Timeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.DialTimeout); err != nil {
 			return
@@ -78,65 +72,60 @@ func newDialer(jsnCfg *HTTPClientOptsJson) (dialer *net.Dialer, err error) {
 	return
 }
 
-func (httpOpts *HTTPClientOpts) loadFromJSONCfg(jsnCfg *HTTPClientOptsJson) (err error) {
+func loadTransportFromJSONCfg(httpOpts *http.Transport, httpDialer *net.Dialer, jsnCfg *HTTPClientOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	httpOpts.Transport = &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-	}
+	httpOpts.Proxy = http.ProxyFromEnvironment
 	if jsnCfg.SkipTLSVerification != nil {
-		httpOpts.Transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: *jsnCfg.SkipTLSVerification}
+		httpOpts.TLSClientConfig = &tls.Config{InsecureSkipVerify: *jsnCfg.SkipTLSVerification}
 	}
 	if jsnCfg.TLSHandshakeTimeout != nil {
-		if httpOpts.Transport.TLSHandshakeTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.TLSHandshakeTimeout); err != nil {
+		if httpOpts.TLSHandshakeTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.TLSHandshakeTimeout); err != nil {
 			return
 		}
 	}
 	if jsnCfg.DisableKeepAlives != nil {
-		httpOpts.Transport.DisableKeepAlives = *jsnCfg.DisableKeepAlives
+		httpOpts.DisableKeepAlives = *jsnCfg.DisableKeepAlives
 	}
 	if jsnCfg.DisableCompression != nil {
-		httpOpts.Transport.DisableCompression = *jsnCfg.DisableCompression
+		httpOpts.DisableCompression = *jsnCfg.DisableCompression
 	}
 	if jsnCfg.MaxIdleConns != nil {
-		httpOpts.Transport.MaxIdleConns = *jsnCfg.MaxIdleConns
+		httpOpts.MaxIdleConns = *jsnCfg.MaxIdleConns
 	}
 	if jsnCfg.MaxIdleConnsPerHost != nil {
-		httpOpts.Transport.MaxIdleConnsPerHost = *jsnCfg.MaxIdleConnsPerHost
+		httpOpts.MaxIdleConnsPerHost = *jsnCfg.MaxIdleConnsPerHost
 	}
 	if jsnCfg.MaxConnsPerHost != nil {
-		httpOpts.Transport.MaxConnsPerHost = *jsnCfg.MaxConnsPerHost
+		httpOpts.MaxConnsPerHost = *jsnCfg.MaxConnsPerHost
 	}
 	if jsnCfg.IdleConnTimeout != nil {
-		if httpOpts.Transport.IdleConnTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.IdleConnTimeout); err != nil {
+		if httpOpts.IdleConnTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.IdleConnTimeout); err != nil {
 			return
 		}
 	}
 	if jsnCfg.ResponseHeaderTimeout != nil {
-		if httpOpts.Transport.ResponseHeaderTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ResponseHeaderTimeout); err != nil {
+		if httpOpts.ResponseHeaderTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ResponseHeaderTimeout); err != nil {
 			return
 		}
 	}
 	if jsnCfg.ExpectContinueTimeout != nil {
-		if httpOpts.Transport.ExpectContinueTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ExpectContinueTimeout); err != nil {
+		if httpOpts.ExpectContinueTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ExpectContinueTimeout); err != nil {
 			return
 		}
 	}
 	if jsnCfg.ForceAttemptHTTP2 != nil {
-		httpOpts.Transport.ForceAttemptHTTP2 = *jsnCfg.ForceAttemptHTTP2
+		httpOpts.ForceAttemptHTTP2 = *jsnCfg.ForceAttemptHTTP2
 	}
-	if httpOpts.Dialer, err = newDialer(jsnCfg); err != nil {
-		return
-	}
-	httpOpts.Transport.DialContext = httpOpts.Dialer.DialContext
+	httpOpts.DialContext = httpDialer.DialContext
 	return
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
 func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 	if jsnHTTPCfg == nil {
-		return nil
+		return
 	}
 	if jsnHTTPCfg.Json_rpc_url != nil {
 		httpcfg.JsonRPCURL = *jsnHTTPCfg.Json_rpc_url
@@ -160,28 +149,31 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 		httpcfg.AuthUsers = *jsnHTTPCfg.Auth_users
 	}
 	if jsnHTTPCfg.Client_opts != nil {
-		err = httpcfg.ClientOpts.loadFromJSONCfg(jsnHTTPCfg.Client_opts)
+		if err = newDialer(httpcfg.dialer, jsnHTTPCfg.Client_opts); err != nil {
+			return
+		}
+		err = loadTransportFromJSONCfg(httpcfg.ClientOpts, httpcfg.dialer, jsnHTTPCfg.Client_opts)
 	}
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (httpcfg HTTPCfg) AsMapInterface(string) interface{} {
 	clientOpts := map[string]interface{}{
-		utils.HTTPClientSkipTLSVerificationCfg:   httpcfg.ClientOpts.Transport.TLSClientConfig.InsecureSkipVerify,
-		utils.HTTPClientTLSHandshakeTimeoutCfg:   httpcfg.ClientOpts.Transport.TLSHandshakeTimeout,
-		utils.HTTPClientDisableKeepAlivesCfg:     httpcfg.ClientOpts.Transport.DisableKeepAlives,
-		utils.HTTPClientDisableCompressionCfg:    httpcfg.ClientOpts.Transport.DisableCompression,
-		utils.HTTPClientMaxIdleConnsCfg:          httpcfg.ClientOpts.Transport.MaxIdleConns,
-		utils.HTTPClientMaxIdleConnsPerHostCfg:   httpcfg.ClientOpts.Transport.MaxIdleConnsPerHost,
-		utils.HTTPClientMaxConnsPerHostCfg:       httpcfg.ClientOpts.Transport.MaxConnsPerHost,
-		utils.HTTPClientIdleConnTimeoutCfg:       httpcfg.ClientOpts.Transport.IdleConnTimeout,
-		utils.HTTPClientResponseHeaderTimeoutCfg: httpcfg.ClientOpts.Transport.ResponseHeaderTimeout,
-		utils.HTTPClientExpectContinueTimeoutCfg: httpcfg.ClientOpts.Transport.ExpectContinueTimeout,
-		utils.HTTPClientForceAttemptHTTP2Cfg:     httpcfg.ClientOpts.Transport.ForceAttemptHTTP2,
-		utils.HTTPClientDialTimeoutCfg:           httpcfg.ClientOpts.Dialer.Timeout,
-		utils.HTTPClientDialFallbackDelayCfg:     httpcfg.ClientOpts.Dialer.FallbackDelay,
-		utils.HTTPClientDialKeepAliveCfg:         httpcfg.ClientOpts.Dialer.KeepAlive,
+		utils.HTTPClientSkipTLSVerificationCfg:   httpcfg.ClientOpts.TLSClientConfig.InsecureSkipVerify,
+		utils.HTTPClientTLSHandshakeTimeoutCfg:   httpcfg.ClientOpts.TLSHandshakeTimeout.String(),
+		utils.HTTPClientDisableKeepAlivesCfg:     httpcfg.ClientOpts.DisableKeepAlives,
+		utils.HTTPClientDisableCompressionCfg:    httpcfg.ClientOpts.DisableCompression,
+		utils.HTTPClientMaxIdleConnsCfg:          httpcfg.ClientOpts.MaxIdleConns,
+		utils.HTTPClientMaxIdleConnsPerHostCfg:   httpcfg.ClientOpts.MaxIdleConnsPerHost,
+		utils.HTTPClientMaxConnsPerHostCfg:       httpcfg.ClientOpts.MaxConnsPerHost,
+		utils.HTTPClientIdleConnTimeoutCfg:       httpcfg.ClientOpts.IdleConnTimeout.String(),
+		utils.HTTPClientResponseHeaderTimeoutCfg: httpcfg.ClientOpts.ResponseHeaderTimeout.String(),
+		utils.HTTPClientExpectContinueTimeoutCfg: httpcfg.ClientOpts.ExpectContinueTimeout.String(),
+		utils.HTTPClientForceAttemptHTTP2Cfg:     httpcfg.ClientOpts.ForceAttemptHTTP2,
+		utils.HTTPClientDialTimeoutCfg:           httpcfg.dialer.Timeout.String(),
+		utils.HTTPClientDialFallbackDelayCfg:     httpcfg.dialer.FallbackDelay.String(),
+		utils.HTTPClientDialKeepAliveCfg:         httpcfg.dialer.KeepAlive.String(),
 	}
 	return map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.JsonRPCURL,
@@ -198,35 +190,28 @@ func (httpcfg HTTPCfg) AsMapInterface(string) interface{} {
 func (HTTPCfg) SName() string                 { return HTTPJSON }
 func (httpcfg HTTPCfg) CloneSection() Section { return httpcfg.Clone() }
 
-func (httpOpts *HTTPClientOpts) Clone() (cln *HTTPClientOpts) {
-	transport := &http.Transport{
-		Proxy:                 httpOpts.Transport.Proxy,
-		TLSClientConfig:       httpOpts.Transport.TLSClientConfig,
-		TLSHandshakeTimeout:   httpOpts.Transport.TLSHandshakeTimeout,
-		DisableKeepAlives:     httpOpts.Transport.DisableKeepAlives,
-		DisableCompression:    httpOpts.Transport.DisableCompression,
-		MaxIdleConns:          httpOpts.Transport.MaxIdleConns,
-		MaxIdleConnsPerHost:   httpOpts.Transport.MaxIdleConnsPerHost,
-		MaxConnsPerHost:       httpOpts.Transport.MaxConnsPerHost,
-		IdleConnTimeout:       httpOpts.Transport.IdleConnTimeout,
-		ResponseHeaderTimeout: httpOpts.Transport.ResponseHeaderTimeout,
-		ExpectContinueTimeout: httpOpts.Transport.ExpectContinueTimeout,
-		ForceAttemptHTTP2:     httpOpts.Transport.ForceAttemptHTTP2,
-	}
-	dialer := &net.Dialer{
-		Timeout:       httpOpts.Dialer.Timeout,
-		DualStack:     httpOpts.Dialer.DualStack,
-		KeepAlive:     httpOpts.Dialer.KeepAlive,
-		FallbackDelay: httpOpts.Dialer.FallbackDelay,
-	}
-	return &HTTPClientOpts{
-		Transport: transport,
-		Dialer:    dialer,
-	}
-}
-
 // Clone returns a deep copy of HTTPCfg
 func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
+	// transport := &http.Transport{
+	// 	Proxy:                 httpcfg.ClientOpts.Proxy,
+	// 	TLSClientConfig:       httpcfg.ClientOpts.TLSClientConfig,
+	// 	TLSHandshakeTimeout:   httpcfg.ClientOpts.TLSHandshakeTimeout,
+	// 	DisableKeepAlives:     httpcfg.ClientOpts.DisableKeepAlives,
+	// 	DisableCompression:    httpcfg.ClientOpts.DisableCompression,
+	// 	MaxIdleConns:          httpcfg.ClientOpts.MaxIdleConns,
+	// 	MaxIdleConnsPerHost:   httpcfg.ClientOpts.MaxIdleConnsPerHost,
+	// 	MaxConnsPerHost:       httpcfg.ClientOpts.MaxConnsPerHost,
+	// 	IdleConnTimeout:       httpcfg.ClientOpts.IdleConnTimeout,
+	// 	ResponseHeaderTimeout: httpcfg.ClientOpts.ResponseHeaderTimeout,
+	// 	ExpectContinueTimeout: httpcfg.ClientOpts.ExpectContinueTimeout,
+	// 	ForceAttemptHTTP2:     httpcfg.ClientOpts.ForceAttemptHTTP2,
+	// }
+	dialer := &net.Dialer{
+		Timeout:       httpcfg.dialer.Timeout,
+		DualStack:     httpcfg.dialer.DualStack,
+		KeepAlive:     httpcfg.dialer.KeepAlive,
+		FallbackDelay: httpcfg.dialer.FallbackDelay,
+	}
 	cln = &HTTPCfg{
 		JsonRPCURL:        httpcfg.JsonRPCURL,
 		RegistrarSURL:     httpcfg.RegistrarSURL,
@@ -236,6 +221,7 @@ func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
 		UseBasicAuth:      httpcfg.UseBasicAuth,
 		AuthUsers:         make(map[string]string),
 		ClientOpts:        httpcfg.ClientOpts.Clone(),
+		dialer:            dialer,
 	}
 	for u, a := range httpcfg.AuthUsers {
 		cln.AuthUsers[u] = a
@@ -249,11 +235,11 @@ type HTTPClientOptsJson struct {
 	DisableKeepAlives     *bool   `json:"disableKeepAlives"`
 	DisableCompression    *bool   `json:"disableCompression"`
 	MaxIdleConns          *int    `json:"maxIdleConns"`
-	MaxIdleConnsPerHost   *int    `json:"maxConnsPerHost"`
+	MaxIdleConnsPerHost   *int    `json:"maxIdleConnsPerHost"`
 	MaxConnsPerHost       *int    `json:"maxConnsPerHost"`
 	IdleConnTimeout       *string `json:"IdleConnTimeout"`
 	ResponseHeaderTimeout *string `json:"responseHeaderTimeout"`
-	ExpectContinueTimeout *string `json:"expectContinueTransport"`
+	ExpectContinueTimeout *string `json:"expectContinueTimeout"`
 	ForceAttemptHTTP2     *bool   `json:"forceAttemptHttp2"`
 	DialTimeout           *string `json:"dialTimeout"`
 	DialFallbackDelay     *string `json:"dialFallbackDelay"`
@@ -272,51 +258,60 @@ type HTTPJsonCfg struct {
 	Client_opts         *HTTPClientOptsJson
 }
 
-func diffHTTPClientOptsJsonCfg(d *HTTPClientOptsJson, v1, v2 *HTTPClientOpts) *HTTPClientOptsJson {
+func diffHTTPClientOptsJsonCfgDialer(d *HTTPClientOptsJson, v1, v2 *net.Dialer) *HTTPClientOptsJson {
 	if d == nil {
 		d = new(HTTPClientOptsJson)
 	}
-	if v1.Transport.TLSClientConfig.InsecureSkipVerify != v2.Transport.TLSClientConfig.InsecureSkipVerify {
-		d.SkipTLSVerification = utils.BoolPointer(v2.Transport.TLSClientConfig.InsecureSkipVerify)
+	if v1.Timeout != v2.Timeout {
+		d.DialTimeout = utils.StringPointer(v2.Timeout.String())
 	}
-	if v1.Transport.TLSHandshakeTimeout != v2.Transport.TLSHandshakeTimeout {
-		d.TLSHandshakeTimeout = utils.StringPointer(v2.Transport.TLSHandshakeTimeout.String())
+	if v1.FallbackDelay != v2.FallbackDelay {
+		d.DialFallbackDelay = utils.StringPointer(v2.FallbackDelay.String())
 	}
-	if v1.Transport.DisableKeepAlives != v2.Transport.DisableKeepAlives {
-		d.DisableKeepAlives = utils.BoolPointer(v2.Transport.DisableKeepAlives)
+	if v1.KeepAlive != v2.KeepAlive {
+		d.DialKeepAlive = utils.StringPointer(v2.KeepAlive.String())
 	}
-	if v1.Transport.DisableCompression != v2.Transport.DisableCompression {
-		d.DisableCompression = utils.BoolPointer(v2.Transport.DisableCompression)
+	return d
+}
+
+func diffHTTPClientOptsJsonCfg(d *HTTPClientOptsJson, v1, v2 *http.Transport) *HTTPClientOptsJson {
+	if d == nil {
+		d = new(HTTPClientOptsJson)
 	}
-	if v1.Transport.MaxIdleConns != v2.Transport.MaxIdleConns {
-		d.MaxIdleConns = utils.IntPointer(v2.Transport.MaxIdleConns)
+	if v1.TLSClientConfig != nil {
+		if v1.TLSClientConfig.InsecureSkipVerify != v2.TLSClientConfig.InsecureSkipVerify {
+			d.SkipTLSVerification = utils.BoolPointer(v2.TLSClientConfig.InsecureSkipVerify)
+		}
 	}
-	if v1.Transport.MaxIdleConnsPerHost != v2.Transport.MaxIdleConnsPerHost {
-		d.MaxIdleConnsPerHost = utils.IntPointer(v2.Transport.MaxIdleConnsPerHost)
+	if v1.TLSHandshakeTimeout != v2.TLSHandshakeTimeout {
+		d.TLSHandshakeTimeout = utils.StringPointer(v2.TLSHandshakeTimeout.String())
 	}
-	if v1.Transport.MaxConnsPerHost != v2.Transport.MaxConnsPerHost {
-		d.MaxConnsPerHost = utils.IntPointer(v2.Transport.MaxConnsPerHost)
+	if v1.DisableKeepAlives != v2.DisableKeepAlives {
+		d.DisableKeepAlives = utils.BoolPointer(v2.DisableKeepAlives)
 	}
-	if v1.Transport.IdleConnTimeout != v2.Transport.IdleConnTimeout {
-		d.IdleConnTimeout = utils.StringPointer(v2.Transport.IdleConnTimeout.String())
+	if v1.DisableCompression != v2.DisableCompression {
+		d.DisableCompression = utils.BoolPointer(v2.DisableCompression)
 	}
-	if v1.Transport.ResponseHeaderTimeout != v2.Transport.ResponseHeaderTimeout {
-		d.ResponseHeaderTimeout = utils.StringPointer(v2.Transport.ResponseHeaderTimeout.String())
+	if v1.MaxIdleConns != v2.MaxIdleConns {
+		d.MaxIdleConns = utils.IntPointer(v2.MaxIdleConns)
 	}
-	if v1.Transport.ExpectContinueTimeout != v2.Transport.ExpectContinueTimeout {
-		d.ExpectContinueTimeout = utils.StringPointer(v2.Transport.ExpectContinueTimeout.String())
+	if v1.MaxIdleConnsPerHost != v2.MaxIdleConnsPerHost {
+		d.MaxIdleConnsPerHost = utils.IntPointer(v2.MaxIdleConnsPerHost)
 	}
-	if v1.Transport.ForceAttemptHTTP2 != v2.Transport.ForceAttemptHTTP2 {
-		d.ForceAttemptHTTP2 = utils.BoolPointer(v2.Transport.ForceAttemptHTTP2)
+	if v1.MaxConnsPerHost != v2.MaxConnsPerHost {
+		d.MaxConnsPerHost = utils.IntPointer(v2.MaxConnsPerHost)
 	}
-	if v1.Dialer.Timeout != v2.Dialer.Timeout {
-		d.DialTimeout = utils.StringPointer(v2.Dialer.Timeout.String())
+	if v1.IdleConnTimeout != v2.IdleConnTimeout {
+		d.IdleConnTimeout = utils.StringPointer(v2.IdleConnTimeout.String())
 	}
-	if v1.Dialer.FallbackDelay != v2.Dialer.FallbackDelay {
-		d.DialFallbackDelay = utils.StringPointer(v2.Dialer.FallbackDelay.String())
+	if v1.ResponseHeaderTimeout != v2.ResponseHeaderTimeout {
+		d.ResponseHeaderTimeout = utils.StringPointer(v2.ResponseHeaderTimeout.String())
 	}
-	if v1.Dialer.KeepAlive != v2.Dialer.KeepAlive {
-		d.DialKeepAlive = utils.StringPointer(v2.Dialer.KeepAlive.String())
+	if v1.ExpectContinueTimeout != v2.ExpectContinueTimeout {
+		d.ExpectContinueTimeout = utils.StringPointer(v2.ExpectContinueTimeout.String())
+	}
+	if v1.ForceAttemptHTTP2 != v2.ForceAttemptHTTP2 {
+		d.ForceAttemptHTTP2 = utils.BoolPointer(v2.ForceAttemptHTTP2)
 	}
 	return d
 }
@@ -347,6 +342,7 @@ func diffHTTPJsonCfg(d *HTTPJsonCfg, v1, v2 *HTTPCfg) *HTTPJsonCfg {
 		d.Auth_users = &v2.AuthUsers
 	}
 	d.Client_opts = diffHTTPClientOptsJsonCfg(d.Client_opts, v1.ClientOpts, v2.ClientOpts)
+	d.Client_opts = diffHTTPClientOptsJsonCfgDialer(d.Client_opts, v1.dialer, v2.dialer)
 	return d
 }
 
@@ -360,4 +356,87 @@ func diffMap(d, v1, v2 map[string]interface{}) map[string]interface{} {
 		}
 	}
 	return d
+}
+
+func transportOptsEqual(t1, t2 *http.Transport) bool {
+	if t1.TLSClientConfig.InsecureSkipVerify != t2.TLSClientConfig.InsecureSkipVerify {
+		return false
+	}
+	if t1.TLSHandshakeTimeout != t2.TLSHandshakeTimeout {
+		return false
+	}
+	if t1.DisableCompression != t2.DisableCompression {
+		return false
+	}
+	if t1.DisableKeepAlives != t2.DisableKeepAlives {
+		return false
+	}
+	if t1.MaxIdleConns != t2.MaxIdleConns {
+		return false
+	}
+	if t1.MaxIdleConnsPerHost != t2.MaxIdleConnsPerHost {
+		return false
+	}
+	if t1.MaxConnsPerHost != t2.MaxConnsPerHost {
+		return false
+	}
+	if t1.IdleConnTimeout != t2.IdleConnTimeout {
+		return false
+	}
+	if t1.ResponseHeaderTimeout != t2.ResponseHeaderTimeout {
+		return false
+	}
+	if t1.ExpectContinueTimeout != t2.ExpectContinueTimeout {
+		return false
+	}
+	if t1.ForceAttemptHTTP2 != t2.ForceAttemptHTTP2 {
+		return false
+	}
+	return true
+}
+
+func dialerOptsEqual(d1, d2 *net.Dialer) bool {
+	if d1.Timeout != d2.Timeout {
+		return false
+	}
+	if d1.FallbackDelay != d2.FallbackDelay {
+		return false
+	}
+	if d1.KeepAlive != d2.KeepAlive {
+		return false
+	}
+	return true
+}
+
+func HTTPCfgEqual(cfg1, cfg2 *HTTPCfg) bool {
+	if cfg1.JsonRPCURL != cfg2.JsonRPCURL {
+		return false
+	}
+	if cfg1.RegistrarSURL != cfg2.RegistrarSURL {
+		return false
+	}
+	if cfg1.WSURL != cfg2.WSURL {
+		return false
+	}
+	if cfg1.UseBasicAuth != cfg2.UseBasicAuth {
+		return false
+	}
+	if cfg1.FreeswitchCDRsURL != cfg2.FreeswitchCDRsURL {
+		return false
+	}
+	if cfg1.CDRsURL != cfg2.CDRsURL {
+		return false
+	}
+	for key, value := range cfg1.AuthUsers {
+		if cfg2.AuthUsers[key] != value {
+			return false
+		}
+	}
+	if !transportOptsEqual(cfg1.ClientOpts, cfg2.ClientOpts) {
+		return false
+	}
+	if !dialerOptsEqual(cfg1.dialer, cfg2.dialer) {
+		return false
+	}
+	return true
 }
