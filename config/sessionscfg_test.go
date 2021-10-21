@@ -222,7 +222,7 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	cfgJSON.Opts.DebitInterval = nil
 
 	/////
-	cfgJSON.Opts.LastUsage = []*utils.DynamicStringOpt{
+	cfgJSON.Opts.TTLLastUsage = []*utils.DynamicStringOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  "1c",
@@ -231,10 +231,10 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
-	cfgJSON.Opts.LastUsage = nil
+	cfgJSON.Opts.TTLLastUsage = nil
 
 	/////
-	cfgJSON.Opts.LastUsed = []*utils.DynamicStringOpt{
+	cfgJSON.Opts.TTLLastUsed = []*utils.DynamicStringOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  "1c",
@@ -243,10 +243,10 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
-	cfgJSON.Opts.LastUsed = nil
+	cfgJSON.Opts.TTLLastUsed = nil
 
 	/////
-	cfgJSON.Opts.Usage = []*utils.DynamicStringOpt{
+	cfgJSON.Opts.TTLUsage = []*utils.DynamicStringOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  "1c",
@@ -255,10 +255,10 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
-	cfgJSON.Opts.Usage = nil
+	cfgJSON.Opts.TTLUsage = nil
 
 	/////
-	cfgJSON.Opts.MaxDelay = []*utils.DynamicStringOpt{
+	cfgJSON.Opts.TTLMaxDelay = []*utils.DynamicStringOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  "1c",
@@ -267,7 +267,7 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
-	cfgJSON.Opts.MaxDelay = nil
+	cfgJSON.Opts.TTLMaxDelay = nil
 }
 
 func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -2072,13 +2072,13 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  false,
 			},
 		},
-		LastUsage: []*utils.DynamicDurationPointerOpt{
+		TTLLastUsage: []*utils.DynamicDurationPointerOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  utils.DurationPointer(5 * time.Second),
 			},
 		},
-		LastUsed: []*utils.DynamicDurationPointerOpt{
+		TTLLastUsed: []*utils.DynamicDurationPointerOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  utils.DurationPointer(5 * time.Second),
@@ -2090,13 +2090,13 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  3 * time.Second,
 			},
 		},
-		MaxDelay: []*utils.DynamicDurationOpt{
+		TTLMaxDelay: []*utils.DynamicDurationOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  3 * time.Second,
 			},
 		},
-		Usage: []*utils.DynamicDurationPointerOpt{
+		TTLUsage: []*utils.DynamicDurationPointerOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  utils.DurationPointer(5 * time.Second),
@@ -2261,13 +2261,13 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  true,
 			},
 		},
-		LastUsage: []*utils.DynamicDurationPointerOpt{
+		TTLLastUsage: []*utils.DynamicDurationPointerOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  utils.DurationPointer(6 * time.Second),
 			},
 		},
-		LastUsed: []*utils.DynamicDurationPointerOpt{
+		TTLLastUsed: []*utils.DynamicDurationPointerOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  utils.DurationPointer(6 * time.Second),
@@ -2279,13 +2279,13 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  4 * time.Second,
 			},
 		},
-		MaxDelay: []*utils.DynamicDurationOpt{
+		TTLMaxDelay: []*utils.DynamicDurationOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  4 * time.Second,
 			},
 		},
-		Usage: []*utils.DynamicDurationPointerOpt{
+		TTLUsage: []*utils.DynamicDurationPointerOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  utils.DurationPointer(4 * time.Second),
@@ -2450,13 +2450,13 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  true,
 			},
 		},
-		LastUsage: []*utils.DynamicStringOpt{
+		TTLLastUsage: []*utils.DynamicStringOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  "6s",
 			},
 		},
-		LastUsed: []*utils.DynamicStringOpt{
+		TTLLastUsed: []*utils.DynamicStringOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  "6s",
@@ -2468,13 +2468,13 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  "4s",
 			},
 		},
-		MaxDelay: []*utils.DynamicStringOpt{
+		TTLMaxDelay: []*utils.DynamicStringOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  "4s",
 			},
 		},
-		Usage: []*utils.DynamicStringOpt{
+		TTLUsage: []*utils.DynamicStringOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  "4s",

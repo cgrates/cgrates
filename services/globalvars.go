@@ -48,13 +48,13 @@ type GlobalVarS struct {
 // Start should handle the sercive start
 func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
 	ees.SetFailedPostCacheTTL(gv.cfg.GeneralCfg().FailedPostsTTL)
-	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts.Transport)
+	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	return nil
 }
 
 // Reload handles the change of config
 func (gv *GlobalVarS) Reload(*context.Context, context.CancelFunc) error {
-	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts.Transport)
+	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	return nil
 }
 

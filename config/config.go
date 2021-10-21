@@ -21,6 +21,7 @@ package config
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -108,7 +109,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		cacheCfg:  &CacheCfg{Partitions: make(map[string]*CacheParamCfg)},
 		listenCfg: new(ListenCfg),
 		httpCfg: &HTTPCfg{
-			ClientOpts: &HTTPClientOpts{},
+			ClientOpts: &http.Transport{},
+			dialer:     &net.Dialer{},
 		},
 		filterSCfg: new(FilterSCfg),
 		cdrsCfg: &CdrsCfg{Opts: &CdrsOpts{
