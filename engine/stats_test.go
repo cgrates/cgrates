@@ -3644,3 +3644,66 @@ func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
 	}
 
 }
+
+func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	sS := NewStatService(dm, cfg, filterS, nil)
+
+	sqPrf1 := &StatQueueProfile{
+		Tenant:       "cgrates.org",
+		ID:           "SQ1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		Weight:       10,
+		Blocker:      true,
+		QueueLength:  10,
+		ThresholdIDs: []string{"*none"},
+		MinItems:     5,
+		Metrics: []*MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+	}
+
+	if err := dm.SetStatQueueProfile(context.Background(), sqPrf1, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		ID: "TestGetStatQueuesForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsProfileIDs:      []string{"SQ1"},
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+
+	exp := []string{"SQ1"}
+	var reply []string
+	if err := sS.V1GetStatQueuesForEvent(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(reply)
+		if !reflect.DeepEqual(reply, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)
+		}
+	}
+}
