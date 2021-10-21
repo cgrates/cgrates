@@ -919,3 +919,71 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 
 	utils.Logger.SetLogLevel(0)
 }
+
+func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
+	dirPath := "/tmp/TestErsOnEvictedCacheDumpfields"
+	err := os.MkdirAll(dirPath, 0755)
+	if err != nil {
+		t.Error(err)
+	}
+
+	value := &erEvents{
+		events: []*utils.CGREvent{
+			{
+				Tenant: "cgrates.org",
+				ID:     "EventErsOnEvicted",
+				Event: map[string]interface{}{
+					utils.AccountField: "1001",
+					utils.Usage:        "10s",
+					utils.Category:     "call",
+					utils.Destination:  "1002",
+					utils.OriginHost:   "local",
+					utils.OriginID:     "123456",
+					utils.ToR:          utils.MetaVoice,
+					utils.CGRID:        "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+					utils.Password:     "secure_pass",
+					"Additional_Field": "Additional_Value",
+				},
+			},
+			{
+				Tenant: "cgrates.org",
+				ID:     "EventErsOnEvicted",
+				Event: map[string]interface{}{
+					utils.AccountField: "1002",
+					utils.Usage:        "12s",
+					utils.Category:     "call",
+					utils.Destination:  "1003",
+					"Intrude_Field":    "Intrude-Value",
+					utils.OriginID:     "1234567",
+					utils.ToR:          utils.MetaSMS,
+					utils.CGRID:        "1133dc80896edf5049b46aa911cb9085eeb27f4d",
+					utils.Password:     "secure_password",
+				},
+			},
+		},
+		rdrCfg: &config.EventReaderCfg{ // CacheDumpFields will be empty
+			ID:   "ER1",
+			Type: utils.MetaNone,
+			Opts: map[string]interface{}{
+				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
+				utils.PartialPathOpt:        dirPath,
+				utils.PartialOrderFieldOpt:  2,
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	erS := &ERService{
+		cfg:       cfg,
+		rdrEvents: make(chan *erEvent, 1),
+		filterS:   fltrS,
+	}
+
+	erS.onEvicted("ID", value)
+	// if err := os.RemoveAll(dirPath); err != nil {
+	// 	t.Error(err)
+	// }
+}

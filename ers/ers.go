@@ -392,7 +392,6 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 		if fldSep, has := eEvs.rdrCfg.Opts[utils.PartialCSVFieldSepartorOpt]; has {
 			csvWriter.Comma = rune(utils.IfaceAsString(fldSep)[0])
 		}
-
 		if err = csvWriter.Write(record); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
 				utils.ERs, record, dumpFilePath, err.Error()))
