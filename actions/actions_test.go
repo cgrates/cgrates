@@ -1135,3 +1135,116 @@ func TestACScheduledActions(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedSChed, schedActs)
 	}
 }
+
+func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
+
+	var reply string
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "test_id1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  1002,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsProfileIDs:    []string{"test_id1"},
+			utils.MetaProfileIgnoreFilters: true,
+			"testFieldIgnore":              "testValue",
+		},
+	}
+
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_id1",
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10", "*prefix:~*opts.testFieldIgnore:testValue1"},
+		Schedule:  utils.MetaASAP,
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      utils.MetaLog,
+				Diktats: []*engine.APDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: "10",
+				}},
+			},
+		},
+	}
+
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := acts.V1ScheduleActions(context.Background(), ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply %+v", reply)
+	}
+}
+
+func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	acts := NewActionS(defaultCfg, filters, dm, nil)
+
+	var reply string
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "test_id1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  1002,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsActionsProfileIDs:    []string{"test_id1"},
+			utils.MetaProfileIgnoreFilters: true,
+			"testFieldIgnore":              "testValue",
+		},
+	}
+
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "test_id1",
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10", "*prefix:~*opts.testFieldIgnore:testValue1"},
+		Schedule:  utils.MetaASAP,
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      utils.MetaLog,
+				Diktats: []*engine.APDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: "10",
+				}},
+			},
+		},
+	}
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply %+v", reply)
+	}
+
+}
