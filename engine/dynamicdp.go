@@ -19,6 +19,8 @@ import (
 	"fmt"
 
 	"github.com/nyaruka/phonenumbers"
+	"golang.org/x/text/language"
+	"golang.org/x/text/language/display"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -195,9 +197,18 @@ func (dDP *libphonenumberDP) fieldAsInterface(fldPath []string) (val interface{}
 	case "NumberType":
 		val = phonenumbers.GetNumberType(dDP.pNumber)
 	case "GeoLocation":
-		geoLocation, err := phonenumbers.GetGeocodingForNumber(dDP.pNumber, phonenumbers.GetRegionCodeForNumber(dDP.pNumber))
+		regCode := phonenumbers.GetRegionCodeForNumber(dDP.pNumber)
+		geoLocation, err := phonenumbers.GetGeocodingForNumber(dDP.pNumber, regCode)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when getting GeoLocation for number %+v", err, dDP.pNumber))
+		}
+		if geoLocation == utils.EmptyString { // until https://github.com/nyaruka/phonenumbers/issues/100 is fixed
+			var reg language.Region
+			if reg, err = language.ParseRegion(regCode); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("Received error: <%+v> when converting region in GeoLocation for number %+v", err, dDP.pNumber))
+			} else {
+				geoLocation = display.English.Regions().Name(reg)
+			}
 		}
 		val = geoLocation
 	case "Carrier":
