@@ -29,7 +29,7 @@ var (
 )
 
 func init() {
-	httpPstrTransport = config.CgrConfig().HTTPCfg().ClientOpts.Transport
+	httpPstrTransport = config.CgrConfig().HTTPCfg().ClientOpts
 }
 
 // SetConnManager is the exported method to set the connectionManager used when operate on an account.
