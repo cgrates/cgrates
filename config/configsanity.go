@@ -994,9 +994,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	for cacheID := range cfg.cacheCfg.Partitions {
+	for cacheID, itm := range cfg.cacheCfg.Partitions {
 		if !utils.CachePartitions.Has(cacheID) {
 			return fmt.Errorf("<%s> partition <%s> not defined", utils.CacheS, cacheID)
+		}
+		if cacheID == utils.CacheRPCConnections &&
+			itm.Replicate {
+			return fmt.Errorf("<%s> partition <%s> does not support replication", utils.CacheS, cacheID) // deadlock prevention
 		}
 	}
 	// FilterS sanity check
