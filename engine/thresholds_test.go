@@ -2981,7 +2981,7 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
-	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3039,4 +3039,50 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv2, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp2, rcv2)
 	}
+}
+
+func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
+	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH",
+		FilterIDs: []string{"*string:~*req.Threshold:testThresholdValue"},
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH",
+		tPrfl:  thPrf,
+	}
+
+	if err := dm.SetThresholdProfile(context.Background(), thPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetThreshold(context.Background(), th); err != nil {
+		t.Error(err)
+	}
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ThdProcessEvent",
+		Event: map[string]interface{}{
+			"Threshold": "testThresholdValue",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsThresholdsProfileIDs: []string{"TH"},
+			utils.MetaProfileIgnoreFilters: time.Second,
+		},
+	}
+
+	if _, err := tS.processEvent(context.Background(), args.Tenant, args); err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
 }
