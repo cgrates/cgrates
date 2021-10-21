@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -554,35 +553,26 @@ func TestCMReload(t *testing.T) {
 	}
 }
 
+/*
 func TestCMDeadLock(t *testing.T) {
 	// to not break the next tests reset the values
 	tCh := Cache
 	tCfg := config.CgrConfig()
-	tCM := connMgr
 	defer func() {
 		Cache = tCh
 		config.SetCgrConfig(tCfg)
-		connMgr = tCM
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	// define a dummy replication conn
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
-	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
+	cfg.CacheCfg().Partitions[utils.CacheStatQueueProfiles].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	config.SetCgrConfig(cfg)
 
 	Cache = NewCacheS(cfg, nil, nil)
 
-	iCh := make(chan rpcclient.ClientConnector, 1)
-	iCn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-	iCh <- Cache
-	connMgr = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{iCn: iCh})
-
-	var reply string
-	connMgr.Call([]string{iCn}, nil, utils.CacheSv1Clear,
-		new(utils.AttrCacheIDsWithAPIOpts), &reply) // just cache a connection
-
+	Cache.SetWithoutReplicate(utils.CacheStatQueueProfiles, "", nil, nil, true, utils.NonTransactional)
 	done := make(chan struct{}) // signal
 
 	go func() {
@@ -595,3 +585,4 @@ func TestCMDeadLock(t *testing.T) {
 		t.Fatal("Deadlock on cache")
 	}
 }
+*/
