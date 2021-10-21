@@ -2666,6 +2666,47 @@ func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	}
 }
 
+func TestV1MaxAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accPrf := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1MaxAbstracts",
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "TestMatchingAccountsForEvent",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                "210ns",
+			utils.OptsAccountsProfileIDs:   []string{"TestV1MaxAbstracts"},
+			utils.MetaProfileIgnoreFilters: time.Second,
+		},
+	}
+	reply := utils.EventCharges{}
+	expected := "cannot convert field: 1s to bool"
+	if err := accnts.V1MaxAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
 func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -2809,6 +2850,84 @@ func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, debitedAcc) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(accPrf), utils.ToJSON(debitedAcc))
+	}
+}
+
+func TestV1DebitAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accPrf := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1MaxAbstracts",
+		Weights: []*utils.DynamicWeight{
+			{
+				FilterIDs: []string{"invalid_filter"},
+				Weight:    0,
+			},
+		},
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight:    25,
+						FilterIDs: []string{"invalid_filter"},
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"ConcreteBalance2": {
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(213, 0), // 213 - 27
+			},
+		},
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                "27s",
+			utils.OptsAccountsProfileIDs:   []string{"TestV1MaxAbstracts"},
+			utils.MetaProfileIgnoreFilters: time.Second,
+		},
+	}
+	reply := utils.EventCharges{}
+
+	expected := "cannot convert field: 1s to bool"
+	if err := accnts.V1DebitAbstracts(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
@@ -2960,9 +3079,50 @@ func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
 		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance1"].Units = utils.NewDecimal(0, 0)
 		exEvCh.Accounts["TestV1DebitAbstracts"].Balances["ConcreteBalance2"].Units = utils.NewDecimal(0, 0)
 		if !exEvCh.Equals(&reply) {
-			//if !reflect.DeepEqual(exEvCh, reply) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
 		}
+	}
+}
+
+func TestV1MaxConcretesProfileIgnoreFiltersError(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accPrf := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1DebitAbstracts",
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField:  "1004",
+			"TestFieldAcccount": "testValue1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                "3m",
+			utils.OptsAccountsProfileIDs:   []string{"TestV1DebitAbstracts"},
+			utils.MetaProfileIgnoreFilters: time.Second,
+		},
+	}
+	reply := utils.EventCharges{}
+	expected := "cannot convert field: 1s to bool"
+	if err := accnts.V1MaxConcretes(context.Background(), ev, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
@@ -3129,4 +3289,48 @@ func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
 	if !reflect.DeepEqual(rcv, accPrf) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcv))
 	}
+}
+
+func TestV1DebitConcretesProfileIgnoreFiltersError(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accPrf := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "TestV1DebitAbstracts",
+		FilterIDs: []string{"*string:~*req.TestFieldAcccount: testValue"},
+	}
+
+	if err := accnts.dm.SetAccount(context.Background(), accPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		ID:     "TestV1DebitID",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField:  "1004",
+			"TestFieldAcccount": "testValue1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage:                "3m",
+			utils.OptsAccountsProfileIDs:   []string{"TestV1DebitAbstracts"},
+			utils.MetaProfileIgnoreFilters: time.Second,
+		},
+	}
+	reply := utils.EventCharges{}
+	expected := "cannot convert field: 1s to bool"
+	if err := accnts.V1DebitConcretes(context.Background(), args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+
 }
