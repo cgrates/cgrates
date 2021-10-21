@@ -1181,3 +1181,140 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 
 	engine.Cache = cache
 }
+
+func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.RateSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	rateS := NewRateS(defaultCfg, filters, dm)
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	rPrf := &utils.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_1",
+		FilterIDs: []string{"*string:~*req.Account:1001",
+			"*string:~*req.TestField:testValue"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 50,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
+					},
+				},
+			},
+		},
+	}
+
+	//MatchItmID before setting
+	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "RATE_1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	expectedRPCost := &utils.RateProfileCost{
+		ID:   "RATE_1",
+		Cost: utils.NewDecimal(2, 1),
+		CostIntervals: []*utils.RateSIntervalCost{
+			{
+				Increments: []*utils.RateSIncrementCost{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             utils.NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*utils.IntervalRate{
+			"RATE1": {
+				IntervalStart: utils.NewDecimal(0, 0),
+				RecurrentFee:  utils.NewDecimal(2, 1),
+				Unit:          minDecimal,
+				Increment:     minDecimal,
+			},
+		},
+	}
+
+	if rcv, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "RATE_1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001"}}, rateS.cfg.RateSCfg().Verbosity); err != nil {
+		t.Error(err)
+	} else {
+		rtsIntrvl := []*utils.RateSInterval{
+			{
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             utils.NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		}
+		rtsIntrvl[0].Cost(expectedRPCost.Rates)
+		expectedRPCost.CostIntervals[0] = rtsIntrvl[0].AsRatesIntervalsCost()
+		if !rcv.Equals(expectedRPCost) {
+			t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(expectedRPCost), utils.ToJSON(rcv))
+		}
+	}
+	event := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "RATE_1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			"TestField":        "testValue1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRatesProfileIDs:      []string{"RATE_1"},
+			utils.MetaProfileIgnoreFilters: true,
+		},
+	}
+	expRpCostAfterV1 := expectedRPCost
+	if err := rateS.V1CostForEvent(context.Background(), event, expectedRPCost); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedRPCost, expRpCostAfterV1) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRpCostAfterV1), utils.ToJSON(expectedRPCost))
+	}
+
+	//fmt.Printf("received costV1: \n%s\n", utils.ToIJSON(expectedRPCost))
+
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
+		t.Error(err)
+	}
+}
