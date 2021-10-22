@@ -5753,10 +5753,10 @@ func TestCGRConfigClone(t *testing.T) {
 	rcv.rldCh = nil
 	cfg.lks = nil
 	rcv.lks = nil
-	// if !reflect.DeepEqual(cfg, rcv) {
-	// 	t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg), utils.ToJSON(rcv))
-	// }
-
+	if !reflect.DeepEqual(cfg.AsMapInterface(utils.InfieldSep),
+		rcv.AsMapInterface(utils.InfieldSep)) {
+		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg), utils.ToJSON(rcv))
+	}
 	if !reflect.DeepEqual(cfg.loaderCfg, rcv.loaderCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.loaderCfg), utils.ToJSON(rcv.loaderCfg))
 	}
@@ -5787,8 +5787,11 @@ func TestCGRConfigClone(t *testing.T) {
 	if !reflect.DeepEqual(cfg.listenCfg, rcv.listenCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.listenCfg), utils.ToJSON(rcv.listenCfg))
 	}
-	if !HTTPCfgEqual(cfg.httpCfg, rcv.httpCfg) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.httpCfg), utils.ToJSON(rcv.httpCfg))
+	if !reflect.DeepEqual(cfg.httpCfg.AsMapInterface(utils.InfieldSep),
+		rcv.httpCfg.AsMapInterface(utils.InfieldSep)) {
+		t.Errorf("Expected: %+v\nReceived: %+v",
+			utils.ToJSON(cfg.httpCfg.AsMapInterface(utils.InfieldSep)),
+			utils.ToJSON(rcv.httpCfg.AsMapInterface(utils.InfieldSep)))
 	}
 	if !reflect.DeepEqual(cfg.filterSCfg, rcv.filterSCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.filterSCfg), utils.ToJSON(rcv.filterSCfg))

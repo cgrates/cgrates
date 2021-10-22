@@ -160,7 +160,7 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (httpcfg HTTPCfg) AsMapInterface(string) interface{} {
 	clientOpts := map[string]interface{}{
-		utils.HTTPClientSkipTLSVerificationCfg:   httpcfg.ClientOpts.TLSClientConfig.InsecureSkipVerify,
+		utils.HTTPClientSkipTLSVerificationCfg:   false,
 		utils.HTTPClientTLSHandshakeTimeoutCfg:   httpcfg.ClientOpts.TLSHandshakeTimeout.String(),
 		utils.HTTPClientDisableKeepAlivesCfg:     httpcfg.ClientOpts.DisableKeepAlives,
 		utils.HTTPClientDisableCompressionCfg:    httpcfg.ClientOpts.DisableCompression,
@@ -174,6 +174,9 @@ func (httpcfg HTTPCfg) AsMapInterface(string) interface{} {
 		utils.HTTPClientDialTimeoutCfg:           httpcfg.dialer.Timeout.String(),
 		utils.HTTPClientDialFallbackDelayCfg:     httpcfg.dialer.FallbackDelay.String(),
 		utils.HTTPClientDialKeepAliveCfg:         httpcfg.dialer.KeepAlive.String(),
+	}
+	if httpcfg.ClientOpts.TLSClientConfig != nil {
+		clientOpts[utils.HTTPClientSkipTLSVerificationCfg] = httpcfg.ClientOpts.TLSClientConfig.InsecureSkipVerify
 	}
 	return map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.JsonRPCURL,
@@ -192,20 +195,6 @@ func (httpcfg HTTPCfg) CloneSection() Section { return httpcfg.Clone() }
 
 // Clone returns a deep copy of HTTPCfg
 func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
-	// transport := &http.Transport{
-	// 	Proxy:                 httpcfg.ClientOpts.Proxy,
-	// 	TLSClientConfig:       httpcfg.ClientOpts.TLSClientConfig,
-	// 	TLSHandshakeTimeout:   httpcfg.ClientOpts.TLSHandshakeTimeout,
-	// 	DisableKeepAlives:     httpcfg.ClientOpts.DisableKeepAlives,
-	// 	DisableCompression:    httpcfg.ClientOpts.DisableCompression,
-	// 	MaxIdleConns:          httpcfg.ClientOpts.MaxIdleConns,
-	// 	MaxIdleConnsPerHost:   httpcfg.ClientOpts.MaxIdleConnsPerHost,
-	// 	MaxConnsPerHost:       httpcfg.ClientOpts.MaxConnsPerHost,
-	// 	IdleConnTimeout:       httpcfg.ClientOpts.IdleConnTimeout,
-	// 	ResponseHeaderTimeout: httpcfg.ClientOpts.ResponseHeaderTimeout,
-	// 	ExpectContinueTimeout: httpcfg.ClientOpts.ExpectContinueTimeout,
-	// 	ForceAttemptHTTP2:     httpcfg.ClientOpts.ForceAttemptHTTP2,
-	// }
 	dialer := &net.Dialer{
 		Timeout:       httpcfg.dialer.Timeout,
 		DualStack:     httpcfg.dialer.DualStack,
@@ -356,87 +345,4 @@ func diffMap(d, v1, v2 map[string]interface{}) map[string]interface{} {
 		}
 	}
 	return d
-}
-
-func transportOptsEqual(t1, t2 *http.Transport) bool {
-	if t1.TLSClientConfig.InsecureSkipVerify != t2.TLSClientConfig.InsecureSkipVerify {
-		return false
-	}
-	if t1.TLSHandshakeTimeout != t2.TLSHandshakeTimeout {
-		return false
-	}
-	if t1.DisableCompression != t2.DisableCompression {
-		return false
-	}
-	if t1.DisableKeepAlives != t2.DisableKeepAlives {
-		return false
-	}
-	if t1.MaxIdleConns != t2.MaxIdleConns {
-		return false
-	}
-	if t1.MaxIdleConnsPerHost != t2.MaxIdleConnsPerHost {
-		return false
-	}
-	if t1.MaxConnsPerHost != t2.MaxConnsPerHost {
-		return false
-	}
-	if t1.IdleConnTimeout != t2.IdleConnTimeout {
-		return false
-	}
-	if t1.ResponseHeaderTimeout != t2.ResponseHeaderTimeout {
-		return false
-	}
-	if t1.ExpectContinueTimeout != t2.ExpectContinueTimeout {
-		return false
-	}
-	if t1.ForceAttemptHTTP2 != t2.ForceAttemptHTTP2 {
-		return false
-	}
-	return true
-}
-
-func dialerOptsEqual(d1, d2 *net.Dialer) bool {
-	if d1.Timeout != d2.Timeout {
-		return false
-	}
-	if d1.FallbackDelay != d2.FallbackDelay {
-		return false
-	}
-	if d1.KeepAlive != d2.KeepAlive {
-		return false
-	}
-	return true
-}
-
-func HTTPCfgEqual(cfg1, cfg2 *HTTPCfg) bool {
-	if cfg1.JsonRPCURL != cfg2.JsonRPCURL {
-		return false
-	}
-	if cfg1.RegistrarSURL != cfg2.RegistrarSURL {
-		return false
-	}
-	if cfg1.WSURL != cfg2.WSURL {
-		return false
-	}
-	if cfg1.UseBasicAuth != cfg2.UseBasicAuth {
-		return false
-	}
-	if cfg1.FreeswitchCDRsURL != cfg2.FreeswitchCDRsURL {
-		return false
-	}
-	if cfg1.CDRsURL != cfg2.CDRsURL {
-		return false
-	}
-	for key, value := range cfg1.AuthUsers {
-		if cfg2.AuthUsers[key] != value {
-			return false
-		}
-	}
-	if !transportOptsEqual(cfg1.ClientOpts, cfg2.ClientOpts) {
-		return false
-	}
-	if !dialerOptsEqual(cfg1.dialer, cfg2.dialer) {
-		return false
-	}
-	return true
 }

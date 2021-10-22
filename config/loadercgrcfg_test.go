@@ -19,7 +19,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -236,7 +235,6 @@ func TestLoaderCfgCloneSection(t *testing.T) {
 	}
 
 	rcv := ldrCfg.CloneSection()
-	fmt.Println(utils.ToJSON(rcv))
 	if !reflect.DeepEqual(rcv.(*LoaderCgrCfg), exp) {
 		t.Errorf("Expected %+v \n but received \n %v", exp, rcv)
 	}
