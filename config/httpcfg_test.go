@@ -73,8 +73,11 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	cfgJsn := NewDefaultCGRConfig()
 	if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if !HTTPCfgEqual(expected, cfgJsn.httpCfg) {
-		t.Errorf("Expected %+v \n, received %+v", expected, cfgJsn.httpCfg)
+	} else if !reflect.DeepEqual(expected.AsMapInterface(utils.InfieldSep),
+		cfgJsn.httpCfg.AsMapInterface(utils.InfieldSep)) {
+		t.Errorf("Expected %+v \n, received %+v",
+			expected.AsMapInterface(utils.InfieldSep),
+			cfgJsn.httpCfg.AsMapInterface(utils.InfieldSep))
 	}
 
 	cfgJSONStr = nil
@@ -198,8 +201,9 @@ func TestHTTPCfgClone(t *testing.T) {
 		},
 	}
 	rcv := ban.Clone()
-	if !HTTPCfgEqual(rcv, ban) {
-		t.Errorf("Expected: %+v\nReceived: %+v", ban, rcv)
+	if !reflect.DeepEqual(rcv.AsMapInterface(utils.InfieldSep), ban.AsMapInterface(utils.InfieldSep)) {
+		t.Errorf("Expected: %+v\nReceived: %+v", ban.AsMapInterface(utils.InfieldSep),
+			rcv.AsMapInterface(utils.InfieldSep))
 	}
 	if rcv.ClientOpts.MaxIdleConns = 50; ban.ClientOpts.MaxIdleConns != 100 {
 		t.Errorf("Expected clone to not modify the cloned")
@@ -273,37 +277,40 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 
 }
 
-// func TestHttpCfgCloneSection(t *testing.T) {
-// 	httpCfg := &HTTPCfg{
-// 		JsonRPCURL:        "JsonRpcUrl",
-// 		RegistrarSURL:     "RegistrarSUrl",
-// 		WSURL:             "WSUrl",
-// 		FreeswitchCDRsURL: "FsCdrsUrl",
-// 		CDRsURL:           "CdrsUrl",
-// 		UseBasicAuth:      true,
-// 		AuthUsers: map[string]string{
-// 			"User1": "passUser1",
-// 		},
-// 		ClientOpts: &http.Transport{},
-// 		dialer:     &net.Dialer{},
-// 	}
+func TestHttpCfgCloneSection(t *testing.T) {
+	httpCfg := &HTTPCfg{
+		JsonRPCURL:        "JsonRpcUrl",
+		RegistrarSURL:     "RegistrarSUrl",
+		WSURL:             "WSUrl",
+		FreeswitchCDRsURL: "FsCdrsUrl",
+		CDRsURL:           "CdrsUrl",
+		UseBasicAuth:      true,
+		AuthUsers: map[string]string{
+			"User1": "passUser1",
+		},
+		ClientOpts: &http.Transport{},
+		dialer:     &net.Dialer{},
+	}
 
-// 	exp := &HTTPCfg{
-// 		JsonRPCURL:        "JsonRpcUrl",
-// 		RegistrarSURL:     "RegistrarSUrl",
-// 		WSURL:             "WSUrl",
-// 		FreeswitchCDRsURL: "FsCdrsUrl",
-// 		CDRsURL:           "CdrsUrl",
-// 		UseBasicAuth:      true,
-// 		AuthUsers: map[string]string{
-// 			"User1": "passUser1",
-// 		},
-// 		ClientOpts: &http.Transport{},
-// 		dialer:     &net.Dialer{},
-// 	}
+	exp := &HTTPCfg{
+		JsonRPCURL:        "JsonRpcUrl",
+		RegistrarSURL:     "RegistrarSUrl",
+		WSURL:             "WSUrl",
+		FreeswitchCDRsURL: "FsCdrsUrl",
+		CDRsURL:           "CdrsUrl",
+		UseBasicAuth:      true,
+		AuthUsers: map[string]string{
+			"User1": "passUser1",
+		},
+		ClientOpts: &http.Transport{},
+		dialer:     &net.Dialer{},
+	}
 
-// 	rcv := httpCfg.CloneSection()
-// 	if !reflect.DeepEqual(rcv, exp) {
-// 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
-// 	}
-// }
+	rcv := httpCfg.CloneSection()
+	if !reflect.DeepEqual(rcv.AsMapInterface(utils.InfieldSep),
+		exp.AsMapInterface(utils.InfieldSep)) {
+		t.Errorf("Expected %v \n but received \n %v",
+			utils.ToJSON(exp.AsMapInterface(utils.InfieldSep)),
+			utils.ToJSON(rcv.AsMapInterface(utils.InfieldSep)))
+	}
+}

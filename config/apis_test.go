@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
 	"path"
 	"reflect"
 	"testing"
@@ -293,7 +292,6 @@ func TestGetSectionAsMap(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expected) {
-		fmt.Printf("%T", rcv)
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
