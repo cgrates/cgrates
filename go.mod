@@ -45,7 +45,7 @@ require (
 	github.com/miekg/dns v1.1.44-0.20210927135021-1630ffe2ca11
 	github.com/nats-io/nats-server/v2 v2.2.6 // indirect
 	github.com/nats-io/nats.go v1.11.0
-	github.com/nyaruka/phonenumbers v1.0.72
+	github.com/nyaruka/phonenumbers v1.0.73
 	github.com/peterh/liner v1.2.1
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -61,7 +61,6 @@ require (
 	golang.org/x/net v0.0.0-20210929193557-e81a3d93ecf6
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
-	golang.org/x/text v0.3.7
 	golang.org/x/tools v0.1.6 // indirect
 	google.golang.org/api v0.36.0
 	google.golang.org/genproto v0.0.0-20210111234610-22ae2b108f89 // indirect
