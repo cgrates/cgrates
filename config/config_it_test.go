@@ -1126,7 +1126,7 @@ func testLoadConfigFromFolderFileNotFound(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	expected := "file </usr/share/cgrates/conf/samples/docker/cgrates.json>:NOT_FOUND:ENV_VAR:DOCKER_IP"
-	if err = loadConfigFromFolder(context.Background(), "/usr/share/cgrates/conf/samples/",
+	if err = loadConfigFromFolder(context.Background(), "/usr/share/cgrates/conf/samples/docker",
 		cfg.sections, false, cfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
