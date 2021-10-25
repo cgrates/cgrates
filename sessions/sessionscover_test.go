@@ -20,6 +20,7 @@ package sessions
 
 import (
 	"bytes"
+	"io"
 	"log"
 	"strings"
 	"testing"
@@ -4617,4 +4618,32 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
+}
+
+func TestSyncSessionsSync(t *testing.T) {
+	log.SetOutput(io.Discard)
+	tmp := engine.Cache
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
+	cfg.CacheCfg().Partitions[utils.CacheClosedSessions] = &config.CacheParamCfg{
+		Replicate: true,
+	}
+	data := engine.NewInternalDB(nil, nil, true)
+	connMgr := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, nil, connMgr)
+	sessions.aSessions = map[string]*Session{}
+	sessions.cgrCfg.GeneralCfg().ReplyTimeout = 1
+	cacheS := engine.NewCacheS(cfg, nil, nil)
+	engine.Cache = cacheS
+	engine.SetConnManager(connMgr)
+	sessions.aSessions = map[string]*Session{}
+	var reply string
+	if err := sessions.BiRPCv1SyncSessions(nil, nil, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected to be OK")
+	}
+	engine.Cache = tmp
 }
