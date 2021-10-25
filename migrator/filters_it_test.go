@@ -105,7 +105,7 @@ func testFltrITConnect(t *testing.T) {
 		fltrCfgIn.DataDbCfg().Host, fltrCfgIn.DataDbCfg().Port,
 		fltrCfgIn.DataDbCfg().Name, fltrCfgIn.DataDbCfg().User,
 		fltrCfgIn.DataDbCfg().Password, fltrCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), fltrCfgIn.DataDbCfg().Opts,nil)
+		config.CgrConfig().CacheCfg(), fltrCfgIn.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -113,7 +113,7 @@ func testFltrITConnect(t *testing.T) {
 		fltrCfgOut.DataDbCfg().Host, fltrCfgOut.DataDbCfg().Port,
 		fltrCfgOut.DataDbCfg().Name, fltrCfgOut.DataDbCfg().User,
 		fltrCfgOut.DataDbCfg().Password, fltrCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), fltrCfgOut.DataDbCfg().Opts,nil)
+		config.CgrConfig().CacheCfg(), fltrCfgOut.DataDbCfg().Opts, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
