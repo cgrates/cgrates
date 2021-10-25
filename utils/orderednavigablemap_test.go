@@ -948,3 +948,40 @@ func TestOrderedNavigableMapCompose(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestOrderedNavigableMapSet2(t *testing.T) {
+	nm := NewOrderedNavigableMap()
+
+	if err := nm.SetAsSlice(&FullPath{
+		PathSlice: []string{"Field"},
+		Path:      "Field",
+	}, []*DataNode{NewLeafNode("1001")}); err != nil {
+		t.Error(err)
+	}
+
+	if err := nm.SetAsSlice(&FullPath{
+		PathSlice: []string{"Field1"},
+		Path:      "Field1",
+	}, []*DataNode{NewLeafNode("1002")}); err != nil {
+		t.Error(err)
+	}
+	if err := nm.SetAsSlice(&FullPath{
+		PathSlice: []string{"Field"},
+		Path:      "Field",
+	}, []*DataNode{NewLeafNode("1001")}); err != nil {
+		t.Error(err)
+	}
+
+	nMap := &DataNode{Type: NMMapType, Map: map[string]*DataNode{
+		"Field1": {Type: NMSliceType, Slice: []*DataNode{NewLeafNode("1002")}},
+		"Field":  {Type: NMSliceType, Slice: []*DataNode{NewLeafNode("1001")}},
+	}}
+	order := [][]string{{"Field1", "0"}, {"Field", "0"}}
+
+	if !reflect.DeepEqual(nm.nm, nMap) {
+		t.Errorf("Expected %s ,received: %s", ToJSON(nMap), ToJSON(nm.nm))
+	}
+	if !reflect.DeepEqual(nm.GetOrder(), order) {
+		t.Errorf("Expected %s ,received: %s", order, nm.GetOrder())
+	}
+}
