@@ -211,11 +211,11 @@ type sTerminator struct {
 
 // setSTerminator installs a new terminator for a session
 // setSTerminator is not thread safe, only the goroutine forked from within
-func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
+func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine.MapEvent) {
 	var err error
 	// TTL
 	var ttl time.Duration
-	if ttl, err = engine.GetDurationOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+	if ttl, err = engine.GetDurationOptsFromMultipleMaps(ctx, s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
 		sS.cgrCfg.SessionSCfg().Opts.TTL, config.SessionsTTLDftOpt, utils.OptsSesTTL); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
@@ -227,7 +227,7 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// random delay computation
 	var maxDelay time.Duration
-	if maxDelay, err = engine.GetDurationOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+	if maxDelay, err = engine.GetDurationOptsFromMultipleMaps(ctx, s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
 		sS.cgrCfg.SessionSCfg().Opts.TTLMaxDelay, config.SessionsTTLMaxDelayDftOpt, utils.OptsSesTTLMaxDelay); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
@@ -241,7 +241,7 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// LastUsed
 	var ttlLastUsed *time.Duration
-	if ttlLastUsed, err = engine.GetDurationPointerOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+	if ttlLastUsed, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
 		sS.cgrCfg.SessionSCfg().Opts.TTLLastUsed, utils.OptsSesTTLLastUsed); err != nil {
 		if err != utils.ErrNotFound {
 			utils.Logger.Warning(
@@ -252,7 +252,7 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// LastUsage
 	var ttlLastUsage *time.Duration
-	if ttlLastUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+	if ttlLastUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
 		sS.cgrCfg.SessionSCfg().Opts.TTLLastUsage, utils.OptsSesTTLLastUsage); err != nil {
 		if err != utils.ErrNotFound {
 			utils.Logger.Warning(
@@ -263,7 +263,7 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 	}
 	// TTLUsage
 	var ttlUsage *time.Duration
-	if ttlUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(context.TODO(), s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
+	if ttlUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.Tenant, s.EventStart, opts, s.OptsStart, sS.filterS,
 		sS.cgrCfg.SessionSCfg().Opts.TTLUsage, utils.OptsSesTTLUsage); err != nil {
 		if err != utils.ErrNotFound {
 			utils.Logger.Warning(
@@ -306,7 +306,7 @@ func (sS *SessionS) setSTerminator(s *Session, opts engine.MapEvent) {
 			if s.sTerminator.ttlLastUsage != nil {
 				lastUsage = *s.sTerminator.ttlLastUsage
 			}
-			sS.forceSTerminate(context.TODO(), s, lastUsage, s.sTerminator.ttlUsage,
+			sS.forceSTerminate(ctx, s, lastUsage, s.sTerminator.ttlUsage,
 				s.sTerminator.ttlLastUsed)
 			s.Unlock()
 		case <-endChan:
@@ -1235,7 +1235,7 @@ func (sS *SessionS) updateSession(ctx *context.Context, s *Session, updtEv, opts
 			s.EventStart[k] = v // update previoius field with new one
 		}
 		s.updateSRuns(updtEv, sS.cgrCfg.SessionSCfg().AlterableFields)
-		sS.setSTerminator(s, opts) // reset the terminator
+		sS.setSTerminator(ctx, s, opts) // reset the terminator
 	}
 	event := &utils.CGREvent{
 		Tenant:  s.Tenant,
