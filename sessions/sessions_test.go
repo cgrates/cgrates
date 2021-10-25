@@ -20,6 +20,8 @@ package sessions
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"reflect"
 	"sort"
 	"strings"
@@ -2974,4 +2976,32 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 	if err := ss.BiRPCv1ProcessEvent(nil, args, reply); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestSyncSessionsSync(t *testing.T) {
+	log.SetOutput(io.Discard)
+	tmp := engine.Cache
+	engine.Cache.Clear(nil)
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	connMgr := engine.NewConnManager(cfg, nil)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	sessions := NewSessionS(cfg, dm, connMgr)
+	sessions.aSessions = map[string]*Session{}
+	sessions.cgrCfg.GeneralCfg().ReplyTimeout = 1
+	engine.SetConnManager(connMgr)
+	sessions.aSessions = map[string]*Session{}
+
+	var reply string
+	if err := sessions.BiRPCv1SyncSessions(nil, "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected to be OK")
+	}
+
+	engine.Cache = tmp
 }
