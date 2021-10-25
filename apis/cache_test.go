@@ -247,3 +247,31 @@ func TestCacheLoadCache(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
+
+func TestCacheReloadCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	cache := NewCacheSv1(ch)
+
+	var reply string
+	if err := cache.ReloadCache(context.Background(), utils.NewAttrReloadCacheWithOpts(),
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexcpected rep[ly returned")
+	}
+
+	argsGetItem := &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheAttributeProfiles,
+		},
+	}
+	var replyStr []string
+	if err := cache.GetItemIDs(nil, argsGetItem,
+		&replyStr); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+}
