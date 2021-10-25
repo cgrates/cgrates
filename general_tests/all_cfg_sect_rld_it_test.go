@@ -105,7 +105,7 @@ func TestSectChange(t *testing.T) {
 	case utils.MetaInternal:
 		testSectCfgDir = "reload_sect_internal"
 	case utils.MetaMySQL:
-		t.SkipNow()
+		testSectCfgDir = "tutmysql"
 	case utils.MetaMongo:
 		testSectCfgDir = "reload_sect_mongo"
 	case utils.MetaPostgres:
@@ -152,7 +152,6 @@ func testSectRPCConn(t *testing.T) {
 }
 
 func testSectConfigSReloadCores(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(utils.CoreSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -327,6 +326,7 @@ func testSectConfigSReloadHTTP(t *testing.T) {
 }
 
 func testSectConfigSReloadSchedulers(t *testing.T) {
+
 	var replyPingBf string
 	if err := testSectRPC.Call(utils.SchedulerSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
