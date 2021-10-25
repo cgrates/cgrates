@@ -29,6 +29,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 
@@ -69,8 +70,7 @@ func testV1LoadResource(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := file.Write([]byte(`#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`)); err != nil {
+cgrates.org,NewRes1`)); err != nil {
 		t.Fatal(err)
 	}
 	if err := file.Sync(); err != nil {
@@ -87,60 +87,50 @@ cgrates.org,NewRes1
 
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
-	cfgLdr[0] = &config.LoaderSCfg{
+	cfg := config.NewDefaultCGRConfig().LoaderCfg()
+	cfg[0] = &config.LoaderSCfg{
 		ID:             "testV1LoadResource",
 		Enabled:        true,
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFilePath:   "res.lck",
-		Data:           nil,
-	}
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
-	ldrs.ldrs["testV1LoadResource"].dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: {
-			{Tag: "Tenant",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-
-	resCsv := `#Tenant[0],ID[1]
-	cgrates.org,NewRes1
-	`
-	rdr := io.NopCloser(strings.NewReader(resCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldrs.ldrs["testV1LoadResource"].rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			utils.ResourcesCsv: &openedCSVFile{
-				fileName: utils.ResourcesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
+		Data: []*config.LoaderDataType{
+			{
+				Type:     utils.MetaResources,
+				Filename: utils.ResourcesCsv,
+				Fields: []*config.FCTemplate{
+					{
+						Path:      "Tenant",
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
+						Mandatory: true,
+					},
+					{
+						Path:      "ID",
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
+						Mandatory: true,
+					},
+				},
 			},
 		},
 	}
+	for _, tmp := range cfg[0].Data[0].Fields {
+		tmp.ComputePath()
+	}
+	ldrs := NewLoaderService(dm, cfg, "UTC", nil, nil)
 
 	var reply string
 	expected := "ANOTHER_LOADER_RUNNING"
 	//cannot load when there is another loader running
-	if err := ldrs.V1Load(&ArgsProcessFolder{
-		LoaderID:  "testV1LoadResource",
-		ForceLock: false}, &reply); err == nil || reply != utils.EmptyString || err.Error() != expected {
+	if err := ldrs.V1Load(&ArgsProcessFolder{LoaderID: "testV1LoadResource"},
+		&reply); err == nil || reply != utils.EmptyString || err.Error() != expected {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", expected, utils.EmptyString, err, reply)
 	}
 
-	if err := ldrs.V1Load(&ArgsProcessFolder{
-		LoaderID:  "testV1LoadResource",
-		ForceLock: true}, &reply); err != nil && reply != utils.OK {
+	if err := ldrs.V1Load(&ArgsProcessFolder{LoaderID: "testV1LoadResource", ForceLock: true},
+		&reply); err != nil && reply != utils.OK {
 		t.Error(err)
 	}
 
@@ -151,7 +141,7 @@ cgrates.org,NewRes1
 		ThresholdIDs: make([]string, 0),
 	}
 
-	if rcv, err := ldrs.ldrs["testV1LoadResource"].dm.GetResourceProfile(expRes.Tenant, expRes.ID,
+	if rcv, err := dm.GetResourceProfile(expRes.Tenant, expRes.ID,
 		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expRes) {
@@ -313,6 +303,7 @@ NOT_UINT
 }
 
 func testV1RemoveResource(t *testing.T) {
+	engine.Cache.Clear(nil)
 	flPath := "/tmp/testV1RemoveResource"
 	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
@@ -321,76 +312,68 @@ func testV1RemoveResource(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	file.Write([]byte(`
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`))
+	file.Write([]byte(`#Tenant[0],ID[1]
+cgrates.org,NewRes1`))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
-	cfgLdr[0] = &config.LoaderSCfg{
+	file, err = os.Create(path.Join(flPath, "lock.cgr"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Close()
+
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig().LoaderCfg()
+	cfg[0] = &config.LoaderSCfg{
 		ID:             "testV1RemoveResource",
 		Enabled:        true,
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFilePath:   utils.ResourcesCsv,
-		Data:           nil,
-	}
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
-	ldrs.ldrs["testV1RemoveResource"].dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: {
-			{Tag: "Tenant",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-
-	resCsv := `
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`
-	rdr := io.NopCloser(strings.NewReader(resCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldrs.ldrs["testV1RemoveResource"].rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			utils.ResourcesCsv: &openedCSVFile{
-				fileName: utils.ResourcesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
+		LockFilePath:   "lock.cgr",
+		Data: []*config.LoaderDataType{
+			{
+				Type:     utils.MetaResources,
+				Filename: utils.ResourcesCsv,
+				Fields: []*config.FCTemplate{
+					{
+						Path:      "Tenant",
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
+						Mandatory: true,
+					},
+					{
+						Path:      "ID",
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
+						Mandatory: true,
+					},
+				},
 			},
 		},
 	}
-
-	expRes := &engine.ResourceProfile{
+	for _, tmp := range cfg[0].Data[0].Fields {
+		tmp.ComputePath()
+	}
+	ldrs := NewLoaderService(dm, cfg, time.UTC.String(), nil, nil)
+	//To remove a resource, we need to set it first
+	if err := dm.SetResourceProfile(&engine.ResourceProfile{
 		Tenant: "cgrates.org",
 		ID:     "NewRes1",
-	}
-	//To remove a resource, we need to set it first
-	if err := ldrs.ldrs["testV1RemoveResource"].dm.SetResourceProfile(expRes, true); err != nil {
-		t.Error(expRes)
+	}, true); err != nil {
+		t.Error(err)
 	}
 
 	var reply string
 	expected := "ANOTHER_LOADER_RUNNING"
 	//cannot load when there is another loader running
-	if err := ldrs.V1Remove(&ArgsProcessFolder{
-		LoaderID:  "testV1RemoveResource",
-		ForceLock: false}, &reply); err == nil || reply != utils.EmptyString || err.Error() != expected {
+	if err := ldrs.V1Remove(&ArgsProcessFolder{LoaderID: "testV1RemoveResource"},
+		&reply); err == nil || reply != utils.EmptyString || err.Error() != expected {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", expected, utils.EmptyString, err, reply)
 	}
 
-	ldrs.ldrs["testV1RemoveResource"].lockFilepath = "invalidFile"
+	os.Remove(path.Join(flPath, "lock.cgr"))
 	if err := ldrs.V1Remove(&ArgsProcessFolder{
 		LoaderID:  "testV1RemoveResource",
 		ForceLock: true}, &reply); err != nil && reply != utils.OK {
@@ -398,13 +381,11 @@ cgrates.org,NewRes1
 	}
 
 	//nothing to get from dataBase
-	if _, err := ldrs.ldrs["testV1RemoveResource"].dm.GetResourceProfile(expRes.Tenant, expRes.ID,
+	if _, err := dm.GetResourceProfile("cgrates.org", "NewRes1",
 		true, true, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := os.Remove(path.Join("/tmp", utils.ResourcesCsv)); err != nil {
-		t.Error(err)
-	} else if err := os.Remove(flPath); err != nil {
+	if err := os.RemoveAll(flPath); err != nil {
 		t.Error(err)
 	}
 }
