@@ -331,7 +331,7 @@ func TestDispatcherHostCallNilRPCConn(t *testing.T) {
 	var args int
 	var reply *int
 
-	experr := "dial tcp 127.0.0.1:2012: connect: connection refused"
+	experr := "nil rpc in argument method: method in: 0 out: <nil>"
 	err := dH.Call("method", args, reply)
 
 	if err == nil || err.Error() != experr {
