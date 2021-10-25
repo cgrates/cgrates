@@ -67,6 +67,11 @@ func (onm *OrderedNavigableMap) Empty() bool {
 func (onm *OrderedNavigableMap) removeRef(path string) {
 	for idxPath, slcIdx := range onm.orderRef { //remove the references from order
 		if strings.HasPrefix(idxPath, path) {
+			if lp := len(path); len(idxPath) > lp &&
+				idxPath[lp] != NestingSep[0] &&
+				idxPath[lp] != IdxStart[0] {
+				continue
+			}
 			for _, el := range slcIdx {
 				onm.orderIdx.Remove(el)
 			}
