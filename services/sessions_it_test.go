@@ -92,7 +92,7 @@ func TestSessionSReload1(t *testing.T) {
 	conMng := engine.NewConnManager(cfg)
 	conMng.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), utils.ChargerSv1, clientConect)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, new(DataDBService), server, make(chan birpc.ClientConnector, 1), conMng, anz, srvDep)
+	srv := NewSessionService(cfg, new(DataDBService), filterSChan, server, make(chan birpc.ClientConnector, 1), conMng, anz, srvDep)
 	ctx, cancel := context.WithCancel(context.TODO())
 	err := srv.Start(ctx, cancel)
 	if err != nil {
@@ -156,7 +156,7 @@ func TestSessionSReload2(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	srv := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg)
 
 	srv.(*SessionService).sm = &sessions.SessionS{}
@@ -205,7 +205,7 @@ func TestSessionSReload3(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	srv := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg)
 	err2 := srv.(*SessionService).start(func() {})
 	if err2 != nil {
