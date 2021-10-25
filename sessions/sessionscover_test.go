@@ -4500,47 +4500,23 @@ func TestSyncSessionsSync(t *testing.T) {
 	log.SetOutput(io.Discard)
 	tmp := engine.Cache
 	engine.Cache.Clear(nil)
-
-	sTestMock := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResourceSv1ReleaseResources: func(args interface{}, reply interface{}) error {
-				return utils.ErrNotImplemented
-			},
-			utils.CacheSv1ReplicateSet: func(args interface{}, reply interface{}) error {
-				return utils.ErrNotImplemented
-			},
-		},
-	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
-	chanInternal <- sTestMock
 	cfg := config.NewDefaultCGRConfig()
-	//cfg.GeneralCfg().ReplyTimeout = 1
 	cfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheClosedSessions] = &config.CacheParamCfg{
 		Replicate: true,
 	}
 	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): chanInternal})
+	connMgr := engine.NewConnManager(cfg, nil)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
-
-	sTestMock1 := &testMockClientSyncSessions{}
-	sessions.RegisterIntBiJConn(sTestMock1, utils.EmptyString)
-
 	sessions.aSessions = map[string]*Session{}
-	sessions.syncSessions()
-
 	sessions.cgrCfg.GeneralCfg().ReplyTimeout = 1
 	cacheS := engine.NewCacheS(cfg, nil, nil)
 	engine.Cache = cacheS
-	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): chanInternal})
+
 	engine.SetConnManager(connMgr)
-	sessions.aSessions = map[string]*Session{
-		"ORIGIN_ID": {},
-	}
+	sessions.aSessions = map[string]*Session{}
 
 	var reply string
 	if err := sessions.BiRPCv1SyncSessions(nil, nil, &reply); err != nil {
