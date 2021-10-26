@@ -428,7 +428,8 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 	if rIcr.cost == nil {
 		icrRt, has := rts[rIcr.RateID]
 		if !has {
-			//return nil, fmt.Errorf("Cannot get the IntervalRate with this RateID: %s", rIcr.RateID)
+			// return nil, fmt.Errorf("Cannot get the IntervalRate with this RateID: %s", rIcr.RateID)
+			return
 		}
 		if rIcr.Usage.Compare(NewDecimal(-1, 0)) == 0 { // FixedFee
 			rIcr.cost = icrRt.FixedFee.Big

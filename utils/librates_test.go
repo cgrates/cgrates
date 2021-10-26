@@ -19,11 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cron"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestLibratesTenantID(t *testing.T) {
@@ -1384,5 +1386,245 @@ func TestAsRatesIntervalsCost(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(expRtsIntCost), ToJSON(rcv))
 	} else if !rcv.Equals(expRtsIntCost, nil, nil) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(expRtsIntCost), ToJSON(rcv))
+	}
+}
+
+func TestRateSIncrementCost(t *testing.T) {
+	rIc := &RateSIncrement{
+		IncrementStart:    NewDecimal(int64(2), 0),
+		RateIntervalIndex: 0,
+		RateID:            "RI1",
+		CompressFactor:    int64(3),
+		Usage:             NewDecimal(int64(30), 0),
+	}
+
+	rts := map[string]*IntervalRate{
+		"RI1": {
+			IntervalStart: NewDecimal(int64(2), 0),
+			FixedFee:      NewDecimal(int64(10), 0),
+			RecurrentFee:  NewDecimal(int64(5), 0),
+		},
+	}
+
+	cost := rIc.Cost(rts)
+	exp := new(decimal.Big).SetUint64(15)
+	if !reflect.DeepEqual(cost, exp) {
+		t.Errorf("Expected %T \n but received \n %T", exp, cost)
+	}
+}
+
+func TestRateSIncrementCostNotNil(t *testing.T) {
+	rIc := &RateSIncrement{
+		IncrementStart:    NewDecimal(int64(2), 0),
+		RateIntervalIndex: 0,
+		RateID:            "RI1",
+		CompressFactor:    int64(3),
+		Usage:             NewDecimal(int64(30), 0),
+		cost:              new(decimal.Big).SetUint64(15),
+	}
+
+	rts := map[string]*IntervalRate{
+		"RI1": {
+			IntervalStart: NewDecimal(int64(2), 0),
+			FixedFee:      NewDecimal(int64(10), 0),
+			RecurrentFee:  NewDecimal(int64(5), 0),
+		},
+	}
+
+	cost := rIc.Cost(rts)
+	exp := new(decimal.Big).SetUint64(15)
+	if !reflect.DeepEqual(cost, exp) {
+		t.Errorf("Expected %T \n but received \n %T", exp, cost)
+	}
+}
+
+func TestRateSIncrementCostNoID(t *testing.T) {
+	rIc := &RateSIncrement{
+		IncrementStart:    NewDecimal(int64(2), 0),
+		RateIntervalIndex: 0,
+		RateID:            "RI1",
+		CompressFactor:    int64(3),
+		Usage:             NewDecimal(int64(30), 0),
+	}
+
+	rts := map[string]*IntervalRate{
+		"not_RI1": {
+			IntervalStart: NewDecimal(int64(2), 0),
+			FixedFee:      NewDecimal(int64(10), 0),
+			RecurrentFee:  NewDecimal(int64(5), 0),
+		},
+	}
+
+	cost := rIc.Cost(rts)
+	if cost != nil {
+		fmt.Println(cost)
+		t.Error("Expected to be nil")
+	}
+}
+
+func TestRateSIncrementCostFixedFee(t *testing.T) {
+	rIc := &RateSIncrement{
+		IncrementStart:    NewDecimal(int64(2), 0),
+		RateIntervalIndex: 0,
+		RateID:            "RI1",
+		CompressFactor:    int64(3),
+		Usage:             NewDecimal(int64(-1), 0),
+	}
+
+	rts := map[string]*IntervalRate{
+		"RI1": {
+			IntervalStart: NewDecimal(int64(2), 0),
+			FixedFee:      NewDecimal(int64(10), 0),
+			RecurrentFee:  NewDecimal(int64(5), 0),
+		},
+	}
+
+	cost := rIc.Cost(rts)
+	exp := new(decimal.Big).SetUint64(10)
+	if !reflect.DeepEqual(cost, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, cost)
+	}
+}
+
+func TestRateSIncrementCostDiffUnitIncrement(t *testing.T) {
+	rIc := &RateSIncrement{
+		IncrementStart:    NewDecimal(int64(2), 0),
+		RateIntervalIndex: 0,
+		RateID:            "RI1",
+		CompressFactor:    int64(1),
+		Usage:             NewDecimal(int64(2), 0),
+	}
+
+	rts := map[string]*IntervalRate{
+		"RI1": {
+			IntervalStart: NewDecimal(int64(2), 0),
+			FixedFee:      NewDecimal(int64(10), 0),
+			RecurrentFee:  NewDecimal(int64(2), 0),
+			Unit:          NewDecimal(int64(2), 0),
+			Increment:     NewDecimal(int64(3), 0),
+		},
+	}
+
+	cost := rIc.Cost(rts)
+	exp := new(decimal.Big).SetUint64(3)
+	if !reflect.DeepEqual(cost, exp) {
+		t.Errorf("Expected %v \n but received \n %v", exp, cost)
+	}
+}
+
+func TestAPIIntervalRateAsIR(t *testing.T) {
+	ext := &APIIntervalRate{
+		IntervalStart: "2",
+		FixedFee:      Float64Pointer(10),
+		RecurrentFee:  Float64Pointer(2),
+		Unit:          Float64Pointer(2),
+		Increment:     Float64Pointer(3),
+	}
+
+	exp := &IntervalRate{
+		IntervalStart: NewDecimal(int64(2), 0),
+		FixedFee:      NewDecimal(int64(10), 0),
+		RecurrentFee:  NewDecimal(int64(2), 0),
+		Unit:          NewDecimal(int64(2), 0),
+		Increment:     NewDecimal(int64(3), 0),
+	}
+
+	rcv, err := ext.AsIntervalRate()
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestAPIIntervalRateAsIRError(t *testing.T) {
+	ext := &APIIntervalRate{
+		IntervalStart: "not_a_decimal",
+		FixedFee:      Float64Pointer(10),
+		RecurrentFee:  Float64Pointer(2),
+		Unit:          Float64Pointer(2),
+		Increment:     Float64Pointer(3),
+	}
+
+	exp := "can't convert <not_a_decimal> to decimal"
+
+	_, err := ext.AsIntervalRate()
+	if !reflect.DeepEqual(exp, err.Error()) {
+		t.Errorf("Expected %v \n but received \n %v", exp, err.Error())
+	}
+}
+
+func TestAPIRateAsRate(t *testing.T) {
+	aR := &APIRate{
+		ID:              "rate_id1",
+		FilterIDs:       []string{"fltr1"},
+		ActivationTimes: "1 1 3",
+		Weights:         ";10",
+		Blocker:         false,
+		IntervalRates: []*APIIntervalRate{
+			{
+				IntervalStart: "2",
+				FixedFee:      Float64Pointer(10),
+				RecurrentFee:  Float64Pointer(2),
+				Unit:          Float64Pointer(2),
+				Increment:     Float64Pointer(3),
+			},
+		},
+	}
+
+	exp := &Rate{
+		ID:              "rate_id1",
+		FilterIDs:       []string{"fltr1"},
+		ActivationTimes: "1 1 3",
+		Weights: DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Blocker: false,
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: NewDecimal(int64(2), 0),
+				FixedFee:      NewDecimal(int64(10), 0),
+				RecurrentFee:  NewDecimal(int64(2), 0),
+				Unit:          NewDecimal(int64(2), 0),
+				Increment:     NewDecimal(int64(3), 0),
+			},
+		},
+	}
+
+	rcv, err := aR.AsRate()
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+}
+
+func TestAPIRateAsRateError(t *testing.T) {
+	aR := &APIRate{
+		ID:              "rate_id1",
+		FilterIDs:       []string{"fltr1"},
+		ActivationTimes: "1 1 3",
+		Weights:         ";10",
+		Blocker:         false,
+		IntervalRates: []*APIIntervalRate{
+			{
+				IntervalStart: "not_a_decimal",
+				FixedFee:      Float64Pointer(10),
+				RecurrentFee:  Float64Pointer(2),
+				Unit:          Float64Pointer(2),
+				Increment:     Float64Pointer(3),
+			},
+		},
+	}
+
+	exp := "can't convert <not_a_decimal> to decimal"
+
+	_, err := aR.AsRate()
+	if !reflect.DeepEqual(exp, err.Error()) {
+		t.Errorf("Expected %v \n but received \n %v", exp, err.Error())
 	}
 }
