@@ -45,7 +45,7 @@ var (
 	getDftLoaderCfg = func() *LoaderSCfg { return new(LoaderSCfg) }
 	getDftRemHstCfg = func() *RemoteHost { return new(RemoteHost) }
 
-	getDftEvExpCfg = func() *EventExporterCfg { return &EventExporterCfg{Opts: make(map[string]interface{})} }
+	getDftEvExpCfg = func() *EventExporterCfg { return &EventExporterCfg{Opts: &EventExporterOpts{}} }
 	getDftEvRdrCfg = func() *EventReaderCfg { return &EventReaderCfg{Opts: make(map[string]interface{})} }
 )
 
