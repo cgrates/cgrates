@@ -527,7 +527,7 @@ func TestSQSERReadMsgError3(t *testing.T) {
 		poster: ees.NewSQSee(&config.EventExporterCfg{
 			ExportPath: "url",
 			Attempts:   1,
-			Opts:       make(map[string]interface{}),
+			Opts:       &config.EventExporterOpts{},
 		}, nil),
 	}
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}

@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,7 +38,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 
 func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(5 * time.Second)
-	AddFailedPost("", "path1", "format1", "module1", "1", make(map[string]interface{}))
+	AddFailedPost("", "path1", "format1", "module1", "1", &config.EventExporterOpts{})
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -60,8 +61,10 @@ func TestAddFldPost(t *testing.T) {
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	AddFailedPost("", "path1", "format1", "module1", "2", make(map[string]interface{}))
-	AddFailedPost("", "path2", "format2", "module2", "3", map[string]interface{}{utils.SQSQueueID: "qID"})
+	AddFailedPost("", "path1", "format1", "module1", "2", &config.EventExporterOpts{})
+	AddFailedPost("", "path2", "format2", "module2", "3", &config.EventExporterOpts{
+		SQSQueueID: "qID",
+	})
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")

@@ -110,19 +110,13 @@ func (e *RPCee) PrepareOrderMap(oMp *utils.OrderedNavigableMap) (interface{}, er
 }
 
 func (e *RPCee) parseOpts() (err error) {
-	e.codec = utils.IfaceAsString(e.cfg.Opts[utils.RpcCodec])
-	e.serviceMethod = utils.IfaceAsString(e.cfg.Opts[utils.ServiceMethod])
-	e.keyPath = utils.IfaceAsString(e.cfg.Opts[utils.KeyPath])
-	e.certPath = utils.IfaceAsString(e.cfg.Opts[utils.CertPath])
-	e.caPath = utils.IfaceAsString(e.cfg.Opts[utils.CaPath])
-	if e.tls, err = utils.IfaceAsBool(e.cfg.Opts[utils.Tls]); err != nil {
-		return
-	}
-	if e.connTimeout, err = utils.IfaceAsDuration(e.cfg.Opts[utils.RpcConnTimeout]); err != nil {
-		return
-	}
-	if e.replyTimeout, err = utils.IfaceAsDuration(e.cfg.Opts[utils.RpcReplyTimeout]); err != nil {
-		return
-	}
+	e.codec = e.cfg.Opts.RPCCodec
+	e.serviceMethod = e.cfg.Opts.ServiceMethod
+	e.keyPath = e.cfg.Opts.KeyPath
+	e.certPath = e.cfg.Opts.CertPath
+	e.caPath = e.cfg.Opts.CAPath
+	e.tls = e.cfg.Opts.TLS
+	e.connTimeout = e.cfg.Opts.RPCConnTimeout
+	e.replyTimeout = e.cfg.Opts.RPCReplyTimeout
 	return
 }

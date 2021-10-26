@@ -61,26 +61,18 @@ type S3EE struct {
 	bytePreparing
 }
 
-func (pstr *S3EE) parseOpts(opts map[string]interface{}) {
+func (pstr *S3EE) parseOpts(opts *config.EventExporterOpts) {
 	pstr.bucket = utils.DefaultQueueID
-	if val, has := opts[utils.S3Bucket]; has {
-		pstr.bucket = utils.IfaceAsString(val)
+	if opts.S3BucketID == utils.EmptyString {
+		pstr.bucket = utils.DefaultQueueID
+	} else {
+		pstr.bucket = opts.S3BucketID
 	}
-	if val, has := opts[utils.S3FolderPath]; has {
-		pstr.folderPath = utils.IfaceAsString(val)
-	}
-	if val, has := opts[utils.AWSRegion]; has {
-		pstr.awsRegion = utils.IfaceAsString(val)
-	}
-	if val, has := opts[utils.AWSKey]; has {
-		pstr.awsID = utils.IfaceAsString(val)
-	}
-	if val, has := opts[utils.AWSSecret]; has {
-		pstr.awsKey = utils.IfaceAsString(val)
-	}
-	if val, has := opts[utils.AWSToken]; has {
-		pstr.awsToken = utils.IfaceAsString(val)
-	}
+	pstr.folderPath = opts.S3FolderPath
+	pstr.awsRegion = opts.AWSRegion
+	pstr.awsID = opts.AWSKey
+	pstr.awsKey = opts.AWSSecret
+	pstr.awsToken = opts.AWSToken
 }
 
 func (pstr *S3EE) Cfg() *config.EventExporterCfg { return pstr.cfg }
