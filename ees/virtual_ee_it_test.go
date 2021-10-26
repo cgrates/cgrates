@@ -119,10 +119,8 @@ func testVirtExportSupplierEvent(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Second,
+				utils.RunID:        "SupplierRun",
 				utils.Cost:         1.23,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaRunID: "SupplierRun",
 			},
 		},
 	}
@@ -154,10 +152,8 @@ func testVirtExportEvents(t *testing.T) {
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
 				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
 				utils.Usage:        10 * time.Second,
+				utils.RunID:        "SupplierRun",
 				utils.Cost:         1.01,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaRunID: "SupplierRun",
 			},
 		},
 	}
