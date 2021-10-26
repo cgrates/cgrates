@@ -57,51 +57,20 @@ type ElasticEE struct {
 // init will create all the necessary dependencies, including opening the file
 func (eEe *ElasticEE) prepareOpts() (err error) {
 	//parse opts
-	eEe.opts.Index = utils.CDRsTBL
-	if val, has := eEe.Cfg().Opts[utils.ElsIndex]; has {
-		eEe.opts.Index = utils.IfaceAsString(val)
+	if eEe.Cfg().Opts.ElsIndex == utils.EmptyString {
+		eEe.opts.Index = utils.CDRsTBL
+	} else {
+		eEe.opts.Index = eEe.Cfg().Opts.ElsIndex
 	}
-	if val, has := eEe.Cfg().Opts[utils.ElsIfPrimaryTerm]; has {
-		var intVal int64
-		if intVal, err = utils.IfaceAsTInt64(val); err != nil {
-			return
-		}
-		eEe.opts.IfPrimaryTerm = utils.IntPointer(int(intVal))
-	}
-	if val, has := eEe.Cfg().Opts[utils.ElsIfSeqNo]; has {
-		var intVal int64
-		if intVal, err = utils.IfaceAsTInt64(val); err != nil {
-			return
-		}
-		eEe.opts.IfSeqNo = utils.IntPointer(int(intVal))
-	}
-	if val, has := eEe.Cfg().Opts[utils.ElsOpType]; has {
-		eEe.opts.OpType = utils.IfaceAsString(val)
-	}
-	if val, has := eEe.Cfg().Opts[utils.ElsPipeline]; has {
-		eEe.opts.Pipeline = utils.IfaceAsString(val)
-	}
-	if val, has := eEe.Cfg().Opts[utils.ElsRouting]; has {
-		eEe.opts.Routing = utils.IfaceAsString(val)
-	}
-	if val, has := eEe.Cfg().Opts[utils.ElsTimeout]; has {
-		if eEe.opts.Timeout, err = utils.IfaceAsDuration(val); err != nil {
-			return
-		}
-	}
-	if val, has := eEe.Cfg().Opts[utils.ElsVersionLow]; has {
-		var intVal int64
-		if intVal, err = utils.IfaceAsTInt64(val); err != nil {
-			return
-		}
-		eEe.opts.Version = utils.IntPointer(int(intVal))
-	}
-	if val, has := eEe.Cfg().Opts[utils.ElsVersionType]; has {
-		eEe.opts.VersionType = utils.IfaceAsString(val)
-	}
-	if val, has := eEe.Cfg().Opts[utils.ElsWaitForActiveShards]; has {
-		eEe.opts.WaitForActiveShards = utils.IfaceAsString(val)
-	}
+	eEe.opts.IfPrimaryTerm = eEe.Cfg().Opts.ElsIfPrimaryTerm
+	eEe.opts.IfSeqNo = eEe.Cfg().Opts.ElsIfSeqNo
+	eEe.opts.OpType = eEe.Cfg().Opts.ElsOpType
+	eEe.opts.Pipeline = eEe.Cfg().Opts.ElsPipeline
+	eEe.opts.Routing = eEe.Cfg().Opts.ElsRouting
+	eEe.opts.Timeout = eEe.Cfg().Opts.ElsTimeout
+	eEe.opts.Version = eEe.Cfg().Opts.ElsVersion
+	eEe.opts.VersionType = eEe.Cfg().Opts.ElsVersionType
+	eEe.opts.WaitForActiveShards = eEe.Cfg().Opts.ElsWaitForActiveShards
 	return
 }
 

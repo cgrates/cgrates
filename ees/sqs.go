@@ -60,23 +60,16 @@ type SQSee struct {
 	bytePreparing
 }
 
-func (pstr *SQSee) parseOpts(opts map[string]interface{}) {
-	pstr.queueID = utils.DefaultQueueID
-	if val, has := opts[utils.SQSQueueID]; has {
-		pstr.queueID = utils.IfaceAsString(val)
+func (pstr *SQSee) parseOpts(opts *config.EventExporterOpts) {
+	if opts.SQSQueueID == utils.EmptyString {
+		pstr.queueID = utils.DefaultQueueID
+	} else {
+		pstr.queueID = opts.SQSQueueID
 	}
-	if val, has := opts[utils.AWSRegion]; has {
-		pstr.awsRegion = utils.IfaceAsString(val)
-	}
-	if val, has := opts[utils.AWSKey]; has {
-		pstr.awsID = utils.IfaceAsString(val)
-	}
-	if val, has := opts[utils.AWSSecret]; has {
-		pstr.awsKey = utils.IfaceAsString(val)
-	}
-	if val, has := opts[utils.AWSToken]; has {
-		pstr.awsToken = utils.IfaceAsString(val)
-	}
+	pstr.awsRegion = opts.AWSRegion
+	pstr.awsID = opts.AWSKey
+	pstr.awsKey = opts.AWSSecret
+	pstr.awsToken = opts.AWSToken
 }
 
 func (pstr *SQSee) Cfg() *config.EventExporterCfg { return pstr.cfg }

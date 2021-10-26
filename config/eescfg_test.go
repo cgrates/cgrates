@@ -40,7 +40,7 @@ func TestEESClone(t *testing.T) {
 			"type": "*none",									
 			"export_path": "/var/spool/cgrates/ees",			
 			"opts": {
-              "*default": "randomVal"
+              "csvFieldSeparator": ";"
              },											
 			"timezone": "local",										
 			"filters": ["randomFiletrs"],										
@@ -88,7 +88,7 @@ func TestEESClone(t *testing.T) {
 				contentFields:  []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -166,8 +166,8 @@ func TestEESClone(t *testing.T) {
 						Layout: time.RFC3339,
 					},
 				},
-				Opts: map[string]interface{}{
-					utils.MetaDefault: "randomVal",
+				Opts: &EventExporterOpts{
+					CSVFieldSeparator: utils.InfieldSep,
 				},
 			},
 		},
@@ -283,7 +283,7 @@ func TestEventExporterSameID(t *testing.T) {
 				contentFields:  []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -305,7 +305,7 @@ func TestEventExporterSameID(t *testing.T) {
 				},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 		},
@@ -405,7 +405,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				Fields:         []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -429,7 +429,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 						Layout: time.RFC3339,
 					},
 				},
-				Opts: make(map[string]interface{}),
+				Opts: &EventExporterOpts{},
 				Fields: []*FCTemplate{
 					{Tag: utils.CGRID, Path: "*exp.CGRID", Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep), Layout: time.RFC3339},
 				},
@@ -518,7 +518,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Fields:         []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -543,7 +543,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 					},
 				},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.CGRID,
@@ -696,7 +696,7 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		ID:         "EES_ID",
 		Type:       "xml",
 		ExportPath: "/tmp/ees",
-		Opts:       map[string]interface{}{},
+		Opts:       &EventExporterOpts{},
 		Timezone:   "UTC",
 		Filters:    []string{"Filter1"},
 		Flags: utils.FlagsWithParams{
@@ -736,8 +736,8 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		ID:         "EES_ID2",
 		Type:       "http",
 		ExportPath: "/var/tmp/ees",
-		Opts: map[string]interface{}{
-			"OPT": "opt",
+		Opts: &EventExporterOpts{
+			CSVFieldSeparator: utils.InfieldSep,
 		},
 
 		Timezone: "EEST",
@@ -779,8 +779,8 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		Id:          utils.StringPointer("EES_ID2"),
 		Type:        utils.StringPointer("http"),
 		Export_path: utils.StringPointer("/var/tmp/ees"),
-		Opts: map[string]interface{}{
-			"OPT": "opt",
+		Opts: &EventExporterOptsJson{
+			CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 		},
 		Timezone:            utils.StringPointer("EEST"),
 		Filters:             &[]string{"Filter2"},
@@ -806,7 +806,7 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &EventExporterJsonCfg{
-		Opts: map[string]interface{}{},
+		Opts: &EventExporterOptsJson{},
 	}
 	rcv = diffEventExporterJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
@@ -822,7 +822,7 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 	}
 
 	expected = &EventExporterJsonCfg{
-		Opts: map[string]interface{}{},
+		Opts: &EventExporterOptsJson{},
 		Fields: &[]*FcTemplateJsonCfg{
 			{
 				Type: utils.StringPointer("*prefix"),
@@ -903,7 +903,7 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			ID:         "EES_ID",
 			Type:       "xml",
 			ExportPath: "/tmp/ees",
-			Opts:       map[string]interface{}{},
+			Opts:       &EventExporterOpts{},
 
 			Timezone: "UTC",
 			Filters:  []string{"Filter1"},
@@ -944,8 +944,8 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			ID:         "EES_ID2",
 			Type:       "http",
 			ExportPath: "/var/tmp/ees",
-			Opts: map[string]interface{}{
-				"OPT": "opt",
+			Opts: &EventExporterOpts{
+				CSVFieldSeparator: utils.InfieldSep,
 			},
 
 			Timezone: "EEST",
@@ -987,8 +987,8 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			Id:          utils.StringPointer("EES_ID2"),
 			Type:        utils.StringPointer("http"),
 			Export_path: utils.StringPointer("/var/tmp/ees"),
-			Opts: map[string]interface{}{
-				"OPT": "opt",
+			Opts: &EventExporterOptsJson{
+				CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 			},
 			Timezone:          utils.StringPointer("EEST"),
 			Filters:           &[]string{"Filter2"},
@@ -1014,7 +1014,7 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 	v1 = v2
 	expected = &[]*EventExporterJsonCfg{
 		{
-			Opts: map[string]interface{}{},
+			Opts: &EventExporterOptsJson{},
 		},
 	}
 	rcv = diffEventExportersJsonCfg(d, v1, v2, ";")
@@ -1030,7 +1030,7 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 
 	expected = &[]*EventExporterJsonCfg{
 		{
-			Opts: map[string]interface{}{},
+			Opts: &EventExporterOptsJson{},
 			Id:   utils.StringPointer("EES_ID2"),
 		},
 	}
@@ -1081,7 +1081,7 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 		Exporters: &[]*EventExporterJsonCfg{
 			{
 				Id:   utils.StringPointer("EES_ID"),
-				Opts: map[string]interface{}{},
+				Opts: &EventExporterOptsJson{},
 			},
 		},
 	}
@@ -1104,7 +1104,7 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 		},
 		Exporters: &[]*EventExporterJsonCfg{
 			{
-				Opts: map[string]interface{}{},
+				Opts: &EventExporterOptsJson{},
 			},
 		},
 	}

@@ -30,13 +30,14 @@ import (
 // NewAMQPv1EE creates a poster for amqpv1
 func NewAMQPv1EE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *AMQPv1EE {
 	pstr := &AMQPv1EE{
-		cfg:     cfg,
-		dc:      dc,
-		queueID: "/" + utils.DefaultQueueID,
-		reqs:    newConcReq(cfg.ConcurrentRequests),
+		cfg:  cfg,
+		dc:   dc,
+		reqs: newConcReq(cfg.ConcurrentRequests),
 	}
-	if vals, has := cfg.Opts[utils.AMQPQueueID]; has {
-		pstr.queueID = "/" + utils.IfaceAsString(vals)
+	if cfg.Opts.AMQPQueueID == utils.EmptyString {
+		pstr.queueID = "/" + utils.DefaultQueueID
+	} else {
+		pstr.queueID = "/" + cfg.Opts.AMQPQueueID
 	}
 	return pstr
 }

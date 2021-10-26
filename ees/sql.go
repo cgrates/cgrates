@@ -71,19 +71,23 @@ func (sqlEe *SQLEe) initDialector() (err error) {
 	}
 	password, _ := u.User.Password()
 
-	dbname := utils.SQLDefaultDBName
-	if vals, has := sqlEe.Cfg().Opts[utils.SQLDBNameOpt]; has {
-		dbname = utils.IfaceAsString(vals)
+	var dbname string
+	if sqlEe.Cfg().Opts.SQLDBName == utils.EmptyString {
+		dbname = utils.SQLDefaultDBName
+	} else {
+		dbname = sqlEe.Cfg().Opts.SQLDBName
 	}
-	ssl := utils.SQLDefaultSSLMode
-	if vals, has := sqlEe.Cfg().Opts[utils.SSLModeCfg]; has {
-		ssl = utils.IfaceAsString(vals)
+	var ssl string
+	if sqlEe.Cfg().Opts.SSLMode == utils.EmptyString {
+		ssl = utils.SQLDefaultSSLMode
+	} else {
+		ssl = sqlEe.Cfg().Opts.SSLMode
 	}
 	// tableName is mandatory in opts
-	if iface, has := sqlEe.Cfg().Opts[utils.SQLTableNameOpt]; !has {
+	if sqlEe.Cfg().Opts.SQLTableName == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.SQLTableNameOpt)
 	} else {
-		sqlEe.tableName = utils.IfaceAsString(iface)
+		sqlEe.tableName = sqlEe.Cfg().Opts.SQLTableName
 	}
 
 	// var dialect gorm.Dialector
@@ -99,7 +103,7 @@ func (sqlEe *SQLEe) initDialector() (err error) {
 	return
 }
 
-func openDB(dialect gorm.Dialector, opts map[string]interface{}) (db *gorm.DB, sqlDB *sql.DB, err error) {
+func openDB(dialect gorm.Dialector, opts *config.EventExporterOpts) (db *gorm.DB, sqlDB *sql.DB, err error) {
 	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
 		return
 	}
@@ -107,26 +111,14 @@ func openDB(dialect gorm.Dialector, opts map[string]interface{}) (db *gorm.DB, s
 		return
 	}
 
-	if iface, has := opts[utils.SQLMaxIdleConnsCfg]; has {
-		val, err := utils.IfaceAsTInt64(iface)
-		if err != nil {
-			return nil, nil, err
-		}
-		sqlDB.SetMaxIdleConns(int(val))
+	if opts.SQLMaxIdleConns != 0 {
+		sqlDB.SetMaxIdleConns(opts.SQLMaxIdleConns)
 	}
-	if iface, has := opts[utils.SQLMaxOpenConns]; has {
-		val, err := utils.IfaceAsTInt64(iface)
-		if err != nil {
-			return nil, nil, err
-		}
-		sqlDB.SetMaxOpenConns(int(val))
+	if opts.SQLMaxOpenConns != 0 {
+		sqlDB.SetMaxOpenConns(opts.SQLMaxOpenConns)
 	}
-	if iface, has := opts[utils.SQLConnMaxLifetime]; has {
-		val, err := utils.IfaceAsDuration(iface)
-		if err != nil {
-			return nil, nil, err
-		}
-		sqlDB.SetConnMaxLifetime(val)
+	if opts.SQLConnMaxLifetime != 0 {
+		sqlDB.SetConnMaxLifetime(opts.SQLConnMaxLifetime)
 	}
 
 	return

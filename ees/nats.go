@@ -61,24 +61,17 @@ type NatsEE struct {
 	bytePreparing
 }
 
-func (pstr *NatsEE) parseOpt(opts map[string]interface{}, nodeID string, connTimeout time.Duration) (err error) {
-	if useJetStreamVal, has := opts[utils.NatsJetStream]; has {
-		if pstr.jetStream, err = utils.IfaceAsBool(useJetStreamVal); err != nil {
-			return
-		}
-	}
-	pstr.subject = utils.DefaultQueueID
-	if vals, has := opts[utils.NatsSubject]; has {
-		pstr.subject = utils.IfaceAsString(vals)
+func (pstr *NatsEE) parseOpt(opts *config.EventExporterOpts, nodeID string, connTimeout time.Duration) (err error) {
+	pstr.jetStream = opts.NATSJetStream
+	if opts.NATSSubject == utils.EmptyString {
+		pstr.subject = utils.DefaultQueueID
+	} else {
+		pstr.subject = opts.NATSSubject
 	}
 	pstr.opts, err = GetNatsOpts(opts, nodeID, connTimeout)
 	if pstr.jetStream {
-		if maxWaitVal, has := opts[utils.NatsJetStreamMaxWait]; has {
-			var maxWait time.Duration
-			if maxWait, err = utils.IfaceAsDuration(maxWaitVal); err != nil {
-				return
-			}
-			pstr.jsOpts = []nats.JSOpt{nats.MaxWait(maxWait)}
+		if opts.NATSJetStreamMaxWait != 0 {
+			pstr.jsOpts = []nats.JSOpt{nats.MaxWait(opts.NATSJetStreamMaxWait)}
 		}
 	}
 	return
@@ -130,51 +123,50 @@ func (pstr *NatsEE) Close() (err error) {
 
 func (pstr *NatsEE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
 
-func GetNatsOpts(opts map[string]interface{}, nodeID string, connTimeout time.Duration) (nop []nats.Option, err error) {
+func GetNatsOpts(opts *config.EventExporterOpts, nodeID string, connTimeout time.Duration) (nop []nats.Option, err error) {
 	nop = make([]nats.Option, 0, 7)
 	nop = append(nop, nats.Name(utils.CGRateSLwr+nodeID),
 		nats.Timeout(connTimeout),
 		nats.DrainTimeout(time.Second))
-	if userFile, has := opts[utils.NatsJWTFile]; has {
+	if opts.NATSJWTFile != utils.EmptyString {
 		keys := make([]string, 0, 1)
-		if keyFile, has := opts[utils.NatsSeedFile]; has {
-			keys = append(keys, utils.IfaceAsString(keyFile))
+		if opts.NATSSeedFile != utils.EmptyString {
+			keys = append(keys, opts.NATSSeedFile)
 		}
-		nop = append(nop, nats.UserCredentials(utils.IfaceAsString(userFile), keys...))
+		nop = append(nop, nats.UserCredentials(opts.NATSJWTFile, keys...))
 	}
-	if nkeyFile, has := opts[utils.NatsSeedFile]; has {
-		opt, err := nats.NkeyOptionFromSeed(utils.IfaceAsString(nkeyFile))
+	if opts.NATSSeedFile != utils.EmptyString {
+		opt, err := nats.NkeyOptionFromSeed(opts.NATSSeedFile)
 		if err != nil {
 			return nil, err
 		}
 		nop = append(nop, opt)
 	}
-	if certFile, has := opts[utils.NatsClientCertificate]; has {
-		clientFile, has := opts[utils.NatsClientKey]
-		if !has {
+	if opts.NATSClientCertificate != utils.EmptyString {
+		if opts.NATSClientKey == utils.EmptyString {
 			err = fmt.Errorf("has certificate but no key")
 			return
 		}
-		nop = append(nop, nats.ClientCert(utils.IfaceAsString(certFile), utils.IfaceAsString(clientFile)))
-	} else if _, has := opts[utils.NatsClientKey]; has {
+		nop = append(nop, nats.ClientCert(opts.NATSClientCertificate, opts.NATSClientKey))
+	} else if opts.NATSClientKey != utils.EmptyString {
 		err = fmt.Errorf("has key but no certificate")
 		return
 	}
-
-	if caFile, has := opts[utils.NatsCertificateAuthority]; has {
+	if opts.NATSCertificateAuthority != utils.EmptyString {
 		nop = append(nop,
 			func(o *nats.Options) error {
 				pool, err := x509.SystemCertPool()
 				if err != nil {
 					return err
 				}
-				rootPEM, err := ioutil.ReadFile(utils.IfaceAsString(caFile))
+				rootPEM, err := ioutil.ReadFile(opts.NATSCertificateAuthority)
 				if err != nil || rootPEM == nil {
 					return fmt.Errorf("nats: error loading or parsing rootCA file: %v", err)
 				}
 				ok := pool.AppendCertsFromPEM(rootPEM)
 				if !ok {
-					return fmt.Errorf("nats: failed to parse root certificate from %q", caFile)
+					return fmt.Errorf("nats: failed to parse root certificate from %q",
+						opts.NATSCertificateAuthority)
 				}
 				if o.TLSConfig == nil {
 					o.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
