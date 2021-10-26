@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -142,12 +144,60 @@ func (eeS EEsCfg) AsMapInterface(separator string) interface{} {
 	return mp
 }
 
+type EventExporterOpts struct {
+	CSVFieldSeparator        string
+	ElsIndex                 string
+	ElsIfPrimaryTerm         *int
+	ElsIfSeqNo               *int
+	ElsOpType                string
+	ElsPipeline              string
+	ElsRouting               string
+	ElsTimeout               time.Duration
+	ElsVersion               *int
+	ElsVersionType           string
+	ElsWaitForActiveShards   string
+	SQLMaxIdleConns          int
+	SQLMaxOpenConns          int
+	SQLConnMaxLifetime       time.Duration
+	SQLTableName             string
+	SQLDBName                string
+	SSLMode                  string
+	KafkaTopic               string
+	AMQPQueueID              string
+	AMQPRoutingKey           string
+	AMQPExchange             string
+	AMQPExchangeType         string
+	AWSRegion                string
+	AWSKey                   string
+	AWSSecret                string
+	AWSToken                 string
+	SQSQueueID               string
+	S3BucketID               string
+	S3FolderPath             string
+	NATSJetStream            bool
+	NATSSubject              string
+	NATSJWTFile              string
+	NATSSeedFile             string
+	NATSCertificateAuthority string
+	NATSClientCertificate    string
+	NATSClientKey            string
+	NATSJetStreamMaxWait     time.Duration
+	RPCCodec                 string
+	ServiceMethod            string
+	KeyPath                  string
+	CertPath                 string
+	CAPath                   string
+	TLS                      bool
+	RPCConnTimeout           time.Duration
+	RPCReplyTimeout          time.Duration
+}
+
 // EventExporterCfg the config for a Event Exporter
 type EventExporterCfg struct {
 	ID                 string
 	Type               string
 	ExportPath         string
-	Opts               map[string]interface{}
+	Opts               *EventExporterOpts
 	Timezone           string
 	Filters            []string
 	Flags              utils.FlagsWithParams
@@ -161,6 +211,158 @@ type EventExporterCfg struct {
 	headerFields       []*FCTemplate
 	contentFields      []*FCTemplate
 	trailerFields      []*FCTemplate
+}
+
+func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.CSVFieldSeparator != nil {
+		eeOpts.CSVFieldSeparator = *jsnCfg.CSVFieldSeparator
+	}
+	if jsnCfg.ElsIndex != nil {
+		eeOpts.ElsIndex = *jsnCfg.ElsIndex
+	}
+	if jsnCfg.ElsIfPrimaryTerm != nil {
+		eeOpts.ElsIfPrimaryTerm = jsnCfg.ElsIfPrimaryTerm
+	}
+	if jsnCfg.ElsIfSeqNo != nil {
+		eeOpts.ElsIfSeqNo = jsnCfg.ElsIfSeqNo
+	}
+	if jsnCfg.ElsOpType != nil {
+		eeOpts.ElsOpType = *jsnCfg.ElsOpType
+	}
+	if jsnCfg.ElsPipeline != nil {
+		eeOpts.ElsPipeline = *jsnCfg.ElsPipeline
+	}
+	if jsnCfg.ElsRouting != nil {
+		eeOpts.ElsRouting = *jsnCfg.ElsRouting
+	}
+	if jsnCfg.ElsTimeout != nil {
+		if eeOpts.ElsTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ElsTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.ElsVersion != nil {
+		eeOpts.ElsVersion = jsnCfg.ElsVersion
+	}
+	if jsnCfg.ElsVersionType != nil {
+		eeOpts.ElsVersionType = *jsnCfg.ElsVersionType
+	}
+	if jsnCfg.ElsWaitForActiveShards != nil {
+		eeOpts.ElsWaitForActiveShards = *jsnCfg.ElsWaitForActiveShards
+	}
+	if jsnCfg.SQLMaxIdleConns != nil {
+		eeOpts.SQLMaxIdleConns = *jsnCfg.SQLMaxIdleConns
+	}
+	if jsnCfg.SQLMaxOpenConns != nil {
+		eeOpts.SQLMaxOpenConns = *jsnCfg.SQLMaxOpenConns
+	}
+	if jsnCfg.SQLConnMaxLifetime != nil {
+		if eeOpts.SQLConnMaxLifetime, err = utils.ParseDurationWithNanosecs(*jsnCfg.SQLConnMaxLifetime); err != nil {
+			return
+		}
+	}
+	if jsnCfg.SQLTableName != nil {
+		eeOpts.SQLTableName = *jsnCfg.SQLTableName
+	}
+	if jsnCfg.SQLDBName != nil {
+		eeOpts.SQLDBName = *jsnCfg.SQLDBName
+	}
+	if jsnCfg.SSLMode != nil {
+		eeOpts.SSLMode = *jsnCfg.SSLMode
+	}
+	if jsnCfg.KafkaTopic != nil {
+		eeOpts.KafkaTopic = *jsnCfg.KafkaTopic
+	}
+	if jsnCfg.AMQPQueueID != nil {
+		eeOpts.AMQPQueueID = *jsnCfg.AMQPQueueID
+	}
+	if jsnCfg.AMQPRoutingKey != nil {
+		eeOpts.AMQPRoutingKey = *jsnCfg.AMQPRoutingKey
+	}
+	if jsnCfg.AMQPExchange != nil {
+		eeOpts.AMQPExchange = *jsnCfg.AMQPExchange
+	}
+	if jsnCfg.AMQPExchangeType != nil {
+		eeOpts.AMQPExchangeType = *jsnCfg.AMQPExchangeType
+	}
+	if jsnCfg.AWSRegion != nil {
+		eeOpts.AWSRegion = *jsnCfg.AWSRegion
+	}
+	if jsnCfg.AWSKey != nil {
+		eeOpts.AWSKey = *jsnCfg.AWSKey
+	}
+	if jsnCfg.AWSSecret != nil {
+		eeOpts.AWSSecret = *jsnCfg.AWSSecret
+	}
+	if jsnCfg.AWSToken != nil {
+		eeOpts.AWSToken = *jsnCfg.AWSToken
+	}
+	if jsnCfg.SQSQueueID != nil {
+		eeOpts.SQSQueueID = *jsnCfg.SQSQueueID
+	}
+	if jsnCfg.S3BucketID != nil {
+		eeOpts.S3BucketID = *jsnCfg.S3BucketID
+	}
+	if jsnCfg.S3FolderPath != nil {
+		eeOpts.S3FolderPath = *jsnCfg.S3FolderPath
+	}
+	if jsnCfg.NATSJetStream != nil {
+		eeOpts.NATSJetStream = *jsnCfg.NATSJetStream
+	}
+	if jsnCfg.NATSSubject != nil {
+		eeOpts.NATSSubject = *jsnCfg.NATSSubject
+	}
+	if jsnCfg.NATSJWTFile != nil {
+		eeOpts.NATSJWTFile = *jsnCfg.NATSJWTFile
+	}
+	if jsnCfg.NATSSeedFile != nil {
+		eeOpts.NATSSeedFile = *jsnCfg.NATSSeedFile
+	}
+	if jsnCfg.NATSCertificateAuthority != nil {
+		eeOpts.NATSCertificateAuthority = *jsnCfg.NATSCertificateAuthority
+	}
+	if jsnCfg.NATSClientCertificate != nil {
+		eeOpts.NATSClientCertificate = *jsnCfg.NATSClientCertificate
+	}
+	if jsnCfg.NATSClientKey != nil {
+		eeOpts.NATSClientKey = *jsnCfg.NATSClientKey
+	}
+	if jsnCfg.NATSJetStreamMaxWait != nil {
+		if eeOpts.NATSJetStreamMaxWait, err = utils.ParseDurationWithNanosecs(*jsnCfg.NATSJetStreamMaxWait); err != nil {
+			return
+		}
+	}
+	if jsnCfg.RPCCodec != nil {
+		eeOpts.RPCCodec = *jsnCfg.RPCCodec
+	}
+	if jsnCfg.ServiceMethod != nil {
+		eeOpts.ServiceMethod = *jsnCfg.ServiceMethod
+	}
+	if jsnCfg.KeyPath != nil {
+		eeOpts.KeyPath = *jsnCfg.KeyPath
+	}
+	if jsnCfg.CertPath != nil {
+		eeOpts.CertPath = *jsnCfg.CertPath
+	}
+	if jsnCfg.CAPath != nil {
+		eeOpts.CAPath = *jsnCfg.CAPath
+	}
+	if jsnCfg.TLS != nil {
+		eeOpts.TLS = *jsnCfg.TLS
+	}
+	if jsnCfg.RPCConnTimeout != nil {
+		if eeOpts.RPCConnTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RPCConnTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.RPCReplyTimeout != nil {
+		if eeOpts.RPCReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RPCReplyTimeout); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
@@ -212,13 +414,11 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		}
 		eeC.ComputeFields()
 	}
-	if jsnEec.Opts != nil {
-		for k, v := range jsnEec.Opts {
-			eeC.Opts[k] = v
-		}
-	}
 	if jsnEec.Failed_posts_dir != nil {
 		eeC.FailedPostsDir = *jsnEec.Failed_posts_dir
+	}
+	if jsnEec.Opts != nil {
+		err = eeC.Opts.loadFromJSONCfg(jsnEec.Opts)
 	}
 	return
 }
@@ -256,6 +456,56 @@ func (eeC *EventExporterCfg) TrailerFields() []*FCTemplate {
 	return eeC.trailerFields
 }
 
+func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
+	return &EventExporterOpts{
+		CSVFieldSeparator:        eeOpts.CSVFieldSeparator,
+		ElsIndex:                 eeOpts.ElsIndex,
+		ElsIfPrimaryTerm:         eeOpts.ElsIfPrimaryTerm,
+		ElsIfSeqNo:               eeOpts.ElsIfSeqNo,
+		ElsOpType:                eeOpts.ElsOpType,
+		ElsPipeline:              eeOpts.ElsPipeline,
+		ElsRouting:               eeOpts.ElsRouting,
+		ElsTimeout:               eeOpts.ElsTimeout,
+		ElsVersion:               eeOpts.ElsVersion,
+		ElsVersionType:           eeOpts.ElsVersionType,
+		ElsWaitForActiveShards:   eeOpts.ElsWaitForActiveShards,
+		SQLMaxIdleConns:          eeOpts.SQLMaxIdleConns,
+		SQLMaxOpenConns:          eeOpts.SQLMaxOpenConns,
+		SQLConnMaxLifetime:       eeOpts.SQLConnMaxLifetime,
+		SQLTableName:             eeOpts.SQLTableName,
+		SQLDBName:                eeOpts.SQLDBName,
+		SSLMode:                  eeOpts.SSLMode,
+		KafkaTopic:               eeOpts.KafkaTopic,
+		AMQPQueueID:              eeOpts.AMQPQueueID,
+		AMQPRoutingKey:           eeOpts.AMQPRoutingKey,
+		AMQPExchange:             eeOpts.AMQPExchange,
+		AMQPExchangeType:         eeOpts.AMQPExchangeType,
+		AWSRegion:                eeOpts.AWSRegion,
+		AWSKey:                   eeOpts.AWSKey,
+		AWSSecret:                eeOpts.AWSSecret,
+		AWSToken:                 eeOpts.AWSToken,
+		SQSQueueID:               eeOpts.SQSQueueID,
+		S3BucketID:               eeOpts.S3BucketID,
+		S3FolderPath:             eeOpts.S3FolderPath,
+		NATSJetStream:            eeOpts.NATSJetStream,
+		NATSSubject:              eeOpts.NATSSubject,
+		NATSJWTFile:              eeOpts.NATSJWTFile,
+		NATSSeedFile:             eeOpts.NATSSeedFile,
+		NATSCertificateAuthority: eeOpts.NATSCertificateAuthority,
+		NATSClientCertificate:    eeOpts.NATSClientCertificate,
+		NATSClientKey:            eeOpts.NATSClientKey,
+		NATSJetStreamMaxWait:     eeOpts.NATSJetStreamMaxWait,
+		RPCCodec:                 eeOpts.RPCCodec,
+		ServiceMethod:            eeOpts.ServiceMethod,
+		KeyPath:                  eeOpts.KeyPath,
+		CertPath:                 eeOpts.CertPath,
+		CAPath:                   eeOpts.CAPath,
+		TLS:                      eeOpts.TLS,
+		RPCConnTimeout:           eeOpts.RPCConnTimeout,
+		RPCReplyTimeout:          eeOpts.RPCReplyTimeout,
+	}
+}
+
 // Clone returns a deep copy of EventExporterCfg
 func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	cln = &EventExporterCfg{
@@ -272,7 +522,7 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		headerFields:       make([]*FCTemplate, len(eeC.headerFields)),
 		contentFields:      make([]*FCTemplate, len(eeC.contentFields)),
 		trailerFields:      make([]*FCTemplate, len(eeC.trailerFields)),
-		Opts:               make(map[string]interface{}),
+		Opts:               eeC.Opts.Clone(),
 		FailedPostsDir:     eeC.FailedPostsDir,
 	}
 
@@ -295,14 +545,58 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	for idx, fld := range eeC.trailerFields {
 		cln.trailerFields[idx] = fld.Clone()
 	}
-	for k, v := range eeC.Opts {
-		cln.Opts[k] = v
-	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.CSVFieldSepOpt:           eeC.Opts.CSVFieldSeparator,
+		utils.ElsIndex:                 eeC.Opts.ElsIndex,
+		utils.ElsIfPrimaryTerm:         eeC.Opts.ElsIfPrimaryTerm,
+		utils.ElsIfSeqNo:               eeC.Opts.ElsIfSeqNo,
+		utils.ElsOpType:                eeC.Opts.ElsOpType,
+		utils.ElsPipeline:              eeC.Opts.ElsPipeline,
+		utils.ElsRouting:               eeC.Opts.ElsRouting,
+		utils.ElsTimeout:               eeC.Opts.ElsTimeout,
+		utils.ElsVersionLow:            eeC.Opts.ElsVersion,
+		utils.ElsVersionType:           eeC.Opts.ElsVersionType,
+		utils.ElsWaitForActiveShards:   eeC.Opts.ElsWaitForActiveShards,
+		utils.SQLMaxIdleConnsCfg:       eeC.Opts.SQLMaxIdleConns,
+		utils.SQLMaxOpenConns:          eeC.Opts.SQLMaxOpenConns,
+		utils.SQLConnMaxLifetime:       eeC.Opts.SQLConnMaxLifetime,
+		utils.SQLTableNameOpt:          eeC.Opts.SQLTableName,
+		utils.SQLDBNameOpt:             eeC.Opts.SQLDBName,
+		utils.SSLModeCfg:               eeC.Opts.SSLMode,
+		utils.KafkaTopic:               eeC.Opts.KafkaTopic,
+		utils.AMQPQueueID:              eeC.Opts.AMQPQueueID,
+		utils.AMQPRoutingKey:           eeC.Opts.AMQPRoutingKey,
+		utils.AMQPExchange:             eeC.Opts.AMQPExchange,
+		utils.AMQPExchangeType:         eeC.Opts.AMQPExchangeType,
+		utils.AWSRegion:                eeC.Opts.AWSRegion,
+		utils.AWSKey:                   eeC.Opts.AWSKey,
+		utils.AWSSecret:                eeC.Opts.AWSSecret,
+		utils.AWSToken:                 eeC.Opts.AWSToken,
+		utils.SQSQueueID:               eeC.Opts.SQSQueueID,
+		utils.S3Bucket:                 eeC.Opts.S3BucketID,
+		utils.S3FolderPath:             eeC.Opts.S3FolderPath,
+		utils.NatsJetStream:            eeC.Opts.NATSJetStream,
+		utils.NatsSubject:              eeC.Opts.NATSSubject,
+		utils.NatsJWTFile:              eeC.Opts.NATSJWTFile,
+		utils.NatsSeedFile:             eeC.Opts.NATSSeedFile,
+		utils.NatsCertificateAuthority: eeC.Opts.NATSCertificateAuthority,
+		utils.NatsClientCertificate:    eeC.Opts.NATSClientCertificate,
+		utils.NatsClientKey:            eeC.Opts.NATSClientKey,
+		utils.NatsJetStreamMaxWait:     eeC.Opts.NATSJetStreamMaxWait,
+		utils.RpcCodec:                 eeC.Opts.RPCCodec,
+		utils.ServiceMethod:            eeC.Opts.ServiceMethod,
+		utils.KeyPath:                  eeC.Opts.KeyPath,
+		utils.CertPath:                 eeC.Opts.CertPath,
+		utils.CaPath:                   eeC.Opts.CAPath,
+		utils.TLS:                      eeC.Opts.TLS,
+		utils.RpcConnTimeout:           eeC.Opts.RPCConnTimeout,
+		utils.RpcReplyTimeout:          eeC.Opts.RPCReplyTimeout,
+	}
 	flgs := eeC.Flags.SliceFlags()
 	if flgs == nil {
 		flgs = []string{}
@@ -320,13 +614,8 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		utils.AttemptsCfg:           eeC.Attempts,
 		utils.ConcurrentRequestsCfg: eeC.ConcurrentRequests,
 		utils.FailedPostsDirCfg:     eeC.FailedPostsDir,
+		utils.OptsCfg:               opts,
 	}
-	opts := make(map[string]interface{})
-	for k, v := range eeC.Opts {
-		opts[k] = v
-	}
-	initialMP[utils.OptsCfg] = opts
-
 	if eeC.Fields != nil {
 		fields := make([]map[string]interface{}, 0, len(eeC.Fields))
 		for _, fld := range eeC.Fields {
@@ -337,12 +626,60 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	return
 }
 
+type EventExporterOptsJson struct {
+	CSVFieldSeparator        *string `json:"csvFieldSeparator"`
+	ElsIndex                 *string `json:"elsIndex"`
+	ElsIfPrimaryTerm         *int    `json:"elsIfPrimaryTerm"`
+	ElsIfSeqNo               *int    `json:"elsIfSeqNo"`
+	ElsOpType                *string `json:"elsOpType"`
+	ElsPipeline              *string `json:"elsPipeline"`
+	ElsRouting               *string `json:"elsRouting"`
+	ElsTimeout               *string `json:"elsTimeout"`
+	ElsVersion               *int    `json:"elsVersion"`
+	ElsVersionType           *string `json:"elsVersionType"`
+	ElsWaitForActiveShards   *string `json:"elsWaitForActiveShards"`
+	SQLMaxIdleConns          *int    `json:"sqlMaxIdleConns"`
+	SQLMaxOpenConns          *int    `json:"sqlMaxOpenConns"`
+	SQLConnMaxLifetime       *string `json:"sqlConnMaxLifetime"`
+	SQLTableName             *string `json:"sqlTableName"`
+	SQLDBName                *string `json:"sqlDBName"`
+	SSLMode                  *string `json:"sslMode"`
+	KafkaTopic               *string `json:"kafkaTopic"`
+	AMQPQueueID              *string `json:"amqpQueueID"`
+	AMQPRoutingKey           *string `json:"amqpRoutingKey"`
+	AMQPExchange             *string `json:"amqpExchange"`
+	AMQPExchangeType         *string `json:"amqpExchangeType"`
+	AWSRegion                *string `json:"awsRegion"`
+	AWSKey                   *string `json:"awsKey"`
+	AWSSecret                *string `json:"awsSecret"`
+	AWSToken                 *string `json:"awsToken"`
+	SQSQueueID               *string `json:"sqsQueueID"`
+	S3BucketID               *string `json:"s3BucketID"`
+	S3FolderPath             *string `json:"s3FolderPath"`
+	NATSJetStream            *bool   `json:"natsJetStream"`
+	NATSSubject              *string `json:"natsSubject"`
+	NATSJWTFile              *string `json:"natsJWTFile"`
+	NATSSeedFile             *string `json:"natsSeedFile"`
+	NATSCertificateAuthority *string `json:"natsCertificateAuthority"`
+	NATSClientCertificate    *string `json:"natsClientCertificate"`
+	NATSClientKey            *string `json:"natsClientKey"`
+	NATSJetStreamMaxWait     *string `json:"natsJetStreamMaxWait"`
+	RPCCodec                 *string `json:"rpcCodec"`
+	ServiceMethod            *string `json:"serviceMethod"`
+	KeyPath                  *string `json:"keyPath"`
+	CertPath                 *string `json:"certPath"`
+	CAPath                   *string `json:"caPath"`
+	TLS                      *bool   `json:"tls"`
+	RPCConnTimeout           *string `json:"rpcConnTimeout"`
+	RPCReplyTimeout          *string `json:"rpcReplyTimeout"`
+}
+
 // EventExporterJsonCfg is the configuration of a single EventExporter
 type EventExporterJsonCfg struct {
 	Id                  *string
 	Type                *string
 	Export_path         *string
-	Opts                map[string]interface{}
+	Opts                *EventExporterOptsJson
 	Timezone            *string
 	Filters             *[]string
 	Flags               *[]string
@@ -353,6 +690,148 @@ type EventExporterJsonCfg struct {
 	Concurrent_requests *int
 	Failed_posts_dir    *string
 	Fields              *[]*FcTemplateJsonCfg
+}
+
+func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporterOpts) *EventExporterOptsJson {
+	if d == nil {
+		d = new(EventExporterOptsJson)
+	}
+	if v1.CSVFieldSeparator != v2.CSVFieldSeparator {
+		d.CSVFieldSeparator = utils.StringPointer(v2.CSVFieldSeparator)
+	}
+	if v1.ElsIndex != v2.ElsIndex {
+		d.ElsIndex = utils.StringPointer(v2.ElsIndex)
+	}
+	if v1.ElsIfPrimaryTerm != v2.ElsIfPrimaryTerm {
+		d.ElsIfPrimaryTerm = v2.ElsIfPrimaryTerm
+	}
+	if v1.ElsIfSeqNo != v2.ElsIfSeqNo {
+		d.ElsIfSeqNo = v2.ElsIfSeqNo
+	}
+	if v1.ElsOpType != v2.ElsOpType {
+		d.ElsOpType = utils.StringPointer(v2.ElsOpType)
+	}
+	if v1.ElsPipeline != v2.ElsPipeline {
+		d.ElsPipeline = utils.StringPointer(v2.ElsPipeline)
+	}
+	if v1.ElsRouting != v2.ElsRouting {
+		d.ElsRouting = utils.StringPointer(v2.ElsRouting)
+	}
+	if v1.ElsTimeout != v2.ElsTimeout {
+		d.ElsTimeout = utils.StringPointer(v2.ElsTimeout.String())
+	}
+	if v1.ElsVersion != v2.ElsVersion {
+		d.ElsVersion = v2.ElsVersion
+	}
+	if v1.ElsVersionType != v2.ElsVersionType {
+		d.ElsVersionType = utils.StringPointer(v2.ElsVersionType)
+	}
+	if v1.ElsWaitForActiveShards != v2.ElsWaitForActiveShards {
+		d.ElsWaitForActiveShards = utils.StringPointer(v2.ElsWaitForActiveShards)
+	}
+	if v1.SQLMaxIdleConns != v2.SQLMaxIdleConns {
+		d.SQLMaxIdleConns = utils.IntPointer(v2.SQLMaxIdleConns)
+	}
+	if v1.SQLMaxOpenConns != v2.SQLMaxOpenConns {
+		d.SQLMaxOpenConns = utils.IntPointer(v2.SQLMaxOpenConns)
+	}
+	if v1.SQLConnMaxLifetime != v2.SQLConnMaxLifetime {
+		d.SQLConnMaxLifetime = utils.StringPointer(v2.SQLConnMaxLifetime.String())
+	}
+	if v1.SQLTableName != v2.SQLTableName {
+		d.SQLTableName = utils.StringPointer(v2.SQLTableName)
+	}
+	if v1.SQLDBName != v2.SQLDBName {
+		d.SQLDBName = utils.StringPointer(v2.SQLDBName)
+	}
+	if v1.SSLMode != v2.SSLMode {
+		d.SSLMode = utils.StringPointer(v2.SSLMode)
+	}
+	if v1.KafkaTopic != v2.KafkaTopic {
+		d.KafkaTopic = utils.StringPointer(v2.KafkaTopic)
+	}
+	if v1.AMQPQueueID != v2.AMQPQueueID {
+		d.AMQPQueueID = utils.StringPointer(v2.AMQPQueueID)
+	}
+	if v1.AMQPRoutingKey != v2.AMQPRoutingKey {
+		d.AMQPRoutingKey = utils.StringPointer(v2.AMQPRoutingKey)
+	}
+	if v1.AMQPExchange != v2.AMQPExchange {
+		d.AMQPExchange = utils.StringPointer(v2.AMQPExchange)
+	}
+	if v1.AMQPExchangeType != v2.AMQPExchangeType {
+		d.AMQPExchangeType = utils.StringPointer(v2.AMQPExchangeType)
+	}
+	if v1.AWSRegion != v2.AWSRegion {
+		d.AWSRegion = utils.StringPointer(v2.AWSRegion)
+	}
+	if v1.AWSKey != v2.AWSKey {
+		d.AWSKey = utils.StringPointer(v2.AWSKey)
+	}
+	if v1.AWSSecret != v2.AWSSecret {
+		d.AWSSecret = utils.StringPointer(v2.AWSSecret)
+	}
+	if v1.AWSToken != v2.AWSToken {
+		d.AWSToken = utils.StringPointer(v2.AWSToken)
+	}
+	if v1.SQSQueueID != v2.SQSQueueID {
+		d.SQSQueueID = utils.StringPointer(v2.SQSQueueID)
+	}
+	if v1.S3BucketID != v2.S3BucketID {
+		d.S3BucketID = utils.StringPointer(v2.S3BucketID)
+	}
+	if v1.S3FolderPath != v2.S3FolderPath {
+		d.S3FolderPath = utils.StringPointer(v2.S3FolderPath)
+	}
+	if v1.NATSJetStream != v2.NATSJetStream {
+		d.NATSJetStream = utils.BoolPointer(v2.NATSJetStream)
+	}
+	if v1.NATSSubject != v2.NATSSubject {
+		d.NATSSubject = utils.StringPointer(v2.NATSSubject)
+	}
+	if v1.NATSJWTFile != v2.NATSJWTFile {
+		d.NATSJWTFile = utils.StringPointer(v2.NATSJWTFile)
+	}
+	if v1.NATSSeedFile != v2.NATSSeedFile {
+		d.NATSSeedFile = utils.StringPointer(v2.NATSSeedFile)
+	}
+	if v1.NATSCertificateAuthority != v2.NATSCertificateAuthority {
+		d.NATSCertificateAuthority = utils.StringPointer(v2.NATSCertificateAuthority)
+	}
+	if v1.NATSClientCertificate != v2.NATSClientCertificate {
+		d.NATSClientCertificate = utils.StringPointer(v2.NATSClientCertificate)
+	}
+	if v1.NATSClientKey != v2.NATSClientKey {
+		d.NATSClientKey = utils.StringPointer(v2.NATSClientKey)
+	}
+	if v1.NATSJetStreamMaxWait != v2.NATSJetStreamMaxWait {
+		d.NATSJetStreamMaxWait = utils.StringPointer(v2.NATSJetStreamMaxWait.String())
+	}
+	if v1.RPCCodec != v2.RPCCodec {
+		d.RPCCodec = utils.StringPointer(v2.RPCCodec)
+	}
+	if v1.ServiceMethod != v2.ServiceMethod {
+		d.ServiceMethod = utils.StringPointer(v2.ServiceMethod)
+	}
+	if v1.KeyPath != v2.KeyPath {
+		d.KeyPath = utils.StringPointer(v2.KeyPath)
+	}
+	if v1.CertPath != v2.CertPath {
+		d.CertPath = utils.StringPointer(v2.CertPath)
+	}
+	if v1.CAPath != v2.CAPath {
+		d.CAPath = utils.StringPointer(v2.CAPath)
+	}
+	if v1.TLS != v2.TLS {
+		d.TLS = utils.BoolPointer(v2.TLS)
+	}
+	if v1.RPCConnTimeout != v2.RPCConnTimeout {
+		d.RPCConnTimeout = utils.StringPointer(v2.RPCConnTimeout.String())
+	}
+	if v1.RPCReplyTimeout != v2.RPCReplyTimeout {
+		d.RPCReplyTimeout = utils.StringPointer(v2.RPCReplyTimeout.String())
+	}
+	return d
 }
 
 func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg, separator string) *EventExporterJsonCfg {
@@ -368,7 +847,7 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 	if v1.ExportPath != v2.ExportPath {
 		d.Export_path = utils.StringPointer(v2.ExportPath)
 	}
-	d.Opts = diffMap(d.Opts, v1.Opts, v2.Opts)
+	d.Opts = diffEventExporterOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}
