@@ -260,6 +260,21 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(expected), ToJSON(rcv))
 	}
 
+	// Can't convert units
+	blc.Units = "can't convert"
+	exp := "can't convert <can't convert> to decimal"
+	if _, err := blc.AsBalance(); err == nil || err.Error() != exp {
+		t.Errorf("Expected %v \n but received \n %v", exp, err.Error())
+	}
+	blc.Units = "0"
+
+	//Can't convert increment
+	blc.CostIncrements[0].Increment = "error"
+	exp = "can't convert <error> to decimal"
+	if _, err := blc.AsBalance(); err == nil || err.Error() != exp {
+		t.Errorf("Expected %v \n but received \n %v", exp, err.Error())
+	}
+	blc.CostIncrements[0].Increment = "1"
 }
 
 func TestAccountBalancesAlteredCompareLength(t *testing.T) {

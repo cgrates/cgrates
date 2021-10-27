@@ -352,7 +352,7 @@ func TestDecimalFloat64(t *testing.T) {
 }
 
 func TestDecimalDuration(t *testing.T) {
-	d := NewDecimal(3, 0)
+	d := NewDecimal(int64(3), 0)
 	rcv, ok := d.Duration()
 	if !ok {
 		t.Error("Cannot convert")

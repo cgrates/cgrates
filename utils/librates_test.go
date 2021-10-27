@@ -1628,3 +1628,44 @@ func TestAPIRateAsRateError(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", exp, err.Error())
 	}
 }
+
+func TestIntervalRateEqualsNilIR(t *testing.T) {
+	var iR *IntervalRate
+	iR = nil
+	iR.Equals(nil)
+
+	iR = &IntervalRate{
+		Unit: NewDecimal(int64(2), 0),
+	}
+	iR.Equals(nil)
+}
+
+func TestRateSIntervalCostEquals(t *testing.T) {
+	rIC := &RateSIntervalCost{
+		Increments: nil,
+	}
+	nRIc := &RateSIntervalCost{
+		Increments: []*RateSIncrementCost{
+			{
+				RateIntervalIndex: 0,
+				RateID:            "RI1",
+				CompressFactor:    int64(1),
+				Usage:             NewDecimal(int64(2), 0),
+			},
+		},
+	}
+	if rIC.Equals(nRIc, nil, nil) {
+		t.Error("Shouldn't match")
+	}
+	rIC.Increments = []*RateSIncrementCost{
+		{
+			RateIntervalIndex: 3,
+			RateID:            "RI2",
+			CompressFactor:    int64(3),
+			Usage:             NewDecimal(int64(5), 0),
+		},
+	}
+	if rIC.Equals(nRIc, nil, nil) {
+		t.Error("Shouldn't match")
+	}
+}
