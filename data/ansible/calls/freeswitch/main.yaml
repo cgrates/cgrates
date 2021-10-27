@@ -1,4 +1,13 @@
 ---
+- name: Install Python
+  hosts: all
+  remote_user: '{{ user }}'
+  gather_facts: false
+  tasks:
+    - name: Install Python3s
+      raw: apt -y install python3 
+      become: true
+
 - hosts: all
   vars:
     ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
