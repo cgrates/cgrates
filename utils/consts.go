@@ -2447,6 +2447,37 @@ const (
 	Tls             = "tls"
 	RpcConnTimeout  = "rpcConnTimeout"
 	RpcReplyTimeout = "rpcReplyTimeout"
+
+	// processed opts
+	AMQPQueueIDProcessedCfg      = "amqpQueueIDProcessed"
+	AMQPExchangeProcessedCfg     = "amqpExchangeProcessed"
+	AMQPExchangeTypeProcessedCfg = "amqpExchangeTypeProcessed"
+	AMQPRoutingKeyProcessedCfg   = "amqpRoutingKeyProcessed"
+
+	KafkaTopicProcessedCfg = "kafkaTopicProcessed"
+
+	SQLDBNameProcessedCfg    = "sqlDBNameProcessed"
+	SQLTableNameProcessedCfg = "sqlTableNameProcessed"
+	SSLModeProcessedCfg      = "sslModeProcessed"
+
+	AWSRegionProcessedCfg = "awsRegionProcessed"
+	AWSKeyProcessedCfg    = "awsKeyProcessed"
+	AWSSecretProcessedCfg = "awsSecretProcessed"
+	AWSTokenProcessedCfg  = "awsTokenProcessed"
+
+	SQSQueueIDProcessedCfg = "sqsQueueIDProcessed"
+
+	S3FolderPathProcessedCfg = "s3FolderPathProcessed"
+	S3BucketIDProcessedCfg   = "s3BucketIDProcessed"
+
+	NATSJetStreamProcessedCfg            = "natsJetStreamProcessed"
+	NATSSubjectProcessedCfg              = "natsSubjectProcessed"
+	NATSJWTFileProcessedCfg              = "natsJWTFileProcessed"
+	NATSSeedFileProcessedCfg             = "natsSeedFileProcessed"
+	NATSCertificateAuthorityProcessedCfg = "natsCertificateAuthorityProcessed"
+	NATSClientCertificateProcessed       = "natsClientCertificateProcessed"
+	NATSClientKeyProcessedCfg            = "natsClientKeyProcessed"
+	NATSJetStreamMaxWaitProcessedCfg     = "natsJetStreamMaxWaitProcessed"
 )
 
 // Analyzers constants
