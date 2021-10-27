@@ -58,7 +58,7 @@ func TestInitCase1(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsIndex: "test",
+				ElsIndex: utils.StringPointer("test"),
 			},
 		},
 	}
@@ -109,7 +109,7 @@ func TestInitCase4(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsOpType: "test",
+				ElsOpType: utils.StringPointer("test"),
 			},
 		},
 	}
@@ -126,7 +126,7 @@ func TestInitCase5(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsPipeline: "test",
+				ElsPipeline: utils.StringPointer("test"),
 			},
 		},
 	}
@@ -143,7 +143,7 @@ func TestInitCase6(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsRouting: "test",
+				ElsRouting: utils.StringPointer("test"),
 			},
 		},
 	}
@@ -177,7 +177,7 @@ func TestInitCase9(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsVersionType: "test",
+				ElsVersionType: utils.StringPointer("test"),
 			},
 		},
 	}
@@ -194,7 +194,7 @@ func TestInitCase10(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
 			Opts: &config.EventExporterOpts{
-				ElsWaitForActiveShards: "test",
+				ElsWaitForActiveShards: utils.StringPointer("test"),
 			},
 		},
 	}

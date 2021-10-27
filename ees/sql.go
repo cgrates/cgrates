@@ -71,23 +71,19 @@ func (sqlEe *SQLEe) initDialector() (err error) {
 	}
 	password, _ := u.User.Password()
 
-	var dbname string
-	if sqlEe.Cfg().Opts.SQLDBName == utils.EmptyString {
-		dbname = utils.SQLDefaultDBName
-	} else {
-		dbname = sqlEe.Cfg().Opts.SQLDBName
+	dbname := utils.SQLDefaultDBName
+	if sqlEe.Cfg().Opts.SQLDBName != nil {
+		dbname = *sqlEe.Cfg().Opts.SQLDBName
 	}
-	var ssl string
-	if sqlEe.Cfg().Opts.SSLMode == utils.EmptyString {
-		ssl = utils.SQLDefaultSSLMode
-	} else {
-		ssl = sqlEe.Cfg().Opts.SSLMode
+	ssl := utils.SQLDefaultSSLMode
+	if sqlEe.Cfg().Opts.SSLMode != nil {
+		ssl = *sqlEe.Cfg().Opts.SSLMode
 	}
 	// tableName is mandatory in opts
-	if sqlEe.Cfg().Opts.SQLTableName == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing(utils.SQLTableNameOpt)
+	if sqlEe.Cfg().Opts.SQLTableName != nil {
+		sqlEe.tableName = *sqlEe.Cfg().Opts.SQLTableName
 	} else {
-		sqlEe.tableName = sqlEe.Cfg().Opts.SQLTableName
+		return utils.NewErrMandatoryIeMissing(utils.SQLTableNameOpt)
 	}
 
 	// var dialect gorm.Dialector
@@ -111,14 +107,14 @@ func openDB(dialect gorm.Dialector, opts *config.EventExporterOpts) (db *gorm.DB
 		return
 	}
 
-	if opts.SQLMaxIdleConns != 0 {
-		sqlDB.SetMaxIdleConns(opts.SQLMaxIdleConns)
+	if opts.SQLMaxIdleConns != nil {
+		sqlDB.SetMaxIdleConns(*opts.SQLMaxIdleConns)
 	}
-	if opts.SQLMaxOpenConns != 0 {
-		sqlDB.SetMaxOpenConns(opts.SQLMaxOpenConns)
+	if opts.SQLMaxOpenConns != nil {
+		sqlDB.SetMaxOpenConns(*opts.SQLMaxOpenConns)
 	}
-	if opts.SQLConnMaxLifetime != 0 {
-		sqlDB.SetConnMaxLifetime(opts.SQLConnMaxLifetime)
+	if opts.SQLConnMaxLifetime != nil {
+		sqlDB.SetConnMaxLifetime(*opts.SQLConnMaxLifetime)
 	}
 
 	return

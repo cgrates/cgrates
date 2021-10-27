@@ -29,14 +29,13 @@ import (
 // NewKafkaEE creates a kafka poster
 func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE {
 	kfkPstr := &KafkaEE{
-		cfg:  cfg,
-		dc:   dc,
-		reqs: newConcReq(cfg.ConcurrentRequests),
+		cfg:   cfg,
+		dc:    dc,
+		topic: utils.DefaultQueueID,
+		reqs:  newConcReq(cfg.ConcurrentRequests),
 	}
-	if cfg.Opts.KafkaTopic == utils.EmptyString {
-		kfkPstr.topic = utils.DefaultQueueID
-	} else {
-		kfkPstr.topic = cfg.Opts.KafkaTopic
+	if cfg.Opts.KafkaTopic != nil {
+		kfkPstr.topic = *cfg.Opts.KafkaTopic
 	}
 	return kfkPstr
 }

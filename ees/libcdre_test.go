@@ -63,7 +63,7 @@ func TestAddFldPost(t *testing.T) {
 	}
 	AddFailedPost("", "path1", "format1", "module1", "2", &config.EventExporterOpts{})
 	AddFailedPost("", "path2", "format2", "module2", "3", &config.EventExporterOpts{
-		SQSQueueID: "qID",
+		SQSQueueID: utils.StringPointer("qID"),
 	})
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1", "module1"))
 	if !ok {

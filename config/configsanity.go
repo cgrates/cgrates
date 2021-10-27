@@ -781,7 +781,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 						return fmt.Errorf("<%s> nonexistent folder: %s for exporter with ID: %s", utils.EEs, dir, exp.ID)
 					}
 				}
-				if exp.Opts.CSVFieldSeparator == utils.EmptyString {
+				if exp.Opts.CSVFieldSeparator == nil {
 					return fmt.Errorf("<%s> empty %s for exporter with ID: %s", utils.EEs, utils.CSVFieldSepOpt, exp.ID)
 				}
 			case utils.MetaFileFWV:

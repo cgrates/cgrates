@@ -167,7 +167,7 @@ func TestEESClone(t *testing.T) {
 					},
 				},
 				Opts: &EventExporterOpts{
-					CSVFieldSeparator: utils.InfieldSep,
+					CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 				},
 			},
 		},
@@ -737,7 +737,7 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		Type:       "http",
 		ExportPath: "/var/tmp/ees",
 		Opts: &EventExporterOpts{
-			CSVFieldSeparator: utils.InfieldSep,
+			CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 		},
 
 		Timezone: "EEST",
@@ -945,7 +945,7 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			Type:       "http",
 			ExportPath: "/var/tmp/ees",
 			Opts: &EventExporterOpts{
-				CSVFieldSeparator: utils.InfieldSep,
+				CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 			},
 
 			Timezone: "EEST",

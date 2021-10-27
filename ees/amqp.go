@@ -57,21 +57,20 @@ type AMQPee struct {
 }
 
 func (pstr *AMQPee) parseOpts(dialURL *config.EventExporterOpts) {
-	if dialURL.AMQPQueueID == utils.EmptyString {
-		pstr.queueID = utils.DefaultQueueID
-	} else {
-		pstr.queueID = dialURL.AMQPQueueID
+	pstr.queueID = utils.DefaultQueueID
+	pstr.routingKey = utils.DefaultQueueID
+	if dialURL.AMQPQueueID != nil {
+		pstr.queueID = *dialURL.AMQPQueueID
 	}
-	if dialURL.AMQPRoutingKey == utils.EmptyString {
-		pstr.routingKey = utils.DefaultQueueID
-	} else {
-		pstr.routingKey = dialURL.AMQPRoutingKey
+	if dialURL.AMQPRoutingKey != nil {
+		pstr.routingKey = *dialURL.AMQPRoutingKey
 	}
-	pstr.exchange = dialURL.AMQPExchange
-	if dialURL.AMQPExchangeType == utils.EmptyString {
-		pstr.exchangeType = utils.DefaultExchangeType
-	} else {
-		pstr.exchangeType = dialURL.AMQPExchangeType
+	if dialURL.AMQPExchange != nil {
+		pstr.exchange = *dialURL.AMQPExchange
+	}
+	pstr.exchangeType = utils.DefaultExchangeType
+	if dialURL.AMQPExchangeType != nil {
+		pstr.exchangeType = *dialURL.AMQPExchangeType
 	}
 }
 
