@@ -184,6 +184,7 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 // in case of partially executed, both error and evs will be returned
 func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (evs []*utils.EventWithFlags, err error) {
 	// making the options
+
 	var attrS bool
 	if attrS, err = GetBoolOpts(ctx, ev.Tenant, ev, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Attributes,
 		config.CDRsAttributesDftOpt, utils.OptsAttributeS); err != nil {
@@ -250,7 +251,6 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 			}
 		}
 	}
-
 	var export bool
 	for _, cgrEv := range cgrEvs {
 		if export, err = GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, cdrS.filterS, cdrS.cfg.CdrsCfg().Opts.Export,
