@@ -61,15 +61,22 @@ type SQSee struct {
 }
 
 func (pstr *SQSee) parseOpts(opts *config.EventExporterOpts) {
-	if opts.SQSQueueID == utils.EmptyString {
-		pstr.queueID = utils.DefaultQueueID
-	} else {
-		pstr.queueID = opts.SQSQueueID
+	pstr.queueID = utils.DefaultQueueID
+	if opts.SQSQueueID != nil {
+		pstr.queueID = *opts.SQSQueueID
 	}
-	pstr.awsRegion = opts.AWSRegion
-	pstr.awsID = opts.AWSKey
-	pstr.awsKey = opts.AWSSecret
-	pstr.awsToken = opts.AWSToken
+	if opts.AWSRegion != nil {
+		pstr.awsRegion = *opts.AWSRegion
+	}
+	if opts.AWSKey != nil {
+		pstr.awsID = *opts.AWSKey
+	}
+	if opts.AWSSecret != nil {
+		pstr.awsKey = *opts.AWSSecret
+	}
+	if opts.AWSToken != nil {
+		pstr.awsToken = *opts.AWSToken
+	}
 }
 
 func (pstr *SQSee) Cfg() *config.EventExporterCfg { return pstr.cfg }

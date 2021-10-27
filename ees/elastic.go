@@ -57,20 +57,31 @@ type ElasticEE struct {
 // init will create all the necessary dependencies, including opening the file
 func (eEe *ElasticEE) prepareOpts() (err error) {
 	//parse opts
-	if eEe.Cfg().Opts.ElsIndex == utils.EmptyString {
-		eEe.opts.Index = utils.CDRsTBL
-	} else {
-		eEe.opts.Index = eEe.Cfg().Opts.ElsIndex
+	eEe.opts.Index = utils.CDRsTBL
+	if eEe.Cfg().Opts.ElsIndex != nil {
+		eEe.opts.Index = *eEe.Cfg().Opts.ElsIndex
 	}
 	eEe.opts.IfPrimaryTerm = eEe.Cfg().Opts.ElsIfPrimaryTerm
 	eEe.opts.IfSeqNo = eEe.Cfg().Opts.ElsIfSeqNo
-	eEe.opts.OpType = eEe.Cfg().Opts.ElsOpType
-	eEe.opts.Pipeline = eEe.Cfg().Opts.ElsPipeline
-	eEe.opts.Routing = eEe.Cfg().Opts.ElsRouting
-	eEe.opts.Timeout = eEe.Cfg().Opts.ElsTimeout
+	if eEe.Cfg().Opts.ElsOpType != nil {
+		eEe.opts.OpType = *eEe.Cfg().Opts.ElsOpType
+	}
+	if eEe.Cfg().Opts.ElsPipeline != nil {
+		eEe.opts.Pipeline = *eEe.Cfg().Opts.ElsPipeline
+	}
+	if eEe.Cfg().Opts.ElsRouting != nil {
+		eEe.opts.Routing = *eEe.Cfg().Opts.ElsRouting
+	}
+	if eEe.Cfg().Opts.ElsTimeout != nil {
+		eEe.opts.Timeout = *eEe.Cfg().Opts.ElsTimeout
+	}
 	eEe.opts.Version = eEe.Cfg().Opts.ElsVersion
-	eEe.opts.VersionType = eEe.Cfg().Opts.ElsVersionType
-	eEe.opts.WaitForActiveShards = eEe.Cfg().Opts.ElsWaitForActiveShards
+	if eEe.Cfg().Opts.ElsVersionType != nil {
+		eEe.opts.VersionType = *eEe.Cfg().Opts.ElsVersionType
+	}
+	if eEe.Cfg().Opts.ElsWaitForActiveShards != nil {
+		eEe.opts.WaitForActiveShards = *eEe.Cfg().Opts.ElsWaitForActiveShards
+	}
 	return
 }
 

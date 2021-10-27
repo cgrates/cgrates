@@ -74,8 +74,8 @@ func (fCsv *FileCSVee) init() (err error) {
 	}
 	fCsv.csvWriter = csv.NewWriter(fCsv.file)
 	fCsv.csvWriter.Comma = utils.CSVSep
-	if fCsv.Cfg().Opts.CSVFieldSeparator != utils.EmptyString {
-		fCsv.csvWriter.Comma = rune(fCsv.Cfg().Opts.CSVFieldSeparator[0])
+	if fCsv.Cfg().Opts.CSVFieldSeparator != nil {
+		fCsv.csvWriter.Comma = rune((*fCsv.Cfg().Opts.CSVFieldSeparator)[0])
 	}
 	return fCsv.composeHeader()
 }

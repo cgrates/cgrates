@@ -60,8 +60,24 @@ func writeFailedPosts(itmID string, value interface{}) {
 func AddFailedPost(failedPostsDir, expPath, format, module string, ev interface{}, opts *config.EventExporterOpts) {
 	key := utils.ConcatenatedKey(failedPostsDir, expPath, format, module)
 	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
-	if qID := utils.FirstNonEmpty(opts.AMQPQueueID, opts.S3BucketID,
-		opts.SQSQueueID, opts.KafkaTopic); len(qID) != 0 {
+	var amqpQueueID string
+	var s3BucketID string
+	var sqsQueueID string
+	var kafkaTopic string
+	if opts.AMQPQueueID != nil {
+		amqpQueueID = *opts.AMQPQueueID
+	}
+	if opts.S3BucketID != nil {
+		s3BucketID = *opts.S3BucketID
+	}
+	if opts.SQSQueueID != nil {
+		sqsQueueID = *opts.SQSQueueID
+	}
+	if opts.KafkaTopic != nil {
+		kafkaTopic = *opts.KafkaTopic
+	}
+	if qID := utils.FirstNonEmpty(amqpQueueID, s3BucketID,
+		sqsQueueID, kafkaTopic); len(qID) != 0 {
 		key = utils.ConcatenatedKey(key, qID)
 	}
 	var failedPost *ExportEvents

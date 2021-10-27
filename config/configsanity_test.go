@@ -1343,7 +1343,7 @@ func TestConfigSanityEventExporter(t *testing.T) {
 	cfg.eesCfg.Exporters[0].Type = utils.MetaFileCSV
 	cfg.eesCfg.Exporters[0].ExportPath = "/"
 	cfg.eesCfg.Exporters[0].Opts = &EventExporterOpts{
-		CSVFieldSeparator: utils.EmptyString,
+		CSVFieldSeparator: utils.StringPointer(utils.EmptyString),
 	}
 	expected = "<EEs> empty csvFieldSeparator for exporter with ID: "
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {

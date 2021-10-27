@@ -46,9 +46,9 @@ func TestSqlGetMetrics(t *testing.T) {
 
 func TestNewSQLeUrl(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = "postgres"
-	cgrCfg.EEsCfg().Exporters[0].Opts.SSLMode = "test"
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("postgres")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SSLMode = utils.StringPointer("test")
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
 		reqs: newConcReq(0),
@@ -61,8 +61,8 @@ func TestNewSQLeUrl(t *testing.T) {
 
 func TestNewSQLeUrlSQL(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = "mysql"
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("mysql")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
@@ -79,8 +79,8 @@ func TestNewSQLeUrlSQL(t *testing.T) {
 
 func TestNewSQLeUrlPostgres(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = "postgres"
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("postgres")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `postgres://cgrates:CGRateS.org@127.0.0.1:3306`
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
@@ -97,8 +97,8 @@ func TestNewSQLeUrlPostgres(t *testing.T) {
 
 func TestNewSQLeExportPathError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = "postgres"
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("postgres")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ":foo"
 	sqlEe := &SQLEe{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
