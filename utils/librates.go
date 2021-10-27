@@ -273,7 +273,7 @@ func (rI *RateSIncrement) AsRateSIncrementCost() (rIc *RateSIncrementCost) {
 
 // Equals returns the equality between two RateSIntervalCost
 func (rIC *RateSIntervalCost) Equals(nRIc *RateSIntervalCost, rIlRef, nRilRef map[string]*IntervalRate) (eq bool) {
-	if (rIC.Increments != nil && rIC.Increments == nil ||
+	if (rIC.Increments != nil && nRIc.Increments == nil ||
 		rIC.Increments == nil && nRIc.Increments != nil ||
 		len(rIC.Increments) != len(nRIc.Increments)) || rIC.CompressFactor != nRIc.CompressFactor {
 		return
