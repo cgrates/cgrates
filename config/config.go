@@ -46,7 +46,7 @@ var (
 	getDftRemHstCfg = func() *RemoteHost { return new(RemoteHost) }
 
 	getDftEvExpCfg = func() *EventExporterCfg { return &EventExporterCfg{Opts: &EventExporterOpts{}} }
-	getDftEvRdrCfg = func() *EventReaderCfg { return &EventReaderCfg{Opts: make(map[string]interface{})} }
+	getDftEvRdrCfg = func() *EventReaderCfg { return &EventReaderCfg{Opts: &EventReaderOpts{}} }
 )
 
 func init() {
