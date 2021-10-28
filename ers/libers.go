@@ -21,7 +21,6 @@ package ers
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
@@ -29,12 +28,99 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func getProcessOptions(opts map[string]interface{}) (proc map[string]interface{}) {
-	proc = make(map[string]interface{})
-	for k, v := range opts {
-		if strings.HasSuffix(k, utils.ProcessedOpt) {
-			proc[k[:len(k)-9]] = v
-		}
+func getProcessOptions(opts *config.EventReaderOpts) (proc *config.EventExporterOpts, populated bool) {
+	proc = &config.EventExporterOpts{}
+	if opts.AMQPExchangeProcessed != nil {
+		proc.AMQPExchange = opts.AMQPExchangeProcessed
+		populated = true
+	}
+	if opts.AMQPExchangeTypeProcessed != nil {
+		proc.AMQPExchangeType = opts.AMQPExchangeTypeProcessed
+		populated = true
+	}
+	if opts.AMQPQueueIDProcessed != nil {
+		proc.AMQPQueueID = opts.AMQPQueueIDProcessed
+		populated = true
+	}
+	if opts.AMQPRoutingKeyProcessed != nil {
+		proc.AMQPRoutingKey = opts.AMQPRoutingKeyProcessed
+		populated = true
+	}
+	if opts.AWSKeyProcessed != nil {
+		proc.AWSKey = opts.AWSKeyProcessed
+		populated = true
+	}
+	if opts.AWSRegionProcessed != nil {
+		proc.AWSRegion = opts.AWSRegionProcessed
+		populated = true
+	}
+	if opts.AWSSecretProcessed != nil {
+		proc.AWSSecret = opts.AWSSecretProcessed
+		populated = true
+	}
+	if opts.AWSTokenProcessed != nil {
+		proc.AWSToken = opts.AWSTokenProcessed
+		populated = true
+	}
+	if opts.KafkaTopicProcessed != nil {
+		proc.KafkaTopic = opts.KafkaTopicProcessed
+		populated = true
+	}
+	if opts.NATSCertificateAuthorityProcessed != nil {
+		proc.NATSCertificateAuthority = opts.NATSCertificateAuthorityProcessed
+		populated = true
+	}
+	if opts.NATSClientCertificateProcessed != nil {
+		proc.NATSClientCertificate = opts.NATSClientCertificateProcessed
+		populated = true
+	}
+	if opts.NATSClientKeyProcessed != nil {
+		proc.NATSClientKey = opts.NATSClientKeyProcessed
+		populated = true
+	}
+	if opts.NATSJWTFileProcessed != nil {
+		proc.NATSJWTFile = opts.NATSJWTFileProcessed
+		populated = true
+	}
+	if opts.NATSJetStreamMaxWaitProcessed != nil {
+		proc.NATSJetStreamMaxWait = opts.NATSJetStreamMaxWaitProcessed
+		populated = true
+	}
+	if opts.NATSJetStreamProcessed != nil {
+		proc.NATSJetStream = opts.NATSJetStreamProcessed
+		populated = true
+	}
+	if opts.NATSSeedFileProcessed != nil {
+		proc.NATSSeedFile = opts.NATSSeedFileProcessed
+		populated = true
+	}
+	if opts.NATSSubjectProcessed != nil {
+		proc.NATSSubject = opts.NATSSubjectProcessed
+		populated = true
+	}
+	if opts.S3BucketIDProcessed != nil {
+		proc.S3BucketID = opts.S3BucketIDProcessed
+		populated = true
+	}
+	if opts.S3FolderPathProcessed != nil {
+		proc.S3FolderPath = opts.S3FolderPathProcessed
+		populated = true
+	}
+	if opts.SQLDBNameProcessed != nil {
+		proc.SQLDBName = opts.SQLDBNameProcessed
+		populated = true
+	}
+	if opts.SQLTableNameProcessed != nil {
+		proc.SQLTableName = opts.SQLTableNameProcessed
+		populated = true
+	}
+	if opts.SQSQueueIDProcessed != nil {
+		proc.SQSQueueID = opts.SQSQueueIDProcessed
+		populated = true
+	}
+	if opts.SSLModeProcessed != nil {
+		proc.SSLMode = opts.SSLModeProcessed
+		populated = true
 	}
 	return
 }
