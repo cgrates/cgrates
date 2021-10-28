@@ -73,7 +73,8 @@ func (e *RPCee) Connect() (err error) {
 func (e *RPCee) ExportEvent(ctx *context.Context, args interface{}, _ string) (err error) {
 	e.Lock()
 	defer e.Unlock()
-	return e.conn.Call(ctx, e.serviceMethod, args, nil)
+	var rply interface{}
+	return e.conn.Call(ctx, e.serviceMethod, args, &rply)
 }
 
 func (e *RPCee) Close() (err error) {
