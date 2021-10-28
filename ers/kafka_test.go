@@ -38,10 +38,10 @@ func TestKafkasetOpts(t *testing.T) {
 		groupID: "new",
 		maxWait: time.Second,
 	}
-	if err := k.setOpts(map[string]interface{}{
-		utils.KafkaTopic:   "cdrs",
-		utils.KafkaGroupID: "new",
-		utils.KafkaMaxWait: "1s",
+	if err := k.setOpts(&config.EventReaderOpts{
+		KafkaTopic:   utils.StringPointer("cdrs"),
+		KafkaGroupID: utils.StringPointer("new"),
+		KafkaMaxWait: utils.DurationPointer(time.Second),
 	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
@@ -61,7 +61,7 @@ func TestKafkasetOpts(t *testing.T) {
 		groupID: "cgrates",
 		maxWait: time.Millisecond,
 	}
-	if err := k.setOpts(map[string]interface{}{}); err != nil {
+	if err := k.setOpts(&config.EventReaderOpts{}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
@@ -81,10 +81,10 @@ func TestKafkasetOpts(t *testing.T) {
 		groupID: "new",
 		maxWait: time.Second,
 	}
-	if err := k.setOpts(map[string]interface{}{
-		utils.KafkaTopic:   "cdrs",
-		utils.KafkaGroupID: "new",
-		utils.KafkaMaxWait: "1s",
+	if err := k.setOpts(&config.EventReaderOpts{
+		KafkaTopic:   utils.StringPointer("cdrs"),
+		KafkaGroupID: utils.StringPointer("new"),
+		KafkaMaxWait: utils.DurationPointer(time.Second),
 	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
@@ -115,7 +115,7 @@ func TestKafkaERServe(t *testing.T) {
 	if err := rdr.Serve(); err != nil {
 		t.Error(err)
 	}
-	rdr.Config().Opts = map[string]interface{}{}
+	rdr.Config().Opts = &config.EventReaderOpts{}
 	rdr.Config().ProcessedPath = ""
 	rdr.(*KafkaER).createPoster()
 	close(rdrExit)

@@ -21,7 +21,6 @@ package ers
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
@@ -203,23 +202,25 @@ func (rdr *NatsER) createPoster() (err error) {
 }
 
 func (rdr *NatsER) processOpts() (err error) {
-	rdr.subject = utils.IfaceAsString(rdr.Config().Opts[utils.NatsSubject])
-	rdr.queueID = utils.FirstNonEmpty(utils.IfaceAsString(rdr.Config().Opts[utils.NatsQueueID]),
-		rdr.cgrCfg.GeneralCfg().NodeID)
-	rdr.consumerName = utils.FirstNonEmpty(utils.IfaceAsString(rdr.Config().Opts[utils.NatsConsumerName]),
-		utils.CGRateSLwr)
-	if useJetStreamVal, has := rdr.Config().Opts[utils.NatsJetStream]; has {
-		if rdr.jetStream, err = utils.IfaceAsBool(useJetStreamVal); err != nil {
-			return
-		}
+	if rdr.Config().Opts.NATSSubject != nil {
+		rdr.subject = *rdr.Config().Opts.NATSSubject
+	}
+	var queueID string
+	if rdr.Config().Opts.NATSQueueID != nil {
+		queueID = *rdr.Config().Opts.NATSQueueID
+	}
+	rdr.queueID = utils.FirstNonEmpty(queueID, rdr.cgrCfg.GeneralCfg().NodeID)
+	var consumerName string
+	if rdr.Config().Opts.NATSConsumerName != nil {
+		consumerName = *rdr.Config().Opts.NATSConsumerName
+	}
+	rdr.consumerName = utils.FirstNonEmpty(consumerName, utils.CGRateSLwr)
+	if rdr.Config().Opts.NATSJetStream != nil {
+		rdr.jetStream = *rdr.Config().Opts.NATSJetStream
 	}
 	if rdr.jetStream {
-		if maxWaitVal, has := rdr.Config().Opts[utils.NatsJetStreamMaxWait]; has {
-			var maxWait time.Duration
-			if maxWait, err = utils.IfaceAsDuration(maxWaitVal); err != nil {
-				return
-			}
-			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(maxWait)}
+		if rdr.Config().Opts.NATSJetStreamMaxWait != nil {
+			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(*rdr.Config().Opts.NATSJetStreamMaxWait)}
 		}
 	}
 	rdr.opts, err = ees.GetNatsOpts(rdr.Config().Opts,

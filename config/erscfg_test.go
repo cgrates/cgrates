@@ -108,14 +108,14 @@ func TestERSClone(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 			{
@@ -149,15 +149,14 @@ func TestERSClone(t *testing.T) {
 						Layout:    time.RFC3339,
 					},
 				},
-				Opts: map[string]interface{}{
-					utils.MetaDefault:           "randomVal",
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 		},
@@ -276,14 +275,14 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 			{
@@ -323,14 +322,14 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 		},
@@ -583,14 +582,14 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 			{
@@ -614,14 +613,14 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 		},
@@ -718,14 +717,14 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 			{
@@ -749,14 +748,14 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 					},
 				},
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 		},
@@ -848,14 +847,14 @@ func TestEventReaderSameID(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 			{
@@ -875,14 +874,14 @@ func TestEventReaderSameID(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 		},
@@ -1238,14 +1237,14 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 			{
@@ -1271,14 +1270,14 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
-				Opts: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
-					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+				Opts: &EventReaderOpts{
+					CSVFieldSeparator:   utils.StringPointer(","),
+					CSVHeaderDefineChar: utils.StringPointer(":"),
+					CSVRowLength:        utils.IntPointer(0),
+					XMLRootPath:         utils.StringPointer(utils.EmptyString),
+					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 		},
@@ -1321,7 +1320,7 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 		ConcurrentReqs: 2,
 		SourcePath:     "/tmp/ers/in",
 		ProcessedPath:  "/tmp/ers/out",
-		Opts:           map[string]interface{}{},
+		Opts:           &EventReaderOpts{},
 		Tenant: RSRParsers{
 			{
 				Rules: "cgrates.org",
@@ -1342,8 +1341,8 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 		ConcurrentReqs: 1,
 		SourcePath:     "/var/tmp/ers/in",
 		ProcessedPath:  "/var/tmp/ers/out",
-		Opts: map[string]interface{}{
-			"OPT": "opt",
+		Opts: &EventReaderOpts{
+			CSVRowLength: utils.IntPointer(5),
 		},
 		Tenant: RSRParsers{
 			{
@@ -1384,8 +1383,8 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 		Concurrent_requests: utils.IntPointer(1),
 		Source_path:         utils.StringPointer("/var/tmp/ers/in"),
 		Processed_path:      utils.StringPointer("/var/tmp/ers/out"),
-		Opts: map[string]interface{}{
-			"OPT": "opt",
+		Opts: &EventReaderOptsJson{
+			CSVRowLength: utils.IntPointer(5),
 		},
 		Tenant:   utils.StringPointer("itsyscom.com"),
 		Timezone: utils.StringPointer("EEST"),
@@ -1442,7 +1441,7 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 	}
 
 	expected = &EventReaderJsonCfg{
-		Opts: map[string]interface{}{},
+		Opts: &EventReaderOptsJson{},
 		Fields: &[]*FcTemplateJsonCfg{
 			{
 				Tag:   utils.StringPointer("ToR"),
@@ -1544,7 +1543,7 @@ func TestDiffEventReadersJsonCfg(t *testing.T) {
 			ConcurrentReqs: 2,
 			SourcePath:     "/tmp/ers/in",
 			ProcessedPath:  "/tmp/ers/out",
-			Opts:           map[string]interface{}{},
+			Opts:           &EventReaderOpts{},
 			Tenant: RSRParsers{
 				{
 					Rules: "cgrates.org",
@@ -1566,8 +1565,8 @@ func TestDiffEventReadersJsonCfg(t *testing.T) {
 			ConcurrentReqs: 1,
 			SourcePath:     "/var/tmp/ers/in",
 			ProcessedPath:  "/var/tmp/ers/out",
-			Opts: map[string]interface{}{
-				"OPT": "opt",
+			Opts: &EventReaderOpts{
+				CSVRowLength: utils.IntPointer(5),
 			},
 			Tenant: RSRParsers{
 				{
@@ -1602,8 +1601,8 @@ func TestDiffEventReadersJsonCfg(t *testing.T) {
 			Concurrent_requests: utils.IntPointer(1),
 			Source_path:         utils.StringPointer("/var/tmp/ers/in"),
 			Processed_path:      utils.StringPointer("/var/tmp/ers/out"),
-			Opts: map[string]interface{}{
-				"OPT": "opt",
+			Opts: &EventReaderOptsJson{
+				CSVRowLength: utils.IntPointer(5),
 			},
 			Tenant:   utils.StringPointer("itsyscom.com"),
 			Timezone: utils.StringPointer("EEST"),
@@ -1632,7 +1631,7 @@ func TestDiffEventReadersJsonCfg(t *testing.T) {
 	v1 = v2
 	expected = &[]*EventReaderJsonCfg{
 		{
-			Opts: map[string]interface{}{},
+			Opts: &EventReaderOptsJson{},
 		},
 	}
 	rcv = diffEventReadersJsonCfg(d, v1, v2, ";")
@@ -1684,7 +1683,7 @@ func TestDiffERsJsonCfg(t *testing.T) {
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:   utils.StringPointer("ERS_ID2"),
-				Opts: map[string]interface{}{},
+				Opts: &EventReaderOptsJson{},
 			},
 		},
 		Partial_cache_ttl: utils.StringPointer("12h0m0s"),

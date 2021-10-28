@@ -58,7 +58,7 @@ func TestERSXMLFileERConfig(t *testing.T) {
 		SourcePath:     "/var/spool/cgrates/ers/in",
 		ProcessedPath:  "/var/spool/cgrates/ers/out",
 		Filters:        []string{},
-		Opts:           make(map[string]interface{}),
+		Opts:           &config.EventReaderOpts{},
 	}
 	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
@@ -80,7 +80,7 @@ func TestERSXMLFileERServeNil(t *testing.T) {
 		SourcePath:     "/var/spool/cgrates/ers/in",
 		ProcessedPath:  "/var/spool/cgrates/ers/out",
 		Filters:        []string{},
-		Opts:           make(map[string]interface{}),
+		Opts:           &config.EventReaderOpts{},
 	}
 	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {

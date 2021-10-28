@@ -161,7 +161,7 @@ func TestNewS3ER(t *testing.T) {
 			SourcePath:     "/var/spool/cgrates/ers/in",
 			ProcessedPath:  "/var/spool/cgrates/ers/out",
 			Filters:        []string{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 		{
 			ID:             utils.MetaDefault,
@@ -171,7 +171,7 @@ func TestNewS3ER(t *testing.T) {
 			SourcePath:     "/var/spool/cgrates/ers/in",
 			ProcessedPath:  "/var/spool/cgrates/ers/out",
 			Filters:        []string{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 	}
 
@@ -212,7 +212,7 @@ func TestNewS3ERCase2(t *testing.T) {
 			SourcePath:     "/var/spool/cgrates/ers/in",
 			ProcessedPath:  "/var/spool/cgrates/ers/out",
 			Filters:        []string{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 	}
 

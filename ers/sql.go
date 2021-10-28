@@ -264,7 +264,7 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 	return
 }
 
-func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interface{}) (err error) {
+func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReaderOpts) (err error) {
 	inURL = strings.TrimPrefix(inURL, utils.Meta)
 	var u *url.URL
 	if u, err = url.Parse(inURL); err != nil {
@@ -274,17 +274,17 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 	rdr.connType = u.Scheme
 
 	dbname := utils.SQLDefaultDBName
-	if vals, has := opts[utils.SQLDBNameOpt]; has {
-		dbname = utils.IfaceAsString(vals)
+	if opts.SQLDBName != nil {
+		dbname = *opts.SQLDBName
 	}
 	ssl := utils.SQLDefaultSSLMode
-	if vals, has := opts[utils.SSLModeCfg]; has {
-		ssl = utils.IfaceAsString(vals)
+	if opts.SSLMode != nil {
+		ssl = *opts.SSLMode
 	}
 
 	rdr.tableName = utils.CDRsTBL
-	if vals, has := opts[utils.SQLTableNameOpt]; has {
-		rdr.tableName = utils.IfaceAsString(vals)
+	if opts.SQLTableName != nil {
+		rdr.tableName = *opts.SQLTableName
 	}
 	switch rdr.connType {
 	case utils.MySQL:

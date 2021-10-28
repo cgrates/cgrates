@@ -67,8 +67,8 @@ func (pstr *AMQPee) parseOpts(dialURL *config.EventExporterOpts) {
 	}
 	if dialURL.AMQPExchange != nil {
 		pstr.exchange = *dialURL.AMQPExchange
+		pstr.exchangeType = utils.DefaultExchangeType
 	}
-	pstr.exchangeType = utils.DefaultExchangeType
 	if dialURL.AMQPExchangeType != nil {
 		pstr.exchangeType = *dialURL.AMQPExchangeType
 	}

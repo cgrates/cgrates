@@ -237,7 +237,7 @@ func TestOpenDB1(t *testing.T) {
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
 	_, _, err := openDB(dialect, &config.EventExporterOpts{
-		SQLMaxIdleConns: 2,
+		SQLMaxIdleConns: utils.IntPointer(2),
 	})
 	if err != nil {
 		t.Error(err)
@@ -248,7 +248,7 @@ func TestOpenDB2(t *testing.T) {
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
 	_, _, err := openDB(dialect, &config.EventExporterOpts{
-		SQLMaxOpenConns: 2,
+		SQLMaxOpenConns: utils.IntPointer(2),
 	})
 	if err != nil {
 		t.Error(err)
@@ -259,7 +259,7 @@ func TestOpenDB3(t *testing.T) {
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
 	_, _, err := openDB(dialect, &config.EventExporterOpts{
-		SQLConnMaxLifetime: 2,
+		SQLConnMaxLifetime: utils.DurationPointer(2),
 	})
 	if err != nil {
 		t.Error(err)
@@ -268,8 +268,8 @@ func TestOpenDB3(t *testing.T) {
 
 func TestSQLExportEvent1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = "cgrates"
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("cgrates")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	sqlEe, err := NewSQLEe(cgrCfg.EEsCfg().Exporters[0], nil)
 	if err != nil {
