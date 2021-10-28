@@ -56,7 +56,7 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format1",
 		module: "module1",
 		Events: []interface{}{"1"},
-		Opts:   make(map[string]interface{}),
+		Opts:   &config.EventExporterOpts{},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
@@ -81,7 +81,7 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format1",
 		module: "module1",
 		Events: []interface{}{"1", "2"},
-		Opts:   make(map[string]interface{}),
+		Opts:   &config.EventExporterOpts{},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
@@ -102,7 +102,9 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format2",
 		module: "module2",
 		Events: []interface{}{"3"},
-		Opts:   map[string]interface{}{utils.SQSQueueID: "qID"},
+		Opts: &config.EventExporterOpts{
+			SQSQueueID: utils.StringPointer("qID"),
+		},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))

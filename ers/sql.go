@@ -297,8 +297,8 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 	}
 
 	// outURL
-	processedOpt := getProcessOptions(opts)
-	if len(processedOpt) == 0 &&
+	processedOpt, populated := getProcessOptions(opts)
+	if !populated &&
 		len(outURL) == 0 {
 		return
 	}
@@ -323,16 +323,16 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 	}
 
 	outDBname = utils.SQLDefaultDBName
-	if vals, has := processedOpt[utils.SQLDBNameOpt]; has {
-		outDBname = utils.IfaceAsString(vals)
+	if processedOpt.SQLDBName != nil {
+		outDBname = *processedOpt.SQLDBName
 	}
 	outSSL = utils.SQLDefaultSSLMode
-	if vals, has := processedOpt[utils.SSLModeCfg]; has {
-		outSSL = utils.IfaceAsString(vals)
+	if processedOpt.SSLMode != nil {
+		outSSL = *processedOpt.SSLMode
 	}
 	rdr.expTableName = utils.CDRsTBL
-	if vals, has := processedOpt[utils.SQLTableNameOpt]; has {
-		rdr.expTableName = utils.IfaceAsString(vals)
+	if processedOpt.SQLTableName != nil {
+		rdr.expTableName = *processedOpt.SQLTableName
 	}
 
 	switch rdr.expConnType {

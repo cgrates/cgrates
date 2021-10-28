@@ -204,8 +204,8 @@ func (rdr *KafkaER) setOpts(opts *config.EventReaderOpts) (err error) {
 }
 
 func (rdr *KafkaER) createPoster() {
-	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if len(processedOpt) == 0 &&
+	processedOpt, populated := getProcessOptions(rdr.Config().Opts)
+	if !populated &&
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}

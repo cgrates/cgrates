@@ -189,8 +189,8 @@ func (rdr *S3ER) readLoop() (err error) {
 }
 
 func (rdr *S3ER) createPoster() {
-	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if len(processedOpt) == 0 &&
+	processedOpt, populated := getProcessOptions(rdr.Config().Opts)
+	if !populated &&
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}

@@ -184,8 +184,8 @@ func (rdr *NatsER) processMessage(msg []byte) (err error) {
 }
 
 func (rdr *NatsER) createPoster() (err error) {
-	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if len(processedOpt) == 0 &&
+	processedOpt, populated := getProcessOptions(rdr.Config().Opts)
+	if !populated &&
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
