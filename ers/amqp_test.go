@@ -21,6 +21,7 @@ package ers
 import (
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,7 +33,10 @@ func TestAMQPSetOpts(t *testing.T) {
 		queueID: "cdrs",
 		tag:     "new",
 	}
-	if k.setOpts(map[string]interface{}{utils.AMQPQueueID: "cdrs", utils.AMQPConsumerTag: "new"}); expKafka.dialURL != k.dialURL {
+	if k.setOpts(&config.EventReaderOpts{
+		AMQPQueueID:     utils.StringPointer("cdrs"),
+		AMQPConsumerTag: utils.StringPointer("new"),
+	}); expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
 	} else if expKafka.queueID != k.queueID {
 		t.Errorf("Expected: %s ,received: %s", expKafka.queueID, k.queueID)
@@ -46,7 +50,7 @@ func TestAMQPSetOpts(t *testing.T) {
 		queueID: "cgrates_cdrs",
 		tag:     "cgrates",
 	}
-	if k.setOpts(map[string]interface{}{}); expKafka.dialURL != k.dialURL {
+	if k.setOpts(&config.EventReaderOpts{}); expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
 	} else if expKafka.queueID != k.queueID {
 		t.Errorf("Expected: %s ,received: %s", expKafka.queueID, k.queueID)

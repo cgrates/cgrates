@@ -79,7 +79,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	if err = ExportWithAttempts(context.Background(), pstr, &HTTPPosterRequest{Body: jsn, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, "test1", jsn, make(map[string]interface{}))
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.MetaHTTPjsonMap, "test1", jsn, &config.EventExporterOpts{})
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test1*")
 	if err != nil {
@@ -115,7 +115,7 @@ func TestHttpBytesPoster(t *testing.T) {
 	if err = ExportWithAttempts(context.Background(), pstr, &HTTPPosterRequest{Body: content, Header: make(http.Header)}, ""); err == nil {
 		t.Error("Expected error")
 	}
-	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, "test2", content, make(map[string]interface{}))
+	AddFailedPost("/tmp", "http://localhost:8080/invalid", utils.ContentJSON, "test2", content, &config.EventExporterOpts{})
 	time.Sleep(5 * time.Millisecond)
 	fs, err := filepath.Glob("/tmp/test2*")
 	if err != nil {
@@ -151,11 +151,11 @@ func TestSQSPoster(t *testing.T) {
 	awsSecret := "replace-this-with-your-secret"
 	qname := "cgrates-cdrs"
 
-	opts := map[string]interface{}{
-		utils.AWSRegion:  region,
-		utils.AWSKey:     awsKey,
-		utils.AWSSecret:  awsSecret,
-		utils.SQSQueueID: qname,
+	opts := &config.EventExporterOpts{
+		AWSRegion:  utils.StringPointer(region),
+		AWSKey:     utils.StringPointer(awsKey),
+		AWSSecret:  utils.StringPointer(awsSecret),
+		SQSQueueID: utils.StringPointer(qname),
 	}
 	//#####################################
 
@@ -234,11 +234,11 @@ func TestS3Poster(t *testing.T) {
 	awsSecret := "replace-this-with-your-secret"
 	qname := "cgrates-cdrs"
 
-	opts := map[string]interface{}{
-		utils.AWSRegion: region,
-		utils.AWSKey:    awsKey,
-		utils.AWSSecret: awsSecret,
-		utils.S3Bucket:  qname,
+	opts := &config.EventExporterOpts{
+		AWSRegion:  utils.StringPointer(region),
+		AWSKey:     utils.StringPointer(awsKey),
+		AWSSecret:  utils.StringPointer(awsSecret),
+		SQSQueueID: utils.StringPointer(qname),
 	}
 	//#####################################
 
@@ -296,8 +296,8 @@ func TestAMQPv1Poster(t *testing.T) {
 	// update this variables
 	endpoint := "amqps://RootManageSharedAccessKey:UlfIJ%2But11L0ZzA%2Fgpje8biFJeQihpWibJsUhaOi1DU%3D@cdrscgrates.servicebus.windows.net"
 	qname := "cgrates-cdrs"
-	opts := map[string]interface{}{
-		utils.AMQPQueueID: qname,
+	opts := &config.EventExporterOpts{
+		AMQPQueueID: utils.StringPointer(qname),
 	}
 	//#####################################
 

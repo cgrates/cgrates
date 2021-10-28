@@ -213,24 +213,24 @@ func (rdr *AMQPER) processMessage(msg []byte) (err error) {
 	return
 }
 
-func (rdr *AMQPER) setOpts(opts map[string]interface{}) {
+func (rdr *AMQPER) setOpts(opts *config.EventReaderOpts) {
 	rdr.queueID = utils.DefaultQueueID
-	if vals, has := opts[utils.AMQPQueueID]; has {
-		rdr.queueID = utils.IfaceAsString(vals)
+	if opts.AMQPQueueID != nil {
+		rdr.queueID = *opts.AMQPQueueID
 	}
 	rdr.tag = utils.AMQPDefaultConsumerTag
-	if vals, has := opts[utils.AMQPConsumerTag]; has {
-		rdr.tag = utils.IfaceAsString(vals)
+	if opts.AMQPConsumerTag != nil {
+		rdr.tag = *opts.AMQPConsumerTag
 	}
-	if vals, has := opts[utils.AMQPRoutingKey]; has {
-		rdr.routingKey = utils.IfaceAsString(vals)
+	if opts.AMQPRoutingKey != nil {
+		rdr.routingKey = *opts.AMQPRoutingKey
 	}
-	if vals, has := opts[utils.AMQPExchange]; has {
-		rdr.exchange = utils.IfaceAsString(vals)
+	if opts.AMQPExchange != nil {
+		rdr.exchange = *opts.AMQPExchange
 		rdr.exchangeType = utils.DefaultExchangeType
 	}
-	if vals, has := opts[utils.AMQPExchangeType]; has {
-		rdr.exchangeType = utils.IfaceAsString(vals)
+	if opts.AMQPExchangeType != nil {
+		rdr.exchangeType = *opts.AMQPExchangeType
 	}
 }
 

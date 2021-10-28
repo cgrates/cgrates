@@ -44,7 +44,10 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 	cgrEv = cgrEvs[0]     // by default there is at least one event
 	if len(cgrEvs) != 1 { // need to merge the incoming events
 		// prepare the field after which the events are ordered
-		ordFld := utils.IfaceAsString(cfg.Opts[utils.PartialOrderFieldOpt]) // safe as the checkConfigSanity forces this option to be populated
+		var ordFld string
+		if cfg.Opts.PartialOrderField != nil {
+			ordFld = *cfg.Opts.PartialOrderField
+		}
 		var ordPath config.RSRParsers
 		if ordPath, err = config.NewRSRParsers(ordFld, rsrSep); err != nil { // convert the option to rsrParsers
 			return nil, err

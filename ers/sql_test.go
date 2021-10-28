@@ -40,14 +40,14 @@ func TestSQLSetURL(t *testing.T) {
 	}
 	inURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
-	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		utils.SQLDBNameOpt:    "cgrates2",
-		utils.SQLTableNameOpt: "cdrs2",
-		utils.SSLModeCfg:      "enabled",
+	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
+		SQLDBName:    utils.StringPointer("cgrates2"),
+		SQLTableName: utils.StringPointer("cdrs2"),
+		SSLMode:      utils.StringPointer("enabled"),
 
-		utils.SQLDBNameOpt + utils.ProcessedOpt:    "cgrates3",
-		utils.SQLTableNameOpt + utils.ProcessedOpt: "cdrs3",
-		utils.SSLModeCfg + utils.ProcessedOpt:      "enabled",
+		SQLDBNameProcessed:    utils.StringPointer("cgrates3"),
+		SQLTableNameProcessed: utils.StringPointer("cdrs3"),
+		SSLModeProcessed:      utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -75,14 +75,14 @@ func TestSQLSetURL(t *testing.T) {
 	}
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
-	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		utils.SQLDBNameOpt:    "cgrates2",
-		utils.SQLTableNameOpt: "cdrs2",
-		utils.SSLModeCfg:      "enabled",
+	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
+		SQLDBName:    utils.StringPointer("cgrates2"),
+		SQLTableName: utils.StringPointer("cdrs2"),
+		SSLMode:      utils.StringPointer("enabled"),
 
-		utils.SQLDBNameOpt + utils.ProcessedOpt:    "cgrates3",
-		utils.SQLTableNameOpt + utils.ProcessedOpt: "cdrs3",
-		utils.SSLModeCfg + utils.ProcessedOpt:      "enabled",
+		SQLDBNameProcessed:    utils.StringPointer("cgrates3"),
+		SQLTableNameProcessed: utils.StringPointer("cdrs3"),
+		SSLModeProcessed:      utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -110,14 +110,14 @@ func TestSQLSetURL(t *testing.T) {
 	}
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL = ""
-	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		utils.SQLDBNameOpt:    "cgrates2",
-		utils.SQLTableNameOpt: "cdrs2",
-		utils.SSLModeCfg:      "enabled",
+	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{
+		SQLDBName:    utils.StringPointer("cgrates2"),
+		SQLTableName: utils.StringPointer("cdrs2"),
+		SSLMode:      utils.StringPointer("enabled"),
 
-		utils.SQLDBNameOpt + utils.ProcessedOpt:    "cgrates2",
-		utils.SQLTableNameOpt + utils.ProcessedOpt: "cdrs2",
-		utils.SSLModeCfg + utils.ProcessedOpt:      "enabled",
+		SQLDBNameProcessed:    utils.StringPointer("cgrates2"),
+		SQLTableNameProcessed: utils.StringPointer("cdrs2"),
+		SSLModeProcessed:      utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -136,12 +136,12 @@ func TestSQLSetURL(t *testing.T) {
 
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306?dbName=cgrates2&tableName=cdrs2&sslmode=enabled"
 	outURL = "*postgres2://cgrates:CGRateS.org@127.0.0.1:3306?dbName=cgrates2&tableName=cdrs2&sslmode=enabled"
-	if err := sql.setURL(inURL, outURL, make(map[string]interface{})); err == nil || err.Error() != "unknown db_type postgres2" {
+	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{}); err == nil || err.Error() != "unknown db_type postgres2" {
 		t.Errorf("Expected error: 'unknown db_type postgres2' ,received: %v", err)
 	}
 	inURL = "*postgres2://cgrates:CGRateS.org@127.0.0.1:3306?dbName=cgrates2&tableName=cdrs2&sslmode=enabled"
 	outURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306?dbName=cgrates2&tableName=cdrs2&sslmode=enabled"
-	if err := sql.setURL(inURL, outURL, make(map[string]interface{})); err == nil || err.Error() != "unknown db_type postgres2" {
+	if err := sql.setURL(inURL, outURL, &config.EventReaderOpts{}); err == nil || err.Error() != "unknown db_type postgres2" {
 		t.Errorf("Expected error: 'unknown db_type postgres2' ,received: %v", err)
 	}
 }
