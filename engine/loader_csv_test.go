@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +37,7 @@ var csvr *TpReader
 
 func init() {
 	var err error
-	csvr, err = NewTpReader(NewInternalDB(nil, nil, true), NewStringCSVStorage(utils.CSVSep,
+	csvr, err = NewTpReader(NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), NewStringCSVStorage(utils.CSVSep,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, false)

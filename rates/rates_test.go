@@ -44,27 +44,27 @@ func TestListenAndServe(t *testing.T) {
 }
 
 func TestNewRateS(t *testing.T) {
-	config := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dataManager := engine.NewDataManager(data, config.CacheCfg(), nil)
-	filters := engine.NewFilterS(config, nil, dataManager)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataManager := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dataManager)
 	expected := &RateS{
-		cfg:     config,
+		cfg:     cfg,
 		filterS: filters,
 		dm:      dataManager,
 	}
-	if newRateS := NewRateS(config, filters, dataManager); !reflect.DeepEqual(newRateS, expected) {
+	if newRateS := NewRateS(cfg, filters, dataManager); !reflect.DeepEqual(newRateS, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, newRateS)
 	}
 }
 
 func TestRateProfileCostForEvent(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	rateS := NewRateS(defaultCfg, filters, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
@@ -184,11 +184,11 @@ func TestRateProfileCostForEvent(t *testing.T) {
 }
 
 func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	rateS := NewRateS(defaultCfg, filters, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
@@ -277,12 +277,12 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 }
 
 func TestMatchingRateProfileEvent(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	rate := RateS{
-		cfg:     defaultCfg,
+		cfg:     cfg,
 		filterS: filters,
 		dm:      dm,
 	}
@@ -402,11 +402,12 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 }
 
 func TestV1CostForEventError(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	rateS := NewRateS(defaultCfg, filters, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
@@ -488,13 +489,13 @@ func TestV1CostForEventError(t *testing.T) {
 
 // go test -run=^$ -v -bench=BenchmarkRateS_V1CostForEvent -benchtime=5s
 func BenchmarkRateS_V1CostForEvent(b *testing.B) {
-	defaultCfg := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	rateS := RateS{
-		cfg:     defaultCfg,
+		cfg:     cfg,
 		filterS: filters,
 		dm:      dm,
 	}
@@ -592,13 +593,13 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 
 // go test -run=^$ -v -bench=BenchmarkRateS_V1CostForEventSingleRate -benchtime=5s
 func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
-	defaultCfg := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 	rateS := RateS{
-		cfg:     defaultCfg,
+		cfg:     cfg,
 		filterS: filters,
 		dm:      dm,
 	}
@@ -686,12 +687,13 @@ func TestRatesShutDown(t *testing.T) {
 }
 
 func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 
-	rateS := NewRateS(defaultCfg, filters, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
@@ -761,12 +763,12 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 }
 
 func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 
-	rateS := NewRateS(defaultCfg, filters, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
@@ -822,12 +824,12 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 }
 
 func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
 
-	rateS := NewRateS(defaultCfg, filters, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
@@ -884,13 +886,13 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 }
 
 func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
-	dftCfg := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, dftCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(dftCfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
 	rateS := RateS{
-		cfg:     dftCfg,
+		cfg:     cfg,
 		filterS: filterS,
 		dm:      dm,
 	}
@@ -928,11 +930,11 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 }
 
 func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	rateS := NewRateS(defaultCfg, filters, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
@@ -992,11 +994,11 @@ func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 }
 
 func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	rateS := NewRateS(defaultCfg, filters, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)
@@ -1077,7 +1079,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 	}
 
 	connMgr := engine.NewConnManager(cfg)
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filters := engine.NewFilterS(cfg, connMgr, dm)
 	storDBChan := make(chan engine.StorDB, 1)
@@ -1183,16 +1185,16 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 }
 
 func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RateSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RateSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
 		{
 			Value: true,
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	rateS := NewRateS(defaultCfg, filters, dm)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
 		t.Error(err)

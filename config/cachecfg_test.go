@@ -143,7 +143,7 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 		}`
 	eMap := map[string]interface{}{
 		utils.PartitionsCfg: map[string]interface{}{
-			utils.MetaDispatchers: map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "precache": true, "replicate": true},
+			utils.MetaDispatchers: map[string]interface{}{"limit": -1, "static_ttl": false, "precache": true, "replicate": true},
 		},
 		utils.ReplicationConnsCfg: []string{},
 	}

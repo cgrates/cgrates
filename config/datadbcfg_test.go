@@ -57,6 +57,7 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		RplConns: []string{"*conn1"},
 		Items: map[string]*ItemOpt{
 			utils.MetaAccounts: {
+				Limit:     -1,
 				Replicate: true,
 				Remote:    true,
 			},
@@ -163,13 +164,14 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	"db_type": "mongo",
 	}
 }`
+	cfg := NewDefaultCGRConfig()
 	expected := DataDbCfg{
 		Type: "mongo",
 		Opts: &DataDBOpts{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -187,7 +189,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -205,7 +207,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -228,7 +230,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	"remote_conns":["Conn1"],
 	}
 }`
-
+	cfg := NewDefaultCGRConfig()
 	dbcfg.Opts = &DataDBOpts{}
 	expected = DataDbCfg{
 		Type:     "redis",
@@ -244,7 +246,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
@@ -273,7 +275,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
@@ -302,7 +304,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
@@ -339,6 +341,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpt{
 			utils.MetaAccounts: {
+				Limit:     -1,
 				Replicate: true,
 			},
 		},
@@ -350,7 +353,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 	dbcfg.Opts = &DataDBOpts{}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, NewDefaultCGRConfig()); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
@@ -370,7 +373,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			"remote_conns":["Conn1"],
 			"items":{
 				"*dispatcher_hosts":{"remote":true, "replicate":true}, 
-				"*indexes" :{"remote":true, "replicate":true}, 
 				"*load_ids":{"remote":true, "replicate":true}, 
 			
 			  }	
@@ -390,14 +392,12 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpt{
 			utils.MetaDispatcherHosts: {
-				Remote:    true,
-				Replicate: true,
-			},
-			utils.MetaIndexes: {
+				Limit:     -1,
 				Remote:    true,
 				Replicate: true,
 			},
 			utils.MetaLoadIDs: {
+				Limit:     -1,
 				Remote:    true,
 				Replicate: true,
 			},
@@ -406,7 +406,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 	dbcfg.Items = make(map[string]*ItemOpt)
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, NewDefaultCGRConfig()); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
@@ -444,15 +444,15 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		},
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaResourceProfile:   {},
-			utils.MetaResources:         {},
-			utils.MetaStatQueueProfiles: {},
+			utils.MetaResourceProfile:   {Limit: -1},
+			utils.MetaResources:         {Limit: -1},
+			utils.MetaStatQueueProfiles: {Limit: -1},
 		},
 	}
 	dbcfg.Items = make(map[string]*ItemOpt)
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err = dbcfg.Load(context.Background(), jsnCfg, NewDefaultCGRConfig()); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v ,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(dbcfg))
@@ -494,7 +494,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},
 		utils.ItemsCfg: map[string]interface{}{
-			utils.MetaAccounts: map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
+			utils.MetaAccounts: map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

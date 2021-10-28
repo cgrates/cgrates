@@ -32,13 +32,11 @@ func TestStorDBServiceCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewStorDBService(cfg, srvDep)
-	err := srv.IsRunning()
-	if err == true {
+	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	srv.db = engine.NewInternalDB([]string{"test"}, []string{"test2"}, true)
-	err = srv.IsRunning()
-	if err == false {
+	srv.db = engine.NewInternalDB([]string{"test"}, []string{"test2"}, cfg.StorDbCfg().Items)
+	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	srv.oldDBCfg = &config.StorDbCfg{

@@ -36,18 +36,12 @@ type CacheParamCfg struct {
 	Replicate bool
 }
 
-func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) error {
+func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
-	var err error
 	if jsnCfg.Limit != nil {
 		cParam.Limit = *jsnCfg.Limit
-	}
-	if jsnCfg.Ttl != nil {
-		if cParam.TTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ttl); err != nil {
-			return err
-		}
 	}
 	if jsnCfg.Static_ttl != nil {
 		cParam.StaticTTL = *jsnCfg.Static_ttl
@@ -58,7 +52,10 @@ func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) error {
 	if jsnCfg.Replicate != nil {
 		cParam.Replicate = *jsnCfg.Replicate
 	}
-	return nil
+	if jsnCfg.Ttl != nil {
+		cParam.TTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ttl)
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
@@ -68,7 +65,6 @@ func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]interface{})
 		utils.StaticTTLCfg: cParam.StaticTTL,
 		utils.PrecacheCfg:  cParam.Precache,
 		utils.ReplicateCfg: cParam.Replicate,
-		utils.TTLCfg:       utils.EmptyString,
 	}
 	if cParam.TTL != 0 {
 		initialMP[utils.TTLCfg] = cParam.TTL.String()

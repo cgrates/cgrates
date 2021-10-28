@@ -36,51 +36,55 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var (
+	loaderDB = engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
+)
+
 func TestLoaderProcessContentSingleFile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
+			{
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Weight",
+			{
 				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "AttributeFilterIDs",
+			{
 				Path:  "AttributeFilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "Path",
+			{
 				Path:  "Path",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "Type",
+			{
 				Path:  "Type",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "Value",
+			{
 				Path:  "Value",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "Blocker",
+			{
 				Path:  "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
@@ -166,34 +170,34 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 func TestLoaderProcessContentMultiFiles(t *testing.T) {
 	file1CSV := `ignored,ignored,ignored,ignored,ignored,,*req.Subject,1001,ignored,ignored`
 	file2CSV := `ignored,TestLoader2`
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContentMultiFiles",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaString,
 				Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "Weight",
+			{
 				Path:  "Weight",
 				Type:  utils.MetaString,
 				Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
-			{Tag: "Path",
+			{
 				Path:  "Path",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
-			{Tag: "Value",
+			{
 				Path:  "Value",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
@@ -240,54 +244,54 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 }
 
 func TestLoaderProcessResource(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessResources",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaResources: {
-			{Tag: "Tenant",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
+			{
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Weight",
+			{
 				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "TTL",
+			{
 				Path:  "UsageTTL",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "Limit",
+			{
 				Path:  "Limit",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "AllocationMessage",
+			{
 				Path:  "AllocationMessage",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "Blocker",
+			{
 				Path:  "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "Stored",
+			{
 				Path:  "Stored",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "Thresholds",
+			{
 				Path:  "Thresholds",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
@@ -348,34 +352,34 @@ func TestLoaderProcessResource(t *testing.T) {
 }
 
 func TestLoaderProcessFilters(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessFilters",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaFilters: {
-			{Tag: "Tenant",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "Type",
+			{
 				Path:  "Type",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Element",
+			{
 				Path:  "Element",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "Values",
+			{
 				Path:  "Values",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
@@ -481,54 +485,54 @@ func TestLoaderProcessFilters(t *testing.T) {
 }
 
 func TestLoaderProcessThresholds(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaThresholds: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
+			{
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Weight",
+			{
 				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "MaxHits",
+			{
 				Path:  "MaxHits",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "MinHits",
+			{
 				Path:  "MinHits",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "MinSleep",
+			{
 				Path:  "MinSleep",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "Blocker",
+			{
 				Path:  "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "ActionProfileIDs",
+			{
 				Path:  "ActionProfileIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "Async",
+			{
 				Path:  "Async",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
@@ -587,62 +591,62 @@ func TestLoaderProcessThresholds(t *testing.T) {
 }
 
 func TestLoaderProcessStats(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaStats: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
+			{
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Weight",
+			{
 				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "QueueLength",
+			{
 				Path:  "QueueLength",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "TTL",
+			{
 				Path:  "TTL",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "MinItems",
+			{
 				Path:  "MinItems",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "MetricIDs",
+			{
 				Path:  "MetricIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "MetricFilterIDs",
+			{
 				Path:  "MetricFilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "Blocker",
+			{
 				Path:  "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "Stored",
+			{
 				Path:  "Stored",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{Tag: "ThresholdIDs",
+			{
 				Path:  "ThresholdIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
@@ -715,19 +719,19 @@ func TestLoaderProcessStats(t *testing.T) {
 }
 
 func TestLoaderProcessStatsWrongMetrics(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessStatsWrongMetrics",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 		dataTpls: map[string][]*config.FCTemplate{
 			utils.MetaStats: {
-				{Tag: "MetricIDs",
+				{
 					Path:  "MetricIDs",
 					Type:  utils.MetaComposed,
 					Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-				{Tag: "Stored",
+				{
 					Path:  "Stored",
 					Type:  utils.MetaComposed,
 					Value: config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep)},
@@ -770,74 +774,74 @@ not_a_valid_metric_type,true,`))
 }
 
 func TestLoaderProcessRoutes(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRoutes: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
+			{
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Weights",
+			{
 				Path:  "Weights",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "Sorting",
+			{
 				Path:  "Sorting",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "SortingParameters",
+			{
 				Path:  "SortingParameters",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "RouteID",
+			{
 				Path:  "RouteID",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "RouteFilterIDs",
+			{
 				Path:  "RouteFilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "RouteAccountIDs",
+			{
 				Path:  "RouteAccountIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "RouteRateProfileIDs",
+			{
 				Path:  "RouteRateProfileIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "RouteResourceIDs",
+			{
 				Path:  "RouteResourceIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{Tag: "RouteStatIDs",
+			{
 				Path:  "RouteStatIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-			{Tag: "RouteWeights",
+			{
 				Path:  "RouteWeights",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
-			{Tag: "RouteBlocker",
+			{
 				Path:  "RouteBlocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
-			{Tag: "RouteParameters",
+			{
 				Path:  "RouteParameters",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
@@ -934,21 +938,21 @@ func TestLoaderProcessRoutes(t *testing.T) {
 }
 
 func TestLoaderProcessAccounts(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessAccounts",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAccounts: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -993,38 +997,38 @@ cgrates.org,ACTPRF_ID1
 }
 
 func TestLoaderProcessChargers(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaChargers: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
+			{
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Weight",
+			{
 				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "RunID",
+			{
 				Path:  "RunID",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "AttributeIDs",
+			{
 				Path:  "AttributeIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
@@ -1077,11 +1081,11 @@ func TestLoaderProcessChargers(t *testing.T) {
 }
 
 func TestLoaderProcessDispatches(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -1230,11 +1234,11 @@ func TestLoaderProcessDispatches(t *testing.T) {
 }
 
 func TestLoaderProcessDispatcheHosts(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -1384,21 +1388,21 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 }
 
 func TestLoaderRemoveContentSingleFile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -1484,82 +1488,82 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 }
 
 func TestLoaderProcessRateProfile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessRateProfile",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
+			{
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Weights",
+			{
 				Path:  "Weights",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "MinCost",
+			{
 				Path:  "MinCost",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "MaxCost",
+			{
 				Path:  "MaxCost",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "MaxCostStrategy",
+			{
 				Path:  "MaxCostStrategy",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "RateID",
+			{
 				Path:  "RateID",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "RateFilterIDs",
+			{
 				Path:  "RateFilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "RateActivationTimes",
+			{
 				Path:  "RateActivationTimes",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "RateWeights",
+			{
 				Path:  "RateWeights",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{Tag: "RateBlocker",
+			{
 				Path:  "RateBlocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-			{Tag: "RateIntervalStart",
+			{
 				Path:  "RateIntervalStart",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
-			{Tag: "RateFixedFee",
+			{
 				Path:  "RateFixedFee",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
-			{Tag: "RateRecurrentFee",
+			{
 				Path:  "RateRecurrentFee",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
-			{Tag: "RateUnit",
+			{
 				Path:  "RateUnit",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
-			{Tag: "RateIncrement",
+			{
 				Path:  "RateIncrement",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
@@ -1691,83 +1695,83 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 }
 
 func TestLoaderProcessRateProfileRates(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessRateProfile",
 		bufLoaderData: make(map[string][]LoaderData),
 		flagsTpls:     make(map[string]utils.FlagsWithParams),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "FilterIDs",
+			{
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "Weights",
+			{
 				Path:  "Weights",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "MinCost",
+			{
 				Path:  "MinCost",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "MaxCost",
+			{
 				Path:  "MaxCost",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "MaxCostStrategy",
+			{
 				Path:  "MaxCostStrategy",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{Tag: "RateID",
+			{
 				Path:  "RateID",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "RateFilterIDs",
+			{
 				Path:  "RateFilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "RateActivationTimes",
+			{
 				Path:  "RateActivationTimes",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "RateWeights",
+			{
 				Path:  "RateWeights",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{Tag: "RateBlocker",
+			{
 				Path:  "RateBlocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-			{Tag: "RateIntervalStart",
+			{
 				Path:  "RateIntervalStart",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
-			{Tag: "RateFixedFee",
+			{
 				Path:  "RateFixedFee",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
-			{Tag: "RateRecurrentFee",
+			{
 				Path:  "RateRecurrentFee",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
-			{Tag: "RateUnit",
+			{
 				Path:  "RateUnit",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
-			{Tag: "RateIncrement",
+			{
 				Path:  "RateIncrement",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
@@ -1961,27 +1965,27 @@ cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 }
 
 func TestLoaderRemoveRateProfileRates(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderRemoveRateProfileRates",
 		bufLoaderData: make(map[string][]LoaderData),
 		flagsTpls:     make(map[string]utils.FlagsWithParams),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "RateIDs",
+			{
 				Path:  "RateIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
@@ -2273,22 +2277,22 @@ cgrates.org,RP1,
 }
 
 func TestRemoveRateProfileFlagsError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderRemoveRateProfileRates",
 		bufLoaderData: make(map[string][]LoaderData),
 		flagsTpls:     make(map[string]utils.FlagsWithParams),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -2323,38 +2327,38 @@ cgrates.org,RP2
 }
 
 func TestNewLoaderWithMultiFiles(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 
-	ldrCfg := config.CgrConfig().LoaderCfg()[0].Clone()
+	ldrCfg := cfg.LoaderCfg()[0].Clone()
 	ldrCfg.Data[0].Fields = []*config.FCTemplate{
-		{Tag: "TenantID",
+		{
 			Path:      "Tenant",
 			Type:      utils.MetaString,
 			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "ProfileID",
+		{
 			Path:      "ID",
 			Type:      utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "Contexts",
+		{
 			Path:  "Contexts",
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("*any", utils.InfieldSep)},
-		{Tag: "Path",
+		{
 			Path:  "Path",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
-		{Tag: "Value",
+		{
 			Path:  "Value",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
-		{Tag: "Weight",
+		{
 			Path:  "Weight",
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
 	}
-	ldr := NewLoader(engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil), ldrCfg, "", nil, nil, nil)
+	ldr := NewLoader(engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil), ldrCfg, "", nil, nil, nil)
 
 	openRdrs := make(utils.StringSet)
 	for _, rdr := range ldr.rdrs {
@@ -2384,88 +2388,88 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 }
 
 func TestLoaderActionProfile(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaActionProfiles: {
-			{Tag: "Tenant",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true,
 				Layout:    time.RFC3339},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true,
 				Layout:    time.RFC3339},
-			{Tag: "FilterIDs",
+			{
 				Path:   "FilterIDs",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "Weight",
+			{
 				Path:   "Weight",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "Schedule",
+			{
 				Path:   "Schedule",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "TargetType",
+			{
 				Path:   "TargetType",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "TargetIDs",
+			{
 				Path:   "TargetIDs",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionID",
+			{
 				Path:   "ActionID",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionFilterIDs",
+			{
 				Path:   "ActionFilterIDs",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionBlocker",
+			{
 				Path:   "ActionBlocker",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionTTL",
+			{
 				Path:   "ActionTTL",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionType",
+			{
 				Path:   "ActionType",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionOpts",
+			{
 				Path:   "ActionOpts",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionPath",
+			{
 				Path:   "ActionPath",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionValue",
+			{
 				Path:   "ActionValue",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep),
@@ -2569,83 +2573,83 @@ func TestLoaderActionProfile(t *testing.T) {
 }
 
 func TestLoaderWrongCsv(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderWrongCsv",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaActionProfiles: {
-			{Tag: "Tenant",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true,
 				Layout:    time.RFC3339},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true,
 				Layout:    time.RFC3339},
-			{Tag: "FilterIDs",
+			{
 				Path:   "FilterIDs",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "Weight",
+			{
 				Path:   "Weight",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "Schedule",
+			{
 				Path:   "Schedule",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "AccountIDs",
+			{
 				Path:   "AccountIDs",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionID",
+			{
 				Path:   "ActionID",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionFilterIDs",
+			{
 				Path:   "ActionFilterIDs",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionBlocker",
+			{
 				Path:   "ActionBlocker",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionTTL",
+			{
 				Path:   "ActionTTL",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionType",
+			{
 				Path:   "ActionType",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionOpts",
+			{
 				Path:   "ActionOpts",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionPath",
+			{
 				Path:   "ActionPath",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActionValue",
+			{
 				Path:   "ActionValue",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
@@ -2706,28 +2710,28 @@ cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.T
 }
 
 func TestLoaderActionProfileAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderActionProfileAsStructErrType",
 		bufLoaderData: map[string][]LoaderData{},
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaActionProfiles: {
-			{Tag: "Tenant",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true,
 				Layout:    time.RFC3339},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true,
 				Layout:    time.RFC3339},
-			{Tag: "ActionBlocker",
+			{
 				Path:   "ActionBlocker",
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
@@ -2753,16 +2757,16 @@ cgrates.org,12,NOT_A_BOOLEAN
 }
 
 func TestLoaderAttributesAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderAttributesAsStructErrType",
 		bufLoaderData: map[string][]LoaderData{},
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAttributes: {
-			{Tag: "Weight",
+			{
 				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -2787,16 +2791,16 @@ true
 }
 
 func TestLoadResourcesAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadResourcesAsStructErr",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaResources: {
-			{Tag: "Blocker",
+			{
 				Path:  "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -2821,16 +2825,16 @@ NOT_A_BOOLEAN
 }
 
 func TestLoadResourcesAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadResourcesAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaResources: {
-			{Tag: "UsageTTL",
+			{
 				Path:  "UsageTTL",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -2855,16 +2859,16 @@ func TestLoadResourcesAsStructErrConversion(t *testing.T) {
 }
 
 func TestLoadFiltersAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadFiltersAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaFilters: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -2893,16 +2897,16 @@ NOT_UINT
 }
 
 func TestLoadStatsAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadStatsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaStats: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -2931,16 +2935,16 @@ NOT_UINT
 }
 
 func TestLoadThresholdsAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadThresholdsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaThresholds: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -2969,16 +2973,16 @@ NOT_UINT
 }
 
 func TestLoadRoutesAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadRoutesAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRoutes: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -3007,16 +3011,16 @@ NOT_UINT
 }
 
 func TestLoadChargersAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadChargersAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaChargers: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -3045,16 +3049,16 @@ NOT_UINT
 }
 
 func TestLoadDispatchersAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadDispatchersAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatchers: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -3083,16 +3087,16 @@ NOT_UINT
 }
 
 func TestLoadDispatcherHostsAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadDispatcherHostsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatcherHosts: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -3121,16 +3125,16 @@ NOT_UINT
 }
 
 func TestLoadRateProfilesAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadRateProfilesAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -3159,28 +3163,28 @@ NOT_UINT
 }
 
 func TestProcessContentAccountAsTPError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestProcessContentAccountAsTPError",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAccounts: {
-			{Tag: "Tenant",
+			{
 				Path:  "Tenant",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-			{Tag: "ID",
+			{
 				Path:  "ID",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep)},
-			{Tag: "BalanceID",
+			{
 				Path:  "BalanceID",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "BalanceUnitFactors",
+			{
 				Path:  "BalanceUnitFactors",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
@@ -3210,16 +3214,16 @@ cgrates.org,1001,MonetaryBalance,fltr1&fltr2;100;fltr3
 }
 
 func TestLoadAccountsAsStructErrType(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadAccountsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAccounts: {
-			{Tag: "PK",
+			{
 				Path:  "PK",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
@@ -3248,22 +3252,22 @@ NOT_UINT
 }
 
 func TestLoadAndRemoveResources(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadAndRemoveResources",
 		bufLoaderData: make(map[string][]LoaderData),
 		dryRun:        true,
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaResources: {
-			{Tag: "Tenant",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -3382,21 +3386,21 @@ cgrates.org,NewRes1
 }
 
 func TestRemoveFilterContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveFilterContents",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaFilters: {
-			{Tag: "Tenant",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -3475,21 +3479,21 @@ cgrates.org,FILTERS_REM_1
 }
 
 func TestRemoveStatsContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaStats: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -3568,21 +3572,21 @@ cgrates.org,REM_STATS_1
 }
 
 func TestRemoveThresholdsContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveThresholdsContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaThresholds: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -3661,21 +3665,21 @@ cgrates.org,REM_THRESHOLDS_1,
 }
 
 func TestRemoveRoutesContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveRoutesContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRoutes: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -3754,21 +3758,21 @@ cgrates.org,ROUTES_REM_1
 }
 
 func TestRemoveChargersContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveChargersContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaChargers: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -3847,21 +3851,21 @@ cgrates.org,REM_ROUTES_1
 }
 
 func TestRemoveDispatchersContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveDispatchersContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatchers: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -3939,21 +3943,21 @@ cgrates.org,REM_DISPATCHERS_1
 }
 
 func TestRemoveDispatcherHostsContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveDispatcherHostsContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaDispatcherHosts: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4074,21 +4078,21 @@ func TestProcessContentEmptyDataBase(t *testing.T) {
 }
 
 func TestRemoveRateProfileContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveRateProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4166,7 +4170,7 @@ cgrates.org,REM_RATEPROFILE_1
 }
 
 func TestRemoveActionProfileContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -4174,12 +4178,12 @@ func TestRemoveActionProfileContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaActionProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4210,7 +4214,7 @@ cgrates.org,REM_ACTPROFILE_1
 	}
 
 	//set dataManager
-	ldr.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	ldr.dm = engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil)
 	actRtPrf := &engine.ActionProfile{
 		Tenant: "cgrates.org",
 		ID:     "REM_ACTPROFILE_1",
@@ -4246,7 +4250,7 @@ cgrates.org,REM_ACTPROFILE_1
 }
 
 func TestRemoveAccountContent(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveAccountContent",
 		dm:            nil,
@@ -4255,12 +4259,12 @@ func TestRemoveAccountContent(t *testing.T) {
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaAccounts: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4289,7 +4293,7 @@ cgrates.org,REM_ACTPROFILE_1
 	}
 
 	//set dataManager
-	ldr.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	ldr.dm = engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil)
 	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "REM_ACTPROFILE_1",
@@ -4326,21 +4330,21 @@ cgrates.org,REM_ACTPROFILE_1
 
 func TestRemoveContentError1(t *testing.T) {
 	//use actionProfile to generate an error by giving a wrong csv
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaActionProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4378,21 +4382,21 @@ cgrates.org,REM_ACTPROFILE_s
 
 func TestRemoveContentError2(t *testing.T) {
 	//use actionProfile to generate an error by giving a wrong csv
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaActionProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4452,27 +4456,27 @@ func TestLoaderListenAndServe(t *testing.T) {
 }
 
 func TestRemoveRateProfileRatesError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveRateProfileRatesMockError",
 		bufLoaderData: make(map[string][]LoaderData),
 		flagsTpls:     make(map[string]utils.FlagsWithParams),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
 		utils.MetaRateProfiles: {
-			{Tag: "TenantID",
+			{
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "ProfileID",
+			{
 				Path:      "ID",
 				Type:      utils.MetaComposed,
 				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 				Mandatory: true},
-			{Tag: "RateIDs",
+			{
 				Path:  "RateIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
@@ -4522,7 +4526,7 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
 
-	ldr.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	ldr.dm = engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil)
 	if err := ldr.dm.SetRateProfile(context.Background(), expRtPrf, true); err != nil {
 		t.Error(err)
 	}
@@ -4535,20 +4539,20 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 }
 
 func TestRemoveThresholdsMockError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveThresholdsMockError",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 		dataTpls: map[string][]*config.FCTemplate{
 			utils.MetaThresholds: {
-				{Tag: "TenantID",
+				{
 					Path:      "Tenant",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 					Mandatory: true},
-				{Tag: "ID",
+				{
 					Path:      "ID",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4580,7 +4584,7 @@ func TestRemoveThresholdsMockError(t *testing.T) {
 		},
 		SetThresholdProfileDrvF: func(ctx *context.Context, tp *engine.ThresholdProfile) (err error) { return expected },
 		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return expected },
-	}, config.CgrConfig().CacheCfg(), nil)
+	}, cfg.CacheCfg(), nil)
 	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	} else if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
@@ -4589,20 +4593,20 @@ func TestRemoveThresholdsMockError(t *testing.T) {
 }
 
 func TestRemoveStatQueueMockError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestRemoveStatQueueError",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 		dataTpls: map[string][]*config.FCTemplate{
 			utils.MetaStats: {
-				{Tag: "TenantID",
+				{
 					Path:      "Tenant",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 					Mandatory: true},
-				{Tag: "ProfileID",
+				{
 					Path:      "ID",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4631,7 +4635,7 @@ cgrates.org,REM_STATS_1`))
 		},
 		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *engine.StatQueueProfile) (err error) { return expected },
 		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return expected },
-	}, config.CgrConfig().CacheCfg(), nil)
+	}, cfg.CacheCfg(), nil)
 
 	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -4641,20 +4645,20 @@ cgrates.org,REM_STATS_1`))
 }
 
 func TestRemoveResourcesMockError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
 	ldr := &Loader{
 		ldrID:         "TestLoadAndRemoveResources",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
 		timezone:      "UTC",
 		dataTpls: map[string][]*config.FCTemplate{
 			utils.MetaResources: {
-				{Tag: "Tenant",
+				{
 					Path:      "Tenant",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 					Mandatory: true},
-				{Tag: "ID",
+				{
 					Path:      "ID",
 					Type:      utils.MetaComposed,
 					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
@@ -4677,7 +4681,7 @@ func TestRemoveResourcesMockError(t *testing.T) {
 		GetResourceProfileDrvF:    func(ctx *context.Context, tnt, id string) (*engine.ResourceProfile, error) { return nil, nil },
 		SetResourceProfileDrvF:    func(ctx *context.Context, rp *engine.ResourceProfile) error { return expected },
 		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error { return expected },
-	}, config.CgrConfig().CacheCfg(), nil)
+	}, cfg.CacheCfg(), nil)
 
 	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -4718,8 +4722,8 @@ func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args interfa
 
 func TestStoreLoadedDataAttributes(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:             nil,
@@ -4744,12 +4748,12 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
@@ -4767,8 +4771,8 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 
 func TestStoreLoadedDataResources(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:            nil,
 		Tenant:             "",
@@ -4793,12 +4797,12 @@ func TestStoreLoadedDataResources(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
@@ -4816,8 +4820,8 @@ func TestStoreLoadedDataResources(t *testing.T) {
 
 func TestStoreLoadedDataFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:   nil,
 		Tenant:    "",
@@ -4841,12 +4845,12 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
@@ -4864,8 +4868,8 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 
 func TestStoreLoadedDataStats(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:              nil,
 		Tenant:               "",
@@ -4890,12 +4894,12 @@ func TestStoreLoadedDataStats(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
@@ -4913,8 +4917,8 @@ func TestStoreLoadedDataStats(t *testing.T) {
 
 func TestStoreLoadedDataThresholds(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:             nil,
 		Tenant:              "",
@@ -4939,12 +4943,12 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
@@ -4962,8 +4966,8 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 
 func TestStoreLoadedDataRoutes(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:         nil,
 		Tenant:          "",
@@ -4987,12 +4991,12 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
@@ -5010,8 +5014,8 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 
 func TestStoreLoadedDataChargers(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:           nil,
 		Tenant:            "",
@@ -5035,12 +5039,12 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
@@ -5058,8 +5062,8 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 
 func TestStoreLoadedDataDispatchers(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:              nil,
 		Tenant:               "",
@@ -5083,12 +5087,12 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{
@@ -5106,8 +5110,8 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 
 func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:           nil,
 		Tenant:            "",
@@ -5131,12 +5135,12 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 	rpcInternal <- cM
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	// ldr := &Loader{
 
 	// }
 	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := config.CgrConfig().LoaderCfg()
+	loaderCfg := cfg.LoaderCfg()
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
 	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
 	lds := map[string][]LoaderData{

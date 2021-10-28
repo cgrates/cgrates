@@ -97,7 +97,7 @@ var sTests = []func(t *testing.T){
 func TestFilterIndexerIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		dataManager = NewDataManager(NewInternalDB(nil, nil, true),
+		dataManager = NewDataManager(NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMySQL:
 		cfg := config.NewDefaultCGRConfig()
@@ -224,12 +224,6 @@ func testITGetFilterIndexes(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
-	}
-	//invalid tnt:context or index key
-	if _, err := dataManager.GetIndexes(context.Background(),
-		"unknown_key", "unkonwn_tenant", utils.EmptyString,
-		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
 	}
 }
 
@@ -1755,10 +1749,9 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 		t.Error(err)
 	}
 	//verify if old key was deleted
-	if _, err := dataManager.GetIndexes(context.Background(),
+	if _, err := dataManager.DataDB().GetIndexesDrv(context.Background(),
 		"tmp_"+utils.CacheResourceFilterIndexes,
-		utils.ConcatenatedKey("cgrates.org", transID), utils.EmptyString,
-		utils.NonTransactional, false, false); err != utils.ErrNotFound {
+		utils.ConcatenatedKey("cgrates.org", transID), utils.EmptyString, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//verify new key and check if data was moved

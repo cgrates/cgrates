@@ -76,13 +76,23 @@ type DataDbCfg struct {
 }
 
 // loadDataDBCfg loads the DataDB section of the configuration
-func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnDataDbCfg := new(DbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, DataDBJSON, jsnDataDbCfg); err != nil {
 		return
 	}
 	if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		return
+	}
+	// in case of internalDB we need to disable the cache
+	// so we enforce it here
+	if cfg.dataDbCfg.Type == utils.Internal {
+		// overwrite only DataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
+		for key := range utils.DataDBPartitions {
+			if _, has := cfg.cacheCfg.Partitions[key]; has {
+				cfg.cacheCfg.Partitions[key] = &CacheParamCfg{}
+			}
+		}
 	}
 	return
 }
@@ -176,9 +186,11 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		for kJsn, vJsn := range jsnDbCfg.Items {
 			val, has := dbcfg.Items[kJsn]
 			if val == nil || !has {
-				val = new(ItemOpt)
+				val = &ItemOpt{Limit: -1}
 			}
-			val.loadFromJSONCfg(vJsn) //To review if the function signature changes
+			if err = val.loadFromJSONCfg(vJsn); err != nil {
+				return
+			}
 			dbcfg.Items[kJsn] = val
 		}
 	}
@@ -282,6 +294,9 @@ func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 
 // ItemOpt the options for the stored items
 type ItemOpt struct {
+	Limit     int
+	TTL       time.Duration
+	StaticTTL bool
 	Remote    bool
 	Replicate bool
 	// used for ArgDispatcher in case we send this to a dispatcher engine
@@ -294,6 +309,8 @@ func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
+		utils.LimitCfg:     itm.Limit,
+		utils.StaticTTLCfg: itm.StaticTTL,
 	}
 	if itm.APIKey != utils.EmptyString {
 		initialMP[utils.APIKeyCfg] = itm.APIKey
@@ -301,12 +318,21 @@ func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	if itm.RouteID != utils.EmptyString {
 		initialMP[utils.RouteIDCfg] = itm.RouteID
 	}
+	if itm.TTL != 0 {
+		initialMP[utils.TTLCfg] = itm.TTL.String()
+	}
 	return
 }
 
-func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) {
+func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) (err error) {
 	if jsonItm == nil {
 		return
+	}
+	if jsonItm.Limit != nil {
+		itm.Limit = *jsonItm.Limit
+	}
+	if jsonItm.Static_ttl != nil {
+		itm.StaticTTL = *jsonItm.Static_ttl
 	}
 	if jsonItm.Remote != nil {
 		itm.Remote = *jsonItm.Remote
@@ -320,11 +346,18 @@ func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) {
 	if jsonItm.Api_key != nil {
 		itm.APIKey = *jsonItm.Api_key
 	}
+	if jsonItm.Ttl != nil {
+		itm.TTL, err = utils.ParseDurationWithNanosecs(*jsonItm.Ttl)
+	}
+	return
 }
 
 // Clone returns a deep copy of ItemOpt
 func (itm *ItemOpt) Clone() *ItemOpt {
 	return &ItemOpt{
+		Limit:     itm.Limit,
+		TTL:       itm.TTL,
+		StaticTTL: itm.StaticTTL,
 		Remote:    itm.Remote,
 		Replicate: itm.Replicate,
 		APIKey:    itm.APIKey,
@@ -338,12 +371,18 @@ func (itm *ItemOpt) Equals(itm2 *ItemOpt) bool {
 			itm.Remote == itm2.Remote &&
 			itm.Replicate == itm2.Replicate &&
 			itm.RouteID == itm2.RouteID &&
-			itm.APIKey == itm2.APIKey)
+			itm.APIKey == itm2.APIKey &&
+			itm.Limit == itm2.Limit &&
+			itm.TTL == itm2.TTL &&
+			itm.StaticTTL == itm2.StaticTTL)
 }
 
 type ItemOptJson struct {
-	Remote    *bool
-	Replicate *bool
+	Limit      *int
+	Ttl        *string
+	Static_ttl *bool
+	Remote     *bool
+	Replicate  *bool
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	Route_id *string
 	Api_key  *string
@@ -358,6 +397,15 @@ func diffItemOptJson(d *ItemOptJson, v1, v2 *ItemOpt) *ItemOptJson {
 	}
 	if v2.Replicate != v1.Replicate {
 		d.Replicate = utils.BoolPointer(v2.Replicate)
+	}
+	if v2.Limit != v1.Limit {
+		d.Limit = utils.IntPointer(v2.Limit)
+	}
+	if v2.StaticTTL != v1.StaticTTL {
+		d.Static_ttl = utils.BoolPointer(v2.StaticTTL)
+	}
+	if v2.TTL != v1.TTL {
+		d.Route_id = utils.StringPointer(v2.TTL.String())
 	}
 	if v2.RouteID != v1.RouteID {
 		d.Route_id = utils.StringPointer(v2.RouteID)

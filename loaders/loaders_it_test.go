@@ -86,7 +86,7 @@ cgrates.org,NewRes1
 	}
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -180,7 +180,7 @@ cgrates.org,NewRes1
 `))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -217,7 +217,7 @@ func testV1LoadUnableToDeleteFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -260,7 +260,7 @@ NOT_UINT
 `))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -330,7 +330,7 @@ cgrates.org,NewRes1
 `))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -401,6 +401,7 @@ cgrates.org,NewRes1
 		t.Error(err)
 	}
 
+	engine.Cache.Clear(nil)
 	//nothing to get from dataBase
 	if _, err := ldrs.ldrs["testV1RemoveResource"].dm.GetResourceProfile(context.TODO(), expRes.Tenant, expRes.ID,
 		true, true, utils.NonTransactional); err != utils.ErrNotFound {
@@ -428,7 +429,7 @@ cgrates.org,NewRes1
 `))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -466,7 +467,7 @@ func testV1RemoveUnableToDeleteFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -505,7 +506,7 @@ func testV1LoadAndRemoveProcessRemoveFolderError(t *testing.T) {
 	}
 	defer file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -563,7 +564,7 @@ func testV1RemoveProcessFolderError(t *testing.T) {
 		t.Error(err)
 	}
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{
@@ -628,7 +629,7 @@ func testLoaderServiceListenAndServe(t *testing.T) {
 
 func testLoaderServiceReload(t *testing.T) {
 	flPath := "/tmp/testLoaderServiceReload"
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
 	cfgLdr[0] = &config.LoaderSCfg{

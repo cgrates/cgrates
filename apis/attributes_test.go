@@ -33,7 +33,7 @@ import (
 func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	admS := &AdminSv1{
 		cfg: cfg,
@@ -97,13 +97,14 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 			}}, &reply); err != nil {
 		t.Error(err)
 	}
+	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	admS := &AdminSv1{
 		cfg: cfg,
@@ -178,13 +179,14 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
+	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	admS := &AdminSv1{
 		cfg: cfg,
@@ -209,13 +211,15 @@ func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
+	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	admS := &AdminSv1{
 		cfg: cfg,
@@ -284,6 +288,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	}
 	admS.dm = engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
+	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
@@ -333,6 +338,7 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
+	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
@@ -371,6 +377,7 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
@@ -396,6 +403,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
@@ -448,13 +456,15 @@ func TestAttributesGetAttributeProfileCountMockErr(t *testing.T) {
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestAttributesGetAttributeForEvent(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	attrS := engine.NewAttributeService(dm, fltrs, cfg)

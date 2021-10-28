@@ -40,11 +40,11 @@ import (
 )
 
 func TestMatchingActionProfilesForEvent(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	evNM := utils.MapStorage{
 		utils.MetaReq: map[string]interface{}{
@@ -56,7 +56,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
-		ID:        "test_id1",
+		ID:        "AP1",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Actions: []*engine.APAction{
 			{
@@ -109,7 +109,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
-	actPrfIDs = []string{"test_id1"}
+	actPrfIDs = []string{"AP1"}
 	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
 		evNM, actPrfIDs, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
@@ -128,7 +128,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
-	acts.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	acts.dm = engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	actPrf.FilterIDs = []string{"invalid_filters"}
 	//Set in database and invalid filter, so it won t pass
 	if err := acts.dm.SetActionProfile(context.Background(), actPrf, false); err != nil {
@@ -147,11 +147,12 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 }
 
 func TestScheduledActions(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -168,7 +169,7 @@ func TestScheduledActions(t *testing.T) {
 
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
-		ID:        "test_id1",
+		ID:        "AP2",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Actions: []*engine.APAction{
 			{
@@ -210,11 +211,12 @@ func TestScheduledActions(t *testing.T) {
 }
 
 func TestScheduleAction(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	cgrEv := []*utils.CGREvent{
 		{
@@ -229,7 +231,7 @@ func TestScheduleAction(t *testing.T) {
 
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
-		ID:        "test_id1",
+		ID:        "AP3",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  "* * * * *",
 		Actions: []*engine.APAction{
@@ -278,10 +280,10 @@ func TestScheduleAction(t *testing.T) {
 
 func TestAsapExecuteActions(t *testing.T) {
 	newData := &dataDBMockError{}
-	dm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(newData, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	cgrEv := []*utils.CGREvent{
 		{
@@ -306,8 +308,8 @@ func TestAsapExecuteActions(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
-	data := engine.NewInternalDB(nil, nil, true)
-	acts.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	acts.dm = engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	expSchedActs = newScheduledActs(context.Background(), cgrEv[0].Tenant, "another_id", utils.MetaNone, utils.EmptyString,
 		utils.EmptyString, evNM, nil)
 	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNotFound {
@@ -317,11 +319,11 @@ func TestAsapExecuteActions(t *testing.T) {
 
 func TestActionSListenAndServe(t *testing.T) {
 	newData := &dataDBMockError{}
-	dm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ActionSCfg().Tenants = &[]string{"cgrates1.org", "cgrates.org2"}
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(newData, cfg.CacheCfg(), nil)
+	cfg.ActionSCfg().Tenants = &[]string{"cgrates1.org", "cgrates.org2"}
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	stopChan := make(chan struct{}, 1)
 	cfgRld := make(chan struct{}, 1)
@@ -347,16 +349,16 @@ func TestActionSListenAndServe(t *testing.T) {
 }
 
 func TestV1ScheduleActions(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "test_id1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
@@ -366,7 +368,7 @@ func TestV1ScheduleActions(t *testing.T) {
 
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
-		ID:        "test_id1",
+		ID:        "AP4",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  utils.MetaASAP,
 		Actions: []*engine.APAction{
@@ -403,16 +405,16 @@ func TestV1ScheduleActions(t *testing.T) {
 }
 
 func TestV1ExecuteActions(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "test_id1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
@@ -422,7 +424,7 @@ func TestV1ExecuteActions(t *testing.T) {
 
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
-		ID:        "test_id1",
+		ID:        "AP5",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  utils.MetaASAP,
 		Actions: []*engine.APAction{
@@ -453,8 +455,8 @@ func TestV1ExecuteActions(t *testing.T) {
 	}
 
 	newData := &dataDBMockError{}
-	newDm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
-	newActs := NewActionS(defaultCfg, filters, newDm, nil)
+	newDm := engine.NewDataManager(newData, cfg.CacheCfg(), nil)
+	newActs := NewActionS(cfg, filters, newDm, nil)
 	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{}
 	if err := newActs.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
@@ -466,11 +468,12 @@ func TestV1ExecuteActions(t *testing.T) {
 }
 
 func TestActionShutDown(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg := config.NewDefaultCGRConfig()
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 	acts.crn = &cron.Cron{}
 
 	var err error
@@ -498,7 +501,7 @@ type dataDBMockError struct {
 func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string) (*engine.ActionProfile, error) {
 	return &engine.ActionProfile{
 		Tenant:    "cgrates.org",
-		ID:        "test_id1",
+		ID:        "AP6",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Actions: []*engine.APAction{
 			{
@@ -605,8 +608,8 @@ func TestCDRLogActionExecute(t *testing.T) {
 	internalCDRsChann <- sMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
@@ -710,8 +713,8 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 		tpl.ComputePath()
 	}
 
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
@@ -1041,7 +1044,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 
 func TestACScheduledActions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	actPrf := &engine.ActionProfile{
@@ -1137,28 +1140,27 @@ func TestACScheduledActions(t *testing.T) {
 }
 
 func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
 		{
 			Value: true,
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "test_id1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsProfileIDs:    []string{"test_id1"},
+			utils.OptsActionsProfileIDs:    []string{"AP7"},
 			utils.MetaProfileIgnoreFilters: true,
 			"testFieldIgnore":              "testValue",
 		},
@@ -1166,7 +1168,7 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
-		ID:        "test_id1",
+		ID:        "AP7",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10", "*prefix:~*opts.testFieldIgnore:testValue1"},
 		Schedule:  utils.MetaASAP,
 		Actions: []*engine.APAction{
@@ -1194,27 +1196,26 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 }
 
 func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
 		{
 			Value: true,
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filters := engine.NewFilterS(defaultCfg, nil, dm)
-	acts := NewActionS(defaultCfg, filters, dm, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, filters, dm, nil)
 
 	var reply string
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "test_id1",
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			utils.Destination:  1002,
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsActionsProfileIDs:    []string{"test_id1"},
+			utils.OptsActionsProfileIDs:    []string{"AP8"},
 			utils.MetaProfileIgnoreFilters: true,
 			"testFieldIgnore":              "testValue",
 		},
@@ -1222,7 +1223,7 @@ func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
-		ID:        "test_id1",
+		ID:        "AP8",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10", "*prefix:~*opts.testFieldIgnore:testValue1"},
 		Schedule:  utils.MetaASAP,
 		Actions: []*engine.APAction{

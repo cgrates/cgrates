@@ -126,7 +126,7 @@ func testDspITConnect(t *testing.T) {
 		dspCfgIn.DataDbCfg().Host, dspCfgIn.DataDbCfg().Port,
 		dspCfgIn.DataDbCfg().Name, dspCfgIn.DataDbCfg().User,
 		dspCfgIn.DataDbCfg().Password, dspCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), dspCfgIn.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), dspCfgIn.DataDbCfg().Opts, dspCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func testDspITConnect(t *testing.T) {
 		dspCfgOut.DataDbCfg().Host, dspCfgOut.DataDbCfg().Port,
 		dspCfgOut.DataDbCfg().Name, dspCfgOut.DataDbCfg().User,
 		dspCfgOut.DataDbCfg().Password, dspCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), dspCfgOut.DataDbCfg().Opts)
+		config.CgrConfig().CacheCfg(), dspCfgOut.DataDbCfg().Opts, dspCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -33,7 +33,7 @@ import (
 
 func TestACExecuteCDRLog(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltr := engine.NewFilterS(cfg, nil, nil)
 
@@ -79,7 +79,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 
 func TestACExecuteScheduledAction(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	acts := []actioner{

@@ -61,7 +61,7 @@ func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error)
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 		db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
 		db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
-		db.cfg.StorDbCfg().Opts)
+		db.cfg.StorDbCfg().Opts, db.cfg.StorDbCfg().Items)
 	if err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure storDB: %s exiting!", err))
 		return
@@ -85,7 +85,7 @@ func (db *StorDBService) Reload(*context.Context, context.CancelFunc) (err error
 			db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 			db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
 			db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
-			db.cfg.StorDbCfg().Opts); err != nil {
+			db.cfg.StorDbCfg().Opts, db.cfg.StorDbCfg().Items); err != nil {
 			return
 		}
 		db.db.Close()

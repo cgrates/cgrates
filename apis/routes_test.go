@@ -30,9 +30,10 @@ import (
 )
 
 func TestRoutesSetGetRemRouteProfile(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -95,6 +96,7 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 	}, &reply); err != nil {
 		t.Error(err)
 	}
+	engine.Cache.Clear(nil)
 
 	if err := adms.GetRouteProfile(context.Background(), arg, &result); err == nil ||
 		err != utils.ErrNotFound {
@@ -105,9 +107,10 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 }
 
 func TestRoutesGetRouteProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -137,9 +140,10 @@ func TestRoutesGetRouteProfileCheckErrors(t *testing.T) {
 }
 
 func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -212,9 +216,10 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 }
 
 func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -300,6 +305,7 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 			return nil
 		},
 	}
+	engine.Cache.Clear(nil)
 
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
@@ -316,6 +322,7 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 }
 
 func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -354,6 +361,7 @@ func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
 }
 
 func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -380,6 +388,7 @@ func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
 }
 
 func TestRoutesGetRouteProfileCountErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -414,6 +423,7 @@ func TestRoutesGetRouteProfileCountErrMock(t *testing.T) {
 }
 
 func TestRoutesGetRouteProfileCountErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -438,8 +448,9 @@ func TestRoutesGetRouteProfileCountErrKeys(t *testing.T) {
 }
 
 func TestRoutesNewRouteSv1(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	rS := engine.NewRouteService(dm, nil, cfg, nil)
 

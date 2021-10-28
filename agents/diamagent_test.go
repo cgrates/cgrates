@@ -55,7 +55,7 @@ func (s *testMockSessionConn) Handlers() (b map[string]interface{}) {
 }
 
 func TestProcessRequest(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
 

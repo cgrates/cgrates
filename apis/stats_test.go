@@ -33,9 +33,10 @@ import (
 )
 
 func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -92,6 +93,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 	if err := adms.RemoveStatQueueProfile(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
+	engine.Cache.Clear(nil)
 
 	if err := adms.GetStatQueueProfile(context.Background(), arg, &result); err == nil ||
 		err != utils.ErrNotFound {
@@ -102,9 +104,10 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -135,9 +138,10 @@ func TestStatsGetStatQueueProfileCheckErrors(t *testing.T) {
 }
 
 func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -196,6 +200,7 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 		},
 	}
 
+	engine.Cache.Clear(nil)
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
@@ -208,9 +213,10 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 }
 
 func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -316,6 +322,7 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -354,6 +361,7 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -380,6 +388,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfileCountErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -414,6 +423,7 @@ func TestStatsGetStatQueueProfileCountErrMock(t *testing.T) {
 }
 
 func TestStatsGetStatQueueProfileCountErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -438,8 +448,9 @@ func TestStatsGetStatQueueProfileCountErrKeys(t *testing.T) {
 }
 
 func TestStatsNewStatsv1(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	sS := engine.NewStatService(dm, cfg, nil, nil)
 
@@ -464,13 +475,14 @@ func TestStatsSv1Ping(t *testing.T) {
 }
 
 func TestStatsAPIs(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.FilterSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
 	cfg.FilterSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	cfg.FilterSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 
 	expThEv := &utils.CGREvent{
 		Tenant: "cgrates.org",

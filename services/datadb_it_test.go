@@ -92,60 +92,37 @@ func TestDataDBReload(t *testing.T) {
 		RmtConns: []string{},
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
-			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResourceProfile: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueues: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResources: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueueProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholds: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholdProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaFilters: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRouteProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAttributeProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherHosts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaChargerProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
+			utils.MetaAccounts:           {Limit: -1},
+			utils.MetaActions:            {Limit: -1},
+			utils.MetaResourceProfile:    {Limit: -1},
+			utils.MetaStatQueues:         {Limit: -1},
+			utils.MetaResources:          {Limit: -1},
+			utils.MetaStatQueueProfiles:  {Limit: -1},
+			utils.MetaThresholds:         {Limit: -1},
+			utils.MetaThresholdProfiles:  {Limit: -1},
+			utils.MetaFilters:            {Limit: -1},
+			utils.MetaRouteProfiles:      {Limit: -1},
+			utils.MetaAttributeProfiles:  {Limit: -1},
+			utils.MetaDispatcherHosts:    {Limit: -1},
+			utils.MetaChargerProfiles:    {Limit: -1},
+			utils.MetaDispatcherProfiles: {Limit: -1},
+			utils.MetaLoadIDs:            {Limit: -1},
+			utils.MetaRateProfiles:       {Limit: -1},
+			utils.MetaActionProfiles:     {Limit: -1},
+
+			utils.CacheResourceFilterIndexes:       {Limit: -1},
+			utils.CacheStatFilterIndexes:           {Limit: -1},
+			utils.CacheThresholdFilterIndexes:      {Limit: -1},
+			utils.CacheRouteFilterIndexes:          {Limit: -1},
+			utils.CacheAttributeFilterIndexes:      {Limit: -1},
+			utils.CacheChargerFilterIndexes:        {Limit: -1},
+			utils.CacheDispatcherFilterIndexes:     {Limit: -1},
+			utils.CacheRateProfilesFilterIndexes:   {Limit: -1},
+			utils.CacheActionProfilesFilterIndexes: {Limit: -1},
+			utils.CacheAccountsFilterIndexes:       {Limit: -1},
+			utils.CacheVersions:                    {Limit: -1},
+			utils.CacheReverseFilterIndexes:        {Limit: -1},
+			utils.CacheRateFilterIndexes:           {Limit: -1},
 		},
 	}
 	if !reflect.DeepEqual(oldcfg, db.oldDBCfg) {
@@ -176,7 +153,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,63 +202,24 @@ func TestDataDBReloadBadType(t *testing.T) {
 		RmtConns: []string{},
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
-			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaCronExp: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResourceProfile: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueues: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResources: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueueProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholds: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholdProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaFilters: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRouteProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAttributeProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherHosts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaChargerProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
+			utils.MetaAccounts:           {},
+			utils.MetaActions:            {},
+			utils.MetaCronExp:            {},
+			utils.MetaResourceProfile:    {},
+			utils.MetaStatQueues:         {},
+			utils.MetaResources:          {},
+			utils.MetaStatQueueProfiles:  {},
+			utils.MetaThresholds:         {},
+			utils.MetaThresholdProfiles:  {},
+			utils.MetaFilters:            {},
+			utils.MetaRouteProfiles:      {},
+			utils.MetaAttributeProfiles:  {},
+			utils.MetaDispatcherHosts:    {},
+			utils.MetaChargerProfiles:    {},
+			utils.MetaDispatcherProfiles: {},
+			utils.MetaLoadIDs:            {},
+			utils.MetaRateProfiles:       {},
+			utils.MetaActionProfiles:     {},
 		},
 	}
 	cfg.DataDbCfg().Type = "dbtype"
@@ -323,63 +261,24 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 		RmtConns: []string{},
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
-			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaCronExp: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResourceProfile: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueues: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResources: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueueProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholds: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholdProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaFilters: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRouteProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAttributeProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherHosts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaChargerProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
+			utils.MetaAccounts:           {},
+			utils.MetaActions:            {},
+			utils.MetaCronExp:            {},
+			utils.MetaResourceProfile:    {},
+			utils.MetaStatQueues:         {},
+			utils.MetaResources:          {},
+			utils.MetaStatQueueProfiles:  {},
+			utils.MetaThresholds:         {},
+			utils.MetaThresholdProfiles:  {},
+			utils.MetaFilters:            {},
+			utils.MetaRouteProfiles:      {},
+			utils.MetaAttributeProfiles:  {},
+			utils.MetaDispatcherHosts:    {},
+			utils.MetaChargerProfiles:    {},
+			utils.MetaDispatcherProfiles: {},
+			utils.MetaLoadIDs:            {},
+			utils.MetaRateProfiles:       {},
+			utils.MetaActionProfiles:     {},
 		},
 	}
 
@@ -401,7 +300,7 @@ func TestDataDBStartVersion(t *testing.T) {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -454,7 +353,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -503,63 +402,24 @@ func TestDataDBReloadCastError(t *testing.T) {
 		RmtConns: []string{},
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
-			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaCronExp: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResourceProfile: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueues: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResources: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueueProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholds: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholdProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaFilters: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRouteProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAttributeProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherHosts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaChargerProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
+			utils.MetaAccounts:           {},
+			utils.MetaActions:            {},
+			utils.MetaCronExp:            {},
+			utils.MetaResourceProfile:    {},
+			utils.MetaStatQueues:         {},
+			utils.MetaResources:          {},
+			utils.MetaStatQueueProfiles:  {},
+			utils.MetaThresholds:         {},
+			utils.MetaThresholdProfiles:  {},
+			utils.MetaFilters:            {},
+			utils.MetaRouteProfiles:      {},
+			utils.MetaAttributeProfiles:  {},
+			utils.MetaDispatcherHosts:    {},
+			utils.MetaChargerProfiles:    {},
+			utils.MetaDispatcherProfiles: {},
+			utils.MetaLoadIDs:            {},
+			utils.MetaRateProfiles:       {},
+			utils.MetaActionProfiles:     {},
 		},
 	}
 
@@ -572,21 +432,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 
 	cancel()
 	time.Sleep(10 * time.Millisecond)
-}
-
-func TestDataDBStartSessionSCfgErr(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
-	cfg.DataDbCfg().Type = "badtype"
-	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
-	ctx, cancel := context.WithCancel(context.TODO())
-	err := db.Start(ctx, cancel)
-	if err != nil {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
-	}
 }
 
 func TestDataDBStartAttributeSCfgErr(t *testing.T) {
@@ -623,66 +468,27 @@ func TestDataDBReloadError(t *testing.T) {
 		RmtConns: []string{},
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
-			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaCronExp: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResourceProfile: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueues: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaResources: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaStatQueueProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholds: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaThresholdProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaFilters: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRouteProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAttributeProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherHosts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaChargerProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDispatcherProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaLoadIDs: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
+			utils.MetaAccounts:           {},
+			utils.MetaActions:            {},
+			utils.MetaCronExp:            {},
+			utils.MetaResourceProfile:    {},
+			utils.MetaStatQueues:         {},
+			utils.MetaResources:          {},
+			utils.MetaStatQueueProfiles:  {},
+			utils.MetaThresholds:         {},
+			utils.MetaThresholdProfiles:  {},
+			utils.MetaFilters:            {},
+			utils.MetaRouteProfiles:      {},
+			utils.MetaAttributeProfiles:  {},
+			utils.MetaDispatcherHosts:    {},
+			utils.MetaChargerProfiles:    {},
+			utils.MetaDispatcherProfiles: {},
+			utils.MetaLoadIDs:            {},
+			utils.MetaRateProfiles:       {},
+			utils.MetaActionProfiles:     {},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	db.dm = engine.NewDataManager(data, nil, nil)
 	ctx, cancel := context.WithCancel(context.TODO())
 	err := db.Reload(ctx, cancel)

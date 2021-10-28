@@ -241,7 +241,7 @@ func InitConfigFromPath(ctx *context.Context, path, nodeID string, lgLevel int) 
 			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
 			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-			cfg.ConfigDBCfg().Opts); err != nil { // Cannot configure getter database, show stopper
+			cfg.ConfigDBCfg().Opts, nil); err != nil { // Cannot configure getter database, show stopper
 			err = fmt.Errorf("could not configure configDB: <%s>", err)
 			return
 		}

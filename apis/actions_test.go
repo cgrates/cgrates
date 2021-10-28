@@ -36,9 +36,10 @@ import (
 )
 
 func TestActionsSetGetRemActionProfile(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -64,13 +65,13 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
 
 	if err := adms.GetActionProfile(context.Background(), arg, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, *actPrf.ActionProfile) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+		t.Errorf("expected: <%+v>, received: <%+v>",
 			utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(result))
 	}
 
@@ -81,7 +82,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 		&actPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actPrfIDs, expactPrfIDs) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expactPrfIDs, actPrfIDs)
+		t.Errorf("expected: <%+v>, received: <%+v>", expactPrfIDs, actPrfIDs)
 	}
 
 	var rplyCount int
@@ -92,25 +93,27 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 		&rplyCount); err != nil {
 		t.Error(err)
 	} else if rplyCount != len(actPrfIDs) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(actPrfIDs), rplyCount)
+		t.Errorf("expected: <%+v>, received: <%+v>", len(actPrfIDs), rplyCount)
 	}
 
 	if err := adms.RemoveActionProfile(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	}
-
+	engine.Cache.Clear(nil)
+	result = engine.ActionProfile{}
 	if err := adms.GetActionProfile(context.Background(), arg, &result); err == nil ||
 		err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -123,7 +126,7 @@ func TestActionsGetActionProfileCheckErrors(t *testing.T) {
 		TenantID: &utils.TenantID{},
 	}, &rcv); err == nil ||
 		err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
 	adms.dm = nil
@@ -134,16 +137,17 @@ func TestActionsGetActionProfileCheckErrors(t *testing.T) {
 			ID: "TestActionsGetActionProfileCheckErrors",
 		},
 	}, &rcv); err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestActionsSetActionProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -159,7 +163,7 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 
 	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err == nil ||
 		err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
 	actPrf.ID = "TestActionsSetActionProfileCheckErrors"
@@ -169,7 +173,7 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 
 	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err == nil ||
 		err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
 	actPrf.FilterIDs = []string{}
@@ -215,9 +219,10 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 }
 
 func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -249,7 +254,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 			ID: "TestActionsRemoveActionProfileCheckErrors",
 		},
 	}, &reply); err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 	cancel()
 
@@ -261,7 +266,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 			ID: "TestActionsRemoveActionProfileCheckErrors",
 		},
 	}, &rcv); err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 
 	experr = "MANDATORY_IE_MISSING: [ID]"
@@ -279,7 +284,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 		TenantID: &utils.TenantID{
 			ID: "TestActionsRemoveActionProfileCheckErrors",
 		}}, &reply); err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
 	dbMock := &engine.DataDBMock{
@@ -304,6 +309,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 		},
 	}
 
+	engine.Cache.Clear(nil)
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
@@ -312,13 +318,14 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 			TenantID: &utils.TenantID{
 				ID: "TestActionsRemoveActionProfileCheckErrors",
 			}}, &reply); err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -350,13 +357,14 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 		&utils.PaginatorWithTenant{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -376,13 +384,14 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 		&utils.PaginatorWithTenant{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
 func TestActionsGetActionProfileCountErrMock(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -414,11 +423,12 @@ func TestActionsGetActionProfileCountErrMock(t *testing.T) {
 				Tenant: "cgrates.org",
 			},
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotImplemented, err)
 	}
 }
 
 func TestActionsGetActionProfileCountErrKeys(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -440,13 +450,14 @@ func TestActionsGetActionProfileCountErrKeys(t *testing.T) {
 				Tenant: "cgrates.org",
 			},
 		}, &reply); err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
 func TestActionsNewActionSv1(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	aS := actions.NewActionS(cfg, nil, dm, nil)
 
@@ -456,7 +467,7 @@ func TestActionsNewActionSv1(t *testing.T) {
 	rcv := NewActionSv1(aS)
 
 	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+		t.Errorf("expected: <%+v>, received: <%+v>", exp, rcv)
 	}
 }
 
@@ -473,7 +484,7 @@ func TestActionsSv1Ping(t *testing.T) {
 func TestActionsAPIs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -527,10 +538,11 @@ func TestActionsAPIs(t *testing.T) {
 }
 
 func TestActionsExecuteActionsResetTH(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -622,10 +634,11 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 }
 
 func TestActionsExecuteActionsResetSQ(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -718,6 +731,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 }
 
 func TestActionsExecuteActionsLog(t *testing.T) {
+	engine.Cache.Clear(nil)
 	utils.Logger.SetLogLevel(6)
 	utils.Logger.SetSyslog(nil)
 
@@ -729,7 +743,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -793,10 +807,11 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 }
 
 func TestActionsExecuteActionsLogCDRs(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs)}
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -884,10 +899,11 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 }
 
 func TestActionsExecuteActionsSetBalance(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -977,10 +993,11 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 }
 
 func TestActionsExecuteActionsRemBalance(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -1069,10 +1086,11 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 }
 
 func TestActionsExecuteActionsAddBalance(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 

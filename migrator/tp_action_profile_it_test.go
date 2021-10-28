@@ -73,7 +73,7 @@ func testTpActPrfConnect(t *testing.T) {
 		tpActPrfCfgIn.StorDbCfg().Name, tpActPrfCfgIn.StorDbCfg().User,
 		tpActPrfCfgIn.StorDbCfg().Password, tpActPrfCfgIn.GeneralCfg().DBDataEncoding,
 		tpActPrfCfgIn.StorDbCfg().StringIndexedFields, tpActPrfCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpActPrfCfgIn.StorDbCfg().Opts)
+		tpActPrfCfgIn.StorDbCfg().Opts, tpActPrfCfgIn.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -82,7 +82,7 @@ func testTpActPrfConnect(t *testing.T) {
 		tpActPrfCfgOut.StorDbCfg().Name, tpActPrfCfgOut.StorDbCfg().User,
 		tpActPrfCfgOut.StorDbCfg().Password, tpActPrfCfgOut.GeneralCfg().DBDataEncoding,
 		tpActPrfCfgOut.StorDbCfg().StringIndexedFields, tpActPrfCfgOut.StorDbCfg().PrefixIndexedFields,
-		tpActPrfCfgOut.StorDbCfg().Opts)
+		tpActPrfCfgOut.StorDbCfg().Opts, tpActPrfCfgOut.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
