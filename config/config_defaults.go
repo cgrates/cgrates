@@ -560,12 +560,12 @@ const CGRATES_CFG_JSON = `
 
 				//RPC
 				// "rpcCodec": "",  // for compression, encoding and decoding <internalRPC | BIRPC | JSON/HTTP/GOB>
-				// "serviceMethod": "" // the method that should be called trough RPC
+				// "serviceMethod": "", // the method that should be called trough RPC
                 // "keyPath": "" , // path to server key 
 				// "certPath": "", // path to client certificate
 				// "caPath": "",  // path to CA certificate
 				// "tls": false, //
-				// "rpcConnTimeout" : 1s, // connection unsuccesfull on timeout
+				// "rpcConnTimeout" : "1s", // connection unsuccesfull on timeout
 				// "rpcReplyTimeout":"2s", // connection down at replies if taking longer that this value
 			},												// extra options for exporter
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
