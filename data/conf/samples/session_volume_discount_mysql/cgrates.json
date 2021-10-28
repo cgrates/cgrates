@@ -58,14 +58,14 @@
                 },
                 {
                     "Tenant": "*any",
-                    "FilterIDs": ["*string:~*req.RunID:customers"],
+                    "FilterIDs": ["*string:~*opts.*runID:customers"],
                     "Value": true,
                 },
             ],	
             "*accountS": [
                 {
                     "Tenant": "*any",
-                    "FilterIDs": ["*string:~*req.Account:1001", "*string:~*req.RunID:suppliers"],
+                    "FilterIDs": ["*string:~*req.Account:1001", "*string:~*opts.*runID:suppliers"],
                     "Value": true,
                 },
             ],		
@@ -95,7 +95,7 @@
         
     "rates": {
         "enabled": true,
-        "string_indexed_fields": ["*req.RunID"],
+        "string_indexed_fields": ["*opts.*runID"],
         "rate_string_indexed_fields": [],
         "rate_prefix_indexed_fields": ["*req.Destination"],
         "opts":{
