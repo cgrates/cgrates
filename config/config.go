@@ -367,7 +367,7 @@ var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.MetaNone, utils.MetaFileFWV,
 	utils.MetaHTTPPost, utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap,
 	utils.MetaKafkajsonMap, utils.MetaS3jsonMap, utils.MetaElastic, utils.MetaVirt, utils.MetaSQL, utils.MetaNatsjsonMap,
-	utils.MetaLog})
+	utils.MetaLog, utils.MetaRpc})
 
 func (cfg *CGRConfig) AddSection(sec Section) {
 	cfg.sections = append(cfg.sections, sec)
