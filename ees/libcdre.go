@@ -123,7 +123,7 @@ func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
 type ExportEvents struct {
 	lk             sync.RWMutex
 	Path           string
-	Opts           map[string]interface{}
+	Opts           *config.EventExporterOpts
 	Format         string
 	Events         []interface{}
 	failedPostsDir string

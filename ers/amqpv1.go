@@ -203,8 +203,8 @@ func (rdr *AMQPv1ER) close() (err error) {
 }
 
 func (rdr *AMQPv1ER) createPoster() {
-	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if len(processedOpt) == 0 &&
+	processedOpt, populated := getProcessOptions(rdr.Config().Opts)
+	if !populated &&
 		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
