@@ -304,10 +304,10 @@ func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 	}
 	lData := make(LoaderData)
 
-	dftCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filterS := engine.NewFilterS(dftCfg, nil, dm)
+	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	for fName, record := range loadRunStr {
 		expected := "Ignoring record: [\"cgrates.org\" \"TEST_1\"] with error : strconv.Atoi: parsing \"Account\": invalid syntax"
@@ -338,10 +338,10 @@ func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
 	}
 	lData := make(LoaderData)
 
-	dftCfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filterS := engine.NewFilterS(dftCfg, nil, dm)
+	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	for fName, record := range loadRunStr {
 		if err := lData.UpdateFromCSV(context.Background(), fName, record, attrSFlds,

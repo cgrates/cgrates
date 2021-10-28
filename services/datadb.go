@@ -64,7 +64,7 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
 		db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
 		db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
-		db.cfg.DataDbCfg().Opts)
+		db.cfg.DataDbCfg().Opts, db.cfg.DataDbCfg().Items)
 	if err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
@@ -88,7 +88,7 @@ func (db *DataDBService) Reload(*context.Context, context.CancelFunc) (err error
 			db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
 			db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
 			db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
-			db.cfg.DataDbCfg().Opts)
+			db.cfg.DataDbCfg().Opts, db.cfg.DataDbCfg().Items)
 		if err != nil {
 			return
 		}
@@ -144,6 +144,15 @@ func (db *DataDBService) needsConnectionReload() bool {
 		db.oldDBCfg.User != db.cfg.DataDbCfg().User ||
 		db.oldDBCfg.Password != db.cfg.DataDbCfg().Password {
 		return true
+	}
+	if db.cfg.DataDbCfg().Type == utils.Internal { // in case of internal recreate the db using the new config
+		for key, itm := range db.oldDBCfg.Items {
+			if db.cfg.DataDbCfg().Items[key].Limit != itm.Limit &&
+				db.cfg.DataDbCfg().Items[key].StaticTTL != itm.StaticTTL &&
+				db.cfg.DataDbCfg().Items[key].TTL != itm.TTL {
+				return true
+			}
+		}
 	}
 	return db.oldDBCfg.Type == utils.Redis &&
 		(db.oldDBCfg.Opts.RedisSentinel != db.cfg.DataDbCfg().Opts.RedisSentinel ||

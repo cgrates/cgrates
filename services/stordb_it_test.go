@@ -155,7 +155,7 @@ func TestStorDBReloadVersion1(t *testing.T) {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func TestStorDBReloadVersion2(t *testing.T) {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -286,7 +286,7 @@ func TestStorDBReloadVersion3(t *testing.T) {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

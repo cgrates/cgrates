@@ -86,10 +86,7 @@ func CheckVersions(storage Storage) error {
 // relevant only for mongoDB
 func isDataDB(storage Storage) bool {
 	conv, ok := storage.(*MongoStorage)
-	if !ok {
-		return false
-	}
-	return conv.IsDataDB()
+	return ok && conv.IsDataDB()
 }
 
 func setDBVersions(storage Storage, overwrite bool) (err error) {

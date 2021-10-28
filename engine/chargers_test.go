@@ -62,11 +62,12 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			Weight:       20,
 		},
 	}
-	data := NewInternalDB(nil, nil, true)
-	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmCharger = NewDataManager(data, cfg.CacheCfg(), nil)
 
 	fltrCP1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_1",
 		Rules: []*FilterRule{
 			{
@@ -86,7 +87,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCP1, true)
 	fltrCP2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_2",
 		Rules: []*FilterRule{
 			{
@@ -98,7 +99,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCP2, true)
 	fltrCPPrefix := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_3",
 		Rules: []*FilterRule{
 			{
@@ -110,7 +111,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCPPrefix, true)
 	fltrCP4 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_4",
 		Rules: []*FilterRule{
 			{
@@ -138,6 +139,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 }
 
 func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	var chargerSrv *ChargerService
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
@@ -168,7 +170,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	}
 	chargerEvents := []*utils.CGREvent{
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "ChargerProfile1",
@@ -181,7 +183,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			},
 		},
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "ChargerProfile2",
@@ -189,7 +191,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			},
 		},
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "DistinctMatch",
@@ -198,14 +200,13 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		},
 	}
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
-	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmCharger = NewDataManager(data, cfg.CacheCfg(), nil)
 	chargerSrv = NewChargerService(dmCharger,
-		&FilterS{dm: dmCharger, cfg: defaultCfg}, defaultCfg, nil)
+		&FilterS{dm: dmCharger, cfg: cfg}, cfg, nil)
 
 	fltrCP1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_1",
 		Rules: []*FilterRule{
 			{
@@ -225,7 +226,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCP1, true)
 	fltrCP2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_2",
 		Rules: []*FilterRule{
 			{
@@ -237,7 +238,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCP2, true)
 	fltrCPPrefix := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_3",
 		Rules: []*FilterRule{
 			{
@@ -249,7 +250,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCPPrefix, true)
 	fltrCP4 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_4",
 		Rules: []*FilterRule{
 			{
@@ -296,6 +297,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 }
 
 func TestChargerProcessEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	var chargerSrv *ChargerService
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
@@ -326,7 +328,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	}
 	chargerEvents := []*utils.CGREvent{
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "ChargerProfile1",
@@ -339,7 +341,7 @@ func TestChargerProcessEvent(t *testing.T) {
 			},
 		},
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "ChargerProfile2",
@@ -347,7 +349,7 @@ func TestChargerProcessEvent(t *testing.T) {
 			},
 		},
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			Tenant: cfg.GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "DistinctMatch",
@@ -356,14 +358,13 @@ func TestChargerProcessEvent(t *testing.T) {
 		},
 	}
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
-	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmCharger = NewDataManager(data, cfg.CacheCfg(), nil)
 	chargerSrv = NewChargerService(dmCharger,
-		&FilterS{dm: dmCharger, cfg: defaultCfg}, defaultCfg, nil)
+		&FilterS{dm: dmCharger, cfg: cfg}, cfg, nil)
 
 	fltrCP1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_1",
 		Rules: []*FilterRule{
 			{
@@ -383,7 +384,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCP1, true)
 	fltrCP2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_2",
 		Rules: []*FilterRule{
 			{
@@ -395,7 +396,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCP2, true)
 	fltrCPPrefix := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_3",
 		Rules: []*FilterRule{
 			{
@@ -407,7 +408,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCPPrefix, true)
 	fltrCP4 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_4",
 		Rules: []*FilterRule{
 			{
@@ -468,27 +469,27 @@ func TestChargerProcessEvent(t *testing.T) {
 }
 
 func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().StringIndexedFields = &[]string{
 		"string",
 	}
-	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
-	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().NestedFields = false
+	cfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	cfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().NestedFields = false
 
-	dataDB := NewInternalDB(nil, nil, true)
-	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmCharger := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
 		filterS: &FilterS{
 			dm:  dmCharger,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]interface{}{
 			"Charger":        "ChargerProfile1",
@@ -514,27 +515,27 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 }
 
 func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().StringIndexedFields = &[]string{
 		"string",
 	}
-	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
-	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().NestedFields = false
+	cfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	cfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().NestedFields = false
 
-	dataDB := NewInternalDB(nil, nil, true)
-	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmCharger := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
 		filterS: &FilterS{
 			dm:  dmCharger,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]interface{}{
 			"Charger":        "ChargerProfile1",
@@ -560,31 +561,31 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 }
 
 func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ChargerSCfg().StringIndexedFields = &[]string{
 		"string",
 	}
-	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
-	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
-	defaultCfg.ChargerSCfg().IndexedSelects = false
-	defaultCfg.ChargerSCfg().NestedFields = false
+	cfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	cfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	cfg.ChargerSCfg().IndexedSelects = false
+	cfg.ChargerSCfg().NestedFields = false
 
 	dbm := &DataDBMock{
 		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}
-	dmCharger := NewDataManager(dbm, defaultCfg.CacheCfg(), nil)
+	dmCharger := NewDataManager(dbm, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
 		filterS: &FilterS{
 			dm:  dmCharger,
-			cfg: defaultCfg,
+			cfg: cfg,
 		},
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Tenant: cfg.GeneralCfg().DefaultTenant,
 		ID:     "cgrEvID",
 		Event: map[string]interface{}{
 			"Charger":        "ChargerProfile1",
@@ -611,9 +612,9 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 }
 
 func TestChargersprocessEvent(t *testing.T) {
-	defaultCfg := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	cS := &ChargerService{
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",

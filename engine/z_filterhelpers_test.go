@@ -36,7 +36,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
 	suffixFilterID := "suffixFilterID"
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 	dmMatch = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
 	ctx := utils.MetaRating
@@ -142,7 +142,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	var stringFilter, prefixFilter, defaultFilter []*FilterRule
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 	dmMatch = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	ctx := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~*req.CallCost.Account", []string{"1001"})

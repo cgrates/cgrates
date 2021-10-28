@@ -385,7 +385,7 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 		utils.MetaAttributes)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -464,7 +464,7 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 		utils.MetaAttributes)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -543,7 +543,7 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 		utils.MetaAttributes)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -641,7 +641,7 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 		utils.MetaChargers)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -709,7 +709,7 @@ func TestCDRsRateProcessEventMock(t *testing.T) {
 		utils.MetaRateS)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -786,7 +786,7 @@ func TestCDRsAccountProcessEventMock(t *testing.T) {
 		utils.MetaAccounts)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -864,7 +864,7 @@ func TestCDRsThdSProcessEventMock(t *testing.T) {
 		utils.MetaThresholds)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -936,7 +936,7 @@ func TestCDRsThdSProcessEventMockNotfound(t *testing.T) {
 		utils.MetaThresholds)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1007,7 +1007,7 @@ func TestCDRsStatSProcessEventMock(t *testing.T) {
 		utils.MetaStats)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1079,7 +1079,7 @@ func TestCDRsEESProcessEventMock(t *testing.T) {
 		utils.MetaEEs)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1155,7 +1155,7 @@ func TestCDRsProcessEventMock(t *testing.T) {
 		utils.MetaEEs)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1227,7 +1227,7 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 		utils.MetaEEs)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1318,7 +1318,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1381,7 +1381,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1444,7 +1444,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1508,7 +1508,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1572,7 +1572,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1636,7 +1636,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1700,7 +1700,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1764,7 +1764,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1829,7 +1829,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1893,7 +1893,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -1957,7 +1957,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2021,7 +2021,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2085,7 +2085,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2149,7 +2149,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 	}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2208,7 +2208,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 		utils.MetaEEs)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2286,7 +2286,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 		utils.MetaEEs)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2367,7 +2367,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 		utils.MetaEEs)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2450,7 +2450,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 		utils.MetaEEs)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2532,7 +2532,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 		utils.MetaEEs)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2596,7 +2596,7 @@ func TestCDRsChrgrSProcessEventEmptyChrgrs(t *testing.T) {
 		utils.MetaChargers)}
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- sent
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
@@ -2651,7 +2651,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- nil
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 	Cache = NewCacheS(cfg, dm, nil)
@@ -2699,7 +2699,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	storDBChan := make(chan StorDB, 1)
 	storDBChan <- nil
-	data := NewInternalDB(nil, nil, true)
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 	Cache = NewCacheS(cfg, dm, nil)

@@ -33,14 +33,14 @@ func TestEeSProcessEvent(t *testing.T) {
 	if err := os.MkdirAll(filePath, 0777); err != nil {
 		t.Error(err)
 	}
-	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = "*fileCSV"
-	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
-	cgrCfg.EEsCfg().Exporters[0].ExportPath = filePath
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := ees.NewEventExporterS(cgrCfg, filterS, nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.EEsCfg().Exporters[0].Type = "*fileCSV"
+	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cfg.EEsCfg().Exporters[0].ExportPath = filePath
+	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, newDM)
+	eeS := ees.NewEventExporterS(cfg, filterS, nil)
 	cS := NewEeSv1(eeS)
 	cgrEv := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"SQLExporterFull"},

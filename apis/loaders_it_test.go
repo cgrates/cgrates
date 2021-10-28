@@ -1248,7 +1248,7 @@ func TestLoadersLoad(t *testing.T) {
 	}
 
 	cfg.LoaderCfg()[0] = loaderCfg
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(), "", fltrs, nil)

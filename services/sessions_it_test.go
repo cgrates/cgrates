@@ -48,13 +48,10 @@ func TestSessionSReload1(t *testing.T) {
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	cfg.RPCConns()["cache1"] = &config.RPCConn{
 		Strategy: rpcclient.PoolFirst,
-		PoolSize: 0,
-		Conns: []*config.RemoteHost{
-			{
-				Address:   "127.0.0.1:9999",
-				Transport: utils.MetaGOB,
-			},
-		},
+		Conns: []*config.RemoteHost{{
+			Address:   "127.0.0.1:9999",
+			Transport: utils.MetaGOB,
+		}},
 	}
 	cfg.CacheCfg().ReplicationConns = []string{"cache1"}
 	cfg.CacheCfg().Partitions[utils.CacheClosedSessions].Limit = 0
@@ -92,7 +89,10 @@ func TestSessionSReload1(t *testing.T) {
 	conMng := engine.NewConnManager(cfg)
 	conMng.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), utils.ChargerSv1, clientConect)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, new(DataDBService), filterSChan, server, make(chan birpc.ClientConnector, 1), conMng, anz, srvDep)
+	db := NewDataDBService(cfg, conMng, srvDep)
+	db.dbchan = make(chan *engine.DataManager, 1)
+	db.dbchan <- nil
+	srv := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), conMng, anz, srvDep)
 	ctx, cancel := context.WithCancel(context.TODO())
 	err := srv.Start(ctx, cancel)
 	if err != nil {
@@ -117,19 +117,18 @@ func TestSessionSReload1(t *testing.T) {
 			utils.Usage:            0,
 		},
 		APIOpts: map[string]interface{}{
+			utils.MetaRunID:       utils.MetaDefault,
 			utils.OptsSesInitiate: true,
 			utils.OptsThresholdS:  true,
 		},
 	}
-
-	rply := new(sessions.V1InitSessionReply)
+	var rply sessions.V1InitSessionReply
 	ss := srv.(*SessionService)
 	if ss.sm == nil {
 		t.Fatal("sessions is nil")
 	}
-	ss.sm.BiRPCv1InitiateSession(context.Background(), args, rply)
-	err = srv.Shutdown()
-	if err == nil || err != utils.ErrPartiallyExecuted {
+	ss.sm.BiRPCv1InitiateSession(context.Background(), args, &rply)
+	if err = srv.Shutdown(); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrPartiallyExecuted, err)
 	}
 }

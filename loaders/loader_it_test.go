@@ -432,7 +432,7 @@ cgrates.org,SET_ACTPROFILE_3
 	newFile.Write([]byte(content))
 	newFile.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -515,7 +515,7 @@ func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
 	if _, err := os.Create(path.Join(pathL, "WrongFileName")); err != nil {
 		t.Error(err)
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -564,7 +564,7 @@ cgrates.org,SET_ACTPROFILE_3`
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(engine.NewInternalDB(nil, nil, true), config.CgrConfig().CacheCfg(), nil),
+		dm:            engine.NewDataManager(engine.NewInternalDB(nil, nil, loaderCfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil),
 		tpInDir:       "/tmp/TestLoadFromFilesCsvActionProfile",
 		tpOutDir:      utils.EmptyString,
 		rdrTypes:      []string{utils.MetaActionProfiles},
@@ -607,11 +607,13 @@ cgrates.org,SET_ACTPROFILE_3`
 	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaRemove, true); err != nil {
 		t.Error(err)
 	}
+	engine.Cache.Clear(nil)
 	//nothing to get from database
 	if _, err := ldr.dm.GetActionProfile(context.TODO(), expACtPrf.Tenant, expACtPrf.ID,
 		true, true, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
+	engine.Cache.Clear(nil)
 
 	//checking the error by adding a caching method
 	ldr.cacheConns = []string{utils.MetaInternal}
@@ -629,7 +631,7 @@ cgrates.org,SET_ACTPROFILE_3`
 }
 
 func testLoadFromFilesCsvActionProfileLockFolderError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "TestRemoveActionProfileContent",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -736,7 +738,7 @@ cgrates.org,NewRes1
 `))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "testProcessFile",
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -838,7 +840,7 @@ cgrates.org,NewRes1
 `))
 	file.Close()
 
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "testProcessFile",
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -971,7 +973,7 @@ func testProcessFileRenameError(t *testing.T) {
 	if err := os.MkdirAll(flPath1, 0777); err != nil {
 		t.Error(err)
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, loaderCfg.DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "testProcessFileRenameError",
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),

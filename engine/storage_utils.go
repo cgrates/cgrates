@@ -31,7 +31,8 @@ import (
 
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
-	pass, marshaler string, opts *config.DataDBOpts) (d DataDBDriver, err error) {
+	pass, marshaler string, opts *config.DataDBOpts,
+	itmsCfg map[string]*config.ItemOpt) (d DataDBDriver, err error) {
 	switch dbType {
 	case utils.Redis:
 		var dbNo int
@@ -49,7 +50,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 	case utils.Mongo:
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
 	case utils.Internal:
-		d = NewInternalDB(nil, nil, true)
+		d = NewInternalDB(nil, nil, itmsCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
 	}
@@ -59,7 +60,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 // NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
 func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
-	opts *config.StorDBOpts) (db StorDB, err error) {
+	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpt) (db StorDB, err error) {
 	switch dbType {
 	case utils.Mongo:
 		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, opts.MongoQueryTimeout)
@@ -70,7 +71,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
 			opts.SQLConnMaxLifetime, opts.MySQLLocation)
 	case utils.Internal:
-		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false)
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, itmsCfg)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
 			dbType, utils.MySQL, utils.Mongo, utils.Postgres, utils.Internal)

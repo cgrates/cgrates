@@ -32,12 +32,12 @@ func (iDB *InternalDB) GetTpIds(colName string) (ids []string, err error) {
 	tpIDs := make(utils.StringSet)
 	if colName == utils.EmptyString { // if colName is empty we need to parse all partitions
 		for _, conNm := range utils.CacheStorDBPartitions { // iterate through all columns
-			for _, key := range Cache.GetItemIDs(conNm, utils.EmptyString) {
+			for _, key := range iDB.db.GetItemIDs(conNm, utils.EmptyString) {
 				tpIDs.Add(strings.Split(key, utils.InInFieldSep)[0])
 			}
 		}
 	} else {
-		for _, key := range Cache.GetItemIDs(utils.CacheStorDBPartitions[colName], utils.EmptyString) {
+		for _, key := range iDB.db.GetItemIDs(utils.CacheStorDBPartitions[colName], utils.EmptyString) {
 			tpIDs.Add(strings.Split(key, utils.InInFieldSep)[0])
 		}
 	}
@@ -46,7 +46,7 @@ func (iDB *InternalDB) GetTpIds(colName string) (ids []string, err error) {
 
 func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct []string,
 	filters map[string]string, paginator *utils.PaginatorWithSearch) (ids []string, err error) {
-	fullIDs := Cache.GetItemIDs(utils.CacheStorDBPartitions[table], tpid)
+	fullIDs := iDB.db.GetItemIDs(utils.CacheStorDBPartitions[table], tpid)
 	idSet := make(utils.StringSet)
 	for _, fullID := range fullIDs {
 		idSet.Add(fullID[len(tpid)+1:])
@@ -63,9 +63,9 @@ func (iDB *InternalDB) GetTPResources(tpid, tenant, id string) (resources []*uti
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPResources, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPResources, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPResources, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPResources, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -86,9 +86,9 @@ func (iDB *InternalDB) GetTPStats(tpid, tenant, id string) (stats []*utils.TPSta
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPStats, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPStats, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPStats, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPStats, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -109,9 +109,9 @@ func (iDB *InternalDB) GetTPThresholds(tpid, tenant, id string) (ths []*utils.TP
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPThresholds, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPThresholds, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPThresholds, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPThresholds, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -132,9 +132,9 @@ func (iDB *InternalDB) GetTPFilters(tpid, tenant, id string) (fltrs []*utils.TPF
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPFilters, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPFilters, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPFilters, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPFilters, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -155,9 +155,9 @@ func (iDB *InternalDB) GetTPRoutes(tpid, tenant, id string) (supps []*utils.TPRo
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPRoutes, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPRoutes, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPRoutes, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPRoutes, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -178,9 +178,9 @@ func (iDB *InternalDB) GetTPAttributes(tpid, tenant, id string) (attrs []*utils.
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPAttributes, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPAttributes, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPAttributes, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPAttributes, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -201,9 +201,9 @@ func (iDB *InternalDB) GetTPChargers(tpid, tenant, id string) (cpps []*utils.TPC
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPChargers, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPChargers, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPChargers, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPChargers, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -224,9 +224,9 @@ func (iDB *InternalDB) GetTPDispatcherProfiles(tpid, tenant, id string) (dpps []
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPDispatchers, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPDispatchers, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPDispatchers, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPDispatchers, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -247,9 +247,9 @@ func (iDB *InternalDB) GetTPDispatcherHosts(tpid, tenant, id string) (dpps []*ut
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPDispatcherHosts, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPDispatcherHosts, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPDispatcherHosts, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPDispatcherHosts, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -270,9 +270,9 @@ func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*uti
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPRateProfiles, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPRateProfiles, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPRateProfiles, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPRateProfiles, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -292,9 +292,9 @@ func (iDB *InternalDB) GetTPActionProfiles(tpid, tenant, id string) (tpPrfs []*u
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPActionProfiles, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPActionProfiles, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPActionProfiles, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPActionProfiles, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -314,9 +314,9 @@ func (iDB *InternalDB) GetTPAccounts(tpid, tenant, id string) (tpPrfs []*utils.T
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPAccounts, key)
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPAccounts, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPAccounts, id)
+		x, ok := iDB.db.Get(utils.CacheTBLTPAccounts, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -342,9 +342,9 @@ func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (er
 				utils.ConcatenatedKeySep + id
 		}
 	}
-	ids := Cache.GetItemIDs(utils.CacheStorDBPartitions[table], key)
+	ids := iDB.db.GetItemIDs(utils.CacheStorDBPartitions[table], key)
 	for _, id := range ids {
-		Cache.RemoveWithoutReplicate(utils.CacheStorDBPartitions[table], id,
+		iDB.db.Remove(utils.CacheStorDBPartitions[table], id,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -355,7 +355,7 @@ func (iDB *InternalDB) SetTPResources(resources []*utils.TPResourceProfile) (err
 		return nil
 	}
 	for _, resource := range resources {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPResources, utils.ConcatenatedKey(resource.TPid, resource.Tenant, resource.ID), resource, nil,
+		iDB.db.Set(utils.CacheTBLTPResources, utils.ConcatenatedKey(resource.TPid, resource.Tenant, resource.ID), resource, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -365,7 +365,7 @@ func (iDB *InternalDB) SetTPStats(stats []*utils.TPStatProfile) (err error) {
 		return nil
 	}
 	for _, stat := range stats {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPStats, utils.ConcatenatedKey(stat.TPid, stat.Tenant, stat.ID), stat, nil,
+		iDB.db.Set(utils.CacheTBLTPStats, utils.ConcatenatedKey(stat.TPid, stat.Tenant, stat.ID), stat, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -376,7 +376,7 @@ func (iDB *InternalDB) SetTPThresholds(thresholds []*utils.TPThresholdProfile) (
 	}
 
 	for _, threshold := range thresholds {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPThresholds, utils.ConcatenatedKey(threshold.TPid, threshold.Tenant, threshold.ID), threshold, nil,
+		iDB.db.Set(utils.CacheTBLTPThresholds, utils.ConcatenatedKey(threshold.TPid, threshold.Tenant, threshold.ID), threshold, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -387,7 +387,7 @@ func (iDB *InternalDB) SetTPFilters(filters []*utils.TPFilterProfile) (err error
 	}
 
 	for _, filter := range filters {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPFilters, utils.ConcatenatedKey(filter.TPid, filter.Tenant, filter.ID), filter, nil,
+		iDB.db.Set(utils.CacheTBLTPFilters, utils.ConcatenatedKey(filter.TPid, filter.Tenant, filter.ID), filter, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -398,7 +398,7 @@ func (iDB *InternalDB) SetTPRoutes(routes []*utils.TPRouteProfile) (err error) {
 		return nil
 	}
 	for _, route := range routes {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPRoutes, utils.ConcatenatedKey(route.TPid, route.Tenant, route.ID), route, nil,
+		iDB.db.Set(utils.CacheTBLTPRoutes, utils.ConcatenatedKey(route.TPid, route.Tenant, route.ID), route, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -410,7 +410,7 @@ func (iDB *InternalDB) SetTPAttributes(attributes []*utils.TPAttributeProfile) (
 	}
 
 	for _, attribute := range attributes {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPAttributes, utils.ConcatenatedKey(attribute.TPid, attribute.Tenant, attribute.ID), attribute, nil,
+		iDB.db.Set(utils.CacheTBLTPAttributes, utils.ConcatenatedKey(attribute.TPid, attribute.Tenant, attribute.ID), attribute, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -421,7 +421,7 @@ func (iDB *InternalDB) SetTPChargers(cpps []*utils.TPChargerProfile) (err error)
 	}
 
 	for _, cpp := range cpps {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPChargers, utils.ConcatenatedKey(cpp.TPid, cpp.Tenant, cpp.ID), cpp, nil,
+		iDB.db.Set(utils.CacheTBLTPChargers, utils.ConcatenatedKey(cpp.TPid, cpp.Tenant, cpp.ID), cpp, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -432,7 +432,7 @@ func (iDB *InternalDB) SetTPDispatcherProfiles(dpps []*utils.TPDispatcherProfile
 	}
 
 	for _, dpp := range dpps {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPDispatchers, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
+		iDB.db.Set(utils.CacheTBLTPDispatchers, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -442,7 +442,7 @@ func (iDB *InternalDB) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err
 		return nil
 	}
 	for _, dpp := range dpps {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPDispatcherHosts, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
+		iDB.db.Set(utils.CacheTBLTPDispatcherHosts, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -453,7 +453,7 @@ func (iDB *InternalDB) SetTPRateProfiles(tpPrfs []*utils.TPRateProfile) (err err
 		return nil
 	}
 	for _, tpPrf := range tpPrfs {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPRateProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
+		iDB.db.Set(utils.CacheTBLTPRateProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -464,7 +464,7 @@ func (iDB *InternalDB) SetTPActionProfiles(tpPrfs []*utils.TPActionProfile) (err
 		return nil
 	}
 	for _, tpPrf := range tpPrfs {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPActionProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
+		iDB.db.Set(utils.CacheTBLTPActionProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -475,7 +475,7 @@ func (iDB *InternalDB) SetTPAccounts(tpPrfs []*utils.TPAccount) (err error) {
 		return nil
 	}
 	for _, tpPrf := range tpPrfs {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPAccounts, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
+		iDB.db.Set(utils.CacheTBLTPAccounts, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -488,7 +488,7 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	}
 	cdrKey := utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID)
 	if !allowUpdate {
-		if _, has := Cache.Get(utils.CacheCDRsTBL, cdrKey); has {
+		if _, has := iDB.db.Get(utils.CacheCDRsTBL, cdrKey); has {
 			return utils.ErrExists
 		}
 	}
@@ -525,7 +525,7 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	}
 	iDB.indexedFieldsMutex.RUnlock()
 
-	Cache.SetWithoutReplicate(utils.CacheCDRsTBL, cdrKey, cdr, idxs.AsSlice(),
+	iDB.db.Set(utils.CacheCDRsTBL, cdrKey, cdr, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 
 	return
@@ -692,7 +692,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		}
 		grpMpIDs := make(utils.StringSet)
 		for _, id := range fltrSlc.ids {
-			grpMpIDs.AddSlice(Cache.tCache.GetGroupItemIDs(utils.CacheCDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id)))
+			grpMpIDs.AddSlice(iDB.db.GetGroupItemIDs(utils.CacheCDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id)))
 		}
 		if grpMpIDs.Size() == 0 {
 			if filter.Count {
@@ -713,7 +713,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		}
 	}
 	if cdrMpIDs == nil {
-		cdrMpIDs = utils.NewStringSet(Cache.GetItemIDs(utils.CacheCDRsTBL, utils.EmptyString))
+		cdrMpIDs = utils.NewStringSet(iDB.db.GetItemIDs(utils.CacheCDRsTBL, utils.EmptyString))
 	}
 	// check for Not filters
 	for _, fltrSlc := range notPairSlice {
@@ -721,7 +721,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			continue
 		}
 		for _, id := range fltrSlc.ids {
-			for _, id := range Cache.tCache.GetGroupItemIDs(utils.CacheCDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id)) {
+			for _, id := range iDB.db.GetGroupItemIDs(utils.CacheCDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id)) {
 				if !cdrMpIDs.Has(id) {
 					continue
 				}
@@ -762,7 +762,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	}
 	filter.Prepare()
 	for key := range cdrMpIDs {
-		x, ok := Cache.Get(utils.CacheCDRsTBL, key)
+		x, ok := iDB.db.Get(utils.CacheCDRsTBL, key)
 		if !ok || x == nil {
 			return nil, 0, utils.ErrNotFound
 		}
@@ -969,7 +969,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	}
 	if remove {
 		for _, cdr := range cdrs {
-			Cache.RemoveWithoutReplicate(utils.CacheCDRsTBL, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID),
+			iDB.db.Remove(utils.CacheCDRsTBL, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID),
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		}
 		return nil, 0, nil

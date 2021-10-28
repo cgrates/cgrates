@@ -37,8 +37,8 @@ import (
 )
 
 var (
-	cfg    *config.CGRConfig
-	storDB StorDB
+	storCfg *config.CGRConfig
+	storDB  StorDB
 )
 
 // subtests to be executed for each confDIR
@@ -65,39 +65,39 @@ func TestStorDBit(t *testing.T) {
 	//var stestName string
 	switch *dbType {
 	case utils.MetaInternal:
-		cfg = config.NewDefaultCGRConfig()
-		config.SetCgrConfig(cfg)
-		storDB = NewInternalDB(nil, nil, false)
+		storCfg = config.NewDefaultCGRConfig()
+		config.SetCgrConfig(storCfg)
+		storDB = NewInternalDB(nil, nil, storCfg.DataDbCfg().Items)
 	case utils.MetaMySQL:
-		if cfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
+		if storCfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
 			t.Fatal(err)
 		}
-		if storDB, err = NewMySQLStorage(cfg.StorDbCfg().Host,
-			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
-			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
+		if storDB, err = NewMySQLStorage(storCfg.StorDbCfg().Host,
+			storCfg.StorDbCfg().Port, storCfg.StorDbCfg().Name,
+			storCfg.StorDbCfg().User, storCfg.StorDbCfg().Password,
 			100, 10, 0, "UTC"); err != nil {
 			t.Fatal(err)
 		}
 		storDB.(*SQLStorage).db.Config.Logger = logger.Default.LogMode(logger.Silent)
 	case utils.MetaMongo:
-		if cfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
+		if storCfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
 			t.Fatal(err)
 		}
-		if storDB, err = NewMongoStorage(cfg.StorDbCfg().Host,
-			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
-			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-			cfg.GeneralCfg().DBDataEncoding,
-			utils.StorDB, cfg.StorDbCfg().StringIndexedFields, 10*time.Second); err != nil {
+		if storDB, err = NewMongoStorage(storCfg.StorDbCfg().Host,
+			storCfg.StorDbCfg().Port, storCfg.StorDbCfg().Name,
+			storCfg.StorDbCfg().User, storCfg.StorDbCfg().Password,
+			storCfg.GeneralCfg().DBDataEncoding,
+			utils.StorDB, storCfg.StorDbCfg().StringIndexedFields, 10*time.Second); err != nil {
 			t.Fatal(err)
 		}
 	case utils.MetaPostgres:
-		if cfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
+		if storCfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 			t.Fatal(err)
 		}
-		if storDB, err = NewPostgresStorage(cfg.StorDbCfg().Host,
-			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
-			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-			cfg.StorDbCfg().Opts.SSLMode,
+		if storDB, err = NewPostgresStorage(storCfg.StorDbCfg().Host,
+			storCfg.StorDbCfg().Port, storCfg.StorDbCfg().Name,
+			storCfg.StorDbCfg().User, storCfg.StorDbCfg().Password,
+			storCfg.StorDbCfg().Opts.SSLMode,
 			100, 10, 0); err != nil {
 			t.Fatal(err)
 		}
@@ -1192,7 +1192,7 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 }
 
 func testStorDBitFlush(t *testing.T) {
-	if err := storDB.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().Type)); err != nil {
+	if err := storDB.Flush(path.Join(storCfg.DataFolderPath, "storage", storCfg.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 }

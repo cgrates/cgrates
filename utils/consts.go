@@ -33,9 +33,9 @@ var (
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
 		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
-		CacheCapsEvents, CacheVersions, CacheReplicationHosts})
+		CacheCapsEvents, CacheReplicationHosts})
 
-	dataDBPartition = NewStringSet([]string{
+	DataDBPartitions = NewStringSet([]string{
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
@@ -43,15 +43,15 @@ var (
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
 		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
 		CacheActionProfilesFilterIndexes, CacheAccountsFilterIndexes, CacheReverseFilterIndexes,
-		CacheAccounts})
+		CacheAccounts, CacheVersions})
 
 	storDBPartition = NewStringSet([]string{
 		CacheTBLTPResources, CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
-		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccounts})
+		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccounts, CacheVersions})
 
 	// CachePartitions enables creation of cache partitions
-	CachePartitions = JoinStringSet(extraDBPartition, dataDBPartition, storDBPartition)
+	CachePartitions = JoinStringSet(extraDBPartition, DataDBPartitions, storDBPartition)
 
 	CacheInstanceToPrefix = map[string]string{
 		CacheResourceProfiles:            ResourceProfilesPrefix,
@@ -850,7 +850,6 @@ const (
 	MetaThresholdProfiles  = "*threshold_profiles"
 	MetaRouteProfiles      = "*route_profiles"
 	MetaAttributeProfiles  = "*attribute_profiles"
-	MetaIndexes            = "*indexes"
 	MetaDispatcherProfiles = "*dispatcher_profiles"
 	MetaRateProfiles       = "*rate_profiles"
 	MetaRateProfileRates   = "*rate_profile_rates"

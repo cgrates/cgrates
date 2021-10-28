@@ -167,7 +167,7 @@ func InitDataDB(cfg *config.CGRConfig) error {
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func InitStorDB(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func InitConfigDB(cfg *config.CGRConfig) error {
 		cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 		cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
 		cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.ConfigDBCfg().Opts)
+		cfg.ConfigDBCfg().Opts, nil)
 	if err != nil {
 		return err
 	}
@@ -421,21 +421,5 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheAccounts:                    {},
 		utils.CacheAccountsFilterIndexes:       {},
 		utils.CacheReplicationHosts:            {},
-
-		utils.CacheVersions:             {},
-		utils.CacheTBLTPResources:       {},
-		utils.CacheTBLTPStats:           {},
-		utils.CacheTBLTPThresholds:      {},
-		utils.CacheTBLTPFilters:         {},
-		utils.CacheSessionCostsTBL:      {},
-		utils.CacheCDRsTBL:              {},
-		utils.CacheTBLTPRoutes:          {},
-		utils.CacheTBLTPAttributes:      {},
-		utils.CacheTBLTPChargers:        {},
-		utils.CacheTBLTPDispatchers:     {},
-		utils.CacheTBLTPDispatcherHosts: {},
-		utils.CacheTBLTPRateProfiles:    {},
-		utils.CacheTBLTPActionProfiles:  {},
-		utils.CacheTBLTPAccounts:        {},
 	}
 }

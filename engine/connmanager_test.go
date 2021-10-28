@@ -35,16 +35,16 @@ func TestCMgetConnNotFound(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 
-	db := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(db, defaultCfg.CacheCfg(), cM)
-	Cache = NewCacheS(defaultCfg, dm, nil)
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, nil)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
 
 	experr := utils.ErrNotFound
@@ -67,13 +67,13 @@ func TestCMgetConnUnsupportedBiRPC(t *testing.T) {
 	}()
 
 	connID := rpcclient.BiRPCInternal + "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
 
 	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
@@ -81,9 +81,9 @@ func TestCMgetConnUnsupportedBiRPC(t *testing.T) {
 	}
 
 	experr := rpcclient.ErrUnsupportedBiRPC
-	exp, err := NewRPCPool(context.Background(), "*first", "", "", "", defaultCfg.GeneralCfg().ConnectAttempts,
-		defaultCfg.GeneralCfg().Reconnects, defaultCfg.GeneralCfg().ConnectTimeout,
-		defaultCfg.GeneralCfg().ReplyTimeout, nil, cc, true, nil, "", cM.connCache)
+	exp, err := NewRPCPool(context.Background(), "*first", "", "", "", cfg.GeneralCfg().ConnectAttempts,
+		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
+		cfg.GeneralCfg().ReplyTimeout, nil, cc, true, nil, "", cM.connCache)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,9 +105,9 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
 			ID:      connID,
 			Address: utils.MetaInternal,
@@ -117,7 +117,7 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			"testString": cc,
 		},
@@ -126,10 +126,10 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 
 	cM.connCache.Set(connID, nil, nil)
 
-	exp, err := NewRPCPool(context.Background(), "*first", defaultCfg.TLSCfg().ClientKey, defaultCfg.TLSCfg().ClientCerificate,
-		defaultCfg.TLSCfg().CaCertificate, defaultCfg.GeneralCfg().ConnectAttempts,
-		defaultCfg.GeneralCfg().Reconnects, defaultCfg.GeneralCfg().ConnectTimeout,
-		defaultCfg.GeneralCfg().ReplyTimeout, defaultCfg.RPCConns()[connID].Conns, cc,
+	exp, err := NewRPCPool(context.Background(), "*first", cfg.TLSCfg().ClientKey, cfg.TLSCfg().ClientCerificate,
+		cfg.TLSCfg().CaCertificate, cfg.GeneralCfg().ConnectAttempts,
+		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
+		cfg.GeneralCfg().ReplyTimeout, cfg.RPCConns()[connID].Conns, cc,
 		true, nil, connID, cM.connCache)
 	if err != nil {
 		t.Fatal(err)
@@ -152,10 +152,10 @@ func TestCMgetConnWithConfigUnsupportedTransport(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
-	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
 			Address:   "invalid",
 			Transport: "invalid",
@@ -165,7 +165,7 @@ func TestCMgetConnWithConfigUnsupportedTransport(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
@@ -173,7 +173,7 @@ func TestCMgetConnWithConfigUnsupportedTransport(t *testing.T) {
 	}
 
 	experr := fmt.Sprintf("Unsupported transport: <%+s>", "invalid")
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, defaultCfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err == nil || err.Error() != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -191,10 +191,10 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
-	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
 			Address:   "invalid",
 			Transport: rpcclient.BiRPCJSON,
@@ -204,7 +204,7 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
@@ -213,7 +213,7 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 
 	experr := rpcclient.ErrUnsupportedCodec
 	var exp *rpcclient.RPCParallelClientPool
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, defaultCfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err == nil || err != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -231,10 +231,10 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
-	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
 			Address:   "invalid",
 			Transport: "",
@@ -244,7 +244,7 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
@@ -253,7 +253,7 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 
 	cM.connCache.Set(connID, nil, nil)
 
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, defaultCfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err != nil {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -271,10 +271,10 @@ func TestCMgetConnWithConfigInternalRPCCodec(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
-	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
 			Address: rpcclient.InternalRPC,
 		},
@@ -283,14 +283,14 @@ func TestCMgetConnWithConfigInternalRPCCodec(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, defaultCfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err != nil {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -308,10 +308,10 @@ func TestCMgetConnWithConfigInternalBiRPCCodecUnsupported(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
-	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
 			Address: rpcclient.BiRPCInternal,
 		},
@@ -320,7 +320,7 @@ func TestCMgetConnWithConfigInternalBiRPCCodecUnsupported(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
@@ -328,7 +328,7 @@ func TestCMgetConnWithConfigInternalBiRPCCodecUnsupported(t *testing.T) {
 	}
 
 	experr := rpcclient.ErrUnsupportedCodec
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, defaultCfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
 
 	if err == nil || err != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -346,16 +346,16 @@ func TestCMCallErrgetConn(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 
-	db := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(db, defaultCfg.CacheCfg(), cM)
-	Cache = NewCacheS(defaultCfg, dm, nil)
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, nil)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
 
 	experr := utils.ErrNotFound
@@ -373,11 +373,11 @@ func TestCMCallWithConnIDsNoSubsHostIDs(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	subsHostIDs := utils.StringSet{}
 
@@ -395,11 +395,11 @@ func TestCMCallWithConnIDsNoConnIDs(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	subsHostIDs := utils.StringSet{
 		"key": struct{}{},
@@ -420,9 +420,9 @@ func TestCMCallWithConnIDsNoConns(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
 			ID:      connID,
 			Address: rpcclient.InternalRPC,
@@ -430,7 +430,7 @@ func TestCMCallWithConnIDsNoConns(t *testing.T) {
 	}
 
 	cM := &ConnManager{
-		cfg: defaultCfg,
+		cfg: cfg,
 	}
 	subsHostIDs := utils.StringSet{
 		"random": struct{}{},
@@ -450,9 +450,9 @@ func TestCMCallWithConnIDsInternallyDCed(t *testing.T) {
 	}()
 
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
 			ID:      connID,
 			Address: rpcclient.InternalRPC,
@@ -460,7 +460,7 @@ func TestCMCallWithConnIDsInternallyDCed(t *testing.T) {
 	}
 
 	cM := &ConnManager{
-		cfg:       defaultCfg,
+		cfg:       cfg,
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 	subsHostIDs := utils.StringSet{
@@ -483,9 +483,9 @@ func TestCMCallWithConnIDsErrNotNetwork(t *testing.T) {
 
 	poolID := "poolID"
 	connID := "connID"
-	defaultCfg := config.NewDefaultCGRConfig()
-	defaultCfg.RPCConns()[poolID] = config.NewDfltRPCConn()
-	defaultCfg.RPCConns()[poolID].Conns = []*config.RemoteHost{
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()[poolID] = config.NewDfltRPCConn()
+	cfg.RPCConns()[poolID].Conns = []*config.RemoteHost{
 		{
 			ID:      connID,
 			Address: "addr",
@@ -501,7 +501,7 @@ func TestCMCallWithConnIDsErrNotNetwork(t *testing.T) {
 	}
 
 	cM := &ConnManager{
-		cfg:       defaultCfg,
+		cfg:       cfg,
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 
@@ -525,17 +525,17 @@ func TestCMReload(t *testing.T) {
 		Cache = tmp
 	}()
 
-	defaultCfg := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 
 	cM := &ConnManager{
-		cfg:       defaultCfg,
+		cfg:       cfg,
 		connCache: ltcache.NewCache(-1, 0, true, nil),
 	}
 	cM.connCache.Set("itmID1", "value of first item", nil)
 
-	db := NewInternalDB(nil, nil, true)
-	dm := NewDataManager(db, defaultCfg.CacheCfg(), cM)
-	Cache = NewCacheS(defaultCfg, dm, nil)
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), cM)
+	Cache = NewCacheS(cfg, dm, nil)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, "itmID2",
 		"value of 2nd item", nil, true, utils.NonTransactional)
 

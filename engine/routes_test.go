@@ -28,276 +28,63 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestRoutesCache(t *testing.T) {
-	var expTimeRoutes = time.Now().Add(20 * time.Minute)
-	expTimeStr := expTimeRoutes.Format(time.RFC3339)
-	var dmSPP *DataManager
-	sppTest := []*RouteProfile{
+var (
+	testRoutesPrfs = []*RouteProfile{
 		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile1",
-			FilterIDs:         []string{"FLTR_RPP_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
+			Tenant:    "cgrates.org",
+			ID:        "RouteProfile1",
+			FilterIDs: []string{"FLTR_RPP_1"},
+			Sorting:   utils.MetaWeight,
 			Routes: []*Route{
 				{
 					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
 					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
 			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile2",
-			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
+			Tenant:    "cgrates.org",
+			ID:        "RouteProfile2",
+			FilterIDs: []string{"FLTR_SUPP_2"},
+			Sorting:   utils.MetaWeight,
 			Routes: []*Route{
 				{
 					ID:              "route2",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
 					Weights:         utils.DynamicWeights{{Weight: 20}},
 					RouteParameters: "param2",
 				},
 				{
 					ID:              "route3",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
 					Weights:         utils.DynamicWeights{{Weight: 10}},
 					RouteParameters: "param3",
 				},
 				{
 					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
 					Weights:         utils.DynamicWeights{{Weight: 30}},
-					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
 			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
 		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfilePrefix",
-			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
+			Tenant:    "cgrates.org",
+			ID:        "RouteProfilePrefix",
+			FilterIDs: []string{"FLTR_SUPP_3"},
+			Sorting:   utils.MetaWeight,
 			Routes: []*Route{
 				{
 					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
 					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
 					RouteParameters: "param1",
 				},
 			},
 			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
 	}
-
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
-	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	fltrSupp1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
-	fltrSupp2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_2",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
-	fltrSupp3 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_3",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfilePrefix"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
-
-	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
-			t.Errorf("Error: %+v", err)
-		}
-	}
-	//Test each route profile from cache
-	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
-			spp.ID, true, true, utils.NonTransactional); err != nil {
-			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
-		}
-	}
-}
-
-func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
-	var expTimeRoutes = time.Now().Add(20 * time.Minute)
-	expTimeStr := expTimeRoutes.Format(time.RFC3339)
-	var routeService *RouteService
-	var dmSPP *DataManager
-	var sppTest = RouteProfilesWithWeight{
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfile1",
-				FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 10}},
-			},
-			Weight: 10,
-		},
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfile2",
-				FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route2",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 20}},
-						RouteParameters: "param2",
-					},
-					{
-						ID:              "route3",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						RouteParameters: "param3",
-					},
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 30}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 20}},
-			},
-			Weight: 20,
-		},
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfilePrefix",
-				FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 10}},
-			},
-			Weight: 10,
-		},
-	}
-	args := []*utils.CGREvent{
-		//matching RouteProfile1
-		{
+	testRoutesArgs = []*utils.CGREvent{
+		{ //matching RouteProfile1
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
 			Event: map[string]interface{}{
@@ -308,7 +95,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 				utils.Weight:     "20.0",
 			},
 		},
-		{
+		{ //matching RouteProfile2
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
 			Event: map[string]interface{}{
@@ -319,14 +106,14 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 				utils.Weight:     "20.0",
 			},
 		},
-		{
+		{ //matching RouteProfilePrefix
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
 			Event: map[string]interface{}{
 				"Route": "RouteProfilePrefix",
 			},
 		},
-		{
+		{ //matching
 			Tenant: "cgrates.org",
 			ID:     "CGR",
 			Event: map[string]interface{}{
@@ -335,16 +122,10 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
+)
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
-	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService = NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-
-	fltrSupp1 := &Filter{
+func prepareRoutesData(t *testing.T, dm *DataManager) {
+	if err := dm.SetFilter(context.Background(), &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
 		Rules: []*FilterRule{
@@ -364,9 +145,10 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 				Values:  []string{"9.0"},
 			},
 		},
+	}, true); err != nil {
+		t.Fatal(err)
 	}
-	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
-	fltrSupp2 := &Filter{
+	if err := dm.SetFilter(context.Background(), &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
 		Rules: []*FilterRule{
@@ -386,9 +168,10 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 				Values:  []string{"15.0"},
 			},
 		},
+	}, true); err != nil {
+		t.Fatal(err)
 	}
-	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
-	fltrSupp3 := &Filter{
+	if err := dm.SetFilter(context.Background(), &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
 		Rules: []*FilterRule{
@@ -398,255 +181,68 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 				Values:  []string{"RouteProfilePrefix"},
 			},
 		},
+	}, true); err != nil {
+		t.Fatal(err)
 	}
-	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
-	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp.RouteProfile, true); err != nil {
-			t.Errorf("Error: %+v", err)
+	for _, spp := range testRoutesPrfs {
+		if err = dm.SetRouteProfile(context.Background(), spp, true); err != nil {
+			t.Fatal(err)
 		}
 	}
 	//Test each route profile from cache
-	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
+	for _, spp := range testRoutesPrfs {
+		if tempSpp, err := dm.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
-			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp.RouteProfile, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(spp, tempSpp) {
+			t.Fatalf("Expecting: %+v, received: %+v", spp, tempSpp)
 		}
 	}
-	sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), args[0].Tenant, args[0])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[0], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
-	}
+}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), args[1].Tenant, args[1])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[1], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
-	}
+func TestRoutesCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	prepareRoutesData(t, dmSPP)
+}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), args[2].Tenant, args[2])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[2], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf[0])
+func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+
+	prepareRoutesData(t, dmSPP)
+
+	for i, spp := range testRoutesPrfs {
+		sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), testRoutesArgs[0].Tenant, testRoutesArgs[i])
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(spp, sprf[0].RouteProfile) {
+			t.Errorf("Expecting: %+v, received: %+v", spp, sprf[0].RouteProfile)
+		}
 	}
 }
 
 func TestRoutesSortedForEvent(t *testing.T) {
-	var expTimeRoutes = time.Now().Add(20 * time.Minute)
-	expTimeStr := expTimeRoutes.Format(time.RFC3339)
-	var routeService *RouteService
-	var dmSPP *DataManager
-	var sppTest = []*RouteProfile{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile1",
-			FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile2",
-			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route2",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 20}},
-					RouteParameters: "param2",
-				},
-				{
-					ID:              "route3",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					RouteParameters: "param3",
-				},
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 30}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 20}},
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfilePrefix",
-			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
-		},
-	}
-	args := []*utils.CGREvent{
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route": "RouteProfilePrefix",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "CGR",
-			Event: map[string]interface{}{
-				"UsageInterval": "1s",
-				"PddInterval":   "1s",
-			},
-		},
-	}
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
-	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService = NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+	prepareRoutesData(t, dmSPP)
 
-	fltrSupp1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
-	fltrSupp2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_2",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
-	fltrSupp3 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_3",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfilePrefix"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
-	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
-			t.Errorf("Error: %+v", err)
-		}
-	}
-	//Test each route profile from cache
-	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
-			spp.ID, true, true, utils.NonTransactional); err != nil {
-			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
-		}
-	}
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile1",
 		Sorting:   utils.MetaWeight,
@@ -663,7 +259,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}}
-	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args[0].Tenant, args[0])
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), testRoutesArgs[0].Tenant, testRoutesArgs[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -708,7 +304,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		},
 	}}
 
-	sprf, err = routeService.sortedRoutesForEvent(context.Background(), args[1].Tenant, args[1])
+	sprf, err = routeService.sortedRoutesForEvent(context.Background(), testRoutesArgs[1].Tenant, testRoutesArgs[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -733,7 +329,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		},
 	}}
 
-	sprf, err = routeService.sortedRoutesForEvent(context.Background(), args[2].Tenant, args[2])
+	sprf, err = routeService.sortedRoutesForEvent(context.Background(), testRoutesArgs[2].Tenant, testRoutesArgs[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -743,217 +339,14 @@ func TestRoutesSortedForEvent(t *testing.T) {
 }
 
 func TestRoutesSortedForEventWithLimit(t *testing.T) {
-	expTimeRoutes := time.Now().Add(20 * time.Minute)
-	expTimeStr := expTimeRoutes.Format(time.RFC3339)
-	var routeService *RouteService
-	sppTest := []*RouteProfile{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile1",
-			FilterIDs:         []string{"FLTR_RPP_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile2",
-			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route2",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 20}},
-					RouteParameters: "param2",
-				},
-				{
-					ID:              "route3",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					RouteParameters: "param3",
-				},
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 30}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 20}},
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfilePrefix",
-			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
-		},
-	}
-	args := []*utils.CGREvent{
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route": "RouteProfilePrefix",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "CGR",
-			Event: map[string]interface{}{
-				"UsageInterval": "1s",
-				"PddInterval":   "1s",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-	}
-
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService = NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-
-	fltrSupp1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
-	fltrSupp2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_2",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
-	fltrSupp3 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_3",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfilePrefix"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
-
-	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
-			t.Errorf("Error: %+v", err)
-		}
-	}
-	//Test each route profile from cache
-	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
-			spp.ID, true, true, utils.NonTransactional); err != nil {
-			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
-		}
-	}
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+	prepareRoutesData(t, dmSPP)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
@@ -981,8 +374,9 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 		},
 	}}
-	args[1].APIOpts[utils.OptsRoutesLimit] = 2
-	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args[1].Tenant, args[1])
+	args := testRoutesArgs[1].Clone()
+	args.APIOpts[utils.OptsRoutesLimit] = 2
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args.Tenant, args)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -992,217 +386,16 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 }
 
 func TestRoutesSortedForEventWithOffset(t *testing.T) {
-	expTimeRoutes := time.Now().Add(20 * time.Minute)
-	expTimeStr := expTimeRoutes.Format(time.RFC3339)
-	var routeService *RouteService
-	sppTest := []*RouteProfile{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile1",
-			FilterIDs:         []string{"FLTR_RPP_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile2",
-			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route2",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 20}},
-					RouteParameters: "param2",
-				},
-				{
-					ID:              "route3",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					RouteParameters: "param3",
-				},
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 30}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 20}},
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfilePrefix",
-			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
-		},
-	}
-	args := []*utils.CGREvent{
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route": "RouteProfilePrefix",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "CGR",
-			Event: map[string]interface{}{
-				"UsageInterval": "1s",
-				"PddInterval":   "1s",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-	}
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService = NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
 
-	fltrSupp1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
-	fltrSupp2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_2",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
-	fltrSupp3 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_3",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfilePrefix"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
-
-	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
-			t.Errorf("Error: %+v", err)
-		}
-	}
-	//Test each route profile from cache
-	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
-			spp.ID, true, true, utils.NonTransactional); err != nil {
-			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
-		}
-	}
+	prepareRoutesData(t, dmSPP)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
@@ -1220,8 +413,9 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			},
 		},
 	}}
-	args[1].APIOpts[utils.OptsRoutesOffset] = 2
-	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args[1].Tenant, args[1])
+	args := testRoutesArgs[1].Clone()
+	args.APIOpts[utils.OptsRoutesOffset] = 2
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args.Tenant, args)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1231,217 +425,15 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 }
 
 func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
-	expTimeRoutes := time.Now().Add(20 * time.Minute)
-	expTimeStr := expTimeRoutes.Format(time.RFC3339)
-	var routeService *RouteService
-	sppTest := []*RouteProfile{
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile1",
-			FilterIDs:         []string{"FLTR_RPP_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfile2",
-			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route2",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 20}},
-					RouteParameters: "param2",
-				},
-				{
-					ID:              "route3",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					RouteParameters: "param3",
-				},
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 30}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 20}},
-		},
-		&RouteProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RouteProfilePrefix",
-			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
-			Sorting:           utils.MetaWeight,
-			SortingParameters: []string{},
-			Routes: []*Route{
-				{
-					ID:              "route1",
-					FilterIDs:       []string{},
-					AccountIDs:      []string{},
-					RateProfileIDs:  []string{},
-					ResourceIDs:     []string{},
-					StatIDs:         []string{},
-					Weights:         utils.DynamicWeights{{Weight: 10}},
-					Blocker:         false,
-					RouteParameters: "param1",
-				},
-			},
-			Weights: utils.DynamicWeights{{Weight: 10}},
-		},
-	}
-	args := []*utils.CGREvent{
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route": "RouteProfilePrefix",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "CGR",
-			Event: map[string]interface{}{
-				"UsageInterval": "1s",
-				"PddInterval":   "1s",
-			},
-			APIOpts: map[string]interface{}{},
-		},
-	}
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService = NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-
-	fltrSupp1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
-	fltrSupp2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_2",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
-	fltrSupp3 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_3",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfilePrefix"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
-
-	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
-			t.Errorf("Error: %+v", err)
-		}
-	}
-	//Test each route profile from cache
-	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
-			spp.ID, true, true, utils.NonTransactional); err != nil {
-			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
-		}
-	}
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+	prepareRoutesData(t, dmSPP)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
 		ProfileID: "RouteProfile2",
@@ -1459,9 +451,10 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			},
 		},
 	}}
-	args[1].APIOpts[utils.OptsRoutesLimit] = 1
-	args[1].APIOpts[utils.OptsRoutesOffset] = 1
-	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args[1].Tenant, args[1])
+	args := testRoutesArgs[1].Clone()
+	args.APIOpts[utils.OptsRoutesLimit] = 1
+	args.APIOpts[utils.OptsRoutesOffset] = 1
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args.Tenant, args)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1492,11 +485,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 }
 
 func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
-	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{
-		{
-			Value: true,
-		},
-	}
+	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{{Value: true}}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]interface{}{},
 	}
@@ -1532,496 +521,31 @@ func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 	}
 }
 
-func TestRoutesNewOptsGetRoutesMaxCost(t *testing.T) {
-	expTimeRoutes := time.Now().Add(20 * time.Minute)
-	expTimeStr := expTimeRoutes.Format(time.RFC3339)
-	var routeService *RouteService
-	sppTest := RouteProfilesWithWeight{
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfile1",
-				FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 10}},
-			},
-			Weight: 10,
-		},
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfile2",
-				FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route2",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 20}},
-						RouteParameters: "param2",
-					},
-					{
-						ID:              "route3",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						RouteParameters: "param3",
-					},
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 30}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 20}},
-			},
-			Weight: 20,
-		},
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfilePrefix",
-				FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 10}},
-			},
-			Weight: 10,
-		},
-	}
-	args := []*utils.CGREvent{
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route": "RouteProfilePrefix",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "CGR",
-			Event: map[string]interface{}{
-				"UsageInterval": "1s",
-				"PddInterval":   "1s",
-			},
-		},
-	}
-
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService = NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
-
-	fltrSupp1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
-	fltrSupp2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_2",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
-	fltrSupp3 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_3",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfilePrefix"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
-
-	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp.RouteProfile, true); err != nil {
-			t.Errorf("Error: %+v", err)
-		}
-	}
-	//Test each route profile from cache
-	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
-			spp.ID, true, true, utils.NonTransactional); err != nil {
-			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp.RouteProfile, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
-		}
-	}
-
-	routeService.cfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), args[0].Tenant, args[0])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[0], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
-	}
-
-	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), args[1].Tenant, args[1])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[1], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
-	}
-
-	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), args[2].Tenant, args[2])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[2], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf[0])
-	}
-}
-
 func TestRoutesMatchWithIndexFalse(t *testing.T) {
-	expTimeRoutes := time.Now().Add(20 * time.Minute)
-	expTimeStr := expTimeRoutes.Format(time.RFC3339)
-	var routeService *RouteService
-	sppTest := RouteProfilesWithWeight{
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfile1",
-				FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 10}},
-			},
-			Weight: 10,
-		},
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfile2",
-				FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route2",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 20}},
-						RouteParameters: "param2",
-					},
-					{
-						ID:              "route3",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						RouteParameters: "param3",
-					},
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 30}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 20}},
-			},
-			Weight: 20,
-		},
-		&RouteProfileWithWeight{
-			RouteProfile: &RouteProfile{
-				Tenant:            "cgrates.org",
-				ID:                "RouteProfilePrefix",
-				FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
-				Sorting:           utils.MetaWeight,
-				SortingParameters: []string{},
-				Routes: []*Route{
-					{
-						ID:              "route1",
-						FilterIDs:       []string{},
-						AccountIDs:      []string{},
-						RateProfileIDs:  []string{},
-						ResourceIDs:     []string{},
-						StatIDs:         []string{},
-						Weights:         utils.DynamicWeights{{Weight: 10}},
-						Blocker:         false,
-						RouteParameters: "param1",
-					},
-				},
-				Weights: utils.DynamicWeights{{Weight: 10}},
-			},
-			Weight: 10,
-		},
-	}
-	args := []*utils.CGREvent{
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route":          "RouteProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				utils.Weight:     "20.0",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event: map[string]interface{}{
-				"Route": "RouteProfilePrefix",
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			ID:     "CGR",
-			Event: map[string]interface{}{
-				"UsageInterval": "1s",
-				"PddInterval":   "1s",
-			},
-		},
-	}
-
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService = NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	cfg.RouteSCfg().IndexedSelects = false
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+	prepareRoutesData(t, dmSPP)
 
-	fltrSupp1 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile1"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.UsageInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"9.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
-	fltrSupp2 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_2",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfile2"},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: "~*req.PddInterval",
-				Values:  []string{(time.Second).String()},
-			},
-			{
-				Type:    utils.MetaGreaterOrEqual,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:  []string{"15.0"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
-	fltrSupp3 := &Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     "FLTR_SUPP_3",
-		Rules: []*FilterRule{
-			{
-				Type:    utils.MetaPrefix,
-				Element: "~*req.Route",
-				Values:  []string{"RouteProfilePrefix"},
-			},
-		},
-	}
-	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
-
-	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(context.Background(), spp.RouteProfile, true); err != nil {
-			t.Errorf("Error: %+v", err)
+	for i, spp := range testRoutesPrfs {
+		sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), testRoutesArgs[0].Tenant, testRoutesArgs[i])
+		if err != nil {
+			t.Fatal(err)
 		}
-	}
-	//Test each route profile from cache
-	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
-			spp.ID, true, true, utils.NonTransactional); err != nil {
-			t.Errorf("Error: %+v", err)
-		} else if !reflect.DeepEqual(spp.RouteProfile, tempSpp) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
+		if !reflect.DeepEqual(spp, sprf[0].RouteProfile) {
+			t.Errorf("Expecting: %+v, received: %+v", spp, sprf[0].RouteProfile)
 		}
-	}
-
-	routeService.cfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), args[0].Tenant, args[0])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[0], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
-	}
-
-	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), args[1].Tenant, args[1])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[1], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
-	}
-
-	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), args[2].Tenant, args[2])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(sppTest[2], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf[0])
 	}
 }
 
 func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
-	var routeService *RouteService
+	Cache.Clear(nil)
 	sppTest := []*RouteProfile{
 		&RouteProfile{
 			Tenant:  "cgrates.org",
@@ -2093,13 +617,13 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 3},
 	}
 
-	defaultCfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg.RouteSCfg().StringIndexedFields = nil
-	defaultCfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService = NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
+	cfg.RouteSCfg().StringIndexedFields = nil
+	cfg.RouteSCfg().PrefixIndexedFields = nil
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
 
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {

@@ -95,7 +95,7 @@ func TestProcessContentCallsLoadCache(t *testing.T) {
 	}
 	internalCacheSChann := make(chan birpc.ClientConnector, 1)
 	internalCacheSChann <- sMock
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCallsLoadCache",
 		bufLoaderData: make(map[string][]LoaderData),
@@ -189,7 +189,7 @@ func TestProcessContentCallsReloadCache(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock2
@@ -286,7 +286,7 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -389,7 +389,7 @@ func TestProcessContentCallsClear(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -499,7 +499,7 @@ func TestRemoveContentCallsReload(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -604,7 +604,7 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -709,7 +709,7 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -825,7 +825,7 @@ func TestRemoveContentCallsClear(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true)
+	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock

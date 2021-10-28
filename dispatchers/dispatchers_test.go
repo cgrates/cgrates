@@ -95,7 +95,7 @@ func TestDispatcherServiceDispatcherProfileForEventMIIDENotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{}
@@ -483,7 +483,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -529,7 +529,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -581,7 +581,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -627,7 +627,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -670,10 +670,11 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 }
 
 func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -717,10 +718,11 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 }
 
 func TestDispatcherServiceDispatchDspErr(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -758,11 +760,11 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 }
 
 func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
-	cacheInit := engine.Cache
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -773,13 +775,11 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	newCache := engine.NewCacheS(cfg, dm, nil)
 	value, errDsp := newDispatcher(dsp)
 	if errDsp != nil {
 		t.Fatal(errDsp)
 	}
 	ctx := &context.Context{}
-	engine.Cache = newCache
 	engine.Cache.Set(ctx, utils.CacheDispatchers, dsp.TenantID(), value, nil, true, utils.EmptyString)
 
 	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
@@ -805,14 +805,14 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	engine.Cache = cacheInit
 }
 
 func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -856,6 +856,7 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 }
 
 func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = true
 	connMng := engine.NewConnManager(cfg)
@@ -902,10 +903,11 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 }
 
 func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -953,7 +955,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	connMng := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -1017,7 +1019,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	chanRPC <- new(mockTypeConSetCache)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, chanRPC)
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
@@ -1064,7 +1066,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 
@@ -1132,7 +1134,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 
@@ -1200,7 +1202,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 
@@ -1266,7 +1268,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 
@@ -1332,7 +1334,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
+	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 

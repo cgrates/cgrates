@@ -128,7 +128,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 				ldrCfg.ConfigDBCfg().Host, ldrCfg.ConfigDBCfg().Port,
 				ldrCfg.ConfigDBCfg().Name, ldrCfg.ConfigDBCfg().User,
 				ldrCfg.ConfigDBCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
-				ldrCfg.ConfigDBCfg().Opts)
+				ldrCfg.ConfigDBCfg().Opts, nil)
 			if err != nil { // Cannot configure getter database, show stopper
 				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
 				return
@@ -347,7 +347,7 @@ func main() {
 			ldrCfg.DataDbCfg().Host, ldrCfg.DataDbCfg().Port,
 			ldrCfg.DataDbCfg().Name, ldrCfg.DataDbCfg().User,
 			ldrCfg.DataDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
-			ldrCfg.DataDbCfg().Opts); err != nil {
+			ldrCfg.DataDbCfg().Opts, ldrCfg.DataDbCfg().Items); err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
 		defer dataDB.Close()
@@ -359,7 +359,7 @@ func main() {
 			ldrCfg.StorDbCfg().Name, ldrCfg.StorDbCfg().User,
 			ldrCfg.StorDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
 			ldrCfg.StorDbCfg().StringIndexedFields, ldrCfg.StorDbCfg().PrefixIndexedFields,
-			ldrCfg.StorDbCfg().Opts); err != nil {
+			ldrCfg.StorDbCfg().Opts, ldrCfg.StorDbCfg().Items); err != nil {
 			log.Fatalf("Coud not open storDB connection: %s", err.Error())
 		}
 		defer storDB.Close()

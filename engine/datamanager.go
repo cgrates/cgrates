@@ -327,7 +327,7 @@ func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheR
 			}
 			if err != nil {
 				err = utils.CastRPCErr(err)
-				if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+				if err == utils.ErrNotFound && cacheWrite {
 					if errCh := Cache.Set(ctx, utils.CacheFilters, tntID, nil, nil,
 						cacheCommit(transactionID), transactionID); errCh != nil {
 						return nil, errCh
@@ -452,7 +452,7 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheThresholds, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -541,7 +541,7 @@ func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id stri
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheThresholdProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -695,7 +695,7 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 			}
 		}
 		if err != nil {
-			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -794,7 +794,7 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheStatQueueProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -878,6 +878,8 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 					return
 				}
 				err = dm.SetStatQueue(ctx, sq)
+				return
+			} else if errRs != nil {
 				return
 			}
 			// update the metrics if needed
@@ -973,7 +975,7 @@ func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cach
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheResources, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1062,7 +1064,7 @@ func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id strin
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheResourceProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1216,7 +1218,7 @@ func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, 
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheRouteProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1350,7 +1352,7 @@ func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id stri
 			}
 			if err != nil {
 				err = utils.CastRPCErr(err)
-				if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+				if err == utils.ErrNotFound && cacheWrite {
 					if errCh := Cache.Set(ctx, utils.CacheAttributeProfiles, tntID, nil, nil,
 						cacheCommit(transactionID), transactionID); errCh != nil {
 						return nil, errCh
@@ -1481,7 +1483,7 @@ func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheChargerProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1608,7 +1610,7 @@ func (dm *DataManager) GetDispatcherProfile(ctx *context.Context, tenant, id str
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheDispatcherProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1735,7 +1737,7 @@ func (dm *DataManager) GetDispatcherHost(ctx *context.Context, tenant, id string
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheDispatcherHosts, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -1823,7 +1825,7 @@ func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				for key := range loadIDs {
 					if errCh := Cache.Set(ctx, utils.CacheLoadIDs, key, nil, nil,
 						cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
@@ -1904,7 +1906,7 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheRateProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -2185,7 +2187,7 @@ func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+			if err == utils.ErrNotFound && cacheWrite {
 				if errCh := Cache.Set(ctx, utils.CacheActionProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
@@ -2306,7 +2308,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, idxK
 		}
 	}
 	if indexes, err = dm.DataDB().GetIndexesDrv(ctx, idxItmType, tntCtx, idxKey, transactionID); err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetIndexes,
 				&utils.GetIndexesArg{
@@ -2324,7 +2326,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, idxK
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite &&
-				idxKey != utils.EmptyString && dm.dataDB.GetStorageType() != utils.Internal {
+				idxKey != utils.EmptyString {
 				if errCh := Cache.Set(ctx, idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, []string{tntCtx},
 					true, utils.NonTransactional); errCh != nil {
 					return nil, errCh
@@ -2353,7 +2355,7 @@ func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx strin
 		indexes, commit, transactionID); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; itm.Replicate {
 		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache
@@ -2376,7 +2378,7 @@ func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx, i
 	if err = dm.DataDB().RemoveIndexesDrv(ctx, idxItmType, tntCtx, idxKey); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; itm.Replicate {
 		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache

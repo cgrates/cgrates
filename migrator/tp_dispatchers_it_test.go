@@ -75,7 +75,7 @@ func testTpDispITConnect(t *testing.T) {
 		tpDispCfgIn.StorDbCfg().Name, tpDispCfgIn.StorDbCfg().User,
 		tpDispCfgIn.StorDbCfg().Password, tpDispCfgIn.GeneralCfg().DBDataEncoding,
 		tpDispCfgIn.StorDbCfg().StringIndexedFields, tpDispCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpDispCfgIn.StorDbCfg().Opts)
+		tpDispCfgIn.StorDbCfg().Opts, tpDispCfgIn.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func testTpDispITConnect(t *testing.T) {
 		tpDispCfgOut.StorDbCfg().Name, tpDispCfgOut.StorDbCfg().User,
 		tpDispCfgOut.StorDbCfg().Password, tpDispCfgOut.GeneralCfg().DBDataEncoding,
 		tpDispCfgIn.StorDbCfg().StringIndexedFields, tpDispCfgIn.StorDbCfg().PrefixIndexedFields,
-		tpDispCfgOut.StorDbCfg().Opts)
+		tpDispCfgOut.StorDbCfg().Opts, tpDispCfgOut.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

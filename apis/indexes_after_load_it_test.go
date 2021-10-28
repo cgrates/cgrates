@@ -122,16 +122,16 @@ func testIdxLoadTariffPlan(t *testing.T) {
 
 func testIdxLoadCheckIndexes(t *testing.T) {
 	expected := []string{
+		"*string:*opts.*runID:balanceonly:RP_ABS_VOLUME2",
+		"*string:*opts.*runID:customers:RP_CUSTOMER1",
+		"*string:*opts.*runID:suppliers:RP_SUPPLIER1",
+		"*string:*opts.*runID:suppliers:RP_SUPPLIER2",
+		"*string:*opts.*runID:suppliers:RP_SUPPLIER3",
+		"*string:*opts.*runID:suppliers:RP_SUPPLIER4",
 		"*string:*req.RouteID:supplier1:RP_SUPPLIER1",
 		"*string:*req.RouteID:supplier2:RP_SUPPLIER2",
 		"*string:*req.RouteID:supplier3:RP_SUPPLIER3",
 		"*string:*req.RouteID:supplier4:RP_SUPPLIER4",
-		"*string:*req.RunID:balanceonly:RP_ABS_VOLUME2",
-		"*string:*req.RunID:customers:RP_CUSTOMER1",
-		"*string:*req.RunID:suppliers:RP_SUPPLIER1",
-		"*string:*req.RunID:suppliers:RP_SUPPLIER2",
-		"*string:*req.RunID:suppliers:RP_SUPPLIER3",
-		"*string:*req.RunID:suppliers:RP_SUPPLIER4",
 	}
 	//get indexes *rate_profiles
 	var reply []string

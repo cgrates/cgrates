@@ -37,8 +37,8 @@ var (
 	storageDb         Storage
 	dm3               *DataManager
 	versionsConfigDIR string
-
-	sTestsITVersions = []func(t *testing.T){
+	vrsCfg            *config.CGRConfig
+	sTestsITVersions  = []func(t *testing.T){
 		testInitConfig,
 		testInitDataDB,
 		testVersionsFlush,
@@ -67,28 +67,28 @@ func TestVersionsIT(t *testing.T) {
 }
 
 func testInitConfig(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
+	if vrsCfg, err = config.NewCGRConfigFromPath(context.Background(), path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testInitDataDB(t *testing.T) {
-	dbConn, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+	dbConn, err := NewDataDBConn(vrsCfg.DataDbCfg().Type,
+		vrsCfg.DataDbCfg().Host, vrsCfg.DataDbCfg().Port,
+		vrsCfg.DataDbCfg().Name, vrsCfg.DataDbCfg().User,
+		vrsCfg.DataDbCfg().Password, vrsCfg.GeneralCfg().DBDataEncoding,
+		vrsCfg.DataDbCfg().Opts, vrsCfg.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dm3 = NewDataManager(dbConn, cfg.CacheCfg(), nil)
+	dm3 = NewDataManager(dbConn, vrsCfg.CacheCfg(), nil)
 
-	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
-		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
+	storageDb, err = NewStorDBConn(vrsCfg.StorDbCfg().Type,
+		vrsCfg.StorDbCfg().Host, vrsCfg.StorDbCfg().Port,
+		vrsCfg.StorDbCfg().Name, vrsCfg.StorDbCfg().User,
+		vrsCfg.StorDbCfg().Password, vrsCfg.GeneralCfg().DBDataEncoding,
+		vrsCfg.StorDbCfg().StringIndexedFields, vrsCfg.StorDbCfg().PrefixIndexedFields,
+		vrsCfg.StorDbCfg().Opts, vrsCfg.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func testVersionsFlush(t *testing.T) {
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
 	}
-	if err := storageDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().Type)); err != nil {
+	if err := storageDb.Flush(path.Join(vrsCfg.DataFolderPath, "storage", vrsCfg.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 	SetDBVersions(storageDb)

@@ -227,10 +227,10 @@ func testDiamItResetAllDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(allCfg2); err != nil {
+	if err := engine.InitDataDB(allCfg2); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(allCfg2); err != nil {
+	if err := engine.InitStorDB(allCfg2); err != nil {
 		t.Fatal(err)
 	}
 }
