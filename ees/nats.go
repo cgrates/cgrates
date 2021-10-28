@@ -167,7 +167,7 @@ func GetNatsOpts(opts *config.EventExporterOpts, nodeID string, connTimeout time
 				ok := pool.AppendCertsFromPEM(rootPEM)
 				if !ok {
 					return fmt.Errorf("nats: failed to parse root certificate from %q",
-						opts.NATSCertificateAuthority)
+						*opts.NATSCertificateAuthority)
 				}
 				if o.TLSConfig == nil {
 					o.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
