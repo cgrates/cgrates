@@ -607,7 +607,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			      "type": "*fileCSV",									
                   "export_path": "/tmp/testCSV",			
 			      "opts": {
-					"kafkaGroupID": "test",
+					"awsSecret": "test",
 				  },											
 			      "timezone": "UTC",										
 			      "filters": [],										
@@ -641,7 +641,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.TypeCfg:       "*fileCSV",
 				utils.ExportPathCfg: "/tmp/testCSV",
 				utils.OptsCfg: map[string]interface{}{
-					utils.KafkaGroupID: "test",
+					utils.AWSSecret: "test",
 				},
 				utils.TimezoneCfg:           "UTC",
 				utils.FiltersCfg:            []string{},
@@ -870,12 +870,14 @@ func TestGetEventExporterJsonCfg(t *testing.T) {
 func TestGetEventExporterCfg(t *testing.T) {
 	d := []*EventExporterCfg{
 		{
-			ID: "EES_ID",
+			ID:   "EES_ID",
+			Opts: &EventExporterOpts{},
 		},
 	}
 
 	expected := &EventExporterCfg{
-		ID: "EES_ID",
+		ID:   "EES_ID",
+		Opts: &EventExporterOpts{},
 	}
 
 	rcv := getEventExporterCfg(d, "EES_ID")
@@ -885,13 +887,17 @@ func TestGetEventExporterCfg(t *testing.T) {
 
 	d = []*EventExporterCfg{
 		{
-			ID: "EES_ID2",
+			ID:   "EES_ID2",
+			Opts: &EventExporterOpts{},
 		},
 	}
 
 	rcv = getEventExporterCfg(d, "EES_ID")
-	if !reflect.DeepEqual(rcv, new(EventExporterCfg)) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(new(EventExporterCfg)), utils.ToJSON(rcv))
+	expected = &EventExporterCfg{
+		Opts: &EventExporterOpts{},
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
@@ -1048,7 +1054,11 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 		Enabled:         false,
 		AttributeSConns: []string{"*localhost"},
 		Cache:           map[string]*CacheParamCfg{},
-		Exporters:       []*EventExporterCfg{},
+		Exporters: []*EventExporterCfg{
+			{
+				Opts: &EventExporterOpts{},
+			},
+		},
 	}
 
 	v2 := &EEsCfg{
@@ -1061,7 +1071,8 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 		},
 		Exporters: []*EventExporterCfg{
 			{
-				ID: "EES_ID",
+				ID:   "EES_ID",
+				Opts: &EventExporterOpts{},
 			},
 		},
 	}
