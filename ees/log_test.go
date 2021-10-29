@@ -87,12 +87,14 @@ func TestLogEEPrepareMap(t *testing.T) {
 		t.Error(err)
 	}
 	logEE := NewLogEE(cfg.EEsCfg().GetDefaultExporter(), dc)
-	mp := map[string]interface{}{
-		"field1": 2,
-		"field2": "value",
+	mp := &utils.CGREvent{
+		Event: map[string]interface{}{
+			"field1": 2,
+			"field2": "value",
+		},
 	}
 	rcv, _ := logEE.PrepareMap(mp)
-	if !reflect.DeepEqual(rcv, mp) {
+	if !reflect.DeepEqual(rcv, mp.Event) {
 		t.Errorf("Expected %v \n but received \n %v", mp, rcv)
 	}
 }

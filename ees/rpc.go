@@ -88,7 +88,7 @@ func (e *RPCee) GetMetrics() (mp *utils.SafeMapStorage) {
 	return e.dc
 }
 
-func (e *RPCee) PrepareMap(mp map[string]interface{}) (interface{}, error) {
+func (e *RPCee) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
 	return mp, nil
 }
 

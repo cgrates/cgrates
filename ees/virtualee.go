@@ -42,7 +42,7 @@ func (vEe *VirtualEE) Connect() error                                          {
 func (vEe *VirtualEE) ExportEvent(*context.Context, interface{}, string) error { return nil }
 func (vEe *VirtualEE) Close() error                                            { return nil }
 func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage                       { return vEe.dc }
-func (vEe *VirtualEE) PrepareMap(map[string]interface{}) (interface{}, error)  { return nil, nil }
+func (vEe *VirtualEE) PrepareMap(mp *utils.CGREvent) (interface{}, error)      { return nil, nil }
 func (vEe *VirtualEE) PrepareOrderMap(*utils.OrderedNavigableMap) (interface{}, error) {
 	return nil, nil
 }
