@@ -297,10 +297,12 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts *config.EventReader
 	}
 
 	// outURL
-	processedOpt, populated := getProcessOptions(opts)
-	if !populated &&
-		len(outURL) == 0 {
-		return
+	processedOpt := getProcessOptions(opts)
+	if processedOpt == nil {
+		if len(outURL) == 0 {
+			return
+		}
+		processedOpt = new(config.EventExporterOpts)
 	}
 	var outUser, outPassword, outDBname, outSSL, outHost, outPort string
 	if len(outURL) == 0 {
