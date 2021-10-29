@@ -982,13 +982,13 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
 				utils.OptsCfg: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
+					utils.CSVFieldSepOpt:        ",",
+					utils.HeaderDefineCharOpt:   ":",
+					utils.CSVRowLengthOpt:       0,
+					utils.XMLRootPathOpt:        "",
+					utils.PartialOrderFieldOpt:  "~*req.AnswerTime",
 					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+					utils.NatsSubject:           "cgrates_cdrs",
 				},
 			},
 			{
@@ -1018,13 +1018,13 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.TenantCfg:        "~*req.Destination1",
 				utils.TimezoneCfg:      "",
 				utils.OptsCfg: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
+					utils.CSVFieldSepOpt:        ",",
+					utils.HeaderDefineCharOpt:   ":",
+					utils.CSVRowLengthOpt:       0,
+					utils.XMLRootPathOpt:        "",
+					utils.PartialOrderFieldOpt:  "~*req.AnswerTime",
 					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+					utils.NatsSubject:           "cgrates_cdrs",
 				},
 			},
 		},
@@ -1101,13 +1101,13 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.Usage", utils.TagCfg: "Usage", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.13"},
 				},
 				utils.OptsCfg: map[string]interface{}{
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
+					utils.CSVFieldSepOpt:        ",",
+					utils.HeaderDefineCharOpt:   ":",
+					utils.CSVRowLengthOpt:       0,
+					utils.XMLRootPathOpt:        "",
+					utils.PartialOrderFieldOpt:  "~*req.AnswerTime",
 					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+					utils.NatsSubject:           "cgrates_cdrs",
 				},
 			},
 			{
@@ -1148,13 +1148,13 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.TimezoneCfg:      "",
 				utils.OptsCfg: map[string]interface{}{
 					utils.KafkaGroupID:          "test",
-					"csvFieldSeparator":         ",",
-					"csvHeaderDefineChar":       ":",
-					"csvRowLength":              0.,
-					"xmlRootPath":               "",
-					"partialOrderField":         "~*req.AnswerTime",
+					utils.CSVFieldSepOpt:        ",",
+					utils.HeaderDefineCharOpt:   ":",
+					utils.CSVRowLengthOpt:       0,
+					utils.XMLRootPathOpt:        "",
+					utils.PartialOrderFieldOpt:  "~*req.AnswerTime",
 					utils.PartialCacheActionOpt: utils.MetaNone,
-					"natsSubject":               "cgrates_cdrs",
+					utils.NatsSubject:           "cgrates_cdrs",
 				},
 			},
 		},
@@ -1507,12 +1507,14 @@ func TestGetEventReaderJsonCfg(t *testing.T) {
 func TestGetEventReaderCfg(t *testing.T) {
 	d := []*EventReaderCfg{
 		{
-			ID: "ERS_ID",
+			ID:   "ERS_ID",
+			Opts: &EventReaderOpts{},
 		},
 	}
 
 	expected := &EventReaderCfg{
-		ID: "ERS_ID",
+		ID:   "ERS_ID",
+		Opts: &EventReaderOpts{},
 	}
 
 	rcv := getEventReaderCfg(d, "ERS_ID")
@@ -1522,13 +1524,17 @@ func TestGetEventReaderCfg(t *testing.T) {
 
 	d = []*EventReaderCfg{
 		{
-			ID: "ERS_ID2",
+			ID:   "ERS_ID2",
+			Opts: &EventReaderOpts{},
 		},
 	}
 
 	rcv = getEventReaderCfg(d, "ERS_ID")
-	if !reflect.DeepEqual(rcv, new(EventReaderCfg)) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(new(EventReaderCfg)), utils.ToJSON(rcv))
+	expected = &EventReaderCfg{
+		Opts: &EventReaderOpts{},
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
@@ -1660,7 +1666,8 @@ func TestDiffERsJsonCfg(t *testing.T) {
 		SessionSConns: []string{"*birpc"},
 		Readers: []*EventReaderCfg{
 			{
-				ID: "ERS_ID",
+				ID:   "ERS_ID",
+				Opts: &EventReaderOpts{},
 			},
 		},
 		PartialCacheTTL: 24 * time.Hour,
@@ -1671,7 +1678,8 @@ func TestDiffERsJsonCfg(t *testing.T) {
 		SessionSConns: []string{"*localhost"},
 		Readers: []*EventReaderCfg{
 			{
-				ID: "ERS_ID2",
+				ID:   "ERS_ID2",
+				Opts: &EventReaderOpts{},
 			},
 		},
 		PartialCacheTTL: 12 * time.Hour,
@@ -1701,7 +1709,8 @@ func TestErSCloneSection(t *testing.T) {
 		SessionSConns: []string{"*birpc"},
 		Readers: []*EventReaderCfg{
 			{
-				ID: "ERS_ID",
+				ID:   "ERS_ID",
+				Opts: &EventReaderOpts{},
 			},
 		},
 		PartialCacheTTL: 24 * time.Hour,
@@ -1712,14 +1721,14 @@ func TestErSCloneSection(t *testing.T) {
 		SessionSConns: []string{"*birpc"},
 		Readers: []*EventReaderCfg{
 			{
-				ID: "ERS_ID",
+				ID:   "ERS_ID",
+				Opts: &EventReaderOpts{},
 			},
 		},
 		PartialCacheTTL: 24 * time.Hour,
 	}
 
 	rcv := erSCfg.CloneSection()
-	rcv.(*ERsCfg).Readers[0].Opts = nil
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
