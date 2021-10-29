@@ -560,53 +560,143 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{
-		utils.CSVFieldSepOpt:           eeC.Opts.CSVFieldSeparator,
-		utils.ElsIndex:                 eeC.Opts.ElsIndex,
-		utils.ElsIfPrimaryTerm:         eeC.Opts.ElsIfPrimaryTerm,
-		utils.ElsIfSeqNo:               eeC.Opts.ElsIfSeqNo,
-		utils.ElsOpType:                eeC.Opts.ElsOpType,
-		utils.ElsPipeline:              eeC.Opts.ElsPipeline,
-		utils.ElsRouting:               eeC.Opts.ElsRouting,
-		utils.ElsTimeout:               eeC.Opts.ElsTimeout,
-		utils.ElsVersionLow:            eeC.Opts.ElsVersion,
-		utils.ElsVersionType:           eeC.Opts.ElsVersionType,
-		utils.ElsWaitForActiveShards:   eeC.Opts.ElsWaitForActiveShards,
-		utils.SQLMaxIdleConnsCfg:       eeC.Opts.SQLMaxIdleConns,
-		utils.SQLMaxOpenConns:          eeC.Opts.SQLMaxOpenConns,
-		utils.SQLConnMaxLifetime:       eeC.Opts.SQLConnMaxLifetime,
-		utils.SQLTableNameOpt:          eeC.Opts.SQLTableName,
-		utils.SQLDBNameOpt:             eeC.Opts.SQLDBName,
-		utils.SSLModeCfg:               eeC.Opts.SSLMode,
-		utils.KafkaTopic:               eeC.Opts.KafkaTopic,
-		utils.AMQPQueueID:              eeC.Opts.AMQPQueueID,
-		utils.AMQPRoutingKey:           eeC.Opts.AMQPRoutingKey,
-		utils.AMQPExchange:             eeC.Opts.AMQPExchange,
-		utils.AMQPExchangeType:         eeC.Opts.AMQPExchangeType,
-		utils.AWSRegion:                eeC.Opts.AWSRegion,
-		utils.AWSKey:                   eeC.Opts.AWSKey,
-		utils.AWSSecret:                eeC.Opts.AWSSecret,
-		utils.AWSToken:                 eeC.Opts.AWSToken,
-		utils.SQSQueueID:               eeC.Opts.SQSQueueID,
-		utils.S3Bucket:                 eeC.Opts.S3BucketID,
-		utils.S3FolderPath:             eeC.Opts.S3FolderPath,
-		utils.NatsJetStream:            eeC.Opts.NATSJetStream,
-		utils.NatsSubject:              eeC.Opts.NATSSubject,
-		utils.NatsJWTFile:              eeC.Opts.NATSJWTFile,
-		utils.NatsSeedFile:             eeC.Opts.NATSSeedFile,
-		utils.NatsCertificateAuthority: eeC.Opts.NATSCertificateAuthority,
-		utils.NatsClientCertificate:    eeC.Opts.NATSClientCertificate,
-		utils.NatsClientKey:            eeC.Opts.NATSClientKey,
-		utils.NatsJetStreamMaxWait:     eeC.Opts.NATSJetStreamMaxWait,
-		utils.RpcCodec:                 eeC.Opts.RPCCodec,
-		utils.ServiceMethod:            eeC.Opts.ServiceMethod,
-		utils.KeyPath:                  eeC.Opts.KeyPath,
-		utils.CertPath:                 eeC.Opts.CertPath,
-		utils.CaPath:                   eeC.Opts.CAPath,
-		utils.TLS:                      eeC.Opts.TLS,
-		utils.RpcConnTimeout:           eeC.Opts.RPCConnTimeout,
-		utils.RpcReplyTimeout:          eeC.Opts.RPCReplyTimeout,
+	opts := map[string]interface{}{}
+	if eeC.Opts.CSVFieldSeparator != nil {
+		opts[utils.CSVFieldSepOpt] = *eeC.Opts.CSVFieldSeparator
 	}
+	if eeC.Opts.ElsIndex != nil {
+		opts[utils.ElsIndex] = *eeC.Opts.ElsIndex
+	}
+	if eeC.Opts.ElsIfPrimaryTerm != nil {
+		opts[utils.ElsIfPrimaryTerm] = *eeC.Opts.ElsIfPrimaryTerm
+	}
+	if eeC.Opts.ElsIfSeqNo != nil {
+		opts[utils.ElsIfSeqNo] = *eeC.Opts.ElsIfSeqNo
+	}
+	if eeC.Opts.ElsOpType != nil {
+		opts[utils.ElsOpType] = *eeC.Opts.ElsOpType
+	}
+	if eeC.Opts.ElsPipeline != nil {
+		opts[utils.ElsPipeline] = *eeC.Opts.ElsPipeline
+	}
+	if eeC.Opts.ElsRouting != nil {
+		opts[utils.ElsRouting] = *eeC.Opts.ElsRouting
+	}
+	if eeC.Opts.ElsTimeout != nil {
+		opts[utils.ElsTimeout] = eeC.Opts.ElsTimeout.String()
+	}
+	if eeC.Opts.ElsVersion != nil {
+		opts[utils.ElsVersionLow] = *eeC.Opts.ElsVersion
+	}
+	if eeC.Opts.ElsVersionType != nil {
+		opts[utils.ElsVersionType] = *eeC.Opts.ElsVersionType
+	}
+	if eeC.Opts.ElsWaitForActiveShards != nil {
+		opts[utils.ElsWaitForActiveShards] = *eeC.Opts.ElsWaitForActiveShards
+	}
+	if eeC.Opts.SQLMaxIdleConns != nil {
+		opts[utils.SQLMaxIdleConnsCfg] = *eeC.Opts.SQLMaxIdleConns
+	}
+	if eeC.Opts.SQLMaxOpenConns != nil {
+		opts[utils.SQLMaxOpenConns] = *eeC.Opts.SQLMaxOpenConns
+	}
+	if eeC.Opts.SQLConnMaxLifetime != nil {
+		opts[utils.SQLConnMaxLifetime] = eeC.Opts.SQLConnMaxLifetime.String()
+	}
+	if eeC.Opts.SQLTableName != nil {
+		opts[utils.SQLTableNameOpt] = *eeC.Opts.SQLTableName
+	}
+	if eeC.Opts.SQLDBName != nil {
+		opts[utils.SQLDBNameOpt] = *eeC.Opts.SQLDBName
+	}
+	if eeC.Opts.SSLMode != nil {
+		opts[utils.SSLModeCfg] = *eeC.Opts.SSLMode
+	}
+	if eeC.Opts.KafkaTopic != nil {
+		opts[utils.KafkaTopic] = *eeC.Opts.KafkaTopic
+	}
+	if eeC.Opts.AMQPQueueID != nil {
+		opts[utils.AMQPQueueID] = *eeC.Opts.AMQPQueueID
+	}
+	if eeC.Opts.AMQPRoutingKey != nil {
+		opts[utils.AMQPRoutingKey] = *eeC.Opts.AMQPRoutingKey
+	}
+	if eeC.Opts.AMQPExchange != nil {
+		opts[utils.AMQPExchange] = *eeC.Opts.AMQPExchange
+	}
+	if eeC.Opts.AMQPExchangeType != nil {
+		opts[utils.AMQPExchangeType] = *eeC.Opts.AMQPExchangeType
+	}
+	if eeC.Opts.AWSRegion != nil {
+		opts[utils.AWSRegion] = *eeC.Opts.AWSRegion
+	}
+	if eeC.Opts.AWSKey != nil {
+		opts[utils.AWSKey] = *eeC.Opts.AWSKey
+	}
+	if eeC.Opts.AWSSecret != nil {
+		opts[utils.AWSSecret] = *eeC.Opts.AWSSecret
+	}
+	if eeC.Opts.AWSToken != nil {
+		opts[utils.AWSToken] = *eeC.Opts.AWSToken
+	}
+	if eeC.Opts.SQSQueueID != nil {
+		opts[utils.SQSQueueID] = *eeC.Opts.SQSQueueID
+	}
+	if eeC.Opts.S3BucketID != nil {
+		opts[utils.S3Bucket] = *eeC.Opts.S3BucketID
+	}
+	if eeC.Opts.S3FolderPath != nil {
+		opts[utils.S3FolderPath] = *eeC.Opts.S3FolderPath
+	}
+	if eeC.Opts.NATSJetStream != nil {
+		opts[utils.NatsJetStream] = *eeC.Opts.NATSJetStream
+	}
+	if eeC.Opts.NATSSubject != nil {
+		opts[utils.NatsSubject] = *eeC.Opts.NATSSubject
+	}
+	if eeC.Opts.NATSJWTFile != nil {
+		opts[utils.NatsJWTFile] = *eeC.Opts.NATSJWTFile
+	}
+	if eeC.Opts.NATSSeedFile != nil {
+		opts[utils.NatsSeedFile] = *eeC.Opts.NATSSeedFile
+	}
+	if eeC.Opts.NATSCertificateAuthority != nil {
+		opts[utils.NatsCertificateAuthority] = *eeC.Opts.NATSCertificateAuthority
+	}
+	if eeC.Opts.NATSClientCertificate != nil {
+		opts[utils.NatsClientCertificate] = *eeC.Opts.NATSClientCertificate
+	}
+	if eeC.Opts.NATSClientKey != nil {
+		opts[utils.NatsClientKey] = *eeC.Opts.NATSClientKey
+	}
+	if eeC.Opts.NATSJetStreamMaxWait != nil {
+		opts[utils.NatsJetStreamMaxWait] = eeC.Opts.NATSJetStreamMaxWait.String()
+	}
+	if eeC.Opts.RPCCodec != nil {
+		opts[utils.RpcCodec] = *eeC.Opts.RPCCodec
+	}
+	if eeC.Opts.ServiceMethod != nil {
+		opts[utils.ServiceMethod] = *eeC.Opts.ServiceMethod
+	}
+	if eeC.Opts.KeyPath != nil {
+		opts[utils.KeyPath] = *eeC.Opts.KeyPath
+	}
+	if eeC.Opts.CertPath != nil {
+		opts[utils.CertPath] = *eeC.Opts.CertPath
+	}
+	if eeC.Opts.CAPath != nil {
+		opts[utils.CaPath] = *eeC.Opts.CAPath
+	}
+	if eeC.Opts.TLS != nil {
+		opts[utils.TLS] = *eeC.Opts.TLS
+	}
+	if eeC.Opts.RPCConnTimeout != nil {
+		opts[utils.RpcConnTimeout] = eeC.Opts.RPCConnTimeout.String()
+	}
+	if eeC.Opts.RPCReplyTimeout != nil {
+		opts[utils.RpcReplyTimeout] = eeC.Opts.RPCReplyTimeout.String()
+	}
+
 	flgs := eeC.Flags.SliceFlags()
 	if flgs == nil {
 		flgs = []string{}
@@ -706,140 +796,365 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 	if d == nil {
 		d = new(EventExporterOptsJson)
 	}
-	if *v1.CSVFieldSeparator != *v2.CSVFieldSeparator {
-		d.CSVFieldSeparator = v2.CSVFieldSeparator
+	if v2.CSVFieldSeparator != nil {
+		if v1.CSVFieldSeparator == nil ||
+			*v1.CSVFieldSeparator != *v2.CSVFieldSeparator {
+			d.CSVFieldSeparator = v2.CSVFieldSeparator
+		}
+	} else {
+		d.CSVFieldSeparator = nil
 	}
-	if *v1.ElsIndex != *v2.ElsIndex {
-		d.ElsIndex = v2.ElsIndex
+	if v2.ElsIndex != nil {
+		if v1.ElsIndex == nil ||
+			*v1.ElsIndex != *v2.ElsIndex {
+			d.ElsIndex = v2.ElsIndex
+		}
+	} else {
+		d.ElsIndex = nil
 	}
-	if *v1.ElsIfPrimaryTerm != *v2.ElsIfPrimaryTerm {
-		d.ElsIfPrimaryTerm = v2.ElsIfPrimaryTerm
+	if v2.ElsIfPrimaryTerm != nil {
+		if v1.ElsIfPrimaryTerm == nil ||
+			*v1.ElsIfPrimaryTerm != *v2.ElsIfPrimaryTerm {
+			d.ElsIfPrimaryTerm = v2.ElsIfPrimaryTerm
+		}
+	} else {
+		d.ElsIfPrimaryTerm = nil
 	}
-	if *v1.ElsIfSeqNo != *v2.ElsIfSeqNo {
-		d.ElsIfSeqNo = v2.ElsIfSeqNo
+	if v2.ElsIfSeqNo != nil {
+		if v1.ElsIfSeqNo == nil ||
+			*v1.ElsIfSeqNo != *v2.ElsIfSeqNo {
+			d.ElsIfSeqNo = v2.ElsIfSeqNo
+		}
+	} else {
+		d.ElsIfSeqNo = nil
 	}
-	if *v1.ElsOpType != *v2.ElsOpType {
-		d.ElsOpType = v2.ElsOpType
+	if v2.ElsOpType != nil {
+		if v1.ElsOpType == nil ||
+			*v1.ElsOpType != *v2.ElsOpType {
+			d.ElsOpType = v2.ElsOpType
+		}
+	} else {
+		d.ElsOpType = nil
 	}
-	if *v1.ElsPipeline != *v2.ElsPipeline {
-		d.ElsPipeline = v2.ElsPipeline
+	if v2.ElsPipeline != nil {
+		if v1.ElsPipeline == nil ||
+			*v1.ElsPipeline != *v2.ElsPipeline {
+			d.ElsPipeline = v2.ElsPipeline
+		}
+	} else {
+		d.ElsPipeline = nil
 	}
-	if *v1.ElsRouting != *v2.ElsRouting {
-		d.ElsRouting = v2.ElsRouting
+	if v2.ElsRouting != nil {
+		if v1.ElsRouting == nil ||
+			*v1.ElsRouting != *v2.ElsRouting {
+			d.ElsRouting = v2.ElsRouting
+		}
+	} else {
+		d.ElsRouting = nil
 	}
-	if *v1.ElsTimeout != *v2.ElsTimeout {
-		d.ElsTimeout = utils.StringPointer(v2.ElsTimeout.String())
+	if v2.ElsTimeout != nil {
+		if v1.ElsTimeout == nil ||
+			*v1.ElsTimeout != *v2.ElsTimeout {
+			d.ElsTimeout = utils.StringPointer(v2.ElsTimeout.String())
+		}
+	} else {
+		d.ElsTimeout = nil
 	}
-	if *v1.ElsVersion != *v2.ElsVersion {
-		d.ElsVersion = v2.ElsVersion
+	if v2.ElsVersion != nil {
+		if v1.ElsVersion == nil ||
+			*v1.ElsVersion != *v2.ElsVersion {
+			d.ElsVersion = v2.ElsVersion
+		}
+	} else {
+		d.ElsVersion = nil
 	}
-	if *v1.ElsVersionType != *v2.ElsVersionType {
-		d.ElsVersionType = v2.ElsVersionType
+	if v2.ElsVersionType != nil {
+		if v1.ElsVersionType == nil ||
+			*v1.ElsVersionType != *v2.ElsVersionType {
+			d.ElsVersionType = v2.ElsVersionType
+		}
+	} else {
+		d.ElsVersionType = nil
 	}
-	if *v1.ElsWaitForActiveShards != *v2.ElsWaitForActiveShards {
-		d.ElsWaitForActiveShards = v2.ElsWaitForActiveShards
+	if v2.ElsWaitForActiveShards != nil {
+		if v1.ElsWaitForActiveShards == nil ||
+			*v1.ElsWaitForActiveShards != *v2.ElsWaitForActiveShards {
+			d.ElsWaitForActiveShards = v2.ElsWaitForActiveShards
+		}
+	} else {
+		d.ElsWaitForActiveShards = nil
 	}
-	if *v1.SQLMaxIdleConns != *v2.SQLMaxIdleConns {
-		d.SQLMaxIdleConns = v2.SQLMaxIdleConns
+	if v2.SQLMaxIdleConns != nil {
+		if v1.SQLMaxIdleConns == nil ||
+			*v1.SQLMaxIdleConns != *v2.SQLMaxIdleConns {
+			d.SQLMaxIdleConns = v2.SQLMaxIdleConns
+		}
+	} else {
+		d.SQLMaxIdleConns = nil
 	}
-	if *v1.SQLMaxOpenConns != *v2.SQLMaxOpenConns {
-		d.SQLMaxOpenConns = v2.SQLMaxOpenConns
+	if v2.SQLMaxOpenConns != nil {
+		if v1.SQLMaxOpenConns == nil ||
+			*v1.SQLMaxOpenConns != *v2.SQLMaxOpenConns {
+			d.SQLMaxOpenConns = v2.SQLMaxOpenConns
+		}
+	} else {
+		d.SQLMaxOpenConns = nil
 	}
-	if *v1.SQLConnMaxLifetime != *v2.SQLConnMaxLifetime {
-		d.SQLConnMaxLifetime = utils.StringPointer(v2.SQLConnMaxLifetime.String())
+	if v2.SQLConnMaxLifetime != nil {
+		if v1.SQLConnMaxLifetime == nil ||
+			*v1.SQLConnMaxLifetime != *v2.SQLConnMaxLifetime {
+			d.SQLConnMaxLifetime = utils.StringPointer(v2.SQLConnMaxLifetime.String())
+		}
+	} else {
+		d.SQLConnMaxLifetime = nil
 	}
-	if *v1.SQLTableName != *v2.SQLTableName {
-		d.SQLTableName = v2.SQLTableName
+	if v2.SQLTableName != nil {
+		if v1.SQLTableName == nil ||
+			*v1.SQLTableName != *v2.SQLTableName {
+			d.SQLTableName = v2.SQLTableName
+		}
+	} else {
+		d.SQLTableName = nil
 	}
-	if *v1.SQLDBName != *v2.SQLDBName {
-		d.SQLDBName = v2.SQLDBName
+	if v2.SQLDBName != nil {
+		if v1.SQLDBName == nil ||
+			*v1.SQLDBName != *v2.SQLDBName {
+			d.SQLDBName = v2.SQLDBName
+		}
+	} else {
+		d.SQLDBName = nil
 	}
-	if *v1.SSLMode != *v2.SSLMode {
-		d.SSLMode = v2.SSLMode
+	if v2.SSLMode != nil {
+		if v1.SSLMode == nil ||
+			*v1.SSLMode != *v2.SSLMode {
+			d.SSLMode = v2.SSLMode
+		}
+	} else {
+		d.SSLMode = nil
 	}
-	if *v1.KafkaTopic != *v2.KafkaTopic {
-		d.KafkaTopic = v2.KafkaTopic
+	if v2.KafkaTopic != nil {
+		if v1.KafkaTopic == nil ||
+			*v1.KafkaTopic != *v2.KafkaTopic {
+			d.KafkaTopic = v2.KafkaTopic
+		}
+	} else {
+		d.KafkaTopic = nil
 	}
-	if *v1.AMQPQueueID != *v2.AMQPQueueID {
-		d.AMQPQueueID = v2.AMQPQueueID
+	if v2.AMQPQueueID != nil {
+		if v1.AMQPQueueID == nil ||
+			*v1.AMQPQueueID != *v2.AMQPQueueID {
+			d.AMQPQueueID = v2.AMQPQueueID
+		}
+	} else {
+		d.AMQPQueueID = nil
 	}
-	if *v1.AMQPRoutingKey != *v2.AMQPRoutingKey {
-		d.AMQPRoutingKey = v2.AMQPRoutingKey
+	if v2.AMQPRoutingKey != nil {
+		if v1.AMQPRoutingKey == nil ||
+			*v1.AMQPRoutingKey != *v2.AMQPRoutingKey {
+			d.AMQPRoutingKey = v2.AMQPRoutingKey
+		}
+	} else {
+		d.AMQPRoutingKey = nil
 	}
-	if *v1.AMQPExchange != *v2.AMQPExchange {
-		d.AMQPExchange = v2.AMQPExchange
+	if v2.AMQPExchange != nil {
+		if v1.AMQPExchange == nil ||
+			*v1.AMQPExchange != *v2.AMQPExchange {
+			d.AMQPExchange = v2.AMQPExchange
+		}
+	} else {
+		d.AMQPExchange = nil
 	}
-	if *v1.AMQPExchangeType != *v2.AMQPExchangeType {
-		d.AMQPExchangeType = v2.AMQPExchangeType
+	if v2.AMQPExchangeType != nil {
+		if v1.AMQPExchangeType == nil ||
+			*v1.AMQPExchangeType != *v2.AMQPExchangeType {
+			d.AMQPExchangeType = v2.AMQPExchangeType
+		}
+	} else {
+		d.AMQPExchangeType = nil
 	}
-	if *v1.AWSRegion != *v2.AWSRegion {
-		d.AWSRegion = v2.AWSRegion
+	if v2.AWSRegion != nil {
+		if v1.AWSRegion == nil ||
+			*v1.AWSRegion != *v2.AWSRegion {
+			d.AWSRegion = v2.AWSRegion
+		}
+	} else {
+		d.AWSRegion = nil
 	}
-	if *v1.AWSKey != *v2.AWSKey {
-		d.AWSKey = v2.AWSKey
+	if v2.AWSKey != nil {
+		if v1.AWSKey == nil ||
+			*v1.AWSKey != *v2.AWSKey {
+			d.AWSKey = v2.AWSKey
+		}
+	} else {
+		d.AWSKey = nil
 	}
-	if *v1.AWSSecret != *v2.AWSSecret {
-		d.AWSSecret = v2.AWSSecret
+	if v2.AWSSecret != nil {
+		if v1.AWSSecret == nil ||
+			*v1.AWSSecret != *v2.AWSSecret {
+			d.AWSSecret = v2.AWSSecret
+		}
+	} else {
+		d.AWSSecret = nil
 	}
-	if *v1.AWSToken != *v2.AWSToken {
-		d.AWSToken = v2.AWSToken
+	if v2.AWSToken != nil {
+		if v1.AWSToken == nil ||
+			*v1.AWSToken != *v2.AWSToken {
+			d.AWSToken = v2.AWSToken
+		}
+	} else {
+		d.AWSToken = nil
 	}
-	if *v1.SQSQueueID != *v2.SQSQueueID {
-		d.SQSQueueID = v2.SQSQueueID
+	if v2.SQSQueueID != nil {
+		if v1.SQSQueueID == nil ||
+			*v1.SQSQueueID != *v2.SQSQueueID {
+			d.SQSQueueID = v2.SQSQueueID
+		}
+	} else {
+		d.SQSQueueID = nil
 	}
-	if *v1.S3BucketID != *v2.S3BucketID {
-		d.S3BucketID = v2.S3BucketID
+	if v2.S3BucketID != nil {
+		if v1.S3BucketID == nil ||
+			*v1.S3BucketID != *v2.S3BucketID {
+			d.S3BucketID = v2.S3BucketID
+		}
+	} else {
+		d.S3BucketID = nil
 	}
-	if *v1.S3FolderPath != *v2.S3FolderPath {
-		d.S3FolderPath = v2.S3FolderPath
+	if v2.S3FolderPath != nil {
+		if v1.S3FolderPath == nil ||
+			*v1.S3FolderPath != *v2.S3FolderPath {
+			d.S3FolderPath = v2.S3FolderPath
+		}
+	} else {
+		d.S3FolderPath = nil
 	}
-	if *v1.NATSJetStream != *v2.NATSJetStream {
-		d.NATSJetStream = v2.NATSJetStream
+	if v2.NATSJetStream != nil {
+		if v1.NATSJetStream == nil ||
+			*v1.NATSJetStream != *v2.NATSJetStream {
+			d.NATSJetStream = v2.NATSJetStream
+		}
+	} else {
+		d.NATSJetStream = nil
 	}
-	if *v1.NATSSubject != *v2.NATSSubject {
-		d.NATSSubject = v2.NATSSubject
+	if v2.NATSSubject != nil {
+		if v1.NATSSubject == nil ||
+			*v1.NATSSubject != *v2.NATSSubject {
+			d.NATSSubject = v2.NATSSubject
+		}
+	} else {
+		d.NATSSubject = nil
 	}
-	if *v1.NATSJWTFile != *v2.NATSJWTFile {
-		d.NATSJWTFile = v2.NATSJWTFile
+	if v2.NATSJWTFile != nil {
+		if v1.NATSJWTFile == nil ||
+			*v1.NATSJWTFile != *v2.NATSJWTFile {
+			d.NATSJWTFile = v2.NATSJWTFile
+		}
+	} else {
+		d.NATSJWTFile = nil
 	}
-	if *v1.NATSSeedFile != *v2.NATSSeedFile {
-		d.NATSSeedFile = v2.NATSSeedFile
+	if v2.NATSSeedFile != nil {
+		if v1.NATSSeedFile == nil ||
+			*v1.NATSSeedFile != *v2.NATSSeedFile {
+			d.NATSSeedFile = v2.NATSSeedFile
+		}
+	} else {
+		d.NATSSeedFile = nil
 	}
-	if *v1.NATSCertificateAuthority != *v2.NATSCertificateAuthority {
-		d.NATSCertificateAuthority = v2.NATSCertificateAuthority
+	if v2.NATSCertificateAuthority != nil {
+		if v1.NATSCertificateAuthority == nil ||
+			*v1.NATSCertificateAuthority != *v2.NATSCertificateAuthority {
+			d.NATSCertificateAuthority = v2.NATSCertificateAuthority
+		}
+	} else {
+		d.NATSCertificateAuthority = nil
 	}
-	if *v1.NATSClientCertificate != *v2.NATSClientCertificate {
-		d.NATSClientCertificate = v2.NATSClientCertificate
+	if v2.NATSClientCertificate != nil {
+		if v1.NATSClientCertificate == nil ||
+			*v1.NATSClientCertificate != *v2.NATSClientCertificate {
+			d.NATSClientCertificate = v2.NATSClientCertificate
+		}
+	} else {
+		d.NATSClientCertificate = nil
 	}
-	if *v1.NATSClientKey != *v2.NATSClientKey {
-		d.NATSClientKey = v2.NATSClientKey
+	if v2.NATSClientKey != nil {
+		if v1.NATSClientKey == nil ||
+			*v1.NATSClientKey != *v2.NATSClientKey {
+			d.NATSClientKey = v2.NATSClientKey
+		}
+	} else {
+		d.NATSClientKey = nil
 	}
-	if *v1.NATSJetStreamMaxWait != *v2.NATSJetStreamMaxWait {
-		d.NATSJetStreamMaxWait = utils.StringPointer(v2.NATSJetStreamMaxWait.String())
+	if v2.NATSJetStreamMaxWait != nil {
+		if v1.NATSJetStreamMaxWait == nil ||
+			*v1.NATSJetStreamMaxWait != *v2.NATSJetStreamMaxWait {
+			d.NATSJetStreamMaxWait = utils.StringPointer(v2.NATSJetStreamMaxWait.String())
+		}
+	} else {
+		d.NATSJetStreamMaxWait = nil
 	}
-	if *v1.RPCCodec != *v2.RPCCodec {
-		d.RPCCodec = v2.RPCCodec
+	if v2.RPCCodec != nil {
+		if v1.RPCCodec == nil ||
+			*v1.RPCCodec != *v2.RPCCodec {
+			d.RPCCodec = v2.RPCCodec
+		}
+	} else {
+		d.RPCCodec = nil
 	}
-	if *v1.ServiceMethod != *v2.ServiceMethod {
-		d.ServiceMethod = v2.ServiceMethod
+	if v2.ServiceMethod != nil {
+		if v1.ServiceMethod == nil ||
+			*v1.ServiceMethod != *v2.ServiceMethod {
+			d.ServiceMethod = v2.ServiceMethod
+		}
+	} else {
+		d.ServiceMethod = nil
 	}
-	if *v1.KeyPath != *v2.KeyPath {
-		d.KeyPath = v2.KeyPath
+	if v2.KeyPath != nil {
+		if v1.KeyPath == nil ||
+			*v1.KeyPath != *v2.KeyPath {
+			d.KeyPath = v2.KeyPath
+		}
+	} else {
+		d.KeyPath = nil
 	}
-	if *v1.CertPath != *v2.CertPath {
-		d.CertPath = v2.CertPath
+	if v2.CertPath != nil {
+		if v1.CertPath == nil ||
+			*v1.CertPath != *v2.CertPath {
+			d.CertPath = v2.CertPath
+		}
+	} else {
+		d.CertPath = nil
 	}
-	if *v1.CAPath != *v2.CAPath {
-		d.CAPath = v2.CAPath
+	if v2.CAPath != nil {
+		if v1.CAPath == nil ||
+			*v1.CAPath != *v2.CAPath {
+			d.CAPath = v2.CAPath
+		}
+	} else {
+		d.CAPath = nil
 	}
-	if *v1.TLS != *v2.TLS {
-		d.TLS = v2.TLS
+	if v2.TLS != nil {
+		if v1.TLS == nil ||
+			*v1.TLS != *v2.TLS {
+			d.TLS = v2.TLS
+		}
+	} else {
+		d.TLS = nil
 	}
-	if *v1.RPCConnTimeout != *v2.RPCConnTimeout {
-		d.RPCConnTimeout = utils.StringPointer(v2.RPCConnTimeout.String())
+	if v2.RPCConnTimeout != nil {
+		if v1.RPCConnTimeout == nil ||
+			*v1.RPCConnTimeout != *v2.RPCConnTimeout {
+			d.RPCConnTimeout = utils.StringPointer(v2.RPCConnTimeout.String())
+		}
+	} else {
+		d.RPCConnTimeout = nil
 	}
-	if *v1.RPCReplyTimeout != *v2.RPCReplyTimeout {
-		d.RPCReplyTimeout = utils.StringPointer(v2.RPCReplyTimeout.String())
+	if v2.RPCReplyTimeout != nil {
+		if v1.RPCReplyTimeout == nil ||
+			*v1.RPCReplyTimeout != *v2.RPCReplyTimeout {
+			d.RPCReplyTimeout = utils.StringPointer(v2.RPCReplyTimeout.String())
+		}
+	} else {
+		d.RPCReplyTimeout = nil
 	}
 	return d
 }
@@ -913,7 +1228,9 @@ func getEventExporterCfg(d []*EventExporterCfg, id string) *EventExporterCfg {
 			return v
 		}
 	}
-	return new(EventExporterCfg)
+	return &EventExporterCfg{
+		Opts: &EventExporterOpts{},
+	}
 }
 
 func diffEventExportersJsonCfg(d *[]*EventExporterJsonCfg, v1, v2 []*EventExporterCfg, separator string) *[]*EventExporterJsonCfg {
