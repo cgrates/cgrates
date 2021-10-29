@@ -36,7 +36,7 @@ type EventExporter interface {
 	ExportEvent(*context.Context, interface{}, string) error // called on each event to be exported
 	Close() error                                            // called when the exporter needs to terminate
 	GetMetrics() *utils.SafeMapStorage                       // called to get metrics
-	PrepareMap(map[string]interface{}) (interface{}, error)
+	PrepareMap(*utils.CGREvent) (interface{}, error)
 	PrepareOrderMap(*utils.OrderedNavigableMap) (interface{}, error)
 }
 
@@ -217,8 +217,8 @@ func updateEEMetrics(dc *utils.SafeMapStorage, cgrID string, ev engine.MapEvent,
 
 type bytePreparing struct{}
 
-func (bytePreparing) PrepareMap(mp map[string]interface{}) (interface{}, error) {
-	return json.Marshal(mp)
+func (bytePreparing) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+	return json.Marshal(mp.Event)
 }
 func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
 	valMp := make(map[string]interface{})
@@ -233,9 +233,9 @@ func (bytePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}
 
 type slicePreparing struct{}
 
-func (slicePreparing) PrepareMap(mp map[string]interface{}) (interface{}, error) {
-	csvRecord := make([]string, 0, len(mp))
-	for _, val := range mp {
+func (slicePreparing) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
+	csvRecord := make([]string, 0, len(mp.Event))
+	for _, val := range mp.Event {
 		csvRecord = append(csvRecord, utils.IfaceAsString(val))
 	}
 	return csvRecord, nil

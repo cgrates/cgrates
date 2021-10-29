@@ -254,7 +254,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, ev *utils.
 	exp.GetMetrics().MapStorage[utils.NumberOfEvents] = exp.GetMetrics().MapStorage[utils.NumberOfEvents].(int64) + 1
 	exp.GetMetrics().Unlock()
 	if len(exp.Cfg().ContentFields()) == 0 {
-		if eEv, err = exp.PrepareMap(ev.Event); err != nil {
+		if eEv, err = exp.PrepareMap(ev); err != nil {
 			return
 		}
 	} else {
