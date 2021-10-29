@@ -42,6 +42,7 @@ func newActHTTPPost(cfg *config.CGRConfig, aCfg *engine.APAction) (aL *actHTTPPo
 			ExportPath:     actD.Path,
 			Attempts:       aL.config.GeneralCfg().PosterAttempts,
 			FailedPostsDir: cfg.GeneralCfg().FailedPostsDir,
+			Opts:           &config.EventExporterOpts{},
 		}, cfg, nil, nil)
 	}
 	return
