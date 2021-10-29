@@ -203,10 +203,12 @@ func (rdr *AMQPv1ER) close() (err error) {
 }
 
 func (rdr *AMQPv1ER) createPoster() {
-	processedOpt, populated := getProcessOptions(rdr.Config().Opts)
-	if !populated &&
-		len(rdr.Config().ProcessedPath) == 0 {
-		return
+	processedOpt := getProcessOptions(rdr.Config().Opts)
+	if processedOpt == nil {
+		if len(rdr.Config().ProcessedPath) == 0 {
+			return
+		}
+		processedOpt = new(config.EventExporterOpts)
 	}
 	rdr.poster = ees.NewAMQPv1EE(&config.EventExporterCfg{
 		ID:             rdr.Config().ID,

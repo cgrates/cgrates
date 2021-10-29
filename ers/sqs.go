@@ -217,10 +217,12 @@ func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
 }
 
 func (rdr *SQSER) createPoster() {
-	processedOpt, populated := getProcessOptions(rdr.Config().Opts)
-	if !populated &&
-		len(rdr.Config().ProcessedPath) == 0 {
-		return
+	processedOpt := getProcessOptions(rdr.Config().Opts)
+	if processedOpt == nil {
+		if len(rdr.Config().ProcessedPath) == 0 {
+			return
+		}
+		processedOpt = new(config.EventExporterOpts)
 	}
 	rdr.poster = ees.NewSQSee(&config.EventExporterCfg{
 		ID:             rdr.Config().ID,
