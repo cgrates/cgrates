@@ -581,67 +581,186 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	opts := map[string]interface{}{
-		utils.PartialPathOpt:                       er.Opts.PartialPath,
-		utils.PartialCacheActionOpt:                er.Opts.PartialCacheAction,
-		utils.PartialOrderFieldOpt:                 er.Opts.PartialOrderField,
-		utils.PartialCSVFieldSepartorOpt:           er.Opts.PartialCSVFieldSeparator,
-		utils.CSVRowLengthOpt:                      er.Opts.CSVRowLength,
-		utils.CSVFieldSepOpt:                       er.Opts.CSVFieldSeparator,
-		utils.HeaderDefineCharOpt:                  er.Opts.CSVHeaderDefineChar,
-		utils.CSVLazyQuotes:                        er.Opts.CSVLazyQuotes,
-		utils.XMLRootPathOpt:                       er.Opts.XMLRootPath,
-		utils.AMQPQueueID:                          er.Opts.AMQPQueueID,
-		utils.AMQPQueueIDProcessedCfg:              er.Opts.AMQPQueueIDProcessed,
-		utils.AMQPConsumerTag:                      er.Opts.AMQPConsumerTag,
-		utils.AMQPExchange:                         er.Opts.AMQPExchange,
-		utils.AMQPExchangeType:                     er.Opts.AMQPExchangeType,
-		utils.AMQPRoutingKey:                       er.Opts.AMQPRoutingKey,
-		utils.AMQPExchangeProcessedCfg:             er.Opts.AMQPExchangeProcessed,
-		utils.AMQPExchangeTypeProcessedCfg:         er.Opts.AMQPExchangeTypeProcessed,
-		utils.AMQPRoutingKeyProcessedCfg:           er.Opts.AMQPRoutingKeyProcessed,
-		utils.KafkaTopic:                           er.Opts.KafkaTopic,
-		utils.KafkaGroupID:                         er.Opts.KafkaGroupID,
-		utils.KafkaMaxWait:                         er.Opts.KafkaMaxWait,
-		utils.KafkaTopicProcessedCfg:               er.Opts.KafkaTopicProcessed,
-		utils.SQLDBNameOpt:                         er.Opts.SQLDBName,
-		utils.SQLTableNameOpt:                      er.Opts.SQLTableName,
-		utils.SSLModeCfg:                           er.Opts.SSLMode,
-		utils.SQLDBNameProcessedCfg:                er.Opts.SQLDBNameProcessed,
-		utils.SQLTableNameProcessedCfg:             er.Opts.SQLTableNameProcessed,
-		utils.SSLModeProcessedCfg:                  er.Opts.SSLModeProcessed,
-		utils.AWSRegion:                            er.Opts.AWSRegion,
-		utils.AWSKey:                               er.Opts.AWSKey,
-		utils.AWSSecret:                            er.Opts.AWSSecret,
-		utils.AWSToken:                             er.Opts.AWSToken,
-		utils.AWSRegionProcessedCfg:                er.Opts.AWSRegionProcessed,
-		utils.AWSKeyProcessedCfg:                   er.Opts.AWSKeyProcessed,
-		utils.AWSSecretProcessedCfg:                er.Opts.AWSSecretProcessed,
-		utils.AWSTokenProcessedCfg:                 er.Opts.AWSTokenProcessed,
-		utils.SQSQueueID:                           er.Opts.SQSQueueID,
-		utils.SQSQueueIDProcessedCfg:               er.Opts.SQSQueueIDProcessed,
-		utils.S3Bucket:                             er.Opts.S3BucketID,
-		utils.S3FolderPathProcessedCfg:             er.Opts.S3FolderPathProcessed,
-		utils.S3BucketIDProcessedCfg:               er.Opts.S3BucketIDProcessed,
-		utils.NatsJetStream:                        er.Opts.NATSJetStream,
-		utils.NatsConsumerName:                     er.Opts.NATSConsumerName,
-		utils.NatsSubject:                          er.Opts.NATSSubject,
-		utils.NatsQueueID:                          er.Opts.NATSQueueID,
-		utils.NatsJWTFile:                          er.Opts.NATSJWTFile,
-		utils.NatsSeedFile:                         er.Opts.NATSSeedFile,
-		utils.NatsCertificateAuthority:             er.Opts.NATSCertificateAuthority,
-		utils.NatsClientCertificate:                er.Opts.NATSClientCertificate,
-		utils.NatsClientKey:                        er.Opts.NATSClientKey,
-		utils.NatsJetStreamMaxWait:                 er.Opts.NATSJetStreamMaxWait,
-		utils.NATSJetStreamProcessedCfg:            er.Opts.NATSJetStreamProcessed,
-		utils.NATSSubjectProcessedCfg:              er.Opts.NATSSubjectProcessed,
-		utils.NATSJWTFileProcessedCfg:              er.Opts.NATSJWTFileProcessed,
-		utils.NATSSeedFileProcessedCfg:             er.Opts.NATSSeedFileProcessed,
-		utils.NATSCertificateAuthorityProcessedCfg: er.Opts.NATSCertificateAuthorityProcessed,
-		utils.NATSClientCertificateProcessed:       er.Opts.NATSClientCertificateProcessed,
-		utils.NATSClientKeyProcessedCfg:            er.Opts.NATSClientKeyProcessed,
-		utils.NATSJetStreamMaxWaitProcessedCfg:     er.Opts.NATSJetStreamMaxWaitProcessed,
+	opts := map[string]interface{}{}
+
+	if er.Opts.PartialPath != nil {
+		opts[utils.PartialPathOpt] = *er.Opts.PartialPath
 	}
+	if er.Opts.PartialCacheAction != nil {
+		opts[utils.PartialCacheActionOpt] = *er.Opts.PartialCacheAction
+	}
+	if er.Opts.PartialOrderField != nil {
+		opts[utils.PartialOrderFieldOpt] = *er.Opts.PartialOrderField
+	}
+	if er.Opts.PartialCSVFieldSeparator != nil {
+		opts[utils.PartialCSVFieldSepartorOpt] = *er.Opts.PartialCSVFieldSeparator
+	}
+	if er.Opts.CSVRowLength != nil {
+		opts[utils.CSVRowLengthOpt] = *er.Opts.CSVRowLength
+	}
+	if er.Opts.CSVFieldSeparator != nil {
+		opts[utils.CSVFieldSepOpt] = *er.Opts.CSVFieldSeparator
+	}
+	if er.Opts.CSVHeaderDefineChar != nil {
+		opts[utils.HeaderDefineCharOpt] = *er.Opts.CSVHeaderDefineChar
+	}
+	if er.Opts.CSVLazyQuotes != nil {
+		opts[utils.CSVLazyQuotes] = *er.Opts.CSVLazyQuotes
+	}
+	if er.Opts.XMLRootPath != nil {
+		opts[utils.XMLRootPathOpt] = *er.Opts.XMLRootPath
+	}
+	if er.Opts.AMQPQueueID != nil {
+		opts[utils.AMQPQueueID] = *er.Opts.AMQPQueueID
+	}
+	if er.Opts.AMQPQueueIDProcessed != nil {
+		opts[utils.AMQPQueueIDProcessedCfg] = *er.Opts.AMQPQueueIDProcessed
+	}
+	if er.Opts.AMQPConsumerTag != nil {
+		opts[utils.AMQPConsumerTag] = *er.Opts.AMQPConsumerTag
+	}
+	if er.Opts.AMQPExchange != nil {
+		opts[utils.AMQPExchange] = *er.Opts.AMQPExchange
+	}
+	if er.Opts.AMQPExchangeType != nil {
+		opts[utils.AMQPExchangeType] = *er.Opts.AMQPExchangeType
+	}
+	if er.Opts.AMQPRoutingKey != nil {
+		opts[utils.AMQPRoutingKey] = *er.Opts.AMQPRoutingKey
+	}
+	if er.Opts.AMQPExchangeProcessed != nil {
+		opts[utils.AMQPExchangeProcessedCfg] = *er.Opts.AMQPExchangeProcessed
+	}
+	if er.Opts.AMQPExchangeTypeProcessed != nil {
+		opts[utils.AMQPExchangeTypeProcessedCfg] = *er.Opts.AMQPExchangeTypeProcessed
+	}
+	if er.Opts.AMQPRoutingKeyProcessed != nil {
+		opts[utils.AMQPRoutingKeyProcessedCfg] = *er.Opts.AMQPRoutingKeyProcessed
+	}
+	if er.Opts.KafkaTopic != nil {
+		opts[utils.KafkaTopic] = *er.Opts.KafkaTopic
+	}
+	if er.Opts.KafkaGroupID != nil {
+		opts[utils.KafkaGroupID] = *er.Opts.KafkaGroupID
+	}
+	if er.Opts.KafkaMaxWait != nil {
+		opts[utils.KafkaMaxWait] = er.Opts.KafkaMaxWait.String()
+	}
+	if er.Opts.KafkaTopicProcessed != nil {
+		opts[utils.KafkaTopicProcessedCfg] = *er.Opts.KafkaTopicProcessed
+	}
+	if er.Opts.SQLDBName != nil {
+		opts[utils.SQLDBNameOpt] = *er.Opts.SQLDBName
+	}
+	if er.Opts.SQLTableName != nil {
+		opts[utils.SQLTableNameOpt] = *er.Opts.SQLTableName
+	}
+	if er.Opts.SSLMode != nil {
+		opts[utils.SSLModeCfg] = *er.Opts.SSLMode
+	}
+	if er.Opts.SQLDBNameProcessed != nil {
+		opts[utils.SQLDBNameProcessedCfg] = *er.Opts.SQLDBNameProcessed
+	}
+	if er.Opts.SQLTableNameProcessed != nil {
+		opts[utils.SQLTableNameProcessedCfg] = *er.Opts.SQLTableNameProcessed
+	}
+	if er.Opts.SSLModeProcessed != nil {
+		opts[utils.SSLModeProcessedCfg] = *er.Opts.SSLModeProcessed
+	}
+	if er.Opts.AWSRegion != nil {
+		opts[utils.AWSRegion] = *er.Opts.AWSRegion
+	}
+	if er.Opts.AWSKey != nil {
+		opts[utils.AWSKey] = *er.Opts.AWSKey
+	}
+	if er.Opts.AWSSecret != nil {
+		opts[utils.AWSSecret] = *er.Opts.AWSSecret
+	}
+	if er.Opts.AWSToken != nil {
+		opts[utils.AWSToken] = *er.Opts.AWSToken
+	}
+	if er.Opts.AWSRegionProcessed != nil {
+		opts[utils.AWSRegionProcessedCfg] = *er.Opts.AWSRegionProcessed
+	}
+	if er.Opts.AWSKeyProcessed != nil {
+		opts[utils.AWSKeyProcessedCfg] = *er.Opts.AWSKeyProcessed
+	}
+	if er.Opts.AWSSecretProcessed != nil {
+		opts[utils.AWSSecretProcessedCfg] = *er.Opts.AWSSecretProcessed
+	}
+	if er.Opts.AWSTokenProcessed != nil {
+		opts[utils.AWSTokenProcessedCfg] = *er.Opts.AWSTokenProcessed
+	}
+	if er.Opts.SQSQueueID != nil {
+		opts[utils.SQSQueueID] = *er.Opts.SQSQueueID
+	}
+	if er.Opts.SQSQueueIDProcessed != nil {
+		opts[utils.SQSQueueIDProcessedCfg] = *er.Opts.SQSQueueIDProcessed
+	}
+	if er.Opts.S3BucketID != nil {
+		opts[utils.S3Bucket] = *er.Opts.S3BucketID
+	}
+	if er.Opts.S3FolderPathProcessed != nil {
+		opts[utils.S3FolderPathProcessedCfg] = *er.Opts.S3FolderPathProcessed
+	}
+	if er.Opts.S3BucketIDProcessed != nil {
+		opts[utils.S3BucketIDProcessedCfg] = *er.Opts.S3BucketIDProcessed
+	}
+	if er.Opts.NATSJetStream != nil {
+		opts[utils.NatsJetStream] = *er.Opts.NATSJetStream
+	}
+	if er.Opts.NATSConsumerName != nil {
+		opts[utils.NatsConsumerName] = *er.Opts.NATSConsumerName
+	}
+	if er.Opts.NATSSubject != nil {
+		opts[utils.NatsSubject] = *er.Opts.NATSSubject
+	}
+	if er.Opts.NATSQueueID != nil {
+		opts[utils.NatsQueueID] = *er.Opts.NATSQueueID
+	}
+	if er.Opts.NATSJWTFile != nil {
+		opts[utils.NatsJWTFile] = *er.Opts.NATSJWTFile
+	}
+	if er.Opts.NATSSeedFile != nil {
+		opts[utils.NatsSeedFile] = *er.Opts.NATSSeedFile
+	}
+	if er.Opts.NATSCertificateAuthority != nil {
+		opts[utils.NatsCertificateAuthority] = *er.Opts.NATSCertificateAuthority
+	}
+	if er.Opts.NATSClientCertificate != nil {
+		opts[utils.NatsClientCertificate] = *er.Opts.NATSClientCertificate
+	}
+	if er.Opts.NATSClientKey != nil {
+		opts[utils.NatsClientKey] = *er.Opts.NATSClientKey
+	}
+	if er.Opts.NATSJetStreamMaxWait != nil {
+		opts[utils.NatsJetStreamMaxWait] = er.Opts.NATSJetStreamMaxWait.String()
+	}
+	if er.Opts.NATSJetStreamProcessed != nil {
+		opts[utils.NATSJetStreamProcessedCfg] = *er.Opts.NATSJetStreamProcessed
+	}
+	if er.Opts.NATSSubjectProcessed != nil {
+		opts[utils.NATSSubjectProcessedCfg] = *er.Opts.NATSSubjectProcessed
+	}
+	if er.Opts.NATSJWTFileProcessed != nil {
+		opts[utils.NATSJWTFileProcessedCfg] = *er.Opts.NATSJWTFileProcessed
+	}
+	if er.Opts.NATSSeedFileProcessed != nil {
+		opts[utils.NATSSeedFileProcessedCfg] = *er.Opts.NATSSeedFileProcessed
+	}
+	if er.Opts.NATSCertificateAuthorityProcessed != nil {
+		opts[utils.NATSCertificateAuthorityProcessedCfg] = *er.Opts.NATSCertificateAuthorityProcessed
+	}
+	if er.Opts.NATSClientCertificateProcessed != nil {
+		opts[utils.NATSClientCertificateProcessed] = *er.Opts.NATSClientCertificateProcessed
+	}
+	if er.Opts.NATSClientKeyProcessed != nil {
+		opts[utils.NATSClientKeyProcessedCfg] = *er.Opts.NATSClientKeyProcessed
+	}
+	if er.Opts.NATSJetStreamMaxWaitProcessed != nil {
+		opts[utils.NATSJetStreamMaxWaitProcessedCfg] = er.Opts.NATSJetStreamMaxWaitProcessed.String()
+	}
+
 	initialMP = map[string]interface{}{
 		utils.IDCfg:                 er.ID,
 		utils.TypeCfg:               er.Type,
@@ -774,182 +893,477 @@ func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts)
 	if d == nil {
 		d = new(EventReaderOptsJson)
 	}
-	if *v1.PartialPath != *v2.PartialPath {
-		d.PartialPath = v2.PartialPath
+	if v2.PartialPath != nil {
+		if v1.PartialPath == nil ||
+			*v1.PartialPath != *v2.PartialPath {
+			d.PartialPath = v2.PartialPath
+		}
+	} else {
+		d.PartialPath = nil
 	}
-	if *v1.PartialCacheAction != *v2.PartialCacheAction {
-		d.PartialCacheAction = v2.PartialCacheAction
+	if v2.PartialCacheAction != nil {
+		if v1.PartialCacheAction == nil ||
+			*v1.PartialCacheAction != *v2.PartialCacheAction {
+			d.PartialCacheAction = v2.PartialCacheAction
+		}
+	} else {
+		d.PartialCacheAction = nil
 	}
-	if *v1.PartialOrderField != *v2.PartialOrderField {
-		d.PartialOrderField = v2.PartialOrderField
+	if v2.PartialOrderField != nil {
+		if v1.PartialOrderField == nil ||
+			*v1.PartialOrderField != *v2.PartialOrderField {
+			d.PartialOrderField = v2.PartialOrderField
+		}
+	} else {
+		d.PartialOrderField = nil
 	}
-	if *v1.PartialCSVFieldSeparator != *v2.PartialCSVFieldSeparator {
-		d.PartialCSVFieldSeparator = v2.PartialCSVFieldSeparator
+	if v2.PartialCSVFieldSeparator != nil {
+		if v1.PartialCSVFieldSeparator == nil ||
+			*v1.PartialCSVFieldSeparator != *v2.PartialCSVFieldSeparator {
+			d.PartialCSVFieldSeparator = v2.PartialCSVFieldSeparator
+		}
+	} else {
+		d.PartialCSVFieldSeparator = nil
 	}
-	if *v1.CSVRowLength != *v2.CSVRowLength {
-		d.CSVRowLength = v2.CSVRowLength
+	if v2.CSVRowLength != nil {
+		if v1.CSVRowLength == nil ||
+			*v1.CSVRowLength != *v2.CSVRowLength {
+			d.CSVRowLength = v2.CSVRowLength
+		}
+	} else {
+		d.CSVRowLength = nil
 	}
-	if *v1.CSVFieldSeparator != *v2.CSVFieldSeparator {
-		d.CSVFieldSeparator = v2.CSVFieldSeparator
+	if v2.CSVFieldSeparator != nil {
+		if v1.CSVFieldSeparator == nil ||
+			*v1.CSVFieldSeparator != *v2.CSVFieldSeparator {
+			d.CSVFieldSeparator = v2.CSVFieldSeparator
+		}
+	} else {
+		d.CSVFieldSeparator = nil
 	}
-	if *v1.CSVHeaderDefineChar != *v2.CSVHeaderDefineChar {
-		d.CSVHeaderDefineChar = v2.CSVHeaderDefineChar
+	if v2.CSVHeaderDefineChar != nil {
+		if v1.CSVHeaderDefineChar == nil ||
+			*v1.CSVHeaderDefineChar != *v2.CSVHeaderDefineChar {
+			d.CSVHeaderDefineChar = v2.CSVHeaderDefineChar
+		}
+	} else {
+		d.CSVHeaderDefineChar = nil
 	}
-	if *v1.CSVLazyQuotes != *v2.CSVLazyQuotes {
-		d.CSVLazyQuotes = v2.CSVLazyQuotes
+	if v2.CSVLazyQuotes != nil {
+		if v1.CSVLazyQuotes == nil ||
+			*v1.CSVLazyQuotes != *v2.CSVLazyQuotes {
+			d.CSVLazyQuotes = v2.CSVLazyQuotes
+		}
+	} else {
+		d.CSVLazyQuotes = nil
 	}
-	if *v1.XMLRootPath != *v2.XMLRootPath {
-		d.XMLRootPath = v2.XMLRootPath
+	if v2.XMLRootPath != nil {
+		if v1.XMLRootPath == nil ||
+			*v1.XMLRootPath != *v2.XMLRootPath {
+			d.XMLRootPath = v2.XMLRootPath
+		}
+	} else {
+		d.XMLRootPath = nil
 	}
-	if *v1.AMQPQueueID != *v2.AMQPQueueID {
-		d.AMQPQueueID = v2.AMQPQueueID
+	if v2.AMQPQueueID != nil {
+		if v1.AMQPQueueID == nil ||
+			*v1.AMQPQueueID != *v2.AMQPQueueID {
+			d.AMQPQueueID = v2.AMQPQueueID
+		}
+	} else {
+		d.AMQPQueueID = nil
 	}
-	if *v1.AMQPQueueIDProcessed != *v2.AMQPQueueIDProcessed {
-		d.AMQPQueueIDProcessed = v2.AMQPQueueIDProcessed
+	if v2.AMQPQueueIDProcessed != nil {
+		if v1.AMQPQueueIDProcessed == nil ||
+			*v1.AMQPQueueIDProcessed != *v2.AMQPQueueIDProcessed {
+			d.AMQPQueueIDProcessed = v2.AMQPQueueIDProcessed
+		}
+	} else {
+		d.AMQPQueueIDProcessed = nil
 	}
-	if *v1.AMQPConsumerTag != *v2.AMQPConsumerTag {
-		d.AMQPConsumerTag = v2.AMQPConsumerTag
+	if v2.AMQPConsumerTag != nil {
+		if v1.AMQPConsumerTag == nil ||
+			*v1.AMQPConsumerTag != *v2.AMQPConsumerTag {
+			d.AMQPConsumerTag = v2.AMQPConsumerTag
+		}
+	} else {
+		d.AMQPConsumerTag = nil
 	}
-	if *v1.AMQPExchange != *v2.AMQPExchange {
-		d.AMQPExchange = v2.AMQPExchange
+	if v2.AMQPExchange != nil {
+		if v1.AMQPExchange == nil ||
+			*v1.AMQPExchange != *v2.AMQPExchange {
+			d.AMQPExchange = v2.AMQPExchange
+		}
+	} else {
+		d.AMQPExchange = nil
 	}
-	if *v1.AMQPExchangeType != *v2.AMQPExchangeType {
-		d.AMQPExchangeType = v2.AMQPExchangeType
+	if v2.AMQPExchangeType != nil {
+		if v1.AMQPExchangeType == nil ||
+			*v1.AMQPExchangeType != *v2.AMQPExchangeType {
+			d.AMQPExchangeType = v2.AMQPExchangeType
+		}
+	} else {
+		d.AMQPExchangeType = nil
 	}
-	if *v1.AMQPRoutingKey != *v2.AMQPRoutingKey {
-		d.AMQPRoutingKey = v2.AMQPRoutingKey
+	if v2.AMQPRoutingKey != nil {
+		if v1.AMQPRoutingKey == nil ||
+			*v1.AMQPRoutingKey != *v2.AMQPRoutingKey {
+			d.AMQPRoutingKey = v2.AMQPRoutingKey
+		}
+	} else {
+		d.AMQPRoutingKey = nil
 	}
-	if *v1.AMQPExchangeProcessed != *v2.AMQPExchangeProcessed {
-		d.AMQPExchangeProcessed = v2.AMQPExchangeProcessed
+	if v2.AMQPExchangeProcessed != nil {
+		if v1.AMQPExchangeProcessed == nil ||
+			*v1.AMQPExchangeProcessed != *v2.AMQPExchangeProcessed {
+			d.AMQPExchangeProcessed = v2.AMQPExchangeProcessed
+		}
+	} else {
+		d.AMQPExchangeProcessed = nil
 	}
-	if *v1.AMQPExchangeTypeProcessed != *v2.AMQPExchangeTypeProcessed {
-		d.AMQPExchangeTypeProcessed = v2.AMQPExchangeTypeProcessed
+	if v2.AMQPExchangeTypeProcessed != nil {
+		if v1.AMQPExchangeTypeProcessed == nil ||
+			*v1.AMQPExchangeTypeProcessed != *v2.AMQPExchangeTypeProcessed {
+			d.AMQPExchangeTypeProcessed = v2.AMQPExchangeTypeProcessed
+		}
+	} else {
+		d.AMQPExchangeTypeProcessed = nil
 	}
-	if *v1.AMQPRoutingKeyProcessed != *v2.AMQPRoutingKeyProcessed {
-		d.AMQPRoutingKeyProcessed = v2.AMQPRoutingKeyProcessed
+	if v2.AMQPRoutingKeyProcessed != nil {
+		if v1.AMQPRoutingKeyProcessed == nil ||
+			*v1.AMQPRoutingKeyProcessed != *v2.AMQPRoutingKeyProcessed {
+			d.AMQPRoutingKeyProcessed = v2.AMQPRoutingKeyProcessed
+		}
+	} else {
+		d.AMQPRoutingKeyProcessed = nil
 	}
-	if *v1.KafkaTopic != *v2.KafkaTopic {
-		d.KafkaTopic = v2.KafkaTopic
+	if v2.KafkaTopic != nil {
+		if v1.KafkaTopic == nil ||
+			*v1.KafkaTopic != *v2.KafkaTopic {
+			d.KafkaTopic = v2.KafkaTopic
+		}
+	} else {
+		d.KafkaTopic = nil
 	}
-	if *v1.KafkaGroupID != *v2.KafkaGroupID {
-		d.KafkaGroupID = v2.KafkaGroupID
+	if v2.KafkaGroupID != nil {
+		if v1.KafkaGroupID == nil ||
+			*v1.KafkaGroupID != *v2.KafkaGroupID {
+			d.KafkaGroupID = v2.KafkaGroupID
+		}
+	} else {
+		d.KafkaGroupID = nil
 	}
-	if *v1.KafkaMaxWait != *v2.KafkaMaxWait {
-		d.KafkaMaxWait = utils.StringPointer(v2.KafkaMaxWait.String())
+	if v2.KafkaMaxWait != nil {
+		if v1.KafkaMaxWait == nil ||
+			*v1.KafkaMaxWait != *v2.KafkaMaxWait {
+			d.KafkaMaxWait = utils.StringPointer(v2.KafkaMaxWait.String())
+		}
+	} else {
+		d.KafkaMaxWait = nil
 	}
-	if *v1.KafkaTopicProcessed != *v2.KafkaTopicProcessed {
-		d.KafkaTopicProcessed = v2.KafkaTopicProcessed
+	if v2.KafkaTopicProcessed != nil {
+		if v1.KafkaTopicProcessed == nil ||
+			*v1.KafkaTopicProcessed != *v2.KafkaTopicProcessed {
+			d.KafkaTopicProcessed = v2.KafkaTopicProcessed
+		}
+	} else {
+		d.KafkaTopicProcessed = nil
 	}
-	if *v1.SQLDBName != *v2.SQLDBName {
-		d.SQLDBName = v2.SQLDBName
+	if v2.SQLDBName != nil {
+		if v1.SQLDBName == nil ||
+			*v1.SQLDBName != *v2.SQLDBName {
+			d.SQLDBName = v2.SQLDBName
+		}
+	} else {
+		d.SQLDBName = nil
 	}
-	if *v1.SQLTableName != *v2.SQLTableName {
-		d.SQLTableName = v2.SQLTableName
+	if v2.SQLTableName != nil {
+		if v1.SQLTableName == nil ||
+			*v1.SQLTableName != *v2.SQLTableName {
+			d.SQLTableName = v2.SQLTableName
+		}
+	} else {
+		d.SQLTableName = nil
 	}
-	if *v1.SSLMode != *v2.SSLMode {
-		d.SSLMode = v2.SSLMode
+	if v2.SSLMode != nil {
+		if v1.SSLMode == nil ||
+			*v1.SSLMode != *v2.SSLMode {
+			d.SSLMode = v2.SSLMode
+		}
+	} else {
+		d.SSLMode = nil
 	}
-	if *v1.SQLDBNameProcessed != *v2.SQLDBNameProcessed {
-		d.SQLDBNameProcessed = v2.SQLDBNameProcessed
+	if v2.SQLDBNameProcessed != nil {
+		if v1.SQLDBNameProcessed == nil ||
+			*v1.SQLDBNameProcessed != *v2.SQLDBNameProcessed {
+			d.SQLDBNameProcessed = v2.SQLDBNameProcessed
+		}
+	} else {
+		d.SQLDBNameProcessed = nil
 	}
-	if *v1.SQLTableNameProcessed != *v2.SQLTableNameProcessed {
-		d.SQLTableNameProcessed = v2.SQLTableNameProcessed
+	if v2.SQLTableNameProcessed != nil {
+		if v1.SQLTableNameProcessed == nil ||
+			*v1.SQLTableNameProcessed != *v2.SQLTableNameProcessed {
+			d.SQLTableNameProcessed = v2.SQLTableNameProcessed
+		}
+	} else {
+		d.SQLTableNameProcessed = nil
 	}
-	if *v1.SSLModeProcessed != *v2.SSLModeProcessed {
-		d.SSLModeProcessed = v2.SSLModeProcessed
+	if v2.SSLModeProcessed != nil {
+		if v1.SSLModeProcessed == nil ||
+			*v1.SSLModeProcessed != *v2.SSLModeProcessed {
+			d.SSLModeProcessed = v2.SSLModeProcessed
+		}
+	} else {
+		d.SSLModeProcessed = nil
 	}
-	if *v1.AWSRegion != *v2.AWSRegion {
-		d.AWSRegion = v2.AWSRegion
+	if v2.AWSRegion != nil {
+		if v1.AWSRegion == nil ||
+			*v1.AWSRegion != *v2.AWSRegion {
+			d.AWSRegion = v2.AWSRegion
+		}
+	} else {
+		d.AWSRegion = nil
 	}
-	if *v1.AWSKey != *v2.AWSKey {
-		d.AWSKey = v2.AWSKey
+	if v2.AWSKey != nil {
+		if v1.AWSKey == nil ||
+			*v1.AWSKey != *v2.AWSKey {
+			d.AWSKey = v2.AWSKey
+		}
+	} else {
+		d.AWSKey = nil
 	}
-	if *v1.AWSSecret != *v2.AWSSecret {
-		d.AWSSecret = v2.AWSSecret
+	if v2.AWSSecret != nil {
+		if v1.AWSSecret == nil ||
+			*v1.AWSSecret != *v2.AWSSecret {
+			d.AWSSecret = v2.AWSSecret
+		}
+	} else {
+		d.AWSSecret = nil
 	}
-	if *v1.AWSToken != *v2.AWSToken {
-		d.AWSToken = v2.AWSToken
+	if v2.AWSToken != nil {
+		if v1.AWSToken == nil ||
+			*v1.AWSToken != *v2.AWSToken {
+			d.AWSToken = v2.AWSToken
+		}
+	} else {
+		d.AWSToken = nil
 	}
-	if *v1.AWSRegionProcessed != *v2.AWSRegionProcessed {
-		d.AWSRegionProcessed = v2.AWSRegionProcessed
+	if v2.AWSRegionProcessed != nil {
+		if v1.AWSRegionProcessed == nil ||
+			*v1.AWSRegionProcessed != *v2.AWSRegionProcessed {
+			d.AWSRegionProcessed = v2.AWSRegionProcessed
+		}
+	} else {
+		d.AWSRegionProcessed = nil
 	}
-	if *v1.AWSKeyProcessed != *v2.AWSKeyProcessed {
-		d.AWSKeyProcessed = v2.AWSKeyProcessed
+	if v2.AWSKeyProcessed != nil {
+		if v1.AWSKeyProcessed == nil ||
+			*v1.AWSKeyProcessed != *v2.AWSKeyProcessed {
+			d.AWSKeyProcessed = v2.AWSKeyProcessed
+		}
+	} else {
+		d.AWSKeyProcessed = nil
 	}
-	if *v1.AWSSecretProcessed != *v2.AWSSecretProcessed {
-		d.AWSSecretProcessed = v2.AWSSecretProcessed
+	if v2.AWSSecretProcessed != nil {
+		if v1.AWSSecretProcessed == nil ||
+			*v1.AWSSecretProcessed != *v2.AWSSecretProcessed {
+			d.AWSSecretProcessed = v2.AWSSecretProcessed
+		}
+	} else {
+		d.AWSSecretProcessed = nil
 	}
-	if *v1.AWSTokenProcessed != *v2.AWSTokenProcessed {
-		d.AWSTokenProcessed = v2.AWSTokenProcessed
+	if v2.AWSTokenProcessed != nil {
+		if v1.AWSTokenProcessed == nil ||
+			*v1.AWSTokenProcessed != *v2.AWSTokenProcessed {
+			d.AWSTokenProcessed = v2.AWSTokenProcessed
+		}
+	} else {
+		d.AWSTokenProcessed = nil
 	}
-	if *v1.SQSQueueID != *v2.SQSQueueID {
-		d.SQSQueueID = v2.SQSQueueID
+	if v2.SQSQueueID != nil {
+		if v1.SQSQueueID == nil ||
+			*v1.SQSQueueID != *v2.SQSQueueID {
+			d.SQSQueueID = v2.SQSQueueID
+		}
+	} else {
+		d.SQSQueueID = nil
 	}
-	if *v1.SQSQueueIDProcessed != *v2.SQSQueueIDProcessed {
-		d.SQSQueueIDProcessed = v2.SQSQueueIDProcessed
+	if v2.SQSQueueIDProcessed != nil {
+		if v1.SQSQueueIDProcessed == nil ||
+			*v1.SQSQueueIDProcessed != *v2.SQSQueueIDProcessed {
+			d.SQSQueueIDProcessed = v2.SQSQueueIDProcessed
+		}
+	} else {
+		d.SQSQueueIDProcessed = nil
 	}
-	if *v1.S3BucketID != *v2.S3BucketID {
-		d.S3BucketID = v2.S3BucketID
+	if v2.S3BucketID != nil {
+		if v1.S3BucketID == nil ||
+			*v1.S3BucketID != *v2.S3BucketID {
+			d.S3BucketID = v2.S3BucketID
+		}
+	} else {
+		d.S3BucketID = nil
 	}
-	if *v1.S3FolderPathProcessed != *v2.S3FolderPathProcessed {
-		d.S3FolderPathProcessed = v2.S3FolderPathProcessed
+	if v2.S3FolderPathProcessed != nil {
+		if v1.S3FolderPathProcessed == nil ||
+			*v1.S3FolderPathProcessed != *v2.S3FolderPathProcessed {
+			d.S3FolderPathProcessed = v2.S3FolderPathProcessed
+		}
+	} else {
+		d.S3FolderPathProcessed = nil
 	}
-	if *v1.S3BucketIDProcessed != *v2.S3BucketIDProcessed {
-		d.S3BucketIDProcessed = v2.S3BucketIDProcessed
+	if v2.S3BucketIDProcessed != nil {
+		if v1.S3BucketIDProcessed == nil ||
+			*v1.S3BucketIDProcessed != *v2.S3BucketIDProcessed {
+			d.S3BucketIDProcessed = v2.S3BucketIDProcessed
+		}
+	} else {
+		d.S3BucketIDProcessed = nil
 	}
-	if *v1.NATSJetStream != *v2.NATSJetStream {
-		d.NATSJetStream = v2.NATSJetStream
+	if v2.NATSJetStream != nil {
+		if v1.NATSJetStream == nil ||
+			*v1.NATSJetStream != *v2.NATSJetStream {
+			d.NATSJetStream = v2.NATSJetStream
+		}
+	} else {
+		d.NATSJetStream = nil
 	}
-	if *v1.NATSConsumerName != *v2.NATSConsumerName {
-		d.NATSConsumerName = v2.NATSConsumerName
+	if v2.NATSConsumerName != nil {
+		if v1.NATSConsumerName == nil ||
+			*v1.NATSConsumerName != *v2.NATSConsumerName {
+			d.NATSConsumerName = v2.NATSConsumerName
+		}
+	} else {
+		d.NATSConsumerName = nil
 	}
-	if *v1.NATSSubject != *v2.NATSSubject {
-		d.NATSSubject = v2.NATSSubject
+	if v2.NATSSubject != nil {
+		if v1.NATSSubject == nil ||
+			*v1.NATSSubject != *v2.NATSSubject {
+			d.NATSSubject = v2.NATSSubject
+		}
+	} else {
+		d.NATSSubject = nil
 	}
-	if *v1.NATSQueueID != *v2.NATSQueueID {
-		d.NATSQueueID = v2.NATSQueueID
+	if v2.NATSQueueID != nil {
+		if v1.NATSQueueID == nil ||
+			*v1.NATSQueueID != *v2.NATSQueueID {
+			d.NATSQueueID = v2.NATSQueueID
+		}
+	} else {
+		d.NATSQueueID = nil
 	}
-	if *v1.NATSJWTFile != *v2.NATSJWTFile {
-		d.NATSJWTFile = v2.NATSJWTFile
+	if v2.NATSJWTFile != nil {
+		if v1.NATSJWTFile == nil ||
+			*v1.NATSJWTFile != *v2.NATSJWTFile {
+			d.NATSJWTFile = v2.NATSJWTFile
+		}
+	} else {
+		d.NATSJWTFile = nil
 	}
-	if *v1.NATSSeedFile != *v2.NATSSeedFile {
-		d.NATSSeedFile = v2.NATSSeedFile
+	if v2.NATSSeedFile != nil {
+		if v1.NATSSeedFile == nil ||
+			*v1.NATSSeedFile != *v2.NATSSeedFile {
+			d.NATSSeedFile = v2.NATSSeedFile
+		}
+	} else {
+		d.NATSSeedFile = nil
 	}
-	if *v1.NATSCertificateAuthority != *v2.NATSCertificateAuthority {
-		d.NATSCertificateAuthority = v2.NATSCertificateAuthority
+	if v2.NATSCertificateAuthority != nil {
+		if v1.NATSCertificateAuthority == nil ||
+			*v1.NATSCertificateAuthority != *v2.NATSCertificateAuthority {
+			d.NATSCertificateAuthority = v2.NATSCertificateAuthority
+		}
+	} else {
+		d.NATSCertificateAuthority = nil
 	}
-	if *v1.NATSClientCertificate != *v2.NATSClientCertificate {
-		d.NATSClientCertificate = v2.NATSClientCertificate
+	if v2.NATSClientCertificate != nil {
+		if v1.NATSClientCertificate == nil ||
+			*v1.NATSClientCertificate != *v2.NATSClientCertificate {
+			d.NATSClientCertificate = v2.NATSClientCertificate
+		}
+	} else {
+		d.NATSClientCertificate = nil
 	}
-	if *v1.NATSClientKey != *v2.NATSClientKey {
-		d.NATSClientKey = v2.NATSClientKey
+	if v2.NATSClientKey != nil {
+		if v1.NATSClientKey == nil ||
+			*v1.NATSClientKey != *v2.NATSClientKey {
+			d.NATSClientKey = v2.NATSClientKey
+		}
+	} else {
+		d.NATSClientKey = nil
 	}
-	if *v1.NATSJetStreamMaxWait != *v2.NATSJetStreamMaxWait {
-		d.NATSJetStreamMaxWait = utils.StringPointer(v2.NATSJetStreamMaxWait.String())
+	if v2.NATSJetStreamMaxWait != nil {
+		if v1.NATSJetStreamMaxWait == nil ||
+			*v1.NATSJetStreamMaxWait != *v2.NATSJetStreamMaxWait {
+			d.NATSJetStreamMaxWait = utils.StringPointer(v2.NATSJetStreamMaxWait.String())
+		}
+	} else {
+		d.NATSJetStreamMaxWait = nil
 	}
-	if *v1.NATSJetStreamProcessed != *v2.NATSJetStreamProcessed {
-		d.NATSJetStreamProcessed = v2.NATSJetStreamProcessed
+	if v2.NATSJetStreamProcessed != nil {
+		if v1.NATSJetStreamProcessed == nil ||
+			*v1.NATSJetStreamProcessed != *v2.NATSJetStreamProcessed {
+			d.NATSJetStreamProcessed = v2.NATSJetStreamProcessed
+		}
+	} else {
+		d.NATSJetStreamProcessed = nil
 	}
-	if *v1.NATSSubjectProcessed != *v2.NATSSubjectProcessed {
-		d.NATSSubjectProcessed = v2.NATSSubjectProcessed
+	if v2.NATSSubjectProcessed != nil {
+		if v1.NATSSubjectProcessed == nil ||
+			*v1.NATSSubjectProcessed != *v2.NATSSubjectProcessed {
+			d.NATSSubjectProcessed = v2.NATSSubjectProcessed
+		}
+	} else {
+		d.NATSSubjectProcessed = nil
 	}
-	if *v1.NATSJWTFileProcessed != *v2.NATSJWTFileProcessed {
-		d.NATSJWTFileProcessed = v2.NATSJWTFileProcessed
+	if v2.NATSJWTFileProcessed != nil {
+		if v1.NATSJWTFileProcessed == nil ||
+			*v1.NATSJWTFileProcessed != *v2.NATSJWTFileProcessed {
+			d.NATSJWTFileProcessed = v2.NATSJWTFileProcessed
+		}
+	} else {
+		d.NATSJWTFileProcessed = nil
 	}
-	if *v1.NATSSeedFileProcessed != *v2.NATSSeedFileProcessed {
-		d.NATSSeedFileProcessed = v2.NATSSeedFileProcessed
+	if v2.NATSSeedFileProcessed != nil {
+		if v1.NATSSeedFileProcessed == nil ||
+			*v1.NATSSeedFileProcessed != *v2.NATSSeedFileProcessed {
+			d.NATSSeedFileProcessed = v2.NATSSeedFileProcessed
+		}
+	} else {
+		d.NATSSeedFileProcessed = nil
 	}
-	if *v1.NATSCertificateAuthorityProcessed != *v2.NATSCertificateAuthorityProcessed {
-		d.NATSCertificateAuthorityProcessed = v2.NATSCertificateAuthorityProcessed
+	if v2.NATSCertificateAuthorityProcessed != nil {
+		if v1.NATSCertificateAuthorityProcessed == nil ||
+			*v1.NATSCertificateAuthorityProcessed != *v2.NATSCertificateAuthorityProcessed {
+			d.NATSCertificateAuthorityProcessed = v2.NATSCertificateAuthorityProcessed
+		}
+	} else {
+		d.NATSCertificateAuthorityProcessed = nil
 	}
-	if *v1.NATSClientCertificateProcessed != *v2.NATSClientCertificateProcessed {
-		d.NATSClientCertificateProcessed = v2.NATSClientCertificateProcessed
+	if v2.NATSClientCertificateProcessed != nil {
+		if v1.NATSClientCertificateProcessed == nil ||
+			*v1.NATSClientCertificateProcessed != *v2.NATSClientCertificateProcessed {
+			d.NATSClientCertificateProcessed = v2.NATSClientCertificateProcessed
+		}
+	} else {
+		d.NATSClientCertificateProcessed = nil
 	}
-	if *v1.NATSClientKeyProcessed != *v2.NATSClientKeyProcessed {
-		d.NATSClientKeyProcessed = v2.NATSClientKeyProcessed
+	if v2.NATSClientKeyProcessed != nil {
+		if v1.NATSClientKeyProcessed == nil ||
+			*v1.NATSClientKeyProcessed != *v2.NATSClientKeyProcessed {
+			d.NATSClientKeyProcessed = v2.NATSClientKeyProcessed
+		}
+	} else {
+		d.NATSClientKeyProcessed = nil
 	}
-	if *v1.NATSJetStreamMaxWaitProcessed != *v2.NATSJetStreamMaxWaitProcessed {
-		d.NATSJetStreamMaxWaitProcessed = utils.StringPointer(v2.NATSJetStreamMaxWaitProcessed.String())
+	if v2.NATSJetStreamMaxWaitProcessed != nil {
+		if v1.NATSJetStreamMaxWaitProcessed == nil ||
+			*v1.NATSJetStreamMaxWaitProcessed != *v2.NATSJetStreamMaxWaitProcessed {
+			d.NATSJetStreamMaxWaitProcessed = utils.StringPointer(v2.NATSJetStreamMaxWaitProcessed.String())
+		}
+	} else {
+		d.NATSJetStreamMaxWaitProcessed = nil
 	}
 	return d
 }
@@ -1038,7 +1452,9 @@ func getEventReaderCfg(d []*EventReaderCfg, id string) *EventReaderCfg {
 			return v
 		}
 	}
-	return new(EventReaderCfg)
+	return &EventReaderCfg{
+		Opts: &EventReaderOpts{},
+	}
 }
 
 func diffEventReadersJsonCfg(d *[]*EventReaderJsonCfg, v1, v2 []*EventReaderCfg, separator string) *[]*EventReaderJsonCfg {
