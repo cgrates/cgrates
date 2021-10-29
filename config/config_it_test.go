@@ -467,11 +467,12 @@ func testCGRConfigReloadERs(t *testing.T) {
 				PartialCommitFields: []*FCTemplate{},
 				Opts: &EventReaderOpts{
 					CSVFieldSeparator:   utils.StringPointer(","),
+					PartialCacheAction:  utils.StringPointer(utils.MetaNone),
 					CSVHeaderDefineChar: utils.StringPointer(":"),
 					CSVRowLength:        utils.IntPointer(0),
 					PartialOrderField:   utils.StringPointer("~*req.AnswerTime"),
 					XMLRootPath:         utils.StringPointer(utils.EmptyString),
-					NATSSubject:         utils.StringPointer("cgrates.cdrs"),
+					NATSSubject:         utils.StringPointer("cgrates_cdrs"),
 				},
 			},
 			{
