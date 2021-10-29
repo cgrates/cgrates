@@ -20,151 +20,123 @@ package loaders
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
-
-type LoaderData map[string]interface{}
-
-func (ld LoaderData) TenantID() string {
-	return utils.ConcatenatedKey(utils.IfaceAsString(ld[utils.Tenant]),
-		utils.IfaceAsString(ld[utils.ID]))
-}
-
-func (ld LoaderData) GetRateIDs() ([]string, error) {
-	if _, has := ld[utils.RateIDs]; !has {
-		return nil, fmt.Errorf("cannot find RateIDs in <%+v>", ld)
-	}
-	if rateIDs := ld[utils.RateIDs].(string); len(rateIDs) != 0 {
-		return strings.Split(rateIDs, utils.InfieldSep), nil
-	}
-	return []string{}, nil
-}
 
 // UpdateFromCSV will update LoaderData with data received from fileName,
 // contained in record and processed with cfgTpl
-func (ld LoaderData) UpdateFromCSV(ctx *context.Context, fileName string, record []string,
-	cfgTpl []*config.FCTemplate, tnt string, filterS *engine.FilterS) (err error) {
-	csvProvider := newCsvProvider(record, fileName)
-	tenant := tnt
-	if err != nil {
-		return err
+func newRecord(ctx *context.Context, req utils.DataProvider, tmpls []*config.FCTemplate, tnt string, filterS *engine.FilterS,
+	cfg *config.CGRConfig, cache *ltcache.Cache) (_ utils.MapStorage, err error) {
+	r := &record{
+		data:  make(utils.MapStorage),
+		req:   req,
+		cfg:   cfg.GetDataProvider(),
+		cache: cache,
 	}
-	for _, cfgFld := range cfgTpl {
+	for _, fld := range tmpls {
 		// Make sure filters are matching
-		if len(cfgFld.Filters) != 0 {
-			if pass, err := filterS.Pass(ctx, tenant,
-				cfgFld.Filters, csvProvider); err != nil {
-				return err
+		if len(fld.Filters) != 0 {
+			if pass, err := filterS.Pass(ctx, tnt,
+				fld.Filters, r); err != nil {
+				return nil, err
 			} else if !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}
-		out, err := cfgFld.Value.ParseDataProvider(csvProvider)
-		if err != nil {
-			return err
+
+		var out interface{}
+		if out, err = engine.ParseAttribute(r, utils.FirstNonEmpty(fld.Type, utils.MetaVariable), utils.DynamicDataPrefix+fld.Path, fld.Value,
+			cfg.GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(fld.Timezone, cfg.GeneralCfg().DefaultTimezone), fld.Layout, cfg.GeneralCfg().RSRSep); err != nil {
+			return
 		}
-		switch cfgFld.Type {
-		case utils.MetaComposed:
-			if _, has := ld[cfgFld.Path]; !has {
-				ld[cfgFld.Path] = out
-			} else if valOrig, canCast := ld[cfgFld.Path].(string); canCast {
-				valOrig += out
-				ld[cfgFld.Path] = valOrig
-			}
-		case utils.MetaVariable:
-			ld[cfgFld.Path] = out
-		case utils.MetaString:
-			if _, has := ld[cfgFld.Path]; !has {
-				ld[cfgFld.Path] = out
+		ps := fld.GetPathSlice()
+		if fld.Type == utils.MetaComposed {
+			if val, err := r.FieldAsString(ps); err == nil {
+				out = utils.IfaceAsString(out) + val
 			}
 		}
+		if err = r.Set(ps, out); err != nil {
+			return
+		}
 	}
-	return
+	return r.data, nil
 }
 
-// newCsvProvider constructs a DataProvider
-func newCsvProvider(record []string, fileName string) (dP utils.DataProvider) {
-	return &csvProvider{
-		req:      record,
-		fileName: fileName,
-		cache:    utils.MapStorage{},
-		cfg:      config.CgrConfig().GetDataProvider(),
+type record struct {
+	data  utils.MapStorage
+	req   utils.DataProvider
+	cfg   utils.DataProvider
+	cache *ltcache.Cache
+	tntID *string
+}
+
+func (r *record) String() string { return r.req.String() }
+
+func (r *record) FieldAsInterface(path []string) (val interface{}, err error) {
+	switch path[0] {
+	case utils.MetaCache:
+		if path[1] == "*id" {
+			path[1] = r.tenatID()
+		}
+		var ok bool
+		if val, ok = r.cache.Get(strings.Join(path[1:], utils.NestingSep)); !ok || val == nil {
+			err = utils.ErrNotFound
+		}
+		return
+	case utils.MetaCfg:
+		return r.cfg.FieldAsInterface(path[1:])
+	case utils.MetaReq:
+		return r.req.FieldAsInterface(path[1:])
+	default:
+		return r.data.FieldAsInterface(path)
 	}
 }
 
-// csvProvider implements utils.DataProvider so we can pass it to filters
-type csvProvider struct {
-	req      []string
-	fileName string
-	cache    utils.MapStorage
-	cfg      utils.DataProvider
-}
-
-// String is part of utils.DataProvider interface
-// when called, it will display the already parsed values out of cache
-func (cP *csvProvider) String() string {
-	return utils.ToJSON(cP)
-}
-
-// FieldAsInterface is part of utils.DataProvider interface
-func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
+func (r *record) FieldAsString(path []string) (str string, err error) {
+	var val interface{}
+	if val, err = r.FieldAsInterface(path); err != nil {
 		return
 	}
-	err = nil // cancel previous err
+	return utils.IfaceAsString(val), nil
+}
 
-	switch {
-	case strings.HasPrefix(fldPath[0], utils.MetaFile+utils.FilterValStart):
-		fileName := strings.TrimPrefix(fldPath[0], utils.MetaFile+utils.FilterValStart)
-		hasSelEnd := false
-		for _, val := range fldPath[1:] {
-			if hasSelEnd = strings.HasSuffix(val, utils.FilterValEnd); hasSelEnd {
-				fileName = fileName + utils.NestingSep + val[:len(val)-1]
-				break
-			}
-			fileName = fileName + utils.NestingSep + val
+func (r *record) Set(path []string, val interface{}) (err error) {
+	switch path[0] {
+	case utils.MetaCache:
+		if path[1] == "*id" {
+			path[1] = r.tenatID()
 		}
-		if !hasSelEnd {
-			return nil, fmt.Errorf("filter rule <%s> needs to end in )", fldPath)
-		}
-		if cP.fileName != fileName {
-			cP.cache.Set(fldPath, nil)
-			return
-		}
-	case fldPath[0] == utils.MetaReq:
-	case fldPath[0] == utils.MetaCfg:
-		data, err = cP.cfg.FieldAsInterface(fldPath[1:])
-		if err != nil {
-			return
-		}
-		cP.cache.Set(fldPath, data)
+		r.cache.Set(strings.Join(path[1:], utils.NestingSep), val, nil)
 		return
 	default:
-		return nil, fmt.Errorf("invalid prefix for : %s", fldPath)
+		return r.data.Set(path, val)
 	}
-	var cfgFieldIdx int
-	if cfgFieldIdx, err = strconv.Atoi(fldPath[len(fldPath)-1]); err != nil || len(cP.req) <= cfgFieldIdx {
-		return nil, fmt.Errorf("Ignoring record: %q with error : %+v", cP.req, err)
-	}
-	data = cP.req[cfgFieldIdx]
-
-	cP.cache.Set(fldPath, data)
-	return
 }
 
-// FieldAsString is part of utils.DataProvider interface
-func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
-	valIface, err = cP.FieldAsInterface(fldPath)
-	if err != nil {
-		return
+func (r *record) tenatID() string {
+	if r.tntID == nil {
+		r.tntID = utils.StringPointer(TenantIDFromMap(r.data).TenantID())
 	}
-	return utils.IfaceAsString(valIface), nil
+	return *r.tntID
+}
+
+func TenantIDFromMap(data utils.MapStorage) *utils.TenantID {
+	return &utils.TenantID{
+		Tenant: utils.IfaceAsString(data[utils.Tenant]),
+		ID:     utils.IfaceAsString(data[utils.ID]),
+	}
+}
+
+func RateIDsFromMap(data utils.MapStorage) ([]string, error) {
+	val, has := data[utils.RateIDs]
+	if !has {
+		return nil, fmt.Errorf("cannot find RateIDs in map")
+	}
+	return utils.IfaceAsStringSlice(val)
 }

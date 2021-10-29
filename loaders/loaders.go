@@ -29,22 +29,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
+func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
 	timezone string, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (ldrS *LoaderService) {
-	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
-	for _, ldrCfg := range ldrsCfg {
-		if ldrCfg.Enabled {
-			ldrS.ldrs[ldrCfg.ID] = NewLoader(dm, ldrCfg, timezone, filterS, connMgr, ldrCfg.CacheSConns)
-		}
-	}
+	ldrS = &LoaderService{cfg: cfg}
+	ldrS.createLoaders(dm, timezone, filterS, connMgr)
 	return
 }
 
 // LoaderService is the Loader service handling independent Loaders
 type LoaderService struct {
 	sync.RWMutex
-	ldrs map[string]*Loader
+	cfg  *config.CGRConfig
+	ldrs map[string]*loader
 }
 
 // Enabled returns true if at least one loader is enabled
@@ -55,7 +52,7 @@ func (ldrS *LoaderService) Enabled() bool {
 func (ldrS *LoaderService) ListenAndServe(stopChan chan struct{}) (err error) {
 	for _, ldr := range ldrS.ldrs {
 		if err = ldr.ListenAndServe(stopChan); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s-%s> error: <%s>", utils.LoaderS, ldr.ldrID, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<%s-%s> error: <%s>", utils.LoaderS, ldr.ldrCfg.ID, err.Error()))
 			return
 		}
 	}
@@ -71,79 +68,63 @@ type ArgsProcessFolder struct {
 
 func (ldrS *LoaderService) V1Load(ctx *context.Context, args *ArgsProcessFolder,
 	rply *string) (err error) {
+	return ldrS.process(ctx, args, utils.MetaStore, rply)
+}
+
+func (ldrS *LoaderService) V1Remove(ctx *context.Context, args *ArgsProcessFolder,
+	rply *string) (err error) {
+	return ldrS.process(ctx, args, utils.MetaRemove, rply)
+}
+
+// Reload recreates the loaders map thread safe
+func (ldrS *LoaderService) Reload(dm *engine.DataManager,
+	timezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) {
+	ldrS.Lock()
+	ldrS.createLoaders(dm, timezone, filterS, connMgr)
+	ldrS.Unlock()
+}
+
+// Reload recreates the loaders map thread safe
+func (ldrS *LoaderService) createLoaders(dm *engine.DataManager,
+	timezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) {
+	ldrS.ldrs = make(map[string]*loader)
+	for _, ldrCfg := range ldrS.cfg.LoaderCfg() {
+		if ldrCfg.Enabled {
+			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, timezone, filterS, connMgr, ldrCfg.CacheSConns)
+		}
+	}
+}
+
+func (ldrS *LoaderService) process(ctx *context.Context, args *ArgsProcessFolder, action string,
+	rply *string) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()
-	if args.LoaderID == "" {
+	if args.LoaderID == utils.EmptyString {
 		args.LoaderID = utils.MetaDefault
 	}
 	ldr, has := ldrS.ldrs[args.LoaderID]
 	if !has {
 		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
 	}
-	if locked, err := ldr.isFolderLocked(); err != nil {
+	if locked, err := ldr.Locked(); err != nil {
 		return utils.NewErrServerError(err)
 	} else if locked {
 		if !args.ForceLock {
 			return errors.New("ANOTHER_LOADER_RUNNING")
 		}
-		if err := ldr.unlockFolder(); err != nil {
+		if err := ldr.Unlock(); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
 	//verify If Caching is present in arguments
-	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	caching := utils.FirstNonEmpty(ldr.ldrCfg.Caching, ldrS.cfg.GeneralCfg().DefaultCaching)
 	if args.Caching != nil {
 		caching = *args.Caching
 	}
-	if err := ldr.ProcessFolder(ctx, caching, utils.MetaStore, args.StopOnError); err != nil {
+
+	if err := ldr.processFolder(context.Background(), action, caching, false, ldr.ldrCfg.WithIndex, args.StopOnError); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*rply = utils.OK
 	return
-}
-
-func (ldrS *LoaderService) V1Remove(ctx *context.Context, args *ArgsProcessFolder,
-	rply *string) (err error) {
-	ldrS.RLock()
-	defer ldrS.RUnlock()
-	if args.LoaderID == "" {
-		args.LoaderID = utils.MetaDefault
-	}
-	ldr, has := ldrS.ldrs[args.LoaderID]
-	if !has {
-		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
-	}
-	if locked, err := ldr.isFolderLocked(); err != nil {
-		return utils.NewErrServerError(err)
-	} else if locked {
-		if args.ForceLock {
-			if err := ldr.unlockFolder(); err != nil {
-				return utils.NewErrServerError(err)
-			}
-		}
-		return errors.New("ANOTHER_LOADER_RUNNING")
-	}
-	//verify If Caching is present in arguments
-	caching := config.CgrConfig().GeneralCfg().DefaultCaching
-	if args.Caching != nil {
-		caching = *args.Caching
-	}
-	if err := ldr.ProcessFolder(ctx, caching, utils.MetaRemove, args.StopOnError); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*rply = utils.OK
-	return
-}
-
-// Reload recreates the loaders map thread safe
-func (ldrS *LoaderService) Reload(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
-	timezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) {
-	ldrS.Lock()
-	ldrS.ldrs = make(map[string]*Loader)
-	for _, ldrCfg := range ldrsCfg {
-		if ldrCfg.Enabled {
-			ldrS.ldrs[ldrCfg.ID] = NewLoader(dm, ldrCfg, timezone, filterS, connMgr, ldrCfg.CacheSConns)
-		}
-	}
-	ldrS.Unlock()
 }

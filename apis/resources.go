@@ -104,7 +104,7 @@ func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *engine.Resou
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	if err = adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheResourceProfiles,
+	if err = adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), arg.Tenant, utils.CacheResourceProfiles,
 		arg.TenantID(), &arg.FilterIDs, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -125,7 +125,7 @@ func (adms *AdminSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.Ten
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheResourceProfiles,
+	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheResourceProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

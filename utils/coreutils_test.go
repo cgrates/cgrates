@@ -1408,7 +1408,7 @@ func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
 	expected := map[string]interface{}{
 		OptsAPIKey:    apiKey,
 		OptsRouteID:   routeID,
-		CacheOpt:      cache,
+		MetaCache:     cache,
 		RemoteHostOpt: rmtHost,
 	}
 	received := GenerateDBItemOpts(apiKey, routeID, cache, rmtHost)

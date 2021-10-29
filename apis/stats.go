@@ -102,7 +102,7 @@ func (adms *AdminSv1) SetStatQueueProfile(ctx *context.Context, arg *engine.Stat
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	if err = adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueueProfiles,
+	if err = adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), arg.Tenant, utils.CacheStatQueueProfiles,
 		arg.TenantID(), &arg.FilterIDs, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -123,7 +123,7 @@ func (adms *AdminSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.T
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheStatQueueProfiles,
+	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheStatQueueProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

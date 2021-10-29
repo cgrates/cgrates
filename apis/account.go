@@ -111,7 +111,7 @@ func (admS *AdminSv1) SetAccount(ctx *context.Context, extAp *APIAccountWithAPIO
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(extAp.APIOpts[utils.CacheOpt]), ap.Tenant, utils.CacheAccounts,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(extAp.APIOpts[utils.MetaCache]), ap.Tenant, utils.CacheAccounts,
 		ap.TenantID(), &ap.FilterIDs, extAp.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -136,7 +136,7 @@ func (admS *AdminSv1) RemoveAccount(ctx *context.Context, arg *utils.TenantIDWit
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAccounts,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheAccounts,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

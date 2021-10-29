@@ -91,7 +91,7 @@ func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 		map[string]int64{arg.ItemType: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := adms.callCacheForRemoveIndexes(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant,
+	if err := adms.callCacheForRemoveIndexes(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), arg.Tenant,
 		arg.ItemType, []string{utils.MetaAny}, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -479,7 +479,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 	if err := adms.dm.SetLoadIDs(ctx, loadIDs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := adms.callCacheForComputeIndexes(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+	if err := adms.callCacheForComputeIndexes(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, cacheIDs, args.APIOpts); err != nil {
 		return err
 	}
@@ -666,7 +666,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 	if err := adms.dm.SetLoadIDs(ctx, loadIDs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := adms.callCacheForComputeIndexes(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+	if err := adms.callCacheForComputeIndexes(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, cacheIDs, args.APIOpts); err != nil {
 		return err
 	}

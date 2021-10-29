@@ -107,7 +107,7 @@ func (admS *AdminSv1) SetRateProfile(ctx *context.Context, ext *utils.APIRatePro
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(ext.APIOpts[utils.CacheOpt]), rPrf.Tenant, utils.CacheRateProfiles,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(ext.APIOpts[utils.MetaCache]), rPrf.Tenant, utils.CacheRateProfiles,
 		rPrf.TenantID(), &rPrf.FilterIDs, ext.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -134,7 +134,7 @@ func (admS *AdminSv1) SetRateProfileRates(ctx *context.Context, ext *utils.APIRa
 	if err = admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err = admS.CallCache(ctx, utils.IfaceAsString(ext.APIOpts[utils.CacheOpt]), rPrf.Tenant, utils.CacheRateProfiles,
+	if err = admS.CallCache(ctx, utils.IfaceAsString(ext.APIOpts[utils.MetaCache]), rPrf.Tenant, utils.CacheRateProfiles,
 		rPrf.TenantID(), &rPrf.FilterIDs, ext.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -158,7 +158,7 @@ func (admS *AdminSv1) RemoveRateProfileRates(ctx *context.Context, args *utils.R
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheRateProfiles,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheRateProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -183,7 +183,7 @@ func (admS *AdminSv1) RemoveRateProfile(ctx *context.Context, arg *utils.TenantI
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheRateProfiles,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheRateProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
