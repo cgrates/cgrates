@@ -15,7 +15,7 @@
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.16.6'
+    golang_version: '1.17.2'
     go_version_target: "go version go{{ golang_version }} linux/amd64"
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'
@@ -59,29 +59,26 @@
     - name: Install dependencies
       become: yes
       apt: name={{ dependencies }} state=present
-
-    - name: Add key for freeswitch
+  
+    - name:  apt-get update && apt-get install gnupg2
       become: yes
-      apt_key: url=https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc state=present
+      shell: 'apt-get update && apt-get install -y gnupg2 wget lsb-release'
 
-    - name: Add FreeSwitch apt repository 
+    - name:  Freeswitch add key
       become: yes
-      apt_repository:
-        repo: deb [ allow-insecure=yes ] http://files.freeswitch.org/repo/deb/debian-release/ buster main
-        state: present
-        filename: 'freeswitch'
+      shell: 'wget -O /usr/share/keyrings/freeswitch-archive-keyring.gpg https://files.freeswitch.org/repo/deb/debian-release/freeswitch-archive-keyring.gpg'
 
-    - name: Add FreeSwitch apt repository (1.8) (Debian 8/Jessie)
+    - name:  Add FreeSwitch apt repository 
       become: yes
-      apt_repository:
-        repo: deb-src http://files.freeswitch.org/repo/deb/debian-release/ buster main
-        state: present
-        filename: 'freeswitch'
+      shell: 'echo "deb [signed-by=/usr/share/keyrings/freeswitch-archive-keyring.gpg trusted=yes] http://files.freeswitch.org/repo/deb/debian-release/ `lsb_release -sc` main" > /etc/apt/sources.list.d/freeswitch.list'
 
-    # Install FreeSwitch
-    - name: Install FreeSwitch
-      become: yes 
-      apt: name={{ freeswitch_packages }} state=latest
+    - name:  Add FreeSwitch apt repository 1.8
+      become: yes
+      shell: 'echo "deb-src [signed-by=/usr/share/keyrings/freeswitch-archive-keyring.gpg trusted=yes] http://files.freeswitch.org/repo/deb/debian-unstable/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list'
+
+    - name:  Install FreeSwitch
+      become: yes
+      shell: 'apt-get update && apt-get install -y freeswitch-meta-all'
 
     ###########################################################################################################################
     # Install Golang
