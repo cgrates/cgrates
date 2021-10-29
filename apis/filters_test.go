@@ -774,7 +774,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	expArgs := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaReload,
+			utils.MetaCache: utils.MetaReload,
 		},
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"cgrates.org:FLTR_ID"},
@@ -810,7 +810,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaReload,
+			utils.MetaCache: utils.MetaReload,
 		},
 	}
 	var reply string
@@ -833,7 +833,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 
@@ -849,7 +849,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 			Weight:    10,
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 
@@ -864,7 +864,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 			Weight:    10,
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 
@@ -879,7 +879,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 			Weight:    10,
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 
@@ -899,12 +899,12 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaReload,
+			utils.MetaCache: utils.MetaReload,
 		},
 	}
 	expArgs = &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaReload,
+			utils.MetaCache: utils.MetaReload,
 		},
 		Tenant:                  "cgrates.org",
 		FilterIDs:               []string{"cgrates.org:FLTR_ID"},
@@ -930,7 +930,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	expArgs := &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaClear,
+			utils.MetaCache: utils.MetaClear,
 		},
 		Tenant:   "cgrates.org",
 		CacheIDs: []string{utils.CacheFilters},
@@ -967,7 +967,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaClear,
+			utils.MetaCache: utils.MetaClear,
 		},
 	}
 	var reply string
@@ -990,7 +990,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 
@@ -1006,7 +1006,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 			Weight:    10,
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 
@@ -1021,7 +1021,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 			Weight:    10,
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 
@@ -1036,7 +1036,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 			Weight:    10,
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 
@@ -1056,12 +1056,12 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaClear,
+			utils.MetaCache: utils.MetaClear,
 		},
 	}
 	expArgs = &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaClear,
+			utils.MetaCache: utils.MetaClear,
 		},
 		Tenant: "cgrates.org",
 		CacheIDs: []string{utils.CacheAttributeFilterIndexes, utils.CacheThresholdFilterIndexes,

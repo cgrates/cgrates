@@ -105,6 +105,10 @@ type LoaderSCfg struct {
 	TpInDir        string
 	TpOutDir       string
 	Data           []*LoaderDataType
+
+	Action    string // toDO
+	Caching   string // toDO
+	WithIndex bool   // toDO
 }
 
 // LoaderDataType the template for profile loading

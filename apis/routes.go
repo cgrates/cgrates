@@ -104,7 +104,7 @@ func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.APIRout
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
-	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheRouteProfiles,
+	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheRouteProfiles,
 		rp.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -129,7 +129,7 @@ func (adms *AdminSv1) RemoveRouteProfile(ctx *context.Context, args *utils.Tenan
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
-	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheRouteProfiles,
+	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheRouteProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

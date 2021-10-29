@@ -104,7 +104,7 @@ func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *engine.ActionPr
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(ap.APIOpts[utils.CacheOpt]), ap.Tenant, utils.CacheActionProfiles,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(ap.APIOpts[utils.MetaCache]), ap.Tenant, utils.CacheActionProfiles,
 		ap.TenantID(), &ap.FilterIDs, ap.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -129,7 +129,7 @@ func (admS *AdminSv1) RemoveActionProfile(ctx *context.Context, arg *utils.Tenan
 	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheActionProfiles,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.MetaCache]), tnt, utils.CacheActionProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

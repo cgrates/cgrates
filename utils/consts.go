@@ -2183,7 +2183,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProfileIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
-	RemoteHostOpt, CacheOpt, OptsThresholdsProfileIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
+	RemoteHostOpt, MetaCache, OptsThresholdsProfileIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
 	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
 	OptsCDRs, OptsSesCDRsDerivedReply, OptsChargerS, OptsResourceS, OptsSesResourceSAuthorize,
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
@@ -2311,7 +2311,7 @@ const (
 	MetaProfileIgnoreFilters = "*profileIgnoreFilters"
 
 	RemoteHostOpt = "*rmtHost"
-	CacheOpt      = "*cache"
+	MetaCache     = "*cache"
 )
 
 // Event Flags

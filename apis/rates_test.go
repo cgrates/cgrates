@@ -1534,7 +1534,7 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: "1",
+			utils.MetaCache: "1",
 		},
 	}
 	var rtRply string

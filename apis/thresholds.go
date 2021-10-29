@@ -102,7 +102,7 @@ func (adms *AdminSv1) SetThresholdProfile(ctx *context.Context, args *engine.Thr
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile and Threshold
-	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheThresholdProfiles,
+	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), args.Tenant, utils.CacheThresholdProfiles,
 		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -123,7 +123,7 @@ func (adms *AdminSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.T
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
-	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheThresholdProfiles,
+	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]), tnt, utils.CacheThresholdProfiles,
 		utils.ConcatenatedKey(tnt, args.ID), nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

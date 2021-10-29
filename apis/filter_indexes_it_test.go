@@ -570,7 +570,7 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaAttributes,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {
@@ -662,7 +662,7 @@ func testV1FIdxAttributeRemoveIndexesComputeIndexesAllProfiles(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaAttributes,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {
@@ -1071,7 +1071,7 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaAccounts,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			}},
 		&reply); err != nil {
 		t.Error(err)
@@ -1540,7 +1540,7 @@ func testV1FIdxActionSRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaActions,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {
@@ -1957,7 +1957,7 @@ func testV1FIdxChargerSRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaChargers,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {
@@ -2416,7 +2416,7 @@ func testV1FIdxRateSRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaRateProfiles,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {
@@ -2955,7 +2955,7 @@ func testV1FIdxRateProfileRatesRemoveComputedIndexesIDs(t *testing.T) {
 			ItemType: utils.MetaRateProfileRates,
 			Context:  "RATE_1",
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {
@@ -3440,7 +3440,7 @@ func testV1FIdxResourceSRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaResources,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {
@@ -3889,7 +3889,7 @@ func testV1FIdxRouteSRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaRoutes,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {
@@ -4336,7 +4336,7 @@ func testV1FIdxStatSRemoveComputedIndexesIDs(t *testing.T) {
 			Tenant:   utils.CGRateSorg,
 			ItemType: utils.MetaStats,
 			APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
+				utils.MetaCache: utils.MetaClear,
 			},
 		},
 		&reply); err != nil {

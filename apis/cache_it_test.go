@@ -140,7 +140,7 @@ func testCacheSSetAttributeProfile(t *testing.T) {
 			},
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaNone,
+			utils.MetaCache: utils.MetaNone,
 		},
 	}
 	var reply string

@@ -685,6 +685,12 @@ type TenantIDWithAPIOpts struct {
 func (tID *TenantID) TenantID() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
 }
+func (tID *TenantID) Equal(tID2 *TenantID) bool {
+	return (tID == nil && tID2 == nil) ||
+		(tID != nil && tID2 != nil &&
+			tID.Tenant == tID2.Tenant &&
+			tID.ID == tID2.ID)
+}
 
 type PaginatorWithTenant struct {
 	Tenant string
@@ -884,7 +890,7 @@ func GenerateDBItemOpts(apiKey, routeID, cache, rmtHost string) (mp map[string]i
 		mp[OptsRouteID] = routeID
 	}
 	if cache != EmptyString {
-		mp[CacheOpt] = cache
+		mp[MetaCache] = cache
 	}
 	if rmtHost != EmptyString {
 		mp[RemoteHostOpt] = rmtHost

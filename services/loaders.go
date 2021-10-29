@@ -84,7 +84,7 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	ldrs.Lock()
 	defer ldrs.Unlock()
 
-	ldrs.ldrs = loaders.NewLoaderService(datadb, ldrs.cfg.LoaderCfg(),
+	ldrs.ldrs = loaders.NewLoaderService(ldrs.cfg, datadb,
 		ldrs.cfg.GeneralCfg().DefaultTimezone, filterS, ldrs.connMgr)
 
 	if !ldrs.ldrs.Enabled() {
@@ -117,7 +117,7 @@ func (ldrs *LoaderService) Reload(ctx *context.Context, _ context.CancelFunc) er
 	ldrs.RLock()
 	defer ldrs.RUnlock()
 
-	ldrs.ldrs.Reload(datadb, ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
+	ldrs.ldrs.Reload(datadb, ldrs.cfg.GeneralCfg().DefaultTimezone,
 		filterS, ldrs.connMgr)
 	return ldrs.ldrs.ListenAndServe(ldrs.stopChan)
 }
