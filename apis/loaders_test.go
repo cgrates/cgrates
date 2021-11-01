@@ -32,7 +32,7 @@ func TestLoadersNewLoaderSv1(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(), "", fltrs, nil)
+	ldrS := loaders.NewLoaderService(cfg, dm, "", fltrs, nil)
 
 	exp := &LoaderSv1{
 		ldrS: ldrS,

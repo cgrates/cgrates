@@ -41,6 +41,19 @@ func TestLoaderSCoverage(t *testing.T) {
 	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
 	cM := engine.NewConnManager(cfg)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	cfg.LoaderCfg()[0] = &config.LoaderSCfg{
+		ID:             "test_id",
+		Enabled:        true,
+		Tenant:         "",
+		DryRun:         false,
+		RunDelay:       0,
+		LockFilePath:   "",
+		CacheSConns:    nil,
+		FieldSeparator: "",
+		TpInDir:        "",
+		TpOutDir:       "",
+		Data:           nil,
+	}
 	srv := NewLoaderService(cfg, db,
 		filterSChan, server, internalLoaderSChan,
 		cM, anz, srvDep)
@@ -50,21 +63,8 @@ func TestLoaderSCoverage(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	srv.ldrs = loaders.NewLoaderService(&engine.DataManager{},
-		[]*config.LoaderSCfg{{
-			ID:             "test_id",
-			Enabled:        true,
-			Tenant:         "",
-			DryRun:         false,
-			RunDelay:       0,
-			LockFilePath:   "",
-			CacheSConns:    nil,
-			FieldSeparator: "",
-			TpInDir:        "",
-			TpOutDir:       "",
-			Data:           nil,
-		}}, "",
-		&engine.FilterS{}, nil)
+	srv.ldrs = loaders.NewLoaderService(cfg, &engine.DataManager{},
+		"", &engine.FilterS{}, nil)
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
@@ -72,8 +72,7 @@ func TestLoaderSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(serviceName, utils.LoaderS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.LoaderS, serviceName)
 	}
-	shouldRun := srv.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
+	if shouldRun := srv.ShouldRun(); !shouldRun {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
 	if !reflect.DeepEqual(srv.GetLoaderS(), srv.ldrs) {

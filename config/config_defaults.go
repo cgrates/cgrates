@@ -1168,6 +1168,8 @@ const CGRATES_CFG_JSON = `
 		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed TPs will be moved
 		"data":[											// data profiles to load
 			{
+				"id": "filters1",
+				"flags": ["*partial"],
 				"type": "*filters",						// data source type
 				"file_name": "Filters.csv",				// file name in the tp_in_dir
 				"fields": [

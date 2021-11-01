@@ -517,8 +517,10 @@ func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*confi
 		}
 		tntID := TenantIDFromMap(data)
 		if !prevTntID.Equal(tntID) {
-			if err = l.process(ctx, prevTntID, lData, lType, action, caching, dryRun, withIndex, partialRates); err != nil {
-				return
+			if prevTntID != nil {
+				if err = l.process(ctx, prevTntID, lData, lType, action, caching, dryRun, withIndex, partialRates); err != nil {
+					return
+				}
 			}
 			prevTntID = tntID
 			lData = make([]utils.MapStorage, 0, 1)
@@ -587,7 +589,7 @@ func (l *loader) processFolder(ctx *context.Context, action, caching string, dry
 		}
 		return
 	}
-	switch l.ldrCfg.Action {
+	switch action {
 	case utils.MetaStore:
 		for i := range l.ldrCfg.Data {
 			if err = proces(i); err != nil {

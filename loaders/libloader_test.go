@@ -32,41 +32,41 @@ import (
 
 func TestDataUpdateFromCSVOneFile(t *testing.T) {
 	attrSFlds := []*config.FCTemplate{
-		{Tag: "TenantID",
+		{
 			Path:      "Tenant",
 			Type:      utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "ProfileID",
+		{
 			Path:      "ID",
 			Type:      utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "Contexts",
+		{
 			Path:  "Contexts",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-		{Tag: "FilterIDs",
+		{
 			Path:  "FilterIDs",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-		{Tag: "Weight",
+		{
 			Path:  "Weight",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-		{Tag: "Path",
+		{
 			Path:  "Path",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-		{Tag: "Initial",
+		{
 			Path:  "Initial",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-		{Tag: "Substitute",
+		{
 			Path:  "Substitute",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-		{Tag: "Append",
+		{
 			Path:  "Append",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
@@ -116,41 +116,41 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 
 func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 	attrSFlds := []*config.FCTemplate{
-		{Tag: "TenantID",
+		{
 			Path:      "Tenant",
 			Type:      utils.MetaVariable,
 			Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "ProfileID",
+		{
 			Path:      "ID",
 			Type:      utils.MetaVariable,
 			Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "Contexts",
+		{
 			Path:  "Contexts",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-		{Tag: "FilterIDs",
+		{
 			Path:  "FilterIDs",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-		{Tag: "Weight",
+		{
 			Path:  "Weight",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-		{Tag: "Path",
+		{
 			Path:  "Path",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-		{Tag: "Initial",
+		{
 			Path:  "Initial",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-		{Tag: "Substitute",
+		{
 			Path:  "Substitute",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-		{Tag: "Append",
+		{
 			Path:  "Append",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
@@ -200,37 +200,37 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 
 func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 	attrSFlds := []*config.FCTemplate{
-		{Tag: "TenantID",
+		{
 			Path:      "Tenant",
 			Type:      utils.MetaString,
 			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "ProfileID",
+		{
 			Path:      "ID",
 			Type:      utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
 			Mandatory: true},
-		{Tag: "Contexts",
+		{
 			Path:  "Contexts",
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("*any", utils.InfieldSep)},
-		{Tag: "Path",
+		{
 			Path:  "Path",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).5", utils.InfieldSep)},
-		{Tag: "Initial",
+		{
 			Path:  "Initial",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
-		{Tag: "Substitute",
+		{
 			Path:  "Substitute",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
-		{Tag: "Append",
+		{
 			Path:  "Append",
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
-		{Tag: "Weight",
+		{
 			Path:  "Weight",
 			Type:  utils.MetaString,
 			Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
@@ -286,13 +286,13 @@ func TestGetRateIDsLoaderData(t *testing.T) {
 
 func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 	attrSFlds := []*config.FCTemplate{
-		{Tag: "TenantID",
+		{
 			Path:      "Tenant",
 			Type:      utils.MetaString,
 			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Filters:   []string{"*string:~*req.Account:10"},
 			Mandatory: true},
-		{Tag: "ProfileID",
+		{
 			Path:      "ID",
 			Type:      utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
@@ -320,13 +320,13 @@ func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 
 func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
 	attrSFlds := []*config.FCTemplate{
-		{Tag: "TenantID",
+		{
 			Path:      "Tenant",
 			Type:      utils.MetaString,
 			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Filters:   []string{`*string:~*req.2:10`},
 			Mandatory: true},
-		{Tag: "ProfileID",
+		{
 			Path:      "ID",
 			Type:      utils.MetaComposed,
 			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),

@@ -88,31 +88,35 @@ cgrates.org,NewRes1
 
 	data := engine.NewInternalDB(nil, nil, config.NewDefaultCGRConfig().DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	cfgLdr := config.NewDefaultCGRConfig().LoaderCfg()
-	cfgLdr[0] = &config.LoaderSCfg{
+	cfgLdr := config.NewDefaultCGRConfig()
+	cfgLdr.LoaderCfg()[0] = &config.LoaderSCfg{
 		ID:             "testV1LoadResource",
 		Enabled:        true,
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
 		LockFilePath:   "res.lck",
-		Data:           nil,
+		Data: []*config.LoaderDataType{{
+			Type:     utils.MetaResources,
+			Filename: utils.ResourcesCsv,
+			Fields: []*config.FCTemplate{
+				{Tag: "Tenant",
+					Path:      "Tenant",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
+					Mandatory: true},
+				{Tag: "ID",
+					Path:      "ID",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
+					Mandatory: true},
+			},
+		}},
 	}
-	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
-	ldrs.ldrs["testV1LoadResource"].dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: {
-			{Tag: "Tenant",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
+	for _, v := range cfgLdr.LoaderCfg()[0].Data[0].Fields {
+		v.ComputePath()
 	}
+	ldrs := NewLoaderService(cfgLdr, dm, "UTC", nil, nil)
 
 	resCsv := `#Tenant[0],ID[1]
 	cgrates.org,NewRes1

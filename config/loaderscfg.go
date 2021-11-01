@@ -113,6 +113,7 @@ type LoaderSCfg struct {
 
 // LoaderDataType the template for profile loading
 type LoaderDataType struct {
+	ID       string
 	Type     string
 	Filename string
 	Flags    utils.FlagsWithParams
@@ -122,6 +123,9 @@ type LoaderDataType struct {
 func (lData *LoaderDataType) loadFromJSONCfg(jsnCfg *LoaderJsonDataType, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
+	}
+	if jsnCfg.Id != nil {
+		lData.ID = *jsnCfg.Id
 	}
 	if jsnCfg.Type != nil {
 		lData.Type = *jsnCfg.Type
@@ -149,6 +153,7 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	if jsnCfg == nil {
 		return nil
 	}
+	l.WithIndex = true
 	if jsnCfg.ID != nil {
 		l.ID = *jsnCfg.ID
 	}
@@ -188,12 +193,17 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 				continue
 			}
 			var ldrDataType *LoaderDataType
+			var lType, id string
 			if jsnLoCfg.Type != nil {
-				for _, ldrDT := range l.Data {
-					if ldrDT.Type == *jsnLoCfg.Type {
-						ldrDataType = ldrDT
-						break
-					}
+				lType = *jsnLoCfg.Type
+			}
+			if jsnLoCfg.Id != nil {
+				id = *jsnLoCfg.Id
+			}
+			for _, ldrDT := range l.Data {
+				if ldrDT.Type == lType && id == ldrDT.ID {
+					ldrDataType = ldrDT
+					break
 				}
 			}
 			if ldrDataType == nil {
@@ -302,6 +312,7 @@ func (l LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]inter
 }
 
 type LoaderJsonDataType struct {
+	Id        *string
 	Type      *string
 	File_name *string
 	Flags     *[]string
@@ -327,7 +338,8 @@ func equalsLoaderDatasType(v1, v2 []*LoaderDataType) bool {
 		return false
 	}
 	for i := range v2 {
-		if v1[i].Type != v2[i].Type ||
+		if v1[i].ID != v2[i].ID ||
+			v1[i].Type != v2[i].Type ||
 			v1[i].Filename != v2[i].Filename ||
 			!utils.SliceStringEqual(v1[i].Flags.SliceFlags(), v2[i].Flags.SliceFlags()) ||
 			!fcTemplatesEqual(v1[i].Fields, v2[i].Fields) {
@@ -377,6 +389,7 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) 
 			var req []*FcTemplateJsonCfg
 			req = diffFcTemplateJsonCfg(req, nil, val2.Fields, separator)
 			data[i] = &LoaderJsonDataType{
+				Id:        utils.StringPointer(val2.ID),
 				Type:      utils.StringPointer(val2.Type),
 				File_name: utils.StringPointer(val2.Filename),
 				Flags:     utils.SliceStringPointer(val2.Flags.SliceFlags()),
