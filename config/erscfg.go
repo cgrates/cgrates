@@ -478,67 +478,185 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 }
 
 func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
-	return &EventReaderOpts{
-		PartialPath:                       utils.StringPointer(*erOpts.PartialPath),
-		PartialCacheAction:                utils.StringPointer(*erOpts.PartialCacheAction),
-		PartialOrderField:                 utils.StringPointer(*erOpts.PartialOrderField),
-		PartialCSVFieldSeparator:          utils.StringPointer(*erOpts.PartialCSVFieldSeparator),
-		CSVRowLength:                      utils.IntPointer(*erOpts.CSVRowLength),
-		CSVFieldSeparator:                 utils.StringPointer(*erOpts.CSVFieldSeparator),
-		CSVHeaderDefineChar:               utils.StringPointer(*erOpts.CSVHeaderDefineChar),
-		CSVLazyQuotes:                     utils.BoolPointer(*erOpts.CSVLazyQuotes),
-		XMLRootPath:                       utils.StringPointer(*erOpts.XMLRootPath),
-		AMQPQueueID:                       utils.StringPointer(*erOpts.AMQPQueueID),
-		AMQPQueueIDProcessed:              utils.StringPointer(*erOpts.AMQPQueueIDProcessed),
-		AMQPConsumerTag:                   utils.StringPointer(*erOpts.AMQPConsumerTag),
-		AMQPExchange:                      utils.StringPointer(*erOpts.AMQPExchange),
-		AMQPExchangeType:                  utils.StringPointer(*erOpts.AMQPExchangeType),
-		AMQPRoutingKey:                    utils.StringPointer(*erOpts.AMQPRoutingKey),
-		AMQPExchangeProcessed:             utils.StringPointer(*erOpts.AMQPExchangeProcessed),
-		AMQPExchangeTypeProcessed:         utils.StringPointer(*erOpts.AMQPExchangeTypeProcessed),
-		AMQPRoutingKeyProcessed:           utils.StringPointer(*erOpts.AMQPRoutingKeyProcessed),
-		KafkaTopic:                        utils.StringPointer(*erOpts.KafkaTopic),
-		KafkaGroupID:                      utils.StringPointer(*erOpts.KafkaGroupID),
-		KafkaMaxWait:                      utils.DurationPointer(*erOpts.KafkaMaxWait),
-		KafkaTopicProcessed:               utils.StringPointer(*erOpts.KafkaTopicProcessed),
-		SQLDBName:                         utils.StringPointer(*erOpts.SQLDBName),
-		SQLTableName:                      utils.StringPointer(*erOpts.SQLTableName),
-		SSLMode:                           utils.StringPointer(*erOpts.SSLMode),
-		SQLDBNameProcessed:                utils.StringPointer(*erOpts.SQLDBNameProcessed),
-		SQLTableNameProcessed:             utils.StringPointer(*erOpts.SQLTableNameProcessed),
-		SSLModeProcessed:                  utils.StringPointer(*erOpts.SSLModeProcessed),
-		AWSRegion:                         utils.StringPointer(*erOpts.AWSRegion),
-		AWSKey:                            utils.StringPointer(*erOpts.AWSKey),
-		AWSSecret:                         utils.StringPointer(*erOpts.AWSSecret),
-		AWSToken:                          utils.StringPointer(*erOpts.AWSToken),
-		AWSRegionProcessed:                utils.StringPointer(*erOpts.AWSRegionProcessed),
-		AWSKeyProcessed:                   utils.StringPointer(*erOpts.AWSKeyProcessed),
-		AWSSecretProcessed:                utils.StringPointer(*erOpts.AWSSecretProcessed),
-		AWSTokenProcessed:                 utils.StringPointer(*erOpts.AWSTokenProcessed),
-		SQSQueueID:                        utils.StringPointer(*erOpts.SQSQueueID),
-		SQSQueueIDProcessed:               utils.StringPointer(*erOpts.SQSQueueIDProcessed),
-		S3BucketID:                        utils.StringPointer(*erOpts.S3BucketID),
-		S3FolderPathProcessed:             utils.StringPointer(*erOpts.S3FolderPathProcessed),
-		S3BucketIDProcessed:               utils.StringPointer(*erOpts.S3BucketIDProcessed),
-		NATSJetStream:                     utils.BoolPointer(*erOpts.NATSJetStream),
-		NATSConsumerName:                  utils.StringPointer(*erOpts.NATSConsumerName),
-		NATSSubject:                       utils.StringPointer(*erOpts.NATSSubject),
-		NATSQueueID:                       utils.StringPointer(*erOpts.NATSQueueID),
-		NATSJWTFile:                       utils.StringPointer(*erOpts.NATSJWTFile),
-		NATSSeedFile:                      utils.StringPointer(*erOpts.NATSSeedFile),
-		NATSCertificateAuthority:          utils.StringPointer(*erOpts.NATSCertificateAuthority),
-		NATSClientCertificate:             utils.StringPointer(*erOpts.NATSClientCertificate),
-		NATSClientKey:                     utils.StringPointer(*erOpts.NATSClientKey),
-		NATSJetStreamMaxWait:              utils.DurationPointer(*erOpts.NATSJetStreamMaxWait),
-		NATSJetStreamProcessed:            utils.BoolPointer(*erOpts.NATSJetStreamProcessed),
-		NATSSubjectProcessed:              utils.StringPointer(*erOpts.NATSSubjectProcessed),
-		NATSJWTFileProcessed:              utils.StringPointer(*erOpts.NATSJWTFileProcessed),
-		NATSSeedFileProcessed:             utils.StringPointer(*erOpts.NATSSeedFileProcessed),
-		NATSCertificateAuthorityProcessed: utils.StringPointer(*erOpts.NATSCertificateAuthorityProcessed),
-		NATSClientCertificateProcessed:    utils.StringPointer(*erOpts.NATSClientCertificateProcessed),
-		NATSClientKeyProcessed:            utils.StringPointer(*erOpts.NATSClientKeyProcessed),
-		NATSJetStreamMaxWaitProcessed:     utils.DurationPointer(*erOpts.NATSJetStreamMaxWaitProcessed),
+	cln := &EventReaderOpts{}
+	if erOpts.PartialPath != nil {
+		cln.PartialPath = utils.StringPointer(*erOpts.PartialPath)
 	}
+	if erOpts.PartialCacheAction != nil {
+		cln.PartialCacheAction = utils.StringPointer(*erOpts.PartialCacheAction)
+	}
+	if erOpts.PartialOrderField != nil {
+		cln.PartialOrderField = utils.StringPointer(*erOpts.PartialOrderField)
+	}
+	if erOpts.PartialCSVFieldSeparator != nil {
+		cln.PartialCSVFieldSeparator = utils.StringPointer(*erOpts.PartialCSVFieldSeparator)
+	}
+	if erOpts.CSVRowLength != nil {
+		cln.CSVRowLength = utils.IntPointer(*erOpts.CSVRowLength)
+	}
+	if erOpts.CSVFieldSeparator != nil {
+		cln.CSVFieldSeparator = utils.StringPointer(*erOpts.CSVFieldSeparator)
+	}
+	if erOpts.CSVHeaderDefineChar != nil {
+		cln.CSVHeaderDefineChar = utils.StringPointer(*erOpts.CSVHeaderDefineChar)
+	}
+	if erOpts.CSVLazyQuotes != nil {
+		cln.CSVLazyQuotes = utils.BoolPointer(*erOpts.CSVLazyQuotes)
+	}
+	if erOpts.XMLRootPath != nil {
+		cln.XMLRootPath = utils.StringPointer(*erOpts.XMLRootPath)
+	}
+	if erOpts.AMQPQueueID != nil {
+		cln.AMQPQueueID = utils.StringPointer(*erOpts.AMQPQueueID)
+	}
+	if erOpts.AMQPQueueIDProcessed != nil {
+		cln.AMQPQueueIDProcessed = utils.StringPointer(*erOpts.AMQPQueueIDProcessed)
+	}
+	if erOpts.AMQPConsumerTag != nil {
+		cln.AMQPConsumerTag = utils.StringPointer(*erOpts.AMQPConsumerTag)
+	}
+	if erOpts.AMQPExchange != nil {
+		cln.AMQPExchange = utils.StringPointer(*erOpts.AMQPExchange)
+	}
+	if erOpts.AMQPExchangeType != nil {
+		cln.AMQPExchangeType = utils.StringPointer(*erOpts.AMQPExchangeType)
+	}
+	if erOpts.AMQPRoutingKey != nil {
+		cln.AMQPRoutingKey = utils.StringPointer(*erOpts.AMQPRoutingKey)
+	}
+	if erOpts.AMQPExchangeProcessed != nil {
+		cln.AMQPExchangeProcessed = utils.StringPointer(*erOpts.AMQPExchangeProcessed)
+	}
+	if erOpts.AMQPExchangeTypeProcessed != nil {
+		cln.AMQPExchangeTypeProcessed = utils.StringPointer(*erOpts.AMQPExchangeTypeProcessed)
+	}
+	if erOpts.AMQPRoutingKeyProcessed != nil {
+		cln.AMQPRoutingKeyProcessed = utils.StringPointer(*erOpts.AMQPRoutingKeyProcessed)
+	}
+	if erOpts.KafkaTopic != nil {
+		cln.KafkaTopic = utils.StringPointer(*erOpts.KafkaTopic)
+	}
+	if erOpts.KafkaGroupID != nil {
+		cln.KafkaGroupID = utils.StringPointer(*erOpts.KafkaGroupID)
+	}
+	if erOpts.KafkaMaxWait != nil {
+		cln.KafkaMaxWait = utils.DurationPointer(*erOpts.KafkaMaxWait)
+	}
+	if erOpts.KafkaTopicProcessed != nil {
+		cln.KafkaTopicProcessed = utils.StringPointer(*erOpts.KafkaTopicProcessed)
+	}
+	if erOpts.SQLDBName != nil {
+		cln.SQLDBName = utils.StringPointer(*erOpts.SQLDBName)
+	}
+	if erOpts.SQLTableName != nil {
+		cln.SQLTableName = utils.StringPointer(*erOpts.SQLTableName)
+	}
+	if erOpts.SSLMode != nil {
+		cln.SSLMode = utils.StringPointer(*erOpts.SSLMode)
+	}
+	if erOpts.SQLDBNameProcessed != nil {
+		cln.SQLDBNameProcessed = utils.StringPointer(*erOpts.SQLDBNameProcessed)
+	}
+	if erOpts.SQLTableNameProcessed != nil {
+		cln.SQLTableNameProcessed = utils.StringPointer(*erOpts.SQLTableNameProcessed)
+	}
+	if erOpts.SSLModeProcessed != nil {
+		cln.SSLModeProcessed = utils.StringPointer(*erOpts.SSLModeProcessed)
+	}
+	if erOpts.AWSRegion != nil {
+		cln.AWSRegion = utils.StringPointer(*erOpts.AWSRegion)
+	}
+	if erOpts.AWSKey != nil {
+		cln.AWSKey = utils.StringPointer(*erOpts.AWSKey)
+	}
+	if erOpts.AWSSecret != nil {
+		cln.AWSSecret = utils.StringPointer(*erOpts.AWSSecret)
+	}
+	if erOpts.AWSToken != nil {
+		cln.AWSToken = utils.StringPointer(*erOpts.AWSToken)
+	}
+	if erOpts.AWSRegionProcessed != nil {
+		cln.AWSRegionProcessed = utils.StringPointer(*erOpts.AWSRegionProcessed)
+	}
+	if erOpts.AWSKeyProcessed != nil {
+		cln.AWSKeyProcessed = utils.StringPointer(*erOpts.AWSKeyProcessed)
+	}
+	if erOpts.AWSSecretProcessed != nil {
+		cln.AWSSecretProcessed = utils.StringPointer(*erOpts.AWSSecretProcessed)
+	}
+	if erOpts.AWSTokenProcessed != nil {
+		cln.AWSTokenProcessed = utils.StringPointer(*erOpts.AWSTokenProcessed)
+	}
+	if erOpts.SQSQueueID != nil {
+		cln.SQSQueueID = utils.StringPointer(*erOpts.SQSQueueID)
+	}
+	if erOpts.SQSQueueIDProcessed != nil {
+		cln.SQSQueueIDProcessed = utils.StringPointer(*erOpts.SQSQueueIDProcessed)
+	}
+	if erOpts.S3BucketID != nil {
+		cln.S3BucketID = utils.StringPointer(*erOpts.S3BucketID)
+	}
+	if erOpts.S3FolderPathProcessed != nil {
+		cln.S3FolderPathProcessed = utils.StringPointer(*erOpts.S3FolderPathProcessed)
+	}
+	if erOpts.S3BucketIDProcessed != nil {
+		cln.S3BucketIDProcessed = utils.StringPointer(*erOpts.S3BucketIDProcessed)
+	}
+	if erOpts.NATSJetStream != nil {
+		cln.NATSJetStream = utils.BoolPointer(*erOpts.NATSJetStream)
+	}
+	if erOpts.NATSConsumerName != nil {
+		cln.NATSConsumerName = utils.StringPointer(*erOpts.NATSConsumerName)
+	}
+	if erOpts.NATSSubject != nil {
+		cln.NATSSubject = utils.StringPointer(*erOpts.NATSSubject)
+	}
+	if erOpts.NATSQueueID != nil {
+		cln.NATSQueueID = utils.StringPointer(*erOpts.NATSQueueID)
+	}
+	if erOpts.NATSJWTFile != nil {
+		cln.NATSJWTFile = utils.StringPointer(*erOpts.NATSJWTFile)
+	}
+	if erOpts.NATSSeedFile != nil {
+		cln.NATSSeedFile = utils.StringPointer(*erOpts.NATSSeedFile)
+	}
+	if erOpts.NATSCertificateAuthority != nil {
+		cln.NATSCertificateAuthority = utils.StringPointer(*erOpts.NATSCertificateAuthority)
+	}
+	if erOpts.NATSClientCertificate != nil {
+		cln.NATSClientCertificate = utils.StringPointer(*erOpts.NATSClientCertificate)
+	}
+	if erOpts.NATSClientKey != nil {
+		cln.NATSClientKey = utils.StringPointer(*erOpts.NATSClientKey)
+	}
+	if erOpts.NATSJetStreamMaxWait != nil {
+		cln.NATSJetStreamMaxWait = utils.DurationPointer(*erOpts.NATSJetStreamMaxWait)
+	}
+	if erOpts.NATSJetStreamProcessed != nil {
+		cln.NATSJetStreamProcessed = utils.BoolPointer(*erOpts.NATSJetStreamProcessed)
+	}
+	if erOpts.NATSSubjectProcessed != nil {
+		cln.NATSSubjectProcessed = utils.StringPointer(*erOpts.NATSSubjectProcessed)
+	}
+	if erOpts.NATSJWTFileProcessed != nil {
+		cln.NATSJWTFileProcessed = utils.StringPointer(*erOpts.NATSJWTFileProcessed)
+	}
+	if erOpts.NATSSeedFileProcessed != nil {
+		cln.NATSSeedFileProcessed = utils.StringPointer(*erOpts.NATSSeedFileProcessed)
+	}
+	if erOpts.NATSCertificateAuthorityProcessed != nil {
+		cln.NATSCertificateAuthorityProcessed = utils.StringPointer(*erOpts.NATSCertificateAuthorityProcessed)
+	}
+	if erOpts.NATSClientCertificateProcessed != nil {
+		cln.NATSClientCertificateProcessed = utils.StringPointer(*erOpts.NATSClientCertificateProcessed)
+	}
+	if erOpts.NATSClientKeyProcessed != nil {
+		cln.NATSClientKeyProcessed = utils.StringPointer(*erOpts.NATSClientKeyProcessed)
+	}
+	if erOpts.NATSJetStreamMaxWaitProcessed != nil {
+		cln.NATSJetStreamMaxWaitProcessed = utils.DurationPointer(*erOpts.NATSJetStreamMaxWaitProcessed)
+	}
+	return cln
 }
 
 // Clone returns a deep copy of EventReaderCfg

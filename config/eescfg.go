@@ -467,53 +467,143 @@ func (eeC *EventExporterCfg) TrailerFields() []*FCTemplate {
 }
 
 func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
-	return &EventExporterOpts{
-		CSVFieldSeparator:        utils.StringPointer(*eeOpts.CSVFieldSeparator),
-		ElsIndex:                 utils.StringPointer(*eeOpts.ElsIndex),
-		ElsIfPrimaryTerm:         utils.IntPointer(*eeOpts.ElsIfPrimaryTerm),
-		ElsIfSeqNo:               utils.IntPointer(*eeOpts.ElsIfSeqNo),
-		ElsOpType:                utils.StringPointer(*eeOpts.ElsOpType),
-		ElsPipeline:              utils.StringPointer(*eeOpts.ElsPipeline),
-		ElsRouting:               utils.StringPointer(*eeOpts.ElsRouting),
-		ElsTimeout:               utils.DurationPointer(*eeOpts.ElsTimeout),
-		ElsVersion:               utils.IntPointer(*eeOpts.ElsVersion),
-		ElsVersionType:           utils.StringPointer(*eeOpts.ElsVersionType),
-		ElsWaitForActiveShards:   utils.StringPointer(*eeOpts.ElsWaitForActiveShards),
-		SQLMaxIdleConns:          utils.IntPointer(*eeOpts.SQLMaxIdleConns),
-		SQLMaxOpenConns:          utils.IntPointer(*eeOpts.SQLMaxOpenConns),
-		SQLConnMaxLifetime:       utils.DurationPointer(*eeOpts.SQLConnMaxLifetime),
-		SQLTableName:             utils.StringPointer(*eeOpts.SQLTableName),
-		SQLDBName:                utils.StringPointer(*eeOpts.SQLDBName),
-		SSLMode:                  utils.StringPointer(*eeOpts.SSLMode),
-		KafkaTopic:               utils.StringPointer(*eeOpts.KafkaTopic),
-		AMQPQueueID:              utils.StringPointer(*eeOpts.AMQPQueueID),
-		AMQPRoutingKey:           utils.StringPointer(*eeOpts.AMQPRoutingKey),
-		AMQPExchange:             utils.StringPointer(*eeOpts.AMQPExchange),
-		AMQPExchangeType:         utils.StringPointer(*eeOpts.AMQPExchangeType),
-		AWSRegion:                utils.StringPointer(*eeOpts.AWSRegion),
-		AWSKey:                   utils.StringPointer(*eeOpts.AWSKey),
-		AWSSecret:                utils.StringPointer(*eeOpts.AWSSecret),
-		AWSToken:                 utils.StringPointer(*eeOpts.AWSToken),
-		SQSQueueID:               utils.StringPointer(*eeOpts.SQSQueueID),
-		S3BucketID:               utils.StringPointer(*eeOpts.S3BucketID),
-		S3FolderPath:             utils.StringPointer(*eeOpts.S3FolderPath),
-		NATSJetStream:            utils.BoolPointer(*eeOpts.NATSJetStream),
-		NATSSubject:              utils.StringPointer(*eeOpts.NATSSubject),
-		NATSJWTFile:              utils.StringPointer(*eeOpts.NATSJWTFile),
-		NATSSeedFile:             utils.StringPointer(*eeOpts.NATSSeedFile),
-		NATSCertificateAuthority: utils.StringPointer(*eeOpts.NATSCertificateAuthority),
-		NATSClientCertificate:    utils.StringPointer(*eeOpts.NATSClientCertificate),
-		NATSClientKey:            utils.StringPointer(*eeOpts.NATSClientKey),
-		NATSJetStreamMaxWait:     utils.DurationPointer(*eeOpts.NATSJetStreamMaxWait),
-		RPCCodec:                 utils.StringPointer(*eeOpts.RPCCodec),
-		ServiceMethod:            utils.StringPointer(*eeOpts.ServiceMethod),
-		KeyPath:                  utils.StringPointer(*eeOpts.KeyPath),
-		CertPath:                 utils.StringPointer(*eeOpts.CertPath),
-		CAPath:                   utils.StringPointer(*eeOpts.CAPath),
-		TLS:                      utils.BoolPointer(*eeOpts.TLS),
-		RPCConnTimeout:           utils.DurationPointer(*eeOpts.RPCConnTimeout),
-		RPCReplyTimeout:          utils.DurationPointer(*eeOpts.RPCReplyTimeout),
+	cln := &EventExporterOpts{}
+	if eeOpts.CSVFieldSeparator != nil {
+		cln.CSVFieldSeparator = utils.StringPointer(*eeOpts.CSVFieldSeparator)
 	}
+	if eeOpts.ElsIndex != nil {
+		cln.ElsIndex = utils.StringPointer(*eeOpts.ElsIndex)
+	}
+	if eeOpts.ElsIfPrimaryTerm != nil {
+		cln.ElsIfPrimaryTerm = utils.IntPointer(*eeOpts.ElsIfPrimaryTerm)
+	}
+	if eeOpts.ElsIfSeqNo != nil {
+		cln.ElsIfSeqNo = utils.IntPointer(*eeOpts.ElsIfSeqNo)
+	}
+	if eeOpts.ElsOpType != nil {
+		cln.ElsOpType = utils.StringPointer(*eeOpts.ElsOpType)
+	}
+	if eeOpts.ElsPipeline != nil {
+		cln.ElsPipeline = utils.StringPointer(*eeOpts.ElsPipeline)
+	}
+	if eeOpts.ElsRouting != nil {
+		cln.ElsRouting = utils.StringPointer(*eeOpts.ElsRouting)
+	}
+	if eeOpts.ElsTimeout != nil {
+		cln.ElsTimeout = utils.DurationPointer(*eeOpts.ElsTimeout)
+	}
+	if eeOpts.ElsVersion != nil {
+		cln.ElsVersion = utils.IntPointer(*eeOpts.ElsVersion)
+	}
+	if eeOpts.ElsVersionType != nil {
+		cln.ElsVersionType = utils.StringPointer(*eeOpts.ElsVersionType)
+	}
+	if eeOpts.ElsWaitForActiveShards != nil {
+		cln.ElsWaitForActiveShards = utils.StringPointer(*eeOpts.ElsWaitForActiveShards)
+	}
+	if eeOpts.SQLMaxIdleConns != nil {
+		cln.SQLMaxIdleConns = utils.IntPointer(*eeOpts.SQLMaxIdleConns)
+	}
+	if eeOpts.SQLMaxOpenConns != nil {
+		cln.SQLMaxOpenConns = utils.IntPointer(*eeOpts.SQLMaxOpenConns)
+	}
+	if eeOpts.SQLConnMaxLifetime != nil {
+		cln.SQLConnMaxLifetime = utils.DurationPointer(*eeOpts.SQLConnMaxLifetime)
+	}
+	if eeOpts.SQLTableName != nil {
+		cln.SQLTableName = utils.StringPointer(*eeOpts.SQLTableName)
+	}
+	if eeOpts.SQLDBName != nil {
+		cln.SQLDBName = utils.StringPointer(*eeOpts.SQLDBName)
+	}
+	if eeOpts.SSLMode != nil {
+		cln.SSLMode = utils.StringPointer(*eeOpts.SSLMode)
+	}
+	if eeOpts.KafkaTopic != nil {
+		cln.KafkaTopic = utils.StringPointer(*eeOpts.KafkaTopic)
+	}
+	if eeOpts.AMQPQueueID != nil {
+		cln.AMQPQueueID = utils.StringPointer(*eeOpts.AMQPQueueID)
+	}
+	if eeOpts.AMQPRoutingKey != nil {
+		cln.AMQPRoutingKey = utils.StringPointer(*eeOpts.AMQPRoutingKey)
+	}
+	if eeOpts.AMQPExchange != nil {
+		cln.AMQPExchange = utils.StringPointer(*eeOpts.AMQPExchange)
+	}
+	if eeOpts.AMQPExchangeType != nil {
+		cln.AMQPExchangeType = utils.StringPointer(*eeOpts.AMQPExchangeType)
+	}
+	if eeOpts.AWSRegion != nil {
+		cln.AWSRegion = utils.StringPointer(*eeOpts.AWSRegion)
+	}
+	if eeOpts.AWSKey != nil {
+		cln.AWSKey = utils.StringPointer(*eeOpts.AWSKey)
+	}
+	if eeOpts.AWSSecret != nil {
+		cln.AWSSecret = utils.StringPointer(*eeOpts.AWSSecret)
+	}
+	if eeOpts.AWSToken != nil {
+		cln.AWSToken = utils.StringPointer(*eeOpts.AWSToken)
+	}
+	if eeOpts.SQSQueueID != nil {
+		cln.SQSQueueID = utils.StringPointer(*eeOpts.SQSQueueID)
+	}
+	if eeOpts.S3BucketID != nil {
+		cln.S3BucketID = utils.StringPointer(*eeOpts.S3BucketID)
+	}
+	if eeOpts.S3FolderPath != nil {
+		cln.S3FolderPath = utils.StringPointer(*eeOpts.S3FolderPath)
+	}
+	if eeOpts.NATSJetStream != nil {
+		cln.NATSJetStream = utils.BoolPointer(*eeOpts.NATSJetStream)
+	}
+	if eeOpts.NATSSubject != nil {
+		cln.NATSSubject = utils.StringPointer(*eeOpts.NATSSubject)
+	}
+	if eeOpts.NATSJWTFile != nil {
+		cln.NATSJWTFile = utils.StringPointer(*eeOpts.NATSJWTFile)
+	}
+	if eeOpts.NATSSeedFile != nil {
+		cln.NATSSeedFile = utils.StringPointer(*eeOpts.NATSSeedFile)
+	}
+	if eeOpts.NATSCertificateAuthority != nil {
+		cln.NATSCertificateAuthority = utils.StringPointer(*eeOpts.NATSCertificateAuthority)
+	}
+	if eeOpts.NATSClientCertificate != nil {
+		cln.NATSClientCertificate = utils.StringPointer(*eeOpts.NATSClientCertificate)
+	}
+	if eeOpts.NATSClientKey != nil {
+		cln.NATSClientKey = utils.StringPointer(*eeOpts.NATSClientKey)
+	}
+	if eeOpts.NATSJetStreamMaxWait != nil {
+		cln.NATSJetStreamMaxWait = utils.DurationPointer(*eeOpts.NATSJetStreamMaxWait)
+	}
+	if eeOpts.RPCCodec != nil {
+		cln.RPCCodec = utils.StringPointer(*eeOpts.RPCCodec)
+	}
+	if eeOpts.ServiceMethod != nil {
+		cln.ServiceMethod = utils.StringPointer(*eeOpts.ServiceMethod)
+	}
+	if eeOpts.KeyPath != nil {
+		cln.KeyPath = utils.StringPointer(*eeOpts.KeyPath)
+	}
+	if eeOpts.CertPath != nil {
+		cln.CertPath = utils.StringPointer(*eeOpts.CertPath)
+	}
+	if eeOpts.CAPath != nil {
+		cln.CAPath = utils.StringPointer(*eeOpts.CAPath)
+	}
+	if eeOpts.TLS != nil {
+		cln.TLS = utils.BoolPointer(*eeOpts.TLS)
+	}
+	if eeOpts.RPCConnTimeout != nil {
+		cln.RPCConnTimeout = utils.DurationPointer(*eeOpts.RPCConnTimeout)
+	}
+	if eeOpts.RPCReplyTimeout != nil {
+		cln.RPCReplyTimeout = utils.DurationPointer(*eeOpts.RPCReplyTimeout)
+	}
+	return cln
 }
 
 // Clone returns a deep copy of EventExporterCfg
