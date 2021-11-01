@@ -221,14 +221,13 @@ var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
 	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
-	utils.MetaRegex})
+	utils.MetaRegex, utils.MetaNever, utils.MetaCronExp})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaCronExp, utils.MetaRSR, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
 	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan,
-	utils.MetaActivationInterval,
-	utils.MetaRegex})
+	utils.MetaActivationInterval, utils.MetaRegex})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
@@ -345,6 +344,8 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 		result, err = fltr.passActivationInterval(dDP)
 	case utils.MetaRegex, utils.MetaNotRegex:
 		result, err = fltr.passRegex(dDP)
+	case utils.MetaNever:
+		result, err = fltr.passNever(dDP)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -681,5 +682,9 @@ func (fltr *FilterRule) passRegex(dDP utils.DataProvider) (bool, error) {
 			return true, nil
 		}
 	}
+	return false, nil
+}
+
+func (fltr *FilterRule) passNever(dDP utils.DataProvider) (bool, error) {
 	return false, nil
 }

@@ -1028,6 +1028,7 @@ const (
 	MetaAPIBan             = "*apiban"
 	MetaActivationInterval = "*ai"
 	MetaRegex              = "*regex"
+	MetaNever              = "*never"
 
 	MetaNotString             = "*notstring"
 	MetaNotPrefix             = "*notprefix"
