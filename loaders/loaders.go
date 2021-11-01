@@ -99,6 +99,7 @@ func (ldrS *LoaderService) process(ctx *context.Context, args *ArgsProcessFolder
 	rply *string) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()
+
 	if args.LoaderID == utils.EmptyString {
 		args.LoaderID = utils.MetaDefault
 	}

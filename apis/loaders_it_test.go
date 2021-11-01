@@ -38,12 +38,10 @@ import (
 )
 
 var (
-	ldrDirPathIn  string
-	ldrDirPathOut string
-	ldrCfgPath    string
-	ldrCfg        *config.CGRConfig
-	ldrRPC        *birpc.Client
-	ldrConfigDIR  string //run tests for specific configuration
+	ldrCfgPath   string
+	ldrCfg       *config.CGRConfig
+	ldrRPC       *birpc.Client
+	ldrConfigDIR string //run tests for specific configuration
 
 	sTestsLdr = []func(t *testing.T){
 		testLoadersRemoveFolders,
@@ -72,7 +70,6 @@ var (
 		testLoadersGetThresholdProfile,
 
 		testLoadersRemove,
-
 		testLoadersGetAccountAfterRemove,
 		testLoadersGetActionProfileAfterRemove,
 		testLoadersGetAttributeProfileAfterRemove,
@@ -165,253 +162,101 @@ func testLoadersPing(t *testing.T) {
 }
 
 func testLoadersCreateFolders(t *testing.T) {
-	ldrDirPathIn = "/tmp/TestLoadersIT/in"
-	err := os.MkdirAll(ldrDirPathIn, 0755)
-	if err != nil {
-		t.Error(err)
-	}
-
-	ldrDirPathOut = "/tmp/TestLoadersIT/out"
-	err = os.MkdirAll(ldrDirPathOut, 0755)
-	if err != nil {
+	if err := os.MkdirAll("/tmp/TestLoadersIT/in", 0755); err != nil {
 		t.Error(err)
 	}
 }
 
 func testLoadersRemoveFolders(t *testing.T) {
-	err := os.RemoveAll("/tmp/TestLoadersIT")
-	if err != nil {
+	if err := os.RemoveAll("/tmp/TestLoadersIT/in"); err != nil {
 		t.Error(err)
 	}
 }
 
 func testLoadersWriteCSVs(t *testing.T) {
+	writeFile := func(fileName, data string) error {
+		csvAccounts, err := os.Create(path.Join(ldrCfg.LoaderCfg()[0].TpInDir, fileName))
+		if err != nil {
+			return err
+		}
+		defer csvAccounts.Close()
+		_, err = csvAccounts.WriteString(data)
+		if err != nil {
+			return err
+
+		}
+		return csvAccounts.Sync()
+	}
 	// Create and populate Accounts.csv
-	csvAccounts, err := os.Create(ldrDirPathIn + "/Accounts.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvAccounts.Close()
-
-	data := `#Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,ACC_PRF,,;20,,MonetaryBalance,,;10,*concrete,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none`
-
-	_, err = csvAccounts.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvAccounts.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.AccountsCsv, `#Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
+cgrates.org,ACC_PRF,,;20,,MonetaryBalance,,;10,*concrete,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none`); err != nil {
+		t.Fatal(err)
 	}
 
-	// Create and populate Actions.csv
-	csvActions, err := os.Create(ldrDirPathIn + "/Actions.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvActions.Close()
-
-	data = `#Tenant,ID,FilterIDs,Weight,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ACT_PRF,,10,*asap,*accounts,1001,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Units,10`
-
-	_, err = csvActions.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvActions.Sync()
-	if err != nil {
-		t.Error(err)
+	// Create and populate ActionProfiles.csv
+	if err := writeFile(utils.ActionsCsv, `#Tenant,ID,FilterIDs,Weight,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ACT_PRF,,10,*asap,*accounts,1001,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Units,10`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate Attributes.csv
-	csvAttributes, err := os.Create(ldrDirPathIn + "/Attributes.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvAttributes.Close()
-
-	data = `#Tenant,ID,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
-cgrates.org,ATTR_ACNT_1001,FLTR_ACCOUNT_1001,10,,*req.OfficeGroup,*constant,Marketing,false`
-
-	_, err = csvAttributes.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvAttributes.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.AttributesCsv, `#Tenant,ID,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
+cgrates.org,ATTR_ACNT_1001,FLTR_ACCOUNT_1001,10,,*req.OfficeGroup,*constant,Marketing,false`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate Chargers.csv
-	csvChargers, err := os.Create(ldrDirPathIn + "/Chargers.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvChargers.Close()
-
-	data = `#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
-cgrates.org,Raw,FLTR_ACCOUNT_1001,20,*raw,*constant:*req.RequestType:*none`
-
-	_, err = csvChargers.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvChargers.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.ChargersCsv, `#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
+cgrates.org,Raw,FLTR_ACCOUNT_1001,20,*raw,*constant:*req.RequestType:*none`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate DispatcherProfiles.csv
-	csvDispatcherProfiles, err := os.Create(ldrDirPathIn + "/DispatcherProfiles.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvDispatcherProfiles.Close()
-
-	data = `#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
-cgrates.org,DSP1,FLTR_ACCOUNT_1001,10,*weight,,ALL,,20,false,`
-
-	_, err = csvDispatcherProfiles.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvDispatcherProfiles.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.DispatcherProfilesCsv, `#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
+cgrates.org,DSP1,FLTR_ACCOUNT_1001,10,*weight,,ALL,,20,false,`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate DispatcherHosts.csv
-	csvDispatcherHosts, err := os.Create(ldrDirPathIn + "/DispatcherHosts.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvDispatcherHosts.Close()
-
-	data = `#Tenant[0],ID[1],Address[2],Transport[3],TLS[4]
-cgrates.org,DSPHOST1,*internal,,`
-
-	_, err = csvDispatcherHosts.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvDispatcherHosts.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.DispatcherHostsCsv, `#Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],ConnectTimeout[6],ReplyTimeout[7],Tls[8],ClientKey[9],ClientCertificate[10],CaCertificate[11]
+cgrates.org,DSPHOST1,*internal,,1,3,"1m","2m",false,,,`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate Filters.csv
-	csvFilters, err := os.Create(ldrDirPathIn + "/Filters.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvFilters.Close()
-
-	data = `#Tenant[0],ID[1],Type[2],Path[3],Values[4]
-cgrates.org,FLTR_ACCOUNT_1001,*string,~*req.Account,1001`
-
-	_, err = csvFilters.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvFilters.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.FiltersCsv, `#Tenant[0],ID[1],Type[2],Path[3],Values[4]
+cgrates.org,FLTR_ACCOUNT_1001,*string,~*req.Account,1001`); err != nil {
+		t.Fatal(err)
 	}
 
-	// Create and populate Rates.csv
-	csvRateProfiles, err := os.Create(ldrDirPathIn + "/Rates.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvRateProfiles.Close()
-
-	data = `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP1,FLTR_ACCOUNT_1001,;0,0.1,0.6,*free,RT_WEEK,FLTR_ACCOUNT_1001,"* * * * 1-5",;0,false,0s,,0.12,1m,1m`
-
-	_, err = csvRateProfiles.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvRateProfiles.Sync()
-	if err != nil {
-		t.Error(err)
+	// Create and populate RateProfiles.csv
+	if err := writeFile(utils.RatesCsv, `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP1,FLTR_ACCOUNT_1001,;0,0.1,0.6,*free,RT_WEEK,FLTR_ACCOUNT_1001,"* * * * 1-5",;0,false,0s,,0.12,1m,1m`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate Resources.csv
-	csvResources, err := os.Create(ldrDirPathIn + "/Resources.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvResources.Close()
-
-	data = `#Tenant[0],Id[1],FilterIDs[2],Weight[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],ThresholdIDs[9]
-cgrates.org,RES_ACNT_1001,FLTR_ACCOUNT_1001,10,1h,1,,false,false,`
-
-	_, err = csvResources.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvResources.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.ResourcesCsv, `#Tenant[0],Id[1],FilterIDs[2],Weight[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],ThresholdIDs[9]
+cgrates.org,RES_ACNT_1001,FLTR_ACCOUNT_1001,10,1h,1,,false,false,`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate Routes.csv
-	csvRoutes, err := os.Create(ldrDirPathIn + "/Routes.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvRoutes.Close()
-
-	data = `#Tenant,ID,FilterIDs,Weights,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeights,RouteBlocker,RouteParameters
-cgrates.org,ROUTE_ACNT_1001,FLTR_ACCOUNT_1001,;10,*weight,,route1,,,,,,;20,,`
-
-	_, err = csvRoutes.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvRoutes.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.RoutesCsv, `#Tenant,ID,FilterIDs,Weights,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRateProfileIDs,RouteResourceIDs,RouteStatIDs,RouteWeights,RouteBlocker,RouteParameters
+cgrates.org,ROUTE_ACNT_1001,FLTR_ACCOUNT_1001,;10,*weight,,route1,,,,,,;20,,`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate Stats.csv
-	csvStats, err := os.Create(ldrDirPathIn + "/Stats.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvStats.Close()
-
-	data = `#Tenant[0],Id[1],FilterIDs[2],Weight[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
-cgrates.org,Stat_1,FLTR_ACCOUNT_1001,30,100,10s,0,*acd;*tcd;*asr,,false,true,*none`
-
-	_, err = csvStats.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvStats.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.StatsCsv, `#Tenant[0],Id[1],FilterIDs[2],Weight[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
+cgrates.org,Stat_1,FLTR_ACCOUNT_1001,30,100,10s,0,*acd;*tcd;*asr,,false,true,*none`); err != nil {
+		t.Fatal(err)
 	}
 
 	// Create and populate Thresholds.csv
-	csvThresholds, err := os.Create(ldrDirPathIn + "/Thresholds.csv")
-	if err != nil {
-		t.Error(err)
-	}
-	defer csvThresholds.Close()
-
-	data = `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
-cgrates.org,THD_ACNT_1001,FLTR_ACCOUNT_1001,10,-1,0,0,false,ACT_PRF,false`
-
-	_, err = csvThresholds.WriteString(data)
-	if err != nil {
-		t.Error(err)
-	}
-	err = csvThresholds.Sync()
-	if err != nil {
-		t.Error(err)
+	if err := writeFile(utils.ThresholdsCsv, `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
+cgrates.org,THD_ACNT_1001,FLTR_ACCOUNT_1001,10,-1,0,0,false,ACT_PRF,false`); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -1261,7 +1106,7 @@ func TestLoadersLoad(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(), "", fltrs, nil)
+	ldrS := loaders.NewLoaderService(cfg, dm, "", fltrs, nil)
 	lSv1 := NewLoaderSv1(ldrS)
 
 	args := &loaders.ArgsProcessFolder{

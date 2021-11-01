@@ -33,41 +33,30 @@ type Locker interface {
 
 func newLocker(path string) Locker {
 	if path != utils.EmptyString {
-		return &folderLock{path: path}
+		return folderLock(path)
 	}
 	return new(nopLock)
 }
 
-type folderLock struct {
-	path string
-	file io.Closer
-}
+type folderLock string
 
 // lockFolder will attempt to lock the folder by creating the lock file
-func (fl *folderLock) Lock() (err error) {
-	// If the path is an empty string, we should not be locking
-	fl.file, err = os.OpenFile(fl.path,
+func (fl folderLock) Lock() (err error) {
+	var file io.Closer
+	file, err = os.OpenFile(string(fl),
 		os.O_RDONLY|os.O_CREATE, 0644)
+	file.Close()
 	return
 }
 
-func (fl *folderLock) Unlock() (err error) {
-	// If the path is an empty string, we should not be locking
-	if fl.file != nil {
-		fl.file.Close()
-		err = os.Remove(fl.path)
-	}
-	return
+func (fl folderLock) Unlock() (err error) {
+	return os.Remove(string(fl))
 }
 
-func (ldr folderLock) Locked() (lk bool, err error) {
-	// If the path is an empty string, we should not be locking
-	if lk = ldr.file != nil; lk {
-		return
-	}
-	if _, err = os.Stat(ldr.path); err != nil {
-		if lk = os.IsNotExist(err); lk {
-			err = nil
+func (fl folderLock) Locked() (lk bool, err error) {
+	if _, err = os.Stat(string(fl)); err != nil {
+		if os.IsNotExist(err) {
+			lk, err = false, nil
 		}
 		return
 	}
@@ -75,18 +64,9 @@ func (ldr folderLock) Locked() (lk bool, err error) {
 	return
 }
 
-type nopLock struct {
-}
+type nopLock struct{}
 
 // lockFolder will attempt to lock the folder by creating the lock file
-func (fl *nopLock) Lock() (_ error) {
-	return
-}
-
-func (fl *nopLock) Unlock() (_ error) {
-	return
-}
-
-func (ldr nopLock) Locked() (_ bool, _ error) {
-	return
-}
+func (nopLock) Lock() (_ error)           { return }
+func (nopLock) Unlock() (_ error)         { return }
+func (nopLock) Locked() (_ bool, _ error) { return }
