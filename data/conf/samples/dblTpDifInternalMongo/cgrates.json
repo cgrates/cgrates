@@ -154,7 +154,7 @@
 		"data":[
 			{
 			  "type": "*rate_profiles",
-			  "file_name": "RateProfiles.csv",
+			  "file_name": "Rates.csv",
 			  "fields": [
 				{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

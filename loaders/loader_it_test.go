@@ -422,7 +422,7 @@ func testLoadFromFilesCsvActionProfile(t *testing.T) {
 	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
 	}
-	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
+	newFile, err := os.Create(path.Join(flPath, "Actions.csv"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -461,7 +461,7 @@ cgrates.org,SET_ACTPROFILE_3
 
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: nil,
+			utils.ActionsCsv: nil,
 		},
 	}
 	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, true); err != nil {
@@ -489,8 +489,8 @@ cgrates.org,SET_ACTPROFILE_3
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{
+				fileName: utils.ActionsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -527,12 +527,12 @@ func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
 	}
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{
+				fileName: utils.ActionsCsv,
 			},
 		},
 	}
-	expectedErr := "open /tmp/testLoadFromFilesCsvActionProfileOpenError/ActionProfiles.csv: no such file or directory"
+	expectedErr := "open /tmp/testLoadFromFilesCsvActionProfileOpenError/Actions.csv: no such file or directory"
 	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -554,7 +554,7 @@ cgrates.org,SET_ACTPROFILE_3`
 	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
 	}
-	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
+	newFile, err := os.Create(path.Join(flPath, "Actions.csv"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -568,7 +568,7 @@ cgrates.org,SET_ACTPROFILE_3`
 		tpInDir:       "/tmp/TestLoadFromFilesCsvActionProfile",
 		tpOutDir:      utils.EmptyString,
 		rdrTypes:      []string{utils.MetaActionProfiles},
-		lockFilepath:  "ActionProfiles.csv",
+		lockFilepath:  "Actions.csv",
 		fieldSep:      ",",
 		timezone:      "UTC",
 
@@ -591,7 +591,7 @@ cgrates.org,SET_ACTPROFILE_3`
 
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: {},
+			utils.ActionsCsv: {},
 		},
 	}
 	expACtPrf := &engine.ActionProfile{
@@ -619,7 +619,7 @@ cgrates.org,SET_ACTPROFILE_3`
 	ldr.cacheConns = []string{utils.MetaInternal}
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: {},
+			utils.ActionsCsv: {},
 		},
 	}
 	if err := ldr.dm.SetActionProfile(context.TODO(), expACtPrf, true); err != nil {
@@ -650,7 +650,7 @@ func testLoaderMoveFiles(t *testing.T) {
 	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
 	}
-	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
+	newFile, err := os.Create(path.Join(flPath, "Actions.csv"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -664,7 +664,7 @@ func testLoaderMoveFiles(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := os.Remove("/tmp/ActionProfiles.csv"); err != nil {
+	if err := os.Remove("/tmp/Actions.csv"); err != nil {
 		t.Error(err)
 	} else if err := os.Remove("/tmp/TestLoadFromFilesCsvActionProfile"); err != nil {
 		t.Error(err)
@@ -676,12 +676,12 @@ func testLoaderMoveFilesMatchingFiles(t *testing.T) {
 	ldr := &Loader{
 		tpInDir:      flPath,
 		tpOutDir:     "/tmp",
-		lockFilepath: "ActionProfiles.csv",
+		lockFilepath: "Actions.csv",
 	}
 	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
 	}
-	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
+	newFile, err := os.Create(path.Join(flPath, "Actions.csv"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -691,7 +691,7 @@ func testLoaderMoveFilesMatchingFiles(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := os.Remove(path.Join(flPath, "ActionProfiles.csv")); err != nil {
+	if err := os.Remove(path.Join(flPath, "Actions.csv")); err != nil {
 		t.Error(err)
 	} else if err := os.Remove(flPath); err != nil {
 		t.Error(err)

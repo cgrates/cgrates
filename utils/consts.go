@@ -1542,8 +1542,8 @@ const (
 	ChargersCsv           = "Chargers.csv"
 	DispatcherProfilesCsv = "DispatcherProfiles.csv"
 	DispatcherHostsCsv    = "DispatcherHosts.csv"
-	RateProfilesCsv       = "RateProfiles.csv"
-	ActionProfilesCsv     = "ActionProfiles.csv"
+	RatesCsv              = "Rates.csv"
+	ActionsCsv            = "Actions.csv"
 	AccountsCsv           = "Accounts.csv"
 )
 

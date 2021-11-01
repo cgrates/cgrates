@@ -132,8 +132,8 @@ cgrates.org,MOCK_RELOAD_ID,20
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   rdrCsv,
 			},
@@ -150,8 +150,8 @@ cgrates.org,MOCK_RELOAD_ID,20
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   rdrCsv,
 			},
@@ -229,8 +229,8 @@ cgrates.org,MOCK_RELOAD_ID,20
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   rdrCsv,
 			},
@@ -247,8 +247,8 @@ cgrates.org,MOCK_RELOAD_ID,20
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   rdrCsv,
 			},

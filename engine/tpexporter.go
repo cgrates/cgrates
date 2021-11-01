@@ -198,7 +198,7 @@ func (tpExp *TPExporter) Run() error {
 	for _, sd := range storDataRateProfiles {
 		sdModels := APItoModelTPRateProfile(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.RateProfilesCsv] = append(toExportMap[utils.RateProfilesCsv], sdModel)
+			toExportMap[utils.RatesCsv] = append(toExportMap[utils.RatesCsv], sdModel)
 		}
 	}
 
@@ -210,7 +210,7 @@ func (tpExp *TPExporter) Run() error {
 	for _, sd := range storDataActionProfiles {
 		sdModels := APItoModelTPActionProfile(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.ActionProfilesCsv] = append(toExportMap[utils.ActionProfilesCsv], sdModel)
+			toExportMap[utils.ActionsCsv] = append(toExportMap[utils.ActionsCsv], sdModel)
 		}
 	}
 
