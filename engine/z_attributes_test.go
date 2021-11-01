@@ -4442,3 +4442,55 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(rply2))
 	}
 }
+
+func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	aA := NewAttributeService(dm, filterS, cfg)
+	args2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AcProcessEvent",
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProfileIDs: time.Second,
+		},
+	}
+	eNM := utils.MapStorage{
+		utils.MetaReq:  args2.Event,
+		utils.MetaOpts: args2.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+	_, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	if err == nil || err.Error() != "cannot convert field: 1s to []string" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cannot convert field: 1s to []string", err)
+	}
+}
+
+func TestAttributeServicesProcessEventGetBoolOptsError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	aA := NewAttributeService(dm, filterS, cfg)
+	args2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AcProcessEvent",
+		APIOpts: map[string]interface{}{
+			utils.MetaProfileIgnoreFilters: time.Second,
+		},
+	}
+	eNM := utils.MapStorage{
+		utils.MetaReq:  args2.Event,
+		utils.MetaOpts: args2.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+	_, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cannot convert field: 1s to bool", err)
+	}
+}
