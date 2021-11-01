@@ -871,7 +871,7 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 				{
 					Type:     "*rate_profiles",
-					Filename: "RateProfiles.csv",
+					Filename: "Rates.csv",
 					Flags:    flags,
 					Fields: []*FCTemplate{
 						{
@@ -1031,7 +1031,7 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 				{
 					Type:     "*action_profiles",
-					Filename: "ActionProfiles.csv",
+					Filename: "Actions.csv",
 					Flags:    flags,
 					Fields: []*FCTemplate{
 						{
@@ -2131,7 +2131,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 				},
 				{
 					utils.TypeCfg:     "*rate_profiles",
-					utils.FilenameCfg: "RateProfiles.csv",
+					utils.FilenameCfg: "Rates.csv",
 					utils.FlagsCfg:    flags,
 					utils.FieldsCfg: []map[string]interface{}{
 						{
@@ -2242,7 +2242,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 				},
 				{
 					utils.TypeCfg:     "*action_profiles",
-					utils.FilenameCfg: "ActionProfiles.csv",
+					utils.FilenameCfg: "Actions.csv",
 					utils.FlagsCfg:    flags,
 					utils.FieldsCfg: []map[string]interface{}{
 						{

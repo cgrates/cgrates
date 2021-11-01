@@ -205,8 +205,8 @@ cgrates.org,ACC_PRF,,;20,,MonetaryBalance,,;10,*concrete,14,fltr1&fltr2;100;fltr
 		t.Error(err)
 	}
 
-	// Create and populate ActionProfiles.csv
-	csvActions, err := os.Create(ldrDirPathIn + "/ActionProfiles.csv")
+	// Create and populate Actions.csv
+	csvActions, err := os.Create(ldrDirPathIn + "/Actions.csv")
 	if err != nil {
 		t.Error(err)
 	}
@@ -319,8 +319,8 @@ cgrates.org,FLTR_ACCOUNT_1001,*string,~*req.Account,1001`
 		t.Error(err)
 	}
 
-	// Create and populate RateProfiles.csv
-	csvRateProfiles, err := os.Create(ldrDirPathIn + "/RateProfiles.csv")
+	// Create and populate Rates.csv
+	csvRateProfiles, err := os.Create(ldrDirPathIn + "/Rates.csv")
 	if err != nil {
 		t.Error(err)
 	}

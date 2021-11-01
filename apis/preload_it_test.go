@@ -84,16 +84,16 @@ func testPreloadITCreateDirectories(t *testing.T) {
 		}
 	}
 	// writing in files the csv containing the profile for RateProfile
-	if err := os.WriteFile(path.Join("/tmp/RatesIn", utils.RateProfilesCsv), []byte(engine.RateProfileCSVContent), 0644); err != nil {
-		t.Fatalf("Err %v when writing in file %s", err, utils.RateProfilesCsv)
+	if err := os.WriteFile(path.Join("/tmp/RatesIn", utils.RatesCsv), []byte(engine.RateProfileCSVContent), 0644); err != nil {
+		t.Fatalf("Err %v when writing in file %s", err, utils.RatesCsv)
 	}
 	// writing in files the csv containing the profile for Accounts
 	if err := os.WriteFile(path.Join("/tmp/AccountsIn", utils.AccountsCsv), []byte(engine.AccountCSVContent), 0644); err != nil {
 		t.Fatalf("Err %v when writing in file %s", err, utils.AccountsCsv)
 	}
 	// writing in files the csv containing the profile for ActionProfile
-	if err := os.WriteFile(path.Join("/tmp/ActionsIn", utils.ActionProfilesCsv), []byte(engine.ActionProfileCSVContent), 0644); err != nil {
-		t.Fatalf("Err %v when writing in file %s", err, utils.ActionProfilesCsv)
+	if err := os.WriteFile(path.Join("/tmp/ActionsIn", utils.ActionsCsv), []byte(engine.ActionProfileCSVContent), 0644); err != nil {
+		t.Fatalf("Err %v when writing in file %s", err, utils.ActionsCsv)
 	}
 }
 

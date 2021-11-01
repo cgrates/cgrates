@@ -1306,7 +1306,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*rate_profiles",						// data source type
-				"file_name": "RateProfiles.csv",				// file name in the tp_in_dir
+				"file_name": "Rates.csv",				// file name in the tp_in_dir
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
@@ -1329,7 +1329,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*action_profiles",						// data source type
-				"file_name": "ActionProfiles.csv",				// file name in the tp_in_dir
+				"file_name": "Actions.csv",				// file name in the tp_in_dir
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

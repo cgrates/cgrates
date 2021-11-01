@@ -96,8 +96,8 @@ func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 	chargersPaths := appendName(allFoldersPath, utils.ChargersCsv)
 	dispatcherprofilesPaths := appendName(allFoldersPath, utils.DispatcherProfilesCsv)
 	dispatcherhostsPaths := appendName(allFoldersPath, utils.DispatcherHostsCsv)
-	rateProfilesFn := appendName(allFoldersPath, utils.RateProfilesCsv)
-	actionProfilesFn := appendName(allFoldersPath, utils.ActionProfilesCsv)
+	rateProfilesFn := appendName(allFoldersPath, utils.RatesCsv)
+	actionProfilesFn := appendName(allFoldersPath, utils.ActionsCsv)
 	accountsFn := appendName(allFoldersPath, utils.AccountsCsv)
 	return NewCSVStorage(sep,
 		resourcesPaths,
@@ -193,8 +193,8 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			chargersPaths = append(chargersPaths, joinURL(baseURL, utils.ChargersCsv))
 			dispatcherprofilesPaths = append(dispatcherprofilesPaths, joinURL(baseURL, utils.DispatcherProfilesCsv))
 			dispatcherhostsPaths = append(dispatcherhostsPaths, joinURL(baseURL, utils.DispatcherHostsCsv))
-			rateProfilesPaths = append(rateProfilesPaths, joinURL(baseURL, utils.RateProfilesCsv))
-			actionProfilesPaths = append(actionProfilesPaths, joinURL(baseURL, utils.ActionProfilesCsv))
+			rateProfilesPaths = append(rateProfilesPaths, joinURL(baseURL, utils.RatesCsv))
+			actionProfilesPaths = append(actionProfilesPaths, joinURL(baseURL, utils.ActionsCsv))
 			accountsPaths = append(accountsPaths, joinURL(baseURL, utils.AccountsCsv))
 			continue
 		}
@@ -217,9 +217,9 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			dispatcherprofilesPaths = append(dispatcherprofilesPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.DispatcherHostsCsv):
 			dispatcherhostsPaths = append(dispatcherhostsPaths, baseURL)
-		case strings.HasSuffix(baseURL, utils.RateProfilesCsv):
+		case strings.HasSuffix(baseURL, utils.RatesCsv):
 			rateProfilesPaths = append(rateProfilesPaths, baseURL)
-		case strings.HasSuffix(baseURL, utils.ActionProfilesCsv):
+		case strings.HasSuffix(baseURL, utils.ActionsCsv):
 			actionProfilesPaths = append(actionProfilesPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.AccountsCsv):
 			accountsPaths = append(accountsPaths, baseURL)

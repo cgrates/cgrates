@@ -1574,7 +1574,7 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
@@ -1685,7 +1685,7 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
@@ -1792,7 +1792,7 @@ cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 	csvRdr1.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
 				rdr: rdr1, csvRdr: csvRdr1}},
 	}
 	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
@@ -1865,7 +1865,7 @@ cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
@@ -2129,7 +2129,7 @@ cgrates.org,RP1,
 	csvRdr1.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
 				rdr: rdr1, csvRdr: csvRdr1}},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
@@ -2200,7 +2200,7 @@ cgrates.org,RP1,
 	csvRdr2.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
@@ -2316,7 +2316,7 @@ cgrates.org,RP2
 	csvRdr1.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
 				rdr: rdr1, csvRdr: csvRdr1}},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
@@ -2374,12 +2374,12 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 		"File1.csv":                 {},
 		"File2.csv":                 {},
 		utils.FiltersCsv:            {},
-		utils.RateProfilesCsv:       {},
+		utils.RatesCsv:              {},
 		utils.ResourcesCsv:          {},
 		utils.RoutesCsv:             {},
 		utils.StatsCsv:              {},
 		utils.ThresholdsCsv:         {},
-		utils.ActionProfilesCsv:     {},
+		utils.ActionsCsv:            {},
 		utils.AccountsCsv:           {},
 	}
 	if !reflect.DeepEqual(expected, openRdrs) {
@@ -2481,7 +2481,7 @@ func TestLoaderActionProfile(t *testing.T) {
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{fileName: utils.ActionsCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
@@ -2564,7 +2564,7 @@ func TestLoaderActionProfile(t *testing.T) {
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{fileName: utils.ActionsCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
@@ -2671,8 +2671,8 @@ cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.T
 	csvRdr := csv.NewReader(rdr)
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{
+				fileName: utils.ActionsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -2696,8 +2696,8 @@ cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.T
 	csvRdr = csv.NewReader(rdr)
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{
+				fileName: utils.ActionsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -2747,7 +2747,7 @@ cgrates.org,12,NOT_A_BOOLEAN
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{fileName: utils.ActionsCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	expErr := `strconv.ParseBool: parsing "NOT_A_BOOLEAN": invalid syntax`
@@ -3149,8 +3149,8 @@ NOT_UINT
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   rdrCsv,
 			},
@@ -4108,8 +4108,8 @@ cgrates.org,REM_RATEPROFILE_1
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -4137,8 +4137,8 @@ cgrates.org,REM_RATEPROFILE_1
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -4159,8 +4159,8 @@ cgrates.org,REM_RATEPROFILE_1
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -4201,8 +4201,8 @@ cgrates.org,REM_ACTPROFILE_1
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{
+				fileName: utils.ActionsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -4237,8 +4237,8 @@ cgrates.org,REM_ACTPROFILE_1
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{
+				fileName: utils.ActionsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -4361,8 +4361,8 @@ cgrates.org,REM_ACTPROFILE_s
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{
+				fileName: utils.ActionsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -4413,8 +4413,8 @@ cgrates.org,REM_ACTPROFILE_s
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
+			utils.ActionsCsv: &openedCSVFile{
+				fileName: utils.ActionsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -4491,8 +4491,8 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
@@ -4514,8 +4514,8 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
+			utils.RatesCsv: &openedCSVFile{
+				fileName: utils.RatesCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},

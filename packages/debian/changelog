@@ -152,7 +152,7 @@ cgrates (0.11.0) UNRELEASED; urgency=medium
   * [ConfigS] Renamed ReloadConfig API to SetConfig
   * [ConfigS] Renamed ReloadConfigFromJSON API to SetConfigFromJSON
   * [CDRs] Replaced RSRField with RSRParser
-  * [RouteS] Add new field RouteRateProfileIDs in RateProfiles.csv
+  * [RouteS] Add new field RouteRateProfileIDs in Rates.csv
   * [DispatcherS] Removed connection pool from DispatcherHost structure
   * [DispatcherS] Updated *broadcast, *broadcast_sync and *broadcast_async to behave similar to RPCPool
   * [ActionsS] Added *remote_set_account action

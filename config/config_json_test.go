@@ -1576,7 +1576,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 				},
 				{
 					Type:      utils.StringPointer(utils.MetaRateProfiles),
-					File_name: utils.StringPointer(utils.RateProfilesCsv),
+					File_name: utils.StringPointer(utils.RatesCsv),
 					Fields: &[]*FcTemplateJsonCfg{
 						{Tag: utils.StringPointer(utils.Tenant),
 							Path:      utils.StringPointer(utils.Tenant),
@@ -1652,7 +1652,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 				},
 				{
 					Type:      utils.StringPointer(utils.MetaActionProfiles),
-					File_name: utils.StringPointer(utils.ActionProfilesCsv),
+					File_name: utils.StringPointer(utils.ActionsCsv),
 					Fields: &[]*FcTemplateJsonCfg{
 						{Tag: utils.StringPointer(utils.Tenant),
 							Path:      utils.StringPointer(utils.Tenant),
