@@ -47,9 +47,11 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
-		ProcessRuns:         1,
 		NestedFields:        true,
 		AnyContext:          true,
+		Opts: &AttributesOpts{
+			ProcessRuns: 1,
+		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.attributeSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -78,8 +80,8 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.ApierSConnsCfg:         []string{utils.MetaInternal},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
-		utils.ProcessRunsCfg:         3,
-		utils.ProfileRunsCfg:         0,
+		utils.MetaProcessRunsCfg:     3,
+		utils.MetaProfileRunsCfg:     0,
 		utils.IndexedSelectsCfg:      true,
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
@@ -110,9 +112,9 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
-		utils.ProcessRunsCfg:         7,
+		utils.MetaProcessRunsCfg:     7,
 		utils.AnyContextCfg:          true,
-		utils.ProfileRunsCfg:         0,
+		utils.MetaProfileRunsCfg:     0,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -136,9 +138,9 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
-		utils.ProcessRunsCfg:         1,
+		utils.MetaProcessRunsCfg:     1,
 		utils.AnyContextCfg:          true,
-		utils.ProfileRunsCfg:         0,
+		utils.MetaProfileRunsCfg:     0,
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
@@ -157,9 +159,11 @@ func TestAttributeSCfgClone(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
-		ProcessRuns:         1,
 		NestedFields:        true,
 		AnyContext:          true,
+		Opts: &AttributesOpts{
+			ProcessRuns: 1,
+		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

@@ -2756,7 +2756,8 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 				return nil
 			},
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
-				if len(args.(*engine.AttrArgsProcessEvent).AttributeIDs) != 0 {
+				if attrIDs, err := utils.IfaceAsSliceString(args.(*engine.AttrArgsProcessEvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
+					len(attrIDs) != 0 {
 					return utils.ErrNotImplemented
 				}
 				return nil
@@ -3103,7 +3104,8 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
-				if len(args.(*engine.AttrArgsProcessEvent).AttributeIDs) == 1 {
+				if attrIDs, err := utils.IfaceAsSliceString(args.(*engine.AttrArgsProcessEvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
+					len(attrIDs) == 1 {
 					return utils.ErrNotImplemented
 				}
 				return nil

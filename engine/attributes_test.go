@@ -63,35 +63,15 @@ func TestAttributesShutdown(t *testing.T) {
 	utils.Logger.SetLogLevel(0)
 }
 
-func TestAttributesSetCloneable(t *testing.T) {
-	attr := &AttrArgsProcessEvent{
-		AttributeIDs: []string{"ATTR_ID"},
-		Context:      utils.StringPointer(utils.MetaAny),
-		ProcessRuns:  utils.IntPointer(1),
-		clnb:         true,
-	}
-
-	exp := &AttrArgsProcessEvent{
-		AttributeIDs: []string{"ATTR_ID"},
-		Context:      utils.StringPointer(utils.MetaAny),
-		ProcessRuns:  utils.IntPointer(1),
-		clnb:         false,
-	}
-	attr.SetCloneable(false)
-
-	if !reflect.DeepEqual(attr, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, attr)
-	}
-}
-
 func TestAttributesRPCClone(t *testing.T) {
 	attr := &AttrArgsProcessEvent{
-		AttributeIDs: []string{"ATTR_ID"},
-		Context:      utils.StringPointer(utils.MetaAny),
-		ProcessRuns:  utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
-			Event:   make(map[string]interface{}),
-			APIOpts: make(map[string]interface{}),
+			Event: make(map[string]interface{}),
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 1,
+				utils.OptsContext:               utils.MetaAny,
+				utils.OptsAttributesProfileIDs:  []string{"ATTR_ID"},
+			},
 		},
 		clnb: true,
 	}
@@ -99,12 +79,13 @@ func TestAttributesRPCClone(t *testing.T) {
 	rcv, err := attr.RPCClone()
 
 	exp := &AttrArgsProcessEvent{
-		AttributeIDs: []string{"ATTR_ID"},
-		Context:      utils.StringPointer(utils.MetaAny),
-		ProcessRuns:  utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
-			Event:   make(map[string]interface{}),
-			APIOpts: make(map[string]interface{}),
+			Event: make(map[string]interface{}),
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 1,
+				utils.OptsContext:               utils.MetaAny,
+				utils.OptsAttributesProfileIDs:  []string{"ATTR_ID"},
+			},
 		},
 		clnb: false,
 	}
@@ -249,8 +230,10 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "adrian@itsyscom.com",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
-		ProcessRuns: utils.IntPointer(2),
 	}, &rply); err != nil {
 		t.Errorf("Expected <%+v>, received <%+v>", nil, err)
 	} else if sort.Strings(rply.AlteredFields); !reflect.DeepEqual(expected, rply) {
@@ -292,8 +275,10 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "adrian@itsyscom.com",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
-		ProcessRuns: utils.IntPointer(2),
 	}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
 	}
@@ -335,8 +320,10 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "adrian@itsyscom.com",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
-		ProcessRuns: utils.IntPointer(2),
 	}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
 	}
@@ -377,8 +364,10 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "adrian@itsyscom.com",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
-		ProcessRuns: utils.IntPointer(2),
 	}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
 	}
@@ -1162,14 +1151,16 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	}
 
 	args := &AttrArgsProcessEvent{
-		AttributeIDs: []string{"ATTR1", "ATTR2"},
-		Context:      utils.StringPointer(utils.MetaAny),
-		ProcessRuns:  utils.IntPointer(3),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
 			Event: map[string]interface{}{
 				"Password": "passwd",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 3,
+				utils.OptsContext:               utils.MetaAny,
+				utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
 			},
 		},
 	}
@@ -1268,12 +1259,14 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	}
 
 	args := &AttrArgsProcessEvent{
-		Context:     utils.StringPointer(utils.MetaAny),
-		ProcessRuns: utils.IntPointer(3),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AttrProcessEventMultipleRuns",
 			Event:  map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 3,
+				utils.OptsContext:               utils.MetaAny,
+			},
 		},
 	}
 

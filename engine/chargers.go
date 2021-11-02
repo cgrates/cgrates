@@ -131,13 +131,13 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 		}
 
 		args := &AttrArgsProcessEvent{
-			AttributeIDs: cP.AttributeIDs,
-			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(clonedEv.APIOpts[utils.OptsContext]),
-				utils.MetaChargers)),
-			ProcessRuns: processRuns,
-			CGREvent:    clonedEv,
+			CGREvent: clonedEv,
 		}
+		args.CGREvent.APIOpts[utils.OptsAttributesProfileIDs] = cP.AttributeIDs
+		if args.CGREvent.APIOpts[utils.OptsContext] == utils.EmptyString {
+			args.CGREvent.APIOpts[utils.OptsContext] = utils.MetaChargers
+		}
+		args.CGREvent.APIOpts[utils.OptsAttributesProcessRuns] = processRuns
 		var evReply AttrSProcessEventReply
 		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,
 			utils.AttributeSv1ProcessEvent, args, &evReply); err != nil {

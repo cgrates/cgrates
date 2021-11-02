@@ -163,9 +163,6 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 
 // AttrArgsProcessEvent arguments used for proccess event
 type AttrArgsProcessEvent struct {
-	AttributeIDs []string
-	Context      *string // attach the event to a context
-	ProcessRuns  *int    // number of loops for ProcessEvent
 	*utils.CGREvent
 	clnb bool //rpcclonable
 }
@@ -185,27 +182,8 @@ func (attr *AttrArgsProcessEvent) RPCClone() (interface{}, error) {
 
 // Clone creates a clone of the object
 func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
-	var attrIDs []string
-	if attr.AttributeIDs != nil {
-		attrIDs = make([]string, len(attr.AttributeIDs))
-		for i, id := range attr.AttributeIDs {
-			attrIDs[i] = id
-		}
-	}
-	var ctx *string
-	if attr.Context != nil {
-		ctx = utils.StringPointer(*attr.Context)
-	}
-	var procRuns *int
-	if attr.ProcessRuns != nil {
-		procRuns = new(int)
-		*procRuns = *attr.ProcessRuns
-	}
 	return &AttrArgsProcessEvent{
-		AttributeIDs: attrIDs,
-		Context:      ctx,
-		ProcessRuns:  procRuns,
-		CGREvent:     attr.CGREvent.Clone(),
+		CGREvent: attr.CGREvent.Clone(),
 	}
 }
 
@@ -213,8 +191,18 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (
 	rply *AttrSProcessEventReply, err error) {
+	context := alS.cgrcfg.AttributeSCfg().Opts.Context
+	if opt, has := args.APIOpts[utils.OptsContext]; has {
+		context = utils.StringPointer(utils.IfaceAsString(opt))
+	}
+	attrIDs := alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs
+	if opt, has := args.APIOpts[utils.OptsAttributesProfileIDs]; has {
+		if attrIDs, err = utils.IfaceAsSliceString(opt); err != nil {
+			return
+		}
+	}
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID, processedPrfNo, profileRuns); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(tnt, context, attrIDs, args.Time, evNm, lastID, processedPrfNo, profileRuns); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -283,7 +271,17 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	if tnt == utils.EmptyString {
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	attrPrf, err := alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, utils.MapStorage{
+	context := alS.cgrcfg.AttributeSCfg().Opts.Context
+	if opt, has := args.APIOpts[utils.OptsContext]; has {
+		context = utils.StringPointer(utils.IfaceAsString(opt))
+	}
+	attrIDs := alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs
+	if opt, has := args.APIOpts[utils.OptsAttributesProfileIDs]; has {
+		if attrIDs, err = utils.IfaceAsSliceString(opt); err != nil {
+			return
+		}
+	}
+	attrPrf, err := alS.attributeProfileForEvent(tnt, context, attrIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -314,11 +312,15 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 
-	processRuns := alS.cgrcfg.AttributeSCfg().ProcessRuns
-	if args.ProcessRuns != nil && *args.ProcessRuns != 0 {
-		processRuns = *args.ProcessRuns
+	processRuns := alS.cgrcfg.AttributeSCfg().Opts.ProcessRuns
+	if opt, has := args.APIOpts[utils.OptsAttributesProcessRuns]; has {
+		var val int64
+		if val, err = utils.IfaceAsTInt64(opt); err != nil {
+			return
+		}
+		processRuns = int(val)
 	}
-	profileRuns := alS.cgrcfg.AttributeSCfg().ProfileRuns
+	profileRuns := alS.cgrcfg.AttributeSCfg().Opts.ProfileRuns
 	if opt, has := args.APIOpts[utils.OptsAttributesProfileRuns]; has {
 		var val int64
 		if val, err = utils.IfaceAsTInt64(opt); err != nil {

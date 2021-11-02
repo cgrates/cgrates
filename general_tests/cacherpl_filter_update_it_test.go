@@ -63,12 +63,18 @@ var (
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaAny,
+		},
 	}
 	ev2 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event2",
 		Event: map[string]interface{}{
 			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaAny,
 		},
 	}
 )
@@ -218,7 +224,6 @@ func testFilterUpdateSetAttrProfileE1(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
 	attrProcessEv := &engine.AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaAny),
 		CGREvent: ev1,
 	}
 
@@ -252,7 +257,6 @@ func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
 	attrProcessEv := &engine.AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaAny),
 		CGREvent: ev1,
 	}
 
@@ -286,7 +290,6 @@ func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
 	attrProcessEv := &engine.AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaAny),
 		CGREvent: ev2,
 	}
 
@@ -320,7 +323,6 @@ func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
 	attrProcessEv := &engine.AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaAny),
 		CGREvent: ev2,
 	}
 
@@ -388,7 +390,6 @@ func testFilterUpdateSetFilterAfterAttrE1(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
 	attrProcessEv := &engine.AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaAny),
 		CGREvent: ev1,
 	}
 
@@ -401,7 +402,6 @@ func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
 	attrProcessEv := &engine.AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaAny),
 		CGREvent: ev1,
 	}
 
@@ -414,7 +414,6 @@ func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
 	attrProcessEv := &engine.AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaAny),
 		CGREvent: ev2,
 	}
 
@@ -427,7 +426,6 @@ func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
 
 func testFilterUpdateGetAttrProfileForEventEv2E2NotMatching(t *testing.T) {
 	attrProcessEv := &engine.AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaAny),
 		CGREvent: ev2,
 	}
 

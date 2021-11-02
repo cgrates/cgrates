@@ -125,12 +125,14 @@ func testCacheSReplicateLoadTariffPlanFromFolder(t *testing.T) {
 
 func testCacheSReplicateProcessAttributes(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testCacheSReplicateProcessAttributes",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}

@@ -114,11 +114,11 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 		}
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
-		AttributeIDs: attrIDs,
-		Context:      utils.StringPointer(ctx),
-		CGREvent:     cgrEv,
-		ProcessRuns:  processRuns,
+		CGREvent: cgrEv,
 	}
+	attrArgs.CGREvent.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
+	attrArgs.CGREvent.APIOpts[utils.OptsContext] = ctx
+	attrArgs.CGREvent.APIOpts[utils.OptsAttributesProcessRuns] = processRuns
 	if err = eeS.connMgr.Call(
 		eeS.cfg.EEsNoLksCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,

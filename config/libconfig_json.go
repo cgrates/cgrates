@@ -397,6 +397,14 @@ type ReqProcessorJsnCfg struct {
 	Reply_fields   *[]*FcTemplateJsonCfg
 }
 
+type AttributesOptsJson struct {
+	ProfileIDs           *[]string `json:"*profileIDs"`
+	ProfileRuns          *int      `json:"*profileRuns"`
+	ProfileIgnoreFilters *bool     `json:"*profileIgnoreFilters"`
+	ProcessRuns          *int      `json:"*processRuns"`
+	Context              *string   `json:"*context"`
+}
+
 // Attribute service config section
 type AttributeSJsonCfg struct {
 	Enabled               *bool
@@ -411,6 +419,7 @@ type AttributeSJsonCfg struct {
 	Process_runs          *int
 	Profile_runs          *int
 	Any_context           *bool
+	Opts                  *AttributesOptsJson
 }
 
 // ChargerSJsonCfg service config section
