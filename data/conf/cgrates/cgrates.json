@@ -76,24 +76,37 @@
 // 	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
 // 	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
 // 	"items":{
-// 		"*accounts":{"remote":false, "replicate":false},
-// 		"*actions":{"remote":false, "replicate":false},
-// 		"*resource_profiles":{"remote":false, "replicate":false}, 
-// 		"*resources":{"remote":false, "replicate":false}, 
-// 		"*statqueue_profiles": {"remote":false, "replicate":false}, 
-// 		"*statqueues": {"remote":false, "replicate":false}, 
-// 		"*threshold_profiles": {"remote":false, "replicate":false}, 
-// 		"*thresholds": {"remote":false, "replicate":false}, 
-// 		"*filters": {"remote":false, "replicate":false}, 
-// 		"*route_profiles":{"remote":false, "replicate":false}, 
-// 		"*attribute_profiles":{"remote":false, "replicate":false}, 
-// 		"*charger_profiles": {"remote":false, "replicate":false}, 
-// 		"*dispatcher_profiles":{"remote":false, "replicate":false}, 
-// 		"*dispatcher_hosts":{"remote":false, "replicate":false}, 
-// 		"*rate_profiles":{"remote":false, "replicate":false},
-// 		"*action_profiles":{"remote":false, "replicate":false},
-// 		"*load_ids":{"remote":false, "replicate":false}, 
-// 		"*indexes":{"remote":false, "replicate":false}, 
+// 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+
 // 	},
 // 	"opts":{
 // 		"redisSentinel": "",					// the name of sentinel when used
@@ -121,27 +134,28 @@
 // 	"opts": {
 // 		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
 // 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
-// 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+// 		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 // 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
 // 		"sslMode":"disable",				// sslMode in case of *postgres
 // 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 // 	},
 // 	"items":{
-// 		"*session_costs": {"remote":false, "replicate":false}, 
-// 		"*cdrs": {"remote":false, "replicate":false},
-// 		"*tp_resources":{"remote":false, "replicate":false}, 
-// 		"*tp_stats":{"remote":false, "replicate":false}, 
-// 		"*tp_thresholds": {"remote":false, "replicate":false}, 
-// 		"*tp_filters": {"remote":false, "replicate":false},
-// 		"*tp_routes": {"remote":false, "replicate":false}, 
-// 		"*tp_attributes":{"remote":false, "replicate":false}, 
-// 		"*tp_chargers":{"remote":false, "replicate":false}, 
-// 		"*versions": {"remote":false, "replicate":false}, 
-// 		"*tp_dispatcher_profiles":{"remote":false, "replicate":false}, 
-// 		"*tp_dispatcher_hosts":{"remote":false, "replicate":false}, 
-// 		"*tp_rate_profiles":{"remote":false, "replicate":false}, 
-// 		"*tp_action_profiles":{"remote":false, "replicate":false},
-// 		"*tp_accounts":{"remote":false, "replicate":false},
+// 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*tp_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_stats": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_attributes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*tp_action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*tp_accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 // 	},
 // },
 
@@ -176,7 +190,7 @@
 // 	"use_basic_auth": false,								// use basic authentication
 // 	"auth_users": {},										// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 // 	"client_opts":{
-// 		"skipTLSVerification": false, 							// if enabled Http Client will accept any TLS certificate
+// 		"skipTLSVerification": false, 						// if enabled Http Client will accept any TLS certificate
 // 		// the options to configure the http.Transport
 // 		"tlsHandshakeTimeout": "10s",
 // 		"disableKeepAlives": false,
@@ -240,25 +254,6 @@
 // 		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "replicate": false}, 
 // 		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},								// caps cached samples
 // 		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "replicate": false},							// the replication hosts cache(used when replication_filtered is enbled)
-		
-// 		// only for *internal database
-// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing
-// 		// internal storDB tabels
-// 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
-
-// 		"*tp_resources":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_stats":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_filters": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
-// 		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_attributes":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_chargers":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_dispatcher_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
-// 		"*tp_action_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
-// 		"*tp_accounts":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 // 	},
 // 	"replication_conns": [],
 // },
@@ -286,6 +281,57 @@
 // 	"ees_conns": [],						// connections to EventExporter
 // 	"rates_conns": [],						// connections to RateS
 // 	"accounts_conns": [],					// connections to AccountS
+// 	"opts": {								//
+// 		"*accountS": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*attributeS": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*chargerS": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*eeS": [							
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*rateS": [							
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*statS": [							
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*thresholdS": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 	},
 // },
 
 
@@ -449,7 +495,7 @@
 // 				// SQL
 // 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 // 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-// 				// "sqlConnMaxLifetime": 0,						// SQLConnMaxLifetime 
+// 				// "sqlConnMaxLifetime": "0",						// SQLConnMaxLifetime 
 
 
 // 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
@@ -490,7 +536,17 @@
 // 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
 // 				// "natsClientKey": "",							// the path to a client key( used by tls)
 // 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
-// 			},													// extra options for exporter
+
+// 				//RPC
+// 				// "rpcCodec": "",  // for compression, encoding and decoding <internalRPC | BIRPC | JSON/HTTP/GOB>
+// 				// "serviceMethod": "", // the method that should be called trough RPC
+//                 // "keyPath": "" , // path to server key 
+// 				// "certPath": "", // path to client certificate
+// 				// "caPath": "",  // path to CA certificate
+// 				// "tls": false, //
+// 				// "rpcConnTimeout" : "1s", // connection unsuccesfull on timeout
+// 				// "rpcReplyTimeout":"2s", // connection down at replies if taking longer that this value
+// 			},												// extra options for exporter
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 // 			"filters": [],										// limit parsing based on the filters
 // 			"flags": [],										// flags to influence the event processing
@@ -544,6 +600,227 @@
 // 		"privatekey_path": "",				// the path to the private key
 // 	},
 // 	"actions_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
+// 	"rates_conns": [], 						// connections to RateS
+// 	"accounts_conns": [],					// connections to AccountS
+// 	"opts": {
+// 		"*accounts": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*attributeS": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*cdrS": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*chargerS": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*resourceS": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*routeS": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*statS": [							
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*thresholdS": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*initiate": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*update": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*terminate": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*message": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*attributesDerivedReply": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*blockerError": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*cdrsDerivedReply": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*resourcesAuthorize": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*resourcesAllocate": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*resourcesRelease": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*resourcesDerivedReply": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*routesDerivedReply": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*statsDerivedReply": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*thresholdsDerivedReply": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*maxUsage": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*forceDuration": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*ttl": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "",
+// 			// },
+// 		],
+// 		"*chargeable": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		// "*ttlLastUsage": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "",
+// 			// },
+// 		// ],
+// 		// "*ttlLastUsed": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "",
+// 			// },
+// 		// ],
+// 		"*debitInterval": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "",
+// 			// },
+// 		],
+// 		// "*ttlMaxDelay": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "",
+// 			// },
+// 		// ],
+// 		// "*ttlUsage": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "",
+// 			// },
+// 		// ],
+// 	},
 // },
 
 
@@ -640,16 +917,42 @@
 // 	"enabled": false,						// starts attribute service: <true|false>
 // 	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],					// connections to ResourceS, empty to disable: <""|*internal|$rpc_conns_id>
-// 	"accounts_conns": [],						// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
+// 	"accounts_conns": [],					// connections to AccountS, empty to disable: <""|*internal|$rpc_conns_id>
 // 	"indexed_selects": true,				// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"opts":{				        		// 
-// 		"*processRuns": 1,					// number of run loops when processing event
+// 	"opts":{								//
+// 		"*profileIDs": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": [],
+// 			// },
+// 		],
+// 		"*processRuns": [					// number of run loops when processing event
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": 1,
+// 			// },
+// 		],									
+// 		"*profileRuns": [					// number of runs a profile will process during the event
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": 0,
+// 			// },
+// 		],									
+// 		"*profileIgnoreFilters": [ 			// ignore the filters for attributeIDs	
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],										
 // 	},
-// 	"profile_runs": 0,						// number of run a profile will process the event
 // },
 
 
@@ -673,6 +976,29 @@
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"opts":{								//
+// 		"*usageID": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "",
+// 			// },
+// 		],
+// 		"*usageTTL": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "72h",
+// 			// },
+// 		],
+// 		"*units": [							
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": 1,
+// 			// },
+// 		],
+// 	},
 // },
 
 
@@ -686,6 +1012,22 @@
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+// 	"opts": {								//
+// 		"*profileIDs": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": [],
+// 			// },
+// 		],	
+// 		"*profileIgnoreFilters": [			// ignore the filters for statIDs
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],									
+// 	},								
 // },
 
 
@@ -698,6 +1040,22 @@
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"actions_conns": [],					// connections to ActionS to execute the actions
+// 	"opts":{								//
+// 		"*thresholdsIDs": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": [],
+// 			// },
+// 		],
+// 		"*profileIgnoreFilters": [			// ignore the filters for thresholdIDs
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],									
+// 	},								
 // },
 
 
@@ -714,9 +1072,56 @@
 // 	"rates_conns": [],						// connections to RateS
 // 	"accounts_conns": [],					// connections to AccountS
 // 	"default_ratio":1,						// default ratio used in case of *load strategy
-// 	"opts":{
-// 		"*context": "*routes",
-// 		"*rouProfileCount": 1,
+// 	"opts":{								//
+// 		"*context": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "*routes",
+// 			// },
+// 		],			
+// 		"*profileCount": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": 1,
+// 			// },
+// 		],
+// 		"*ignoreErrors": [					
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],
+// 		"*maxCost": [						
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "",
+// 			// },
+// 		],
+// 		// "*limit": [						
+// 		// 	{
+// 		// 		"Tenant": "*any",
+// 		// 		"FilterIDs": [],
+// 		// 		"Value": 1,
+// 		// 	},
+// 		// ],
+// 		// "*offset": [						
+// 		// 	{
+// 		// 		"Tenant": "*any",
+// 		// 		"FilterIDs": [],
+// 		// 		"Value": 1,
+// 		// 	},
+// 		// ],
+// 		"*usage": [							
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "1m",
+// 			// },
+// 		],
 // 	},
 // },
 
@@ -929,18 +1334,18 @@
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
 // 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-// 					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
-// 					{"tag": "BalanceID", "path": "BalanceID", "type": "*variable", "value": "~*req.4"},
-// 					{"tag": "BalanceFilterIDs", "path": "BalanceFilterIDs", "type": "*variable", "value": "~*req.5"},
-// 					{"tag": "BalanceWeight", "path": "BalanceWeight", "type": "*variable", "value": "~*req.6"},
-// 					{"tag": "BalanceBlocker", "path": "BalanceBlocker", "type": "*variable", "value": "~*req.7"},
+// 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
+// 					{"tag": "Opts", "path": "Opts", "type": "*variable", "value": "~*req.4"},
+// 					{"tag": "BalanceID", "path": "BalanceID", "type": "*variable", "value": "~*req.5"},
+// 					{"tag": "BalanceFilterIDs", "path": "BalanceFilterIDs", "type": "*variable", "value": "~*req.6"},
+// 					{"tag": "BalanceWeights", "path": "BalanceWeights", "type": "*variable", "value": "~*req.7"},
 // 					{"tag": "BalanceType", "path": "BalanceType", "type": "*variable", "value": "~*req.8"},
-// 					{"tag": "BalanceOpts", "path": "BalanceOpts", "type": "*variable", "value": "~*req.9"},
-// 					{"tag": "BalanceCostIncrements", "path": "BalanceCostIncrements", "type": "*variable", "value": "~*req.10"},
-// 					{"tag": "BalanceAttributeIDs", "path": "BalanceAttributeIDs", "type": "*variable", "value": "~*req.11"},
-// 					{"tag": "BalanceRateProfileIDs", "path": "BalanceRateProfileIDs", "type": "*variable", "value": "~*req.12"},
-// 					{"tag": "BalanceUnitFactors", "path": "BalanceUnitFactors", "type": "*variable", "value": "~*req.13"},
-// 					{"tag": "BalanceUnits", "path": "BalanceUnits", "type": "*variable", "value": "~*req.14"},
+// 					{"tag": "BalanceUnits", "path": "BalanceUnits", "type": "*variable", "value": "~*req.9"},
+// 					{"tag": "BalanceUnitFactors", "path": "BalanceUnitFactors", "type": "*variable", "value": "~*req.10"},
+// 					{"tag": "BalanceOpts", "path": "BalanceOpts", "type": "*variable", "value": "~*req.11"},
+// 					{"tag": "BalanceCostIncrements", "path": "BalanceCostIncrements", "type": "*variable", "value": "~*req.12"},
+// 					{"tag": "BalanceAttributeIDs", "path": "BalanceAttributeIDs", "type": "*variable", "value": "~*req.13"},
+// 					{"tag": "BalanceRateProfileIDs", "path": "BalanceRateProfileIDs", "type": "*variable", "value": "~*req.14"},
 // 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.15"},
 // 				],
 // 			},
@@ -1078,6 +1483,43 @@
 // 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 //     "verbosity": 1000,                      // number of increment iterations allowed
+// 	"opts":{								//
+// 		"*profileIDs": [					// select the rate profiles used for cost calculation
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": [],
+// 			// },
+// 		],	
+// 		"*startTime": [						// start time used for cost calculation
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "*now",
+// 			// },
+// 		],
+// 		"*usage": [							// usage used for cost calculation
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "1m",
+// 			// },
+// 		],
+// 		"*intervalStart": [					// event interval start
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "0",
+// 			// },
+// 		],
+// 		"*profileIgnoreFilters": [			// ignore the filters for rateProfileIDs 
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],									
+// 	},
 // },
 
 
@@ -1209,7 +1651,23 @@
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-// 	"dynaprepaid_actionprofile": [],	
+// 	"dynaprepaid_actionprofile": [],		//
+// 	"opts":{								//
+// 		"*profileIDs": [				
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": [],
+// 			// },
+// 		],
+// 		"*profileIgnoreFilters": [			// ignore the filters for actionProfileIDs
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],									
+// 	},
 // },
 
 
@@ -1225,6 +1683,29 @@
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 //     "max_iterations": 1000,                 // maximum number of iterations
 //     "max_usage": "72h",                     // maximum time of usage
+// 	"opts":{								//	
+// 		"*profileIDs": [					//
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": [],
+// 			// },
+// 		],
+// 		"*usage": [							//
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": "72h",
+// 			// },
+// 		],
+// 		"*profileIgnoreFilters": [			// ignore the filters for accountIDs
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": false,
+// 			// },
+// 		],	
+// 	},
 // },
 
 
