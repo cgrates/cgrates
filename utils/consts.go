@@ -723,7 +723,6 @@ const (
 	MetaWeekly              = "*weekly"
 	RateS                   = "RateS"
 	Underline               = "_"
-	MetaPartial             = "*partial"
 	MetaBusy                = "*busy"
 	MetaQueue               = "*queue"
 	MetaMonthEnd            = "*month_end"
@@ -2412,7 +2411,8 @@ const (
 	KafkaMaxWait = "kafkaMaxWait"
 
 	// partial
-	PartialOpt = "*partial"
+	PartialOpt      = "*partial"
+	PartialRatesOpt = "*partial_rates"
 
 	PartialOrderFieldOpt       = "partialOrderField"
 	PartialCacheActionOpt      = "partialCacheAction"
