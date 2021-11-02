@@ -27,12 +27,17 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
 	timezone string, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (ldrS *LoaderService) {
-	ldrS = &LoaderService{cfg: cfg}
+	ldrS = &LoaderService{cfg: cfg, cache: make(map[string]*ltcache.Cache)}
+	for i := range cfg.LoaderCfg()[0].Data {
+		cfg := cfg.LoaderCfg()[0].Data[i]
+		ldrS.cache[cfg.Type] = ltcache.NewCache(-1, 0, false, nil)
+	}
 	ldrS.createLoaders(dm, timezone, filterS, connMgr)
 	return
 }
@@ -40,8 +45,9 @@ func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
 // LoaderService is the Loader service handling independent Loaders
 type LoaderService struct {
 	sync.RWMutex
-	cfg  *config.CGRConfig
-	ldrs map[string]*loader
+	cfg   *config.CGRConfig
+	cache map[string]*ltcache.Cache
+	ldrs  map[string]*loader
 }
 
 // Enabled returns true if at least one loader is enabled
@@ -90,7 +96,7 @@ func (ldrS *LoaderService) createLoaders(dm *engine.DataManager,
 	ldrS.ldrs = make(map[string]*loader)
 	for _, ldrCfg := range ldrS.cfg.LoaderCfg() {
 		if ldrCfg.Enabled {
-			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, timezone, filterS, connMgr, ldrCfg.CacheSConns)
+			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, ldrS.cache, timezone, filterS, connMgr, ldrCfg.CacheSConns)
 		}
 	}
 }
