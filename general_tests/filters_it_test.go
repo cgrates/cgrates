@@ -1061,9 +1061,10 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 				"CustomField2":    "+2007",
 				utils.Destination: "+1207",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: "prefix",
+			},
 		},
-		Context: utils.StringPointer("prefix"),
 	}
 	var result2 *engine.AttrSProcessEventReply
 	if err := fltrRpc.Call(utils.AttributeSv1ProcessEvent, cgrEv, &result2); err != nil {
@@ -1136,13 +1137,15 @@ func testV1FltrPopulateTimings(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		AttributeIDs: []string{"FltrTest"},
-		Context:      utils.StringPointer(utils.MetaAny),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1FltrPopulateTimings",
 			Event: map[string]interface{}{
 				utils.AnswerTime: "2021-04-29T08:35:00Z",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext:              utils.MetaAny,
+				utils.OptsAttributesProfileIDs: []string{"FltrTest"},
 			},
 		},
 	}

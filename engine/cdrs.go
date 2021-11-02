@@ -381,12 +381,12 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 	}
 	attrArgs := &AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.FirstNonEmpty(
-			utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
-			utils.MetaCDRs)),
-		CGREvent:    cgrEv,
-		ProcessRuns: processRuns,
+		CGREvent: cgrEv,
 	}
+	if attrArgs.CGREvent.APIOpts[utils.OptsContext] == utils.EmptyString {
+		attrArgs.CGREvent.APIOpts[utils.OptsContext] = utils.MetaCDRs
+	}
+	attrArgs.CGREvent.APIOpts[utils.OptsAttributesProcessRuns] = processRuns
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {

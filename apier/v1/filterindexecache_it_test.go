@@ -951,13 +951,15 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 //AttributeProfile
 func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "3009",
 				utils.Destination:  "+492511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -1025,13 +1027,15 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	}
 	//matches TEST_PROFILE1
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1009",
 				utils.Destination:  "+491511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -1045,13 +1049,15 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 	//matches ATTR_1
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1007",
 				utils.Destination:  "+491511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -1118,13 +1124,15 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	}
 	//matches TEST_PROFILE1
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "2009",
 				utils.Destination:  "+492511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -1176,13 +1184,15 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	}
 	//matches TEST_PROFILE1
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "3009",
 				utils.Destination:  "+492511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -1195,13 +1205,15 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	var resp string
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "3009",
 				utils.Destination:  "+492511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -1211,13 +1223,15 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	}
 
 	ev2 := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "2009",
 				utils.Destination:  "+492511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}

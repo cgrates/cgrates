@@ -1041,8 +1041,10 @@ func TestConfigSanityAttributesCfg(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
 	cfg.attributeSCfg = &AttributeSCfg{
-		Enabled:     true,
-		ProcessRuns: -1,
+		Enabled: true,
+		Opts: &AttributesOpts{
+			ProfileRuns: -1,
+		},
 	}
 	expected := "<AttributeS> process_runs needs to be bigger than 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {

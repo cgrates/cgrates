@@ -2171,11 +2171,13 @@ const (
 	ClientDictionariesCfg = "client_dictionaries"
 
 	// AttributeSCfg
-	IndexedSelectsCfg = "indexed_selects"
-	ProcessRunsCfg    = "process_runs"
-	ProfileRunsCfg    = "profile_runs"
-	NestedFieldsCfg   = "nested_fields"
-	AnyContextCfg     = "any_context"
+	IndexedSelectsCfg           = "indexed_selects"
+	MetaProfileIDs              = "*profileIDs"
+	MetaProcessRunsCfg          = "*processRuns"
+	MetaProfileRunsCfg          = "*profileRuns"
+	MetaProfileIgnoreFiltersCfg = "*profileIgnoreFilters"
+	NestedFieldsCfg             = "nested_fields"
+	AnyContextCfg               = "any_context"
 
 	// ChargerSCfg
 	StoreIntervalCfg = "store_interval"
@@ -2450,8 +2452,9 @@ const (
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"
 	MetaMethod                = "*reqMethod"
-	OptsAttributesProcessRuns = "*processRuns"
-	OptsAttributesProfileRuns = "*profileRuns"
+	OptsAttributesProfileIDs  = "*attrProfileIDs"
+	OptsAttributesProcessRuns = "*attrProcessRuns"
+	OptsAttributesProfileRuns = "*attrProfileRuns"
 	MetaEventType             = "*eventType"
 	EventType                 = "EventType"
 	SchedulerInit             = "SchedulerInit"

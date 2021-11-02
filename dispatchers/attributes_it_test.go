@@ -212,7 +212,6 @@ func testDspAttrPingFailover2(t *testing.T) {
 
 func testDspAttrGetAttrFailover(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -221,7 +220,8 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				utils.EventName:    "Event1",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -325,12 +325,14 @@ func testDspAttrPing(t *testing.T) {
 
 func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -343,12 +345,14 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 
 func testDspAttrTestMissingApiKey(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -381,7 +385,6 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 
 func testDspAttrTestAuthKey(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -389,7 +392,8 @@ func testDspAttrTestAuthKey(t *testing.T) {
 				utils.AccountField: "1001",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "12345",
+				utils.OptsAPIKey:  "12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -402,7 +406,6 @@ func testDspAttrTestAuthKey(t *testing.T) {
 
 func testDspAttrTestAuthKey2(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -410,7 +413,8 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 				utils.AccountField: "1001",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -474,7 +478,6 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 
 func testDspAttrTestAuthKey3(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -483,7 +486,8 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 				utils.EventName:    "Event1",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -496,7 +500,6 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 
 func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -505,7 +508,8 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 				utils.EventName:    "RoundRobin",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -587,7 +591,6 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 
 func testDspAttrGetAttrInternal(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer("simpleauth"),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -596,7 +599,8 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				utils.AccountField: "1003",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}

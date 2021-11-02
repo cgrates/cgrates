@@ -148,7 +148,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.dnsAgentCfg = new(DNSAgentCfg)
-	cfg.attributeSCfg = new(AttributeSCfg)
+	cfg.attributeSCfg = &AttributeSCfg{Opts: &AttributesOpts{}}
 	cfg.chargerSCfg = new(ChargerSCfg)
 	cfg.resourceSCfg = new(ResourceSConfig)
 	cfg.statsCfg = new(StatSCfg)

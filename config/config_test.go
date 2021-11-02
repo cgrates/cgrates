@@ -1937,9 +1937,11 @@ func TestAttributeSConfig(t *testing.T) {
 		IndexedSelects:      true,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
-		ProcessRuns:         1,
 		NestedFields:        false,
 		AnyContext:          true,
+		Opts: &AttributesOpts{
+			ProcessRuns: 1,
+		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
@@ -4002,9 +4004,9 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
-			utils.ProcessRunsCfg:         1,
+			utils.MetaProcessRunsCfg:     1,
 			utils.AnyContextCfg:          true,
-			utils.ProfileRunsCfg:         0,
+			utils.MetaProfileRunsCfg:     0,
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()

@@ -709,6 +709,11 @@ const CGRATES_CFG_JSON = `
 	"process_runs": 1,						// number of run loops when processing event
 	"profile_runs": 0,						// number of run a profile will process thes event
 	"any_context": true,					// if we match the *any context
+	"opts": {
+		"*profileIDs": [],
+		"*profileRuns": 0,
+		"*processRuns": 1,
+	},
 },
 
 
