@@ -4362,7 +4362,6 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 	}
 }
 
-//doesn't work as intended need to discuss
 func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
@@ -4492,5 +4491,94 @@ func TestAttributeServicesProcessEventGetBoolOptsError(t *testing.T) {
 	_, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "cannot convert field: 1s to bool", err)
+	}
+}
+
+func TestAttributesParseAttributeMetaNone(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":  "12345",
+			"to":   "1001",
+			"from": "1002",
+		},
+	}
+	if out, err := ParseAttribute(dp, utils.MetaNone, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Fatal(err)
+	} else if out != nil {
+		t.Errorf("Expected %+v, Received %+v", nil, out)
+	}
+}
+
+func TestAttributesParseAttributeMetaUsageDifferenceBadValError(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":  "12345",
+			"to":   "1001",
+			"from": "1002",
+		},
+	}
+	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("", utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+
+	if err == nil || err.Error() != "invalid arguments <null> to *usageDifference" {
+		t.Fatal(err)
+	}
+}
+
+func TestAttributesParseAttributeMetaCCUsageError(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":  "12345",
+			"to":   "1001",
+			"from": "1002",
+		},
+	}
+	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("::;~*req.to;~*req.from", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+	if err == nil || err.Error() != "invalid requestNumber <::> to *ccUsage" {
+		t.Fatal(err)
+	}
+}
+
+func TestAttributesProcessEventSetError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	aA := NewAttributeService(dm, filterS, cfg)
+	acPrf := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AC1",
+		FilterIDs: []string{"*string:~*req.Attribute:testAttrValue"},
+		Attributes: []*Attribute{
+			{
+				Path: "",
+			},
+		},
+	}
+	if err := dm.SetAttributeProfile(context.Background(), acPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	args2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AcProcessEvent",
+		Event: map[string]interface{}{
+			"Attribute": "testAttrValue",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProfileIDs: []string{"AC1"},
+		},
+	}
+	eNM := utils.MapStorage{
+		utils.MetaReq:  args2.Event,
+		utils.MetaOpts: args2.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.OptsAttributesProcessRuns: 0,
+		},
+	}
+
+	if _, err := aA.processEvent(context.Background(), args2.Tenant, args2, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0); err != nil {
+		t.Error(err)
 	}
 }
