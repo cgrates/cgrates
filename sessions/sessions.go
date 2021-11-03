@@ -3875,16 +3875,13 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, attrIDs []string,
 		cgrEv.APIOpts = make(engine.MapEvent)
 	}
 	cgrEv.APIOpts[utils.Subsys] = utils.MetaSessionS
-	attrArgs := &engine.AttrArgsProcessEvent{
-		CGREvent: cgrEv,
-	}
-	attrArgs.CGREvent.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
-	if attrArgs.CGREvent.APIOpts[utils.OptsContext] == utils.EmptyString {
-		attrArgs.CGREvent.APIOpts[utils.OptsContext] = utils.MetaSessionS
+	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
+	if cgrEv.APIOpts[utils.OptsContext] == utils.EmptyString {
+		cgrEv.APIOpts[utils.OptsContext] = utils.MetaSessionS
 	}
 	cgrEv.SetCloneable(clnb)
 	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
-		attrArgs, &rplyEv)
+		cgrEv, &rplyEv)
 	return
 }
 

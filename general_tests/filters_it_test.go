@@ -1052,18 +1052,16 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 			APIOpts: map[string]interface{}{},
 		},
 	}
-	cgrEv := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.new",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				"CustomField":     "+2007",
-				"CustomField2":    "+2007",
-				utils.Destination: "+1207",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: "prefix",
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.new",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			"CustomField":     "+2007",
+			"CustomField2":    "+2007",
+			utils.Destination: "+1207",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: "prefix",
 		},
 	}
 	var result2 *engine.AttrSProcessEventReply
@@ -1136,17 +1134,15 @@ func testV1FltrPopulateTimings(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1FltrPopulateTimings",
-			Event: map[string]interface{}{
-				utils.AnswerTime: "2021-04-29T08:35:00Z",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext:              utils.MetaAny,
-				utils.OptsAttributesProfileIDs: []string{"FltrTest"},
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testV1FltrPopulateTimings",
+		Event: map[string]interface{}{
+			utils.AnswerTime: "2021-04-29T08:35:00Z",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext:              utils.MetaAny,
+			utils.OptsAttributesProfileIDs: []string{"FltrTest"},
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
@@ -1175,7 +1171,7 @@ func testV1FltrPopulateTimings(t *testing.T) {
 		}
 	}
 
-	ev.CGREvent.Event[utils.AnswerTime] = "2021-04-29T13:35:00Z"
+	ev.Event[utils.AnswerTime] = "2021-04-29T13:35:00Z"
 
 	var rplyEv2 engine.AttrSProcessEventReply
 	if err := fltrRpc.Call(utils.AttributeSv1ProcessEvent,

@@ -43,34 +43,34 @@ func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREvent,
 }
 
 // AttributeSv1GetAttributeForEvent is the dispatcher method for AttributeSv1.GetAttributeForEvent
-func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *engine.AttrArgsProcessEvent,
+func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *utils.CGREvent,
 	reply *engine.AttributeProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, utils.AttributeSv1GetAttributeForEvent, args, reply)
+	return dS.Dispatch(args, utils.MetaAttributes, utils.AttributeSv1GetAttributeForEvent, args, reply)
 }
 
 // AttributeSv1ProcessEvent .
-func (dS *DispatcherService) AttributeSv1ProcessEvent(args *engine.AttrArgsProcessEvent,
+func (dS *DispatcherService) AttributeSv1ProcessEvent(args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AttributeSv1ProcessEvent, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, utils.AttributeSv1ProcessEvent, args, reply)
+	return dS.Dispatch(args, utils.MetaAttributes, utils.AttributeSv1ProcessEvent, args, reply)
 }

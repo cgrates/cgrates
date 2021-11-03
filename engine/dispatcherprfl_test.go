@@ -21,7 +21,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -319,22 +318,5 @@ func TestDispatcherHostProfileCloneWithParams(t *testing.T) {
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v", exp, rcv)
-	}
-}
-
-func TestDispatcherHostCallNilRPCConn(t *testing.T) {
-	dH := &DispatcherHost{
-		Tenant:     "cgrates.org",
-		RemoteHost: config.NewDfltRemoteHost(),
-	}
-
-	var args int
-	var reply *int
-
-	experr := "dial tcp 127.0.0.1:2012: connect: connection refused"
-	err := dH.Call("method", args, reply)
-
-	if err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }

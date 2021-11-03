@@ -63,50 +63,12 @@ func TestAttributesShutdown(t *testing.T) {
 	utils.Logger.SetLogLevel(0)
 }
 
-func TestAttributesRPCClone(t *testing.T) {
-	attr := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Event: make(map[string]interface{}),
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 1,
-				utils.OptsContext:               utils.MetaAny,
-				utils.OptsAttributesProfileIDs:  []string{"ATTR_ID"},
-			},
-		},
-		clnb: true,
-	}
-
-	rcv, err := attr.RPCClone()
-
-	exp := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Event: make(map[string]interface{}),
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 1,
-				utils.OptsContext:               utils.MetaAny,
-				utils.OptsAttributesProfileIDs:  []string{"ATTR_ID"},
-			},
-		},
-		clnb: false,
-	}
-
-	if err != nil {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-	}
-
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-
-}
-
 func TestAttributesV1GetAttributeForEventNilCGREvent(t *testing.T) {
 	alS := &AttributeService{}
-	args := &AttrArgsProcessEvent{}
 	reply := &AttributeProfile{}
 
 	experr := fmt.Sprintf("MANDATORY_IE_MISSING: [%s]", "CGREvent")
-	err := alS.V1GetAttributeForEvent(args, reply)
+	err := alS.V1GetAttributeForEvent(nil, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -122,9 +84,7 @@ func TestAttributesV1GetAttributeForEventProfileNotFound(t *testing.T) {
 		filterS: &FilterS{},
 		cgrcfg:  cfg,
 	}
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{},
-	}
+	args := &utils.CGREvent{}
 	reply := &AttributeProfile{}
 
 	experr := utils.ErrNotFound
@@ -144,9 +104,7 @@ func TestAttributesV1GetAttributeForEvent2(t *testing.T) {
 		filterS: &FilterS{},
 		cgrcfg:  cfg,
 	}
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{},
-	}
+	args := &utils.CGREvent{}
 	reply := &AttributeProfile{}
 
 	experr := utils.ErrNotFound
@@ -226,15 +184,13 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 		},
 		blocker: false,
 	}
-	if err = alS.V1ProcessEvent(&AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "adrian@itsyscom.com",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
-			},
+	if err = alS.V1ProcessEvent(&utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
 		},
 	}, &rply); err != nil {
 		t.Errorf("Expected <%+v>, received <%+v>", nil, err)
@@ -271,15 +227,13 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	alS := NewAttributeService(dm, filterS, cfg)
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: NotEnoughParameters"
-	if err = alS.V1ProcessEvent(&AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "adrian@itsyscom.com",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
-			},
+	if err = alS.V1ProcessEvent(&utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
 		},
 	}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
@@ -316,15 +270,13 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	alS := NewAttributeService(dm, filterS, cfg)
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: NotEnoughParameters"
-	if err := alS.V1ProcessEvent(&AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "adrian@itsyscom.com",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
-			},
+	if err := alS.V1ProcessEvent(&utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
 		},
 	}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
@@ -360,15 +312,13 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	alS := NewAttributeService(dm, filterS, cfg)
 	var rply AttrSProcessEventReply
 	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\"}]> to *value_exponent"
-	if err := alS.V1ProcessEvent(&AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "adrian@itsyscom.com",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 2,
-			},
+	if err := alS.V1ProcessEvent(&utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "adrian@itsyscom.com",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
 		},
 	}, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected <%+v>, received <%+v>", expErr, err)
@@ -1152,18 +1102,16 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "AttrProcessEventMultipleRuns",
-			Event: map[string]interface{}{
-				"Password": "passwd",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 3,
-				utils.OptsContext:               utils.MetaAny,
-				utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AttrProcessEventMultipleRuns",
+		Event: map[string]interface{}{
+			"Password": "passwd",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 3,
+			utils.OptsContext:               utils.MetaAny,
+			utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
 		},
 	}
 	reply := &AttrSProcessEventReply{}
@@ -1264,15 +1212,13 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "AttrProcessEventMultipleRuns",
-			Event:  map[string]interface{}{},
-			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 3,
-				utils.OptsContext:               utils.MetaAny,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AttrProcessEventMultipleRuns",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 3,
+			utils.OptsContext:               utils.MetaAny,
 		},
 	}
 

@@ -123,17 +123,13 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.MetaNone {
 			continue // AttributeS disabled
 		}
-
-		args := &AttrArgsProcessEvent{
-			CGREvent: clonedEv,
-		}
-		args.CGREvent.APIOpts[utils.OptsAttributesProfileIDs] = cP.AttributeIDs
-		if args.CGREvent.APIOpts[utils.OptsContext] == utils.EmptyString {
-			args.CGREvent.APIOpts[utils.OptsContext] = utils.MetaChargers
+		clonedEv.APIOpts[utils.OptsAttributesProfileIDs] = cP.AttributeIDs
+		if clonedEv.APIOpts[utils.OptsContext] == utils.EmptyString {
+			clonedEv.APIOpts[utils.OptsContext] = utils.MetaChargers
 		}
 		var evReply AttrSProcessEventReply
 		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,
-			utils.AttributeSv1ProcessEvent, args, &evReply); err != nil {
+			utils.AttributeSv1ProcessEvent, clonedEv, &evReply); err != nil {
 			if err.Error() != utils.ErrNotFound.Error() {
 				return nil, err
 			}

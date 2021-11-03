@@ -61,10 +61,7 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	ev.APIOpts[utils.OptsContext] = utils.MetaAuth
 	if err = dS.connMgr.Call(dS.cfg.DispatcherSCfg().AttributeSConns, nil,
-		utils.AttributeSv1ProcessEvent,
-		&engine.AttrArgsProcessEvent{
-			CGREvent: ev,
-		}, reply); err != nil {
+		utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
 		}

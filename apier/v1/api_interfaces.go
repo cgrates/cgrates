@@ -64,8 +64,8 @@ type RouteSv1Interface interface {
 }
 
 type AttributeSv1Interface interface {
-	GetAttributeForEvent(args *engine.AttrArgsProcessEvent, reply *engine.AttributeProfile) (err error)
-	ProcessEvent(args *engine.AttrArgsProcessEvent, reply *engine.AttrSProcessEventReply) error
+	GetAttributeForEvent(args *utils.CGREvent, reply *engine.AttributeProfile) (err error)
+	ProcessEvent(args *utils.CGREvent, reply *engine.AttrSProcessEventReply) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 

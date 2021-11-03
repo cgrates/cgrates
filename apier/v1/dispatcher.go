@@ -375,13 +375,13 @@ func (dA *DispatcherAttributeSv1) Ping(args *utils.CGREvent, reply *string) erro
 }
 
 // GetAttributeForEvent implements AttributeSv1GetAttributeForEvent
-func (dA *DispatcherAttributeSv1) GetAttributeForEvent(args *engine.AttrArgsProcessEvent,
+func (dA *DispatcherAttributeSv1) GetAttributeForEvent(args *utils.CGREvent,
 	reply *engine.AttributeProfile) error {
 	return dA.dA.AttributeSv1GetAttributeForEvent(args, reply)
 }
 
 // ProcessEvent implements AttributeSv1ProcessEvent
-func (dA *DispatcherAttributeSv1) ProcessEvent(args *engine.AttrArgsProcessEvent,
+func (dA *DispatcherAttributeSv1) ProcessEvent(args *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) error {
 	return dA.dA.AttributeSv1ProcessEvent(args, reply)
 }

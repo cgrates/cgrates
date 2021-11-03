@@ -127,17 +127,15 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 }
 
 func testAttributeSProcessEvent(t *testing.T) {
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]interface{}{
-				utils.EventName: "VariableTest",
-				utils.ToR:       utils.MetaVoice,
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEvent",
+		Event: map[string]interface{}{
+			utils.EventName: "VariableTest",
+			utils.ToR:       utils.MetaVoice,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 	eRply := engine.AttrSProcessEventReply{
@@ -211,16 +209,14 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithAccount",
-			Event: map[string]interface{}{
-				"EventName": "AddAccountInfo",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithAccount",
+		Event: map[string]interface{}{
+			"EventName": "AddAccountInfo",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -294,16 +290,14 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithAccount2",
-			Event: map[string]interface{}{
-				"EventName": "AddFullAccount",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithAccount2",
+		Event: map[string]interface{}{
+			"EventName": "AddFullAccount",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -426,16 +420,14 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithStat",
-			Event: map[string]interface{}{
-				"EventName": "AddStatEvent",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithStat",
+		Event: map[string]interface{}{
+			"EventName": "AddStatEvent",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -509,16 +501,14 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithStat",
-			Event: map[string]interface{}{
-				"EventName": "AddFullStats",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithStat",
+		Event: map[string]interface{}{
+			"EventName": "AddFullStats",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -655,16 +645,14 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithResource",
-			Event: map[string]interface{}{
-				"EventName": "AddResourceUsages",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithResource",
+		Event: map[string]interface{}{
+			"EventName": "AddResourceUsages",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -738,16 +726,14 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithResource2",
-			Event: map[string]interface{}{
-				"EventName": "AddFullResource",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithResource2",
+		Event: map[string]interface{}{
+			"EventName": "AddFullResource",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -831,17 +817,15 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
-			Event: map[string]interface{}{
-				"EventName":   "AddDestinationCarrier",
-				"Destination": "+447779330921",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
+		Event: map[string]interface{}{
+			"EventName":   "AddDestinationCarrier",
+			"Destination": "+447779330921",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -934,17 +918,15 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
-			Event: map[string]interface{}{
-				"EventName":   "AddComposedInfo",
-				"Destination": "+447779330921",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
+		Event: map[string]interface{}{
+			"EventName":   "AddComposedInfo",
+			"Destination": "+447779330921",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 
@@ -1019,17 +1001,15 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
 	}
 
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEventWithLibPhoneNumber",
-			Event: map[string]interface{}{
-				"EventName":   "AddDestinationDetails",
-				"Destination": "+447779330921",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: utils.MetaSessionS,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAttributeSProcessEventWithLibPhoneNumber",
+		Event: map[string]interface{}{
+			"EventName":   "AddDestinationDetails",
+			"Destination": "+447779330921",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
 

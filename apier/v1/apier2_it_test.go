@@ -154,16 +154,14 @@ func testAPIerLoadFromFolder(t *testing.T) {
 }
 
 func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAPIerAfterDelete",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAPIerAfterDelete",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: "simpleauth",
 		},
 	}
 
@@ -232,16 +230,14 @@ func testAPIerAfterDelete(t *testing.T) {
 }
 
 func testAPIerVerifyAttributesAfterDelete(t *testing.T) {
-	ev := &engine.AttrArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAPIerAfterDelete",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsContext: "simpleauth",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testAPIerAfterDelete",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsContext: "simpleauth",
 		},
 	}
 	var attrReply *engine.AttributeProfile
