@@ -3071,9 +3071,11 @@ func TestAttributeMetaTenant(t *testing.T) {
 		MatchedProfiles: []string{"cgrates.org:ATTR_TNT"},
 		AlteredFields:   []string{utils.MetaTenant},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "prfx_" + config.CgrConfig().GeneralCfg().DefaultTenant,
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
+			Tenant: "prfx_" + config.CgrConfig().GeneralCfg().DefaultTenant,
+			Event:  map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	var reply AttrSProcessEventReply
@@ -3182,6 +3184,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 			},
 			APIOpts: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: 2,
+				utils.OptsContext:               utils.MetaSessionS,
 			},
 		},
 	}
@@ -3263,6 +3266,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.OptsAttributesProfileRuns: 2,
 				utils.OptsAttributesProcessRuns: 40,
+				utils.OptsContext:               utils.MetaSessionS,
 			},
 		},
 	}
@@ -3304,6 +3308,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 			APIOpts: map[string]interface{}{
 				utils.OptsAttributesProfileRuns: 1,
 				utils.OptsAttributesProcessRuns: 40,
+				utils.OptsContext:               utils.MetaSessionS,
 			},
 		},
 	}

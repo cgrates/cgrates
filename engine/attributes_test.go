@@ -220,7 +220,9 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 				utils.AccountField: "andrei.itsyscom.com",
 				"Password":         "CGRATES.ORG",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 2,
+			},
 		},
 		blocker: false,
 	}
@@ -1175,7 +1177,11 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 				"Password":        "CGRateS.org",
 				utils.RequestType: utils.MetaPostpaid,
 			},
-			APIOpts: make(map[string]interface{}),
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 3,
+				utils.OptsContext:               utils.MetaAny,
+				utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
+			},
 		},
 	}
 
@@ -1282,7 +1288,10 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 				"PaypalAccount":   "cgrates@paypal.com",
 				utils.RequestType: utils.MetaPostpaid,
 			},
-			APIOpts: make(map[string]interface{}),
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: 3,
+				utils.OptsContext:               utils.MetaAny,
+			},
 		},
 	}
 	if err := alS.V1ProcessEvent(args, reply); err != nil {

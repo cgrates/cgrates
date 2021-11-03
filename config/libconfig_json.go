@@ -416,8 +416,6 @@ type AttributeSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
-	Process_runs          *int
-	Profile_runs          *int
 	Any_context           *bool
 	Opts                  *AttributesOptsJson
 }

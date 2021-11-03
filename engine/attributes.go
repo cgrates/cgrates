@@ -285,7 +285,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.OptsAttributesProcessRuns: 0,
+			utils.MetaProcessRuns: 0,
 		},
 	}, utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
@@ -335,8 +335,8 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.OptsAttributesProcessRuns: 0,
-			utils.MetaProcessedProfileIDs:   processedPrf,
+			utils.MetaProcessRuns:         0,
+			utils.MetaProcessedProfileIDs: processedPrf,
 		},
 		utils.MetaTenant: tnt,
 	}
@@ -346,7 +346,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	dynDP := newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
 		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
-		(eNV[utils.MetaVars].(utils.MapStorage))[utils.OptsAttributesProcessRuns] = i + 1
+		(eNV[utils.MetaVars].(utils.MapStorage))[utils.MetaProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(tnt, args, eNV, dynDP, lastID, processedPrfNo, profileRuns)
 		if err != nil {

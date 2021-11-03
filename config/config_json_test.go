@@ -1029,9 +1029,13 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
-		Process_runs:          utils.IntPointer(1),
-		Profile_runs:          utils.IntPointer(0),
 		Any_context:           utils.BoolPointer(true),
+		Opts: &AttributesOptsJson{
+			ProcessRuns:          utils.IntPointer(1),
+			ProfileRuns:          utils.IntPointer(0),
+			ProfileIDs:           &[]string{},
+			ProfileIgnoreFilters: utils.BoolPointer(false),
+		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
