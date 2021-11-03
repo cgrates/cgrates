@@ -183,34 +183,34 @@ type Marshaler interface {
 
 type JSONMarshaler struct{}
 
-func (jm *JSONMarshaler) Marshal(v interface{}) ([]byte, error) {
+func (JSONMarshaler) Marshal(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func (jm *JSONMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (JSONMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }
 
 type BSONMarshaler struct{}
 
-func (jm *BSONMarshaler) Marshal(v interface{}) ([]byte, error) {
+func (BSONMarshaler) Marshal(v interface{}) ([]byte, error) {
 	return bson.Marshal(v)
 }
 
-func (jm *BSONMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (BSONMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return bson.Unmarshal(data, v)
 }
 
 type JSONBufMarshaler struct{}
 
-func (jbm *JSONBufMarshaler) Marshal(v interface{}) (data []byte, err error) {
+func (JSONBufMarshaler) Marshal(v interface{}) (data []byte, err error) {
 	buf := new(bytes.Buffer)
 	err = json.NewEncoder(buf).Encode(v)
 	data = buf.Bytes()
 	return
 }
 
-func (jbm *JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return json.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 
@@ -258,14 +258,14 @@ func (bm *BincMarshaler) Unmarshal(data []byte, v interface{}) error {
 
 type GOBMarshaler struct{}
 
-func (gm *GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
+func (GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
 	buf := new(bytes.Buffer)
 	err = gob.NewEncoder(buf).Encode(v)
 	data = buf.Bytes()
 	return
 }
 
-func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
+func (GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 

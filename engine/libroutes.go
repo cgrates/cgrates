@@ -30,10 +30,18 @@ import (
 
 // SortedRoute represents one route in SortedRoutes
 type SortedRoute struct {
-	RouteID         string
-	RouteParameters string
-	SortingData     map[string]interface{} // store here extra info like cost or stats (can contain the data that we do not use to sort after)
-	sortingDataF64  map[string]float64     // only the data we sort after
+	RouteID            string
+	RouteParameters    string
+	SortingData        map[string]interface{}    // store here extra info like cost or stats (can contain the data that we do not use to sort after)
+	sortingDataDecimal map[string]*utils.Decimal // only the data we sort after
+}
+
+// getSortedData returns the data from map or a 0( in case it was not populated)
+func (s *SortedRoute) getSortedData(field string) *utils.Decimal {
+	if v, has := s.sortingDataDecimal[field]; has {
+		return v
+	}
+	return utils.NewDecimalFromFloat64(0)
 }
 
 // SortedRoutes represents all viable routes inside one routing profile
@@ -64,27 +72,28 @@ func (sRoutes *SortedRoutes) RoutesWithParams() (sPs []string) {
 	return
 }
 
+func (sRoutes *SortedRoutes) compareWeight(i, j int) bool {
+	cmp := sRoutes.Routes[i].getSortedData(utils.Weight).Compare(sRoutes.Routes[j].getSortedData(utils.Weight))
+	if cmp == 0 {
+		return utils.BoolGenerator().RandomBool()
+	}
+	return cmp > 0
+}
+
 // SortWeight is part of sort interface, sort based on Weight
 func (sRoutes *SortedRoutes) SortWeight() {
-	sort.Slice(sRoutes.Routes, func(i, j int) bool {
-		if sRoutes.Routes[i].sortingDataF64[utils.Weight] == sRoutes.Routes[j].sortingDataF64[utils.Weight] {
-			return utils.BoolGenerator().RandomBool()
-		}
-		return sRoutes.Routes[i].sortingDataF64[utils.Weight] > sRoutes.Routes[j].sortingDataF64[utils.Weight]
-	})
+	sort.Slice(sRoutes.Routes, sRoutes.compareWeight)
 }
 
 // SortLeastCost is part of sort interface,
 // sort ascendent based on Cost with fallback on Weight
 func (sRoutes *SortedRoutes) SortLeastCost() {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
-		if sRoutes.Routes[i].sortingDataF64[utils.Cost] == sRoutes.Routes[j].sortingDataF64[utils.Cost] {
-			if sRoutes.Routes[i].sortingDataF64[utils.Weight] == sRoutes.Routes[j].sortingDataF64[utils.Weight] {
-				return utils.BoolGenerator().RandomBool()
-			}
-			return sRoutes.Routes[i].sortingDataF64[utils.Weight] > sRoutes.Routes[j].sortingDataF64[utils.Weight]
+		cmp := sRoutes.Routes[i].getSortedData(utils.Cost).Compare(sRoutes.Routes[j].getSortedData(utils.Cost))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
 		}
-		return sRoutes.Routes[i].sortingDataF64[utils.Cost] < sRoutes.Routes[j].sortingDataF64[utils.Cost]
+		return cmp < 0
 	})
 }
 
@@ -92,13 +101,11 @@ func (sRoutes *SortedRoutes) SortLeastCost() {
 // sort descendent based on Cost with fallback on Weight
 func (sRoutes *SortedRoutes) SortHighestCost() {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
-		if sRoutes.Routes[i].sortingDataF64[utils.Cost] == sRoutes.Routes[j].sortingDataF64[utils.Cost] {
-			if sRoutes.Routes[i].sortingDataF64[utils.Weight] == sRoutes.Routes[j].sortingDataF64[utils.Weight] {
-				return utils.BoolGenerator().RandomBool()
-			}
-			return sRoutes.Routes[i].sortingDataF64[utils.Weight] > sRoutes.Routes[j].sortingDataF64[utils.Weight]
+		cmp := sRoutes.Routes[i].getSortedData(utils.Cost).Compare(sRoutes.Routes[j].getSortedData(utils.Cost))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
 		}
-		return sRoutes.Routes[i].sortingDataF64[utils.Cost] > sRoutes.Routes[j].sortingDataF64[utils.Cost]
+		return cmp > 0
 	})
 }
 
@@ -109,28 +116,17 @@ func (sRoutes *SortedRoutes) SortQOS(params []string) {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
 		for _, param := range params {
 			//in case we have the same value for the current param we skip to the next one
-			if sRoutes.Routes[i].sortingDataF64[param] == sRoutes.Routes[j].sortingDataF64[param] {
+			cmp := sRoutes.Routes[i].getSortedData(param).Compare(sRoutes.Routes[j].getSortedData(param))
+			if cmp == 0 {
 				continue
 			}
-			switch param {
-			default:
-				if sRoutes.Routes[i].sortingDataF64[param] > sRoutes.Routes[j].sortingDataF64[param] {
-					return true
-				}
-				return false
-			case utils.MetaPDD: //in case of pdd the smallest value if the best
-				if sRoutes.Routes[i].sortingDataF64[param] < sRoutes.Routes[j].sortingDataF64[param] {
-					return true
-				}
-				return false
+			if param == utils.MetaPDD {
+				return cmp < 0
 			}
-
+			return cmp > 0
 		}
 		//in case that we have the same value for all params we sort base on weight
-		if sRoutes.Routes[i].sortingDataF64[utils.Weight] == sRoutes.Routes[j].sortingDataF64[utils.Weight] {
-			return utils.BoolGenerator().RandomBool()
-		}
-		return sRoutes.Routes[i].sortingDataF64[utils.Weight] > sRoutes.Routes[j].sortingDataF64[utils.Weight]
+		return sRoutes.compareWeight(i, j)
 	})
 }
 
@@ -138,13 +134,11 @@ func (sRoutes *SortedRoutes) SortQOS(params []string) {
 // sort ascendent based on ResourceUsage with fallback on Weight
 func (sRoutes *SortedRoutes) SortResourceAscendent() {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
-		if sRoutes.Routes[i].sortingDataF64[utils.ResourceUsage] == sRoutes.Routes[j].sortingDataF64[utils.ResourceUsage] {
-			if sRoutes.Routes[i].sortingDataF64[utils.Weight] == sRoutes.Routes[j].sortingDataF64[utils.Weight] {
-				return utils.BoolGenerator().RandomBool()
-			}
-			return sRoutes.Routes[i].sortingDataF64[utils.Weight] > sRoutes.Routes[j].sortingDataF64[utils.Weight]
+		cmp := sRoutes.Routes[i].getSortedData(utils.ResourceUsage).Compare(sRoutes.Routes[j].getSortedData(utils.ResourceUsage))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
 		}
-		return sRoutes.Routes[i].sortingDataF64[utils.ResourceUsage] < sRoutes.Routes[j].sortingDataF64[utils.ResourceUsage]
+		return cmp < 0
 	})
 }
 
@@ -152,13 +146,11 @@ func (sRoutes *SortedRoutes) SortResourceAscendent() {
 // sort descendent based on ResourceUsage with fallback on Weight
 func (sRoutes *SortedRoutes) SortResourceDescendent() {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
-		if sRoutes.Routes[i].sortingDataF64[utils.ResourceUsage] == sRoutes.Routes[j].sortingDataF64[utils.ResourceUsage] {
-			if sRoutes.Routes[i].sortingDataF64[utils.Weight] == sRoutes.Routes[j].sortingDataF64[utils.Weight] {
-				return utils.BoolGenerator().RandomBool()
-			}
-			return sRoutes.Routes[i].sortingDataF64[utils.Weight] > sRoutes.Routes[j].sortingDataF64[utils.Weight]
+		cmp := sRoutes.Routes[i].getSortedData(utils.ResourceUsage).Compare(sRoutes.Routes[j].getSortedData(utils.ResourceUsage))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
 		}
-		return sRoutes.Routes[i].sortingDataF64[utils.ResourceUsage] > sRoutes.Routes[j].sortingDataF64[utils.ResourceUsage]
+		return cmp > 0
 	})
 }
 
@@ -167,15 +159,12 @@ func (sRoutes *SortedRoutes) SortResourceDescendent() {
 func (sRoutes *SortedRoutes) SortLoadDistribution() {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
 		// ((ratio + metricVal) / (ratio)) -1 = ((ratio+metricVal)/ratio) - (ratio/ratio) = (ratio+metricVal-ratio)/ratio = metricVal/ratio
-		splIVal := sRoutes.Routes[i].sortingDataF64[utils.Load] / sRoutes.Routes[i].sortingDataF64[utils.Ratio]
-		splJVal := sRoutes.Routes[j].sortingDataF64[utils.Load] / sRoutes.Routes[j].sortingDataF64[utils.Ratio]
-		if splIVal == splJVal {
-			if sRoutes.Routes[i].sortingDataF64[utils.Weight] == sRoutes.Routes[j].sortingDataF64[utils.Weight] {
-				return utils.BoolGenerator().RandomBool()
-			}
-			return sRoutes.Routes[i].sortingDataF64[utils.Weight] > sRoutes.Routes[j].sortingDataF64[utils.Weight]
+		cmp := utils.DivideDecimal(sRoutes.Routes[i].getSortedData(utils.Load), sRoutes.Routes[i].getSortedData(utils.Ratio)).Compare(
+			utils.DivideDecimal(sRoutes.Routes[j].getSortedData(utils.Load), sRoutes.Routes[j].getSortedData(utils.Ratio)))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
 		}
-		return splIVal < splJVal
+		return cmp < 0
 	})
 }
 

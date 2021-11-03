@@ -46,8 +46,8 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			SortingData: map[string]interface{}{
 				utils.Weight: route.Weight,
 			},
-			sortingDataF64: map[string]float64{
-				utils.Weight: route.Weight,
+			sortingDataDecimal: map[string]*utils.Decimal{
+				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
 			},
 			RouteParameters: route.RouteParameters,
 		}
@@ -65,7 +65,7 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			tUsage += res.TotalUsage()
 		}
 		srtRoute.SortingData[utils.ResourceUsage] = tUsage
-		srtRoute.sortingDataF64[utils.ResourceUsage] = tUsage
+		srtRoute.sortingDataDecimal[utils.ResourceUsage] = utils.NewDecimalFromFloat64(tUsage)
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			cfg.FilterSCfg().ResourceSConns,

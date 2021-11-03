@@ -249,8 +249,8 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 10.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
@@ -273,8 +273,8 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 30.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(30.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 30.0,
@@ -283,8 +283,8 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 20.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
@@ -293,8 +293,8 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 10.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
@@ -318,8 +318,8 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 10.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
@@ -354,8 +354,8 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 30.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(30.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 30.0,
@@ -364,8 +364,8 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 20.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
@@ -403,8 +403,8 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route3",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 10.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(10.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
@@ -441,8 +441,8 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
-				sortingDataF64: map[string]float64{
-					utils.Weight: 20.0,
+				sortingDataDecimal: map[string]*utils.Decimal{
+					utils.Weight: utils.NewDecimalFromFloat64(20.0),
 				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
@@ -644,8 +644,8 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Routes: []*SortedRoute{
 				{
 					RouteID: "route2",
-					sortingDataF64: map[string]float64{
-						utils.Weight: 10.,
+					sortingDataDecimal: map[string]*utils.Decimal{
+						utils.Weight: utils.NewDecimalFromFloat64(10.),
 					},
 					SortingData: map[string]interface{}{
 						utils.Weight: 10.,
@@ -660,8 +660,8 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Routes: []*SortedRoute{
 				{
 					RouteID: "route1",
-					sortingDataF64: map[string]float64{
-						utils.Weight: 30.,
+					sortingDataDecimal: map[string]*utils.Decimal{
+						utils.Weight: utils.NewDecimalFromFloat64(30.),
 					},
 					SortingData: map[string]interface{}{
 						utils.Weight: 30.,

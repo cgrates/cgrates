@@ -46,8 +46,8 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			SortingData: map[string]interface{}{
 				utils.Weight: route.Weight,
 			},
-			sortingDataF64: map[string]float64{
-				utils.Weight: route.Weight,
+			sortingDataDecimal: map[string]*utils.Decimal{
+				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
 			},
 			RouteParameters: route.RouteParameters,
 		}
@@ -99,7 +99,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 		}
 
 		if cost != nil {
-			srtRoute.sortingDataF64[utils.Cost], _ = cost.Float64()
+			srtRoute.sortingDataDecimal[utils.Cost] = cost
 		}
 		srtRoute.SortingData[utils.Cost] = cost
 

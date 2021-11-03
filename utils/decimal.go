@@ -28,6 +28,15 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
+var (
+	DecimalNaN = &Decimal{}
+)
+
+func init() {
+	d, _ := new(decimal.Big).SetString("NaN")
+	DecimalNaN = &Decimal{d}
+}
+
 func DivideBig(x, y *decimal.Big) *decimal.Big {
 	if x == nil {
 		return nil
@@ -78,6 +87,16 @@ func SubstractBig(x, y *decimal.Big) *decimal.Big {
 // MultiplyDecimal multiples two Decimals and returns the result
 func MultiplyDecimal(x, y *Decimal) *Decimal {
 	return &Decimal{new(decimal.Big).Mul(x.Big, y.Big)}
+}
+
+// DivideDecimal divides two Decimals and returns the result
+func DivideDecimal(x, y *Decimal) *Decimal {
+	return &Decimal{new(decimal.Big).Quo(x.Big, y.Big)}
+}
+
+// sumDecimal adds two Decimals and returns the result
+func SumDecimal(x, y *Decimal) *Decimal {
+	return &Decimal{new(decimal.Big).Add(x.Big, y.Big)}
 }
 
 func SubstractDecimal(x, y *Decimal) *Decimal {
@@ -163,6 +182,9 @@ func (d *Decimal) UnmarshalJSON(data []byte) (err error) {
 
 // MarshalJSON implements the method for jsonMarshal for JSON encoding
 func (d *Decimal) MarshalJSON() ([]byte, error) {
+	if d.IsNaN(0) {
+		return []byte(`"NaN"`), nil
+	}
 	x, err := d.MarshalText()
 	return bytes.Trim(x, `"`), err
 }
@@ -195,11 +217,6 @@ func (d *Decimal) Round(rndDec int) *Decimal {
 	ctx := d.Big.Context
 	ctx.Precision = rndDec
 	return &Decimal{ctx.Round(d.Big)}
-}
-
-// Float64 returns the decimal as float64 number or !ok otherwise
-func (d *Decimal) Float64() (f float64, ok bool) {
-	return d.Big.Float64()
 }
 
 // Duration returns the decimal as duration or !ok otherwise

@@ -20,30 +20,17 @@ package engine
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
-
-// ACDHelper structure
-type DurationWithCompress struct {
-	Duration       time.Duration
-	CompressFactor int
-}
-
-// ACDHelper structure
-type StatWithCompress struct {
-	Stat           float64
-	CompressFactor int
-}
 
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
-func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMetric, err error) {
-	metrics := map[string]func(int, string, []string) (StatMetric, error){
+func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm *StatMetricWithFilters, err error) {
+	metrics := map[string]func(uint64, string) StatMetric{
 		utils.MetaASR:      NewASR,
 		utils.MetaACD:      NewACD,
 		utils.MetaTCD:      NewTCD,
@@ -65,74 +52,44 @@ func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMe
 	if len(metricSplit[1:]) > 0 {
 		extraParams = metricSplit[1]
 	}
-	return metrics[metricSplit[0]](minItems, extraParams, filterIDs)
+	return &StatMetricWithFilters{StatMetric: metrics[metricSplit[0]](minItems, extraParams), FilterIDs: filterIDs}, nil
 }
 
 // StatMetric is the interface which a metric should implement
 type StatMetric interface {
-	GetValue(roundingDecimal int) interface{}
-	GetStringValue(roundingDecimal int) (val string)
-	GetFloat64Value(roundingDecimal int) (val float64)
+	GetValue() *utils.Decimal
+	GetStringValue() string
 	AddEvent(evID string, ev utils.DataProvider) error
-	RemEvent(evTenantID string) error
-	Marshal(ms Marshaler) (marshaled []byte, err error)
-	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
-	GetFilterIDs() (filterIDs []string)
-	GetMinItems() (minIts int)
-	Compress(queueLen int64, defaultID string, roundingDec int) (eventIDs []string)
-	GetCompressFactor(events map[string]int) map[string]int
+	RemEvent(evID string) error
+	GetMinItems() (minIts uint64)
+	Compress(queueLen uint64, defaultID string) (eventIDs []string)
+	GetCompressFactor(events map[string]uint64) map[string]uint64
 	Clone() StatMetric
 }
 
-func NewASR(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatASR{Events: make(map[string]*StatWithCompress),
-		MinItems: minItems, FilterIDs: filterIDs}, nil
+func NewASR(minItems uint64, _ string) StatMetric {
+	return &StatASR{Metric: NewMetric(minItems)}
 }
 
 // ASR implements AverageSuccessRatio metric
 type StatASR struct {
-	FilterIDs []string
-	Answered  float64
-	Count     int64
-	Events    map[string]*StatWithCompress // map[EventTenantID]Answered
-	MinItems  int
-	val       *float64 // cached ASR value
+	*Metric
 }
 
-// getValue returns asr.val
-func (asr *StatASR) getValue(roundingDecimal int) float64 {
-	if asr.val == nil {
-		if (asr.MinItems > 0 && asr.Count < int64(asr.MinItems)) || (asr.Count == 0) {
-			asr.val = utils.Float64Pointer(utils.StatsNA)
-		} else {
-			asr.val = utils.Float64Pointer(utils.Round((asr.Answered / float64(asr.Count) * 100.0),
-				roundingDecimal, utils.MetaRoundingMiddle))
-		}
-	}
-	return *asr.val
-}
-
-// GetValue returns the ASR value as part of StatMetric interface
-func (asr *StatASR) GetValue(roundingDecimal int) (v interface{}) {
-	return asr.getValue(roundingDecimal)
-}
-
-func (asr *StatASR) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := asr.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = fmt.Sprintf("%v%%", asr.getValue(roundingDecimal))
+func (asr *StatASR) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := asr.getAvgValue(); val != utils.DecimalNaN {
+		valStr = utils.MultiplyDecimal(val, utils.NewDecimal(100, 0)).String() + "%"
 	}
 	return
 }
 
-// GetFloat64Value is part of StatMetric interface
-func (asr *StatASR) GetFloat64Value(roundingDecimal int) (val float64) {
-	return asr.getValue(roundingDecimal)
+func (asr *StatASR) GetValue() *utils.Decimal {
+	return utils.MultiplyDecimal(asr.getAvgValue(), utils.NewDecimal(100, 0))
 }
 
 // AddEvent is part of StatMetric interface
-func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
+func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) error {
 	var answered int
 	if val, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.AnswerTime}); err != nil {
 		if err != utils.ErrNotFound {
@@ -144,886 +101,236 @@ func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) (err error) {
 	} else if !at.IsZero() {
 		answered = 1
 	}
-
-	if val, has := asr.Events[evID]; !has {
-		asr.Events[evID] = &StatWithCompress{Stat: float64(answered), CompressFactor: 1}
-	} else {
-		val.Stat = (val.Stat*float64(val.CompressFactor) + float64(answered)) / float64(val.CompressFactor+1)
-		val.CompressFactor = val.CompressFactor + 1
-	}
-	asr.Count++
-	if answered == 1 {
-		asr.Answered++
-	}
-	asr.val = nil
-	return
-}
-
-func (asr *StatASR) RemEvent(evID string) (err error) {
-	val, has := asr.Events[evID]
-	if !has {
-		return utils.ErrNotFound
-	}
-	ans := 0
-	if val.Stat > 0.5 {
-		ans = 1
-		asr.Answered--
-	}
-	asr.Count--
-	if val.CompressFactor <= 1 {
-		delete(asr.Events, evID)
-	} else {
-		val.Stat = (val.Stat*float64(val.CompressFactor) - float64(ans)) / (float64(val.CompressFactor - 1))
-		val.CompressFactor = val.CompressFactor - 1
-	}
-	asr.val = nil
-	return
-}
-
-// Marshal is part of StatMetric interface
-func (asr *StatASR) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(asr)
-}
-
-// LoadMarshaled is part of StatMetric interface
-func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, asr)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (asr *StatASR) GetFilterIDs() []string {
-	return asr.FilterIDs
-}
-
-// GetMinItems returns the minim items for the metric
-func (asr *StatASR) GetMinItems() (minIts int) { return asr.MinItems }
-
-// Compress is part of StatMetric interface
-func (asr *StatASR) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
-	if asr.Count < queueLen {
-		for id := range asr.Events {
-			eventIDs = append(eventIDs, id)
-		}
-		return
-	}
-	stat := &StatWithCompress{
-		Stat: utils.Round(asr.Answered/float64(asr.Count),
-			roundingDecimal, utils.MetaRoundingMiddle),
-		CompressFactor: int(asr.Count),
-	}
-	asr.Events = map[string]*StatWithCompress{defaultID: stat}
-	return []string{defaultID}
-}
-
-// Compress is part of StatMetric interface
-func (asr *StatASR) GetCompressFactor(events map[string]int) map[string]int {
-	for id, val := range asr.Events {
-		if _, has := events[id]; !has {
-			events[id] = val.CompressFactor
-		}
-		if events[id] < val.CompressFactor {
-			events[id] = val.CompressFactor
-		}
-	}
-	return events
+	return asr.addEvent(evID, answered)
 }
 
 func (asr *StatASR) Clone() StatMetric {
-	cln := &StatASR{
-		FilterIDs: utils.CloneStringSlice(asr.FilterIDs),
-		Answered:  asr.Answered,
-		Count:     asr.Count,
-		Events:    make(map[string]*StatWithCompress),
-		MinItems:  asr.MinItems,
+	return &StatASR{
+		Metric: asr.Metric.Clone(),
 	}
-	for k, v := range asr.Events {
-		cln.Events[k] = &(*v)
-	}
-	return cln
 }
 
-func NewACD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatACD{Events: make(map[string]*DurationWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
+func NewACD(minItems uint64, _ string) StatMetric {
+	return &StatACD{Metric: NewMetric(minItems)}
 }
 
 // ACD implements AverageCallDuration metric
 type StatACD struct {
-	FilterIDs []string
-	Sum       time.Duration
-	Count     int64
-	Events    map[string]*DurationWithCompress // map[EventTenantID]Duration
-	MinItems  int
-	val       *time.Duration // cached ACD value
+	*Metric
 }
 
-// getValue returns acd.val
-func (acd *StatACD) getValue(roundingDecimal int) time.Duration {
-	if acd.val == nil {
-		if (acd.MinItems > 0 && acd.Count < int64(acd.MinItems)) || (acd.Count == 0) {
-			acd.val = utils.DurationPointer(-time.Nanosecond)
-		} else {
-			acd.val = utils.DurationPointer(utils.RoundStatDuration(
-				time.Duration(acd.Sum.Nanoseconds()/acd.Count),
-				roundingDecimal))
-		}
-	}
-	return *acd.val
-}
-
-func (acd *StatACD) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := acd.getValue(roundingDecimal); val == -time.Nanosecond {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = fmt.Sprintf("%+v", acd.getValue(roundingDecimal))
+func (acd *StatACD) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := acd.getAvgValue(); val != utils.DecimalNaN {
+		dur, _ := val.Duration()
+		valStr = dur.String()
 	}
 	return
 }
 
-func (acd *StatACD) GetValue(roundingDecimal int) (v interface{}) {
-	return acd.getValue(roundingDecimal)
+func (acd *StatACD) GetValue() *utils.Decimal {
+	return acd.getAvgValue()
 }
 
-func (acd *StatACD) GetFloat64Value(roundingDecimal int) (v float64) {
-	if val := acd.getValue(roundingDecimal); val == -time.Nanosecond {
-		v = utils.StatsNA
-	} else {
-		v = float64(acd.getValue(roundingDecimal).Nanoseconds())
-	}
-	return
-}
-
-func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var dur time.Duration
-	var val interface{}
-	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage}); err != nil {
+func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage})
+	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.Usage)
 		}
-		return
-	} else if dur, err = utils.IfaceAsDuration(val); err != nil {
-		return
+		return err
 	}
-	acd.Sum += dur
-	if val, has := acd.Events[evID]; !has {
-		acd.Events[evID] = &DurationWithCompress{Duration: dur, CompressFactor: 1}
-	} else {
-		val.Duration = time.Duration((float64(val.Duration.Nanoseconds())*float64(val.CompressFactor) + float64(dur.Nanoseconds())) / float64(val.CompressFactor+1))
-		val.CompressFactor = val.CompressFactor + 1
-	}
-	acd.Count++
-	acd.val = nil
-	return
-}
-
-func (acd *StatACD) RemEvent(evID string) (err error) {
-	val, has := acd.Events[evID]
-	if !has {
-		return utils.ErrNotFound
-	}
-	if val.Duration != 0 {
-		acd.Sum -= val.Duration
-	}
-	acd.Count--
-	if val.CompressFactor <= 1 {
-		delete(acd.Events, evID)
-	} else {
-		val.CompressFactor = val.CompressFactor - 1
-	}
-	acd.val = nil
-	return
-}
-
-func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(acd)
-}
-func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, acd)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (acd *StatACD) GetFilterIDs() []string {
-	return acd.FilterIDs
-}
-
-// GetMinItems returns the minim items for the metric
-func (acd *StatACD) GetMinItems() (minIts int) { return acd.MinItems }
-
-// Compress is part of StatMetric interface
-func (acd *StatACD) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
-	if acd.Count < queueLen {
-		for id := range acd.Events {
-			eventIDs = append(eventIDs, id)
-		}
-		return
-	}
-	stat := &DurationWithCompress{
-		Duration: utils.RoundStatDuration(time.Duration(acd.Sum.Nanoseconds()/acd.Count),
-			roundingDecimal),
-		CompressFactor: int(acd.Count),
-	}
-	acd.Events = map[string]*DurationWithCompress{defaultID: stat}
-	return []string{defaultID}
-}
-
-// Compress is part of StatMetric interface
-func (acd *StatACD) GetCompressFactor(events map[string]int) map[string]int {
-	for id, val := range acd.Events {
-		if _, has := events[id]; !has {
-			events[id] = val.CompressFactor
-		}
-		if events[id] < val.CompressFactor {
-			events[id] = val.CompressFactor
-		}
-	}
-	return events
+	return acd.addEvent(evID, ival)
 }
 
 func (acd *StatACD) Clone() StatMetric {
-	cln := &StatACD{
-		FilterIDs: utils.CloneStringSlice(acd.FilterIDs),
-		Sum:       acd.Sum,
-		Count:     acd.Count,
-		Events:    make(map[string]*DurationWithCompress),
-		MinItems:  acd.MinItems,
+	return &StatAverage{
+		Metric: acd.Metric.Clone(),
 	}
-	for k, v := range acd.Events {
-		cln.Events[k] = &(*v)
-	}
-	return cln
 }
 
-func NewTCD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatTCD{Events: make(map[string]*DurationWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
+func NewTCD(minItems uint64, _ string) StatMetric {
+	return &StatTCD{Metric: NewMetric(minItems)}
 }
 
 // TCD implements TotalCallDuration metric
 type StatTCD struct {
-	FilterIDs []string
-	Sum       time.Duration
-	Count     int64
-	Events    map[string]*DurationWithCompress // map[EventTenantID]Duration
-	MinItems  int
-	val       *time.Duration // cached TCD value
+	*Metric
 }
 
-// getValue returns tcd.val
-func (tcd *StatTCD) getValue(roundingDecimal int) time.Duration {
-	if tcd.val == nil {
-		if (tcd.MinItems > 0 && tcd.Count < int64(tcd.MinItems)) || (tcd.Count == 0) {
-			tcd.val = utils.DurationPointer(-time.Nanosecond)
-		} else {
-			tcd.val = utils.DurationPointer(utils.RoundStatDuration(
-				time.Duration(tcd.Sum.Nanoseconds()),
-				roundingDecimal))
-
-		}
-	}
-	return *tcd.val
-}
-
-func (tcd *StatTCD) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := tcd.getValue(roundingDecimal); val == -time.Nanosecond {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = fmt.Sprintf("%+v", tcd.getValue(roundingDecimal))
+func (sum *StatTCD) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := sum.getTotalValue(); val != utils.DecimalNaN {
+		dur, _ := val.Duration()
+		valStr = dur.String()
 	}
 	return
 }
 
-func (tcd *StatTCD) GetValue(roundingDecimal int) (v interface{}) {
-	return tcd.getValue(roundingDecimal)
-}
-
-func (tcd *StatTCD) GetFloat64Value(roundingDecimal int) (v float64) {
-	if val := tcd.getValue(roundingDecimal); val == -time.Nanosecond {
-		v = utils.StatsNA
-	} else {
-		v = float64(tcd.getValue(roundingDecimal).Nanoseconds())
-	}
-	return
-}
-
-func (tcd *StatTCD) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var dur time.Duration
-	var val interface{}
-	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage}); err != nil {
+func (sum *StatTCD) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.Usage})
+	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.Usage)
 		}
-		return
-	} else if dur, err = utils.IfaceAsDuration(val); err != nil {
-		return
+		return err
 	}
-	tcd.Sum += dur
-	if val, has := tcd.Events[evID]; !has {
-		tcd.Events[evID] = &DurationWithCompress{Duration: dur, CompressFactor: 1}
-	} else {
-		val.Duration = time.Duration((float64(val.Duration.Nanoseconds())*float64(val.CompressFactor) + float64(dur.Nanoseconds())) / float64(val.CompressFactor+1))
-		val.CompressFactor = val.CompressFactor + 1
-	}
-	tcd.Count++
-	tcd.val = nil
-	return
+	return sum.addEvent(evID, ival)
 }
 
-func (tcd *StatTCD) RemEvent(evID string) (err error) {
-	val, has := tcd.Events[evID]
-	if !has {
-		return utils.ErrNotFound
+func (sum *StatTCD) Clone() StatMetric {
+	return &StatTCD{
+		Metric: sum.Metric.Clone(),
 	}
-	if val.Duration != 0 {
-		tcd.Sum -= val.Duration
-	}
-	tcd.Count--
-	if val.CompressFactor <= 1 {
-		delete(tcd.Events, evID)
-	} else {
-		val.CompressFactor = val.CompressFactor - 1
-	}
-	tcd.val = nil
-	return
 }
 
-func (tcd *StatTCD) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(tcd)
-}
-
-func (tcd *StatTCD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, tcd)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (tcd *StatTCD) GetFilterIDs() []string {
-	return tcd.FilterIDs
-}
-
-// GetMinItems returns the minim items for the metric
-func (tcd *StatTCD) GetMinItems() (minIts int) { return tcd.MinItems }
-
-// Compress is part of StatMetric interface
-func (tcd *StatTCD) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
-	if tcd.Count < queueLen {
-		for id := range tcd.Events {
-			eventIDs = append(eventIDs, id)
-		}
-		return
-	}
-	stat := &DurationWithCompress{
-		Duration: utils.RoundStatDuration(time.Duration(tcd.Sum.Nanoseconds()/tcd.Count),
-			roundingDecimal),
-		CompressFactor: int(tcd.Count),
-	}
-	tcd.Events = map[string]*DurationWithCompress{defaultID: stat}
-	return []string{defaultID}
-}
-
-// Compress is part of StatMetric interface
-func (tcd *StatTCD) GetCompressFactor(events map[string]int) map[string]int {
-	for id, val := range tcd.Events {
-		if _, has := events[id]; !has {
-			events[id] = val.CompressFactor
-		}
-		if events[id] < val.CompressFactor {
-			events[id] = val.CompressFactor
-		}
-	}
-	return events
-}
-
-func (tcd *StatTCD) Clone() StatMetric {
-	cln := &StatTCD{
-		FilterIDs: utils.CloneStringSlice(tcd.FilterIDs),
-		Sum:       tcd.Sum,
-		Count:     tcd.Count,
-		Events:    make(map[string]*DurationWithCompress),
-		MinItems:  tcd.MinItems,
-	}
-	for k, v := range tcd.Events {
-		cln.Events[k] = &(*v)
-	}
-	return cln
-}
-
-func NewACC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatACC{Events: make(map[string]*StatWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
+func NewACC(minItems uint64, _ string) StatMetric {
+	return &StatACC{Metric: NewMetric(minItems)}
 }
 
 // ACC implements AverageCallCost metric
 type StatACC struct {
-	FilterIDs []string
-	Sum       float64
-	Count     int64
-	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
-	MinItems  int
-	val       *float64 // cached ACC value
+	*Metric
 }
 
-// getValue returns tcd.val
-func (acc *StatACC) getValue(roundingDecimal int) float64 {
-	if acc.val == nil {
-		if (acc.MinItems > 0 && acc.Count < int64(acc.MinItems)) || (acc.Count == 0) {
-			acc.val = utils.Float64Pointer(utils.StatsNA)
-		} else {
-			acc.val = utils.Float64Pointer(utils.Round(acc.Sum/float64(acc.Count),
-				roundingDecimal, utils.MetaRoundingMiddle))
-		}
-	}
-	return *acc.val
-}
-
-func (acc *StatACC) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := acc.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = strconv.FormatFloat(acc.getValue(roundingDecimal), 'f', -1, 64)
+func (acc *StatACC) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := acc.getAvgValue(); val != utils.DecimalNaN {
+		valStr = val.String()
 	}
 	return
-
 }
 
-func (acc *StatACC) GetValue(roundingDecimal int) (v interface{}) {
-	return acc.getValue(roundingDecimal)
+func (acc *StatACC) GetValue() *utils.Decimal {
+	return acc.getAvgValue()
 }
 
-func (acc *StatACC) GetFloat64Value(roundingDecimal int) (v float64) {
-	return acc.getValue(roundingDecimal)
-}
-
-func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var cost float64
-	var val interface{}
-	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
+func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost})
+	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.Cost)
 		}
-		return
-	} else if cost, err = utils.IfaceAsFloat64(val); err != nil {
-		return
-	} else if cost < 0 {
-		return utils.ErrPrefix(utils.ErrNegative, utils.Cost)
+		return err
 	}
-	acc.Sum += cost
-	if val, has := acc.Events[evID]; !has {
-		acc.Events[evID] = &StatWithCompress{Stat: cost, CompressFactor: 1}
-	} else {
-		val.Stat = (val.Stat*float64(val.CompressFactor) + cost) / float64(val.CompressFactor+1)
-		val.CompressFactor = val.CompressFactor + 1
-	}
-	acc.Count++
-	acc.val = nil
-	return
-}
-
-func (acc *StatACC) RemEvent(evID string) (err error) {
-	cost, has := acc.Events[evID]
-	if !has {
-		return utils.ErrNotFound
-	}
-	acc.Sum -= cost.Stat
-	acc.Count--
-	if cost.CompressFactor <= 1 {
-		delete(acc.Events, evID)
-	} else {
-		cost.CompressFactor = cost.CompressFactor - 1
-	}
-	acc.val = nil
-	return
-}
-
-func (acc *StatACC) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(acc)
-}
-
-func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, acc)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (acc *StatACC) GetFilterIDs() []string {
-	return acc.FilterIDs
-}
-
-// GetMinItems returns the minim items for the metric
-func (acc *StatACC) GetMinItems() (minIts int) { return acc.MinItems }
-
-// Compress is part of StatMetric interface
-func (acc *StatACC) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
-	if acc.Count < queueLen {
-		for id := range acc.Events {
-			eventIDs = append(eventIDs, id)
-		}
-		return
-	}
-	stat := &StatWithCompress{
-		Stat: utils.Round(acc.Sum/float64(acc.Count),
-			roundingDecimal, utils.MetaRoundingMiddle),
-		CompressFactor: int(acc.Count),
-	}
-	acc.Events = map[string]*StatWithCompress{defaultID: stat}
-	return []string{defaultID}
-}
-
-// Compress is part of StatMetric interface
-func (acc *StatACC) GetCompressFactor(events map[string]int) map[string]int {
-	for id, val := range acc.Events {
-		if _, has := events[id]; !has {
-			events[id] = val.CompressFactor
-		}
-		if events[id] < val.CompressFactor {
-			events[id] = val.CompressFactor
-		}
-	}
-	return events
+	return acc.addEvent(evID, ival)
 }
 
 func (acc *StatACC) Clone() StatMetric {
-	cln := &StatACC{
-		FilterIDs: utils.CloneStringSlice(acc.FilterIDs),
-		Sum:       acc.Sum,
-		Count:     acc.Count,
-		Events:    make(map[string]*StatWithCompress),
-		MinItems:  acc.MinItems,
+	return &StatACC{
+		Metric: acc.Metric.Clone(),
 	}
-	for k, v := range acc.Events {
-		cln.Events[k] = &(*v)
-	}
-	return cln
 }
 
-func NewTCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatTCC{Events: make(map[string]*StatWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
+func NewTCC(minItems uint64, _ string) StatMetric {
+	return &StatTCC{Metric: NewMetric(minItems)}
 }
 
 // TCC implements TotalCallCost metric
 type StatTCC struct {
-	FilterIDs []string
-	Sum       float64
-	Count     int64
-	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
-	MinItems  int
-	val       *float64 // cached TCC value
+	*Metric
 }
 
-// getValue returns tcd.val
-func (tcc *StatTCC) getValue(roundingDecimal int) float64 {
-	if tcc.val == nil {
-		if (tcc.MinItems > 0 && tcc.Count < int64(tcc.MinItems)) || (tcc.Count == 0) {
-			tcc.val = utils.Float64Pointer(utils.StatsNA)
-		} else {
-			tcc.val = utils.Float64Pointer(utils.Round(tcc.Sum,
-				roundingDecimal,
-				utils.MetaRoundingMiddle))
-		}
-	}
-	return *tcc.val
-}
-
-func (tcc *StatTCC) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := tcc.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = strconv.FormatFloat(tcc.getValue(roundingDecimal), 'f', -1, 64)
+func (tcc *StatTCC) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := tcc.getTotalValue(); val != utils.DecimalNaN {
+		valStr = val.String()
 	}
 	return
 }
 
-func (tcc *StatTCC) GetValue(roundingDecimal int) (v interface{}) {
-	return tcc.getValue(roundingDecimal)
-}
-
-func (tcc *StatTCC) GetFloat64Value(roundingDecimal int) (v float64) {
-	return tcc.getValue(roundingDecimal)
-}
-
-func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var cost float64
-	var val interface{}
-	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost}); err != nil {
+func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.Cost})
+	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.Cost)
 		}
-		return
-	} else if cost, err = utils.IfaceAsFloat64(val); err != nil {
-		return
-	} else if cost < 0 {
-		return utils.ErrPrefix(utils.ErrNegative, utils.Cost)
+		return err
 	}
-	tcc.Sum += cost
-	if val, has := tcc.Events[evID]; !has {
-		tcc.Events[evID] = &StatWithCompress{Stat: cost, CompressFactor: 1}
-	} else {
-		val.Stat = (val.Stat*float64(val.CompressFactor) + cost) / float64(val.CompressFactor+1)
-		val.CompressFactor = val.CompressFactor + 1
-	}
-	tcc.Count++
-	tcc.val = nil
-	return
-}
-
-func (tcc *StatTCC) RemEvent(evID string) (err error) {
-	cost, has := tcc.Events[evID]
-	if !has {
-		return utils.ErrNotFound
-	}
-	if cost.Stat != 0 {
-		tcc.Sum -= cost.Stat
-	}
-	tcc.Count--
-	if cost.CompressFactor <= 1 {
-		delete(tcc.Events, evID)
-	} else {
-		cost.CompressFactor = cost.CompressFactor - 1
-	}
-	tcc.val = nil
-	return
-}
-
-func (tcc *StatTCC) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(tcc)
-}
-
-func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, tcc)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (tcc *StatTCC) GetFilterIDs() []string {
-	return tcc.FilterIDs
-}
-
-// GetMinItems returns the minim items for the metric
-func (tcc *StatTCC) GetMinItems() (minIts int) { return tcc.MinItems }
-
-// Compress is part of StatMetric interface
-func (tcc *StatTCC) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
-	if tcc.Count < queueLen {
-		for id := range tcc.Events {
-			eventIDs = append(eventIDs, id)
-		}
-		return
-	}
-	stat := &StatWithCompress{
-		Stat: utils.Round((tcc.Sum / float64(tcc.Count)),
-			roundingDecimal, utils.MetaRoundingMiddle),
-		CompressFactor: int(tcc.Count),
-	}
-	tcc.Events = map[string]*StatWithCompress{defaultID: stat}
-	return []string{defaultID}
-}
-
-// Compress is part of StatMetric interface
-func (tcc *StatTCC) GetCompressFactor(events map[string]int) map[string]int {
-	for id, val := range tcc.Events {
-		if _, has := events[id]; !has {
-			events[id] = val.CompressFactor
-		}
-		if events[id] < val.CompressFactor {
-			events[id] = val.CompressFactor
-		}
-	}
-	return events
+	return tcc.addEvent(evID, ival)
 }
 
 func (tcc *StatTCC) Clone() StatMetric {
-	cln := &StatTCC{
-		FilterIDs: utils.CloneStringSlice(tcc.FilterIDs),
-		Sum:       tcc.Sum,
-		Count:     tcc.Count,
-		Events:    make(map[string]*StatWithCompress),
-		MinItems:  tcc.MinItems,
+	return &StatTCC{
+		Metric: tcc.Metric.Clone(),
 	}
-	for k, v := range tcc.Events {
-		cln.Events[k] = &(*v)
-	}
-	return cln
 }
 
-func NewPDD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatPDD{Events: make(map[string]*DurationWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
+func NewPDD(minItems uint64, _ string) StatMetric {
+	return &StatPDD{Metric: NewMetric(minItems)}
 }
 
 // PDD implements Post Dial Delay (average) metric
 type StatPDD struct {
-	FilterIDs []string
-	Sum       time.Duration
-	Count     int64
-	Events    map[string]*DurationWithCompress // map[EventTenantID]Duration
-	MinItems  int
-	val       *time.Duration // cached PDD value
+	*Metric
 }
 
-// getValue returns pdd.val
-func (pdd *StatPDD) getValue(roundingDecimal int) time.Duration {
-	if pdd.val == nil {
-		if (pdd.MinItems > 0 && pdd.Count < int64(pdd.MinItems)) || (pdd.Count == 0) {
-			pdd.val = utils.DurationPointer(-time.Nanosecond)
-		} else {
-			pdd.val = utils.DurationPointer(utils.RoundStatDuration(
-				time.Duration(pdd.Sum.Nanoseconds()/pdd.Count),
-				roundingDecimal))
-		}
-	}
-	return *pdd.val
-}
-
-func (pdd *StatPDD) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := pdd.getValue(roundingDecimal); val == -time.Nanosecond {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = fmt.Sprintf("%+v", pdd.getValue(roundingDecimal))
+func (pdd *StatPDD) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := pdd.getAvgValue(); val != utils.DecimalNaN {
+		dur, _ := val.Duration()
+		valStr = dur.String()
 	}
 	return
 }
 
-func (pdd *StatPDD) GetValue(roundingDecimal int) (v interface{}) {
-	return pdd.getValue(roundingDecimal)
+func (pdd *StatPDD) GetValue() *utils.Decimal {
+	return pdd.getAvgValue()
 }
 
-func (pdd *StatPDD) GetFloat64Value(roundingDecimal int) (v float64) {
-	if val := pdd.getValue(roundingDecimal); val == -time.Nanosecond {
-		v = utils.StatsNA
-	} else {
-		v = float64(pdd.getValue(roundingDecimal).Nanoseconds())
-	}
-	return
-}
-
-func (pdd *StatPDD) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var dur time.Duration
-	var val interface{}
-	if val, err = ev.FieldAsInterface([]string{utils.MetaReq, utils.PDD}); err != nil {
+func (pdd *StatPDD) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.PDD})
+	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, utils.PDD)
 		}
-		return
-	} else if dur, err = utils.IfaceAsDuration(val); err != nil {
-		return
+		return err
 	}
-	pdd.Sum += dur
-	if val, has := pdd.Events[evID]; !has {
-		pdd.Events[evID] = &DurationWithCompress{Duration: dur, CompressFactor: 1}
-	} else {
-		val.Duration = time.Duration((float64(val.Duration.Nanoseconds())*float64(val.CompressFactor) + float64(dur.Nanoseconds())) / float64(val.CompressFactor+1))
-		val.CompressFactor = val.CompressFactor + 1
-	}
-	pdd.Count++
-	pdd.val = nil
-	return
-}
-
-func (pdd *StatPDD) RemEvent(evID string) (err error) {
-	val, has := pdd.Events[evID]
-	if !has {
-		return utils.ErrNotFound
-	}
-	if val.Duration != 0 {
-		pdd.Sum -= val.Duration
-	}
-	pdd.Count--
-	if val.CompressFactor <= 1 {
-		delete(pdd.Events, evID)
-	} else {
-		val.CompressFactor = val.CompressFactor - 1
-	}
-	pdd.val = nil
-	return
-}
-
-func (pdd *StatPDD) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(pdd)
-}
-func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, pdd)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (pdd *StatPDD) GetFilterIDs() []string {
-	return pdd.FilterIDs
-}
-
-// GetMinItems returns the minim items for the metric
-func (pdd *StatPDD) GetMinItems() (minIts int) { return pdd.MinItems }
-
-// Compress is part of StatMetric interface
-func (pdd *StatPDD) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
-	if pdd.Count < queueLen {
-		for id := range pdd.Events {
-			eventIDs = append(eventIDs, id)
-		}
-		return
-	}
-	stat := &DurationWithCompress{
-		Duration: utils.RoundStatDuration(time.Duration(pdd.Sum.Nanoseconds()/pdd.Count),
-			roundingDecimal),
-		CompressFactor: int(pdd.Count),
-	}
-	pdd.Events = map[string]*DurationWithCompress{defaultID: stat}
-	return []string{defaultID}
-}
-
-// Compress is part of StatMetric interface
-func (pdd *StatPDD) GetCompressFactor(events map[string]int) map[string]int {
-	for id, val := range pdd.Events {
-		if _, has := events[id]; !has {
-			events[id] = val.CompressFactor
-		}
-		if events[id] < val.CompressFactor {
-			events[id] = val.CompressFactor
-		}
-	}
-	return events
+	return pdd.addEvent(evID, ival)
 }
 
 func (pdd *StatPDD) Clone() StatMetric {
-	cln := &StatPDD{
-		FilterIDs: utils.CloneStringSlice(pdd.FilterIDs),
-		Sum:       pdd.Sum,
-		Count:     pdd.Count,
-		Events:    make(map[string]*DurationWithCompress),
-		MinItems:  pdd.MinItems,
+	return &StatPDD{
+		Metric: pdd.Metric.Clone(),
 	}
-	for k, v := range pdd.Events {
-		cln.Events[k] = &(*v)
-	}
-	return cln
 }
 
-func NewDDC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatDDC{Events: make(map[string]map[string]int64), FieldValues: make(map[string]utils.StringSet),
-		MinItems: minItems, FilterIDs: filterIDs}, nil
+func NewDDC(minItems uint64, _ string) StatMetric {
+	return &StatDDC{
+		Events:      make(map[string]map[string]uint64),
+		FieldValues: make(map[string]utils.StringSet),
+		MinItems:    minItems,
+	}
 }
 
 type StatDDC struct {
-	FilterIDs   []string
-	FieldValues map[string]utils.StringSet  // map[fieldValue]map[eventID]
-	Events      map[string]map[string]int64 // map[EventTenantID]map[fieldValue]compressfactor
-	MinItems    int
-	Count       int64
+	FieldValues map[string]utils.StringSet   // map[fieldValue]map[eventID]
+	Events      map[string]map[string]uint64 // map[EventTenantID]map[fieldValue]compressfactor
+	MinItems    uint64
+	Count       uint64
 }
 
 // getValue returns tcd.val
 func (ddc *StatDDC) getValue(roundingDecimal int) float64 {
-	if ddc.Count == 0 || ddc.Count < int64(ddc.MinItems) {
+	if ddc.Count == 0 || ddc.Count < ddc.MinItems {
 		return utils.StatsNA
 	}
 	return float64(len(ddc.FieldValues))
 }
 
-func (ddc *StatDDC) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := ddc.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = strconv.FormatFloat(ddc.getValue(roundingDecimal), 'f', -1, 64)
+func (ddc *StatDDC) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := ddc.GetValue(); val != utils.DecimalNaN {
+		valStr = val.String()
 	}
 	return
 }
 
-func (ddc *StatDDC) GetValue(roundingDecimal int) (v interface{}) {
-	return ddc.getValue(roundingDecimal)
-}
-
-func (ddc *StatDDC) GetFloat64Value(roundingDecimal int) (v float64) {
-	return ddc.getValue(roundingDecimal)
+func (ddc *StatDDC) GetValue() *utils.Decimal {
+	if ddc.Count == 0 || ddc.Count < ddc.MinItems {
+		return utils.DecimalNaN
+	}
+	return utils.NewDecimal(int64(len(ddc.FieldValues)), 0)
 }
 
 func (ddc *StatDDC) AddEvent(evID string, ev utils.DataProvider) (err error) {
@@ -1043,7 +350,7 @@ func (ddc *StatDDC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 
 	// add to events
 	if _, has := ddc.Events[evID]; !has {
-		ddc.Events[evID] = make(map[string]int64)
+		ddc.Events[evID] = make(map[string]uint64)
 	}
 	ddc.Count++
 	if _, has := ddc.Events[evID][fieldValue]; !has {
@@ -1088,23 +395,11 @@ func (ddc *StatDDC) RemEvent(evID string) (err error) {
 	return
 }
 
-func (ddc *StatDDC) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(ddc)
-}
-
-func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, ddc)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (ddc *StatDDC) GetFilterIDs() []string {
-	return ddc.FilterIDs
-}
-
 // GetMinItems returns the minim items for the metric
-func (ddc *StatDDC) GetMinItems() (minIts int) { return ddc.MinItems }
+func (ddc *StatDDC) GetMinItems() (minIts uint64) { return ddc.MinItems }
 
-func (ddc *StatDDC) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
+func (ddc *StatDDC) Compress(queueLen uint64, defaultID string) (eventIDs []string) {
+	eventIDs = make([]string, 0, len(ddc.Events))
 	for id := range ddc.Events {
 		eventIDs = append(eventIDs, id)
 	}
@@ -1112,11 +407,11 @@ func (ddc *StatDDC) Compress(queueLen int64, defaultID string, roundingDecimal i
 }
 
 // Compress is part of StatMetric interface
-func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
+func (ddc *StatDDC) GetCompressFactor(events map[string]uint64) map[string]uint64 {
 	for id, ev := range ddc.Events {
-		compressFactor := 0
+		var compressFactor uint64
 		for _, fields := range ev {
-			compressFactor += int(fields)
+			compressFactor += fields
 		}
 		if _, has := events[id]; !has {
 			events[id] = compressFactor
@@ -1130,14 +425,13 @@ func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
 
 func (ddc *StatDDC) Clone() StatMetric {
 	cln := &StatDDC{
-		FilterIDs:   utils.CloneStringSlice(ddc.FilterIDs),
 		FieldValues: make(map[string]utils.StringSet),
 		Count:       ddc.Count,
-		Events:      make(map[string]map[string]int64),
+		Events:      make(map[string]map[string]uint64),
 		MinItems:    ddc.MinItems,
 	}
 	for k, v := range ddc.Events {
-		cln.Events[k] = make(map[string]int64)
+		cln.Events[k] = make(map[string]uint64)
 		for d, n := range v {
 			cln.Events[k][d] = n
 		}
@@ -1148,82 +442,84 @@ func (ddc *StatDDC) Clone() StatMetric {
 	return cln
 }
 
-func NewStatSum(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatSum{Events: make(map[string]*StatWithCompress),
-		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
-}
-
-type StatSum struct {
+////////////////////////////////////
+type StatMetricWithFilters struct {
+	StatMetric
 	FilterIDs []string
-	Sum       float64
-	Count     int64
-	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
-	MinItems  int
-	FieldName string
-	val       *float64 // cached sum value
 }
 
-// getValue returns tcd.val
-func (sum *StatSum) getValue(roundingDecimal int) float64 {
-	if sum.val == nil {
-		if len(sum.Events) == 0 || sum.Count < int64(sum.MinItems) {
-			sum.val = utils.Float64Pointer(utils.StatsNA)
-		} else {
-			sum.val = utils.Float64Pointer(utils.Round(sum.Sum,
-				roundingDecimal,
-				utils.MetaRoundingMiddle))
-		}
+func (sm *StatMetricWithFilters) Clone() *StatMetricWithFilters {
+	return &StatMetricWithFilters{
+		StatMetric: sm.StatMetric.Clone(),
+		FilterIDs:  utils.CloneStringSlice(sm.FilterIDs),
 	}
-	return *sum.val
 }
 
-func (sum *StatSum) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := sum.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = strconv.FormatFloat(sum.getValue(roundingDecimal), 'f', -1, 64)
+// ACDHelper structure
+type DecimalWithCompress struct {
+	Stat           *utils.Decimal
+	CompressFactor uint64
+}
+
+func NewMetric(minItems uint64) *Metric {
+	return &Metric{
+		Value:    utils.NewDecimal(0, 0),
+		Events:   make(map[string]*DecimalWithCompress),
+		MinItems: minItems,
 	}
-	return
 }
 
-func (sum *StatSum) GetValue(roundingDecimal int) (v interface{}) {
-	return sum.getValue(roundingDecimal)
+type Metric struct {
+	Value    *utils.Decimal
+	Count    uint64
+	Events   map[string]*DecimalWithCompress // map[EventTenantID]Cost
+	MinItems uint64
 }
 
-func (sum *StatSum) GetFloat64Value(roundingDecimal int) (v float64) {
-	return sum.getValue(roundingDecimal)
+func (sum *Metric) getTotalValue() *utils.Decimal {
+	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+		return utils.DecimalNaN
+	}
+	return sum.Value
 }
 
-func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var val float64
-	var ival interface{}
-	if ival, err = utils.DPDynamicInterface(sum.FieldName, ev); err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, sum.FieldName)
-		}
+func (sum *Metric) getAvgValue() *utils.Decimal {
+	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+		return utils.DecimalNaN
+	}
+	return utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0))
+}
+
+func (sum *Metric) GetValue() (v *utils.Decimal) {
+	return sum.getTotalValue()
+}
+
+func (sum *Metric) addEvent(evID string, ival interface{}) (err error) {
+	var val *decimal.Big
+	if val, err = utils.IfaceAsBig(ival); err != nil {
 		return
-	} else if val, err = utils.IfaceAsFloat64(ival); err != nil {
-		return
 	}
-	sum.Sum += val
+	dVal := &utils.Decimal{val}
+	sum.Value = utils.SumDecimal(sum.Value, dVal)
 	if v, has := sum.Events[evID]; !has {
-		sum.Events[evID] = &StatWithCompress{Stat: val, CompressFactor: 1}
+		sum.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}
 	} else {
-		v.Stat = (v.Stat*float64(v.CompressFactor) + val) / float64(v.CompressFactor+1)
+		v.Stat = utils.DivideDecimal(
+			utils.MultiplyDecimal(v.Stat, utils.NewDecimal(int64(v.CompressFactor), 0)),
+			utils.NewDecimal(int64(v.CompressFactor)+1, 0))
 		v.CompressFactor = v.CompressFactor + 1
 	}
 	sum.Count++
-	sum.val = nil
 	return
 }
 
-func (sum *StatSum) RemEvent(evID string) (err error) {
+func (sum *Metric) RemEvent(evID string) (err error) {
 	val, has := sum.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	if val.Stat != 0 {
-		sum.Sum -= val.Stat
+	if val.Stat.Compare(utils.NewDecimal(0, 0)) != 0 {
+		sum.Value = utils.SubstractDecimal(sum.Value, val.Stat)
 	}
 	sum.Count--
 	if val.CompressFactor <= 1 {
@@ -1231,45 +527,30 @@ func (sum *StatSum) RemEvent(evID string) (err error) {
 	} else {
 		val.CompressFactor = val.CompressFactor - 1
 	}
-	sum.val = nil
 	return
 }
 
-func (sum *StatSum) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(sum)
-}
-
-func (sum *StatSum) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, sum)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (sum *StatSum) GetFilterIDs() []string {
-	return sum.FilterIDs
-}
-
 // GetMinItems returns the minim items for the metric
-func (sum *StatSum) GetMinItems() (minIts int) { return sum.MinItems }
+func (sum *Metric) GetMinItems() uint64 { return sum.MinItems }
 
 // Compress is part of StatMetric interface
-func (sum *StatSum) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
+func (sum *Metric) Compress(queueLen uint64, defaultID string) (eventIDs []string) {
 	if sum.Count < queueLen {
+		eventIDs = make([]string, 0, len(sum.Events))
 		for id := range sum.Events {
 			eventIDs = append(eventIDs, id)
 		}
 		return
 	}
-	stat := &StatWithCompress{
-		Stat: utils.Round((sum.Sum / float64(sum.Count)),
-			roundingDecimal, utils.MetaRoundingMiddle),
-		CompressFactor: int(sum.Count),
-	}
-	sum.Events = map[string]*StatWithCompress{defaultID: stat}
+	sum.Events = map[string]*DecimalWithCompress{defaultID: {
+		Stat:           utils.DivideDecimal(sum.Value, utils.NewDecimalFromFloat64(float64(sum.Count))),
+		CompressFactor: sum.Count,
+	}}
 	return []string{defaultID}
 }
 
 // Compress is part of StatMetric interface
-func (sum *StatSum) GetCompressFactor(events map[string]int) map[string]int {
+func (sum *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64 {
 	for id, val := range sum.Events {
 		if _, has := events[id]; !has {
 			events[id] = val.CompressFactor
@@ -1281,207 +562,134 @@ func (sum *StatSum) GetCompressFactor(events map[string]int) map[string]int {
 	return events
 }
 
-func (sum *StatSum) Clone() StatMetric {
-	cln := &StatSum{
-		FilterIDs: utils.CloneStringSlice(sum.FilterIDs),
-		Sum:       sum.Sum,
-		Count:     sum.Count,
-		Events:    make(map[string]*StatWithCompress),
-		MinItems:  sum.MinItems,
-		FieldName: sum.FieldName,
+func (sum *Metric) Clone() (cln *Metric) {
+	cln = &Metric{
+		Value:    sum.Value.Clone(),
+		Count:    sum.Count,
+		Events:   make(map[string]*DecimalWithCompress),
+		MinItems: sum.MinItems,
 	}
 	for k, v := range sum.Events {
 		cln.Events[k] = &(*v)
 	}
-	return cln
+	return
 }
 
-func NewStatAverage(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatAverage{Events: make(map[string]*StatWithCompress),
-		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
+func NewStatSum(minItems uint64, fieldName string) StatMetric {
+	return &StatSum{Metric: NewMetric(minItems),
+		FieldName: fieldName}
+}
+
+type StatSum struct {
+	*Metric
+	FieldName string
+}
+
+func (sum *StatSum) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := sum.getTotalValue(); val != utils.DecimalNaN {
+		valStr = val.String()
+	}
+	return
+}
+
+func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := utils.DPDynamicInterface(sum.FieldName, ev)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, sum.FieldName)
+		}
+		return err
+	}
+	return sum.addEvent(evID, ival)
+}
+
+func (sum *StatSum) Clone() StatMetric {
+	return &StatSum{
+		Metric:    sum.Metric.Clone(),
+		FieldName: sum.FieldName,
+	}
+}
+
+func NewStatAverage(minItems uint64, fieldName string) StatMetric {
+	return &StatAverage{Metric: NewMetric(minItems),
+		FieldName: fieldName}
 }
 
 // StatAverage implements TotalCallCost metric
 type StatAverage struct {
-	FilterIDs []string
-	Sum       float64
-	Count     int64
-	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
-	MinItems  int
+	*Metric
 	FieldName string
-	val       *float64 // cached avg value
 }
 
-// getValue returns tcd.val
-func (avg *StatAverage) getValue(roundingDecimal int) float64 {
-	if avg.val == nil {
-		if (avg.MinItems > 0 && avg.Count < int64(avg.MinItems)) || (avg.Count == 0) {
-			avg.val = utils.Float64Pointer(utils.StatsNA)
-		} else {
-			avg.val = utils.Float64Pointer(utils.Round((avg.Sum / float64(avg.Count)),
-				roundingDecimal, utils.MetaRoundingMiddle))
-		}
-	}
-	return *avg.val
-}
-
-func (avg *StatAverage) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := avg.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = strconv.FormatFloat(avg.getValue(roundingDecimal), 'f', -1, 64)
+func (avg *StatAverage) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := avg.getAvgValue(); val != utils.DecimalNaN {
+		valStr = val.String()
 	}
 	return
-
 }
 
-func (avg *StatAverage) GetValue(roundingDecimal int) (v interface{}) {
-	return avg.getValue(roundingDecimal)
+func (avg *StatAverage) GetValue() *utils.Decimal {
+	return avg.getAvgValue()
 }
 
-func (avg *StatAverage) GetFloat64Value(roundingDecimal int) (v float64) {
-	return avg.getValue(roundingDecimal)
-}
-
-func (avg *StatAverage) AddEvent(evID string, ev utils.DataProvider) (err error) {
-	var val float64
-	var ival interface{}
-	if ival, err = utils.DPDynamicInterface(avg.FieldName, ev); err != nil {
+func (avg *StatAverage) AddEvent(evID string, ev utils.DataProvider) error {
+	ival, err := utils.DPDynamicInterface(avg.FieldName, ev)
+	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, avg.FieldName)
 		}
-		return
-	} else if val, err = utils.IfaceAsFloat64(ival); err != nil {
-		return
+		return err
 	}
-	avg.Sum += val
-	if v, has := avg.Events[evID]; !has {
-		avg.Events[evID] = &StatWithCompress{Stat: val, CompressFactor: 1}
-	} else {
-		v.Stat = (v.Stat*float64(v.CompressFactor) + val) / float64(v.CompressFactor+1)
-		v.CompressFactor = v.CompressFactor + 1
-	}
-	avg.Count++
-	avg.val = nil
-	return
-}
-
-func (avg *StatAverage) RemEvent(evID string) (err error) {
-	val, has := avg.Events[evID]
-	if !has {
-		return utils.ErrNotFound
-	}
-	if val.Stat >= 0 {
-		avg.Sum -= val.Stat
-	}
-	avg.Count--
-	if val.CompressFactor <= 1 {
-		delete(avg.Events, evID)
-	} else {
-		val.CompressFactor = val.CompressFactor - 1
-	}
-	avg.val = nil
-	return
-}
-
-func (avg *StatAverage) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(avg)
-}
-
-func (avg *StatAverage) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, avg)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (avg *StatAverage) GetFilterIDs() []string {
-	return avg.FilterIDs
-}
-
-// GetMinItems returns the minim items for the metric
-func (avg *StatAverage) GetMinItems() (minIts int) { return avg.MinItems }
-
-// Compress is part of StatMetric interface
-func (avg *StatAverage) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
-	if avg.Count < queueLen {
-		for id := range avg.Events {
-			eventIDs = append(eventIDs, id)
-		}
-		return
-	}
-	stat := &StatWithCompress{
-		Stat: utils.Round((avg.Sum / float64(avg.Count)),
-			roundingDecimal, utils.MetaRoundingMiddle),
-		CompressFactor: int(avg.Count),
-	}
-	avg.Events = map[string]*StatWithCompress{defaultID: stat}
-	return []string{defaultID}
-}
-
-// Compress is part of StatMetric interface
-func (avg *StatAverage) GetCompressFactor(events map[string]int) map[string]int {
-	for id, val := range avg.Events {
-		if _, has := events[id]; !has {
-			events[id] = val.CompressFactor
-		}
-		if events[id] < val.CompressFactor {
-			events[id] = val.CompressFactor
-		}
-	}
-	return events
+	return avg.addEvent(evID, ival)
 }
 
 func (avg *StatAverage) Clone() StatMetric {
-	cln := &StatAverage{
-		FilterIDs: utils.CloneStringSlice(avg.FilterIDs),
-		Sum:       avg.Sum,
-		Count:     avg.Count,
-		Events:    make(map[string]*StatWithCompress),
-		MinItems:  avg.MinItems,
+	return &StatAverage{
+		Metric:    avg.Metric.Clone(),
 		FieldName: avg.FieldName,
 	}
-	for k, v := range avg.Events {
-		cln.Events[k] = &(*v)
-	}
-	return cln
 }
 
-func NewStatDistinct(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatDistinct{Events: make(map[string]map[string]int64), FieldValues: make(map[string]utils.StringSet),
-		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
+func NewStatDistinct(minItems uint64, fieldName string) StatMetric {
+	return &StatDistinct{
+		Events:      make(map[string]map[string]uint64),
+		FieldValues: make(map[string]utils.StringSet),
+		MinItems:    minItems,
+		FieldName:   fieldName,
+	}
 }
 
 type StatDistinct struct {
-	FilterIDs   []string
-	FieldValues map[string]utils.StringSet  // map[fieldValue]map[eventID]
-	Events      map[string]map[string]int64 // map[EventTenantID]map[fieldValue]compressfactor
-	MinItems    int
+	FieldValues map[string]utils.StringSet   // map[fieldValue]map[eventID]
+	Events      map[string]map[string]uint64 // map[EventTenantID]map[fieldValue]compressfactor
+	MinItems    uint64
 	FieldName   string
-	Count       int64
+	Count       uint64
 }
 
 // getValue returns tcd.val
 func (dst *StatDistinct) getValue(roundingDecimal int) float64 {
-	if dst.Count == 0 || dst.Count < int64(dst.MinItems) {
+	if dst.Count == 0 || dst.Count < dst.MinItems {
 		return utils.StatsNA
 	}
 	return float64(len(dst.FieldValues))
 }
 
-func (dst *StatDistinct) GetStringValue(roundingDecimal int) (valStr string) {
-	if val := dst.getValue(roundingDecimal); val == utils.StatsNA {
-		valStr = utils.NotAvailable
-	} else {
-		valStr = strconv.FormatFloat(dst.getValue(roundingDecimal), 'f', -1, 64)
+func (dst *StatDistinct) GetStringValue() (valStr string) {
+	valStr = utils.NotAvailable
+	if val := dst.GetValue(); val != utils.DecimalNaN {
+		valStr = val.String()
 	}
 	return
 }
 
-func (dst *StatDistinct) GetValue(roundingDecimal int) (v interface{}) {
-	return dst.getValue(roundingDecimal)
-}
-
-func (dst *StatDistinct) GetFloat64Value(roundingDecimal int) (v float64) {
-	return dst.getValue(roundingDecimal)
+func (dst *StatDistinct) GetValue() *utils.Decimal {
+	if dst.Count == 0 || dst.Count < dst.MinItems {
+		return utils.DecimalNaN
+	}
+	return utils.NewDecimal(int64(len(dst.FieldValues)), 0)
 }
 
 func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error) {
@@ -1506,7 +714,7 @@ func (dst *StatDistinct) AddEvent(evID string, ev utils.DataProvider) (err error
 
 	// add to events
 	if _, has := dst.Events[evID]; !has {
-		dst.Events[evID] = make(map[string]int64)
+		dst.Events[evID] = make(map[string]uint64)
 	}
 	dst.Count++
 	if _, has := dst.Events[evID][fieldValue]; !has {
@@ -1551,23 +759,11 @@ func (dst *StatDistinct) RemEvent(evID string) (err error) {
 	return
 }
 
-func (dst *StatDistinct) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(dst)
-}
-
-func (dst *StatDistinct) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, dst)
-}
-
-// GetFilterIDs is part of StatMetric interface
-func (dst *StatDistinct) GetFilterIDs() []string {
-	return dst.FilterIDs
-}
-
 // GetMinItems returns the minim items for the metric
-func (dst *StatDistinct) GetMinItems() (minIts int) { return dst.MinItems }
+func (dst *StatDistinct) GetMinItems() uint64 { return dst.MinItems }
 
-func (dst *StatDistinct) Compress(queueLen int64, defaultID string, roundingDecimal int) (eventIDs []string) {
+func (dst *StatDistinct) Compress(uint64, string) (eventIDs []string) {
+	eventIDs = make([]string, 0, len(dst.Events))
 	for id := range dst.Events {
 		eventIDs = append(eventIDs, id)
 	}
@@ -1575,11 +771,11 @@ func (dst *StatDistinct) Compress(queueLen int64, defaultID string, roundingDeci
 }
 
 // Compress is part of StatMetric interface
-func (dst *StatDistinct) GetCompressFactor(events map[string]int) map[string]int {
+func (dst *StatDistinct) GetCompressFactor(events map[string]uint64) map[string]uint64 {
 	for id, ev := range dst.Events {
-		compressFactor := 0
+		var compressFactor uint64
 		for _, fields := range ev {
-			compressFactor += int(fields)
+			compressFactor += fields
 		}
 		if _, has := events[id]; !has {
 			events[id] = compressFactor
@@ -1593,15 +789,14 @@ func (dst *StatDistinct) GetCompressFactor(events map[string]int) map[string]int
 
 func (dst *StatDistinct) Clone() StatMetric {
 	cln := &StatDistinct{
-		FilterIDs:   utils.CloneStringSlice(dst.FilterIDs),
 		Count:       dst.Count,
-		Events:      make(map[string]map[string]int64),
+		Events:      make(map[string]map[string]uint64),
 		MinItems:    dst.MinItems,
 		FieldName:   dst.FieldName,
 		FieldValues: make(map[string]utils.StringSet),
 	}
 	for k, v := range dst.Events {
-		cln.Events[k] = make(map[string]int64)
+		cln.Events[k] = make(map[string]uint64)
 		for d, n := range v {
 			cln.Events[k][d] = n
 		}

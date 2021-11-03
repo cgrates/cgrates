@@ -63,12 +63,12 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 			SortingData: map[string]interface{}{
 				utils.Weight: route.Weight,
 			},
-			sortingDataF64: map[string]float64{
-				utils.Weight: route.Weight,
+			sortingDataDecimal: map[string]*utils.Decimal{
+				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
 			},
 			RouteParameters: route.RouteParameters,
 		}
-		var metricSum float64
+		var metricSum *utils.Decimal
 		if metricSum, err = populateStatsForLoadRoute(ctx, ws.cfg, ws.connMgr, route.StatIDs, ev.Tenant); err != nil { //create metric map for route
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
@@ -80,7 +80,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 			return
 		}
 		srtRoute.SortingData[utils.Load] = metricSum
-		srtRoute.sortingDataF64[utils.Load] = metricSum
+		srtRoute.sortingDataDecimal[utils.Load] = metricSum
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			ws.cfg.FilterSCfg().ResourceSConns,
@@ -89,14 +89,14 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 			return
 		} else if pass {
 			// Add the ratio in SortingData so we can used it later in SortLoadDistribution
-			floatRatio, err := utils.IfaceAsFloat64(route.cacheRoute[utils.MetaRatio])
+			floatRatio, err := utils.IfaceAsBig(route.cacheRoute[utils.MetaRatio])
 			if err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> cannot convert ratio <%+v> to float64 supplier: <%s>",
 						utils.RouteS, route.cacheRoute[utils.MetaRatio], route.ID))
 			}
 			srtRoute.SortingData[utils.Ratio] = floatRatio
-			srtRoute.sortingDataF64[utils.Ratio] = floatRatio
+			srtRoute.sortingDataDecimal[utils.Ratio] = &utils.Decimal{floatRatio}
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)
 		}
 	}
@@ -107,11 +107,12 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 // populateStatsForLoadRoute will query a list of statIDs and return the sum of metrics
 // first metric found is always returned
 func populateStatsForLoadRoute(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *ConnManager, statIDs []string, tenant string) (result float64, err error) {
+	connMgr *ConnManager, statIDs []string, tenant string) (result *utils.Decimal, err error) {
+	result = utils.NewDecimalFromFloat64(0)
 	for _, statID := range statIDs {
 		// check if we get an ID in the following form (StatID:MetricID)
 		statWithMetric := strings.Split(statID, utils.InInFieldSep)
-		var metrics map[string]float64
+		var metrics map[string]*utils.Decimal
 		if err = connMgr.Call(ctx,
 			cfg.RouteSCfg().StatSConns,
 			utils.StatSv1GetQueueFloatMetrics,
@@ -129,14 +130,14 @@ func populateStatsForLoadRoute(ctx *context.Context, cfg *config.CGRConfig,
 			// check if statQueue have metric defined
 			metricVal, has := metrics[statWithMetric[1]]
 			if !has {
-				return 0, fmt.Errorf("<%s> error: %s metric %s for statID: %s",
+				return nil, fmt.Errorf("<%s> error: %s metric %s for statID: %s",
 					utils.RouteS, utils.ErrNotFound, statWithMetric[1], statWithMetric[0])
 			}
-			result += metricVal
+			result = utils.SumDecimal(result, metricVal)
 		} else { // otherwise we consider all metrics
 			for _, val := range metrics {
 				//add value of metric in a slice in case that we get the same metric from different stat
-				result += val
+				result = utils.SumDecimal(result, val)
 			}
 		}
 	}

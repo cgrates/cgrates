@@ -487,9 +487,9 @@ func TestStatsAPIs(t *testing.T) {
 	expThEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.MetaACD:   time.Duration(0),
-			utils.MetaASR:   float64(0),
-			utils.MetaTCD:   time.Duration(0),
+			utils.MetaACD:   utils.NewDecimal(3000, 0),
+			utils.MetaASR:   utils.NewDecimal(0, 0),
+			utils.MetaTCD:   utils.NewDecimal(3000, 0),
 			utils.EventType: utils.StatUpdate,
 			utils.StatID:    "sq2",
 		},
@@ -504,6 +504,8 @@ func TestStatsAPIs(t *testing.T) {
 			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
 				expThEv.ID = args.(*utils.CGREvent).ID
 				if !reflect.DeepEqual(args.(*utils.CGREvent), expThEv) {
+					t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+						utils.ToJSON(expThEv), utils.ToJSON(args))
 					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>",
 						utils.ToJSON(expThEv), utils.ToJSON(args))
 				}
@@ -661,13 +663,9 @@ func TestStatsAPIs(t *testing.T) {
 	expStatQueue := &engine.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "sq1",
-		SQMetrics: map[string]engine.StatMetric{
-			utils.MetaACD: &engine.StatACD{
-				Events: make(map[string]*engine.DurationWithCompress),
-			},
-			utils.MetaTCD: &engine.StatTCD{
-				Events: make(map[string]*engine.DurationWithCompress),
-			},
+		SQMetrics: map[string]*engine.StatMetricWithFilters{
+			utils.MetaACD: {StatMetric: engine.NewACD(0, "")},
+			utils.MetaTCD: {StatMetric: engine.NewTCD(0, "")},
 		},
 	}
 
@@ -688,9 +686,9 @@ func TestStatsAPIs(t *testing.T) {
 	}
 
 	expStrMetrics := map[string]string{
-		utils.MetaACD: "0s",
+		utils.MetaACD: "3µs",
 		utils.MetaASR: "0%",
-		utils.MetaTCD: "0s",
+		utils.MetaTCD: "3µs",
 	}
 	rplyStrMetrics := make(map[string]string)
 	if err := stV1.GetQueueStringMetrics(context.Background(), &utils.TenantIDWithAPIOpts{
@@ -706,9 +704,9 @@ func TestStatsAPIs(t *testing.T) {
 	}
 
 	expFloatMetrics := map[string]float64{
-		utils.MetaACD: 0,
+		utils.MetaACD: 3000,
 		utils.MetaASR: 0,
-		utils.MetaTCD: 0,
+		utils.MetaTCD: 3000,
 	}
 	rplyFloatMetrics := make(map[string]float64)
 	if err := stV1.GetQueueFloatMetrics(context.Background(), &utils.TenantIDWithAPIOpts{
