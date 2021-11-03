@@ -147,7 +147,9 @@ func TestDispatcherauthorizeEvent(t *testing.T) {
 	fltr := &engine.FilterS{}
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
-	ev := &utils.CGREvent{}
+	ev := &utils.CGREvent{
+		APIOpts: make(map[string]interface{}),
+	}
 	reply := &engine.AttrSProcessEventReply{}
 	err := dsp.authorizeEvent(ev, reply)
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
@@ -162,7 +164,9 @@ func TestDispatcherAuthorizeEventErr(t *testing.T) {
 	fltr := &engine.FilterS{}
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
-	ev := &utils.CGREvent{}
+	ev := &utils.CGREvent{
+		APIOpts: make(map[string]interface{}),
+	}
 	reply := &engine.AttrSProcessEventReply{}
 	err := dsp.authorizeEvent(ev, reply)
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
@@ -267,7 +271,9 @@ func TestDispatcherServiceAuthorizeEvenError1(t *testing.T) {
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
-	ev := &utils.CGREvent{}
+	ev := &utils.CGREvent{
+		APIOpts: make(map[string]interface{}),
+	}
 	reply := &engine.AttrSProcessEventReply{}
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
 		nil, nil, true, utils.NonTransactional)
@@ -289,7 +295,9 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 	connMgr := &engine.ConnManager{}
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
-	ev := &utils.CGREvent{}
+	ev := &utils.CGREvent{
+		APIOpts: make(map[string]interface{}),
+	}
 	reply := &engine.AttrSProcessEventReply{}
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
@@ -334,7 +342,7 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 		ID:      "testID",
 		Time:    nil,
 		Event:   map[string]interface{}{},
-		APIOpts: nil,
+		APIOpts: make(map[string]interface{}),
 	}
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",

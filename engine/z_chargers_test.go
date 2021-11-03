@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-
 package engine
 
 import (
@@ -374,7 +373,8 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 					"RunID":            utils.MetaDefault,
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys: utils.MetaChargers,
+					utils.Subsys:                   utils.MetaChargers,
+					utils.OptsAttributesProfileIDs: []string(nil),
 				},
 			},
 		},

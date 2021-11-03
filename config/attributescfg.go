@@ -138,9 +138,9 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	opts := map[string]interface{}{
 		utils.MetaProfileIDs:              alS.Opts.ProfileIDs,
-		utils.MetaProfileRunsCfg:          alS.Opts.ProfileRuns,
+		utils.MetaProfileRuns:             alS.Opts.ProfileRuns,
 		utils.MetaProfileIgnoreFiltersCfg: alS.Opts.ProfileIgnoreFilters,
-		utils.MetaProcessRunsCfg:          alS.Opts.ProcessRuns,
+		utils.MetaProcessRuns:             alS.Opts.ProcessRuns,
 	}
 	if alS.Opts.Context != nil {
 		opts[utils.OptsContext] = *alS.Opts.Context
@@ -207,14 +207,17 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
-func (attrOpts AttributesOpts) Clone() *AttributesOpts {
-	return &AttributesOpts{
+func (attrOpts *AttributesOpts) Clone() *AttributesOpts {
+	cln := &AttributesOpts{
 		ProfileIDs:           utils.CloneStringSlice(attrOpts.ProfileIDs),
 		ProfileRuns:          attrOpts.ProfileRuns,
 		ProfileIgnoreFilters: attrOpts.ProfileIgnoreFilters,
 		ProcessRuns:          attrOpts.ProcessRuns,
-		Context:              utils.StringPointer(*attrOpts.Context),
 	}
+	if attrOpts.Context != nil {
+		cln.Context = utils.StringPointer(*attrOpts.Context)
+	}
+	return cln
 }
 
 // Clone returns a deep copy of AttributeSCfg

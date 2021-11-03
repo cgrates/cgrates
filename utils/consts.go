@@ -2173,8 +2173,8 @@ const (
 	// AttributeSCfg
 	IndexedSelectsCfg           = "indexed_selects"
 	MetaProfileIDs              = "*profileIDs"
-	MetaProcessRunsCfg          = "*processRuns"
-	MetaProfileRunsCfg          = "*profileRuns"
+	MetaProcessRuns             = "*processRuns"
+	MetaProfileRuns             = "*profileRuns"
 	MetaProfileIgnoreFiltersCfg = "*profileIgnoreFilters"
 	NestedFieldsCfg             = "nested_fields"
 	AnyContextCfg               = "any_context"
@@ -2396,7 +2396,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, Op
 	OptsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
-	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
+	OptsAttributesProcessRuns, OptsAttributesProfileIDs, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
 	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount,
 	OptsAttributesProfileRuns})
 

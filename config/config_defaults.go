@@ -706,13 +706,12 @@ const CGRATES_CFG_JSON = `
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"process_runs": 1,						// number of run loops when processing event
-	"profile_runs": 0,						// number of run a profile will process thes event
 	"any_context": true,					// if we match the *any context
 	"opts": {
 		"*profileIDs": [],
-		"*profileRuns": 0,
-		"*processRuns": 1,
+		"*profileRuns": 0,					// number of runs a profile will process the event
+		"*processRuns": 1,					// number of run loops when processing event
+		"*profileIgnoreFilters": false,
 	},
 },
 

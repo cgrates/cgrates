@@ -158,6 +158,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		AnyContext:          true,
 		Opts: &AttributesOpts{
 			ProcessRuns: 1,
+			ProfileIDs:  []string{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {

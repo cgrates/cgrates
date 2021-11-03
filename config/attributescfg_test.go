@@ -34,9 +34,11 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
-		Process_runs:          utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(true),
 		Any_context:           utils.BoolPointer(true),
+		Opts: &AttributesOptsJson{
+			ProcessRuns: utils.IntPointer(1),
+		},
 	}
 	expected := &AttributeSCfg{
 		Enabled:             true,
@@ -51,6 +53,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		AnyContext:          true,
 		Opts: &AttributesOpts{
 			ProcessRuns: 1,
+			ProfileIDs:  []string{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -70,8 +73,10 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"apiers_conns": ["*internal"],			
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
     "string_indexed_fields": ["*req.index1"],
-	"process_runs": 3,						
-	},		
+	"opts": {
+		"*processRuns": 3,
+	},
+},		
 }`
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:             true,
@@ -80,12 +85,16 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.ApierSConnsCfg:         []string{utils.MetaInternal},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
-		utils.MetaProcessRunsCfg:     3,
-		utils.MetaProfileRunsCfg:     0,
 		utils.IndexedSelectsCfg:      true,
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.AnyContextCfg:          true,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaProcessRuns:             3,
+			utils.MetaProfileRuns:             0,
+			utils.MetaProfileIDs:              []string{},
+			utils.MetaProfileIgnoreFiltersCfg: false,
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -100,7 +109,9 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
            "suffix_indexed_fields": ["*req.index1","*req.index2"],
            "nested_fields": true,
            "enabled": true,
-           "process_runs": 7,
+		   "opts": {
+			   "*processRuns": 7,
+		   },
      },
 }`
 	expectedMap := map[string]interface{}{
@@ -112,9 +123,13 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
-		utils.MetaProcessRunsCfg:     7,
 		utils.AnyContextCfg:          true,
-		utils.MetaProfileRunsCfg:     0,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaProcessRuns:             7,
+			utils.MetaProfileRuns:             0,
+			utils.MetaProfileIDs:              []string{},
+			utils.MetaProfileIgnoreFiltersCfg: false,
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -138,14 +153,18 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
-		utils.MetaProcessRunsCfg:     1,
 		utils.AnyContextCfg:          true,
-		utils.MetaProfileRunsCfg:     0,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaProcessRuns:             1,
+			utils.MetaProfileRuns:             0,
+			utils.MetaProfileIDs:              []string{},
+			utils.MetaProfileIgnoreFiltersCfg: false,
+		},
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
 	} else if newMap := conv.attributeSCfg.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
-		t.Errorf("Expected %+v, receieved %+v", expectedMap, newMap)
+		t.Errorf("Expected %+v, receieved %+v", utils.ToJSON(expectedMap), utils.ToJSON(newMap))
 	}
 }
 
@@ -163,6 +182,7 @@ func TestAttributeSCfgClone(t *testing.T) {
 		AnyContext:          true,
 		Opts: &AttributesOpts{
 			ProcessRuns: 1,
+			ProfileIDs:  []string{},
 		},
 	}
 	rcv := ban.Clone()
