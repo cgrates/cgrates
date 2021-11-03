@@ -54,7 +54,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 		var cost *utils.Decimal
 		if len(route.AccountIDs) != 0 { // query AccountS for cost
 
-			acntCost := new(utils.EventCharges)
+			var acntCost utils.EventCharges
 			ev.APIOpts[utils.OptsAccountsProfileIDs] = utils.CloneStringSlice(route.AccountIDs)
 			if err = connMgr.Call(ctx, cfg.RouteSCfg().AccountSConns,
 				utils.AccountSv1MaxAbstracts, ev, &acntCost); err != nil {
