@@ -30,6 +30,7 @@ type CGREvent struct {
 	Time    *time.Time // event time
 	Event   map[string]interface{}
 	APIOpts map[string]interface{}
+	clnb    bool //rpcclonable
 }
 
 func (ev *CGREvent) HasField(fldName string) (has bool) {
@@ -232,4 +233,17 @@ func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapS
 		}
 	}
 	return
+}
+
+// SetCloneable sets if the args should be clonned on internal connections
+func (attr *CGREvent) SetCloneable(rpcCloneable bool) {
+	attr.clnb = rpcCloneable
+}
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (attr *CGREvent) RPCClone() (interface{}, error) {
+	if !attr.clnb {
+		return attr, nil
+	}
+	return attr.Clone(), nil
 }
