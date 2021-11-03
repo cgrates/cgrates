@@ -3882,7 +3882,7 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, attrIDs []string,
 	if attrArgs.CGREvent.APIOpts[utils.OptsContext] == utils.EmptyString {
 		attrArgs.CGREvent.APIOpts[utils.OptsContext] = utils.MetaSessionS
 	}
-	attrArgs.SetCloneable(clnb)
+	cgrEv.SetCloneable(clnb)
 	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv)
 	return
