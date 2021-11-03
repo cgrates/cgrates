@@ -583,15 +583,12 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesLis
 			args.APIOpts = make(map[string]interface{})
 		}
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
-		attrArgs := &AttrArgsProcessEvent{
-			CGREvent: args.CGREvent,
-		}
-		if attrArgs.CGREvent.APIOpts[utils.OptsContext] == utils.EmptyString {
-			attrArgs.CGREvent.APIOpts[utils.OptsContext] = utils.MetaRoutes
+		if args.CGREvent.APIOpts[utils.OptsContext] == utils.EmptyString {
+			args.CGREvent.APIOpts[utils.OptsContext] = utils.MetaRoutes
 		}
 		var rplyEv AttrSProcessEventReply
 		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().AttributeSConns, nil,
-			utils.AttributeSv1ProcessEvent, attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+			utils.AttributeSv1ProcessEvent, args.CGREvent, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = rplyEv.CGREvent
 			args.APIOpts = rplyEv.APIOpts
 		} else if err.Error() != utils.ErrNotFound.Error() {

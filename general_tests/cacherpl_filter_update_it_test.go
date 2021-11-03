@@ -223,10 +223,6 @@ func testFilterUpdateSetAttrProfileE1(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
-	attrProcessEv := &engine.AttrArgsProcessEvent{
-		CGREvent: ev1,
-	}
-
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"FLTR_ID"},
@@ -245,7 +241,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
 	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := fltrUpdateRPC1.Call(utils.AttributeSv1GetAttributeForEvent,
-		attrProcessEv, &attrReply); err != nil {
+		ev1, &attrReply); err != nil {
 		t.Fatal(err)
 	}
 	attrReply.Compile() // Populate private variables in RSRParsers
@@ -256,10 +252,6 @@ func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
-	attrProcessEv := &engine.AttrArgsProcessEvent{
-		CGREvent: ev1,
-	}
-
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"FLTR_ID"},
@@ -278,7 +270,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
 	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := fltrUpdateRPC2.Call(utils.AttributeSv1GetAttributeForEvent,
-		attrProcessEv, &attrReply); err != nil {
+		ev1, &attrReply); err != nil {
 		t.Fatal(err)
 	}
 	attrReply.Compile() // Populate private variables in RSRParsers
@@ -289,10 +281,6 @@ func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
-	attrProcessEv := &engine.AttrArgsProcessEvent{
-		CGREvent: ev2,
-	}
-
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"FLTR_ID"},
@@ -311,7 +299,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
 	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := fltrUpdateRPC1.Call(utils.AttributeSv1GetAttributeForEvent,
-		attrProcessEv, &attrReply); err != nil {
+		ev2, &attrReply); err != nil {
 		t.Fatal(err)
 	}
 	attrReply.Compile() // Populate private variables in RSRParsers
@@ -322,10 +310,6 @@ func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
-	attrProcessEv := &engine.AttrArgsProcessEvent{
-		CGREvent: ev2,
-	}
-
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"FLTR_ID"},
@@ -344,7 +328,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
 	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := fltrUpdateRPC2.Call(utils.AttributeSv1GetAttributeForEvent,
-		attrProcessEv, &attrReply); err != nil {
+		ev2, &attrReply); err != nil {
 		t.Fatal(err)
 	}
 	attrReply.Compile() // Populate private variables in RSRParsers
@@ -389,49 +373,33 @@ func testFilterUpdateSetFilterAfterAttrE1(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
-	attrProcessEv := &engine.AttrArgsProcessEvent{
-		CGREvent: ev1,
-	}
-
 	var attrReply *engine.AttributeProfile
 	if err := fltrUpdateRPC1.Call(utils.AttributeSv1GetAttributeForEvent,
-		attrProcessEv, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev1, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
 func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
-	attrProcessEv := &engine.AttrArgsProcessEvent{
-		CGREvent: ev1,
-	}
-
 	var attrReply *engine.AttributeProfile
 	if err := fltrUpdateRPC2.Call(utils.AttributeSv1GetAttributeForEvent,
-		attrProcessEv, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev1, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
 func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
-	attrProcessEv := &engine.AttrArgsProcessEvent{
-		CGREvent: ev2,
-	}
-
 	var attrReply *engine.AttributeProfile
 	if err := fltrUpdateRPC1.Call(utils.AttributeSv1GetAttributeForEvent,
-		attrProcessEv, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev2, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
 
 func testFilterUpdateGetAttrProfileForEventEv2E2NotMatching(t *testing.T) {
-	attrProcessEv := &engine.AttrArgsProcessEvent{
-		CGREvent: ev2,
-	}
-
 	var attrReply *engine.AttributeProfile
 	if err := fltrUpdateRPC2.Call(utils.AttributeSv1GetAttributeForEvent,
-		attrProcessEv, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		ev2, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }

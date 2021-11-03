@@ -42,7 +42,7 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*AttrArgsProcessEvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}

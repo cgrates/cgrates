@@ -2756,7 +2756,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 				return nil
 			},
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
-				if attrIDs, err := utils.IfaceAsSliceString(args.(*engine.AttrArgsProcessEvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
+				if attrIDs, err := utils.IfaceAsSliceString(args.(*utils.CGREvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
 					len(attrIDs) != 0 {
 					return utils.ErrNotImplemented
 				}
@@ -3104,7 +3104,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
-				if attrIDs, err := utils.IfaceAsSliceString(args.(*engine.AttrArgsProcessEvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
+				if attrIDs, err := utils.IfaceAsSliceString(args.(*utils.CGREvent).APIOpts[utils.OptsAttributesProfileIDs]); err == nil &&
 					len(attrIDs) == 1 {
 					return utils.ErrNotImplemented
 				}
@@ -3509,7 +3509,7 @@ func TestBiRPCv1ProcessMessage1(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
-				if args.(*engine.AttrArgsProcessEvent).ID == "test_id" {
+				if args.(*utils.CGREvent).ID == "test_id" {
 					return nil
 				}
 				return utils.ErrNotImplemented
@@ -3715,7 +3715,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 						},
 					},
 				}
-				if args.(*engine.AttrArgsProcessEvent).ID == "CHANGED_ID" {
+				if args.(*utils.CGREvent).ID == "CHANGED_ID" {
 					*reply.(*engine.AttrSProcessEventReply) = attrs
 					return nil
 				}

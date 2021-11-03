@@ -2694,7 +2694,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2764,7 +2764,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2832,7 +2832,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2900,7 +2900,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -2965,7 +2965,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -3081,7 +3081,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
@@ -3149,7 +3149,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		newArgs, cancast := args.(*engine.AttrArgsProcessEvent)
+		newArgs, cancast := args.(*utils.CGREvent)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
