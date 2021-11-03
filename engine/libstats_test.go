@@ -19,6 +19,7 @@ package engine
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -52,41 +53,43 @@ func TestStatQueuesSort(t *testing.T) {
 
 func TestStatRemEventWithID(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 1,
-				Count:    2,
-				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestRemEventWithID_1": {Stat: 1, CompressFactor: 1},
-					"cgrates.org:TestRemEventWithID_2": {Stat: 0, CompressFactor: 1},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 2,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestRemEventWithID_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+						"cgrates.org:TestRemEventWithID_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 1},
+					},
 				},
-			},
+			}},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
-		t.Errorf("received asrMetric: %v", asrMetric)
+	asrMetric := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(50, 0)) != 0 {
+		t.Errorf("received asrMetric: %v", utils.ToJSON(asrMetric.GetValue()))
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 0 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_5") // non existent
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 0 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != -1 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(-1, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != -1 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(-1, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
@@ -95,43 +98,45 @@ func TestStatRemEventWithID(t *testing.T) {
 
 func TestStatRemEventWithID2(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 2,
-				Count:    4,
-				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestRemEventWithID_1": {Stat: 1, CompressFactor: 2},
-					"cgrates.org:TestRemEventWithID_2": {Stat: 0, CompressFactor: 2},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(2, 0),
+					Count: 4,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestRemEventWithID_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 2},
+						"cgrates.org:TestRemEventWithID_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 2},
+					},
 				},
-			},
+			}},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
+	asrMetric := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(50, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(50, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 2 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_5") // non existent
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(50, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 2 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_1")
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != -1 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(-1, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
 	sq.remEventWithID("cgrates.org:TestRemEventWithID_2")
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != -1 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(-1, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	} else if len(asrMetric.Events) != 0 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
@@ -140,16 +145,18 @@ func TestStatRemEventWithID2(t *testing.T) {
 
 func TestStatRemExpired(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 2,
-				Count:    3,
-				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
-					"cgrates.org:TestStatRemExpired_2": {Stat: 0, CompressFactor: 1},
-					"cgrates.org:TestStatRemExpired_3": {Stat: 1, CompressFactor: 1},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(2, 0),
+					Count: 3,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+						"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 1},
+						"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+					},
 				},
-			},
+			}},
 		},
 		SQItems: []SQItem{
 			{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
@@ -157,13 +164,13 @@ func TestStatRemExpired(t *testing.T) {
 			{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Minute))},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 66.66667 {
-		t.Errorf("received asrMetric: %v", asrMetric)
+	asrMetric := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
+		t.Errorf("received asrMetric: %v", asrMetric.GetValue())
 	}
 	sq.remExpired()
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 100 {
-		t.Errorf("received asrMetric: %v", asrMetric)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
+		t.Errorf("received asrMetric: %v", asrMetric.GetValue())
 	} else if len(asrMetric.Events) != 1 {
 		t.Errorf("unexpected Events in asrMetric: %+v", asrMetric.Events)
 	}
@@ -209,33 +216,35 @@ func TestStatRemOnQueueLength(t *testing.T) {
 
 func TestStatAddStatEvent(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 1,
-				Count:    1,
-				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+					},
 				},
 			},
-		},
+			}},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 100 {
+	asrMetric := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR)
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
 		t.Errorf("received ASR: %v", asr)
 	}
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
 	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 50 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(50)) != 0 {
 		t.Errorf("received ASR: %v", asr)
-	} else if asrMetric.Answered != 1 || asrMetric.Count != 2 {
+	} else if asrMetric.Value.Compare(utils.NewDecimal(1, 0)) != 0 || asrMetric.Count != 2 {
 		t.Errorf("ASR: %v", asrMetric)
 	}
 	ev1.Event = map[string]interface{}{
 		utils.AnswerTime: time.Now()}
 	sq.addStatEvent(context.Background(), ev1.Tenant, ev1.ID, nil, utils.MapStorage{utils.MetaReq: ev1.Event})
-	if asr := asrMetric.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); asr != 66.66667 {
+	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
 		t.Errorf("received ASR: %v", asr)
-	} else if asrMetric.Answered != 2 || asrMetric.Count != 3 {
+	} else if asrMetric.Value.Compare(utils.NewDecimal(2, 0)) != 0 || asrMetric.Count != 3 {
 		t.Errorf("ASR: %v", asrMetric)
 	}
 }
@@ -250,21 +259,30 @@ func TestStatRemOnQueueLength2(t *testing.T) {
 			{"cgrates.org:TestStatRemExpired_1", nil},
 			{"cgrates.org:TestStatRemExpired_2", nil},
 		},
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &StatTCD{
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaTCD: {
 				FilterIDs: []string{"*string:~*req.Account:1002"},
-				Events: map[string]*DurationWithCompress{
-					"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
+				StatMetric: &StatTCD{
+					Metric: &Metric{
+						Value: utils.NewDecimal(0, 0),
+						Events: map[string]*DecimalWithCompress{
+							"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimalFromFloat64(float64(time.Minute)), CompressFactor: 1},
+						},
+					},
 				},
 			},
-			utils.MetaASR: &StatASR{
+			utils.MetaASR: {
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+				StatMetric: &StatASR{
+					Metric: &Metric{
+						Value: utils.NewDecimal(0, 0),
+						Events: map[string]*DecimalWithCompress{
+							"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+						},
+					},
 				},
 			},
-		},
-	}
+		}}
 	sq.remOnQueueLength()
 	if len(sq.SQItems) != 1 {
 		t.Errorf("wrong items: %+v", utils.ToJSON(sq.SQItems))
@@ -273,20 +291,24 @@ func TestStatRemOnQueueLength2(t *testing.T) {
 
 func TestStatCompress(t *testing.T) {
 	asr := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_2": {Stat: 0, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": {Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0, CompressFactor: 1},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimalFromFloat64(0), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0), CompressFactor: 1},
+			},
 		},
 	}
 	expectedASR := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	sqItems := []SQItem{
@@ -300,55 +322,63 @@ func TestStatCompress(t *testing.T) {
 	}
 	sq = &StatQueue{
 		SQItems: sqItems,
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: asr,
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: asr},
 		},
 	}
-	if sq.Compress(int64(100), config.CgrConfig().GeneralCfg().RoundingDecimals) {
+	if sq.Compress(100) {
 		t.Errorf("StatQueue compressed: %s", utils.ToJSON(sq))
 	}
-	if !sq.Compress(int64(2), config.CgrConfig().GeneralCfg().RoundingDecimals) {
+	if !sq.Compress(2) {
 		t.Errorf("StatQueue not compressed: %s", utils.ToJSON(sq))
 	}
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
 }
 
 func TestStatCompress2(t *testing.T) {
 	asr := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_2": {Stat: 0, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": {Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0, CompressFactor: 1},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimalFromFloat64(0), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0), CompressFactor: 1},
+			},
 		},
 	}
 	expectedASR := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	tcd := &StatTCD{
-		Sum:   3 * time.Minute,
-		Count: 2,
-		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
+		Metric: &Metric{
+			Value: utils.NewDecimal(int64(3*time.Minute), 0),
+			Count: 2,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimal(int64(2*time.Minute), 0), CompressFactor: 1},
+			},
 		},
 	}
 	expectedTCD := &StatTCD{
-		Sum:   3 * time.Minute,
-		Count: 2,
-		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Duration: time.Minute + 30*time.Second, CompressFactor: 2},
+		Metric: &Metric{
+			Value: utils.NewDecimal(int64(3*time.Minute), 0),
+			Count: 2,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(float64(time.Minute + 30*time.Second)), CompressFactor: 2},
+			},
 		},
 	}
 	sqItems := []SQItem{
@@ -363,24 +393,24 @@ func TestStatCompress2(t *testing.T) {
 	sq = &StatQueue{
 		SQItems: sqItems,
 		ttl:     utils.DurationPointer(time.Second),
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: asr,
-			utils.MetaTCD: tcd,
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: asr},
+			utils.MetaTCD: {StatMetric: tcd},
 		},
 	}
-	if sq.Compress(int64(100), config.CgrConfig().GeneralCfg().RoundingDecimals) {
+	if sq.Compress(100) {
 		t.Errorf("StatQueue compressed: %s", utils.ToJSON(sq))
 	}
-	if !sq.Compress(int64(2), config.CgrConfig().GeneralCfg().RoundingDecimals) {
+	if !sq.Compress(2) {
 		t.Errorf("StatQueue not compressed: %s", utils.ToJSON(sq))
 	}
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
-	if rply := sq.SQMetrics[utils.MetaTCD].(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
+	if rply := sq.SQMetrics[utils.MetaTCD].StatMetric.(*StatTCD); !reflect.DeepEqual(rply, expectedTCD) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
@@ -388,36 +418,44 @@ func TestStatCompress2(t *testing.T) {
 func TestStatCompress3(t *testing.T) {
 	tmNow := time.Now()
 	asr := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_2": {Stat: 0, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": {Stat: 1, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0, CompressFactor: 1},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimalFromFloat64(0), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0), CompressFactor: 1},
+			},
 		},
 	}
 	expectedASR := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	tcd := &StatTCD{
-		Sum:   3 * time.Minute,
-		Count: 2,
-		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
+		Metric: &Metric{
+			Value: utils.NewDecimal(int64(3*time.Minute), 0),
+			Count: 2,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimal(int64(2*time.Minute), 0), CompressFactor: 1},
+			},
 		},
 	}
 	expectedTCD := &StatTCD{
-		Sum:   3 * time.Minute,
-		Count: 2,
-		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_3": {Duration: 2 * time.Minute, CompressFactor: 1},
+		Metric: &Metric{
+			Value: utils.NewDecimal(int64(3*time.Minute), 0),
+			Count: 2,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimal(int64(2*time.Minute), 0), CompressFactor: 1},
+			},
 		},
 	}
 	sqItems := []SQItem{
@@ -434,41 +472,45 @@ func TestStatCompress3(t *testing.T) {
 	sq = &StatQueue{
 		SQItems: sqItems,
 		ttl:     utils.DurationPointer(time.Second),
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: asr,
-			utils.MetaTCD: tcd,
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: asr},
+			utils.MetaTCD: {StatMetric: tcd},
 		},
 	}
-	if sq.Compress(int64(100), config.CgrConfig().GeneralCfg().RoundingDecimals) {
+	if sq.Compress(100) {
 		t.Errorf("StatQueue compressed: %s", utils.ToJSON(sq))
 	}
-	if !sq.Compress(int64(3), config.CgrConfig().GeneralCfg().RoundingDecimals) {
+	if !sq.Compress(3) {
 		t.Errorf("StatQueue not compressed: %s", utils.ToJSON(sq))
 	}
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
-	if rply := sq.SQMetrics[utils.MetaTCD].(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
+	if rply := sq.SQMetrics[utils.MetaTCD].StatMetric.(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
 
 func TestStatExpand(t *testing.T) {
 	expectedASR := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	asr := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	expectedSqItems := []SQItem{
@@ -482,15 +524,15 @@ func TestStatExpand(t *testing.T) {
 	}
 	sq = &StatQueue{
 		SQItems: sqItems,
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: asr,
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: asr},
 		},
 	}
 	sq.Expand()
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
 }
@@ -498,31 +540,39 @@ func TestStatExpand(t *testing.T) {
 func TestStatExpand2(t *testing.T) {
 	tmNow := time.Now()
 	expectedASR := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	asr := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	expectedTCD := &StatTCD{
-		Sum:   3 * time.Minute,
-		Count: 2,
-		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Duration: time.Minute + 30*time.Second, CompressFactor: 2},
+		Metric: &Metric{
+			Value: utils.NewDecimal(int64(3*time.Minute), 0),
+			Count: 2,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimal(int64(time.Minute+30*time.Second), 0), CompressFactor: 2},
+			},
 		},
 	}
 	tcd := &StatTCD{
-		Sum:   3 * time.Minute,
-		Count: 2,
-		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_4": {Duration: time.Minute + 30*time.Second, CompressFactor: 2},
+		Metric: &Metric{
+			Value: utils.NewDecimal(int64(3*time.Minute), 0),
+			Count: 2,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimal(int64(time.Minute+30*time.Second), 0), CompressFactor: 2},
+			},
 		},
 	}
 	expectedSqItems := []SQItem{
@@ -538,52 +588,60 @@ func TestStatExpand2(t *testing.T) {
 	sq = &StatQueue{
 		SQItems: sqItems,
 		ttl:     utils.DurationPointer(time.Second),
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: asr,
-			utils.MetaTCD: tcd,
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: asr},
+			utils.MetaTCD: {StatMetric: tcd},
 		},
 	}
 	sq.Expand()
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
-	if rply := sq.SQMetrics[utils.MetaTCD].(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
+	if rply := sq.SQMetrics[utils.MetaTCD].StatMetric.(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
 func TestStatExpand3(t *testing.T) {
 	tmNow := time.Now()
 	expectedASR := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_3": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	asr := &StatASR{
-		Answered: 2,
-		Count:    4,
-		Events: map[string]*StatWithCompress{
-			"cgrates.org:TestStatRemExpired_3": {Stat: 0.5, CompressFactor: 4},
+		Metric: &Metric{
+			Value: utils.NewDecimal(2, 0),
+			Count: 4,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimalFromFloat64(0.5), CompressFactor: 4},
+			},
 		},
 	}
 	expectedTCD := &StatTCD{
-		Sum:   3 * time.Minute,
-		Count: 2,
-		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": {Duration: 2 * time.Minute, CompressFactor: 1},
+		Metric: &Metric{
+			Value: utils.NewDecimal(int64(3*time.Minute), 0),
+			Count: 2,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimal(int64(2*time.Minute), 0), CompressFactor: 1},
+			},
 		},
 	}
 	tcd := &StatTCD{
-		Sum:   3 * time.Minute,
-		Count: 2,
-		Events: map[string]*DurationWithCompress{
-			"cgrates.org:TestStatRemExpired_2": {Duration: time.Minute, CompressFactor: 1},
-			"cgrates.org:TestStatRemExpired_4": {Duration: 2 * time.Minute, CompressFactor: 1},
+		Metric: &Metric{
+			Value: utils.NewDecimal(int64(3*time.Minute), 0),
+			Count: 2,
+			Events: map[string]*DecimalWithCompress{
+				"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimal(int64(time.Minute), 0), CompressFactor: 1},
+				"cgrates.org:TestStatRemExpired_4": {Stat: utils.NewDecimal(int64(2*time.Minute), 0), CompressFactor: 1},
+			},
 		},
 	}
 	expectedSqItems := []SQItem{
@@ -602,19 +660,19 @@ func TestStatExpand3(t *testing.T) {
 	sq = &StatQueue{
 		SQItems: sqItems,
 		ttl:     utils.DurationPointer(time.Second),
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: asr,
-			utils.MetaTCD: tcd,
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: asr},
+			utils.MetaTCD: {StatMetric: tcd},
 		},
 	}
 	sq.Expand()
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
-	if rply := sq.SQMetrics[utils.MetaTCD].(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
+	if rply := sq.SQMetrics[utils.MetaTCD].StatMetric.(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
@@ -622,15 +680,17 @@ func TestStatExpand3(t *testing.T) {
 func TestStatRemoveExpiredTTL(t *testing.T) {
 	sq = &StatQueue{
 		ttl: utils.DurationPointer(100 * time.Millisecond),
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 1,
-				Count:    1,
-				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"grates.org:TestStatRemExpired_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+					},
 				},
 			},
-		},
+			}},
 		sqPrfl: &StatQueueProfile{
 			QueueLength: 0, //unlimited que
 		},
@@ -656,15 +716,17 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 
 func TestStatRemoveExpiredQueue(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaASR: &StatASR{
-				Answered: 1,
-				Count:    1,
-				Events: map[string]*StatWithCompress{
-					"cgrates.org:TestStatRemExpired_1": {Stat: 1, CompressFactor: 1},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaASR: {StatMetric: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(1, 0),
+					Count: 1,
+					Events: map[string]*DecimalWithCompress{
+						"grates.org:TestStatRemExpired_1": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
+					},
 				},
 			},
-		},
+			}},
 		sqPrfl: &StatQueueProfile{
 			QueueLength: 2, //unlimited que
 		},
@@ -711,81 +773,58 @@ func TestStatQueueSqID(t *testing.T) {
 	}
 }
 
-type statMetricMock struct {
-	testcase string
-}
+type statMetricMock string
 
-func (sMM *statMetricMock) GetValue(roundingDecimal int) interface{} {
+func (statMetricMock) GetValue() *utils.Decimal {
 	return nil
 }
 
-func (sMM *statMetricMock) GetStringValue(roundingDecimal int) (val string) {
+func (statMetricMock) GetStringValue() (val string) {
 	return
 }
 
-func (sMM *statMetricMock) GetFloat64Value(roundingDecimal int) (val float64) {
-	return
-}
-
-func (sMM *statMetricMock) AddEvent(evID string, ev utils.DataProvider) error {
+func (statMetricMock) AddEvent(string, utils.DataProvider) error {
 	return nil
 }
 
-func (sMM *statMetricMock) RemEvent(evTenantID string) error {
-	switch sMM.testcase {
-	case "remExpired error":
+func (sMM statMetricMock) RemEvent(string) error {
+	if sMM == "remExpired error" {
 		return fmt.Errorf("remExpired mock error")
 	}
 	return nil
 }
 
-func (sMM *statMetricMock) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	err = fmt.Errorf("marshal mock error")
-	return
-}
-
-func (sMM *statMetricMock) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return nil
-}
-
-func (sMM *statMetricMock) GetFilterIDs() (filterIDs []string) {
-	switch sMM.testcase {
-	case "pass error":
-		filterIDs = []string{"filter1", "filter2"}
-		return
-	}
-	return
-}
-
-func (sMM *statMetricMock) GetMinItems() (minIts int) {
+func (sMM statMetricMock) GetMinItems() uint64 {
 	return 0
 }
 
-func (sMM *statMetricMock) Compress(queueLen int64, defaultID string, roundingDec int) (eventIDs []string) {
-	switch sMM.testcase {
-	case "populate idMap":
-		eventIDs = []string{"id1", "id2", "id3", "id4", "id5", "id6"}
-		return
+func (sMM statMetricMock) Compress(uint64, string) []string {
+	if sMM == "populate idMap" {
+		return []string{"id1", "id2", "id3", "id4", "id5", "id6"}
 	}
-	return
-}
-
-func (sMM *statMetricMock) GetCompressFactor(events map[string]int) map[string]int {
 	return nil
 }
-func (sMM *statMetricMock) Clone() StatMetric {
-	return &statMetricMock{testcase: sMM.testcase}
+
+func (sMM statMetricMock) GetCompressFactor(map[string]uint64) map[string]uint64 {
+	return nil
+}
+func (sMM statMetricMock) Clone() StatMetric {
+	return sMM
 }
 
+type mockMarshal string
+
+func (m mockMarshal) Marshal(v interface{}) ([]byte, error)      { return nil, errors.New(string(m)) }
+func (m mockMarshal) Unmarshal(data []byte, v interface{}) error { return errors.New(string(m)) }
 func TestStatQueueNewStoredStatQueue(t *testing.T) {
 	sq := &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			"key": &statMetricMock{},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			"key": &StatMetricWithFilters{StatMetric: statMetricMock("")},
 		},
 	}
-	var ms Marshaler
-
 	experr := "marshal mock error"
+	var ms Marshaler = mockMarshal(experr)
+
 	rcv, err := NewStoredStatQueue(sq, ms)
 
 	if err == nil || err.Error() != experr {
@@ -828,7 +867,7 @@ func TestStatQueueAsStatQueueSuccess(t *testing.T) {
 				EventID: "testEventID",
 			},
 		},
-		SQMetrics: map[string]StatMetric{},
+		SQMetrics: map[string]*StatMetricWithFilters{},
 	}
 	rcv, err := ssq.AsStatQueue(ms)
 
@@ -906,7 +945,7 @@ func TestStatQueueAsStatQueueOK(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	msm, err := sm.Marshal(ms)
+	msm, err := ms.Marshal(sm)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -924,7 +963,7 @@ func TestStatQueueAsStatQueueOK(t *testing.T) {
 	}
 
 	exp := &StatQueue{
-		SQMetrics: map[string]StatMetric{
+		SQMetrics: map[string]*StatMetricWithFilters{
 			utils.MetaTCD: sm,
 		},
 	}
@@ -947,13 +986,13 @@ func TestStatQueueNewStatQueue(t *testing.T) {
 			MetricID: "invalid",
 		},
 	}
-	minItems := 0
+	var minItems uint64
 
 	experr := fmt.Sprintf("unsupported metric type <%s>", metrics[0].MetricID)
 	exp := &StatQueue{
 		Tenant: tnt,
 		ID:     id,
-		SQMetrics: map[string]StatMetric{
+		SQMetrics: map[string]*StatMetricWithFilters{
 			"invalid": nil,
 		},
 	}
@@ -986,10 +1025,8 @@ func TestStatQueueProcessEventremExpiredErr(t *testing.T) {
 				ExpiryTime: &expiry,
 			},
 		},
-		SQMetrics: map[string]StatMetric{
-			"key": &statMetricMock{
-				testcase: "remExpired error",
-			},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			"key": {StatMetric: statMetricMock("remExpired error")},
 		},
 	}
 
@@ -1017,10 +1054,8 @@ func TestStatQueueProcessEventremOnQueueLengthErr(t *testing.T) {
 				EventID: evID,
 			},
 		},
-		SQMetrics: map[string]StatMetric{
-			"key": &statMetricMock{
-				testcase: "remExpired error",
-			},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			"key": {StatMetric: statMetricMock("remExpired error")},
 		},
 	}
 
@@ -1048,8 +1083,8 @@ func TestStatQueueProcessEventaddStatEvent(t *testing.T) {
 				EventID: evID,
 			},
 		},
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &StatTCD{},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaTCD: {StatMetric: &StatTCD{Metric: &Metric{}}},
 		},
 	}
 
@@ -1094,17 +1129,14 @@ func TestStatQueueCompress(t *testing.T) {
 				EventID: "id5",
 			},
 		},
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &statMetricMock{
-				testcase: "populate idMap",
-			},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaTCD: {StatMetric: statMetricMock("populate idMap")},
 			utils.MetaReq: sm,
 		},
 		ttl: &ttl,
 	}
 
-	maxQL := int64(1)
-	roundDec := 1
+	maxQL := uint64(1)
 
 	exp := []SQItem{
 		{
@@ -1130,7 +1162,7 @@ func TestStatQueueCompress(t *testing.T) {
 			EventID: "id6",
 		},
 	}
-	rcv := sq.Compress(maxQL, roundDec)
+	rcv := sq.Compress(maxQL)
 	if rcv != true {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
 	}
@@ -1145,10 +1177,8 @@ func TestStatQueueCompress(t *testing.T) {
 
 func TestStatQueueaddStatEventPassErr(t *testing.T) {
 	sq := &StatQueue{
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &statMetricMock{
-				testcase: "pass error",
-			},
+		SQMetrics: map[string]*StatMetricWithFilters{
+			utils.MetaTCD: &StatMetricWithFilters{StatMetric: statMetricMock("pass error"), FilterIDs: []string{"filter1", "filter2"}},
 		},
 	}
 	tnt, evID := "tenant", "eventID"
@@ -1184,7 +1214,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	}
 
 	sq := &StatQueue{
-		SQMetrics: map[string]StatMetric{
+		SQMetrics: map[string]*StatMetricWithFilters{
 			utils.MetaTCD: sm,
 		},
 	}
@@ -1209,7 +1239,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	}
 
 	exp := &StatQueue{
-		SQMetrics: map[string]StatMetric{
+		SQMetrics: map[string]*StatMetricWithFilters{
 			utils.MetaTCD: sm,
 		},
 		SQItems: []SQItem{

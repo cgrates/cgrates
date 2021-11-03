@@ -58,11 +58,7 @@ func TestNewCaps(t *testing.T) {
 }
 
 func TestCapsStats(t *testing.T) {
-	st, err := NewStatAverage(1, utils.MetaDynReq, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	exp := &CapsStats{st: st}
+	exp := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq)}
 	cr := NewCaps(0, utils.MetaBusy)
 	stopChan := make(chan struct{}, 1)
 	close(stopChan)
@@ -81,7 +77,7 @@ func TestCapsStats(t *testing.T) {
 	cr.Allocate()
 	cr.Allocate()
 	cs.loop(1, stopChan, cr)
-	if avg := cs.GetAverage(2); avg <= 0 {
+	if avg := cs.GetAverage(); avg <= 0 {
 		t.Errorf("Expected at least an event to be processed: %v", avg)
 	}
 	if pk := cs.GetPeak(); pk != 2 {
@@ -91,14 +87,10 @@ func TestCapsStats(t *testing.T) {
 }
 
 func TestCapsStatsGetAverage(t *testing.T) {
-	st, err := NewStatAverage(1, utils.MetaDynReq, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	cs := &CapsStats{st: st}
+	cs := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq)}
 	cs.addSample("1", 10)
 	expAvg := 10.
-	if avg := cs.GetAverage(2); avg != expAvg {
+	if avg := cs.GetAverage(); avg != expAvg {
 		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
 	}
 	expPk := 10
@@ -107,7 +99,7 @@ func TestCapsStatsGetAverage(t *testing.T) {
 	}
 	cs.addSample("2", 16)
 	expAvg = 13.
-	if avg := cs.GetAverage(2); avg != expAvg {
+	if avg := cs.GetAverage(); avg != expAvg {
 		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
 	}
 	expPk = 16
@@ -116,7 +108,7 @@ func TestCapsStatsGetAverage(t *testing.T) {
 	}
 	cs.OnEvict("2", nil)
 	expAvg = 10.
-	if avg := cs.GetAverage(2); avg != expAvg {
+	if avg := cs.GetAverage(); avg != expAvg {
 		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
 	}
 	if pk := cs.GetPeak(); pk != expPk {
@@ -144,11 +136,7 @@ func TestFloatDP(t *testing.T) {
 }
 
 func TestCapsStatsGetAverageOnEvict(t *testing.T) {
-	st, err := NewStatAverage(1, utils.MetaDynReq, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	cs := &CapsStats{st: st}
+	cs := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq)}
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheCapsEvents] = &config.CacheParamCfg{Limit: 2}
 	tmp := Cache
@@ -156,7 +144,7 @@ func TestCapsStatsGetAverageOnEvict(t *testing.T) {
 
 	cs.addSample("1", 10)
 	expAvg := 10.
-	if avg := cs.GetAverage(2); avg != expAvg {
+	if avg := cs.GetAverage(); avg != expAvg {
 		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
 	}
 	expPk := 10
@@ -165,7 +153,7 @@ func TestCapsStatsGetAverageOnEvict(t *testing.T) {
 	}
 	cs.addSample("2", 16)
 	expAvg = 13.
-	if avg := cs.GetAverage(2); avg != expAvg {
+	if avg := cs.GetAverage(); avg != expAvg {
 		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
 	}
 	expPk = 16
@@ -174,7 +162,7 @@ func TestCapsStatsGetAverageOnEvict(t *testing.T) {
 	}
 	cs.addSample("3", 18)
 	expAvg = 17.
-	if avg := cs.GetAverage(2); avg != expAvg {
+	if avg := cs.GetAverage(); avg != expAvg {
 		t.Errorf("Expected: %v ,received: %v", expAvg, avg)
 	}
 	expPk = 18

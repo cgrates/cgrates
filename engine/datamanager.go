@@ -864,7 +864,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
 			var sq *StatQueue
 			if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
-				sqp.MinItems); err != nil {
+				uint64(sqp.MinItems)); err != nil {
 				return
 			}
 			err = dm.SetStatQueue(ctx, sq)
@@ -877,7 +877,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 			if errRs == utils.ErrNotFound { // the stats queue does not exist
 				var sq *StatQueue
 				if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
-					sqp.MinItems); err != nil {
+					uint64(sqp.MinItems)); err != nil {
 					return
 				}
 				err = dm.SetStatQueue(ctx, sq)
@@ -890,9 +890,9 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 			for _, metric := range sqp.Metrics { // add missing metrics and recreate the old metrics that changed
 				cMetricIDs.Add(metric.MetricID)
 				if oSqMetric, has := oSq.SQMetrics[metric.MetricID]; !has ||
-					!utils.SliceStringEqual(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
+					!utils.SliceStringEqual(oSqMetric.FilterIDs, metric.FilterIDs) { // recreate it if the filter changed
 					if oSq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
-						sqp.MinItems, metric.FilterIDs); err != nil {
+						uint64(sqp.MinItems), metric.FilterIDs); err != nil {
 						return
 					}
 				}

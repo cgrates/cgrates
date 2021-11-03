@@ -46,8 +46,8 @@ func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
 			SortingData: map[string]interface{}{
 				utils.Weight: route.Weight,
 			},
-			sortingDataF64: map[string]float64{
-				utils.Weight: route.Weight,
+			sortingDataDecimal: map[string]*utils.Decimal{
+				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
 			},
 			RouteParameters: route.RouteParameters,
 		}

@@ -53,12 +53,12 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 			SortingData: map[string]interface{}{
 				utils.Weight: route.Weight,
 			},
-			sortingDataF64: map[string]float64{
-				utils.Weight: route.Weight,
+			sortingDataDecimal: map[string]*utils.Decimal{
+				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
 			},
 			RouteParameters: route.RouteParameters,
 		}
-		var metricSupp map[string]float64
+		var metricSupp map[string]*utils.Decimal
 		if metricSupp, err = populatStatsForQOSRoute(ctx, qos.cfg, qos.connMgr, route.StatIDs, ev.Tenant); err != nil { //create metric map for route
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
@@ -72,7 +72,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 		// add metrics from statIDs in SortingData
 		for key, val := range metricSupp {
 			srtRoute.SortingData[key] = val
-			srtRoute.sortingDataF64[key] = val
+			srtRoute.sortingDataDecimal[key] = val
 		}
 		// check if the route have the metric from sortingParameters
 		// in case that the metric don't exist
@@ -81,10 +81,10 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 			if _, hasMetric := metricSupp[metric]; !hasMetric {
 				if metric == utils.MetaPDD {
 					srtRoute.SortingData[metric] = math.MaxFloat64
-					srtRoute.sortingDataF64[metric] = math.MaxFloat64
+					srtRoute.sortingDataDecimal[metric] = utils.NewDecimalFromFloat64(math.MaxFloat64)
 				} else {
 					srtRoute.SortingData[metric] = -1.0
-					srtRoute.sortingDataF64[metric] = -1.0
+					srtRoute.sortingDataDecimal[metric] = utils.NewDecimalFromFloat64(-1.0)
 				}
 			}
 		}
@@ -105,15 +105,15 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 // populatStatsForQOSRoute will query a list of statIDs and return composed metric values
 // first metric found is always returned
 func populatStatsForQOSRoute(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *ConnManager, statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
+	connMgr *ConnManager, statIDs []string, tenant string) (stsMetric map[string]*utils.Decimal, err error) {
 	type metric struct {
-		sum float64
+		sum *utils.Decimal
 		len int
 	}
-	stsMetric = make(map[string]float64)
+	stsMetric = make(map[string]*utils.Decimal)
 	provStsMetrics := make(map[string]metric)
 	for _, statID := range statIDs {
-		var metrics map[string]float64
+		var metrics map[string]*utils.Decimal
 		if err = connMgr.Call(ctx, cfg.RouteSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -124,13 +124,13 @@ func populatStatsForQOSRoute(ctx *context.Context, cfg *config.CGRConfig,
 		for key, val := range metrics {
 			//add value of metric in a slice in case that we get the same metric from different stat
 			provStsMetrics[key] = metric{
-				sum: provStsMetrics[key].sum + val,
+				sum: utils.SumDecimal(provStsMetrics[key].sum, val),
 				len: provStsMetrics[key].len + 1,
 			}
 		}
 	}
 	for metric, val := range provStsMetrics {
-		stsMetric[metric] = val.sum / float64(val.len)
+		stsMetric[metric] = utils.DivideDecimal(val.sum, utils.NewDecimal(int64(val.len), 0))
 	}
 	return
 }

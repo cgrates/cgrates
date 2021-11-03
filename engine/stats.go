@@ -288,7 +288,7 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 			APIOpts: opts,
 		}
 		for metricID, metric := range sq.SQMetrics {
-			thEv.Event[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
+			thEv.Event[metricID] = metric.GetValue()
 		}
 
 		var tIDs []string
@@ -446,7 +446,7 @@ func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils
 	}
 	metrics := make(map[string]string, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID] = metric.GetStringValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
+		metrics[metricID] = metric.GetStringValue()
 	}
 	*reply = metrics
 	return
@@ -475,7 +475,7 @@ func (sS *StatService) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.
 	}
 	metrics := make(map[string]float64, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID] = metric.GetFloat64Value(sS.cgrcfg.GeneralCfg().RoundingDecimals)
+		metrics[metricID], _ = metric.GetValue().Float64()
 	}
 	*reply = metrics
 	return
@@ -520,11 +520,11 @@ func (sS *StatService) V1ResetStatQueue(ctx *context.Context, tntID *utils.Tenan
 	}
 	sq.SQItems = make([]SQItem, 0)
 	metrics := sq.SQMetrics
-	sq.SQMetrics = make(map[string]StatMetric)
+	sq.SQMetrics = make(map[string]*StatMetricWithFilters)
 	for id, m := range metrics {
-		var metric StatMetric
+		var metric *StatMetricWithFilters
 		if metric, err = NewStatMetric(id,
-			m.GetMinItems(), m.GetFilterIDs()); err != nil {
+			m.GetMinItems(), m.FilterIDs); err != nil {
 			return
 		}
 		sq.SQMetrics[id] = metric

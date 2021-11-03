@@ -116,7 +116,7 @@ func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
 		Tenant:    sq.Tenant,
 		ID:        sq.ID,
 		SQItems:   sq.SQItems,
-		SQMetrics: make(map[string]engine.StatMetric),
+		SQMetrics: make(map[string]*engine.StatMetricWithFilters),
 	}
 	for mID, metric := range sq.SQMetrics {
 		out.SQMetrics[mID] = metric
@@ -385,7 +385,7 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	sq = &engine.StatQueue{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        v1Sts.Id,
-		SQMetrics: make(map[string]engine.StatMetric),
+		SQMetrics: make(map[string]*engine.StatMetricWithFilters),
 	}
 	if len(v1Sts.Metrics) != 0 {
 		for i := range v1Sts.Metrics {
