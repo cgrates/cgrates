@@ -1344,6 +1344,198 @@ func TestRateProfileCostEquals(t *testing.T) {
 	}
 }
 
+func TestRateProfileCostNotEquals(t *testing.T) {
+	rtPrfCost := &RateProfileCost{
+		ID:              "RATE_1",
+		Cost:            NewDecimal(4, 1),
+		MinCost:         NewDecimal(1, 2),
+		MaxCost:         NewDecimal(15, 0),
+		MaxCostStrategy: "*round",
+		CostIntervals: []*RateSIntervalCost{
+			{
+				Increments: []*RateSIncrementCost{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 1),
+				Unit:          NewDecimal(int64(time.Second), 1),
+				Increment:     NewDecimal(int64(time.Second), 1),
+			},
+		},
+		Altered: []string{MetaRoundingDown},
+	}
+	expectedRT := &RateProfileCost{
+		ID:              "RATE_1",
+		Cost:            NewDecimal(2, 1),
+		MinCost:         NewDecimal(1, 2),
+		MaxCost:         NewDecimal(15, 0),
+		MaxCostStrategy: "*round",
+		CostIntervals: []*RateSIntervalCost{
+			{
+				Increments: []*RateSIncrementCost{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 1),
+				Unit:          NewDecimal(int64(time.Second), 1),
+				Increment:     NewDecimal(int64(time.Second), 1),
+			},
+		},
+		Altered: []string{MetaRoundingDown},
+	}
+	if rtPrfCost.Equals(expectedRT) {
+		t.Errorf("%v and \n%v are equals", ToJSON(rtPrfCost), ToJSON(expectedRT))
+	}
+}
+
+func TestRateProfileCostAlteredNotEquals(t *testing.T) {
+	rtPrfCost := &RateProfileCost{
+		ID:              "RATE_1",
+		Cost:            NewDecimal(2, 1),
+		MinCost:         NewDecimal(1, 2),
+		MaxCost:         NewDecimal(15, 0),
+		MaxCostStrategy: "*round",
+		CostIntervals: []*RateSIntervalCost{
+			{
+				Increments: []*RateSIncrementCost{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 1),
+				Unit:          NewDecimal(int64(time.Second), 1),
+				Increment:     NewDecimal(int64(time.Second), 1),
+			},
+		},
+		Altered: []string{MetaRoundingDown},
+	}
+	expectedRT := &RateProfileCost{
+		ID:              "RATE_1",
+		Cost:            NewDecimal(2, 1),
+		MinCost:         NewDecimal(1, 2),
+		MaxCost:         NewDecimal(15, 0),
+		MaxCostStrategy: "*round",
+		CostIntervals: []*RateSIntervalCost{
+			{
+				Increments: []*RateSIncrementCost{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 1),
+				Unit:          NewDecimal(int64(time.Second), 1),
+				Increment:     NewDecimal(int64(time.Second), 1),
+			},
+		},
+		Altered: []string{},
+	}
+	if rtPrfCost.Equals(expectedRT) {
+		t.Errorf("%v and \n%v are equals", ToJSON(rtPrfCost), ToJSON(expectedRT))
+	}
+}
+
+func TestRateProfileCostCINotEquals(t *testing.T) {
+	rtPrfCost := &RateProfileCost{
+		ID:              "RATE_1",
+		Cost:            NewDecimal(2, 1),
+		MinCost:         NewDecimal(1, 2),
+		MaxCost:         NewDecimal(15, 0),
+		MaxCostStrategy: "*round",
+		CostIntervals: []*RateSIntervalCost{
+			{
+				Increments: []*RateSIncrementCost{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "RATE1",
+						CompressFactor:    1,
+						Usage:             NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 1),
+				Unit:          NewDecimal(int64(time.Second), 1),
+				Increment:     NewDecimal(int64(time.Second), 1),
+			},
+		},
+		Altered: []string{MetaRoundingDown},
+	}
+	expectedRT := &RateProfileCost{
+		ID:              "RATE_1",
+		Cost:            NewDecimal(2, 1),
+		MinCost:         NewDecimal(1, 2),
+		MaxCost:         NewDecimal(15, 0),
+		MaxCostStrategy: "*round",
+		CostIntervals: []*RateSIntervalCost{
+			{
+				Increments: []*RateSIncrementCost{
+					{
+						RateIntervalIndex: 1,
+						RateID:            "RATE2",
+						CompressFactor:    2,
+						Usage:             NewDecimal(int64(time.Minute), 0),
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 1),
+				Unit:          NewDecimal(int64(time.Second), 1),
+				Increment:     NewDecimal(int64(time.Second), 1),
+			},
+		},
+		Altered: []string{MetaRoundingDown},
+	}
+	if rtPrfCost.Equals(expectedRT) {
+		t.Errorf("%v and \n%v are equals", ToJSON(rtPrfCost), ToJSON(expectedRT))
+	}
+}
+
 func TestAsRatesIntervalsCost(t *testing.T) {
 	rtsIntrvl := &RateSInterval{
 		IntervalStart: NewDecimal(0, 0),
@@ -1667,5 +1859,27 @@ func TestRateSIntervalCostEquals(t *testing.T) {
 	}
 	if rIC.Equals(nRIc, nil, nil) {
 		t.Error("Shouldn't match")
+	}
+}
+func TestRateSIntervalCost(t *testing.T) {
+	rIv := &RateSInterval{
+		Increments: []*RateSIncrement{
+			{
+				RateID: "ir1",
+				Usage:  NewDecimal(int64(-1), 0),
+			},
+		},
+	}
+
+	rts := map[string]*IntervalRate{
+		"ir1": {
+			FixedFee: NewDecimal(int64(2), 0),
+		},
+	}
+
+	rcv := rIv.Cost(rts)
+	exp := new(decimal.Big).SetUint64(2)
+	if !reflect.DeepEqual(rcv, exp) {
+		fmt.Printf("Expected %v \n but received \n %v", exp, rcv)
 	}
 }

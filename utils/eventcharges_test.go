@@ -1203,3 +1203,99 @@ func TestEventChargesAppendChargeEntryNonEmptyCharges(t *testing.T) {
 		t.Errorf("Expected 5, received %v", eC.Charges[len(eC.Charges)-1].CompressFactor)
 	}
 }
+
+func TestUnitFactorID(t *testing.T) {
+	ec := &EventCharges{
+		UnitFactors: map[string]*UnitFactor{
+			"uf1": {
+				FilterIDs: []string{"fltr1"},
+				Factor:    NewDecimal(int64(2), 0),
+			},
+		},
+	}
+
+	uF := &UnitFactor{
+		FilterIDs: []string{"fltr1"},
+		Factor:    NewDecimal(int64(2), 0),
+	}
+
+	exp := "uf1"
+	if rcv := ec.unitFactorID(uF); rcv != exp {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+
+	uF.Factor = NewDecimal(int64(3), 0)
+	if rcv := ec.unitFactorID(uF); rcv != "" {
+		t.Errorf("Expected %v \n but received \n %v", "", rcv)
+	}
+}
+
+func TestRatingID(t *testing.T) {
+	ec := &EventCharges{
+		Rating: map[string]*RateSInterval{
+			"ri1": {
+				IntervalStart:  NewDecimal(int64(2), 0),
+				CompressFactor: int64(1),
+			},
+		},
+	}
+
+	rIl := &RateSInterval{
+		IntervalStart:  NewDecimal(int64(2), 0),
+		CompressFactor: int64(1),
+	}
+
+	nIrRef := map[string]*IntervalRate{
+		"ir1": {
+			IntervalStart: NewDecimal(int64(2), 0),
+		},
+	}
+
+	exp := "ri1"
+	if rcv := ec.ratingID(rIl, nIrRef); rcv != exp {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+
+	rIl.IntervalStart = NewDecimal(int64(3), 0)
+	exp = ""
+	if rcv := ec.ratingID(rIl, nIrRef); rcv != "" {
+		t.Errorf("Expected %v \n but received \n %v", "", rcv)
+	}
+}
+
+func TestAccountChargeID(t *testing.T) {
+	ec := &EventCharges{
+		Accounting: map[string]*AccountCharge{
+			"acc1": {
+				AccountID:    "acc_id1",
+				BalanceID:    "blncid1",
+				Units:        NewDecimal(int64(2), 0),
+				BalanceLimit: NewDecimal(int64(3), 0),
+				UnitFactorID: "uf1",
+				AttributeIDs: []string{"attr_id1"},
+				RatingID:     "ri1",
+			},
+		},
+	}
+
+	ac := &AccountCharge{
+		AccountID:    "acc_id1",
+		BalanceID:    "blncid1",
+		Units:        NewDecimal(int64(2), 0),
+		BalanceLimit: NewDecimal(int64(3), 0),
+		UnitFactorID: "uf1",
+		AttributeIDs: []string{"attr_id1"},
+		RatingID:     "ri1",
+	}
+
+	exp := "acc1"
+	if rcv := ec.accountChargeID(ac); rcv != exp {
+		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
+	}
+
+	ac.AccountID = "acc_id2"
+	exp = ""
+	if rcv := ec.accountChargeID(ac); rcv != "" {
+		t.Errorf("Expected %v \n but received \n %v", "", rcv)
+	}
+}
