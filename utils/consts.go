@@ -2391,7 +2391,7 @@ var (
 )
 
 // CGROptionsSet the possible cgr options
-var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, OptsSessionsTTL,
+var CGROptionsSet = NewStringSet([]string{OptsSessionsTTL,
 	OptsSessionsTTLMaxDelay, OptsSessionsTTLLastUsed, OptsSessionsTTLLastUsage, OptsSessionsTTLUsage,
 	OptsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
@@ -2423,8 +2423,6 @@ const (
 	OptsRoutesProfilesCount  = "*routesProfilesCount"
 	OptsRoutesLimit          = "*routes_limit"
 	OptsRoutesOffset         = "*routes_offset"
-	OptsRatesStartTime       = "*ratesStartTime"
-	OptsRatesUsage           = "*ratesUsage"
 	OptsSessionsTTL          = "*sessionsTTL"
 	OptsSessionsTTLMaxDelay  = "*sessionsTTLMaxDelay"
 	OptsSessionsTTLLastUsed  = "*sessionsTTLLastUsed"
@@ -2449,15 +2447,16 @@ const (
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
 	// Others
-	OptsContext               = "*context"
-	Subsys                    = "*subsys"
-	MetaMethod                = "*reqMethod"
-	OptsAttributesProfileIDs  = "*attrProfileIDs"
-	OptsAttributesProcessRuns = "*attrProcessRuns"
-	OptsAttributesProfileRuns = "*attrProfileRuns"
-	MetaEventType             = "*eventType"
-	EventType                 = "EventType"
-	SchedulerInit             = "SchedulerInit"
+	OptsContext                        = "*context"
+	Subsys                             = "*subsys"
+	MetaMethod                         = "*reqMethod"
+	OptsAttributesProfileIDs           = "*attrProfileIDs"
+	OptsAttributesProcessRuns          = "*attrProcessRuns"
+	OptsAttributesProfileRuns          = "*attrProfileRuns"
+	OptsAttributesProfileIgnoreFilters = "*attrProfileIgnoreFilters"
+	MetaEventType                      = "*eventType"
+	EventType                          = "EventType"
+	SchedulerInit                      = "SchedulerInit"
 
 	RemoteHostOpt = "*rmtHost"
 	CacheOpt      = "*cache"
