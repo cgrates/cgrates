@@ -1762,6 +1762,7 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.ClientConnector,
 		*reply = utils.OK
 		return
 	}
+	s.chargeable = s.OptsStart.GetBoolOrDefault(utils.OptsChargeable, true)
 	if aSs := sS.getSessions(s.CGRID, false); len(aSs) != 0 { // found active session, transit to passive
 		aSs[0].Lock()
 		sS.unregisterSession(s.CGRID, false)
