@@ -2398,7 +2398,8 @@ var CGROptionsSet = NewStringSet([]string{OptsSessionsTTL,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
 	OptsAttributesProcessRuns, OptsAttributesProfileIDs, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
 	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount,
-	OptsAttributesProfileRuns})
+	OptsAttributesProfileRuns, OptsAttributesProfileIgnoreFilters, OptsStatsProfileIDs,
+	OptsStatsProfileIgnoreFilters})
 
 // EventExporter metrics
 const (
@@ -2446,6 +2447,9 @@ const (
 	OptsDispatchersProfilesCount = "*dispatchersProfilesCount"
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
+	// Stats
+	OptsStatsProfileIDs           = "*stsProfileIDs"
+	OptsStatsProfileIgnoreFilters = "*stsProfileIgnoreFilters"
 	// Others
 	OptsContext                        = "*context"
 	Subsys                             = "*subsys"

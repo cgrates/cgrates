@@ -24,6 +24,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type StatsOpts struct {
+	ProfileIDs           []string
+	ProfileIgnoreFilters bool
+}
+
 // StatSCfg the stats config section
 type StatSCfg struct {
 	Enabled                bool
@@ -35,6 +40,19 @@ type StatSCfg struct {
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string
 	NestedFields           bool
+	Opts                   *StatsOpts
+}
+
+func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.ProfileIDs != nil {
+		sqOpts.ProfileIDs = *jsnCfg.ProfileIDs
+	}
+	if jsnCfg.ProfileIgnoreFilters != nil {
+		sqOpts.ProfileIgnoreFilters = *jsnCfg.ProfileIgnoreFilters
+	}
 }
 
 func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -89,17 +107,25 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		st.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Opts != nil {
+		st.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.MetaProfileIDs:              st.Opts.ProfileIDs,
+		utils.MetaProfileIgnoreFiltersCfg: st.Opts.ProfileIgnoreFilters,
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
 		utils.IndexedSelectsCfg:         st.IndexedSelects,
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
 		utils.NestedFieldsCfg:           st.NestedFields,
 		utils.StoreIntervalCfg:          utils.EmptyString,
+		utils.OptsCfg:                   opts,
 	}
 	if st.StoreInterval != 0 {
 		initialMP[utils.StoreIntervalCfg] = st.StoreInterval.String()
@@ -141,6 +167,13 @@ func (st *StatSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+func (stOpts *StatsOpts) Clone() *StatsOpts {
+	return &StatsOpts{
+		ProfileIDs:           utils.CloneStringSlice(stOpts.ProfileIDs),
+		ProfileIgnoreFilters: stOpts.ProfileIgnoreFilters,
+	}
+}
+
 // Clone returns a deep copy of StatSCfg
 func (st StatSCfg) Clone() (cln *StatSCfg) {
 	cln = &StatSCfg{
@@ -149,6 +182,7 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 		StoreInterval:          st.StoreInterval,
 		StoreUncompressedLimit: st.StoreUncompressedLimit,
 		NestedFields:           st.NestedFields,
+		Opts:                   st.Opts.Clone(),
 	}
 	if st.ThresholdSConns != nil {
 		cln.ThresholdSConns = make([]string, len(st.ThresholdSConns))
