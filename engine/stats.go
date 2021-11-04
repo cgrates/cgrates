@@ -156,9 +156,10 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching statQueues which are active by the time of the call
-func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string, actTime *time.Time, evNm utils.MapStorage) (sqs StatQueues, err error) {
+func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string, actTime *time.Time, evNm utils.MapStorage, ignoreFilters bool) (sqs StatQueues, err error) {
 	sqIDs := utils.NewStringSet(statsIDs)
 	if len(sqIDs) == 0 {
+		ignoreFilters = false
 		sqIDs, err = MatchingItemIDsForEvent(evNm,
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
 			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
@@ -192,15 +193,17 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 			sqPrfl.unlock()
 			continue
 		}
-		var pass bool
-		if pass, err = sS.filterS.Pass(tnt, sqPrfl.FilterIDs,
-			evNm); err != nil {
-			sqPrfl.unlock()
-			sqs.unlock()
-			return nil, err
-		} else if !pass {
-			sqPrfl.unlock()
-			continue
+		if !ignoreFilters {
+			var pass bool
+			if pass, err = sS.filterS.Pass(tnt, sqPrfl.FilterIDs,
+				evNm); err != nil {
+				sqPrfl.unlock()
+				sqs.unlock()
+				return nil, err
+			} else if !pass {
+				sqPrfl.unlock()
+				continue
+			}
 		}
 		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -331,7 +334,13 @@ func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueue
 			return
 		}
 	}
-	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, stsIDs, args.Time, evNm)
+	ignFilters := sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters
+	if opt, has := args.APIOpts[utils.OptsStatsProfileIDs]; has {
+		if ignFilters, err = utils.IfaceAsBool(opt); err != nil {
+			return
+		}
+	}
+	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, stsIDs, args.Time, evNm, ignFilters)
 	if err != nil {
 		return nil, err
 	}
@@ -398,11 +407,17 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *utils.CGREvent, reply *[]st
 			return
 		}
 	}
+	ignFilters := sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters
+	if opt, has := args.APIOpts[utils.OptsStatsProfileIDs]; has {
+		if ignFilters, err = utils.IfaceAsBool(opt); err != nil {
+			return
+		}
+	}
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(tnt, stsIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
-	}); err != nil {
+	}, ignFilters); err != nil {
 		return
 	}
 

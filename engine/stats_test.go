@@ -242,7 +242,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 	msq, err := statService.matchingStatQueuesForEvent(testStatsArgs[0].Tenant, stsIDs, testStatsArgs[0].Time,
-		utils.MapStorage{utils.MetaReq: testStatsArgs[0].Event, utils.MetaOpts: testStatsArgs[0].APIOpts})
+		utils.MapStorage{utils.MetaReq: testStatsArgs[0].Event, utils.MetaOpts: testStatsArgs[0].APIOpts}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -259,7 +259,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[1].Tenant, stsIDs, testStatsArgs[1].Time,
-		utils.MapStorage{utils.MetaReq: testStatsArgs[1].Event, utils.MetaOpts: testStatsArgs[1].APIOpts})
+		utils.MapStorage{utils.MetaReq: testStatsArgs[1].Event, utils.MetaOpts: testStatsArgs[1].APIOpts}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -276,7 +276,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[2].Tenant, stsIDs, testStatsArgs[2].Time,
-		utils.MapStorage{utils.MetaReq: testStatsArgs[2].Event, utils.MetaOpts: testStatsArgs[2].APIOpts})
+		utils.MapStorage{utils.MetaReq: testStatsArgs[2].Event, utils.MetaOpts: testStatsArgs[2].APIOpts}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -358,7 +358,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		t.Error(err)
 	}
 	msq, err := statService.matchingStatQueuesForEvent(testStatsArgs[0].Tenant, stsIDs, testStatsArgs[0].Time,
-		utils.MapStorage{utils.MetaReq: testStatsArgs[0].Event, utils.MetaOpts: testStatsArgs[0].APIOpts})
+		utils.MapStorage{utils.MetaReq: testStatsArgs[0].Event, utils.MetaOpts: testStatsArgs[0].APIOpts}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -375,7 +375,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		t.Error(err)
 	}
 	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[1].Tenant, stsIDs, testStatsArgs[1].Time,
-		utils.MapStorage{utils.MetaReq: testStatsArgs[1].Event, utils.MetaOpts: testStatsArgs[1].APIOpts})
+		utils.MapStorage{utils.MetaReq: testStatsArgs[1].Event, utils.MetaOpts: testStatsArgs[1].APIOpts}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -392,7 +392,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		t.Error(err)
 	}
 	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[2].Tenant, stsIDs, testStatsArgs[2].Time,
-		utils.MapStorage{utils.MetaReq: testStatsArgs[2].Event, utils.MetaOpts: testStatsArgs[2].APIOpts})
+		utils.MapStorage{utils.MetaReq: testStatsArgs[2].Event, utils.MetaOpts: testStatsArgs[2].APIOpts}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -692,7 +692,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 		ids.Add(rPrf.ID)
 	}
 	dm.RemoveStatQueue("cgrates.org", "STS1")
-	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{}, false)
 	if err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
@@ -753,7 +753,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 	}
 	prfs = append(prfs, rPrf)
 	ids.Add(rPrf.ID)
-	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{}, false)
 	expErr := utils.ErrPrefixNotFound(rPrf.FilterIDs[0])
 	if err == nil || err.Error() != expErr.Error() {
 		t.Errorf("Expected error: %s ,received: %+v", expErr, err)
@@ -800,7 +800,7 @@ func TestStatQueueMatchingStatQueuesForEventLocksBlocker(t *testing.T) {
 		prfs = append(prfs, rPrf)
 		ids.Add(rPrf.ID)
 	}
-	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -867,7 +867,7 @@ func TestStatQueueMatchingStatQueuesForEventLocksActivationInterval(t *testing.T
 	}
 	dm.SetStatQueueProfile(rPrf, true)
 	ids.Add(rPrf.ID)
-	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), utils.TimePointer(time.Now()), utils.MapStorage{})
+	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), utils.TimePointer(time.Now()), utils.MapStorage{}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -919,7 +919,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		ids.Add(fmt.Sprintf("STS%d", i))
 	}
-	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	_, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{}, false)
 	if err != utils.ErrNotImplemented {
 		t.Fatalf("Error: %+v", err)
 	}
@@ -958,7 +958,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks4(t *testing.T) {
 		ids.Add(rPrf.ID)
 	}
 	ids.Add("STS20")
-	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{})
+	mres, err := rS.matchingStatQueuesForEvent("cgrates.org", ids.AsSlice(), nil, utils.MapStorage{}, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
