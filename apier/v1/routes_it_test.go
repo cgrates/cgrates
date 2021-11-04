@@ -548,16 +548,14 @@ func testV1RouteGetLeastCostRoutesErr(t *testing.T) {
 func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
-	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        11 * time.Second,
-				utils.Cost:         10.0,
-			},
+	ev1 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        11 * time.Second,
+			utils.Cost:         10.0,
 		},
 	}
 	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -567,16 +565,14 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        11 * time.Second,
-				utils.Cost:         10.5,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        11 * time.Second,
+			utils.Cost:         10.5,
 		},
 	}
 	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -586,16 +582,14 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        5 * time.Second,
-				utils.Cost:         12.5,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        5 * time.Second,
+			utils.Cost:         12.5,
 		},
 	}
 	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -605,16 +599,14 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        6 * time.Second,
-				utils.Cost:         17.5,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        6 * time.Second,
+			utils.Cost:         17.5,
 		},
 	}
 	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -624,16 +616,14 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_3"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				utils.AccountField: "1003",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        11 * time.Second,
-				utils.Cost:         12.5,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        11 * time.Second,
+			utils.Cost:         12.5,
 		},
 	}
 	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -643,17 +633,15 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				"Stat":           "Stat1_1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      11 * time.Second,
-				utils.Cost:       12.5,
-				utils.PDD:        12 * time.Second,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			"Stat":           "Stat1_1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      11 * time.Second,
+			utils.Cost:       12.5,
+			utils.PDD:        12 * time.Second,
 		},
 	}
 	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -663,17 +651,15 @@ func testV1RoutePolulateStatsForQOS(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				"Stat":           "Stat1_1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      15 * time.Second,
-				utils.Cost:       15.5,
-				utils.PDD:        15 * time.Second,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			"Stat":           "Stat1_1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      15 * time.Second,
+			utils.Cost:       15.5,
+			utils.PDD:        15 * time.Second,
 		},
 	}
 	if err := routeSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {

@@ -243,32 +243,6 @@ func (sS *StatService) Call(serviceMethod string, args interface{}, reply interf
 	return utils.RPCCall(sS, serviceMethod, args, reply)
 }
 
-// StatsArgsProcessEvent the arguments for processing the event with stats
-type StatsArgsProcessEvent struct {
-	*utils.CGREvent
-	clnb bool //rpcclonable
-}
-
-// SetCloneable sets if the args should be clonned on internal connections
-func (attr *StatsArgsProcessEvent) SetCloneable(rpcCloneable bool) {
-	attr.clnb = rpcCloneable
-}
-
-// RPCClone implements rpcclient.RPCCloner interface
-func (attr *StatsArgsProcessEvent) RPCClone() (interface{}, error) {
-	if !attr.clnb {
-		return attr, nil
-	}
-	return attr.Clone(), nil
-}
-
-// Clone creates a clone of the object
-func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
-	return &StatsArgsProcessEvent{
-		CGREvent: attr.CGREvent.Clone(),
-	}
-}
-
 func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
 	if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
 		return
@@ -346,7 +320,7 @@ func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]interfa
 
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
-func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
+func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
@@ -383,8 +357,8 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 }
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
-	if args.CGREvent == nil {
+func (sS *StatService) V1ProcessEvent(args *utils.CGREvent, reply *[]string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
@@ -405,8 +379,8 @@ func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]stri
 }
 
 // V1GetStatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
-	if args.CGREvent == nil {
+func (sS *StatService) V1GetStatQueuesForEvent(args *utils.CGREvent, reply *[]string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing

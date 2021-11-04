@@ -764,14 +764,12 @@ func testActionsitSetSDestinations(t *testing.T) {
 
 	var reply2 []string
 	expected := []string{"DistinctMetricProfile"}
-	args := StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Destination: "333",
-				utils.Usage:       6 * time.Second,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.Destination: "333",
+			utils.Usage:       6 * time.Second,
 		},
 	}
 	if err := actsLclRpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
@@ -780,14 +778,12 @@ func testActionsitSetSDestinations(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
 	}
 
-	args = StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.Destination: "777",
-				utils.Usage:       6 * time.Second,
-			},
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.Destination: "777",
+			utils.Usage:       6 * time.Second,
 		},
 	}
 	if err := actsLclRpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {

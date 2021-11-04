@@ -674,17 +674,15 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 	//gonna match one stats for matching vendor 2 acd filter
 	var result []string
 	expected := []string{"STATS_VENDOR_2", "STATS_TCC1"}
-	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Category:     "vendor2",
-				utils.Usage:        "2m30s",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Cost:         1.0,
-			},
+	ev1 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Category:     "vendor2",
+			utils.Usage:        "2m30s",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Cost:         1.0,
 		},
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &result); err != nil {
@@ -919,17 +917,15 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 	//we will process this stats 2 times
 	//Vendor2
 	expected := []string{"STATS_TCC1", "STATS_VENDOR_2"}
-	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Category:     "vendor2",
-				utils.Usage:        "2m30s",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Cost:         1.0,
-			},
+	ev1 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Category:     "vendor2",
+			utils.Usage:        "2m30s",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Cost:         1.0,
 		},
 	}
 	var result []string
@@ -954,17 +950,15 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 
 	//Vendor1
 	expected = []string{"STATS_TCC1", "STATS_VENDOR_1"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Category:     "vendor1",
-				utils.Usage:        "2m30s",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Cost:         1.0,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Category:     "vendor1",
+			utils.Usage:        "2m30s",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Cost:         1.0,
 		},
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &result); err != nil {
@@ -1044,17 +1038,15 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 	// process *tcc metric for matching vendor3
-	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Category:     "vendor1",
-				utils.Usage:        "2m30s",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Cost:         10.0,
-			},
+	ev1 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Category:     "vendor1",
+			utils.Usage:        "2m30s",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Cost:         10.0,
 		},
 	}
 	var result []string
@@ -1298,17 +1290,15 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 	// "STATS_VENDOR_1"
 	var reply []string
 	expected := []string{"STATS_VENDOR_1", "STATS_TCC1"}
-	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				//utils.AccountField: "1004",
-				utils.Category:   "vendor1",
-				utils.Usage:      "1m20s",
-				utils.AnswerTime: "2013-06-01T05:00:00Z",
-				utils.Cost:       1.8,
-			},
+	ev1 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			//utils.AccountField: "1004",
+			utils.Category:   "vendor1",
+			utils.Usage:      "1m20s",
+			utils.AnswerTime: "2013-06-01T05:00:00Z",
+			utils.Cost:       1.8,
 		},
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -1323,17 +1313,15 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 		}
 	}
 	// different usage for *distinct metric
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				//utils.AccountField: "1004",
-				utils.Category:   "vendor1",
-				utils.Usage:      "20s",
-				utils.AnswerTime: "2013-06-01T05:00:00Z",
-				utils.Cost:       1.8,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			//utils.AccountField: "1004",
+			utils.Category:   "vendor1",
+			utils.Usage:      "20s",
+			utils.AnswerTime: "2013-06-01T05:00:00Z",
+			utils.Cost:       1.8,
 		},
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -1350,17 +1338,15 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 
 	// "STATS_VENDOR_2"
 	expected = []string{"STATS_VENDOR_2", "STATS_TCC1"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				//utils.AccountField: "1004",
-				utils.Category:   "vendor2",
-				utils.Usage:      "30s",
-				utils.AnswerTime: "2013-06-01T05:00:00Z",
-				utils.Cost:       0.77,
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			//utils.AccountField: "1004",
+			utils.Category:   "vendor2",
+			utils.Usage:      "30s",
+			utils.AnswerTime: "2013-06-01T05:00:00Z",
+			utils.Cost:       0.77,
 		},
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {

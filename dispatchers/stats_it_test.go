@@ -27,7 +27,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -104,23 +103,21 @@ func testDspStsGetStatFailover(t *testing.T) {
 	var reply []string
 	var metrics map[string]string
 	expected := []string{"Stats1"}
-	args := engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventName:    "Event1",
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        135 * time.Second,
-				utils.Cost:         123.0,
-				utils.RunID:        utils.MetaDefault,
-				utils.Destination:  "1002",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventName:    "Event1",
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        135 * time.Second,
+			utils.Cost:         123.0,
+			utils.RunID:        utils.MetaDefault,
+			utils.Destination:  "1002",
+		},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "stat12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "stat12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -175,19 +172,17 @@ func testDspStsPing(t *testing.T) {
 
 func testDspStsTestAuthKey(t *testing.T) {
 	var reply []string
-	args := engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        135 * time.Second,
-				utils.Cost:         123.0,
-				utils.PDD:          12 * time.Second},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "12345",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        135 * time.Second,
+			utils.Cost:         123.0,
+			utils.PDD:          12 * time.Second},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent,
@@ -216,20 +211,18 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	var reply []string
 	var metrics map[string]string
 	expected := []string{"Stats2"}
-	args := engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        135 * time.Second,
-				utils.Cost:         123.0,
-				utils.RunID:        utils.MetaDefault,
-				utils.Destination:  "1002"},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "stat12345",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        135 * time.Second,
+			utils.Cost:         123.0,
+			utils.RunID:        utils.MetaDefault,
+			utils.Destination:  "1002"},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "stat12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -259,21 +252,19 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 
-	args = engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        45 * time.Second,
-				utils.RunID:        utils.MetaDefault,
-				utils.Cost:         10.0,
-				utils.Destination:  "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "stat12345",
-			},
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.RunID:        utils.MetaDefault,
+			utils.Cost:         10.0,
+			utils.Destination:  "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "stat12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -336,26 +327,21 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	}
 
 	estats = []string{"Stats2"}
-	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueuesForEvent,
-		&engine.StatsArgsProcessEvent{
-
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "GetStats",
-				Event: map[string]interface{}{
-					utils.AccountField: "1002",
-					utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:        45 * time.Second,
-					utils.RunID:        utils.MetaDefault,
-					utils.Cost:         10.0,
-					utils.Destination:  "1001",
-				},
-
-				APIOpts: map[string]interface{}{
-					utils.OptsAPIKey: "stat12345",
-				},
-			},
-		}, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueuesForEvent, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "GetStats",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.RunID:        utils.MetaDefault,
+			utils.Cost:         10.0,
+			utils.Destination:  "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "stat12345",
+		},
+	}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(estats, reply) {
 		t.Errorf("expecting: %+v, received reply: %v", estats, reply)

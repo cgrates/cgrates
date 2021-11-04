@@ -531,17 +531,15 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 //StatQueue
 func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 	var reply *[]string
-	tEv := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.AccountUpdate,
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.AccountUpdate,
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
@@ -549,7 +547,7 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 		t.Error(err)
 	}
 
-	tEv.CGREvent.Tenant = utils.EmptyString
+	tEv.Tenant = utils.EmptyString
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -614,18 +612,16 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tEv := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.AccountUpdate,
-				utils.AccountField: "1001",
-				"Val":              10,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.AccountUpdate,
+			utils.AccountField: "1001",
+			"Val":              10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	var reply []string
@@ -641,16 +637,14 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 	var reply []string
 	expected := []string{"Stats1"}
-	ev2 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        45 * time.Second,
-				utils.Cost:         12.1,
-			},
+	ev2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, ev2, &reply); err != nil {
@@ -658,16 +652,14 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	ev3 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        45 * time.Second,
-				utils.Cost:         12.1,
-			},
+	ev3 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
@@ -676,20 +668,18 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	tEv := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.AccountUpdate,
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        45 * time.Second,
-				utils.Cost:         12.1,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.AccountUpdate,
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv, &reply); err != nil {
@@ -697,20 +687,18 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	tEv2 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.AccountUpdate,
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        45 * time.Second,
-				utils.Cost:         12.1,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.AccountUpdate,
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv2, &reply); err != nil {
@@ -777,18 +765,16 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 	}
 	var reply []string
 	expected := []string{"TEST_PROFILE1"}
-	tEv := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.BalanceUpdate,
-				utils.AccountField: "1003",
-				"Val":              10,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.BalanceUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.BalanceUpdate,
+			utils.AccountField: "1003",
+			"Val":              10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.BalanceUpdate,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
@@ -839,20 +825,18 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tEv := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.AccountUpdate,
-				utils.AccountField: "1003",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        45 * time.Second,
-				utils.Cost:         12.1,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.AccountUpdate,
+			utils.AccountField: "1003",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	var ids []string
@@ -868,18 +852,16 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 	var reply []string
 	expected := []string{"TEST_PROFILE1"}
-	tEv := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.BalanceUpdate,
-				utils.AccountField: "1003",
-				"Val":              10,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.BalanceUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.BalanceUpdate,
+			utils.AccountField: "1003",
+			"Val":              10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.BalanceUpdate,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
@@ -888,20 +870,18 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	expected = []string{"Stats1"}
-	tEv2 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.AccountUpdate,
-				utils.AccountField: "1003",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        45 * time.Second,
-				utils.Cost:         12.1,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.AccountUpdate,
+			utils.AccountField: "1003",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        45 * time.Second,
+			utils.Cost:         12.1,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv2, &reply); err != nil {

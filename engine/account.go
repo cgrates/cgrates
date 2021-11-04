@@ -1093,7 +1093,7 @@ func (acc *Account) Publish(initBal map[string]float64) {
 	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
 		var stsIDs []string
 		if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
-			utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &stsIDs); err != nil &&
+			utils.StatSv1ProcessEvent, cgrEv, &stsIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<AccountS> error: %s processing account event %+v with StatS.", err.Error(), cgrEv))

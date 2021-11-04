@@ -3829,16 +3829,13 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, clnb bo
 		return sIDs, utils.NewErrNotConnected(utils.StatS)
 	}
 
-	statArgs := &engine.StatsArgsProcessEvent{
-		CGREvent: cgrEv,
-	}
 	// check in case we have StatIDs inside flags
 	if len(stsIDs) != 0 {
-		statArgs.CGREvent.APIOpts[utils.OptsStatsProfileIDs] = stsIDs
+		cgrEv.APIOpts[utils.OptsStatsProfileIDs] = stsIDs
 	}
-	statArgs.SetCloneable(clnb)
+	cgrEv.SetCloneable(clnb)
 	//initialize the returned variable
-	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().StatSConns, nil, utils.StatSv1ProcessEvent, statArgs, &sIDs)
+	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().StatSConns, nil, utils.StatSv1ProcessEvent, cgrEv, &sIDs)
 	return
 }
 

@@ -101,44 +101,38 @@ var (
 		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: testStatsPrfs[1], SQMetrics: make(map[string]StatMetric)},
 		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: testStatsPrfs[2], SQMetrics: make(map[string]StatMetric)},
 	}
-	testStatsArgs = []*StatsArgsProcessEvent{
+	testStatsArgs = []*utils.CGREvent{
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					"Stats":          "StatQueueProfile1",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					"PddInterval":    "1s",
-					"Weight":         "9.0",
-					utils.Usage:      135 * time.Second,
-					utils.Cost:       123.0,
-				},
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"Stats":          "StatQueueProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				"Weight":         "9.0",
+				utils.Usage:      135 * time.Second,
+				utils.Cost:       123.0,
 			},
 		},
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event2",
-				Event: map[string]interface{}{
-					"Stats":          "StatQueueProfile2",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					"PddInterval":    "1s",
-					"Weight":         "15.0",
-					utils.Usage:      45 * time.Second,
-				},
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				"Stats":          "StatQueueProfile2",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				"Weight":         "15.0",
+				utils.Usage:      45 * time.Second,
 			},
 		},
 		{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event3",
-				Event: map[string]interface{}{
-					"Stats":     "StatQueueProfilePrefix",
-					utils.Usage: 30 * time.Second,
-				},
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				"Stats":     "StatQueueProfilePrefix",
+				utils.Usage: 30 * time.Second,
 			},
 		},
 	}
@@ -243,7 +237,11 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		&FilterS{dm: dmSTS, cfg: cfg}, nil)
 	prepareStatsData(t, dmSTS)
 
-	msq, err := statService.matchingStatQueuesForEvent(testStatsArgs[0].Tenant, testStatsArgs[0].StatIDs, testStatsArgs[0].Time,
+	stsIDs, err := utils.IfaceAsSliceString(testStatsArgs[0].APIOpts[utils.OptsStatsProfileIDs])
+	if err != nil {
+		t.Error(err)
+	}
+	msq, err := statService.matchingStatQueuesForEvent(testStatsArgs[0].Tenant, stsIDs, testStatsArgs[0].Time,
 		utils.MapStorage{utils.MetaReq: testStatsArgs[0].Event, utils.MetaOpts: testStatsArgs[0].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -256,7 +254,11 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(testStatsQ[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[0].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[1].Tenant, testStatsArgs[1].StatIDs, testStatsArgs[1].Time,
+	stsIDs, err = utils.IfaceAsSliceString(testStatsArgs[1].APIOpts[utils.OptsStatsProfileIDs])
+	if err != nil {
+		t.Error(err)
+	}
+	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[1].Tenant, stsIDs, testStatsArgs[1].Time,
 		utils.MapStorage{utils.MetaReq: testStatsArgs[1].Event, utils.MetaOpts: testStatsArgs[1].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -269,7 +271,11 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(testStatsQ[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[1].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[2].Tenant, testStatsArgs[2].StatIDs, testStatsArgs[2].Time,
+	stsIDs, err = utils.IfaceAsSliceString(testStatsArgs[2].APIOpts[utils.OptsStatsProfileIDs])
+	if err != nil {
+		t.Error(err)
+	}
+	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[2].Tenant, stsIDs, testStatsArgs[2].Time,
 		utils.MapStorage{utils.MetaReq: testStatsArgs[2].Event, utils.MetaOpts: testStatsArgs[2].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -347,7 +353,11 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	prepareStatsData(t, dmSTS)
 
 	statService.cgrcfg.StatSCfg().IndexedSelects = false
-	msq, err := statService.matchingStatQueuesForEvent(testStatsArgs[0].Tenant, testStatsArgs[0].StatIDs, testStatsArgs[0].Time,
+	stsIDs, err := utils.IfaceAsSliceString(testStatsArgs[0].APIOpts[utils.OptsStatsProfileIDs])
+	if err != nil {
+		t.Error(err)
+	}
+	msq, err := statService.matchingStatQueuesForEvent(testStatsArgs[0].Tenant, stsIDs, testStatsArgs[0].Time,
 		utils.MapStorage{utils.MetaReq: testStatsArgs[0].Event, utils.MetaOpts: testStatsArgs[0].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -360,7 +370,11 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	} else if !reflect.DeepEqual(testStatsQ[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[0].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[1].Tenant, testStatsArgs[1].StatIDs, testStatsArgs[1].Time,
+	stsIDs, err = utils.IfaceAsSliceString(testStatsArgs[1].APIOpts[utils.OptsStatsProfileIDs])
+	if err != nil {
+		t.Error(err)
+	}
+	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[1].Tenant, stsIDs, testStatsArgs[1].Time,
 		utils.MapStorage{utils.MetaReq: testStatsArgs[1].Event, utils.MetaOpts: testStatsArgs[1].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -373,7 +387,11 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	} else if !reflect.DeepEqual(testStatsQ[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[1].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[2].Tenant, testStatsArgs[2].StatIDs, testStatsArgs[2].Time,
+	stsIDs, err = utils.IfaceAsSliceString(testStatsArgs[2].APIOpts[utils.OptsStatsProfileIDs])
+	if err != nil {
+		t.Error(err)
+	}
+	msq, err = statService.matchingStatQueuesForEvent(testStatsArgs[2].Tenant, stsIDs, testStatsArgs[2].Time,
 		utils.MapStorage{utils.MetaReq: testStatsArgs[2].Event, utils.MetaOpts: testStatsArgs[2].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -432,10 +450,8 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(sqPrf, tempStat) {
 		t.Errorf("Expecting: %+v, received: %+v", sqPrf, tempStat)
 	}
-	ev := &StatsArgsProcessEvent{
-		StatIDs:  []string{"StatQueueProfile1", "StatQueueProfile2", "StatQueueProfile3"},
-		CGREvent: testStatsArgs[0].CGREvent,
-	}
+	ev := testStatsArgs[0]
+	ev.APIOpts[utils.OptsStatsProfileIDs] = []string{"StatQueueProfile1", "StatQueueProfile2", "StatQueueProfile3"}
 	reply := []string{}
 	expected := []string{"StatQueueProfile1", "StatQueueProfile3"}
 	expectedRev := []string{"StatQueueProfile3", "StatQueueProfile1"}
@@ -1159,93 +1175,6 @@ func TestStatQueueStoreThresholdNilDirtyField(t *testing.T) {
 	}
 }
 
-func TestStatQueueSetCloneable(t *testing.T) {
-	args := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ_ID"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventTest",
-			Event:  map[string]interface{}{},
-		},
-		clnb: false,
-	}
-
-	exp := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ_ID"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventTest",
-			Event:  map[string]interface{}{},
-		},
-		clnb: true,
-	}
-	args.SetCloneable(true)
-
-	if !reflect.DeepEqual(args, exp) {
-		t.Errorf("expected: <%+v>, received: <%+v>", exp, args)
-	}
-}
-
-func TestStatQueueRPCCloneOK(t *testing.T) {
-	args := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ_ID"},
-		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "EventTest",
-			Event:   make(map[string]interface{}),
-			APIOpts: make(map[string]interface{}),
-		},
-		clnb: true,
-	}
-
-	exp := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ_ID"},
-		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "EventTest",
-			Event:   make(map[string]interface{}),
-			APIOpts: make(map[string]interface{}),
-		},
-	}
-
-	if out, err := args.RPCClone(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(out.(*StatsArgsProcessEvent), exp) {
-		t.Errorf("expected: <%T>, \nreceived: <%T>",
-			args, exp)
-	}
-}
-
-func TestStatQueueRPCCloneNotCloneable(t *testing.T) {
-	args := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ_ID"},
-		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "EventTest",
-			Event:   make(map[string]interface{}),
-			APIOpts: make(map[string]interface{}),
-		},
-		clnb: false,
-	}
-
-	exp := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ_ID"},
-		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "EventTest",
-			Event:   make(map[string]interface{}),
-			APIOpts: make(map[string]interface{}),
-		},
-	}
-
-	if out, err := args.RPCClone(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(out.(*StatsArgsProcessEvent), exp) {
-		t.Errorf("expected: <%T>, \nreceived: <%T>",
-			args, exp)
-	}
-}
-
 func TestStatQueueProcessEventOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
@@ -1290,14 +1219,14 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ1"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "SqProcessEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -1348,13 +1277,11 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "SqProcessEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
 		},
 	}
 
@@ -1419,14 +1346,14 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ1"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "SqProcessEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -1497,13 +1424,13 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ1"},
-		CGREvent: &utils.CGREvent{
-			ID: "SqProcessEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args := &utils.CGREvent{
+		ID: "SqProcessEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -1566,25 +1493,20 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &StatsArgsProcessEvent{
-		StatIDs:  []string{"SQ1"},
-		CGREvent: nil,
-	}
-
 	var reply []string
 	experr := `MANDATORY_IE_MISSING: [CGREvent]`
-	if err := sS.V1ProcessEvent(args, &reply); err == nil ||
+	if err := sS.V1ProcessEvent(nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	args = &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ1"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -1594,12 +1516,12 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	args = &StatsArgsProcessEvent{
-		StatIDs: []string{"SQ1"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "SqProcessEvent",
-			Event:  nil,
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "SqProcessEvent",
+		Event:  nil,
+		APIOpts: map[string]interface{}{
+			utils.OptsStatsProfileIDs: []string{"SQ1"},
 		},
 	}
 
@@ -1918,12 +1840,10 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			ID: "TestGetStatQueuesForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args := &utils.CGREvent{
+		ID: "TestGetStatQueuesForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 	}
 
@@ -1975,12 +1895,10 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			ID: "TestGetStatQueuesForEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-			},
+	args := &utils.CGREvent{
+		ID: "TestGetStatQueuesForEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
 		},
 	}
 
@@ -2027,24 +1945,18 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 		t.Error(err)
 	}
 
-	args := &StatsArgsProcessEvent{
-		CGREvent: nil,
-	}
-
 	experr := `MANDATORY_IE_MISSING: [CGREvent]`
 	var reply []string
-	if err := sS.V1GetStatQueuesForEvent(args, &reply); err == nil ||
+	if err := sS.V1GetStatQueuesForEvent(nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	args = &StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.EmptyString,
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.EmptyString,
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 	}
 
@@ -2054,12 +1966,10 @@ func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
 	}
 
-	args = &StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestGetStatQueuesForEvent",
-			Event:  nil,
-		},
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestGetStatQueuesForEvent",
+		Event:  nil,
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`

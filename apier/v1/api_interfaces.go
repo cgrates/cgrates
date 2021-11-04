@@ -39,8 +39,8 @@ type ThresholdSv1Interface interface {
 
 type StatSv1Interface interface {
 	GetQueueIDs(tenant *utils.TenantWithAPIOpts, qIDs *[]string) error
-	ProcessEvent(args *engine.StatsArgsProcessEvent, reply *[]string) error
-	GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) (err error)
+	ProcessEvent(args *utils.CGREvent, reply *[]string) error
+	GetStatQueuesForEvent(args *utils.CGREvent, reply *[]string) (err error)
 	GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error)
 	GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error)
 	Ping(ign *utils.CGREvent, reply *string) error
