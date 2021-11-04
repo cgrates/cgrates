@@ -443,6 +443,11 @@ type ResourceSJsonCfg struct {
 	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
+type StatsOptsJson struct {
+	ProfileIDs           *[]string `json:"*profileIDs"`
+	ProfileIgnoreFilters *bool     `json:"*profileIgnoreFilters"`
+}
+
 // Stat service config section
 type StatServJsonCfg struct {
 	Enabled                  *bool
@@ -454,6 +459,7 @@ type StatServJsonCfg struct {
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
 	Nested_fields            *bool // applies when indexed fields is not defined
+	Opts                     *StatsOptsJson
 }
 
 // Threshold service config section

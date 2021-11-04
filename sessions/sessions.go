@@ -3834,7 +3834,7 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, clnb bo
 	}
 	// check in case we have StatIDs inside flags
 	if len(stsIDs) != 0 {
-		statArgs.StatIDs = stsIDs
+		statArgs.CGREvent.APIOpts[utils.OptsStatsProfileIDs] = stsIDs
 	}
 	statArgs.SetCloneable(clnb)
 	//initialize the returned variable

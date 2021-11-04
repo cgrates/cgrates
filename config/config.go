@@ -151,7 +151,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.attributeSCfg = &AttributeSCfg{Opts: &AttributesOpts{}}
 	cfg.chargerSCfg = new(ChargerSCfg)
 	cfg.resourceSCfg = new(ResourceSConfig)
-	cfg.statsCfg = new(StatSCfg)
+	cfg.statsCfg = &StatSCfg{Opts: &StatsOpts{}}
 	cfg.thresholdSCfg = new(ThresholdSCfg)
 	cfg.routeSCfg = new(RouteSCfg)
 	cfg.sureTaxCfg = new(SureTaxCfg)
