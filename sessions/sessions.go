@@ -1498,6 +1498,14 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 		*reply = utils.OK
 		return
 	}
+	if s.chargeable, err = engine.GetBoolOpts(ctx, s.Tenant, &utils.CGREvent{
+		Tenant:  s.Tenant,
+		Event:   s.EventStart,
+		APIOpts: s.OptsStart,
+	}, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
+		config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
+		return
+	}
 	if aSs := sS.getSessions(s.CGRID, false); len(aSs) != 0 { // found active session, transit to passive
 		aSs[0].Lock()
 		sS.unregisterSession(s.CGRID, false)
