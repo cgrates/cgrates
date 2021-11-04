@@ -342,16 +342,14 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	// simulate some stat event
 	var reply []string
 	expected := []string{"Stat_1"}
-	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        11 * time.Second,
-				utils.Cost:         10.0,
-			},
+	ev1 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        11 * time.Second,
+			utils.Cost:         10.0,
 		},
 	}
 	if err := attrRPC.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -361,7 +359,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1"}
-	ev1.CGREvent = &utils.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{

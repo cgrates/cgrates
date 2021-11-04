@@ -681,14 +681,12 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	sEv := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "dan",
-				utils.Usage:        45 * time.Second,
-			},
+	sEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "dan",
+			utils.Usage:        45 * time.Second,
 		},
 	}
 	var sqIDs []string

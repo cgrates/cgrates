@@ -145,17 +145,14 @@ func testV1FltrLoadTarrifPlans(t *testing.T) {
 func testV1FltrAddStats(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
-	ev1 := &engine.StatsArgsProcessEvent{
-
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        11 * time.Second,
-				utils.Cost:         10.0,
-			},
+	ev1 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        11 * time.Second,
+			utils.Cost:         10.0,
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -165,7 +162,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1"}
-	ev1.CGREvent = &utils.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -182,7 +179,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1.CGREvent = &utils.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -199,7 +196,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1.CGREvent = &utils.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -216,7 +213,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_3"}
-	ev1.CGREvent = &utils.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -233,7 +230,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1.CGREvent = &utils.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -251,7 +248,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1.CGREvent = &utils.CGREvent{
+	ev1 = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -656,14 +653,12 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	//here will check the event
-	statsEv := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event_nr2",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Usage:        "1",
-			},
+	statsEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event_nr2",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Usage:        "1",
 		},
 	}
 	var ids []string

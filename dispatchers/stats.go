@@ -21,7 +21,6 @@ package dispatchers
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -40,17 +39,17 @@ func (dS *DispatcherService) StatSv1Ping(args *utils.CGREvent, reply *string) (e
 	return dS.Dispatch(args, utils.MetaStats, utils.StatSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent,
+func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *utils.CGREvent,
 	reply *[]string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetStatQueuesForEvent,
-			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			args.Tenant,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
+	return dS.Dispatch(args, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts,
@@ -70,17 +69,17 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWi
 	}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEvent,
+func (dS *DispatcherService) StatSv1ProcessEvent(args *utils.CGREvent,
 	reply *[]string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1ProcessEvent,
-			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			args.Tenant,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
+	return dS.Dispatch(args, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts,

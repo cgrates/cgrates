@@ -555,14 +555,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 	// so we can check the metrics in Suppliers for *load strategy
 	var reply []string
 	expected := []string{"Stat_Supplier1"}
-	ev1 := &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				"LoadReq": 1,
-				"StatID":  "Stat_Supplier1",
-			},
+	ev1 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			"LoadReq": 1,
+			"StatID":  "Stat_Supplier1",
 		},
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -572,14 +570,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier1"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				"LoadReq": 1,
-				"StatID":  "Stat_Supplier1",
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			"LoadReq": 1,
+			"StatID":  "Stat_Supplier1",
 		},
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -601,14 +597,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier2"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				"LoadReq": 1,
-				"StatID":  "Stat_Supplier2",
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			"LoadReq": 1,
+			"StatID":  "Stat_Supplier2",
 		},
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -618,14 +612,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier2"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event4",
-			Event: map[string]interface{}{
-				"LoadReq": 1,
-				"StatID":  "Stat_Supplier2",
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event4",
+		Event: map[string]interface{}{
+			"LoadReq": 1,
+			"StatID":  "Stat_Supplier2",
 		},
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -643,14 +635,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier3"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event5",
-			Event: map[string]interface{}{
-				"LoadReq": 1,
-				"StatID":  "Stat_Supplier3",
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event5",
+		Event: map[string]interface{}{
+			"LoadReq": 1,
+			"StatID":  "Stat_Supplier3",
 		},
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -660,14 +650,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier3"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event6",
-			Event: map[string]interface{}{
-				"LoadReq": 1,
-				"StatID":  "Stat_Supplier3",
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event6",
+		Event: map[string]interface{}{
+			"LoadReq": 1,
+			"StatID":  "Stat_Supplier3",
 		},
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
@@ -677,14 +665,12 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_Supplier3"}
-	ev1 = &engine.StatsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event7",
-			Event: map[string]interface{}{
-				"LoadReq": 1,
-				"StatID":  "Stat_Supplier3",
-			},
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event7",
+		Event: map[string]interface{}{
+			"LoadReq": 1,
+			"StatID":  "Stat_Supplier3",
 		},
 	}
 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {

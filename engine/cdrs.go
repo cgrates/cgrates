@@ -411,9 +411,7 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 // statSProcessEvent will send the event to StatS
 func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var reply []string
-	statArgs := &StatsArgsProcessEvent{
-		CGREvent: cgrEv.Clone(),
-	}
+	statArgs := cgrEv.Clone()
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().StatSConns, nil,
 		utils.StatSv1ProcessEvent,
 		statArgs, &reply); err != nil &&
