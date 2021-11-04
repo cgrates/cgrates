@@ -114,6 +114,7 @@ var (
 				utils.Usage:      135 * time.Second,
 				utils.Cost:       123.0,
 			},
+			APIOpts: map[string]interface{}{},
 		},
 		{
 			Tenant: "cgrates.org",
@@ -126,6 +127,7 @@ var (
 				"Weight":         "15.0",
 				utils.Usage:      45 * time.Second,
 			},
+			APIOpts: map[string]interface{}{},
 		},
 		{
 			Tenant: "cgrates.org",
@@ -134,6 +136,7 @@ var (
 				"Stats":     "StatQueueProfilePrefix",
 				utils.Usage: 30 * time.Second,
 			},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 )

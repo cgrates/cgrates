@@ -335,7 +335,7 @@ func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueue
 		}
 	}
 	ignFilters := sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters
-	if opt, has := args.APIOpts[utils.OptsStatsProfileIDs]; has {
+	if opt, has := args.APIOpts[utils.OptsStatsProfileIgnoreFilters]; has {
 		if ignFilters, err = utils.IfaceAsBool(opt); err != nil {
 			return
 		}
@@ -408,7 +408,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *utils.CGREvent, reply *[]st
 		}
 	}
 	ignFilters := sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters
-	if opt, has := args.APIOpts[utils.OptsStatsProfileIDs]; has {
+	if opt, has := args.APIOpts[utils.OptsStatsProfileIgnoreFilters]; has {
 		if ignFilters, err = utils.IfaceAsBool(opt); err != nil {
 			return
 		}
