@@ -220,3 +220,27 @@ func TestUpdateStructWithIfaceMapErrorDefault(t *testing.T) {
 		t.Errorf("Expected <cannot update unsupported struct field: (0+0i)> ,received: <%+v>", err)
 	}
 }
+
+// func TestContentStructFieldByIndexIsEmpty(t *testing.T) {
+
+// 	type InsideStruct struct {
+// 		Field1 int
+// 	}
+// 	type contentStruct struct {
+// 		content1 string
+// 		content2 InsideStruct
+// 	}
+
+// 	myStruct := contentStruct{
+// 		content1: "string1",
+// 		content2: InsideStruct{
+// 			Field1: 1,
+// 		},
+// 	}
+// 	value := reflect.ValueOf(myStruct)
+// 	ptr := value.FieldByName("content2")
+// 	value = reflect.Indirect(ptr).FieldByName("Field1")
+// 	if fieldByIndexIsEmpty(value, []int{0, 1}) {
+// 		fmt.Printf("%v", value)
+// 	}
+// }
