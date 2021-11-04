@@ -53,6 +53,9 @@ func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) {
 	if jsnCfg.ProfileRuns != nil {
 		attrOpts.ProfileRuns = *jsnCfg.ProfileRuns
 	}
+	if jsnCfg.ProfileIgnoreFilters != nil {
+		attrOpts.ProfileIgnoreFilters = *jsnCfg.ProfileIgnoreFilters
+	}
 	if jsnCfg.ProcessRuns != nil {
 		attrOpts.ProcessRuns = *jsnCfg.ProcessRuns
 	}
