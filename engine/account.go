@@ -549,20 +549,18 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 		if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 			defaultBalance := acc.GetDefaultMoneyBalance()
 			acntTnt := utils.NewTenantID(acc.ID)
-			thEv := &ThresholdsArgsProcessEvent{
-				CGREvent: &utils.CGREvent{
-					Tenant: acntTnt.Tenant,
-					ID:     utils.GenUUID(),
-					Event: map[string]interface{}{
-						utils.EventType:    utils.BalanceUpdate,
-						utils.EventSource:  utils.AccountService,
-						utils.AccountField: acntTnt.ID,
-						utils.BalanceID:    defaultBalance.ID,
-						utils.Units:        defaultBalance.Value,
-					},
-					APIOpts: map[string]interface{}{
-						utils.MetaEventType: utils.BalanceUpdate,
-					},
+			thEv := &utils.CGREvent{
+				Tenant: acntTnt.Tenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					utils.EventType:    utils.BalanceUpdate,
+					utils.EventSource:  utils.AccountService,
+					utils.AccountField: acntTnt.ID,
+					utils.BalanceID:    defaultBalance.ID,
+					utils.Units:        defaultBalance.Value,
+				},
+				APIOpts: map[string]interface{}{
+					utils.MetaEventType: utils.BalanceUpdate,
 				},
 			}
 			var tIDs []string
@@ -1084,7 +1082,7 @@ func (acc *Account) Publish(initBal map[string]float64) {
 	if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 		var tIDs []string
 		if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-			utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+			utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))

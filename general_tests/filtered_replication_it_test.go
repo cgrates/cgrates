@@ -492,13 +492,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "dan",
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "dan",
 		},
 	}
 	var thIDs []string

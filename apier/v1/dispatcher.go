@@ -227,13 +227,13 @@ func (dT *DispatcherThresholdSv1) Ping(args *utils.CGREvent, reply *string) erro
 }
 
 // GetThresholdsForEvent implements ThresholdSv1GetThresholdsForEvent
-func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(tntID *engine.ThresholdsArgsProcessEvent,
+func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(tntID *utils.CGREvent,
 	t *engine.Thresholds) error {
 	return dT.dS.ThresholdSv1GetThresholdsForEvent(tntID, t)
 }
 
 // ProcessEvent implements ThresholdSv1ProcessEvent
-func (dT *DispatcherThresholdSv1) ProcessEvent(args *engine.ThresholdsArgsProcessEvent,
+func (dT *DispatcherThresholdSv1) ProcessEvent(args *utils.CGREvent,
 	tIDs *[]string) error {
 	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
 }

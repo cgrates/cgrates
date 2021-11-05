@@ -144,17 +144,15 @@ func testV1FIdxCaFromFolder(t *testing.T) {
 
 //ThresholdProfile
 func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.BalanceUpdate,
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.BalanceUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.BalanceUpdate,
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.BalanceUpdate,
 		},
 	}
 	var thIDs []string
@@ -214,18 +212,16 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//matches TEST_PROFILE1
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		ThresholdIDs: []string{"TEST_PROFILE1"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.BalanceUpdate,
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.BalanceUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.BalanceUpdate,
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType:            utils.BalanceUpdate,
+			utils.OptsThresholdsProfileIDs: []string{"TEST_PROFILE1"},
 		},
 	}
 	var thIDs []string
@@ -241,20 +237,18 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 
 func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 	//matches THD_ACNT_BALANCE_1
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		ThresholdIDs: []string{"THD_ACNT_BALANCE_1"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.BalanceUpdate,
-				utils.AccountField: "1001",
-				utils.BalanceID:    utils.MetaDefault,
-				utils.Units:        12.3,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.BalanceUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.BalanceUpdate,
+			utils.AccountField: "1001",
+			utils.BalanceID:    utils.MetaDefault,
+			utils.Units:        12.3,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType:            utils.BalanceUpdate,
+			utils.OptsThresholdsProfileIDs: []string{"THD_ACNT_BALANCE_1"},
 		},
 	}
 	var thIDs []string
@@ -317,17 +311,15 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//make sure doesn't match the thresholdprofile after update
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.AccountUpdate,
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.AccountUpdate,
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	var thIDs []string
@@ -338,17 +330,15 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//matches thresholdprofile after update
-	tEv2 := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:    utils.AccountUpdate,
-				utils.AccountField: "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.EventType:    utils.AccountUpdate,
+			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	eIDs = []string{"TEST_PROFILE1"}
@@ -408,17 +398,15 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.EventType:    utils.BalanceUpdate,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.BalanceUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.EventType:    utils.BalanceUpdate,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.BalanceUpdate,
 		},
 	}
 	var thIDs []string
@@ -427,17 +415,15 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tEv2 := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				utils.AccountField: "1003",
-				utils.EventType:    utils.BalanceUpdate,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.BalanceUpdate,
-			},
+	tEv2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+			utils.EventType:    utils.BalanceUpdate,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.BalanceUpdate,
 		},
 	}
 	eIDs := []string{"THD_ACNT_BALANCE_1"}
@@ -451,17 +437,15 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 
 func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	var resp string
-	tEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event8",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.EventType:    utils.AccountUpdate,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.AccountUpdate,
-			},
+	tEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event8",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.EventType:    utils.AccountUpdate,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}
 	var thIDs []string
@@ -472,17 +456,15 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
 	}
 
-	tEv2 := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event9",
-			Event: map[string]interface{}{
-				utils.AccountField: "1003",
-				utils.EventType:    utils.BalanceUpdate,
-			},
-			APIOpts: map[string]interface{}{
-				utils.MetaEventType: utils.BalanceUpdate,
-			},
+	tEv2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event9",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+			utils.EventType:    utils.BalanceUpdate,
+		},
+		APIOpts: map[string]interface{}{
+			utils.MetaEventType: utils.BalanceUpdate,
 		},
 	}
 	eIDs = []string{"THD_ACNT_BALANCE_1"}

@@ -3810,16 +3810,13 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, clnb
 	if len(sS.cgrCfg.SessionSCfg().ThreshSConns) == 0 {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
 	}
-	thEv := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: cgrEv,
-	}
 	// check if we have thresholdIDs
 	if len(thIDs) != 0 {
-		thEv.ThresholdIDs = thIDs
+		cgrEv.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 	}
-	thEv.SetCloneable(clnb)
+	cgrEv.SetCloneable(clnb)
 	//initialize the returned variable
-	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ThreshSConns, nil, utils.ThresholdSv1ProcessEvent, thEv, &tIDs)
+	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ThreshSConns, nil, utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs)
 	return
 }
 

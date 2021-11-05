@@ -67,10 +67,8 @@ func TestDspThresholdSv1PingErrorNil(t *testing.T) {
 func TestDspThresholdSv1GetThresholdsForEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *engine.Thresholds
 	result := dspSrv.ThresholdSv1GetThresholdsForEvent(CGREvent, reply)
@@ -84,10 +82,8 @@ func TestDspThresholdSv1GetThresholdsEvnil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *engine.Thresholds
 	result := dspSrv.ThresholdSv1GetThresholdsForEvent(CGREvent, reply)
@@ -100,10 +96,8 @@ func TestDspThresholdSv1GetThresholdsEvnil(t *testing.T) {
 func TestDspThresholdSv1ProcessEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]string
 	result := dspSrv.ThresholdSv1ProcessEvent(CGREvent, reply)
@@ -117,10 +111,8 @@ func TestDspThresholdSv1ProcessEventnNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]string
 	result := dspSrv.ThresholdSv1ProcessEvent(CGREvent, reply)

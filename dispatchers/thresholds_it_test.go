@@ -105,18 +105,16 @@ func testDspThProcessEventFailover(t *testing.T) {
 	var ids []string
 	eIDs := []string{"THD_ACNT_1001"}
 	nowTime := time.Now()
-	args := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Time:   &nowTime,
-			Event: map[string]interface{}{
-				utils.EventName:    "Event1",
-				utils.AccountField: "1001"},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   &nowTime,
+		Event: map[string]interface{}{
+			utils.EventName:    "Event1",
+			utils.AccountField: "1001"},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "thr12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "thr12345",
 		},
 	}
 

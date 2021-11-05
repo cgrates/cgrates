@@ -2337,19 +2337,17 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
-				exp := &ThresholdsArgsProcessEvent{
-					ThresholdIDs: []string{"TH1"},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
-						Event: map[string]interface{}{
-							utils.EventType:  utils.StatUpdate,
-							utils.StatID:     "SQ1",
-							"testMetricType": time.Duration(time.Hour),
-						},
-						APIOpts: map[string]interface{}{
-							utils.MetaEventType: utils.StatUpdate,
-						},
+				exp := &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     args.(*utils.CGREvent).ID,
+					Event: map[string]interface{}{
+						utils.EventType:  utils.StatUpdate,
+						utils.StatID:     "SQ1",
+						"testMetricType": time.Duration(time.Hour),
+					},
+					APIOpts: map[string]interface{}{
+						utils.MetaEventType:            utils.StatUpdate,
+						utils.OptsThresholdsProfileIDs: []string{"TH1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {

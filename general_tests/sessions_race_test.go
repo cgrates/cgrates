@@ -49,10 +49,10 @@ var (
 type raceConn struct{}
 
 func (_ raceConn) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
-	cgrev := args.(*engine.ThresholdsArgsProcessEvent)
+	cgrev := args.(*utils.CGREvent)
 	for {
-		for k := range cgrev.CGREvent.Event {
-			if _, has := cgrev.CGREvent.Event[k]; !has {
+		for k := range cgrev.Event {
+			if _, has := cgrev.Event[k]; !has {
 				fmt.Println(1)
 			}
 		}
