@@ -143,7 +143,7 @@ func (t *Threshold) isLocked() bool {
 
 // ProcessEvent processes an ThresholdEvent
 // concurrentActions limits the number of simultaneous action sets executed
-func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManager, fltrS *FilterS) (err error) {
+func (t *Threshold) ProcessEvent(args *utils.CGREvent, dm *DataManager, fltrS *FilterS) (err error) {
 	if t.Snooze.After(time.Now()) || // snoozed, not executing actions
 		t.Hits < t.tPrfl.MinHits || // number of hits was not met, will not execute actions
 		(t.tPrfl.MaxHits != -1 &&
@@ -165,7 +165,7 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 		at := &ActionTiming{
 			Uuid:      utils.GenUUID(),
 			ActionsID: actionSetID,
-			ExtraData: args.CGREvent,
+			ExtraData: args,
 		}
 		if tntAcnt != utils.EmptyString {
 			at.accountIDs = utils.NewStringMap(tntAcnt)
@@ -324,12 +324,18 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *ThresholdsArgsProcessEvent) (ts Thresholds, err error) {
+func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.CGREvent) (ts Thresholds, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	tIDs := utils.NewStringSet(args.ThresholdIDs)
+	thdIDs := tS.cgrcfg.ThresholdSCfg().Opts.ProfileIDs
+	if opt, has := args.APIOpts[utils.OptsThresholdsProfileIDs]; has {
+		if thdIDs, err = utils.IfaceAsSliceString(opt); err != nil {
+			return
+		}
+	}
+	tIDs := utils.NewStringSet(thdIDs)
 	if len(tIDs) == 0 {
 		tIDs, err = MatchingItemIDsForEvent(evNm,
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
@@ -410,40 +416,8 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *Thresho
 	return
 }
 
-// ThresholdsArgsProcessEvent are the arguments to proccess the event with thresholds
-type ThresholdsArgsProcessEvent struct {
-	ThresholdIDs []string
-	*utils.CGREvent
-	clnb bool //rpcclonable
-}
-
-// SetCloneable sets if the args should be clonned on internal connections
-func (attr *ThresholdsArgsProcessEvent) SetCloneable(rpcCloneable bool) {
-	attr.clnb = rpcCloneable
-}
-
-// RPCClone implements rpcclient.RPCCloner interface
-func (attr *ThresholdsArgsProcessEvent) RPCClone() (interface{}, error) {
-	if !attr.clnb {
-		return attr, nil
-	}
-	return attr.Clone(), nil
-}
-
-// Clone creates a clone of the object
-func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
-	var thIDs []string
-	if attr.ThresholdIDs != nil {
-		thIDs = utils.CloneStringSlice(attr.ThresholdIDs)
-	}
-	return &ThresholdsArgsProcessEvent{
-		ThresholdIDs: thIDs,
-		CGREvent:     attr.CGREvent.Clone(),
-	}
-}
-
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcessEvent) (thresholdsIDs []string, err error) {
+func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thresholdsIDs []string, err error) {
 	var matchTs Thresholds
 	if matchTs, err = tS.matchingThresholdsForEvent(tnt, args); err != nil {
 		return nil, err
@@ -456,7 +430,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcess
 		if err = t.ProcessEvent(args, tS.dm, tS.filterS); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
-					t.TenantID(), utils.ConcatenatedKey(tnt, args.CGREvent.ID), err.Error()))
+					t.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
 			withErrors = true
 			continue
 		}
@@ -498,13 +472,13 @@ func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcess
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(args *ThresholdsArgsProcessEvent, reply *[]string) (err error) {
-	if args.CGREvent == nil {
+func (tS *ThresholdService) V1ProcessEvent(args *utils.CGREvent, reply *[]string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent.Event == nil {
+	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant
@@ -520,13 +494,13 @@ func (tS *ThresholdService) V1ProcessEvent(args *ThresholdsArgsProcessEvent, rep
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdService) V1GetThresholdsForEvent(args *ThresholdsArgsProcessEvent, reply *Thresholds) (err error) {
-	if args.CGREvent == nil {
+func (tS *ThresholdService) V1GetThresholdsForEvent(args *utils.CGREvent, reply *Thresholds) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent.Event == nil {
+	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant

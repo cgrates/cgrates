@@ -31,9 +31,9 @@ import (
 
 type ThresholdSv1Interface interface {
 	GetThresholdIDs(tenant *utils.TenantWithAPIOpts, tIDs *[]string) error
-	GetThresholdsForEvent(args *engine.ThresholdsArgsProcessEvent, reply *engine.Thresholds) error
+	GetThresholdsForEvent(args *utils.CGREvent, reply *engine.Thresholds) error
 	GetThreshold(tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error
-	ProcessEvent(args *engine.ThresholdsArgsProcessEvent, tIDs *[]string) error
+	ProcessEvent(args *utils.CGREvent, tIDs *[]string) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 

@@ -2895,19 +2895,17 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
-				exp := &ThresholdsArgsProcessEvent{
-					ThresholdIDs: []string{"THD_1"},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
-						Event: map[string]interface{}{
-							utils.EventType:  utils.ResourceUpdate,
-							utils.ResourceID: "RES_1",
-							utils.Usage:      0.,
-						},
-						APIOpts: map[string]interface{}{
-							utils.MetaEventType: utils.ResourceUpdate,
-						},
+				exp := &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     args.(*utils.CGREvent).ID,
+					Event: map[string]interface{}{
+						utils.EventType:  utils.ResourceUpdate,
+						utils.ResourceID: "RES_1",
+						utils.Usage:      0.,
+					},
+					APIOpts: map[string]interface{}{
+						utils.MetaEventType:            utils.ResourceUpdate,
+						utils.OptsThresholdsProfileIDs: []string{"THD_1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -2964,19 +2962,17 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
-				exp := &ThresholdsArgsProcessEvent{
-					ThresholdIDs: []string{"THD_1"},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
-						Event: map[string]interface{}{
-							utils.EventType:  utils.ResourceUpdate,
-							utils.ResourceID: "RES_1",
-							utils.Usage:      0.,
-						},
-						APIOpts: map[string]interface{}{
-							utils.MetaEventType: utils.ResourceUpdate,
-						},
+				exp := &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     args.(*utils.CGREvent).ID,
+					Event: map[string]interface{}{
+						utils.EventType:  utils.ResourceUpdate,
+						utils.ResourceID: "RES_1",
+						utils.Usage:      0.,
+					},
+					APIOpts: map[string]interface{}{
+						utils.MetaEventType:            utils.ResourceUpdate,
+						utils.OptsThresholdsProfileIDs: []string{"THD_1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {

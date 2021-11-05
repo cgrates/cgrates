@@ -462,6 +462,11 @@ type StatServJsonCfg struct {
 	Opts                     *StatsOptsJson
 }
 
+type ThresholdsOptsJson struct {
+	ProfileIDs           *[]string `json:"*profileIDs"`
+	ProfileIgnoreFilters *bool     `json:"*profileIgnoreFilters"`
+}
+
 // Threshold service config section
 type ThresholdSJsonCfg struct {
 	Enabled               *bool
@@ -471,6 +476,7 @@ type ThresholdSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
+	Opts                  *ThresholdsOptsJson
 }
 
 // Route service config section

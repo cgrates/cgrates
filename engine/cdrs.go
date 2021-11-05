@@ -392,9 +392,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var tIDs []string
 	// we clone the CGREvent so we can add EventType without being propagated
-	thArgs := &ThresholdsArgsProcessEvent{
-		CGREvent: cgrEv.Clone(),
-	}
+	thArgs := cgrEv.Clone()
 	if thArgs.APIOpts == nil {
 		thArgs.APIOpts = make(map[string]interface{})
 	}

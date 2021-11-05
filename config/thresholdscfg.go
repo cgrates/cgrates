@@ -24,6 +24,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type ThresholdsOpts struct {
+	ProfileIDs           []string
+	ProfileIgnoreFilters bool
+}
+
 // ThresholdSCfg the threshold config section
 type ThresholdSCfg struct {
 	Enabled             bool
@@ -33,6 +38,19 @@ type ThresholdSCfg struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+	Opts                *ThresholdsOpts
+}
+
+func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.ProfileIDs != nil {
+		thdOpts.ProfileIDs = *jsnCfg.ProfileIDs
+	}
+	if jsnCfg.ProfileIgnoreFilters != nil {
+		thdOpts.ProfileIgnoreFilters = *jsnCfg.ProfileIgnoreFilters
+	}
 }
 
 func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
@@ -74,16 +92,24 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		t.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Opts != nil {
+		t.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.MetaProfileIDs:              t.Opts.ProfileIDs,
+		utils.MetaProfileIgnoreFiltersCfg: t.Opts.ProfileIgnoreFilters,
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        t.Enabled,
 		utils.IndexedSelectsCfg: t.IndexedSelects,
 		utils.NestedFieldsCfg:   t.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
+		utils.OptsCfg:           opts,
 	}
 	if t.StoreInterval != 0 {
 		initialMP[utils.StoreIntervalCfg] = t.StoreInterval.String()
@@ -113,6 +139,13 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
+	return &ThresholdsOpts{
+		ProfileIDs:           utils.CloneStringSlice(thdOpts.ProfileIDs),
+		ProfileIgnoreFilters: thdOpts.ProfileIgnoreFilters,
+	}
+}
+
 // Clone returns a deep copy of ThresholdSCfg
 func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	cln = &ThresholdSCfg{
@@ -120,6 +153,7 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 		IndexedSelects: t.IndexedSelects,
 		StoreInterval:  t.StoreInterval,
 		NestedFields:   t.NestedFields,
+		Opts:           t.Opts.Clone(),
 	}
 
 	if t.StringIndexedFields != nil {
