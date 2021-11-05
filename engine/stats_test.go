@@ -89,9 +89,9 @@ var (
 		},
 	}
 	testStatsQ = []*StatQueue{
-		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: testStatsPrfs[0], SQMetrics: make(map[string]*StatMetricWithFilters)},
-		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: testStatsPrfs[1], SQMetrics: make(map[string]*StatMetricWithFilters)},
-		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: testStatsPrfs[2], SQMetrics: make(map[string]*StatMetricWithFilters)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: testStatsPrfs[0], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: testStatsPrfs[1], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: testStatsPrfs[2], SQMetrics: make(map[string]StatMetric)},
 	}
 	testStatsArgs = []*utils.CGREvent{
 		{
@@ -433,7 +433,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		Weight:       20,
 		MinItems:     1,
 	}
-	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf, SQMetrics: make(map[string]*StatMetricWithFilters)}
+	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf, SQMetrics: make(map[string]StatMetric)}
 	if err := dmSTS.SetStatQueueProfile(context.TODO(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
@@ -469,7 +469,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		QueueLength: 1,
 		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC}},
 	}
-	sqm := NewTCC(0, utils.EmptyString)
+	sqm := NewTCC(0, utils.EmptyString, nil)
 	if err = sqm.AddEvent("ev1", utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.Cost: 10}}); err != nil {
 		t.Fatal(err)
 	}
@@ -477,16 +477,16 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		Tenant:    sqp.Tenant,
 		ID:        sqp.ID,
 		SQItems:   []SQItem{{EventID: "ev1"}},
-		SQMetrics: map[string]*StatMetricWithFilters{utils.MetaTCC: {StatMetric: sqm}, utils.MetaTCD: {StatMetric: sqm}},
+		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm, utils.MetaTCD: sqm},
 	}
-	sqm2 := NewTCC(0, utils.EmptyString)
+	sqm2 := NewTCC(0, utils.EmptyString, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	expTh := &StatQueue{
 		Tenant:    sqp.Tenant,
 		ID:        sqp.ID,
-		SQMetrics: map[string]*StatMetricWithFilters{utils.MetaTCC: {StatMetric: sqm2}},
+		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm2},
 	}
 
 	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
@@ -527,7 +527,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sqm3 := NewTCC(0, utils.EmptyString)
+	sqm3 := NewTCC(0, utils.EmptyString, []string{"*string:~*req.Account:1001"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -535,7 +535,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		Tenant:    sqp.Tenant,
 		ID:        sqp.ID,
 		SQItems:   []SQItem{{EventID: "ev1"}},
-		SQMetrics: map[string]*StatMetricWithFilters{utils.MetaTCC: {StatMetric: sqm3, FilterIDs: []string{"*string:~*req.Account:1001"}}},
+		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm3},
 	}
 	if th, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
@@ -547,14 +547,14 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sqm2 = NewTCC(5, utils.EmptyString)
+	sqm2 = NewTCC(5, utils.EmptyString, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	expTh = &StatQueue{
 		Tenant:    sqp.Tenant,
 		ID:        sqp.ID,
-		SQMetrics: map[string]*StatMetricWithFilters{utils.MetaTCC: {StatMetric: sqm2}},
+		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm2},
 	}
 	delete(sq.SQMetrics, utils.MetaTCD)
 	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
@@ -852,7 +852,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 			Cache.Set(ctx, utils.CacheStatQueues, rPrf.TenantID(), &StatQueue{
 				Tenant:    rPrf.Tenant,
 				ID:        rPrf.ID,
-				SQMetrics: make(map[string]*StatMetricWithFilters),
+				SQMetrics: make(map[string]StatMetric),
 			}, nil, true, utils.NonTransactional)
 			prfs = append(prfs, rPrf)
 			return rPrf, nil
@@ -1010,7 +1010,7 @@ func TestStatQueueStoreStatsOK(t *testing.T) {
 		dirty:     utils.BoolPointer(true),
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 	Cache.SetWithoutReplicate(utils.CacheStatQueues, "cgrates.org:SQ1", exp, nil, true,
 		utils.NonTransactional)
@@ -1050,7 +1050,7 @@ func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
 		dirty:     utils.BoolPointer(true),
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	Cache.SetWithoutReplicate(utils.CacheStatQueues, "SQ1", value, nil, true,
@@ -1097,7 +1097,7 @@ func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 		dirty:     utils.BoolPointer(true),
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	Cache.SetWithoutReplicate(utils.CacheStatQueues, "SQ2", value, nil, true,
@@ -1148,7 +1148,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	sq := &StatQueue{
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 		dirty:     utils.BoolPointer(true),
 	}
 	Cache.SetWithoutReplicate(utils.CacheStatQueues, sq.TenantID(), sq, nil, true, utils.NonTransactional)
@@ -1172,7 +1172,7 @@ func TestStatQueueStoreThresholdNilDirtyField(t *testing.T) {
 	sq := &StatQueue{
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	if err := sS.StoreStatQueue(context.Background(), sq); err != nil {
@@ -1211,7 +1211,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
@@ -1266,7 +1266,7 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
@@ -1330,8 +1330,8 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
 		},
 	}
 
@@ -1407,8 +1407,8 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
 		},
 	}
 
@@ -1475,8 +1475,8 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
 		},
 	}
 
@@ -1565,8 +1565,8 @@ func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
 		},
 	}
 
@@ -1574,13 +1574,13 @@ func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 		sqPrfl:    nil,
 		Tenant:    "testTenant",
 		ID:        "SQ2",
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 	sq3 := &StatQueue{
 		sqPrfl:    nil,
 		Tenant:    "cgrates.org",
 		ID:        "SQ3",
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
@@ -1669,8 +1669,8 @@ func TestStatQueueV1GetStatQueueOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
 		},
 	}
 
@@ -1758,8 +1758,8 @@ func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{},
 		},
 	}
 
@@ -2011,14 +2011,13 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2036,13 +2035,12 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 		Tenant:  "cgrates.org",
 		ID:      "SQ1",
 		SQItems: []SQItem{},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(0, 0),
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2102,14 +2100,13 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2167,14 +2164,13 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2232,14 +2228,13 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			"testMetricType": {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			"testMetricType": &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2302,14 +2297,13 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			"testMetricType": {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			"testMetricType": &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2402,8 +2396,8 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			"testMetricType": {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			"testMetricType": &StatTCD{
 				Metric: &Metric{
 					Value: utils.NewDecimal(int64(time.Hour), 0),
 					Count: 1,
@@ -2411,7 +2405,6 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 						"SqProcessEvent": {},
 					},
 				},
-			},
 			},
 		},
 	}
@@ -2493,14 +2486,13 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			"testMetricType": {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			"testMetricType": &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2563,8 +2555,8 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value: utils.NewDecimal(int64(time.Hour), 0),
 					Count: 1,
@@ -2572,7 +2564,6 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 						"SqProcessEvent": {},
 					},
 				},
-			},
 			},
 		},
 	}
@@ -2635,8 +2626,8 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value: utils.NewDecimal(int64(time.Hour), 0),
 					Count: 1,
@@ -2644,7 +2635,6 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 						"SqProcessEvent": {},
 					},
 				},
-			},
 			},
 		},
 	}
@@ -2702,14 +2692,13 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2790,8 +2779,8 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value: utils.NewDecimal(int64(time.Hour), 0),
 					Count: 1,
@@ -2799,7 +2788,6 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 						"SqProcessEvent": {},
 					},
 				},
-			},
 			},
 		},
 	}
@@ -2862,14 +2850,13 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2927,14 +2914,13 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -2997,7 +2983,7 @@ func TestStatQueueStoreStatQueueStoreIntervalDisabled(t *testing.T) {
 	sq := &StatQueue{
 		Tenant:    "cgrates.org",
 		ID:        "SQ1",
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 		dirty:     utils.BoolPointer(true),
 	}
 
@@ -3050,14 +3036,13 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 				ExpiryTime: utils.TimePointer(time.Now()),
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
 				Metric: &Metric{
 					Value:  utils.NewDecimal(int64(time.Hour), 0),
 					Count:  1,
 					Events: make(map[string]*DecimalWithCompress),
 				},
-			},
 			},
 		},
 	}
@@ -3104,7 +3089,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
@@ -3178,7 +3163,7 @@ func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
 				EventID: "SqProcessEvent",
 			},
 		},
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {

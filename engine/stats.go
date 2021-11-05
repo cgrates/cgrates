@@ -446,7 +446,7 @@ func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils
 	}
 	metrics := make(map[string]string, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID] = metric.GetStringValue()
+		metrics[metricID] = metric.GetStringValue(sS.cgrcfg.GeneralCfg().RoundingDecimals) // ToDo
 	}
 	*reply = metrics
 	return
@@ -520,11 +520,11 @@ func (sS *StatService) V1ResetStatQueue(ctx *context.Context, tntID *utils.Tenan
 	}
 	sq.SQItems = make([]SQItem, 0)
 	metrics := sq.SQMetrics
-	sq.SQMetrics = make(map[string]*StatMetricWithFilters)
+	sq.SQMetrics = make(map[string]StatMetric)
 	for id, m := range metrics {
-		var metric *StatMetricWithFilters
+		var metric StatMetric
 		if metric, err = NewStatMetric(id,
-			m.GetMinItems(), m.FilterIDs); err != nil {
+			m.GetMinItems(), m.GetFilterIDs()); err != nil {
 			return
 		}
 		sq.SQMetrics[id] = metric

@@ -384,17 +384,15 @@ func testOnStorITStatQueue(t *testing.T) {
 			{EventID: "cgrates.org:ev2", ExpiryTime: eTime},
 			{EventID: "cgrates.org:ev3", ExpiryTime: eTime},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {
-				StatMetric: &StatASR{
-					Metric: &Metric{
-						Value: utils.NewDecimal(2, 0),
-						Count: 3,
-						Events: map[string]*DecimalWithCompress{
-							"cgrates.org:ev1": {Stat: utils.NewDecimal(1, 0)},
-							"cgrates.org:ev2": {Stat: utils.NewDecimal(1, 0)},
-							"cgrates.org:ev3": {Stat: utils.NewDecimal(0, 0)},
-						},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Metric: &Metric{
+					Value: utils.NewDecimal(2, 0),
+					Count: 3,
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:ev1": {Stat: utils.NewDecimal(1, 0)},
+						"cgrates.org:ev2": {Stat: utils.NewDecimal(1, 0)},
+						"cgrates.org:ev3": {Stat: utils.NewDecimal(0, 0)},
 					},
 				},
 			},
@@ -421,17 +419,15 @@ func testOnStorITStatQueue(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	sq.SQMetrics = map[string]*StatMetricWithFilters{
-		utils.MetaASR: {
-			StatMetric: &StatASR{
-				Metric: &Metric{
-					Value: utils.NewDecimal(3, 0),
-					Count: 3,
-					Events: map[string]*DecimalWithCompress{
-						"cgrates.org:ev1": {Stat: utils.NewDecimal(1, 0)},
-						"cgrates.org:ev2": {Stat: utils.NewDecimal(1, 0)},
-						"cgrates.org:ev3": {Stat: utils.NewDecimal(1, 0)},
-					},
+	sq.SQMetrics = map[string]StatMetric{
+		utils.MetaASR: &StatASR{
+			Metric: &Metric{
+				Value: utils.NewDecimal(3, 0),
+				Count: 3,
+				Events: map[string]*DecimalWithCompress{
+					"cgrates.org:ev1": {Stat: utils.NewDecimal(1, 0)},
+					"cgrates.org:ev2": {Stat: utils.NewDecimal(1, 0)},
+					"cgrates.org:ev3": {Stat: utils.NewDecimal(1, 0)},
 				},
 			},
 		},

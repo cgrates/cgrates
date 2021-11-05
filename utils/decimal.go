@@ -210,6 +210,12 @@ func NewDecimalFromString(value string) (*Decimal, error) {
 	return &Decimal{z}, nil
 }
 
+// NewDecimalFromStringIgnoreError same as above but ignore error( for test only)
+func NewDecimalFromStringIgnoreError(v string) (d *Decimal) {
+	d, _ = NewDecimalFromString(v)
+	return
+}
+
 // Round rounds d down to the Context's precision and returns Decimal. The result is
 // undefined if d is not finite. The result of Round will always be within the
 // interval [⌊10**x⌋, d] where x = the precision of d.

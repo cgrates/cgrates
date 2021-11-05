@@ -23,33 +23,35 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 func TestASRGetStringValue(t *testing.T) {
-	asr := NewASR(2, "")
+	asr := NewASR(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
-	if strVal := asr.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	asr.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := asr.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	asr.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := asr.GetStringValue(); strVal != "50.0%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50.0%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	asr.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := asr.GetStringValue(); strVal != "33.33333333333333%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "33.33333333333333%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	asr.RemEvent(ev3.ID)
-	if strVal := asr.GetStringValue(); strVal != "50.0%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50.0%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -61,22 +63,22 @@ func TestASRGetStringValue(t *testing.T) {
 	asr.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
 	asr.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
 	asr.RemEvent(ev.ID)
-	if strVal := asr.GetStringValue(); strVal != "66.66666666666667%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "66.66666666666667%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	asr.RemEvent(ev2.ID)
-	if strVal := asr.GetStringValue(); strVal != "100%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "100%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	asr.RemEvent(ev4.ID)
 	asr.RemEvent(ev5.ID)
-	if strVal := asr.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 }
 
 func TestASRGetStringValue2(t *testing.T) {
-	asr := NewASR(2, "")
+	asr := NewASR(2, "", nil)
 	ev := &utils.CGREvent{ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
@@ -88,19 +90,19 @@ func TestASRGetStringValue2(t *testing.T) {
 	if err := asr.AddEvent(ev2, utils.MapStorage{utils.MetaReq: utils.MapStorage{}}); err != nil {
 		t.Error(err)
 	}
-	if strVal := asr.GetStringValue(); strVal != "50.0%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50.0%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if err := asr.AddEvent(ev2, utils.MapStorage{utils.MetaReq: utils.MapStorage{}}); err != nil {
 		t.Error(err)
 	}
-	if strVal := asr.GetStringValue(); strVal != "33.33333333333333%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "33.33333333333333%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if err := asr.AddEvent(ev4, utils.MapStorage{utils.MetaReq: utils.MapStorage{}}); err != nil {
 		t.Error(err)
 	}
-	if strVal := asr.GetStringValue(); strVal != "25.00%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "25.00%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if err := asr.RemEvent(ev4); err != nil {
@@ -109,7 +111,7 @@ func TestASRGetStringValue2(t *testing.T) {
 	if err := asr.RemEvent(ev2); err != nil {
 		t.Error(err)
 	}
-	if strVal := asr.GetStringValue(); strVal != "50.0%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50.0%" {
 		t.Errorf("wrong asr value: %s", strVal)
 		t.Error(utils.ToJSON(asr))
 	}
@@ -119,13 +121,13 @@ func TestASRGetStringValue2(t *testing.T) {
 	if err := asr.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event}); err != nil {
 		t.Error(err)
 	}
-	if strVal := asr.GetStringValue(); strVal != "100%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "100%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 }
 
 func TestASRGetStringValue3(t *testing.T) {
-	asr := &StatASR{Metric: NewMetric(2)}
+	asr := &StatASR{Metric: NewMetric(2, nil)}
 	expected := &StatASR{
 		Metric: &Metric{
 			Value:    utils.NewDecimal(1, 0),
@@ -137,7 +139,7 @@ func TestASRGetStringValue3(t *testing.T) {
 			},
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
@@ -145,7 +147,7 @@ func TestASRGetStringValue3(t *testing.T) {
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1"}
 	asr.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	asr.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := asr.GetStringValue(); strVal != "50.0%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50.0%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if !reflect.DeepEqual(*expected, *asr) {
@@ -160,7 +162,7 @@ func TestASRGetStringValue3(t *testing.T) {
 	v.Stat = utils.NewDecimalFromFloat64(0)
 	v.CompressFactor = 2
 	expected.Count = 4
-	if strVal := asr.GetStringValue(); strVal != "25.00%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "25.00%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if !reflect.DeepEqual(*expected, *asr) {
@@ -175,7 +177,7 @@ func TestASRGetStringValue3(t *testing.T) {
 	v.Stat = utils.NewDecimalFromFloat64(0)
 	v.CompressFactor = 1
 	expected.Count = 2
-	if strVal := asr.GetStringValue(); strVal != "50.0%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50.0%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if !reflect.DeepEqual(*expected, *asr) {
@@ -184,7 +186,7 @@ func TestASRGetStringValue3(t *testing.T) {
 }
 
 func TestASRGetValue(t *testing.T) {
-	asr := NewASR(2, "")
+	asr := NewASR(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
@@ -196,7 +198,7 @@ func TestASRGetValue(t *testing.T) {
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	asr.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	asr.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if v := asr.GetValue(); v.Compare(utils.NewDecimalFromFloat64(33.33333)) != 0 {
+	if v := asr.GetValue(); v.Compare(utils.NewDecimalFromFloat64(33.33333333333333)) != 0 {
 		t.Errorf("wrong asr value: %f", v)
 	}
 	asr.RemEvent(ev3.ID)
@@ -212,7 +214,7 @@ func TestASRGetValue(t *testing.T) {
 	asr.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
 	asr.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
 	asr.RemEvent(ev.ID)
-	if v := asr.GetValue(); v.Compare(utils.NewDecimalFromFloat64(66.666670)) != 0 {
+	if v := asr.GetValue(); v.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
 		t.Errorf("wrong asr value: %f", v)
 	}
 	asr.RemEvent(ev2.ID)
@@ -230,7 +232,7 @@ func TestASRGetValue(t *testing.T) {
 }
 
 func TestASRCompress(t *testing.T) {
-	asr := &StatASR{Metric: NewMetric(2)}
+	asr := &StatASR{Metric: NewMetric(2, nil)}
 	expected := &StatASR{
 		Metric: &Metric{
 			Value:    utils.NewDecimal(1, 0),
@@ -242,7 +244,7 @@ func TestASRCompress(t *testing.T) {
 			},
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
@@ -256,7 +258,7 @@ func TestASRCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	if strVal := asr.GetStringValue(); strVal != "50.0%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50.0%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if !reflect.DeepEqual(*expected, *asr) {
@@ -272,12 +274,12 @@ func TestASRCompress(t *testing.T) {
 			},
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	expIDs = []string{"EVENT_3"}
 	if rply := asr.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	if strVal := asr.GetStringValue(); strVal != "50.0%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "50.0%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if !reflect.DeepEqual(*expected, *asr) {
@@ -292,7 +294,7 @@ func TestASRCompress(t *testing.T) {
 	if rply := asr.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	if strVal := asr.GetStringValue(); strVal != "25.00%" {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "25.00%" {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	if !reflect.DeepEqual(*expected, *asr) {
@@ -306,7 +308,7 @@ func TestASRGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	asr := NewASR(2, "")
+	asr := NewASR(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
@@ -332,19 +334,19 @@ func TestASRGetCompressFactor(t *testing.T) {
 }
 
 func TestACDGetStringValue(t *testing.T) {
-	acd := NewACD(2, "")
+	acd := NewACD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			utils.Usage:  10 * time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		}}
-	if strVal := acd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	if err := acd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event}); err != nil {
 		t.Error(err)
 	}
-	if strVal := acd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
@@ -355,74 +357,74 @@ func TestACDGetStringValue(t *testing.T) {
 	if err := acd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err == nil || err.Error() != "NOT_FOUND:Usage" {
 		t.Error(err)
 	}
-	if strVal := acd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
-	if strVal := acd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev.ID)
-	if strVal := acd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      478433753 * time.Nanosecond,
+			utils.Usage:  478433753 * time.Nanosecond,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      30*time.Second + 982433452*time.Nanosecond,
+			utils.Usage:  30*time.Second + 982433452*time.Nanosecond,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	acd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
-	if strVal := acd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
-	if strVal := acd.GetStringValue(); strVal != "15.73043s" {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "15.730433602s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev2.ID)
-	if strVal := acd.GetStringValue(); strVal != "15.73043s" {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "15.730433602s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev5.ID)
 	acd.RemEvent(ev4.ID)
 	acd.RemEvent(ev5.ID)
-	if strVal := acd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 }
 
 func TestACDGetStringValue2(t *testing.T) {
-	acd := NewACD(2, "")
+	acd := NewACD(2, "", nil)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 2 * time.Minute}}
 	if err := acd.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
 		t.Error(err)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	acd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := acd.GetStringValue(); strVal != "1m30s" {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m30s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	acd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := acd.GetStringValue(); strVal != "1m15s" {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m15s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	acd.RemEvent(ev2.ID)
-	if strVal := acd.GetStringValue(); strVal != "1m20s" {
+	if strVal := acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m20s" {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 }
 
 func TestACDGetStringValue3(t *testing.T) {
-	acd := &StatACD{Metric: NewMetric(2)}
+	acd := &StatACD{Metric: NewMetric(2, nil)}
 	expected := &StatACD{
 		Metric: &Metric{
 			Value:    utils.NewDecimal(6*int64(time.Minute), 0),
@@ -434,13 +436,13 @@ func TestACDGetStringValue3(t *testing.T) {
 			},
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 2 * time.Minute}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 3 * time.Minute}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	if err := acd.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
 		t.Error(err)
 	}
@@ -450,8 +452,8 @@ func TestACDGetStringValue3(t *testing.T) {
 	if err := acd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err != nil {
 		t.Error(err)
 	}
-	acd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acd) {
+	acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
 	}
 	v := expected.Events[ev1.ID]
@@ -459,14 +461,14 @@ func TestACDGetStringValue3(t *testing.T) {
 	expected.Count = 2
 	expected.Value = utils.NewDecimal(int64(3*time.Minute+30*time.Second), 0)
 	acd.RemEvent(ev1.ID)
-	acd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acd) {
+	acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
 	}
 }
 
 func TestACDCompress(t *testing.T) {
-	acd := &StatACD{Metric: NewMetric(2)}
+	acd := &StatACD{Metric: NewMetric(2, nil)}
 	expected := &StatACD{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -478,13 +480,13 @@ func TestACDCompress(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 2 * time.Minute}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 3 * time.Minute}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	acd.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event})
 	acd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	acd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
@@ -494,8 +496,8 @@ func TestACDCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	acd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acd) {
+	acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
 	}
 	expected = &StatACD{
@@ -508,14 +510,14 @@ func TestACDCompress(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 
 	expIDs = []string{"EVENT_3"}
 	if rply := acd.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	acd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acd) {
+	acd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
 	}
 }
@@ -526,12 +528,12 @@ func TestACDGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	acd := NewACD(2, "")
+	acd := NewACD(2, "", nil)
 
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{utils.Usage: 2 * time.Minute}}
 
@@ -554,11 +556,11 @@ func TestACDGetCompressFactor(t *testing.T) {
 }
 
 func TestACDGetFloat64Value(t *testing.T) {
-	acd := NewACD(2, "")
+	acd := NewACD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second}}
+			utils.Usage:  10 * time.Second}}
 	acd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	if v := acd.GetValue(); v != utils.DecimalNaN {
 		t.Errorf("wrong acd value: %v", v)
@@ -570,13 +572,13 @@ func TestACDGetFloat64Value(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute,
+			utils.Usage:  time.Minute,
 			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute + 30*time.Second,
+			utils.Usage:  time.Minute + 30*time.Second,
 			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
@@ -586,12 +588,12 @@ func TestACDGetFloat64Value(t *testing.T) {
 	}
 	acd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
 	// by default rounding decimal is 5
-	if strVal := acd.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(53.33333*1e9)) != 0 {
+	if strVal := acd.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(53.33333333333333*1e9)) != 0 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 
 	acd.RemEvent(ev2.ID)
-	if strVal := acd.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(53.33333*1e9)) != 0 {
+	if strVal := acd.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(53.33333333333333*1e9)) != 0 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.RemEvent(ev4.ID)
@@ -609,11 +611,11 @@ func TestACDGetFloat64Value(t *testing.T) {
 }
 
 func TestACDGetValue(t *testing.T) {
-	acd := NewACD(2, "")
+	acd := NewACD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second}}
+			utils.Usage:  10 * time.Second}}
 	acd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	if v := acd.GetValue(); v != utils.DecimalNaN {
 		t.Errorf("wrong acd value: %+v", v)
@@ -621,7 +623,7 @@ func TestACDGetValue(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      8 * time.Second}}
+			utils.Usage:  8 * time.Second}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	acd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	acd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
@@ -638,13 +640,13 @@ func TestACDGetValue(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute,
+			utils.Usage:  time.Minute,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      4*time.Minute + 30*time.Second,
+			utils.Usage:  4*time.Minute + 30*time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
@@ -665,92 +667,92 @@ func TestACDGetValue(t *testing.T) {
 }
 
 func TestTCDGetStringValue(t *testing.T) {
-	tcd := NewTCD(2, "")
+	tcd := NewTCD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
-			"Usage":      10 * time.Second,
+			utils.Usage:  10 * time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		}}
-	if strVal := tcd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := tcd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
-			"Usage":      10 * time.Second,
+			utils.Usage:  10 * time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	tcd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	tcd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := tcd.GetStringValue(); strVal != "20s" {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "20s" {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev2.ID)
-	if strVal := tcd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev.ID)
-	if strVal := tcd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute,
+			utils.Usage:  time.Minute,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute + 30*time.Second,
+			utils.Usage:  time.Minute + 30*time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	tcd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
 	tcd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
-	if strVal := tcd.GetStringValue(); strVal != "2m30s" {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2m30s" {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev4.ID)
-	if strVal := tcd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev5.ID)
 	tcd.RemEvent(ev3.ID)
-	if strVal := tcd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 }
 
 func TestTCDGetStringValue2(t *testing.T) {
-	tcd := NewTCD(2, "")
+	tcd := NewTCD(2, "", nil)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 2 * time.Minute}}
 	if err := tcd.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
 		t.Error(err)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	tcd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := tcd.GetStringValue(); strVal != "3m0s" {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "3m0s" {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	tcd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := tcd.GetStringValue(); strVal != "5m0s" {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "5m0s" {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 	tcd.RemEvent(ev2.ID)
-	if strVal := tcd.GetStringValue(); strVal != "4m0s" {
+	if strVal := tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "4m0s" {
 		t.Errorf("wrong tcd value: %s", strVal)
 	}
 }
 
 func TestTCDGetStringValue3(t *testing.T) {
-	tcd := &StatTCD{Metric: NewMetric(2)}
+	tcd := &StatTCD{Metric: NewMetric(2, nil)}
 	expected := &StatTCD{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -762,13 +764,13 @@ func TestTCDGetStringValue3(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 2 * time.Minute}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 3 * time.Minute}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	if err := tcd.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
 		t.Error(err)
 	}
@@ -778,8 +780,8 @@ func TestTCDGetStringValue3(t *testing.T) {
 	if err := tcd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err != nil {
 		t.Error(err)
 	}
-	tcd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *tcd) {
+	tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(tcd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
 	}
 	v := expected.Events[ev1.ID]
@@ -787,18 +789,18 @@ func TestTCDGetStringValue3(t *testing.T) {
 	expected.Count = 2
 	expected.Value = utils.NewDecimalFromFloat64(float64(3*time.Minute + 30*time.Second))
 	tcd.RemEvent(ev1.ID)
-	tcd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *tcd) {
+	tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(tcd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
 	}
 }
 
 func TestTCDGetFloat64Value(t *testing.T) {
-	tcd := NewTCD(2, "")
+	tcd := NewTCD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second}}
+			utils.Usage:  10 * time.Second}}
 	tcd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	if v := tcd.GetValue(); v != utils.DecimalNaN {
 		t.Errorf("wrong tcd value: %f", v)
@@ -810,13 +812,13 @@ func TestTCDGetFloat64Value(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute,
+			utils.Usage:  time.Minute,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute + 30*time.Second,
+			utils.Usage:  time.Minute + 30*time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
@@ -847,11 +849,11 @@ func TestTCDGetFloat64Value(t *testing.T) {
 }
 
 func TestTCDGetValue(t *testing.T) {
-	tcd := NewTCD(2, "")
+	tcd := NewTCD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second}}
+			utils.Usage:  10 * time.Second}}
 	tcd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	if v := tcd.GetValue(); v != utils.DecimalNaN {
 		t.Errorf("wrong tcd value: %+v", v)
@@ -859,7 +861,7 @@ func TestTCDGetValue(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      5 * time.Second}}
+			utils.Usage:  5 * time.Second}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	tcd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	tcd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
@@ -876,13 +878,13 @@ func TestTCDGetValue(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute,
+			utils.Usage:  time.Minute,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute + 30*time.Second,
+			utils.Usage:  time.Minute + 30*time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
@@ -903,7 +905,7 @@ func TestTCDGetValue(t *testing.T) {
 }
 
 func TestTCDCompress(t *testing.T) {
-	tcd := &StatTCD{Metric: NewMetric(2)}
+	tcd := &StatTCD{Metric: NewMetric(2, nil)}
 	expected := &StatTCD{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -915,13 +917,13 @@ func TestTCDCompress(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 2 * time.Minute}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Usage: 3 * time.Minute}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	tcd.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event})
 	tcd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	tcd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
@@ -931,8 +933,8 @@ func TestTCDCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	tcd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *tcd) {
+	tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(tcd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
 	}
 	expected = &StatTCD{
@@ -945,14 +947,14 @@ func TestTCDCompress(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 
 	expIDs = []string{"EVENT_3"}
 	if rply := tcd.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	tcd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *tcd) {
+	tcd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(tcd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
 	}
 }
@@ -963,12 +965,12 @@ func TestTCDGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	tcd := NewTCD(2, "")
+	tcd := NewTCD(2, "", nil)
 
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{"Usage": time.Minute}}
+		Event: map[string]interface{}{utils.Usage: time.Minute}}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{utils.Usage: 2 * time.Minute}}
 
@@ -991,16 +993,16 @@ func TestTCDGetCompressFactor(t *testing.T) {
 }
 
 func TestACCGetStringValue(t *testing.T) {
-	acc := NewACC(2, "")
+	acc := NewACC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       12.3}}
-	if strVal := acc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := acc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
@@ -1010,11 +1012,11 @@ func TestACCGetStringValue(t *testing.T) {
 			"Cost":       12.3}}
 	acc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	acc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := acc.GetStringValue(); strVal != "12.3" {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "12.30000000000000" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.RemEvent(ev3.ID)
-	if strVal := acc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -1028,16 +1030,16 @@ func TestACCGetStringValue(t *testing.T) {
 	acc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
 	acc.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
 	acc.RemEvent(ev.ID)
-	if strVal := acc.GetStringValue(); strVal != "3.4" {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "3.400000000000000" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.RemEvent(ev2.ID)
-	if strVal := acc.GetStringValue(); strVal != "3.4" {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "3.400000000000000" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.RemEvent(ev4.ID)
 	acc.RemEvent(ev5.ID)
-	if strVal := acc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	expErr := "NEGATIVE:Cost"
@@ -1049,7 +1051,7 @@ func TestACCGetStringValue(t *testing.T) {
 }
 
 func TestACCGetStringValue2(t *testing.T) {
-	acc := NewACC(2, "")
+	acc := NewACC(2, "", nil)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 12.3}}
 	if err := acc.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
@@ -1058,34 +1060,34 @@ func TestACCGetStringValue2(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{"Cost": 18.3}}
 	acc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := acc.GetStringValue(); strVal != "15.3" {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "15.30000000000000" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	acc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := acc.GetStringValue(); strVal != "16.8" {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "16.80000000000000" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 	acc.RemEvent(ev2.ID)
-	if strVal := acc.GetStringValue(); strVal != "16.3" {
+	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "16.30000000000000" {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
 }
 
 func TestACCGetStringValue3(t *testing.T) {
-	acc := &StatACC{Metric: NewMetric(2)}
+	acc := &StatACC{Metric: NewMetric(2, nil)}
 	expected := &StatACC{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
-				"EVENT_1": {Stat: utils.NewDecimalFromFloat64(12.2), CompressFactor: 2},
-				"EVENT_3": {Stat: utils.NewDecimalFromFloat64(18.3), CompressFactor: 1},
+				"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 2},
+				"EVENT_3": {Stat: &utils.Decimal{decimal.WithContext(decimal.Context{Precision: 3}).SetFloat64(18.3)}, CompressFactor: 1},
 			},
 			MinItems: 2,
 			Count:    3,
-			Value:    utils.NewDecimalFromFloat64(42.7),
+			Value:    utils.NewDecimalFromStringIgnoreError("42.70000000000000"),
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1101,8 +1103,8 @@ func TestACCGetStringValue3(t *testing.T) {
 	if err := acc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err != nil {
 		t.Error(err)
 	}
-	acc.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acc) {
+	acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acc.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
 	}
 	v := expected.Events[ev1.ID]
@@ -1110,14 +1112,14 @@ func TestACCGetStringValue3(t *testing.T) {
 	expected.Count = 2
 	expected.Value = utils.SubstractDecimal(expected.Value, utils.NewDecimalFromFloat64(12.2))
 	acc.RemEvent(ev1.ID)
-	acc.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acc) {
+	acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acc.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
 	}
 }
 
 func TestACCGetValue(t *testing.T) {
-	acc := NewACC(2, "")
+	acc := NewACC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1166,19 +1168,19 @@ func TestACCGetValue(t *testing.T) {
 }
 
 func TestACCCompress(t *testing.T) {
-	acc := &StatACC{Metric: NewMetric(2)}
+	acc := &StatACC{Metric: NewMetric(2, nil)}
 	expected := &StatACC{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
-				"EVENT_1": {Stat: utils.NewDecimalFromFloat64(18.2), CompressFactor: 1},
-				"EVENT_2": {Stat: utils.NewDecimalFromFloat64(6.2), CompressFactor: 1},
+				"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("18.199999999999999289457264239899814128875732421875"), CompressFactor: 1},
+				"EVENT_2": {Stat: utils.NewDecimalFromStringIgnoreError("6.20000000000000017763568394002504646778106689453125"), CompressFactor: 1},
 			},
 			MinItems: 2,
-			Value:    utils.NewDecimalFromFloat64(24.4),
+			Value:    utils.NewDecimalFromStringIgnoreError("24.40000000000000"),
 			Count:    2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -1193,8 +1195,8 @@ func TestACCCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	acc.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acc) {
+	acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acc.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
 	}
 	expected = &StatACC{
@@ -1207,27 +1209,27 @@ func TestACCCompress(t *testing.T) {
 			Count:    2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	expIDs = []string{"EVENT_3"}
 	if rply := acc.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	acc.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acc) {
+	acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acc.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
 	}
 	acc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	acc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
 	v := expected.Events["EVENT_3"]
-	v.Stat = utils.NewDecimalFromFloat64(12.225)
+	v.Stat = utils.NewDecimalFromFloat64(12.22500000000000)
 	v.CompressFactor = 4
 	expected.Count = 4
 	expected.Value = utils.NewDecimalFromFloat64(48.9)
 	if rply := acc.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	acc.GetStringValue()
-	if !reflect.DeepEqual(*expected, *acc) {
+	acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(acc.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
 	}
 }
@@ -1238,7 +1240,7 @@ func TestACCGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	acc := NewACC(2, "")
+	acc := NewACC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -1265,16 +1267,16 @@ func TestACCGetCompressFactor(t *testing.T) {
 }
 
 func TestTCCGetStringValue(t *testing.T) {
-	tcc := NewTCC(2, "")
+	tcc := NewTCC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       12.3}}
-	if strVal := tcc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	tcc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := tcc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
@@ -1284,11 +1286,11 @@ func TestTCCGetStringValue(t *testing.T) {
 			"Cost":       5.7}}
 	tcc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	tcc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := tcc.GetStringValue(); strVal != "18" {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "18.00000000000000" {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	tcc.RemEvent(ev3.ID)
-	if strVal := tcc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -1302,16 +1304,16 @@ func TestTCCGetStringValue(t *testing.T) {
 	tcc.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
 	tcc.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
 	tcc.RemEvent(ev.ID)
-	if strVal := tcc.GetStringValue(); strVal != "6.8" {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "6.799999999999999" {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	tcc.RemEvent(ev2.ID)
-	if strVal := tcc.GetStringValue(); strVal != "6.8" {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "6.799999999999999" {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	tcc.RemEvent(ev4.ID)
 	tcc.RemEvent(ev5.ID)
-	if strVal := tcc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 
@@ -1324,7 +1326,7 @@ func TestTCCGetStringValue(t *testing.T) {
 }
 
 func TestTCCGetStringValue2(t *testing.T) {
-	tcc := NewTCC(2, "")
+	tcc := NewTCC(2, "", nil)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 12.3}}
 	if err := tcc.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
@@ -1333,34 +1335,34 @@ func TestTCCGetStringValue2(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{"Cost": 18.3}}
 	tcc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := tcc.GetStringValue(); strVal != "30.6" {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "30.60000000000000" {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	tcc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	tcc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := tcc.GetStringValue(); strVal != "67.2" {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "67.20000000000000" {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 	tcc.RemEvent(ev2.ID)
-	if strVal := tcc.GetStringValue(); strVal != "48.9" {
+	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "48.90000000000000" {
 		t.Errorf("wrong tcc value: %s", strVal)
 	}
 }
 
 func TestTCCGetStringValue3(t *testing.T) {
-	tcc := &StatTCC{Metric: NewMetric(2)}
+	tcc := &StatTCC{Metric: NewMetric(2, nil)}
 	expected := &StatTCC{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
-				"EVENT_1": {Stat: utils.NewDecimalFromFloat64(12.2), CompressFactor: 2},
-				"EVENT_3": {Stat: utils.NewDecimalFromFloat64(18.3), CompressFactor: 1},
+				"EVENT_1": {Stat: utils.NewDecimalFromStringIgnoreError("12.20000000000000"), CompressFactor: 2},
+				"EVENT_3": {Stat: utils.NewDecimalFromStringIgnoreError("18.300000000000000710542735760100185871124267578125"), CompressFactor: 1},
 			},
 			MinItems: 2,
 			Count:    3,
-			Value:    utils.NewDecimalFromFloat64(42.7),
+			Value:    utils.NewDecimalFromStringIgnoreError("42.70000000000000"),
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1376,7 +1378,7 @@ func TestTCCGetStringValue3(t *testing.T) {
 	if err := tcc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err != nil {
 		t.Error(err)
 	}
-	tcc.GetStringValue()
+	tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *tcc) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
 	}
@@ -1385,14 +1387,14 @@ func TestTCCGetStringValue3(t *testing.T) {
 	expected.Count = 2
 	expected.Value = utils.SubstractDecimal(expected.Value, utils.NewDecimalFromFloat64(12.2))
 	tcc.RemEvent(ev1.ID)
-	tcc.GetStringValue()
+	tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *tcc) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
 	}
 }
 
 func TestTCCGetValue(t *testing.T) {
-	tcc := NewTCC(2, "")
+	tcc := NewTCC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1444,7 +1446,7 @@ func TestTCCGetValue(t *testing.T) {
 }
 
 func TestTCCCompress(t *testing.T) {
-	tcc := &StatTCC{Metric: NewMetric(2)}
+	tcc := &StatTCC{Metric: NewMetric(2, nil)}
 	expected := &StatTCC{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -1456,7 +1458,7 @@ func TestTCCCompress(t *testing.T) {
 			Count:    2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -1471,8 +1473,8 @@ func TestTCCCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	tcc.GetStringValue()
-	if !reflect.DeepEqual(*expected, *tcc) {
+	tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(tcc.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
 	}
 	expected = &StatTCC{
@@ -1485,13 +1487,13 @@ func TestTCCCompress(t *testing.T) {
 			Count:    2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	expIDs = []string{"EVENT_3"}
 	if rply := tcc.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	tcc.GetStringValue()
-	if !reflect.DeepEqual(*expected, *tcc) {
+	tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(tcc.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
 	}
 	tcc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
@@ -1504,8 +1506,8 @@ func TestTCCCompress(t *testing.T) {
 	if rply := tcc.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	tcc.GetStringValue()
-	if !reflect.DeepEqual(*expected, *tcc) {
+	tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(tcc.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
 	}
 }
@@ -1516,7 +1518,7 @@ func TestTCCGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	tcc := NewTCC(2, "")
+	tcc := NewTCC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -1543,38 +1545,38 @@ func TestTCCGetCompressFactor(t *testing.T) {
 }
 
 func TestPDDGetStringValue(t *testing.T) {
-	pdd := NewPDD(2, "")
+	pdd := NewPDD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			utils.Usage:  10 * time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    5 * time.Second,
 		}}
-	if strVal := pdd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := pdd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	pdd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	pdd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := pdd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev3.ID)
-	if strVal := pdd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev.ID)
-	if strVal := pdd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute,
+			utils.Usage:  time.Minute,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    10 * time.Second,
 		},
@@ -1585,27 +1587,27 @@ func TestPDDGetStringValue(t *testing.T) {
 		},
 	}
 	pdd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
-	if strVal := pdd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
-	if strVal := pdd.GetStringValue(); strVal != "10s" {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "10s" {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev2.ID)
-	if strVal := pdd.GetStringValue(); strVal != "10s" {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "10s" {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev5.ID)
 	pdd.RemEvent(ev4.ID)
 	pdd.RemEvent(ev5.ID)
-	if strVal := pdd.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 }
 
 func TestPDDGetStringValue2(t *testing.T) {
-	pdd := NewPDD(2, "")
+	pdd := NewPDD(2, "", nil)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.PDD: 2 * time.Minute}}
 	if err := pdd.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
@@ -1614,22 +1616,22 @@ func TestPDDGetStringValue2(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{utils.PDD: time.Minute}}
 	pdd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := pdd.GetStringValue(); strVal != "1m30s" {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m30s" {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	pdd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := pdd.GetStringValue(); strVal != "1m15s" {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m15s" {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev2.ID)
-	if strVal := pdd.GetStringValue(); strVal != "1m20s" {
+	if strVal := pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "1m20s" {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 }
 
 func TestPDDGetStringValue3(t *testing.T) {
-	pdd := &StatPDD{Metric: NewMetric(2)}
+	pdd := &StatPDD{Metric: NewMetric(2, nil)}
 	expected := &StatPDD{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -1641,7 +1643,7 @@ func TestPDDGetStringValue3(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.PDD: 2 * time.Minute}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1657,8 +1659,8 @@ func TestPDDGetStringValue3(t *testing.T) {
 	if err := pdd.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err != nil {
 		t.Error(err)
 	}
-	pdd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *pdd) {
+	pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(pdd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
 	}
 	v := expected.Events[ev1.ID]
@@ -1666,18 +1668,18 @@ func TestPDDGetStringValue3(t *testing.T) {
 	expected.Count = 2
 	expected.Value = utils.NewDecimalFromFloat64(float64(3*time.Minute + 30*time.Second))
 	pdd.RemEvent(ev1.ID)
-	pdd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *pdd) {
+	pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(pdd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
 	}
 }
 
 func TestPDDGetFloat64Value(t *testing.T) {
-	pdd := NewPDD(2, "")
+	pdd := NewPDD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second,
+			utils.Usage:  10 * time.Second,
 			utils.PDD:    5 * time.Second}}
 	pdd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	if v := pdd.GetValue(); v != utils.DecimalNaN {
@@ -1690,14 +1692,14 @@ func TestPDDGetFloat64Value(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute,
+			utils.Usage:  time.Minute,
 			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    10 * time.Second,
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute + 30*time.Second,
+			utils.Usage:  time.Minute + 30*time.Second,
 			"AnswerTime": time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
@@ -1728,11 +1730,11 @@ func TestPDDGetFloat64Value(t *testing.T) {
 }
 
 func TestPDDGetValue(t *testing.T) {
-	pdd := NewPDD(2, "")
+	pdd := NewPDD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second,
+			utils.Usage:  10 * time.Second,
 			utils.PDD:    9 * time.Second}}
 	pdd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	if v := pdd.GetValue(); v != utils.DecimalNaN {
@@ -1741,7 +1743,7 @@ func TestPDDGetValue(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      8 * time.Second,
+			utils.Usage:  8 * time.Second,
 			utils.PDD:    10 * time.Second}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	if err := pdd.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event}); err != nil {
@@ -1767,14 +1769,14 @@ func TestPDDGetValue(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":      time.Minute,
+			utils.Usage:  time.Minute,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:    8 * time.Second,
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":      4*time.Minute + 30*time.Second,
+			utils.Usage:  4*time.Minute + 30*time.Second,
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
@@ -1799,7 +1801,7 @@ func TestPDDGetValue(t *testing.T) {
 }
 
 func TestPDDCompress(t *testing.T) {
-	pdd := &StatPDD{Metric: NewMetric(2)}
+	pdd := &StatPDD{Metric: NewMetric(2, nil)}
 	expected := &StatPDD{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -1811,7 +1813,7 @@ func TestPDDCompress(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.PDD: 2 * time.Minute}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1827,8 +1829,8 @@ func TestPDDCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	pdd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *pdd) {
+	pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(pdd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
 	}
 	expected = &StatPDD{
@@ -1841,14 +1843,14 @@ func TestPDDCompress(t *testing.T) {
 			MinItems: 2,
 		},
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 
 	expIDs = []string{"EVENT_3"}
 	if rply := pdd.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	pdd.GetStringValue()
-	if !reflect.DeepEqual(*expected, *pdd) {
+	pdd.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(pdd.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
 	}
 }
@@ -1859,7 +1861,7 @@ func TestPDDGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	pdd := NewPDD(2, "")
+	pdd := NewPDD(2, "", nil)
 
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.PDD: time.Minute}}
@@ -1887,17 +1889,17 @@ func TestPDDGetCompressFactor(t *testing.T) {
 }
 
 func TestDDCGetStringValue(t *testing.T) {
-	ddc := NewDDC(2, "")
+	ddc := NewDDC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1002"}}
-	if strVal := ddc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 
 	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := ddc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -1911,29 +1913,29 @@ func TestDDCGetStringValue(t *testing.T) {
 			utils.Destination: "1001"}}
 	ddc.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	ddc.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := ddc.GetStringValue(); strVal != "2" {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 	ddc.RemEvent(ev.ID)
-	if strVal := ddc.GetStringValue(); strVal != "2" {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 	ddc.RemEvent(ev2.ID)
-	if strVal := ddc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 	ddc.RemEvent(ev3.ID)
-	if strVal := ddc.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 }
 
 func TestDDCGetFloat64Value(t *testing.T) {
-	ddc := NewDDC(2, "")
+	ddc := NewDDC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":           10 * time.Second,
+			utils.Usage:       10 * time.Second,
 			utils.PDD:         5 * time.Second,
 			utils.Destination: "1002"}}
 	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
@@ -1947,7 +1949,7 @@ func TestDDCGetFloat64Value(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage":           time.Minute,
+			utils.Usage:       time.Minute,
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:         10 * time.Second,
 			utils.Destination: "1001",
@@ -1955,7 +1957,7 @@ func TestDDCGetFloat64Value(t *testing.T) {
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage":           time.Minute + 30*time.Second,
+			utils.Usage:       time.Minute + 30*time.Second,
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1003",
 		},
@@ -1987,25 +1989,25 @@ func TestDDCGetFloat64Value(t *testing.T) {
 }
 
 func TestDDCGetStringValue2(t *testing.T) {
-	statDistinct := NewDDC(2, "")
+	statDistinct := NewDDC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Destination: "1001"}}
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 
 	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Destination: "1002"}}
 	statDistinct.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := statDistinct.GetStringValue(); strVal != "2" {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev.ID)
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 }
@@ -2036,7 +2038,7 @@ func TestDDCCompress(t *testing.T) {
 		MinItems: 2,
 		Count:    3,
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Destination: "1001"}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2052,7 +2054,7 @@ func TestDDCCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	ddc.GetStringValue()
+	ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *ddc) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
 	}
@@ -2061,7 +2063,7 @@ func TestDDCCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	ddc.GetStringValue()
+	ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *ddc) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
 	}
@@ -2073,7 +2075,7 @@ func TestDDCGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	ddc := NewDDC(2, "")
+	ddc := NewDDC(2, "", nil)
 
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Destination: "1002"}}
@@ -2101,12 +2103,12 @@ func TestDDCGetCompressFactor(t *testing.T) {
 }
 
 func TestStatSumGetFloat64Value(t *testing.T) {
-	statSum := NewStatSum(2, "~*req.Cost")
+	statSum := NewStatSum(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":           10 * time.Second,
+			utils.Usage:       10 * time.Second,
 			utils.PDD:         5 * time.Second,
 			utils.Destination: "1002"}}
 	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
@@ -2123,7 +2125,7 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Cost":            "20",
-			"Usage":           time.Minute,
+			utils.Usage:       time.Minute,
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:         10 * time.Second,
 			utils.Destination: "1001",
@@ -2132,7 +2134,7 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Cost":            "20",
-			"Usage":           time.Minute + 30*time.Second,
+			utils.Usage:       time.Minute + 30*time.Second,
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1003",
 		},
@@ -2164,18 +2166,18 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 }
 
 func TestStatSumGetStringValue(t *testing.T) {
-	statSum := NewStatSum(2, "~*req.Cost")
+	statSum := NewStatSum(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1002"}}
-	if strVal := statSum.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 
 	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statSum.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2191,25 +2193,25 @@ func TestStatSumGetStringValue(t *testing.T) {
 			utils.Destination: "1001"}}
 	statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	statSum.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := statSum.GetStringValue(); strVal != "60" {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "60" {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	statSum.RemEvent(ev.ID)
-	if strVal := statSum.GetStringValue(); strVal != "40" {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "40" {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	statSum.RemEvent(ev2.ID)
-	if strVal := statSum.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	statSum.RemEvent(ev3.ID)
-	if strVal := statSum.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 }
 
 func TestStatSumGetStringValue2(t *testing.T) {
-	statSum := NewStatSum(2, "~*req.Cost")
+	statSum := NewStatSum(2, "~*req.Cost", nil)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 12.3}}
 	if err := statSum.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
@@ -2218,22 +2220,22 @@ func TestStatSumGetStringValue2(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{"Cost": 18.3}}
 	statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := statSum.GetStringValue(); strVal != "30.6" {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "30.60000000000000" {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := statSum.GetStringValue(); strVal != "67.2" {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "67.20000000000000" {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 	statSum.RemEvent(ev2.ID)
-	if strVal := statSum.GetStringValue(); strVal != "48.9" {
+	if strVal := statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "48.90000000000000" {
 		t.Errorf("wrong statSum value: %s", strVal)
 	}
 }
 
 func TestStatSumGetStringValue3(t *testing.T) {
-	statSum := &StatSum{Metric: NewMetric(2), FieldName: "~*req.Cost"}
+	statSum := &StatSum{Metric: NewMetric(2, nil), FieldName: "~*req.Cost"}
 	expected := &StatSum{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -2246,7 +2248,7 @@ func TestStatSumGetStringValue3(t *testing.T) {
 		},
 		FieldName: "~*req.Cost",
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2262,7 +2264,7 @@ func TestStatSumGetStringValue3(t *testing.T) {
 	if err := statSum.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err != nil {
 		t.Error(err)
 	}
-	statSum.GetStringValue()
+	statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *statSum) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statSum))
 	}
@@ -2271,14 +2273,14 @@ func TestStatSumGetStringValue3(t *testing.T) {
 	expected.Count = 2
 	expected.Value = utils.SubstractDecimal(expected.Value, utils.NewDecimalFromFloat64(12.2))
 	statSum.RemEvent(ev1.ID)
-	statSum.GetStringValue()
+	statSum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *statSum) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statSum))
 	}
 }
 
 func TestStatSumCompress(t *testing.T) {
-	sum := &StatSum{Metric: NewMetric(2), FieldName: "~*req.Cost"}
+	sum := &StatSum{Metric: NewMetric(2, nil), FieldName: "~*req.Cost"}
 	expected := &StatSum{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -2291,7 +2293,7 @@ func TestStatSumCompress(t *testing.T) {
 		},
 		FieldName: "~*req.Cost",
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2306,8 +2308,8 @@ func TestStatSumCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	sum.GetStringValue()
-	if !reflect.DeepEqual(*expected, *sum) {
+	sum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(sum.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
 	}
 	expected = &StatSum{
@@ -2321,13 +2323,13 @@ func TestStatSumCompress(t *testing.T) {
 		},
 		FieldName: "~*req.Cost",
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	expIDs = []string{"EVENT_3"}
 	if rply := sum.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	sum.GetStringValue()
-	if !reflect.DeepEqual(*expected, *sum) {
+	sum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(sum.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
 	}
 	sum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
@@ -2340,8 +2342,8 @@ func TestStatSumCompress(t *testing.T) {
 	if rply := sum.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	sum.GetStringValue()
-	if !reflect.DeepEqual(*expected, *sum) {
+	sum.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(sum.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
 	}
 }
@@ -2352,7 +2354,7 @@ func TestStatSumGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	sum := NewStatSum(2, "~*req.Cost")
+	sum := NewStatSum(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2379,12 +2381,12 @@ func TestStatSumGetCompressFactor(t *testing.T) {
 }
 
 func TestStatAverageGetFloat64Value(t *testing.T) {
-	statAvg := NewStatAverage(2, "~*req.Cost")
+	statAvg := NewStatAverage(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":           10 * time.Second,
+			utils.Usage:       10 * time.Second,
 			utils.PDD:         5 * time.Second,
 			utils.Destination: "1002"}}
 	statAvg.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
@@ -2399,7 +2401,7 @@ func TestStatAverageGetFloat64Value(t *testing.T) {
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
 			"Cost":            "30",
-			"Usage":           time.Minute,
+			utils.Usage:       time.Minute,
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.PDD:         10 * time.Second,
 			utils.Destination: "1001",
@@ -2408,7 +2410,7 @@ func TestStatAverageGetFloat64Value(t *testing.T) {
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
 			"Cost":            "20",
-			"Usage":           time.Minute + 30*time.Second,
+			utils.Usage:       time.Minute + 30*time.Second,
 			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1003",
 		},
@@ -2418,11 +2420,11 @@ func TestStatAverageGetFloat64Value(t *testing.T) {
 		t.Errorf("wrong statAvg value: %v", strVal)
 	}
 	statAvg.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
-	if strVal := statAvg.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(23.33333)) != 0 {
+	if strVal := statAvg.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(23.33333333333333)) != 0 {
 		t.Errorf("wrong statAvg value: %v", strVal)
 	}
 	statAvg.RemEvent(ev2.ID)
-	if strVal := statAvg.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(23.33333)) != 0 {
+	if strVal := statAvg.GetValue(); strVal.Compare(utils.NewDecimalFromFloat64(23.33333333333333)) != 0 {
 		t.Errorf("wrong statAvg value: %v", strVal)
 	}
 	statAvg.RemEvent(ev4.ID)
@@ -2440,18 +2442,18 @@ func TestStatAverageGetFloat64Value(t *testing.T) {
 }
 
 func TestStatAverageGetStringValue(t *testing.T) {
-	statAvg := NewStatAverage(2, "~*req.Cost")
+	statAvg := NewStatAverage(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Destination: "1002"}}
-	if strVal := statAvg.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong ddc value: %s", strVal)
 	}
 
 	statAvg.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statAvg.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2467,25 +2469,25 @@ func TestStatAverageGetStringValue(t *testing.T) {
 			utils.Destination: "1001"}}
 	statAvg.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	statAvg.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := statAvg.GetStringValue(); strVal != "20" {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "20" {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	statAvg.RemEvent(ev.ID)
-	if strVal := statAvg.GetStringValue(); strVal != "20" {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "20" {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	statAvg.RemEvent(ev2.ID)
-	if strVal := statAvg.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	statAvg.RemEvent(ev3.ID)
-	if strVal := statAvg.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 }
 
 func TestStatAverageGetStringValue2(t *testing.T) {
-	statAvg := NewStatAverage(2, "~*req.Cost")
+	statAvg := NewStatAverage(2, "~*req.Cost", nil)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 12.3}}
 	if err := statAvg.AddEvent(ev1.ID, utils.MapStorage{utils.MetaReq: ev1.Event}); err != nil {
@@ -2494,22 +2496,22 @@ func TestStatAverageGetStringValue2(t *testing.T) {
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
 		Event: map[string]interface{}{"Cost": 18.3}}
 	statAvg.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := statAvg.GetStringValue(); strVal != "15.3" {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "15.30000000000000" {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	statAvg.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	statAvg.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := statAvg.GetStringValue(); strVal != "16.8" {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "16.80000000000000" {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 	statAvg.RemEvent(ev2.ID)
-	if strVal := statAvg.GetStringValue(); strVal != "16.3" {
+	if strVal := statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "16.30000000000000" {
 		t.Errorf("wrong statAvg value: %s", strVal)
 	}
 }
 
 func TestStatAverageGetStringValue3(t *testing.T) {
-	statAvg := &StatAverage{Metric: NewMetric(2), FieldName: "~*req.Cost"}
+	statAvg := &StatAverage{Metric: NewMetric(2, nil), FieldName: "~*req.Cost"}
 	expected := &StatAverage{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -2522,7 +2524,7 @@ func TestStatAverageGetStringValue3(t *testing.T) {
 		},
 		FieldName: "~*req.Cost",
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2538,7 +2540,7 @@ func TestStatAverageGetStringValue3(t *testing.T) {
 	if err := statAvg.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event}); err != nil {
 		t.Error(err)
 	}
-	statAvg.GetStringValue()
+	statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *statAvg) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statAvg))
 	}
@@ -2547,14 +2549,14 @@ func TestStatAverageGetStringValue3(t *testing.T) {
 	expected.Count = 2
 	expected.Value = utils.SubstractDecimal(expected.Value, utils.NewDecimalFromFloat64(12.2))
 	statAvg.RemEvent(ev1.ID)
-	statAvg.GetStringValue()
+	statAvg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *statAvg) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statAvg))
 	}
 }
 
 func TestStatAverageCompress(t *testing.T) {
-	avg := &StatAverage{Metric: NewMetric(2), FieldName: "~*req.Cost"}
+	avg := &StatAverage{Metric: NewMetric(2, nil), FieldName: "~*req.Cost"}
 	expected := &StatAverage{
 		Metric: &Metric{
 			Events: map[string]*DecimalWithCompress{
@@ -2567,7 +2569,7 @@ func TestStatAverageCompress(t *testing.T) {
 		},
 		FieldName: "~*req.Cost",
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2582,8 +2584,8 @@ func TestStatAverageCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	avg.GetStringValue()
-	if !reflect.DeepEqual(*expected, *avg) {
+	avg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(avg.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
 	}
 	expected = &StatAverage{
@@ -2597,13 +2599,13 @@ func TestStatAverageCompress(t *testing.T) {
 		},
 		FieldName: "~*req.Cost",
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	expIDs = []string{"EVENT_3"}
 	if rply := avg.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	avg.GetStringValue()
-	if !reflect.DeepEqual(*expected, *avg) {
+	avg.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
+	if !expected.Equal(avg.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
 	}
 	avg.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
@@ -2616,7 +2618,7 @@ func TestStatAverageCompress(t *testing.T) {
 	if rply := avg.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	if !reflect.DeepEqual(expected, avg) {
+	if !expected.Equal(avg.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
 	}
 }
@@ -2627,7 +2629,7 @@ func TestStatAverageGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	avg := NewStatAverage(2, "~*req.Cost")
+	avg := NewStatAverage(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": 18.2}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2654,9 +2656,9 @@ func TestStatAverageGetCompressFactor(t *testing.T) {
 }
 
 func TestStatDistinctGetFloat64Value(t *testing.T) {
-	statDistinct := NewStatDistinct(2, "~*req.Usage")
+	statDistinct := NewStatDistinct(2, "~*req.Usage", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{"Usage": 10 * time.Second}}
+		Event: map[string]interface{}{utils.Usage: 10 * time.Second}}
 	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	if v := statDistinct.GetValue(); v != utils.DecimalNaN {
 		t.Errorf("wrong statDistinct value: %v", v)
@@ -2668,12 +2670,12 @@ func TestStatDistinctGetFloat64Value(t *testing.T) {
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Usage": time.Minute,
+			utils.Usage: time.Minute,
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Usage": time.Minute + 30*time.Second,
+			utils.Usage: time.Minute + 30*time.Second,
 		},
 	}
 	if err := statDistinct.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event}); err != nil {
@@ -2705,15 +2707,15 @@ func TestStatDistinctGetFloat64Value(t *testing.T) {
 }
 
 func TestStatDistinctGetStringValue(t *testing.T) {
-	statDistinct := NewStatDistinct(2, "~*req.Cost")
+	statDistinct := NewStatDistinct(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": "20"}}
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 
 	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
@@ -2722,43 +2724,43 @@ func TestStatDistinctGetStringValue(t *testing.T) {
 		Event: map[string]interface{}{"Cost": "40"}}
 	statDistinct.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
 	statDistinct.AddEvent(ev3.ID, utils.MapStorage{utils.MetaReq: ev3.Event})
-	if strVal := statDistinct.GetStringValue(); strVal != "2" {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev.ID)
-	if strVal := statDistinct.GetStringValue(); strVal != "2" {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev2.ID)
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev3.ID)
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 }
 
 func TestStatDistinctGetStringValue2(t *testing.T) {
-	statDistinct := NewStatDistinct(2, "~*req.Cost")
+	statDistinct := NewStatDistinct(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": "20"}}
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 
 	statDistinct.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{"Cost": "40"}}
 	statDistinct.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event})
-	if strVal := statDistinct.GetStringValue(); strVal != "2" {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != "2" {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev.ID)
-	if strVal := statDistinct.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := statDistinct.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 }
@@ -2791,7 +2793,7 @@ func TestStatDistinctCompress(t *testing.T) {
 		FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 		Count:     3,
 	}
-	expected.GetStringValue()
+	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Destination: "1001"}}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -2807,7 +2809,7 @@ func TestStatDistinctCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	ddc.GetStringValue()
+	ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *ddc) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
 	}
@@ -2816,7 +2818,7 @@ func TestStatDistinctCompress(t *testing.T) {
 	if !reflect.DeepEqual(expIDs, rply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
 	}
-	ddc.GetStringValue()
+	ddc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
 	if !reflect.DeepEqual(*expected, *ddc) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
 	}
@@ -2828,7 +2830,7 @@ func TestStatDistinctGetCompressFactor(t *testing.T) {
 		"EVENT_1": 1,
 		"EVENT_2": 1,
 	}
-	ddc := NewStatDistinct(2, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Destination)
+	ddc := NewStatDistinct(2, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep+utils.Destination, nil)
 
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{utils.Destination: "1002"}}
@@ -2880,11 +2882,11 @@ func TestASRMarshal(t *testing.T) {
 }
 
 func TestACDMarshal(t *testing.T) {
-	acd := NewACD(2, "")
+	acd := NewACD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second}}
+			utils.Usage:  10 * time.Second}}
 	acd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	var nacd StatACD
 	expected := []byte(`{"Value":10000000000,"Count":1,"Events":{"EVENT_1":{"Stat":10000000000,"CompressFactor":1}},"MinItems":2}`)
@@ -2900,11 +2902,11 @@ func TestACDMarshal(t *testing.T) {
 }
 
 func TestTCDMarshal(t *testing.T) {
-	tcd := NewTCD(2, "")
+	tcd := NewTCD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second}}
+			utils.Usage:  10 * time.Second}}
 	tcd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	var ntcd StatTCD
 	expected := []byte(`{"Value":10000000000,"Count":1,"Events":{"EVENT_1":{"Stat":10000000000,"CompressFactor":1}},"MinItems":2}`)
@@ -2920,7 +2922,7 @@ func TestTCDMarshal(t *testing.T) {
 }
 
 func TestACCMarshal(t *testing.T) {
-	acc := NewACC(2, "")
+	acc := NewACC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -2940,7 +2942,7 @@ func TestACCMarshal(t *testing.T) {
 }
 
 func TestTCCMarshal(t *testing.T) {
-	tcc := NewTCC(2, "")
+	tcc := NewTCC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -2960,11 +2962,11 @@ func TestTCCMarshal(t *testing.T) {
 }
 
 func TestPDDMarshal(t *testing.T) {
-	pdd := NewPDD(2, "")
+	pdd := NewPDD(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":      10 * time.Second,
+			utils.Usage:  10 * time.Second,
 			utils.PDD:    5 * time.Second}}
 	pdd.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	var ntdd StatPDD
@@ -2981,11 +2983,11 @@ func TestPDDMarshal(t *testing.T) {
 }
 
 func TestDCCMarshal(t *testing.T) {
-	ddc := NewDDC(2, "")
+	ddc := NewDDC(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":           10 * time.Second,
+			utils.Usage:       10 * time.Second,
 			utils.PDD:         5 * time.Second,
 			utils.Destination: "1002"}}
 	ddc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
@@ -3003,12 +3005,12 @@ func TestDCCMarshal(t *testing.T) {
 }
 
 func TestStatSumMarshal(t *testing.T) {
-	statSum := NewStatSum(2, "~*req.Cost")
+	statSum := NewStatSum(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":           10 * time.Second,
+			utils.Usage:       10 * time.Second,
 			utils.PDD:         5 * time.Second,
 			utils.Destination: "1002"}}
 	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
@@ -3026,12 +3028,12 @@ func TestStatSumMarshal(t *testing.T) {
 }
 
 func TestStatAverageMarshal(t *testing.T) {
-	statAvg := NewStatAverage(2, "~*req.Cost")
+	statAvg := NewStatAverage(2, "~*req.Cost", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":           10 * time.Second,
+			utils.Usage:       10 * time.Second,
 			utils.PDD:         5 * time.Second,
 			utils.Destination: "1002"}}
 	statAvg.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
@@ -3049,11 +3051,11 @@ func TestStatAverageMarshal(t *testing.T) {
 }
 
 func TestStatDistrictMarshal(t *testing.T) {
-	statDistinct := NewStatDistinct(2, "~*req.Usage")
+	statDistinct := NewStatDistinct(2, "~*req.Usage", nil)
 	statDistinct.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"Cost":            "20",
 		"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		"Usage":           10 * time.Second,
+		utils.Usage:       10 * time.Second,
 		utils.PDD:         5 * time.Second,
 		utils.Destination: "1002"}})
 	var nStatDistinct StatDistinct
@@ -3078,7 +3080,7 @@ func TestStatMetricsNewStatMetricError(t *testing.T) {
 }
 
 func TestStatMetricsGetMinItems(t *testing.T) {
-	asr := NewASR(2, "")
+	asr := NewASR(2, "", nil)
 	result := asr.GetMinItems()
 	if result != 2 {
 		t.Errorf("\n Expecting <2>,\nRecevied  <%+v>", result)
@@ -3216,11 +3218,11 @@ func TestStatMetricsStatDistinctRemEvent2(t *testing.T) {
 }
 
 func TestStatMetricsStatDistinctAddEventErr(t *testing.T) {
-	asr := NewASR(2, "")
+	asr := NewASR(2, "", nil)
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
-	if strVal := asr.GetStringValue(); strVal != utils.NotAvailable {
+	if strVal := asr.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong asr value: %s", strVal)
 	}
 	dst := &StatDistinct{
@@ -3266,7 +3268,7 @@ func TestStatMetricsStatDistinctGetValue(t *testing.T) {
 
 func TestStatMetricsStatAverageGetMinItems(t *testing.T) {
 	avg := &StatAverage{
-		Metric:    NewMetric(10),
+		Metric:    NewMetric(10, nil),
 		FieldName: "Test_Field_Name",
 	}
 	result := avg.GetMinItems()
@@ -3295,7 +3297,7 @@ func TestStatMetricsStatAverageGetValue(t *testing.T) {
 
 func TestStatMetricsStatSumGetMinItems(t *testing.T) {
 	sum := &StatSum{
-		Metric: NewMetric(20),
+		Metric: NewMetric(20, nil),
 	}
 	result := sum.GetMinItems()
 	if result != 20 {
@@ -3422,7 +3424,7 @@ func TestStatMetricsStatDDCRemEvent2(t *testing.T) {
 }
 
 func TestStatMetricsStatACDGetMinItems(t *testing.T) {
-	acd := &StatACD{Metric: NewMetric(2)}
+	acd := &StatACD{Metric: NewMetric(2, nil)}
 	result := acd.GetMinItems()
 	if !reflect.DeepEqual(acd.MinItems, result) {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", acd.MinItems, result)
@@ -3430,7 +3432,7 @@ func TestStatMetricsStatACDGetMinItems(t *testing.T) {
 }
 
 func TestStatMetricsStatTCDGetMinItems(t *testing.T) {
-	tcd := &StatTCD{Metric: NewMetric(2)}
+	tcd := &StatTCD{Metric: NewMetric(2, nil)}
 	result := tcd.GetMinItems()
 	if !reflect.DeepEqual(tcd.MinItems, result) {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", tcd.MinItems, result)
@@ -3455,7 +3457,7 @@ func TestStatMetricsStatACCGetFloat64Value(t *testing.T) {
 }
 
 func TestStatMetricsStatACCGetMinItems(t *testing.T) {
-	acc := &StatACC{Metric: NewMetric(2)}
+	acc := &StatACC{Metric: NewMetric(2, nil)}
 	result := acc.GetMinItems()
 	if !reflect.DeepEqual(acc.MinItems, result) {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", acc.MinItems, result)
@@ -3463,7 +3465,7 @@ func TestStatMetricsStatACCGetMinItems(t *testing.T) {
 }
 
 func TestStatMetricsStatTCCGetMinItems(t *testing.T) {
-	tcc := &StatTCC{Metric: NewMetric(2)}
+	tcc := &StatTCC{Metric: NewMetric(2, nil)}
 	result := tcc.GetMinItems()
 	if !reflect.DeepEqual(tcc.MinItems, result) {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", tcc.MinItems, result)
@@ -3488,7 +3490,7 @@ func TestStatMetricsStatTCCGetFloat64Value(t *testing.T) {
 }
 
 func TestStatMetricsStatPDDGetMinItems(t *testing.T) {
-	pdd := &StatPDD{Metric: NewMetric(2)}
+	pdd := &StatPDD{Metric: NewMetric(2, nil)}
 	result := pdd.GetMinItems()
 	if !reflect.DeepEqual(pdd.MinItems, result) {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", pdd.MinItems, result)
@@ -3516,7 +3518,7 @@ func TestStatMetricsStatDDCGetValue(t *testing.T) {
 }
 
 func TestStatMetricsStatASRAddEventErr1(t *testing.T) {
-	asr := &StatASR{Metric: NewMetric(2)}
+	asr := &StatASR{Metric: NewMetric(2, nil)}
 	err := asr.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: map[string]interface{}{utils.AnswerTime: "10"}})
 	if err == nil || err.Error() != "Unsupported time format" {
 		t.Errorf("\nExpecting <Unsupported time format>,\n Recevied <%+v>", err)
@@ -3524,7 +3526,7 @@ func TestStatMetricsStatASRAddEventErr1(t *testing.T) {
 }
 
 func TestStatMetricsStatASRAddEventErr2(t *testing.T) {
-	asr := &StatASR{Metric: NewMetric(2)}
+	asr := &StatASR{Metric: NewMetric(2, nil)}
 	err := asr.AddEvent("EVENT_1", utils.MapStorage{utils.MetaReq: utils.MapStorage{"AnswerTime": false}})
 	if err == nil || err.Error() != "cannot convert field: false to time.Time" {
 		t.Errorf("\nExpecting <cannot convert field: false to time.Time>,\n Recevied <%+v>", err)
@@ -3532,7 +3534,7 @@ func TestStatMetricsStatASRAddEventErr2(t *testing.T) {
 }
 
 func TestStatMetricsStatACDAddEventErr(t *testing.T) {
-	acd := NewMetric(2)
+	acd := NewMetric(2, nil)
 	err := acd.addEvent("EVENT_1", false)
 	if err == nil || err.Error() != "cannot convert field: bool to decimal.Big" {
 		t.Errorf("\nExpecting <cannot convert field: false to time.Duration>,\n Recevied <%+v>", err)
@@ -3650,7 +3652,7 @@ func (mockDP) FieldAsString([]string) (string, error) {
 }
 
 func TestStatMetricsStatASRAddEventErr3(t *testing.T) {
-	asr := &StatASR{Metric: NewMetric(2)}
+	asr := &StatASR{Metric: NewMetric(2, nil)}
 	err := asr.AddEvent("EVENT_1", new(mockDP))
 	if err == nil || err.Error() != utils.ErrAccountNotFound.Error() {
 		t.Errorf("Expecting <%+v>,\n Recevied <%+v>", utils.ErrAccountNotFound, err)

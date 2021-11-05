@@ -25,8 +25,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ericlagergren/decimal"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -4843,7 +4841,7 @@ func TestApitoAccountCase2(t *testing.T) {
 					},
 				},
 				Type:           utils.MetaVoice,
-				Units:          &utils.Decimal{decimal.New(3600000000000, 0)},
+				Units:          utils.NewDecimal(3600000000000, 0),
 				RateProfileIDs: []string{"RTPRF1"},
 				Opts: map[string]interface{}{
 					"key1": "val1",

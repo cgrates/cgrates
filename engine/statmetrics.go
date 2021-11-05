@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -29,8 +30,8 @@ import (
 
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
-func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm *StatMetricWithFilters, err error) {
-	metrics := map[string]func(uint64, string) StatMetric{
+func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm StatMetric, err error) {
+	metrics := map[string]func(uint64, string, []string) StatMetric{
 		utils.MetaASR:      NewASR,
 		utils.MetaACD:      NewACD,
 		utils.MetaTCD:      NewTCD,
@@ -52,23 +53,24 @@ func NewStatMetric(metricID string, minItems uint64, filterIDs []string) (sm *St
 	if len(metricSplit[1:]) > 0 {
 		extraParams = metricSplit[1]
 	}
-	return &StatMetricWithFilters{StatMetric: metrics[metricSplit[0]](minItems, extraParams), FilterIDs: filterIDs}, nil
+	return metrics[metricSplit[0]](minItems, extraParams, filterIDs), nil
 }
 
 // StatMetric is the interface which a metric should implement
 type StatMetric interface {
 	GetValue() *utils.Decimal
-	GetStringValue() string
+	GetStringValue(rounding int) string
 	AddEvent(evID string, ev utils.DataProvider) error
 	RemEvent(evID string) error
 	GetMinItems() (minIts uint64)
 	Compress(queueLen uint64, defaultID string) (eventIDs []string)
 	GetCompressFactor(events map[string]uint64) map[string]uint64
 	Clone() StatMetric
+	GetFilterIDs() []string
 }
 
-func NewASR(minItems uint64, _ string) StatMetric {
-	return &StatASR{Metric: NewMetric(minItems)}
+func NewASR(minItems uint64, _ string, filterIDs []string) StatMetric {
+	return &StatASR{Metric: NewMetric(minItems, filterIDs)}
 }
 
 // ASR implements AverageSuccessRatio metric
@@ -76,16 +78,20 @@ type StatASR struct {
 	*Metric
 }
 
-func (asr *StatASR) GetStringValue() (valStr string) {
+func (asr *StatASR) GetStringValue(rounding int) (valStr string) {
 	valStr = utils.NotAvailable
 	if val := asr.getAvgValue(); val != utils.DecimalNaN {
-		valStr = utils.MultiplyDecimal(val, utils.NewDecimal(100, 0)).String() + "%"
+		v, _ := utils.MultiplyDecimal(val, utils.NewDecimal(100, 0)).Round(rounding).Float64()
+		valStr = strconv.FormatFloat(v, 'f', -1, 64) + "%"
 	}
 	return
 }
 
-func (asr *StatASR) GetValue() *utils.Decimal {
-	return utils.MultiplyDecimal(asr.getAvgValue(), utils.NewDecimal(100, 0))
+func (asr *StatASR) GetValue() (val *utils.Decimal) {
+	if val = asr.getAvgValue(); val != utils.DecimalNaN {
+		val = utils.MultiplyDecimal(val, utils.NewDecimal(100, 0))
+	}
+	return
 }
 
 // AddEvent is part of StatMetric interface
@@ -104,14 +110,39 @@ func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) error {
 	return asr.addEvent(evID, answered)
 }
 
+func (asr *StatASR) RemEvent(evID string) (err error) {
+
+	val, has := asr.Events[evID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	ans := utils.NewDecimal(0, 0)
+	if val.Stat.Compare(utils.NewDecimalFromFloat64(0.5)) > 0 {
+		ans := utils.NewDecimal(1, 0)
+		asr.Value = utils.SubstractDecimal(asr.Value, ans)
+	}
+	asr.Count--
+	if val.CompressFactor <= 1 {
+		delete(asr.Events, evID)
+	} else {
+		val.Stat = utils.DivideDecimal(
+			utils.SubstractDecimal(
+				utils.MultiplyDecimal(val.Stat, utils.NewDecimal(int64(val.CompressFactor), 0)),
+				ans),
+			utils.NewDecimal(int64(val.CompressFactor)-1, 0))
+		val.CompressFactor = val.CompressFactor - 1
+	}
+	return
+}
+
 func (asr *StatASR) Clone() StatMetric {
 	return &StatASR{
 		Metric: asr.Metric.Clone(),
 	}
 }
 
-func NewACD(minItems uint64, _ string) StatMetric {
-	return &StatACD{Metric: NewMetric(minItems)}
+func NewACD(minItems uint64, _ string, filterIDs []string) StatMetric {
+	return &StatACD{Metric: NewMetric(minItems, filterIDs)}
 }
 
 // ACD implements AverageCallDuration metric
@@ -119,13 +150,8 @@ type StatACD struct {
 	*Metric
 }
 
-func (acd *StatACD) GetStringValue() (valStr string) {
-	valStr = utils.NotAvailable
-	if val := acd.getAvgValue(); val != utils.DecimalNaN {
-		dur, _ := val.Duration()
-		valStr = dur.String()
-	}
-	return
+func (acd *StatACD) GetStringValue(rounding int) (valStr string) {
+	return acd.getAvgStringValue(rounding)
 }
 
 func (acd *StatACD) GetValue() *utils.Decimal {
@@ -144,27 +170,18 @@ func (acd *StatACD) AddEvent(evID string, ev utils.DataProvider) error {
 }
 
 func (acd *StatACD) Clone() StatMetric {
-	return &StatAverage{
+	return &StatACD{
 		Metric: acd.Metric.Clone(),
 	}
 }
 
-func NewTCD(minItems uint64, _ string) StatMetric {
-	return &StatTCD{Metric: NewMetric(minItems)}
+func NewTCD(minItems uint64, _ string, filterIDs []string) StatMetric {
+	return &StatTCD{Metric: NewMetric(minItems, filterIDs)}
 }
 
 // TCD implements TotalCallDuration metric
 type StatTCD struct {
 	*Metric
-}
-
-func (sum *StatTCD) GetStringValue() (valStr string) {
-	valStr = utils.NotAvailable
-	if val := sum.getTotalValue(); val != utils.DecimalNaN {
-		dur, _ := val.Duration()
-		valStr = dur.String()
-	}
-	return
 }
 
 func (sum *StatTCD) AddEvent(evID string, ev utils.DataProvider) error {
@@ -184,8 +201,8 @@ func (sum *StatTCD) Clone() StatMetric {
 	}
 }
 
-func NewACC(minItems uint64, _ string) StatMetric {
-	return &StatACC{Metric: NewMetric(minItems)}
+func NewACC(minItems uint64, _ string, filterIDs []string) StatMetric {
+	return &StatACC{Metric: NewMetric(minItems, filterIDs)}
 }
 
 // ACC implements AverageCallCost metric
@@ -193,12 +210,8 @@ type StatACC struct {
 	*Metric
 }
 
-func (acc *StatACC) GetStringValue() (valStr string) {
-	valStr = utils.NotAvailable
-	if val := acc.getAvgValue(); val != utils.DecimalNaN {
-		valStr = val.String()
-	}
-	return
+func (acc *StatACC) GetStringValue(rounding int) string {
+	return acc.getAvgStringValue(rounding)
 }
 
 func (acc *StatACC) GetValue() *utils.Decimal {
@@ -213,7 +226,14 @@ func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) error {
 		}
 		return err
 	}
-	return acc.addEvent(evID, ival)
+	val, err := utils.IfaceAsBig(ival)
+	if err != nil {
+		return err
+	}
+	if val.Cmp(decimal.New(0, 0)) < 0 {
+		return utils.ErrPrefix(utils.ErrNegative, utils.Cost)
+	}
+	return acc.addEvent(evID, val)
 }
 
 func (acc *StatACC) Clone() StatMetric {
@@ -222,21 +242,13 @@ func (acc *StatACC) Clone() StatMetric {
 	}
 }
 
-func NewTCC(minItems uint64, _ string) StatMetric {
-	return &StatTCC{Metric: NewMetric(minItems)}
+func NewTCC(minItems uint64, _ string, filterIDs []string) StatMetric {
+	return &StatTCC{Metric: NewMetric(minItems, filterIDs)}
 }
 
 // TCC implements TotalCallCost metric
 type StatTCC struct {
 	*Metric
-}
-
-func (tcc *StatTCC) GetStringValue() (valStr string) {
-	valStr = utils.NotAvailable
-	if val := tcc.getTotalValue(); val != utils.DecimalNaN {
-		valStr = val.String()
-	}
-	return
 }
 
 func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) error {
@@ -247,7 +259,14 @@ func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) error {
 		}
 		return err
 	}
-	return tcc.addEvent(evID, ival)
+	val, err := utils.IfaceAsBig(ival)
+	if err != nil {
+		return err
+	}
+	if val.Cmp(decimal.New(0, 0)) < 0 {
+		return utils.ErrPrefix(utils.ErrNegative, utils.Cost)
+	}
+	return tcc.addEvent(evID, val)
 }
 
 func (tcc *StatTCC) Clone() StatMetric {
@@ -256,8 +275,8 @@ func (tcc *StatTCC) Clone() StatMetric {
 	}
 }
 
-func NewPDD(minItems uint64, _ string) StatMetric {
-	return &StatPDD{Metric: NewMetric(minItems)}
+func NewPDD(minItems uint64, _ string, filterIDs []string) StatMetric {
+	return &StatPDD{Metric: NewMetric(minItems, filterIDs)}
 }
 
 // PDD implements Post Dial Delay (average) metric
@@ -265,13 +284,8 @@ type StatPDD struct {
 	*Metric
 }
 
-func (pdd *StatPDD) GetStringValue() (valStr string) {
-	valStr = utils.NotAvailable
-	if val := pdd.getAvgValue(); val != utils.DecimalNaN {
-		dur, _ := val.Duration()
-		valStr = dur.String()
-	}
-	return
+func (pdd *StatPDD) GetStringValue(rounding int) string {
+	return pdd.getAvgStringValue(rounding)
 }
 
 func (pdd *StatPDD) GetValue() *utils.Decimal {
@@ -295,11 +309,12 @@ func (pdd *StatPDD) Clone() StatMetric {
 	}
 }
 
-func NewDDC(minItems uint64, _ string) StatMetric {
+func NewDDC(minItems uint64, _ string, filterIDs []string) StatMetric {
 	return &StatDDC{
 		Events:      make(map[string]map[string]uint64),
 		FieldValues: make(map[string]utils.StringSet),
 		MinItems:    minItems,
+		FilterIDs:   filterIDs,
 	}
 }
 
@@ -308,20 +323,16 @@ type StatDDC struct {
 	Events      map[string]map[string]uint64 // map[EventTenantID]map[fieldValue]compressfactor
 	MinItems    uint64
 	Count       uint64
+	FilterIDs   []string
 }
 
-// getValue returns tcd.val
-func (ddc *StatDDC) getValue(roundingDecimal int) float64 {
-	if ddc.Count == 0 || ddc.Count < ddc.MinItems {
-		return utils.StatsNA
-	}
-	return float64(len(ddc.FieldValues))
-}
+func (ddc *StatDDC) GetFilterIDs() []string { return ddc.FilterIDs }
 
-func (ddc *StatDDC) GetStringValue() (valStr string) {
+func (ddc *StatDDC) GetStringValue(rounding int) (valStr string) {
 	valStr = utils.NotAvailable
 	if val := ddc.GetValue(); val != utils.DecimalNaN {
-		valStr = val.String()
+		v, _ := val.Round(rounding).Float64()
+		valStr = strconv.FormatFloat(v, 'f', -1, 64)
 	}
 	return
 }
@@ -442,39 +453,30 @@ func (ddc *StatDDC) Clone() StatMetric {
 	return cln
 }
 
-////////////////////////////////////
-type StatMetricWithFilters struct {
-	StatMetric
-	FilterIDs []string
-}
-
-func (sm *StatMetricWithFilters) Clone() *StatMetricWithFilters {
-	return &StatMetricWithFilters{
-		StatMetric: sm.StatMetric.Clone(),
-		FilterIDs:  utils.CloneStringSlice(sm.FilterIDs),
-	}
-}
-
 // ACDHelper structure
 type DecimalWithCompress struct {
 	Stat           *utils.Decimal
 	CompressFactor uint64
 }
 
-func NewMetric(minItems uint64) *Metric {
+func NewMetric(minItems uint64, filterIDs []string) *Metric {
 	return &Metric{
-		Value:    utils.NewDecimal(0, 0),
-		Events:   make(map[string]*DecimalWithCompress),
-		MinItems: minItems,
+		Value:     utils.NewDecimal(0, 0),
+		Events:    make(map[string]*DecimalWithCompress),
+		MinItems:  minItems,
+		FilterIDs: filterIDs,
 	}
 }
 
 type Metric struct {
-	Value    *utils.Decimal
-	Count    uint64
-	Events   map[string]*DecimalWithCompress // map[EventTenantID]Cost
-	MinItems uint64
+	Value     *utils.Decimal
+	Count     uint64
+	Events    map[string]*DecimalWithCompress // map[EventTenantID]Cost
+	MinItems  uint64
+	FilterIDs []string
 }
+
+func (sum *Metric) GetFilterIDs() []string { return sum.FilterIDs }
 
 func (sum *Metric) getTotalValue() *utils.Decimal {
 	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
@@ -488,6 +490,22 @@ func (sum *Metric) getAvgValue() *utils.Decimal {
 		return utils.DecimalNaN
 	}
 	return utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0))
+}
+
+func (sum *Metric) getAvgStringValue(rounding int) string {
+	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := utils.DivideDecimal(sum.Value, utils.NewDecimal(int64(sum.Count), 0)).Round(rounding).Float64()
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
+func (sum *Metric) GetStringValue(rounding int) string {
+	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := sum.Value.Round(rounding).Float64()
+	return strconv.FormatFloat(v, 'f', -1, 64)
 }
 
 func (sum *Metric) GetValue() (v *utils.Decimal) {
@@ -505,7 +523,9 @@ func (sum *Metric) addEvent(evID string, ival interface{}) (err error) {
 		sum.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}
 	} else {
 		v.Stat = utils.DivideDecimal(
-			utils.MultiplyDecimal(v.Stat, utils.NewDecimal(int64(v.CompressFactor), 0)),
+			utils.SumDecimal(
+				utils.MultiplyDecimal(v.Stat, utils.NewDecimal(int64(v.CompressFactor), 0)),
+				dVal),
 			utils.NewDecimal(int64(v.CompressFactor)+1, 0))
 		v.CompressFactor = v.CompressFactor + 1
 	}
@@ -564,10 +584,11 @@ func (sum *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64
 
 func (sum *Metric) Clone() (cln *Metric) {
 	cln = &Metric{
-		Value:    sum.Value.Clone(),
-		Count:    sum.Count,
-		Events:   make(map[string]*DecimalWithCompress),
-		MinItems: sum.MinItems,
+		Value:     sum.Value.Clone(),
+		Count:     sum.Count,
+		Events:    make(map[string]*DecimalWithCompress),
+		MinItems:  sum.MinItems,
+		FilterIDs: utils.CloneStringSlice(sum.FilterIDs),
 	}
 	for k, v := range sum.Events {
 		cln.Events[k] = &(*v)
@@ -575,22 +596,32 @@ func (sum *Metric) Clone() (cln *Metric) {
 	return
 }
 
-func NewStatSum(minItems uint64, fieldName string) StatMetric {
-	return &StatSum{Metric: NewMetric(minItems),
+func (sum *Metric) Equal(v *Metric) bool {
+	if sum.MinItems != v.MinItems ||
+		sum.Count != v.Count ||
+		sum.Value.Compare(v.Value) != 0 ||
+		len(sum.Events) != len(v.Events) {
+		return false
+	}
+	for k, c1 := range sum.Events {
+		c2, has := v.Events[k]
+		if !has ||
+			c1.CompressFactor != c2.CompressFactor ||
+			c1.Stat.Compare(c2.Stat) != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func NewStatSum(minItems uint64, fieldName string, filterIDs []string) StatMetric {
+	return &StatSum{Metric: NewMetric(minItems, filterIDs),
 		FieldName: fieldName}
 }
 
 type StatSum struct {
 	*Metric
 	FieldName string
-}
-
-func (sum *StatSum) GetStringValue() (valStr string) {
-	valStr = utils.NotAvailable
-	if val := sum.getTotalValue(); val != utils.DecimalNaN {
-		valStr = val.String()
-	}
-	return
 }
 
 func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) error {
@@ -611,8 +642,8 @@ func (sum *StatSum) Clone() StatMetric {
 	}
 }
 
-func NewStatAverage(minItems uint64, fieldName string) StatMetric {
-	return &StatAverage{Metric: NewMetric(minItems),
+func NewStatAverage(minItems uint64, fieldName string, filterIDs []string) StatMetric {
+	return &StatAverage{Metric: NewMetric(minItems, filterIDs),
 		FieldName: fieldName}
 }
 
@@ -622,12 +653,8 @@ type StatAverage struct {
 	FieldName string
 }
 
-func (avg *StatAverage) GetStringValue() (valStr string) {
-	valStr = utils.NotAvailable
-	if val := avg.getAvgValue(); val != utils.DecimalNaN {
-		valStr = val.String()
-	}
-	return
+func (avg *StatAverage) GetStringValue(rounding int) string {
+	return avg.getAvgStringValue(rounding)
 }
 
 func (avg *StatAverage) GetValue() *utils.Decimal {
@@ -652,12 +679,13 @@ func (avg *StatAverage) Clone() StatMetric {
 	}
 }
 
-func NewStatDistinct(minItems uint64, fieldName string) StatMetric {
+func NewStatDistinct(minItems uint64, fieldName string, filterIDs []string) StatMetric {
 	return &StatDistinct{
 		Events:      make(map[string]map[string]uint64),
 		FieldValues: make(map[string]utils.StringSet),
 		MinItems:    minItems,
 		FieldName:   fieldName,
+		FilterIDs:   filterIDs,
 	}
 }
 
@@ -667,20 +695,16 @@ type StatDistinct struct {
 	MinItems    uint64
 	FieldName   string
 	Count       uint64
+	FilterIDs   []string
 }
 
-// getValue returns tcd.val
-func (dst *StatDistinct) getValue(roundingDecimal int) float64 {
-	if dst.Count == 0 || dst.Count < dst.MinItems {
-		return utils.StatsNA
-	}
-	return float64(len(dst.FieldValues))
-}
+func (dst *StatDistinct) GetFilterIDs() []string { return dst.FilterIDs }
 
-func (dst *StatDistinct) GetStringValue() (valStr string) {
+func (dst *StatDistinct) GetStringValue(rounding int) (valStr string) {
 	valStr = utils.NotAvailable
 	if val := dst.GetValue(); val != utils.DecimalNaN {
-		valStr = val.String()
+		v, _ := val.Round(rounding).Float64()
+		valStr = strconv.FormatFloat(v, 'f', -1, 64)
 	}
 	return
 }
