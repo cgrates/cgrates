@@ -53,8 +53,8 @@ func TestStatQueuesSort(t *testing.T) {
 
 func TestStatRemEventWithID(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: &StatASR{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
 				Metric: &Metric{
 					Value: utils.NewDecimal(1, 0),
 					Count: 2,
@@ -63,10 +63,10 @@ func TestStatRemEventWithID(t *testing.T) {
 						"cgrates.org:TestRemEventWithID_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 1},
 					},
 				},
-			}},
+			},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR)
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(50, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", utils.ToJSON(asrMetric.GetValue()))
 	}
@@ -98,8 +98,8 @@ func TestStatRemEventWithID(t *testing.T) {
 
 func TestStatRemEventWithID2(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: &StatASR{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
 				Metric: &Metric{
 					Value: utils.NewDecimal(2, 0),
 					Count: 4,
@@ -108,10 +108,10 @@ func TestStatRemEventWithID2(t *testing.T) {
 						"cgrates.org:TestRemEventWithID_2": {Stat: utils.NewDecimal(0, 0), CompressFactor: 2},
 					},
 				},
-			}},
+			},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR)
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimal(50, 0)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric)
 	}
@@ -145,8 +145,8 @@ func TestStatRemEventWithID2(t *testing.T) {
 
 func TestStatRemExpired(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: &StatASR{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
 				Metric: &Metric{
 					Value: utils.NewDecimal(2, 0),
 					Count: 3,
@@ -156,7 +156,7 @@ func TestStatRemExpired(t *testing.T) {
 						"cgrates.org:TestStatRemExpired_3": {Stat: utils.NewDecimal(1, 0), CompressFactor: 1},
 					},
 				},
-			}},
+			},
 		},
 		SQItems: []SQItem{
 			{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
@@ -164,7 +164,7 @@ func TestStatRemExpired(t *testing.T) {
 			{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Minute))},
 		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR)
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(66.66666666666667)) != 0 {
 		t.Errorf("received asrMetric: %v", asrMetric.GetValue())
 	}
@@ -216,8 +216,8 @@ func TestStatRemOnQueueLength(t *testing.T) {
 
 func TestStatAddStatEvent(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: &StatASR{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
 				Metric: &Metric{
 					Value: utils.NewDecimal(1, 0),
 					Count: 1,
@@ -226,9 +226,9 @@ func TestStatAddStatEvent(t *testing.T) {
 					},
 				},
 			},
-			}},
+		},
 	}
-	asrMetric := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR)
+	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
 	if asr := asrMetric.GetValue(); asr.Compare(utils.NewDecimalFromFloat64(100)) != 0 {
 		t.Errorf("received ASR: %v", asr)
 	}
@@ -259,26 +259,22 @@ func TestStatRemOnQueueLength2(t *testing.T) {
 			{"cgrates.org:TestStatRemExpired_1", nil},
 			{"cgrates.org:TestStatRemExpired_2", nil},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {
-				FilterIDs: []string{"*string:~*req.Account:1002"},
-				StatMetric: &StatTCD{
-					Metric: &Metric{
-						Value: utils.NewDecimal(0, 0),
-						Events: map[string]*DecimalWithCompress{
-							"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimalFromFloat64(float64(time.Minute)), CompressFactor: 1},
-						},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{
+				Metric: &Metric{
+					FilterIDs: []string{"*string:~*req.Account:1002"},
+					Value:     utils.NewDecimal(0, 0),
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_2": {Stat: utils.NewDecimalFromFloat64(float64(time.Minute)), CompressFactor: 1},
 					},
 				},
 			},
-			utils.MetaASR: {
-				FilterIDs: []string{"*string:~*req.Account:1001"},
-				StatMetric: &StatASR{
-					Metric: &Metric{
-						Value: utils.NewDecimal(0, 0),
-						Events: map[string]*DecimalWithCompress{
-							"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
-						},
+			utils.MetaASR: &StatASR{
+				Metric: &Metric{
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Value:     utils.NewDecimal(0, 0),
+					Events: map[string]*DecimalWithCompress{
+						"cgrates.org:TestStatRemExpired_1": {Stat: utils.NewDecimalFromFloat64(1), CompressFactor: 1},
 					},
 				},
 			},
@@ -322,8 +318,8 @@ func TestStatCompress(t *testing.T) {
 	}
 	sq = &StatQueue{
 		SQItems: sqItems,
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: asr},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: asr,
 		},
 	}
 	if sq.Compress(100) {
@@ -335,7 +331,7 @@ func TestStatCompress(t *testing.T) {
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
 }
@@ -393,9 +389,9 @@ func TestStatCompress2(t *testing.T) {
 	sq = &StatQueue{
 		SQItems: sqItems,
 		ttl:     utils.DurationPointer(time.Second),
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: asr},
-			utils.MetaTCD: {StatMetric: tcd},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: asr,
+			utils.MetaTCD: tcd,
 		},
 	}
 	if sq.Compress(100) {
@@ -407,10 +403,10 @@ func TestStatCompress2(t *testing.T) {
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
-	if rply := sq.SQMetrics[utils.MetaTCD].StatMetric.(*StatTCD); !reflect.DeepEqual(rply, expectedTCD) {
+	if rply := sq.SQMetrics[utils.MetaTCD].(*StatTCD); !rply.Equal(expectedTCD.Metric) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
@@ -472,9 +468,9 @@ func TestStatCompress3(t *testing.T) {
 	sq = &StatQueue{
 		SQItems: sqItems,
 		ttl:     utils.DurationPointer(time.Second),
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: asr},
-			utils.MetaTCD: {StatMetric: tcd},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: asr,
+			utils.MetaTCD: tcd,
 		},
 	}
 	if sq.Compress(100) {
@@ -486,10 +482,10 @@ func TestStatCompress3(t *testing.T) {
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
-	if rply := sq.SQMetrics[utils.MetaTCD].StatMetric.(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
+	if rply := sq.SQMetrics[utils.MetaTCD].(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
@@ -524,15 +520,15 @@ func TestStatExpand(t *testing.T) {
 	}
 	sq = &StatQueue{
 		SQItems: sqItems,
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: asr},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: asr,
 		},
 	}
 	sq.Expand()
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
 }
@@ -588,19 +584,19 @@ func TestStatExpand2(t *testing.T) {
 	sq = &StatQueue{
 		SQItems: sqItems,
 		ttl:     utils.DurationPointer(time.Second),
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: asr},
-			utils.MetaTCD: {StatMetric: tcd},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: asr,
+			utils.MetaTCD: tcd,
 		},
 	}
 	sq.Expand()
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
-	if rply := sq.SQMetrics[utils.MetaTCD].StatMetric.(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
+	if rply := sq.SQMetrics[utils.MetaTCD].(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
@@ -660,19 +656,19 @@ func TestStatExpand3(t *testing.T) {
 	sq = &StatQueue{
 		SQItems: sqItems,
 		ttl:     utils.DurationPointer(time.Second),
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: asr},
-			utils.MetaTCD: {StatMetric: tcd},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: asr,
+			utils.MetaTCD: tcd,
 		},
 	}
 	sq.Expand()
 	if !reflect.DeepEqual(sq.SQItems, expectedSqItems) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedSqItems), utils.ToJSON(sq.SQItems))
 	}
-	if rply := sq.SQMetrics[utils.MetaASR].StatMetric.(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
+	if rply := sq.SQMetrics[utils.MetaASR].(*StatASR); !reflect.DeepEqual(*rply, *expectedASR) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedASR), utils.ToJSON(rply))
 	}
-	if rply := sq.SQMetrics[utils.MetaTCD].StatMetric.(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
+	if rply := sq.SQMetrics[utils.MetaTCD].(*StatTCD); !reflect.DeepEqual(*rply, *expectedTCD) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
@@ -680,8 +676,8 @@ func TestStatExpand3(t *testing.T) {
 func TestStatRemoveExpiredTTL(t *testing.T) {
 	sq = &StatQueue{
 		ttl: utils.DurationPointer(100 * time.Millisecond),
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: &StatASR{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
 				Metric: &Metric{
 					Value: utils.NewDecimal(1, 0),
 					Count: 1,
@@ -690,7 +686,7 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 					},
 				},
 			},
-			}},
+		},
 		sqPrfl: &StatQueueProfile{
 			QueueLength: 0, //unlimited que
 		},
@@ -716,8 +712,8 @@ func TestStatRemoveExpiredTTL(t *testing.T) {
 
 func TestStatRemoveExpiredQueue(t *testing.T) {
 	sq = &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaASR: {StatMetric: &StatASR{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
 				Metric: &Metric{
 					Value: utils.NewDecimal(1, 0),
 					Count: 1,
@@ -726,7 +722,7 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 					},
 				},
 			},
-			}},
+		},
 		sqPrfl: &StatQueueProfile{
 			QueueLength: 2, //unlimited que
 		},
@@ -779,7 +775,7 @@ func (statMetricMock) GetValue() *utils.Decimal {
 	return nil
 }
 
-func (statMetricMock) GetStringValue() (val string) {
+func (statMetricMock) GetStringValue(int) (val string) {
 	return
 }
 
@@ -805,6 +801,12 @@ func (sMM statMetricMock) Compress(uint64, string) []string {
 	return nil
 }
 
+func (sMM statMetricMock) GetFilterIDs() []string {
+	if sMM == "pass error" {
+		return []string{"filter1", "filter2"}
+	}
+	return nil
+}
 func (sMM statMetricMock) GetCompressFactor(map[string]uint64) map[string]uint64 {
 	return nil
 }
@@ -818,8 +820,8 @@ func (m mockMarshal) Marshal(v interface{}) ([]byte, error)      { return nil, e
 func (m mockMarshal) Unmarshal(data []byte, v interface{}) error { return errors.New(string(m)) }
 func TestStatQueueNewStoredStatQueue(t *testing.T) {
 	sq := &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
-			"key": &StatMetricWithFilters{StatMetric: statMetricMock("")},
+		SQMetrics: map[string]StatMetric{
+			"key": statMetricMock(""),
 		},
 	}
 	experr := "marshal mock error"
@@ -867,7 +869,7 @@ func TestStatQueueAsStatQueueSuccess(t *testing.T) {
 				EventID: "testEventID",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{},
+		SQMetrics: map[string]StatMetric{},
 	}
 	rcv, err := ssq.AsStatQueue(ms)
 
@@ -963,7 +965,7 @@ func TestStatQueueAsStatQueueOK(t *testing.T) {
 	}
 
 	exp := &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
+		SQMetrics: map[string]StatMetric{
 			utils.MetaTCD: sm,
 		},
 	}
@@ -992,7 +994,7 @@ func TestStatQueueNewStatQueue(t *testing.T) {
 	exp := &StatQueue{
 		Tenant: tnt,
 		ID:     id,
-		SQMetrics: map[string]*StatMetricWithFilters{
+		SQMetrics: map[string]StatMetric{
 			"invalid": nil,
 		},
 	}
@@ -1025,8 +1027,8 @@ func TestStatQueueProcessEventremExpiredErr(t *testing.T) {
 				ExpiryTime: &expiry,
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			"key": {StatMetric: statMetricMock("remExpired error")},
+		SQMetrics: map[string]StatMetric{
+			"key": statMetricMock("remExpired error"),
 		},
 	}
 
@@ -1054,8 +1056,8 @@ func TestStatQueueProcessEventremOnQueueLengthErr(t *testing.T) {
 				EventID: evID,
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			"key": {StatMetric: statMetricMock("remExpired error")},
+		SQMetrics: map[string]StatMetric{
+			"key": statMetricMock("remExpired error"),
 		},
 	}
 
@@ -1083,8 +1085,8 @@ func TestStatQueueProcessEventaddStatEvent(t *testing.T) {
 				EventID: evID,
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: &StatTCD{Metric: &Metric{}}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: &StatTCD{Metric: &Metric{}},
 		},
 	}
 
@@ -1129,8 +1131,8 @@ func TestStatQueueCompress(t *testing.T) {
 				EventID: "id5",
 			},
 		},
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: {StatMetric: statMetricMock("populate idMap")},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: statMetricMock("populate idMap"),
 			utils.MetaReq: sm,
 		},
 		ttl: &ttl,
@@ -1177,8 +1179,8 @@ func TestStatQueueCompress(t *testing.T) {
 
 func TestStatQueueaddStatEventPassErr(t *testing.T) {
 	sq := &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
-			utils.MetaTCD: &StatMetricWithFilters{StatMetric: statMetricMock("pass error"), FilterIDs: []string{"filter1", "filter2"}},
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: statMetricMock("pass error"),
 		},
 	}
 	tnt, evID := "tenant", "eventID"
@@ -1214,7 +1216,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	}
 
 	sq := &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
+		SQMetrics: map[string]StatMetric{
 			utils.MetaTCD: sm,
 		},
 	}
@@ -1239,7 +1241,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	}
 
 	exp := &StatQueue{
-		SQMetrics: map[string]*StatMetricWithFilters{
+		SQMetrics: map[string]StatMetric{
 			utils.MetaTCD: sm,
 		},
 		SQItems: []SQItem{

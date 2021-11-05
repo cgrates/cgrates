@@ -58,7 +58,7 @@ func TestNewCaps(t *testing.T) {
 }
 
 func TestCapsStats(t *testing.T) {
-	exp := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq)}
+	exp := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq, nil)}
 	cr := NewCaps(0, utils.MetaBusy)
 	stopChan := make(chan struct{}, 1)
 	close(stopChan)
@@ -87,7 +87,7 @@ func TestCapsStats(t *testing.T) {
 }
 
 func TestCapsStatsGetAverage(t *testing.T) {
-	cs := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq)}
+	cs := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq, nil)}
 	cs.addSample("1", 10)
 	expAvg := 10.
 	if avg := cs.GetAverage(); avg != expAvg {
@@ -136,7 +136,7 @@ func TestFloatDP(t *testing.T) {
 }
 
 func TestCapsStatsGetAverageOnEvict(t *testing.T) {
-	cs := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq)}
+	cs := &CapsStats{st: NewStatAverage(1, utils.MetaDynReq, nil)}
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheCapsEvents] = &config.CacheParamCfg{Limit: 2}
 	tmp := Cache

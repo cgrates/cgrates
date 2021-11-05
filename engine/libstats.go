@@ -145,7 +145,7 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 		Tenant:    ssq.Tenant,
 		ID:        ssq.ID,
 		SQItems:   make([]SQItem, len(ssq.SQItems)),
-		SQMetrics: make(map[string]*StatMetricWithFilters, len(ssq.SQMetrics)),
+		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
 	}
 	for i, sqItm := range ssq.SQItems {
 		sq.SQItems[i] = sqItm
@@ -174,7 +174,7 @@ func NewStatQueue(tnt, id string, metrics []*MetricWithFilters, minItems uint64)
 	sq = &StatQueue{
 		Tenant:    tnt,
 		ID:        id,
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 
 	for _, metric := range metrics {
@@ -191,7 +191,7 @@ type StatQueue struct {
 	Tenant    string
 	ID        string
 	SQItems   []SQItem
-	SQMetrics map[string]*StatMetricWithFilters
+	SQMetrics map[string]StatMetric
 	lkID      string // ID of the lock used when matching the stat
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
@@ -309,7 +309,7 @@ func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filter
 	dDP := newDynamicDP(ctx, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
 		config.CgrConfig().FilterSCfg().AccountSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq]})
 	for metricID, metric := range sq.SQMetrics {
-		if pass, err = filterS.Pass(ctx, tnt, metric.FilterIDs,
+		if pass, err = filterS.Pass(ctx, tnt, metric.GetFilterIDs(),
 			evNm); err != nil {
 			return
 		} else if !pass {
@@ -437,31 +437,31 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 	sq.Tenant = tmp.Tenant
 	sq.ID = tmp.ID
 	sq.SQItems = tmp.SQItems
-	sq.SQMetrics = make(map[string]*StatMetricWithFilters)
+	sq.SQMetrics = make(map[string]StatMetric)
 	for metricID, val := range tmp.SQMetrics {
 		metricSplit := strings.Split(metricID, utils.HashtagSep)
-		var metric *StatMetricWithFilters
+		var metric StatMetric
 		switch metricSplit[0] {
 		case utils.MetaASR:
-			metric = &StatMetricWithFilters{StatMetric: new(StatASR)}
+			metric = new(StatASR)
 		case utils.MetaACD:
-			metric = &StatMetricWithFilters{StatMetric: new(StatACD)}
+			metric = new(StatACD)
 		case utils.MetaTCD:
-			metric = &StatMetricWithFilters{StatMetric: new(StatTCD)}
+			metric = new(StatTCD)
 		case utils.MetaACC:
-			metric = &StatMetricWithFilters{StatMetric: new(StatACC)}
+			metric = new(StatACC)
 		case utils.MetaTCC:
-			metric = &StatMetricWithFilters{StatMetric: new(StatTCC)}
+			metric = new(StatTCC)
 		case utils.MetaPDD:
-			metric = &StatMetricWithFilters{StatMetric: new(StatPDD)}
+			metric = new(StatPDD)
 		case utils.MetaDDC:
-			metric = &StatMetricWithFilters{StatMetric: new(StatDDC)}
+			metric = new(StatDDC)
 		case utils.MetaSum:
-			metric = &StatMetricWithFilters{StatMetric: new(StatSum)}
+			metric = new(StatSum)
 		case utils.MetaAverage:
-			metric = &StatMetricWithFilters{StatMetric: new(StatAverage)}
+			metric = new(StatAverage)
 		case utils.MetaDistinct:
-			metric = &StatMetricWithFilters{StatMetric: new(StatDistinct)}
+			metric = new(StatDistinct)
 		default:
 			return fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
 		}
@@ -487,7 +487,7 @@ func (sq *StatQueue) Clone() (cln *StatQueue) {
 		Tenant:    sq.Tenant,
 		ID:        sq.ID,
 		SQItems:   make([]SQItem, len(sq.SQItems)),
-		SQMetrics: make(map[string]*StatMetricWithFilters),
+		SQMetrics: make(map[string]StatMetric),
 	}
 	for i, itm := range sq.SQItems {
 		var exp *time.Time

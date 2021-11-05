@@ -207,15 +207,6 @@ func TestDecimalCalculus(t *testing.T) {
 	}
 }
 
-func TestMarshalJSON(t *testing.T) {
-	dec := new(Decimal)
-	if rcv, err := dec.MarshalJSON(); err != nil {
-		t.Error(err)
-	} else if len(rcv) != 5 {
-		t.Error("Expected empty slice", len(rcv))
-	}
-}
-
 func TestNewDecimalFromUsage(t *testing.T) {
 	dec := "12tts"
 	expectedErr := "time: unknown unit \"tts\" in duration \"12tts\""
