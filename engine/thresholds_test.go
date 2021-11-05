@@ -93,6 +93,7 @@ var (
 				"Threshold": "TH_1",
 				"Weight":    "10.0",
 			},
+			APIOpts: map[string]interface{}{},
 		},
 		{
 			Tenant: "cgrates.org",
@@ -101,6 +102,7 @@ var (
 				"Threshold": "TH_2",
 				"Weight":    "20.0",
 			},
+			APIOpts: map[string]interface{}{},
 		},
 		{
 			Tenant: "cgrates.org",
@@ -108,6 +110,7 @@ var (
 			Event: map[string]interface{}{
 				"Threshold": "ThresholdPrefix123",
 			},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 )

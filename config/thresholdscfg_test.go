@@ -33,6 +33,10 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Prefix_indexed_fields: &[]string{"*req.index1"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
+		Opts: &ThresholdsOptsJson{
+			ProfileIDs:           &[]string{},
+			ProfileIgnoreFilters: utils.BoolPointer(false),
+		},
 	}
 	expected := &ThresholdSCfg{
 		Enabled:             true,
@@ -42,6 +46,10 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		Opts: &ThresholdsOpts{
+			ProfileIDs:           []string{},
+			ProfileIgnoreFilters: false,
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.thresholdSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -73,6 +81,10 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaProfileIDs:              []string{},
+			utils.MetaProfileIgnoreFiltersCfg: false,
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -101,6 +113,10 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"},
 		utils.NestedFieldsCfg:        true,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaProfileIDs:              []string{},
+			utils.MetaProfileIgnoreFiltersCfg: false,
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -117,6 +133,9 @@ func TestThresholdSCfgClone(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		Opts: &ThresholdsOpts{
+			ProfileIDs: []string{},
+		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
