@@ -188,6 +188,7 @@ type EventExporterOpts struct {
 	CertPath                 *string
 	CAPath                   *string
 	TLS                      *bool
+	ConnIDs                  *[]string
 	RPCConnTimeout           *time.Duration
 	RPCReplyTimeout          *time.Duration
 }

@@ -178,7 +178,7 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 		Opts:           expEv.Opts,
 		Attempts:       attempts,
 		FailedPostsDir: utils.MetaNone,
-	}, config.CgrConfig(), nil); err != nil {
+	}, config.CgrConfig(), nil, nil); err != nil {
 		return
 	}
 	keyFunc := func() string { return utils.EmptyString }

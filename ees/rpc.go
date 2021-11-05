@@ -25,11 +25,12 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
-func NewRpcEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (e *RPCee, err error) {
+func NewRpcEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage,
+	connMgr *engine.ConnManager) (e *RPCee, err error) {
 	e = &RPCee{
 		cfg: cfg,
 		dc:  dc,
@@ -39,9 +40,10 @@ func NewRpcEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (e *RPCee,
 }
 
 type RPCee struct {
-	cfg  *config.EventExporterCfg
-	dc   *utils.SafeMapStorage
-	conn *rpcclient.RPCClient
+	cfg     *config.EventExporterCfg
+	dc      *utils.SafeMapStorage
+	connMgr *engine.ConnManager
+	//	conn    *rpcclient.RPCClient
 
 	//opts
 	codec         string
@@ -50,6 +52,7 @@ type RPCee struct {
 	keyPath       string
 	certPath      string
 	caPath        string
+	connIDs       []string
 	connTimeout   time.Duration
 	replyTimeout  time.Duration
 
@@ -61,12 +64,6 @@ func (e *RPCee) Cfg() (eCfg *config.EventExporterCfg) {
 }
 
 func (e *RPCee) Connect() (err error) {
-	e.Lock()
-	if e.conn, err = rpcclient.NewRPCClient(context.TODO(), utils.TCP, e.cfg.ExportPath, e.tls,
-		e.keyPath, e.certPath, e.caPath, 1, 1, e.connTimeout, e.replyTimeout, e.codec, nil, false, nil); err != nil {
-		return
-	}
-	e.Unlock()
 	return
 }
 
@@ -74,13 +71,13 @@ func (e *RPCee) ExportEvent(ctx *context.Context, args interface{}, _ string) (e
 	e.Lock()
 	defer e.Unlock()
 	var rply interface{}
-	return e.conn.Call(ctx, e.serviceMethod, args, &rply)
+	return e.connMgr.Call(ctx, e.connIDs, e.serviceMethod, args, &rply)
 }
 
 func (e *RPCee) Close() (err error) {
 	e.Lock()
 	defer e.Unlock()
-	e.conn = nil
+	e.connMgr = nil
 	return
 }
 
@@ -127,6 +124,9 @@ func (e *RPCee) parseOpts() (err error) {
 	}
 	if e.cfg.Opts.TLS != nil {
 		e.tls = *e.cfg.Opts.TLS
+	}
+	if e.cfg.Opts.ConnIDs != nil {
+		e.connIDs = *e.cfg.Opts.ConnIDs
 	}
 	if e.cfg.Opts.RPCConnTimeout != nil {
 		e.connTimeout = *e.cfg.Opts.RPCConnTimeout
