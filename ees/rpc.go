@@ -108,7 +108,6 @@ func (e *RPCee) PrepareOrderMap(oMp *utils.OrderedNavigableMap) (interface{}, er
 }
 
 func (e *RPCee) parseOpts() (err error) {
-	utils.Logger.Debug(utils.ToJSON(e.cfg.Opts))
 	if e.cfg.Opts.RPCCodec != nil {
 		e.codec = *e.cfg.Opts.RPCCodec
 	}
@@ -136,6 +135,5 @@ func (e *RPCee) parseOpts() (err error) {
 	if e.cfg.Opts.RPCReplyTimeout != nil {
 		e.replyTimeout = *e.cfg.Opts.RPCReplyTimeout
 	}
-	utils.Logger.Debug(utils.ToJSON(e))
 	return
 }
