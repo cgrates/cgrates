@@ -433,7 +433,7 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 		return
 	}
 	sr := s.SRuns[sRunIdx]
-	if !s.chargeable {
+	if !s.Chargeable {
 		sS.pause(sr, dur)
 		sr.TotalUsage += sr.LastUsage
 		return dur, nil
@@ -1179,7 +1179,7 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREvent, resID, clntConnID string,
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 	}
-	s.chargeable = s.OptsStart.GetBoolOrDefault(utils.OptsChargeable, true)
+	s.Chargeable = s.OptsStart.GetBoolOrDefault(utils.OptsChargeable, true)
 	if !isMsg && sS.isIndexed(s, false) { // check if already exists
 		return nil, utils.ErrExists
 	}
@@ -1515,7 +1515,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 		s.updateSRuns(updtEv, sS.cgrCfg.SessionSCfg().AlterableFields)
 		sS.setSTerminator(s, opts) // reset the terminator
 	}
-	s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+	s.Chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
 	//init has no updtEv
 	if updtEv == nil {
 		updtEv = engine.MapEvent(s.EventStart.Clone())
@@ -1584,7 +1584,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 		if sr.EventCost != nil {
 			// if !isMsg { // in case of one time charge there is no need of corrections
 			if notCharged := sUsage - sr.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
-				if !s.chargeable {
+				if !s.Chargeable {
 					sS.pause(sr, notCharged)
 				} else {
 					if sr.CD.LoopIndex > 0 {
@@ -1762,7 +1762,6 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.ClientConnector,
 		*reply = utils.OK
 		return
 	}
-	s.chargeable = s.OptsStart.GetBoolOrDefault(utils.OptsChargeable, true)
 	if aSs := sS.getSessions(s.CGRID, false); len(aSs) != 0 { // found active session, transit to passive
 		aSs[0].Lock()
 		sS.unregisterSession(s.CGRID, false)
@@ -2682,7 +2681,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
 		}
 		s.Lock()
-		s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+		s.Chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
 		s.Unlock()
 		if err = sS.terminateSession(s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
@@ -3510,7 +3509,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					}
 				} else {
 					s.Lock()
-					s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+					s.Chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
 					s.Unlock()
 				}
 				if err = sS.terminateSession(s,

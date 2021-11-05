@@ -236,6 +236,7 @@ func testSeSRplPrepaidActivateSessions(t *testing.T) {
 		OptsStart: map[string]interface{}{
 			utils.DebitInterval: "5ms",
 		},
+		Chargeable: true,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {

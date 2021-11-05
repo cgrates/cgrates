@@ -2658,7 +2658,7 @@ func TestInitSession(t *testing.T) {
 			utils.Usage:        2 * time.Second,
 		},
 		DebitInterval: 0,
-		chargeable:    true,
+		Chargeable:    true,
 	}
 	s.SRuns = nil
 	if !reflect.DeepEqual(exp, s) {
