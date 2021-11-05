@@ -154,17 +154,15 @@ func testDspThPing(t *testing.T) {
 func testDspThTestAuthKey(t *testing.T) {
 	var ids []string
 	nowTime := time.Now()
-	args := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Time:   &nowTime,
-			Event: map[string]interface{}{
-				utils.AccountField: "1002"},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   &nowTime,
+		Event: map[string]interface{}{
+			utils.AccountField: "1002"},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "12345",
 		},
 	}
 
@@ -183,17 +181,15 @@ func testDspThTestAuthKey2(t *testing.T) {
 	var ids []string
 	eIDs := []string{"THD_ACNT_1002"}
 	nowTime := time.Now()
-	args := &engine.ThresholdsArgsProcessEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Time:   &nowTime,
-			Event: map[string]interface{}{
-				utils.AccountField: "1002"},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   &nowTime,
+		Event: map[string]interface{}{
+			utils.AccountField: "1002"},
 
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "thr12345",
-			},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "thr12345",
 		},
 	}
 
