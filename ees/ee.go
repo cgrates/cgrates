@@ -41,7 +41,8 @@ type EventExporter interface {
 }
 
 // NewEventExporter produces exporters
-func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS) (ee EventExporter, err error) {
+func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
+	filterS *engine.FilterS, connMngr *engine.ConnManager) (ee EventExporter, err error) {
 	var dc *utils.SafeMapStorage
 	if dc, err = newEEMetrics(utils.FirstNonEmpty(
 		cfg.Timezone,
@@ -79,7 +80,7 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, fi
 	case utils.MetaLog:
 		return NewLogEE(cfg, dc), nil
 	case utils.MetaRpc:
-		return NewRpcEE(cfg, dc)
+		return NewRpcEE(cfg, dc, connMngr)
 	default:
 		return nil, fmt.Errorf("unsupported exporter type: <%s>", cfg.Type)
 	}
