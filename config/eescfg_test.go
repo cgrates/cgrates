@@ -1360,3 +1360,315 @@ func TestEventExporterOptsClone(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestLoadFromJSONCfg(t *testing.T) {
+	eeOpts := &EventExporterOpts{}
+
+	eeSJson := &EventExporterOptsJson{
+		CSVFieldSeparator:        utils.StringPointer(","),
+		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsIfPrimaryTerm:         utils.IntPointer(1),
+		ElsIfSeqNo:               utils.IntPointer(2),
+		ElsOpType:                utils.StringPointer("op_type"),
+		ElsPipeline:              utils.StringPointer("pipeline"),
+		ElsRouting:               utils.StringPointer("routing"),
+		ElsTimeout:               utils.StringPointer("2s"),
+		ElsVersion:               utils.IntPointer(1),
+		ElsVersionType:           utils.StringPointer("version_type"),
+		ElsWaitForActiveShards:   utils.StringPointer("wfas"),
+		SQLMaxIdleConns:          utils.IntPointer(5),
+		SQLMaxOpenConns:          utils.IntPointer(10),
+		SQLConnMaxLifetime:       utils.StringPointer("2s"),
+		SQLTableName:             utils.StringPointer("cdrs"),
+		SQLDBName:                utils.StringPointer("cgrates"),
+		SSLMode:                  utils.StringPointer("sslm"),
+		KafkaTopic:               utils.StringPointer("topic1"),
+		AMQPRoutingKey:           utils.StringPointer("routing_key"),
+		AMQPQueueID:              utils.StringPointer("queue_id"),
+		AMQPExchange:             utils.StringPointer("amqp_exchange"),
+		AMQPExchangeType:         utils.StringPointer("amqp_exchange_type"),
+		AWSRegion:                utils.StringPointer("utc"),
+		AWSKey:                   utils.StringPointer("aws_key"),
+		AWSSecret:                utils.StringPointer("aws_secret"),
+		AWSToken:                 utils.StringPointer("aws_token"),
+		SQSQueueID:               utils.StringPointer("sqs_queue_id"),
+		S3BucketID:               utils.StringPointer("s3_bucket_id"),
+		S3FolderPath:             utils.StringPointer("s3_folder_path"),
+		NATSJetStream:            utils.BoolPointer(false),
+		NATSSubject:              utils.StringPointer("ees_nats"),
+		NATSJWTFile:              utils.StringPointer("/path/to/jwt"),
+		NATSSeedFile:             utils.StringPointer("/path/to/seed"),
+		NATSCertificateAuthority: utils.StringPointer("ca"),
+		NATSClientCertificate:    utils.StringPointer("cc"),
+		NATSClientKey:            utils.StringPointer("ck"),
+		NATSJetStreamMaxWait:     utils.StringPointer("2s"),
+		RPCCodec:                 utils.StringPointer("rpccodec"),
+		ServiceMethod:            utils.StringPointer("service_method"),
+		KeyPath:                  utils.StringPointer("/path/to/key"),
+		CertPath:                 utils.StringPointer("cp"),
+		CAPath:                   utils.StringPointer("ca_path"),
+		TLS:                      utils.BoolPointer(false),
+		RPCConnTimeout:           utils.StringPointer("2s"),
+		RPCReplyTimeout:          utils.StringPointer("2s"),
+	}
+
+	exp := &EventExporterOpts{
+		CSVFieldSeparator:        utils.StringPointer(","),
+		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsIfPrimaryTerm:         utils.IntPointer(1),
+		ElsIfSeqNo:               utils.IntPointer(2),
+		ElsOpType:                utils.StringPointer("op_type"),
+		ElsPipeline:              utils.StringPointer("pipeline"),
+		ElsRouting:               utils.StringPointer("routing"),
+		ElsTimeout:               utils.DurationPointer(2 * time.Second),
+		ElsVersion:               utils.IntPointer(1),
+		ElsVersionType:           utils.StringPointer("version_type"),
+		ElsWaitForActiveShards:   utils.StringPointer("wfas"),
+		SQLMaxIdleConns:          utils.IntPointer(5),
+		SQLMaxOpenConns:          utils.IntPointer(10),
+		SQLConnMaxLifetime:       utils.DurationPointer(2 * time.Second),
+		SQLTableName:             utils.StringPointer("cdrs"),
+		SQLDBName:                utils.StringPointer("cgrates"),
+		SSLMode:                  utils.StringPointer("sslm"),
+		KafkaTopic:               utils.StringPointer("topic1"),
+		AMQPRoutingKey:           utils.StringPointer("routing_key"),
+		AMQPQueueID:              utils.StringPointer("queue_id"),
+		AMQPExchange:             utils.StringPointer("amqp_exchange"),
+		AMQPExchangeType:         utils.StringPointer("amqp_exchange_type"),
+		AWSRegion:                utils.StringPointer("utc"),
+		AWSKey:                   utils.StringPointer("aws_key"),
+		AWSSecret:                utils.StringPointer("aws_secret"),
+		AWSToken:                 utils.StringPointer("aws_token"),
+		SQSQueueID:               utils.StringPointer("sqs_queue_id"),
+		S3BucketID:               utils.StringPointer("s3_bucket_id"),
+		S3FolderPath:             utils.StringPointer("s3_folder_path"),
+		NATSJetStream:            utils.BoolPointer(false),
+		NATSSubject:              utils.StringPointer("ees_nats"),
+		NATSJWTFile:              utils.StringPointer("/path/to/jwt"),
+		NATSSeedFile:             utils.StringPointer("/path/to/seed"),
+		NATSCertificateAuthority: utils.StringPointer("ca"),
+		NATSClientCertificate:    utils.StringPointer("cc"),
+		NATSClientKey:            utils.StringPointer("ck"),
+		NATSJetStreamMaxWait:     utils.DurationPointer(2 * time.Second),
+		RPCCodec:                 utils.StringPointer("rpccodec"),
+		ServiceMethod:            utils.StringPointer("service_method"),
+		KeyPath:                  utils.StringPointer("/path/to/key"),
+		CertPath:                 utils.StringPointer("cp"),
+		CAPath:                   utils.StringPointer("ca_path"),
+		TLS:                      utils.BoolPointer(false),
+		RPCConnTimeout:           utils.DurationPointer(2 * time.Second),
+		RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
+	}
+
+	if err := eeOpts.loadFromJSONCfg(eeSJson); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(exp, eeOpts) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(eeOpts))
+	}
+
+	//check with empty json config
+	eeSJson = nil
+	if err := eeOpts.loadFromJSONCfg(eeSJson); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestLoadFromJsonParseErrors(t *testing.T) {
+	eeOpts := &EventExporterOpts{}
+
+	eeSJson := &EventExporterOptsJson{
+		CSVFieldSeparator:        utils.StringPointer(","),
+		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsIfPrimaryTerm:         utils.IntPointer(1),
+		ElsIfSeqNo:               utils.IntPointer(2),
+		ElsOpType:                utils.StringPointer("op_type"),
+		ElsPipeline:              utils.StringPointer("pipeline"),
+		ElsRouting:               utils.StringPointer("routing"),
+		ElsTimeout:               utils.StringPointer("2c"),
+		ElsVersion:               utils.IntPointer(1),
+		ElsVersionType:           utils.StringPointer("version_type"),
+		ElsWaitForActiveShards:   utils.StringPointer("wfas"),
+		SQLMaxIdleConns:          utils.IntPointer(5),
+		SQLMaxOpenConns:          utils.IntPointer(10),
+		SQLConnMaxLifetime:       utils.StringPointer("2s"),
+		SQLTableName:             utils.StringPointer("cdrs"),
+		SQLDBName:                utils.StringPointer("cgrates"),
+		SSLMode:                  utils.StringPointer("sslm"),
+		KafkaTopic:               utils.StringPointer("topic1"),
+		AMQPRoutingKey:           utils.StringPointer("routing_key"),
+		AMQPQueueID:              utils.StringPointer("queue_id"),
+		AMQPExchange:             utils.StringPointer("amqp_exchange"),
+		AMQPExchangeType:         utils.StringPointer("amqp_exchange_type"),
+		AWSRegion:                utils.StringPointer("utc"),
+		AWSKey:                   utils.StringPointer("aws_key"),
+		AWSSecret:                utils.StringPointer("aws_secret"),
+		AWSToken:                 utils.StringPointer("aws_token"),
+		SQSQueueID:               utils.StringPointer("sqs_queue_id"),
+		S3BucketID:               utils.StringPointer("s3_bucket_id"),
+		S3FolderPath:             utils.StringPointer("s3_folder_path"),
+		NATSJetStream:            utils.BoolPointer(false),
+		NATSSubject:              utils.StringPointer("ees_nats"),
+		NATSJWTFile:              utils.StringPointer("/path/to/jwt"),
+		NATSSeedFile:             utils.StringPointer("/path/to/seed"),
+		NATSCertificateAuthority: utils.StringPointer("ca"),
+		NATSClientCertificate:    utils.StringPointer("cc"),
+		NATSClientKey:            utils.StringPointer("ck"),
+		NATSJetStreamMaxWait:     utils.StringPointer("2s"),
+		RPCCodec:                 utils.StringPointer("rpccodec"),
+		ServiceMethod:            utils.StringPointer("service_method"),
+		KeyPath:                  utils.StringPointer("/path/to/key"),
+		CertPath:                 utils.StringPointer("cp"),
+		CAPath:                   utils.StringPointer("ca_path"),
+		TLS:                      utils.BoolPointer(false),
+		RPCConnTimeout:           utils.StringPointer("2s"),
+		RPCReplyTimeout:          utils.StringPointer("2s"),
+	}
+
+	errExp := `time: unknown unit "c" in duration "2c"`
+	if err := eeOpts.loadFromJSONCfg(eeSJson); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err.Error())
+	}
+	eeSJson.ElsTimeout = utils.StringPointer("2s")
+
+	///////
+
+	eeSJson.SQLConnMaxLifetime = utils.StringPointer("2c")
+	if err := eeOpts.loadFromJSONCfg(eeSJson); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err.Error())
+	}
+	eeSJson.SQLConnMaxLifetime = utils.StringPointer("2s")
+
+	//////
+
+	eeSJson.NATSJetStreamMaxWait = utils.StringPointer("2c")
+	if err := eeOpts.loadFromJSONCfg(eeSJson); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err.Error())
+	}
+	eeSJson.NATSJetStreamMaxWait = utils.StringPointer("2s")
+
+	/////
+
+	eeSJson.RPCConnTimeout = utils.StringPointer("2c")
+	if err := eeOpts.loadFromJSONCfg(eeSJson); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err.Error())
+	}
+	eeSJson.RPCConnTimeout = utils.StringPointer("2s")
+
+	/////
+
+	eeSJson.RPCReplyTimeout = utils.StringPointer("2c")
+	if err := eeOpts.loadFromJSONCfg(eeSJson); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v \n but received \n %v", errExp, err.Error())
+	}
+	eeSJson.RPCReplyTimeout = utils.StringPointer("2s")
+}
+
+func TestEEsAsMapInterface(t *testing.T) {
+	eeCfg := &EventExporterCfg{
+		Opts: &EventExporterOpts{
+			CSVFieldSeparator:        utils.StringPointer(","),
+			ElsIndex:                 utils.StringPointer("idx1"),
+			ElsIfPrimaryTerm:         utils.IntPointer(1),
+			ElsIfSeqNo:               utils.IntPointer(2),
+			ElsOpType:                utils.StringPointer("op_type"),
+			ElsPipeline:              utils.StringPointer("pipeline"),
+			ElsRouting:               utils.StringPointer("routing"),
+			ElsTimeout:               utils.DurationPointer(2 * time.Second),
+			ElsVersion:               utils.IntPointer(1),
+			ElsVersionType:           utils.StringPointer("version_type"),
+			ElsWaitForActiveShards:   utils.StringPointer("wfas"),
+			SQLMaxIdleConns:          utils.IntPointer(5),
+			SQLMaxOpenConns:          utils.IntPointer(10),
+			SQLConnMaxLifetime:       utils.DurationPointer(2 * time.Second),
+			SQLTableName:             utils.StringPointer("cdrs"),
+			SQLDBName:                utils.StringPointer("cgrates"),
+			SSLMode:                  utils.StringPointer("sslm"),
+			KafkaTopic:               utils.StringPointer("topic1"),
+			AMQPRoutingKey:           utils.StringPointer("routing_key"),
+			AMQPQueueID:              utils.StringPointer("queue_id"),
+			AMQPExchange:             utils.StringPointer("amqp_exchange"),
+			AMQPExchangeType:         utils.StringPointer("amqp_exchange_type"),
+			AWSRegion:                utils.StringPointer("utc"),
+			AWSKey:                   utils.StringPointer("aws_key"),
+			AWSSecret:                utils.StringPointer("aws_secret"),
+			AWSToken:                 utils.StringPointer("aws_token"),
+			SQSQueueID:               utils.StringPointer("sqs_queue_id"),
+			S3BucketID:               utils.StringPointer("s3_bucket_id"),
+			S3FolderPath:             utils.StringPointer("s3_folder_path"),
+			NATSJetStream:            utils.BoolPointer(false),
+			NATSSubject:              utils.StringPointer("ees_nats"),
+			NATSJWTFile:              utils.StringPointer("/path/to/jwt"),
+			NATSSeedFile:             utils.StringPointer("/path/to/seed"),
+			NATSCertificateAuthority: utils.StringPointer("ca"),
+			NATSClientCertificate:    utils.StringPointer("cc"),
+			NATSClientKey:            utils.StringPointer("ck"),
+			NATSJetStreamMaxWait:     utils.DurationPointer(2 * time.Second),
+			RPCCodec:                 utils.StringPointer("rpccodec"),
+			ServiceMethod:            utils.StringPointer("service_method"),
+			KeyPath:                  utils.StringPointer("/path/to/key"),
+			CertPath:                 utils.StringPointer("cp"),
+			CAPath:                   utils.StringPointer("ca_path"),
+			TLS:                      utils.BoolPointer(false),
+			RPCConnTimeout:           utils.DurationPointer(2 * time.Second),
+			RPCReplyTimeout:          utils.DurationPointer(2 * time.Second),
+		},
+	}
+
+	exp := map[string]interface{}{
+		"opts": map[string]interface{}{
+			"TLS":                      false,
+			"amqpExchange":             "amqp_exchange",
+			"amqpExchangeType":         "amqp_exchange_type",
+			"amqpQueueID":              "queue_id",
+			"amqpRoutingKey":           "routing_key",
+			"awsKey":                   "aws_key",
+			"awsRegion":                "utc",
+			"awsSecret":                "aws_secret",
+			"awsToken":                 "aws_token",
+			"caPath":                   "ca_path",
+			"certPath":                 "cp",
+			"csvFieldSeparator":        ",",
+			"elsIfPrimaryTerm":         1,
+			"elsIfSeqNo":               2,
+			"elsIndex":                 "idx1",
+			"elsOpType":                "op_type",
+			"elsPipeline":              "pipeline",
+			"elsRouting":               "routing",
+			"elsTimeout":               "2s",
+			"elsVersion":               1,
+			"elsVersionType":           "version_type",
+			"elsWaitForActiveShards":   "wfas",
+			"kafkaTopic":               "topic1",
+			"keyPath":                  "/path/to/key",
+			"natsCertificateAuthority": "ca",
+			"natsClientCertificate":    "cc",
+			"natsClientKey":            "ck",
+			"natsJWTFile":              "/path/to/jwt",
+			"natsJetStream":            false,
+			"natsJetStreamMaxWait":     "2s",
+			"natsSeedFile":             "/path/to/seed",
+			"natsSubject":              "ees_nats",
+			"rpcCodec":                 "rpccodec",
+			"rpcConnTimeout":           "2s",
+			"rpcReplyTimeout":          "2s",
+			"s3BucketID":               "s3_bucket_id",
+			"s3FolderPath":             "s3_folder_path",
+			"serviceMethod":            "service_method",
+			"sqlConnMaxLifetime":       "2s",
+			"sqlDBName":                "cgrates",
+			"sqlMaxIdleConns":          5,
+			"sqlMaxOpenConns":          10,
+			"sqlTableName":             "cdrs",
+			"sqsQueueID":               "sqs_queue_id",
+			"sslMode":                  "sslm",
+		},
+	}
+
+	rcv := eeCfg.AsMapInterface(",")
+
+	if !reflect.DeepEqual(exp[utils.OptsCfg], rcv[utils.OptsCfg]) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
