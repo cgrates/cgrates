@@ -32,8 +32,9 @@ import (
 func NewRpcEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage,
 	connMgr *engine.ConnManager) (e *RPCee, err error) {
 	e = &RPCee{
-		cfg: cfg,
-		dc:  dc,
+		cfg:     cfg,
+		dc:      dc,
+		connMgr: connMgr,
 	}
 	err = e.parseOpts()
 	return
@@ -70,7 +71,7 @@ func (e *RPCee) Connect() (err error) {
 func (e *RPCee) ExportEvent(ctx *context.Context, args interface{}, _ string) (err error) {
 	e.Lock()
 	defer e.Unlock()
-	var rply interface{}
+	var rply string
 	return e.connMgr.Call(ctx, e.connIDs, e.serviceMethod, args, &rply)
 }
 
@@ -107,6 +108,7 @@ func (e *RPCee) PrepareOrderMap(oMp *utils.OrderedNavigableMap) (interface{}, er
 }
 
 func (e *RPCee) parseOpts() (err error) {
+	utils.Logger.Debug(utils.ToJSON(e.cfg.Opts))
 	if e.cfg.Opts.RPCCodec != nil {
 		e.codec = *e.cfg.Opts.RPCCodec
 	}
@@ -134,5 +136,6 @@ func (e *RPCee) parseOpts() (err error) {
 	if e.cfg.Opts.RPCReplyTimeout != nil {
 		e.replyTimeout = *e.cfg.Opts.RPCReplyTimeout
 	}
+	utils.Logger.Debug(utils.ToJSON(e))
 	return
 }

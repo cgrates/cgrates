@@ -564,6 +564,7 @@ const CGRATES_CFG_JSON = `
 				// "certPath": "", // path to client certificate
 				// "caPath": "",  // path to CA certificate
 				// "tls": false, //
+				// "connIDs": [],  // connections for connManager to this exporter
 				// "rpcConnTimeout" : "1s", // connection unsuccesfull on timeout
 				// "rpcReplyTimeout":"2s", // connection down at replies if taking longer that this value
 			},												// extra options for exporter
