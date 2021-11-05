@@ -920,7 +920,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent, resI
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 	}
-	if s.chargeable, err = engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
+	if s.Chargeable, err = engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
 		config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
 		return
 	}
@@ -1242,7 +1242,7 @@ func (sS *SessionS) updateSession(ctx *context.Context, s *Session, updtEv, opts
 		Event:   updtEv,
 		APIOpts: opts,
 	}
-	if s.chargeable, err = engine.GetBoolOpts(ctx, event.Tenant, event, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
+	if s.Chargeable, err = engine.GetBoolOpts(ctx, event.Tenant, event, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
 		config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
 		return
 	}
@@ -1314,7 +1314,7 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 		// if sr.EventCost != nil {
 		// 	if !isMsg { // in case of one time charge there is no need of corrections
 		// 		if notCharged := sUsage - sr.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
-		// 			if !s.chargeable {
+		// 			if !s.Chargeable {
 		// 				sS.pause(sr, notCharged)
 		// 			} else {
 		// 				if sr.CD.LoopIndex > 0 {
@@ -1496,14 +1496,6 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 			return utils.ErrNotFound
 		}
 		*reply = utils.OK
-		return
-	}
-	if s.chargeable, err = engine.GetBoolOpts(ctx, s.Tenant, &utils.CGREvent{
-		Tenant:  s.Tenant,
-		Event:   s.EventStart,
-		APIOpts: s.OptsStart,
-	}, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
-		config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
 		return
 	}
 	if aSs := sS.getSessions(s.CGRID, false); len(aSs) != 0 { // found active session, transit to passive
@@ -2137,7 +2129,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
 		}
 		s.Lock()
-		if s.chargeable, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
+		if s.Chargeable, err = engine.GetBoolOpts(ctx, args.Tenant, args, sS.filterS, sS.cgrCfg.SessionSCfg().Opts.Chargeable,
 			config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
 			return
 		}
@@ -2783,7 +2775,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	// 				}
 	// 			} else {
 	// 				s.Lock()
-	// 				s.chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
+	// 				s.Chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
 	// 				s.Unlock()
 	// 			}
 	// 			if err = sS.terminateSession(s,

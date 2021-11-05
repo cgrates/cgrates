@@ -76,12 +76,12 @@ type Session struct {
 	ClientConnID  string          // connection ID towards the client so we can recover from passive
 	EventStart    engine.MapEvent // Event which started the session
 	DebitInterval time.Duration   // execute debits for *prepaid runs
+	Chargeable    bool            // used in case of pausing debit
 	SRuns         []*SRun         // forked based on ChargerS
 	OptsStart     engine.MapEvent
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
-	chargeable  bool
 }
 
 // Lock exported function from sync.RWMutex
