@@ -44,7 +44,6 @@ type RPCee struct {
 	cfg     *config.EventExporterCfg
 	dc      *utils.SafeMapStorage
 	connMgr *engine.ConnManager
-	//	conn    *rpcclient.RPCClient
 
 	//opts
 	codec         string
