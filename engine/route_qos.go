@@ -114,7 +114,7 @@ func populatStatsForQOSRoute(ctx *context.Context, cfg *config.CGRConfig,
 	provStsMetrics := make(map[string]metric)
 	for _, statID := range statIDs {
 		var metrics map[string]*utils.Decimal
-		if err = connMgr.Call(ctx, cfg.RouteSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
+		if err = connMgr.Call(ctx, cfg.RouteSCfg().StatSConns, utils.StatSv1GetQueueDecimalMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(

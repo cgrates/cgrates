@@ -487,7 +487,7 @@ func TestStatsAPIs(t *testing.T) {
 	expThEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.MetaACD:   utils.NewDecimal(3000, 0),
+			utils.MetaACD:   utils.NewDecimalFromStringIgnoreError("3E+3"),
 			utils.MetaASR:   utils.NewDecimal(0, 0),
 			utils.MetaTCD:   utils.NewDecimal(3000, 0),
 			utils.EventType: utils.StatUpdate,
