@@ -299,6 +299,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		Opts: &StatsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			RoundingDecimals:     []*utils.DynamicIntOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.StatSCfg()) {

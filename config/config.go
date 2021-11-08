@@ -184,6 +184,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		statsCfg: &StatSCfg{Opts: &StatsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			RoundingDecimals:     []*utils.DynamicIntOpt{},
 		}},
 		thresholdSCfg: &ThresholdSCfg{Opts: &ThresholdsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},

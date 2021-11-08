@@ -50,6 +50,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Opts: &StatsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			RoundingDecimals:     []*utils.DynamicIntOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -124,6 +125,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -160,6 +162,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
