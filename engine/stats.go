@@ -475,7 +475,40 @@ func (sS *StatService) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.
 	}
 	metrics := make(map[string]float64, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID], _ = metric.GetValue().Float64()
+		val := metric.GetValue()
+		metrics[metricID] = -1
+		if val != utils.DecimalNaN {
+			metrics[metricID], _ = val.Float64()
+		}
+	}
+	*reply = metrics
+	return
+}
+
+// V1GetQueueDecimalMetrics returns the metrics as decimal values
+func (sS *StatService) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantID, reply *map[string]*utils.Decimal) (err error) {
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	// make sure statQueue is locked at process level
+	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
+		config.CgrConfig().GeneralCfg().LockingTimeout,
+		statQueueLockKey(tnt, args.ID))
+	defer guardian.Guardian.UnguardIDs(lkID)
+	sq, err := sS.getStatQueue(ctx, tnt, args.ID)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	metrics := make(map[string]*utils.Decimal, len(sq.SQMetrics))
+	for metricID, metric := range sq.SQMetrics {
+		metrics[metricID] = metric.GetValue()
 	}
 	*reply = metrics
 	return

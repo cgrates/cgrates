@@ -178,6 +178,11 @@ func (stsv1 *StatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.Ten
 	return stsv1.sS.V1GetQueueFloatMetrics(ctx, args.TenantID, reply)
 }
 
+// GetQueueDecimalMetrics returns the decimal metrics for a Queue
+func (stsv1 *StatSv1) GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
+	return stsv1.sS.V1GetQueueDecimalMetrics(ctx, args.TenantID, reply)
+}
+
 // ResetStatQueue resets the stat queue
 func (stsv1 *StatSv1) ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
 	return stsv1.sS.V1ResetStatQueue(ctx, tntID.TenantID, reply)

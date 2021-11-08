@@ -150,8 +150,12 @@ type StatACD struct {
 	*Metric
 }
 
-func (acd *StatACD) GetStringValue(rounding int) (valStr string) {
-	return acd.getAvgStringValue(rounding)
+func (acd *StatACD) GetStringValue(rounding int) string {
+	if len(acd.Events) == 0 || acd.Count < acd.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := acd.getAvgValue().Round(rounding).Duration()
+	return v.String()
 }
 
 func (acd *StatACD) GetValue() *utils.Decimal {
@@ -182,6 +186,14 @@ func NewTCD(minItems uint64, _ string, filterIDs []string) StatMetric {
 // TCD implements TotalCallDuration metric
 type StatTCD struct {
 	*Metric
+}
+
+func (sum *StatTCD) GetStringValue(rounding int) string {
+	if len(sum.Events) == 0 || sum.Count < sum.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := sum.Value.Round(rounding).Duration()
+	return v.String()
 }
 
 func (sum *StatTCD) AddEvent(evID string, ev utils.DataProvider) error {
@@ -285,7 +297,11 @@ type StatPDD struct {
 }
 
 func (pdd *StatPDD) GetStringValue(rounding int) string {
-	return pdd.getAvgStringValue(rounding)
+	if len(pdd.Events) == 0 || pdd.Count < pdd.MinItems {
+		return utils.NotAvailable
+	}
+	v, _ := pdd.getAvgValue().Round(rounding).Duration()
+	return v.String()
 }
 
 func (pdd *StatPDD) GetValue() *utils.Decimal {
@@ -440,6 +456,7 @@ func (ddc *StatDDC) Clone() StatMetric {
 		Count:       ddc.Count,
 		Events:      make(map[string]map[string]uint64),
 		MinItems:    ddc.MinItems,
+		FilterIDs:   utils.CloneStringSlice(ddc.FilterIDs),
 	}
 	for k, v := range ddc.Events {
 		cln.Events[k] = make(map[string]uint64)
@@ -818,6 +835,7 @@ func (dst *StatDistinct) Clone() StatMetric {
 		MinItems:    dst.MinItems,
 		FieldName:   dst.FieldName,
 		FieldValues: make(map[string]utils.StringSet),
+		FilterIDs:   utils.CloneStringSlice(dst.FilterIDs),
 	}
 	for k, v := range dst.Events {
 		cln.Events[k] = make(map[string]uint64)

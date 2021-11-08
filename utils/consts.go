@@ -1340,6 +1340,7 @@ const (
 	StatSv1GetQueueIDs               = "StatSv1.GetQueueIDs"
 	StatSv1GetQueueStringMetrics     = "StatSv1.GetQueueStringMetrics"
 	StatSv1GetQueueFloatMetrics      = "StatSv1.GetQueueFloatMetrics"
+	StatSv1GetQueueDecimalMetrics    = "StatSv1.GetQueueDecimalMetrics"
 	StatSv1Ping                      = "StatSv1.Ping"
 	StatSv1GetStatQueuesForEvent     = "StatSv1.GetStatQueuesForEvent"
 	StatSv1GetStatQueue              = "StatSv1.GetStatQueue"

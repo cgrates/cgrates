@@ -1408,7 +1408,7 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 			},
 		},
 		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &StatTCD{},
+			utils.MetaTCD: &StatTCD{Metric: &Metric{}},
 		},
 	}
 
