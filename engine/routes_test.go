@@ -681,3 +681,97 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 }
+
+func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+	var reply SortedRoutesList
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event:  map[string]interface{}{},
+	}
+	err := routeService.V1GetRoutes(context.Background(), args, &reply)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [ID]", err)
+	}
+}
+
+func TestRoutesV1GetRoutesMsnStructFieldEventError(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+	var reply SortedRoutesList
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "CGREvent1",
+	}
+	err := routeService.V1GetRoutes(context.Background(), args, &reply)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [Event]" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [Event]", err)
+	}
+}
+
+func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+	var reply SortedRoutesList
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "CGREvent1",
+		Event:  map[string]interface{}{},
+	}
+	err := routeService.V1GetRoutes(context.Background(), args, &reply)
+	if err == nil || err.Error() != utils.NotFoundCaps {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.NotFoundCaps, err)
+	}
+}
+
+func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	routeService := NewRouteService(dmSPP, &FilterS{
+		dm: dmSPP, cfg: cfg}, cfg, nil)
+	var reply SortedRoutesList
+	args := &utils.CGREvent{
+		ID:    "CGREvent1",
+		Event: map[string]interface{}{},
+	}
+	err := routeService.V1GetRoutes(context.Background(), args, &reply)
+	if err == nil || err.Error() != utils.NotFoundCaps {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.NotFoundCaps, err)
+	}
+}
+
+func TestRoutesV1GetRoutesAttrConn(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RPCConns()["testConn"] = config.NewDfltRPCConn()
+	cfg.RouteSCfg().AttributeSConns = []string{"testConn"}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	routeService := NewRouteService(dmSPP, nil, cfg, connMng)
+	var reply SortedRoutesList
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "CGREvent1",
+		Event:  map[string]interface{}{},
+	}
+	err := routeService.V1GetRoutes(context.Background(), args, &reply)
+	if err == nil || err.Error() != "ROUTES_ERROR:%!s(<nil>)" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "ROUTES_ERROR:%!s(<nil>)", err)
+	}
+}

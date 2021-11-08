@@ -280,7 +280,7 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent,
 			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args = rplyEv.CGREvent
 			args.APIOpts = rplyEv.APIOpts
-		} else if err.Error() != utils.ErrNotFound.Error() {
+		} else if err = utils.CastRPCErr(err); err != utils.ErrNotFound {
 			return utils.NewErrRouteS(err)
 		}
 	}
