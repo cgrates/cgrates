@@ -170,17 +170,17 @@ func (stsv1 *StatSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWit
 
 // GetQueueStringMetrics returns the string metrics for a Queue
 func (stsv1 *StatSv1) GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
-	return stsv1.sS.V1GetQueueStringMetrics(ctx, args.TenantID, reply)
+	return stsv1.sS.V1GetQueueStringMetrics(ctx, args, reply)
 }
 
 // GetQueueFloatMetrics returns the float metrics for a Queue
 func (stsv1 *StatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
-	return stsv1.sS.V1GetQueueFloatMetrics(ctx, args.TenantID, reply)
+	return stsv1.sS.V1GetQueueFloatMetrics(ctx, args, reply)
 }
 
 // GetQueueDecimalMetrics returns the decimal metrics for a Queue
 func (stsv1 *StatSv1) GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
-	return stsv1.sS.V1GetQueueDecimalMetrics(ctx, args.TenantID, reply)
+	return stsv1.sS.V1GetQueueDecimalMetrics(ctx, args, reply)
 }
 
 // ResetStatQueue resets the stat queue

@@ -37,7 +37,7 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 		dm:               dm,
 		connMgr:          connMgr,
 		filterS:          filterS,
-		cgrcfg:           cgrcfg,
+		cfg:              cgrcfg,
 		storedStatQueues: make(utils.StringSet),
 		loopStopped:      make(chan struct{}),
 		stopBackup:       make(chan struct{}),
@@ -49,7 +49,7 @@ type StatService struct {
 	dm               *DataManager
 	connMgr          *ConnManager
 	filterS          *FilterS
-	cgrcfg           *config.CGRConfig
+	cfg              *config.CGRConfig
 	loopStopped      chan struct{}
 	stopBackup       chan struct{}
 	storedStatQueues utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
@@ -79,7 +79,7 @@ func (sS *StatService) Shutdown(ctx *context.Context) {
 
 // runBackup will regularly store statQueues changed to dataDB
 func (sS *StatService) runBackup(ctx *context.Context) {
-	storeInterval := sS.cgrcfg.StatSCfg().StoreInterval
+	storeInterval := sS.cfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
 		sS.loopStopped <- struct{}{}
 		return
@@ -162,12 +162,12 @@ func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt stri
 	if len(sqIDs) == 0 {
 		ignoreFilters = false
 		sqIDs, err = MatchingItemIDsForEvent(ctx, evNm,
-			sS.cgrcfg.StatSCfg().StringIndexedFields,
-			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
-			sS.cgrcfg.StatSCfg().SuffixIndexedFields,
+			sS.cfg.StatSCfg().StringIndexedFields,
+			sS.cfg.StatSCfg().PrefixIndexedFields,
+			sS.cfg.StatSCfg().SuffixIndexedFields,
 			sS.dm, utils.CacheStatFilterIndexes, tnt,
-			sS.cgrcfg.StatSCfg().IndexedSelects,
-			sS.cgrcfg.StatSCfg().NestedFields,
+			sS.cfg.StatSCfg().IndexedSelects,
+			sS.cfg.StatSCfg().NestedFields,
 		)
 		if err != nil {
 			return
@@ -250,9 +250,9 @@ func (sS *StatService) getStatQueue(ctx *context.Context, tnt, id string) (sq *S
 
 // storeStatQueue will store the sq if needed
 func (sS *StatService) storeStatQueue(ctx *context.Context, sq *StatQueue) {
-	if sS.cgrcfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
+	if sS.cfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
 		*sq.dirty = true // mark it to be saved
-		if sS.cgrcfg.StatSCfg().StoreInterval == -1 {
+		if sS.cfg.StatSCfg().StoreInterval == -1 {
 			sS.StoreStatQueue(ctx, sq)
 		} else {
 			sS.ssqMux.Lock()
@@ -264,7 +264,7 @@ func (sS *StatService) storeStatQueue(ctx *context.Context, sq *StatQueue) {
 
 // processThresholds will pass the event for statQueue to ThresholdS
 func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, opts map[string]interface{}) (err error) {
-	if len(sS.cgrcfg.StatSCfg().ThresholdSConns) == 0 {
+	if len(sS.cfg.StatSCfg().ThresholdSConns) == 0 {
 		return
 	}
 	if opts == nil {
@@ -292,7 +292,7 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 		}
 
 		var tIDs []string
-		if err := sS.connMgr.Call(ctx, sS.cgrcfg.StatSCfg().ThresholdSConns,
+		if err := sS.connMgr.Call(ctx, sS.cfg.StatSCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(sq.sqPrfl.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
@@ -311,12 +311,12 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
 	evNm := args.AsDataProvider()
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.filterS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		config.StatsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -357,7 +357,7 @@ func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	var ids []string
 	if ids, err = sS.processEvent(ctx, tnt, args); err != nil {
@@ -379,15 +379,15 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.filterS, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.filterS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		config.StatsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -408,7 +408,7 @@ func (sS *StatService) V1GetStatQueue(ctx *context.Context, args *utils.TenantID
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
@@ -424,13 +424,13 @@ func (sS *StatService) V1GetStatQueue(ctx *context.Context, args *utils.TenantID
 }
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
-func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantID, reply *map[string]string) (err error) {
+func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
@@ -444,22 +444,28 @@ func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils
 		}
 		return err
 	}
+	var rnd int
+	if rnd, err = GetIntOpts(ctx, tnt, &utils.CGREvent{Tenant: tnt}, sS.filterS,
+		sS.cfg.StatSCfg().Opts.RoundingDecimals, sS.cfg.GeneralCfg().RoundingDecimals,
+		utils.OptsRoundingDecimals); err != nil {
+		return
+	}
 	metrics := make(map[string]string, len(sq.SQMetrics))
 	for metricID, metric := range sq.SQMetrics {
-		metrics[metricID] = metric.GetStringValue(sS.cgrcfg.GeneralCfg().RoundingDecimals) // ToDo
+		metrics[metricID] = metric.GetStringValue(rnd)
 	}
 	*reply = metrics
 	return
 }
 
 // V1GetQueueFloatMetrics returns the metrics as float64 values
-func (sS *StatService) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantID, reply *map[string]float64) (err error) {
+func (sS *StatService) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
@@ -486,13 +492,13 @@ func (sS *StatService) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.
 }
 
 // V1GetQueueDecimalMetrics returns the metrics as decimal values
-func (sS *StatService) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantID, reply *map[string]*utils.Decimal) (err error) {
+func (sS *StatService) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
@@ -517,7 +523,7 @@ func (sS *StatService) V1GetQueueDecimalMetrics(ctx *context.Context, args *util
 // V1GetQueueIDs returns list of queueIDs registered for a tenant
 func (sS *StatService) V1GetQueueIDs(ctx *context.Context, tenant string, qIDs *[]string) (err error) {
 	if tenant == utils.EmptyString {
-		tenant = sS.cgrcfg.GeneralCfg().DefaultTenant
+		tenant = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.StatQueuePrefix + tenant + utils.ConcatenatedKeySep
 	keys, err := sS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
@@ -539,7 +545,7 @@ func (sS *StatService) V1ResetStatQueue(ctx *context.Context, tntID *utils.Tenan
 	}
 	tnt := tntID.Tenant
 	if tnt == utils.EmptyString {
-		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,

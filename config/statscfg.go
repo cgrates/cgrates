@@ -32,6 +32,7 @@ const StatsProfileIgnoreFilters = false
 type StatsOpts struct {
 	ProfileIDs           []*utils.DynamicStringSliceOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
+	RoundingDecimals     []*utils.DynamicIntOpt
 }
 
 // StatSCfg the stats config section
@@ -66,6 +67,9 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
 		sqOpts.ProfileIgnoreFilters = append(sqOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
+	}
+	if jsnCfg.RoundingDecimals != nil {
+		sqOpts.RoundingDecimals = append(sqOpts.RoundingDecimals, jsnCfg.RoundingDecimals...)
 	}
 }
 
@@ -113,6 +117,7 @@ func (st StatSCfg) AsMapInterface(string) interface{} {
 	opts := map[string]interface{}{
 		utils.MetaProfileIDs:           st.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFilters: st.Opts.ProfileIgnoreFilters,
+		utils.OptsRoundingDecimals:     st.Opts.RoundingDecimals,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
@@ -153,9 +158,14 @@ func (sqOpts *StatsOpts) Clone() *StatsOpts {
 	if sqOpts.ProfileIgnoreFilters != nil {
 		profileIgnoreFilters = utils.CloneDynamicBoolOpt(sqOpts.ProfileIgnoreFilters)
 	}
+	var rounding []*utils.DynamicIntOpt
+	if sqOpts.RoundingDecimals != nil {
+		rounding = utils.CloneDynamicIntOpt(sqOpts.RoundingDecimals)
+	}
 	return &StatsOpts{
 		ProfileIDs:           sqIDs,
 		ProfileIgnoreFilters: profileIgnoreFilters,
+		RoundingDecimals:     rounding,
 	}
 }
 
@@ -188,6 +198,7 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 type StatsOptsJson struct {
 	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	RoundingDecimals     []*utils.DynamicIntOpt         `json:"*roundingDecimals"`
 }
 
 // Stat service config section
@@ -213,6 +224,9 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 	}
 	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
+	}
+	if !utils.DynamicIntOptEqual(v1.RoundingDecimals, v2.RoundingDecimals) {
+		d.RoundingDecimals = v2.RoundingDecimals
 	}
 	return d
 }

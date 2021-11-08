@@ -1046,6 +1046,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Opts: &StatsOptsJson{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			RoundingDecimals:     []*utils.DynamicIntOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

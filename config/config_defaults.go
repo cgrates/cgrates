@@ -1047,6 +1047,13 @@ const CGRATES_CFG_JSON = `
 			// 	"FilterIDs": [],
 			// 	"Value": false,
 			// },
+		],	
+		"*roundingDecimals": [			// ignore the filters for statIDs
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": 5,
+			// },
 		],									
 	},								
 },

@@ -225,7 +225,7 @@ func TestNewStatService(t *testing.T) {
 	sSrv := &StatService{
 		dm:               dm,
 		filterS:          fltrS,
-		cgrcfg:           cfg,
+		cfg:              cfg,
 		storedStatQueues: make(utils.StringSet),
 	}
 	result := NewStatService(dm, cfg, fltrS, nil)
@@ -235,8 +235,8 @@ func TestNewStatService(t *testing.T) {
 	if !reflect.DeepEqual(sSrv.filterS, result.filterS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.filterS, result.filterS)
 	}
-	if !reflect.DeepEqual(sSrv.cgrcfg, result.cgrcfg) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.cgrcfg, result.cgrcfg)
+	if !reflect.DeepEqual(sSrv.cfg, result.cfg) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.cfg, result.cfg)
 	}
 	if !reflect.DeepEqual(sSrv.storedStatQueues, sSrv.storedStatQueues) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.storedStatQueues, sSrv.storedStatQueues)
@@ -318,7 +318,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantID{Tenant: testStatsQ[0].Tenant, ID: testStatsQ[0].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: testStatsQ[0].Tenant, ID: testStatsQ[0].ID}}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -330,7 +330,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantID{Tenant: testStatsQ[1].Tenant, ID: testStatsQ[1].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: testStatsQ[1].Tenant, ID: testStatsQ[1].ID}}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -342,7 +342,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantID{Tenant: testStatsQ[2].Tenant, ID: testStatsQ[2].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: testStatsQ[2].Tenant, ID: testStatsQ[2].ID}}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -361,7 +361,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		&FilterS{dm: dmSTS, cfg: cfg}, nil)
 	prepareStatsData(t, dmSTS)
 
-	statService.cgrcfg.StatSCfg().IndexedSelects = false
+	statService.cfg.StatSCfg().IndexedSelects = false
 	msq, err := statService.matchingStatQueuesForEvent(context.TODO(), testStatsArgs[0].Tenant, nil,
 		testStatsArgs[0].AsDataProvider(), false)
 	if err != nil {
@@ -939,7 +939,7 @@ func TestStatQueueReload(t *testing.T) {
 		filterS:     filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
+		cfg:         cfg,
 	}
 	sS.loopStopped <- struct{}{}
 	sS.Reload(context.Background())
@@ -957,7 +957,7 @@ func TestStatQueueStartLoop(t *testing.T) {
 		filterS:     filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
+		cfg:         cfg,
 	}
 
 	sS.StartLoop(context.Background())
@@ -2576,9 +2576,7 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 		utils.MetaTCD: 3600000000000,
 	}
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err != nil {
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ1"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, reply)
@@ -2644,9 +2642,7 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 	}
 
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{
-		ID: "SQ2",
-	}, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ2"}}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -2709,7 +2705,7 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{}}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2731,9 +2727,7 @@ func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	reply := map[string]float64{}
-	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err == nil || err.Error() != experr {
+	if err := sS.V1GetQueueFloatMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ1"}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
@@ -2800,9 +2794,7 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 		utils.MetaTCD: "1h0m0s",
 	}
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err != nil {
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ1"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, reply)
@@ -2866,9 +2858,7 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 	}
 
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{
-		ID: "SQ2",
-	}, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ2"}}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -2931,7 +2921,7 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{}}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2953,9 +2943,7 @@ func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
 
 	experr := `SERVER_ERROR: NO_DATABASE_CONNECTION`
 	reply := map[string]string{}
-	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantID{
-		ID: "SQ1",
-	}, &reply); err == nil || err.Error() != experr {
+	if err := sS.V1GetQueueStringMetrics(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SQ1"}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
