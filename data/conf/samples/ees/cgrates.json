@@ -328,9 +328,9 @@
 					//"elsIfSeqNo": 0,
 					"elsOpType": "",
 					"elsPipeline": "",
-					"require_alias": "",
+					// "require_alias": "",
 					"elsRouting": "",
-					"elsTimeout": 0,
+					"elsTimeout": "0",
 					//"elsVersion": 0,
 					"elsVersionType": "",
 					"elsWaitForActiveShards": "",
@@ -383,8 +383,8 @@
 				"sqlDBName": "cgrates2", // if dbName is not present "cgrates" will be used as default
 				"sqlTableName": "expTable", // tableName is mandatory in opts for sql exporter
 				"sslMode": "disable",
-				"sqlMaxIdleConns": "10",
-				"sqlMaxOpenConns": "100",
+				"sqlMaxIdleConns": 10,
+				"sqlMaxOpenConns": 100,
 				"sqlConnMaxLifetime": "0",
 			},
 			"fields":[ // in case that the path is *exp.*row user must complete all the fields one to one with his sql schema in the correct order
@@ -403,8 +403,8 @@
 				"sqlDBName": "cgrates2",
 				"sqlTableName": "expTable",
 				"sslMode": "disable",
-				"sqlMaxIdleConns": "10",
-				"sqlMaxOpenConns": "100",
+				"sqlMaxIdleConns": 10,
+				"sqlMaxOpenConns": 100,
 				"sqlConnMaxLifetime": "0",
 			},
 			"fields":[ // the path constains *exp.columnName

@@ -72,6 +72,7 @@ func TestHttpJsonPoster(t *testing.T) {
 		ExportPath:     "http://localhost:8080/invalid",
 		Attempts:       3,
 		FailedPostsDir: "/tmp",
+		Opts:           &config.EventExporterOpts{},
 	}, config.CgrConfig(), nil, nil)
 	if err != nil {
 		t.Error(err)
@@ -108,6 +109,7 @@ func TestHttpBytesPoster(t *testing.T) {
 		ExportPath:     "http://localhost:8080/invalid",
 		Attempts:       3,
 		FailedPostsDir: "/tmp",
+		Opts:           &config.EventExporterOpts{},
 	}, config.CgrConfig(), nil, nil)
 	if err != nil {
 		t.Error(err)
