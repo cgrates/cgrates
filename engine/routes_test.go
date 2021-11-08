@@ -755,7 +755,7 @@ func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
 	}
 }
 
-func TestRoutesV1GetRoutesAttrConn(t *testing.T) {
+func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RPCConns()["testConn"] = config.NewDfltRPCConn()
@@ -773,5 +773,62 @@ func TestRoutesV1GetRoutesAttrConn(t *testing.T) {
 	err := routeService.V1GetRoutes(context.Background(), args, &reply)
 	if err == nil || err.Error() != "ROUTES_ERROR:%!s(<nil>)" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "ROUTES_ERROR:%!s(<nil>)", err)
+	}
+}
+
+func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	fltr := &FilterS{dm: dmSPP, cfg: cfg}
+	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
+	var reply []*RouteProfile
+	args := &utils.CGREvent{
+		ID:    "CGREvent1",
+		Event: map[string]interface{}{},
+	}
+	err := routeService.V1GetRouteProfilesForEvent(context.Background(), args, &reply)
+	if err == nil || err.Error() != utils.NotFoundCaps {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.NotFoundCaps, err)
+	}
+}
+
+func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	fltr := &FilterS{dm: dmSPP, cfg: cfg}
+	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
+	var reply []*RouteProfile
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event:  map[string]interface{}{},
+	}
+	err := routeService.V1GetRouteProfilesForEvent(context.Background(), args, &reply)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [ID]", err)
+	}
+}
+
+func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := NewConnManager(cfg)
+	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	fltr := &FilterS{dm: dmSPP, cfg: cfg}
+	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
+	var reply []*RouteProfile
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "CGREvent1",
+	}
+	err := routeService.V1GetRouteProfilesForEvent(context.Background(), args, &reply)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [Event]" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [Event]", err)
 	}
 }
