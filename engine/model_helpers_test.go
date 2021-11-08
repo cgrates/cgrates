@@ -834,7 +834,7 @@ func TestTPFilterAsTPFilter3(t *testing.T) {
 				{
 					Type:    utils.MetaPrefix,
 					Element: "Account",
-					Values:  []string{"1001", "1002"},
+					Values:  []string{"1001", "1001"},
 				},
 			},
 		},
@@ -854,7 +854,7 @@ func TestTPFilterAsTPFilter3(t *testing.T) {
 
 	rcvTPs := FilterMdls(tps).AsTPFilter()
 	sort.Strings(rcvTPs[0].Filters[0].Values)
-	if len(eTPs) != len(rcvTPs) {
+	if !reflect.DeepEqual(eTPs, rcvTPs) {
 		t.Errorf("Expecting: %+v ,Received: %+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
