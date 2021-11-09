@@ -34,9 +34,8 @@ func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
 	timezone string, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (ldrS *LoaderService) {
 	ldrS = &LoaderService{cfg: cfg, cache: make(map[string]*ltcache.Cache)}
-	for i := range cfg.LoaderCfg()[0].Data {
-		cfg := cfg.LoaderCfg()[0].Data[i]
-		ldrS.cache[cfg.Type] = ltcache.NewCache(-1, 0, false, nil)
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		ldrS.cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
 	ldrS.createLoaders(dm, timezone, filterS, connMgr)
 	return
@@ -66,20 +65,58 @@ func (ldrS *LoaderService) ListenAndServe(stopChan chan struct{}) (err error) {
 }
 
 type ArgsProcessFolder struct {
-	LoaderID    string
-	ForceLock   bool
-	Caching     *string
-	StopOnError bool
+	LoaderID string
+	APIOpts  map[string]interface{}
 }
 
-func (ldrS *LoaderService) V1Load(ctx *context.Context, args *ArgsProcessFolder,
+func (ldrS *LoaderService) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 	rply *string) (err error) {
-	return ldrS.process(ctx, args, utils.MetaStore, rply)
-}
+	ldrS.RLock()
+	defer ldrS.RUnlock()
 
-func (ldrS *LoaderService) V1Remove(ctx *context.Context, args *ArgsProcessFolder,
-	rply *string) (err error) {
-	return ldrS.process(ctx, args, utils.MetaRemove, rply)
+	if args.LoaderID == utils.EmptyString {
+		args.LoaderID = utils.MetaDefault
+	}
+	ldr, has := ldrS.ldrs[args.LoaderID]
+	if !has {
+		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
+	}
+	var locked bool
+	if locked, err = ldr.Locked(); err != nil {
+		return utils.NewErrServerError(err)
+	} else if locked {
+		fl := ldr.ldrCfg.Opts.ForceLock
+		if val, has := args.APIOpts[utils.MetaForceLock]; has {
+			if fl, err = utils.IfaceAsBool(val); err != nil {
+				return
+			}
+		}
+		if !fl {
+			return errors.New("ANOTHER_LOADER_RUNNING")
+		}
+		if err := ldr.Unlock(); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	wI := ldr.ldrCfg.Opts.WithIndex
+	if val, has := args.APIOpts[utils.MetaWithIndex]; has {
+		if wI, err = utils.IfaceAsBool(val); err != nil {
+			return
+		}
+	}
+
+	soE := ldr.ldrCfg.Opts.StopOnError
+	if val, has := args.APIOpts[utils.MetaStopOnError]; has {
+		if soE, err = utils.IfaceAsBool(val); err != nil {
+			return
+		}
+	}
+	if err := ldr.processFolder(context.Background(), utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), ldr.ldrCfg.Opts.Cache, ldrS.cfg.GeneralCfg().DefaultCaching),
+		wI, soE); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*rply = utils.OK
+	return
 }
 
 // Reload recreates the loaders map thread safe
@@ -99,39 +136,4 @@ func (ldrS *LoaderService) createLoaders(dm *engine.DataManager,
 			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, ldrS.cache, timezone, filterS, connMgr, ldrCfg.CacheSConns)
 		}
 	}
-}
-
-func (ldrS *LoaderService) process(ctx *context.Context, args *ArgsProcessFolder, action string,
-	rply *string) (err error) {
-	ldrS.RLock()
-	defer ldrS.RUnlock()
-
-	if args.LoaderID == utils.EmptyString {
-		args.LoaderID = utils.MetaDefault
-	}
-	ldr, has := ldrS.ldrs[args.LoaderID]
-	if !has {
-		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
-	}
-	if locked, err := ldr.Locked(); err != nil {
-		return utils.NewErrServerError(err)
-	} else if locked {
-		if !args.ForceLock {
-			return errors.New("ANOTHER_LOADER_RUNNING")
-		}
-		if err := ldr.Unlock(); err != nil {
-			return utils.NewErrServerError(err)
-		}
-	}
-	//verify If Caching is present in arguments
-	caching := utils.FirstNonEmpty(ldr.ldrCfg.Caching, ldrS.cfg.GeneralCfg().DefaultCaching)
-	if args.Caching != nil {
-		caching = *args.Caching
-	}
-
-	if err := ldr.processFolder(context.Background(), action, caching, false, ldr.ldrCfg.WithIndex, args.StopOnError); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*rply = utils.OK
-	return
 }

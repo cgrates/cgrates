@@ -92,12 +92,18 @@ func (ldrs LoaderSCfgs) Clone() *LoaderSCfgs {
 	return &cln
 }
 
+type LoaderSOptsCfg struct {
+	Cache       string
+	WithIndex   bool
+	ForceLock   bool
+	StopOnError bool
+}
+
 // LoaderSCfg the config for a loader
 type LoaderSCfg struct {
 	ID             string
 	Enabled        bool
 	Tenant         string
-	DryRun         bool
 	RunDelay       time.Duration
 	LockFilePath   string
 	CacheSConns    []string
@@ -106,9 +112,9 @@ type LoaderSCfg struct {
 	TpOutDir       string
 	Data           []*LoaderDataType
 
-	Action    string // toDO
-	Caching   string // toDO
-	WithIndex bool   // toDO
+	Action string
+	Opts   *LoaderSOptsCfg
+	Cache  map[string]*CacheParamCfg
 }
 
 // LoaderDataType the template for profile loading
@@ -120,6 +126,23 @@ type LoaderDataType struct {
 	Fields   []*FCTemplate
 }
 
+func (l *LoaderSOptsCfg) loadFromJSONCfg(jsnCfg *LoaderJsonOptsCfg) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Cache != nil {
+		l.Cache = *jsnCfg.Cache
+	}
+	if jsnCfg.WithIndex != nil {
+		l.WithIndex = *jsnCfg.WithIndex
+	}
+	if jsnCfg.ForceLock != nil {
+		l.ForceLock = *jsnCfg.ForceLock
+	}
+	if jsnCfg.StopOnError != nil {
+		l.StopOnError = *jsnCfg.StopOnError
+	}
+}
 func (lData *LoaderDataType) loadFromJSONCfg(jsnCfg *LoaderJsonDataType, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
@@ -153,7 +176,6 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	if jsnCfg == nil {
 		return nil
 	}
-	l.WithIndex = true
 	if jsnCfg.ID != nil {
 		l.ID = *jsnCfg.ID
 	}
@@ -162,9 +184,6 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	}
 	if jsnCfg.Tenant != nil {
 		l.Tenant = *jsnCfg.Tenant
-	}
-	if jsnCfg.Dry_run != nil {
-		l.DryRun = *jsnCfg.Dry_run
 	}
 	if jsnCfg.Run_delay != nil {
 		if l.RunDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Run_delay); err != nil {
@@ -215,7 +234,17 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 			}
 		}
 	}
-
+	if jsnCfg.Action != nil {
+		l.Action = *jsnCfg.Action
+	}
+	for kJsn, vJsn := range jsnCfg.Cache {
+		val := new(CacheParamCfg)
+		if err := val.loadFromJSONCfg(vJsn); err != nil {
+			return err
+		}
+		l.Cache[kJsn] = val
+	}
+	l.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	return nil
 }
 
@@ -251,7 +280,6 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		ID:             l.ID,
 		Enabled:        l.Enabled,
 		Tenant:         l.Tenant,
-		DryRun:         l.DryRun,
 		RunDelay:       l.RunDelay,
 		LockFilePath:   l.LockFilePath,
 		CacheSConns:    utils.CloneStringSlice(l.CacheSConns),
@@ -259,9 +287,15 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		TpInDir:        l.TpInDir,
 		TpOutDir:       l.TpOutDir,
 		Data:           make([]*LoaderDataType, len(l.Data)),
+		Action:         l.Action,
+		Opts:           &(*l.Opts),
+		Cache:          make(map[string]*CacheParamCfg),
 	}
 	for idx, fld := range l.Data {
 		cln.Data[idx] = fld.Clone()
+	}
+	for key, value := range l.Cache {
+		cln.Cache[key] = value.Clone()
 	}
 	return
 }
@@ -283,30 +317,43 @@ func (lData LoaderDataType) AsMapInterface(separator string) (initialMP map[stri
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (l LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	initialMP = map[string]interface{}{
+func (l LoaderSCfg) AsMapInterface(separator string) (mp map[string]interface{}) {
+	mp = map[string]interface{}{
 		utils.IDCfg:           l.ID,
 		utils.TenantCfg:       l.Tenant,
 		utils.EnabledCfg:      l.Enabled,
-		utils.DryRunCfg:       l.DryRun,
 		utils.LockFilePathCfg: l.LockFilePath,
 		utils.FieldSepCfg:     l.FieldSeparator,
 		utils.TpInDirCfg:      l.TpInDir,
 		utils.TpOutDirCfg:     l.TpOutDir,
 		utils.RunDelayCfg:     "0",
+		utils.ActionCfg:       l.Action,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaCache:       l.Opts.Cache,
+			utils.MetaWithIndex:   l.Opts.WithIndex,
+			utils.MetaForceLock:   l.Opts.ForceLock,
+			utils.MetaStopOnError: l.Opts.StopOnError,
+		},
 	}
 	if l.Data != nil {
 		data := make([]map[string]interface{}, len(l.Data))
 		for i, item := range l.Data {
 			data[i] = item.AsMapInterface(separator)
 		}
-		initialMP[utils.DataCfg] = data
+		mp[utils.DataCfg] = data
 	}
 	if l.RunDelay != 0 {
-		initialMP[utils.RunDelayCfg] = l.RunDelay.String()
+		mp[utils.RunDelayCfg] = l.RunDelay.String()
 	}
 	if l.CacheSConns != nil {
-		initialMP[utils.CachesConnsCfg] = getInternalJSONConns(l.CacheSConns)
+		mp[utils.CachesConnsCfg] = getInternalJSONConns(l.CacheSConns)
+	}
+	if l.Cache != nil {
+		cache := make(map[string]interface{}, len(l.Cache))
+		for key, value := range l.Cache {
+			cache[key] = value.AsMapInterface()
+		}
+		mp[utils.CacheCfg] = cache
 	}
 	return
 }
@@ -319,11 +366,17 @@ type LoaderJsonDataType struct {
 	Fields    *[]*FcTemplateJsonCfg
 }
 
+type LoaderJsonOptsCfg struct {
+	Cache       *string `json:"*cache"`
+	WithIndex   *bool   `json:"*withIndex"`
+	ForceLock   *bool   `json:"*forceLock"`
+	StopOnError *bool   `json:"*stopOnError"`
+}
+
 type LoaderJsonCfg struct {
 	ID              *string
 	Enabled         *bool
 	Tenant          *string
-	Dry_run         *bool
 	Run_delay       *string
 	Lockfile_path   *string
 	Caches_conns    *[]string
@@ -331,6 +384,10 @@ type LoaderJsonCfg struct {
 	Tp_in_dir       *string
 	Tp_out_dir      *string
 	Data            *[]*LoaderJsonDataType
+
+	Action *string
+	Opts   *LoaderJsonOptsCfg
+	Cache  map[string]*CacheParamJsonCfg
 }
 
 func equalsLoaderDatasType(v1, v2 []*LoaderDataType) bool {
@@ -349,6 +406,22 @@ func equalsLoaderDatasType(v1, v2 []*LoaderDataType) bool {
 	return true
 }
 
+func diffLoaderJsonOptsCfg(v1, v2 *LoaderSOptsCfg) (d *LoaderJsonOptsCfg) {
+	d = new(LoaderJsonOptsCfg)
+	if v1.Cache != v2.Cache {
+		d.Cache = utils.StringPointer(v2.Cache)
+	}
+	if v1.WithIndex != v2.WithIndex {
+		d.WithIndex = utils.BoolPointer(v2.WithIndex)
+	}
+	if v1.ForceLock != v2.ForceLock {
+		d.ForceLock = utils.BoolPointer(v2.ForceLock)
+	}
+	if v1.StopOnError != v2.StopOnError {
+		d.StopOnError = utils.BoolPointer(v2.StopOnError)
+	}
+	return
+}
 func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) {
 	d = new(LoaderJsonCfg)
 	if v1.ID != v2.ID {
@@ -357,13 +430,8 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) 
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	tnt1 := v1.Tenant
-	tnt2 := v2.Tenant
-	if tnt1 != tnt2 {
-		d.Tenant = utils.StringPointer(tnt2)
-	}
-	if v1.DryRun != v2.DryRun {
-		d.Dry_run = utils.BoolPointer(v2.DryRun)
+	if v1.Tenant != v2.Tenant {
+		d.Tenant = utils.StringPointer(v2.Tenant)
 	}
 	if v1.RunDelay != v2.RunDelay {
 		d.Run_delay = utils.StringPointer(v2.RunDelay.String())
@@ -398,6 +466,11 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) 
 		}
 		d.Data = &data
 	}
+	if v1.Action != v2.Action {
+		d.Action = utils.StringPointer(v2.Action)
+	}
+	d.Opts = diffLoaderJsonOptsCfg(v1.Opts, v2.Opts)
+	d.Cache = diffCacheParamsJsonCfg(d.Cache, v2.Cache)
 	return
 }
 
@@ -409,14 +482,18 @@ func equalsLoadersJsonCfg(v1, v2 LoaderSCfgs) bool {
 		if v1[i].ID != v2[i].ID ||
 			v1[i].Enabled != v2[i].Enabled ||
 			v1[i].Tenant != v2[i].Tenant ||
-			v1[i].DryRun != v2[i].DryRun ||
 			v1[i].RunDelay != v2[i].RunDelay ||
 			v1[i].LockFilePath != v2[i].LockFilePath ||
 			!utils.SliceStringEqual(v1[i].CacheSConns, v2[i].CacheSConns) ||
 			v1[i].FieldSeparator != v2[i].FieldSeparator ||
 			v1[i].TpInDir != v2[i].TpInDir ||
 			v1[i].TpOutDir != v2[i].TpOutDir ||
-			!equalsLoaderDatasType(v1[i].Data, v2[i].Data) {
+			v1[i].Action != v2[i].Action ||
+			!equalsLoaderDatasType(v1[i].Data, v2[i].Data) ||
+			v1[i].Opts.Cache != v2[i].Opts.Cache ||
+			v1[i].Opts.WithIndex != v2[i].Opts.WithIndex ||
+			v1[i].Opts.ForceLock != v2[i].Opts.ForceLock ||
+			v1[i].Opts.StopOnError != v2[i].Opts.StopOnError {
 			return false
 		}
 	}

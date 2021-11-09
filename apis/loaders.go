@@ -33,12 +33,7 @@ type LoaderSv1 struct {
 	ping
 }
 
-func (ldrSv1 *LoaderSv1) Load(ctx *context.Context, args *loaders.ArgsProcessFolder,
+func (ldrSv1 *LoaderSv1) Run(ctx *context.Context, args *loaders.ArgsProcessFolder,
 	rply *string) error {
-	return ldrSv1.ldrS.V1Load(ctx, args, rply)
-}
-
-func (ldrSv1 *LoaderSv1) Remove(ctx *context.Context, args *loaders.ArgsProcessFolder,
-	rply *string) error {
-	return ldrSv1.ldrS.V1Remove(ctx, args, rply)
+	return ldrSv1.ldrS.V1Run(ctx, args, rply)
 }

@@ -67,6 +67,22 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 			FieldSeparator: ",",
 			TpInDir:        "/var/spool/cgrates/loader/in",
 			TpOutDir:       "/var/spool/cgrates/loader/out",
+			Action:         utils.MetaStore,
+			Opts:           &LoaderSOptsCfg{WithIndex: true},
+			Cache: map[string]*CacheParamCfg{
+				utils.MetaFilters:         {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaAttributes:      {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaResources:       {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaStats:           {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaThresholds:      {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaRoutes:          {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaChargers:        {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaDispatchers:     {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaDispatcherHosts: {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaRateProfiles:    {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaActionProfiles:  {Limit: -1, TTL: 5 * time.Second},
+				utils.MetaAccounts:        {Limit: -1, TTL: 5 * time.Second},
+			},
 			Data: []*LoaderDataType{
 				{
 					Type:     "*filters",
@@ -1517,7 +1533,6 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 		"id": "*default",									
 		"enabled": false,									
 		"tenant": "cgrates.org",										
-		"dry_run": false,									
 		"run_delay": "0",										
 		"lockfile_path": ".cgr.lck",						
 		"caches_conns": ["*internal:*caches"],
@@ -1543,13 +1558,19 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.IDCfg:           "*default",
 			utils.EnabledCfg:      false,
 			utils.TenantCfg:       "cgrates.org",
-			utils.DryRunCfg:       false,
 			utils.RunDelayCfg:     "0",
 			utils.LockFilePathCfg: ".cgr.lck",
 			utils.CachesConnsCfg:  []string{utils.MetaInternal},
 			utils.FieldSepCfg:     ",",
 			utils.TpInDirCfg:      "/var/spool/cgrates/loader/in",
 			utils.TpOutDirCfg:     "/var/spool/cgrates/loader/out",
+			utils.ActionCfg:       utils.MetaStore,
+			utils.OptsCfg: map[string]interface{}{
+				utils.MetaCache:       "",
+				utils.MetaStopOnError: false,
+				utils.MetaForceLock:   false,
+				utils.MetaWithIndex:   true,
+			},
 			utils.DataCfg: []map[string]interface{}{
 				{
 					utils.TypeCfg:     "*filters",
@@ -2445,6 +2466,20 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 					},
 				},
 			},
+			utils.CacheCfg: map[string]interface{}{
+				utils.MetaFilters:         map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaAttributes:      map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaResources:       map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaStats:           map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaThresholds:      map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaRoutes:          map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaChargers:        map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaDispatchers:     map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaDispatcherHosts: map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaRateProfiles:    map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaActionProfiles:  map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+				utils.MetaAccounts:        map[string]interface{}{utils.LimitCfg: -1, utils.TTLCfg: "5s", utils.PrecacheCfg: false, utils.ReplicateCfg: false, utils.StaticTTLCfg: false},
+			},
 		},
 	}
 	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -2466,7 +2501,6 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 		"id": "*default",									
 		"enabled": false,									
 		"tenant": "~*req.Destination1",										
-		"dry_run": false,									
 		"run_delay": "1",										
 		"lockfile_path": ".cgr.lck",						
 		"caches_conns": ["*conn1"],
@@ -2491,7 +2525,6 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.IDCfg:           "*default",
 			utils.EnabledCfg:      false,
 			utils.TenantCfg:       "~*req.Destination1",
-			utils.DryRunCfg:       false,
 			utils.RunDelayCfg:     "0",
 			utils.LockFilePathCfg: ".cgr.lck",
 			utils.CachesConnsCfg:  []string{"*conn1"},
@@ -2553,6 +2586,21 @@ func TestLoaderSCfgsClone(t *testing.T) {
 					Layout:    time.RFC3339,
 				},
 			}},
+		},
+		Opts: &LoaderSOptsCfg{},
+		Cache: map[string]*CacheParamCfg{
+			utils.MetaFilters:         {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaAttributes:      {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaResources:       {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaStats:           {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaThresholds:      {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaRoutes:          {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaChargers:        {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaDispatchers:     {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaDispatcherHosts: {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaRateProfiles:    {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaActionProfiles:  {Limit: -1, TTL: 5 * time.Second},
+			utils.MetaAccounts:        {Limit: -1, TTL: 5 * time.Second},
 		},
 	}}
 	rcv := ban.Clone()
@@ -2625,7 +2673,6 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 		ID:             "LoaderID",
 		Enabled:        true,
 		Tenant:         "cgrates.org",
-		DryRun:         false,
 		RunDelay:       1 * time.Millisecond,
 		LockFilePath:   "lockFileName",
 		CacheSConns:    []string{"*localhost"},
@@ -2633,13 +2680,13 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 		TpInDir:        "/tp/in/dir",
 		TpOutDir:       "/tp/out/dir",
 		Data:           nil,
+		Opts:           &LoaderSOptsCfg{},
 	}
 
 	v2 := &LoaderSCfg{
 		ID:             "LoaderID2",
 		Enabled:        false,
 		Tenant:         "itsyscom.com",
-		DryRun:         true,
 		RunDelay:       2 * time.Millisecond,
 		LockFilePath:   "lockFileName2",
 		CacheSConns:    []string{"*birpc"},
@@ -2663,13 +2710,13 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 				},
 			},
 		},
+		Opts: &LoaderSOptsCfg{},
 	}
 
 	expected := &LoaderJsonCfg{
 		ID:              utils.StringPointer("LoaderID2"),
 		Enabled:         utils.BoolPointer(false),
 		Tenant:          utils.StringPointer("itsyscom.com"),
-		Dry_run:         utils.BoolPointer(true),
 		Run_delay:       utils.StringPointer("2ms"),
 		Lockfile_path:   utils.StringPointer("lockFileName2"),
 		Caches_conns:    &[]string{"*birpc"},
@@ -2678,6 +2725,7 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 		Tp_out_dir:      utils.StringPointer("/tp/out/dir/2"),
 		Data: &[]*LoaderJsonDataType{
 			{
+				Id:        utils.StringPointer(""),
 				Type:      utils.StringPointer("*xml"),
 				File_name: utils.StringPointer("file.xml"),
 				Flags:     &[]string{"FLAG_2:PARAM_2:param2"},
@@ -2690,6 +2738,8 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 				},
 			},
 		},
+		Opts:  &LoaderJsonOptsCfg{},
+		Cache: map[string]*CacheParamJsonCfg{},
 	}
 
 	rcv := diffLoaderJsonCfg(v1, v2, ";")
@@ -2698,7 +2748,7 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	expected = &LoaderJsonCfg{}
+	expected = &LoaderJsonCfg{Opts: &LoaderJsonOptsCfg{}, Cache: make(map[string]*CacheParamJsonCfg)}
 	rcv = diffLoaderJsonCfg(v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -2712,7 +2762,6 @@ func TestEqualsLoadersJsonCfg(t *testing.T) {
 			ID:             "LoaderID",
 			Enabled:        true,
 			Tenant:         "cgrates.org",
-			DryRun:         false,
 			RunDelay:       1 * time.Millisecond,
 			LockFilePath:   "lockFileName",
 			CacheSConns:    []string{"*localhost"},
@@ -2720,6 +2769,7 @@ func TestEqualsLoadersJsonCfg(t *testing.T) {
 			TpInDir:        "/tp/in/dir",
 			TpOutDir:       "/tp/out/dir",
 			Data:           nil,
+			Opts:           &LoaderSOptsCfg{},
 		},
 	}
 
@@ -2728,7 +2778,6 @@ func TestEqualsLoadersJsonCfg(t *testing.T) {
 			ID:             "LoaderID2",
 			Enabled:        false,
 			Tenant:         "cgrates.org",
-			DryRun:         true,
 			RunDelay:       2 * time.Millisecond,
 			LockFilePath:   "lockFileName2",
 			CacheSConns:    []string{"*birpc"},
@@ -2752,6 +2801,7 @@ func TestEqualsLoadersJsonCfg(t *testing.T) {
 					},
 				},
 			},
+			Opts: &LoaderSOptsCfg{},
 		},
 	}
 
@@ -2778,7 +2828,6 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 			ID:             "LoaderID",
 			Enabled:        false,
 			Tenant:         "cgrates.org",
-			DryRun:         false,
 			RunDelay:       1 * time.Millisecond,
 			LockFilePath:   "lockFileName",
 			CacheSConns:    []string{"*localhost"},
@@ -2786,6 +2835,7 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 			TpInDir:        "/tp/in/dir",
 			TpOutDir:       "/tp/out/dir",
 			Data:           nil,
+			Opts:           &LoaderSOptsCfg{},
 		},
 	}
 
@@ -2794,7 +2844,6 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 			ID:             "LoaderID2",
 			Enabled:        true,
 			Tenant:         "itsyscom.com",
-			DryRun:         true,
 			RunDelay:       2 * time.Millisecond,
 			LockFilePath:   "lockFileName2",
 			CacheSConns:    []string{"*birpc"},
@@ -2818,6 +2867,7 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 					},
 				},
 			},
+			Opts: &LoaderSOptsCfg{},
 		},
 	}
 
@@ -2826,7 +2876,6 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 			ID:              utils.StringPointer("LoaderID2"),
 			Enabled:         utils.BoolPointer(true),
 			Tenant:          utils.StringPointer("itsyscom.com"),
-			Dry_run:         utils.BoolPointer(true),
 			Run_delay:       utils.StringPointer("2ms"),
 			Lockfile_path:   utils.StringPointer("lockFileName2"),
 			Caches_conns:    &[]string{"*birpc"},
@@ -2835,6 +2884,7 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 			Tp_out_dir:      utils.StringPointer("/tp/out/dir/2"),
 			Data: &[]*LoaderJsonDataType{
 				{
+					Id:        utils.StringPointer(""),
 					Type:      utils.StringPointer("*xml"),
 					File_name: utils.StringPointer("file.xml"),
 					Flags:     &[]string{"FLAG_2:PARAM_2:param2"},
@@ -2847,6 +2897,9 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 					},
 				},
 			},
+			Action: utils.StringPointer(""),
+			Opts:   &LoaderJsonOptsCfg{WithIndex: utils.BoolPointer(false)},
+			Cache:  map[string]*CacheParamJsonCfg{},
 		},
 	}
 
@@ -2874,7 +2927,6 @@ func TestLockFolderRelativePath(t *testing.T) {
 		ID:              utils.StringPointer("loaderid"),
 		Enabled:         utils.BoolPointer(true),
 		Tenant:          utils.StringPointer("cgrates.org"),
-		Dry_run:         utils.BoolPointer(false),
 		Lockfile_path:   utils.StringPointer(utils.ResourcesCsv),
 		Field_separator: utils.StringPointer(utils.InfieldSep),
 		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
@@ -2898,7 +2950,6 @@ func TestLockFolderNonRelativePath(t *testing.T) {
 		ID:              utils.StringPointer("loaderid"),
 		Enabled:         utils.BoolPointer(true),
 		Tenant:          utils.StringPointer("cgrates.org"),
-		Dry_run:         utils.BoolPointer(false),
 		Lockfile_path:   utils.StringPointer(path.Join("/tmp/", utils.ResourcesCsv)),
 		Field_separator: utils.StringPointer(utils.InfieldSep),
 		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
@@ -2921,7 +2972,6 @@ func TestLockFolderIsDir(t *testing.T) {
 		ID:              utils.StringPointer("loaderid"),
 		Enabled:         utils.BoolPointer(true),
 		Tenant:          utils.StringPointer("cgrates.org"),
-		Dry_run:         utils.BoolPointer(false),
 		Lockfile_path:   utils.StringPointer("/tmp"),
 		Field_separator: utils.StringPointer(utils.InfieldSep),
 		Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in/"),
@@ -2942,7 +2992,6 @@ func TestLoaderSCloneSection(t *testing.T) {
 			ID:             "LoaderID",
 			Enabled:        false,
 			Tenant:         "cgrates.org",
-			DryRun:         false,
 			RunDelay:       1 * time.Millisecond,
 			LockFilePath:   "lockFileName",
 			CacheSConns:    []string{"*localhost"},
@@ -2965,6 +3014,7 @@ func TestLoaderSCloneSection(t *testing.T) {
 					},
 				},
 			},
+			Opts: &LoaderSOptsCfg{},
 		},
 	}
 
@@ -2973,7 +3023,6 @@ func TestLoaderSCloneSection(t *testing.T) {
 			ID:             "LoaderID",
 			Enabled:        false,
 			Tenant:         "cgrates.org",
-			DryRun:         false,
 			RunDelay:       1 * time.Millisecond,
 			LockFilePath:   "lockFileName",
 			CacheSConns:    []string{"*localhost"},
@@ -2996,6 +3045,8 @@ func TestLoaderSCloneSection(t *testing.T) {
 					},
 				},
 			},
+			Opts:  &LoaderSOptsCfg{},
+			Cache: make(map[string]*CacheParamCfg),
 		},
 	}
 

@@ -29,6 +29,7 @@ type Locker interface {
 	Lock() error
 	Unlock() error
 	Locked() (bool, error)
+	IsLockFile(string) bool
 }
 
 func newLocker(path string) Locker {
@@ -63,10 +64,12 @@ func (fl folderLock) Locked() (lk bool, err error) {
 	lk = true
 	return
 }
+func (fl folderLock) IsLockFile(path string) bool { return path == string(fl) }
 
 type nopLock struct{}
 
 // lockFolder will attempt to lock the folder by creating the lock file
-func (nopLock) Lock() (_ error)           { return }
-func (nopLock) Unlock() (_ error)         { return }
-func (nopLock) Locked() (_ bool, _ error) { return }
+func (nopLock) Lock() (_ error)            { return }
+func (nopLock) Unlock() (_ error)          { return }
+func (nopLock) Locked() (_ bool, _ error)  { return }
+func (nopLock) IsLockFile(string) (_ bool) { return }
