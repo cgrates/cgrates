@@ -45,7 +45,6 @@ func TestLoaderSCoverage(t *testing.T) {
 		ID:             "test_id",
 		Enabled:        true,
 		Tenant:         "",
-		DryRun:         false,
 		RunDelay:       0,
 		LockFilePath:   "",
 		CacheSConns:    nil,

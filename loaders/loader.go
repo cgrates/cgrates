@@ -37,40 +37,7 @@ const (
 	gprefix = utils.MetaGoogleAPI + utils.ConcatenatedKeySep
 )
 
-func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id, ldrID string, dryRun, withIndex, ratesPartial bool, ratesData utils.MapStorage) (_ error) {
-	if dryRun {
-		var logID string
-		switch lType {
-		case utils.MetaAttributes:
-			logID = "AttributeProfile"
-		case utils.MetaResources:
-			logID = "ResourceProfile"
-		case utils.MetaFilters:
-			logID = "Filter"
-		case utils.MetaStats:
-			logID = "StatsQueueProfile"
-		case utils.MetaThresholds:
-			logID = "ThresholdProfile"
-		case utils.MetaRoutes:
-			logID = "RouteProfile"
-		case utils.MetaChargers:
-			logID = "ChargerProfile"
-		case utils.MetaDispatchers:
-			logID = "DispatcherProfile"
-		case utils.MetaDispatcherHosts:
-			logID = "DispatcherHost"
-		case utils.MetaRateProfiles:
-			logID = "RateProfile"
-		case utils.MetaActionProfiles:
-			logID = "ActionProfil"
-		case utils.MetaAccounts:
-			logID = "Account"
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: %sID: %s",
-				utils.LoaderS, ldrID, logID, utils.ConcatenatedKey(tnt, id)))
-		return
-	}
+func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id string, withIndex, ratesPartial bool, ratesData utils.MapStorage) (_ error) {
 	switch lType {
 	case utils.MetaAttributes:
 		return dm.RemoveAttributeProfile(ctx, tnt, id, withIndex)
@@ -107,7 +74,7 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id, 
 	return
 }
 
-func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID string, lDataSet []utils.MapStorage, dryRun, withIndex, ratesPartial bool) (err error) {
+func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz string, lDataSet []utils.MapStorage, withIndex, ratesPartial bool) (err error) {
 	switch lType {
 	case utils.MetaAttributes:
 		attrModels := make(engine.AttributeMdls, len(lDataSet))
@@ -121,12 +88,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			var apf *engine.AttributeProfile
 			if apf, err = engine.APItoAttributeProfile(tpApf, tmz); err != nil {
 				return
-			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(apf)))
-				continue
 			}
 			if err = dm.SetAttributeProfile(ctx, apf, withIndex); err != nil {
 				return
@@ -144,12 +105,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			var res *engine.ResourceProfile
 			if res, err = engine.APItoResource(tpRes, tmz); err != nil {
 				return
-			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: ResourceProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(res)))
-				continue
 			}
 			if err = dm.SetResourceProfile(ctx, res, withIndex); err != nil {
 				return
@@ -169,12 +124,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			if fltrPrf, err = engine.APItoFilter(tpFltr, tmz); err != nil {
 				return
 			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: Filter: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(fltrPrf)))
-				continue
-			}
 			if err = dm.SetFilter(ctx, fltrPrf, withIndex); err != nil {
 				return
 			}
@@ -192,12 +141,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			if stsPrf, err = engine.APItoStats(tpSts, tmz); err != nil {
 				return
 			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(stsPrf)))
-				continue
-			}
 			if err = dm.SetStatQueueProfile(ctx, stsPrf, withIndex); err != nil {
 				return
 			}
@@ -214,12 +157,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			var thPrf *engine.ThresholdProfile
 			if thPrf, err = engine.APItoThresholdProfile(tpTh, tmz); err != nil {
 				return
-			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: ThresholdProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(thPrf)))
-				continue
 			}
 			if err = dm.SetThresholdProfile(ctx, thPrf, withIndex); err != nil {
 				return
@@ -239,12 +176,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			if spPrf, err = engine.APItoRouteProfile(tpSpp, tmz); err != nil {
 				return
 			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: RouteProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(spPrf)))
-				continue
-			}
 			if err = dm.SetRouteProfile(ctx, spPrf, withIndex); err != nil {
 				return
 			}
@@ -263,12 +194,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			if cpp, err = engine.APItoChargerProfile(tpCPP, tmz); err != nil {
 				return
 			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: ChargerProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(cpp)))
-				continue
-			}
 			if err = dm.SetChargerProfile(ctx, cpp, withIndex); err != nil {
 				return
 			}
@@ -285,12 +210,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			var dsp *engine.DispatcherProfile
 			if dsp, err = engine.APItoDispatcherProfile(tpDsp, tmz); err != nil {
 				return
-			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(dsp)))
-				continue
 			}
 			if err = dm.SetDispatcherProfile(ctx, dsp, withIndex); err != nil {
 				return
@@ -310,12 +229,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 		}
 		for _, tpDsp := range tpDsps {
 			dsp := engine.APItoDispatcherHost(tpDsp)
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherHost: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(dsp)))
-				continue
-			}
 			if err = dm.SetDispatcherHost(ctx, dsp); err != nil {
 				return
 			}
@@ -332,12 +245,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			var rpl *utils.RateProfile
 			if rpl, err = engine.APItoRateProfile(tpRpl, tmz); err != nil {
 				return
-			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: RateProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(rpl)))
-				continue
 			}
 			if ratesPartial {
 				err = dm.SetRateProfileRates(ctx, rpl, true)
@@ -362,12 +269,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			if acp, err = engine.APItoActionProfile(tpAcp, tmz); err != nil {
 				return
 			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: ActionProfile: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(acp)))
-				continue
-			}
 			if err = dm.SetActionProfile(ctx, acp, true); err != nil {
 				return
 			}
@@ -389,15 +290,229 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID str
 			if acp, err = engine.APItoAccount(tpAcp, tmz); err != nil {
 				return
 			}
-			if dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: Accounts: %s",
-						utils.LoaderS, ldrID, utils.ToJSON(acp)))
-				continue
-			}
 			if err = dm.SetAccount(ctx, acp, true); err != nil {
 				return
 			}
+		}
+	}
+	return
+}
+
+func dryRun(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID string, lDataSet []utils.MapStorage) (err error) {
+	switch lType {
+	case utils.MetaAttributes:
+		attrModels := make(engine.AttributeMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			attrModels[i] = new(engine.AttributeMdl)
+			if err = utils.UpdateStructWithIfaceMap(attrModels[i], ld); err != nil {
+				return
+			}
+		}
+		for _, tpApf := range attrModels.AsTPAttributes() {
+			var apf *engine.AttributeProfile
+			if apf, err = engine.APItoAttributeProfile(tpApf, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(apf)))
+		}
+	case utils.MetaResources:
+		resModels := make(engine.ResourceMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			resModels[i] = new(engine.ResourceMdl)
+			if err = utils.UpdateStructWithIfaceMap(resModels[i], ld); err != nil {
+				return
+			}
+		}
+		for _, tpRes := range resModels.AsTPResources() {
+			var res *engine.ResourceProfile
+			if res, err = engine.APItoResource(tpRes, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: ResourceProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(res)))
+		}
+	case utils.MetaFilters:
+		fltrModels := make(engine.FilterMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			fltrModels[i] = new(engine.FilterMdl)
+			if err = utils.UpdateStructWithIfaceMap(fltrModels[i], ld); err != nil {
+				return
+			}
+		}
+
+		for _, tpFltr := range fltrModels.AsTPFilter() {
+			var fltrPrf *engine.Filter
+			if fltrPrf, err = engine.APItoFilter(tpFltr, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: Filter: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(fltrPrf)))
+		}
+	case utils.MetaStats:
+		stsModels := make(engine.StatMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			stsModels[i] = new(engine.StatMdl)
+			if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
+				return
+			}
+		}
+		for _, tpSts := range stsModels.AsTPStats() {
+			var stsPrf *engine.StatQueueProfile
+			if stsPrf, err = engine.APItoStats(tpSts, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(stsPrf)))
+		}
+	case utils.MetaThresholds:
+		thModels := make(engine.ThresholdMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			thModels[i] = new(engine.ThresholdMdl)
+			if err = utils.UpdateStructWithIfaceMap(thModels[i], ld); err != nil {
+				return
+			}
+		}
+		for _, tpTh := range thModels.AsTPThreshold() {
+			var thPrf *engine.ThresholdProfile
+			if thPrf, err = engine.APItoThresholdProfile(tpTh, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: ThresholdProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(thPrf)))
+		}
+	case utils.MetaRoutes:
+		sppModels := make(engine.RouteMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			sppModels[i] = new(engine.RouteMdl)
+			if err = utils.UpdateStructWithIfaceMap(sppModels[i], ld); err != nil {
+				return
+			}
+		}
+
+		for _, tpSpp := range sppModels.AsTPRouteProfile() {
+			var spPrf *engine.RouteProfile
+			if spPrf, err = engine.APItoRouteProfile(tpSpp, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: RouteProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(spPrf)))
+		}
+	case utils.MetaChargers:
+		cppModels := make(engine.ChargerMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			cppModels[i] = new(engine.ChargerMdl)
+			if err = utils.UpdateStructWithIfaceMap(cppModels[i], ld); err != nil {
+				return
+			}
+		}
+
+		for _, tpCPP := range cppModels.AsTPChargers() {
+			var cpp *engine.ChargerProfile
+			if cpp, err = engine.APItoChargerProfile(tpCPP, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: ChargerProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(cpp)))
+		}
+	case utils.MetaDispatchers:
+		dispModels := make(engine.DispatcherProfileMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			dispModels[i] = new(engine.DispatcherProfileMdl)
+			if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
+				return
+			}
+		}
+		for _, tpDsp := range dispModels.AsTPDispatcherProfiles() {
+			var dsp *engine.DispatcherProfile
+			if dsp, err = engine.APItoDispatcherProfile(tpDsp, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(dsp)))
+		}
+	case utils.MetaDispatcherHosts:
+		dispModels := make(engine.DispatcherHostMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			dispModels[i] = new(engine.DispatcherHostMdl)
+			if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
+				return
+			}
+		}
+		var tpDsps []*utils.TPDispatcherHost
+		if tpDsps, err = dispModels.AsTPDispatcherHosts(); err != nil {
+			return
+		}
+		for _, tpDsp := range tpDsps {
+			dsp := engine.APItoDispatcherHost(tpDsp)
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherHost: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(dsp)))
+		}
+	case utils.MetaRateProfiles:
+		rpMdls := make(engine.RateProfileMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			rpMdls[i] = new(engine.RateProfileMdl)
+			if err = utils.UpdateStructWithIfaceMap(rpMdls[i], ld); err != nil {
+				return
+			}
+		}
+		for _, tpRpl := range rpMdls.AsTPRateProfile() {
+			var rpl *utils.RateProfile
+			if rpl, err = engine.APItoRateProfile(tpRpl, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: RateProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(rpl)))
+
+		}
+	case utils.MetaActionProfiles:
+		acpsModels := make(engine.ActionProfileMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			acpsModels[i] = new(engine.ActionProfileMdl)
+			if err = utils.UpdateStructWithIfaceMap(acpsModels[i], ld); err != nil {
+				return
+			}
+		}
+
+		for _, tpAcp := range acpsModels.AsTPActionProfile() {
+			var acp *engine.ActionProfile
+			if acp, err = engine.APItoActionProfile(tpAcp, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: ActionProfile: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(acp)))
+		}
+	case utils.MetaAccounts:
+		acpsModels := make(engine.AccountMdls, len(lDataSet))
+		for i, ld := range lDataSet {
+			acpsModels[i] = new(engine.AccountMdl)
+			if err = utils.UpdateStructWithIfaceMap(acpsModels[i], ld); err != nil {
+				return
+			}
+		}
+		var accountTPModels []*utils.TPAccount
+		if accountTPModels, err = acpsModels.AsTPAccount(); err != nil {
+			return
+		}
+		for _, tpAcp := range accountTPModels {
+			var acp *utils.Account
+			if acp, err = engine.APItoAccount(tpAcp, tmz); err != nil {
+				return
+			}
+			utils.Logger.Info(
+				fmt.Sprintf("<%s-%s> DRY_RUN: Accounts: %s",
+					utils.LoaderS, ldrID, utils.ToJSON(acp)))
 		}
 	}
 	return
@@ -431,20 +546,20 @@ type loader struct {
 	Locker
 }
 
-func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet []utils.MapStorage, lType, action, caching string, dryRun, withIndex, partialRates, partial bool) (err error) {
-	if partial { // do not set in DB; ToDo: how to determine if is cache or not
-		return
-	}
+func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet []utils.MapStorage, lType, action, caching string, withIndex, partialRates bool) (err error) {
 	switch action {
+	case utils.MetaParse:
+		return
+	case utils.MetaDryRun:
+		return dryRun(ctx, l.dm, lType, l.timezone, l.ldrCfg.ID, lDataSet)
 	case utils.MetaStore:
-		err = setToDB(ctx, l.dm, lType, l.timezone, l.ldrCfg.ID, lDataSet, dryRun, withIndex, partialRates)
+		err = setToDB(ctx, l.dm, lType, l.timezone, lDataSet, withIndex, partialRates)
 	case utils.MetaRemove:
-		err = removeFromDB(ctx, l.dm, lType, tntID.Tenant, tntID.ID, l.ldrCfg.ID, dryRun, withIndex, partialRates, lDataSet[0])
+		err = removeFromDB(ctx, l.dm, lType, tntID.Tenant, tntID.ID, withIndex, partialRates, lDataSet[0])
 	default:
-		err = fmt.Errorf("unsupported loader action: <%q>", action)
+		return fmt.Errorf("unsupported loader action: <%q>", action)
 	}
-	if err != nil || dryRun ||
-		len(l.cacheConns) == 0 {
+	if err != nil || len(l.cacheConns) == 0 {
 		return
 	}
 	cacheArgs := make(map[string][]string)
@@ -494,7 +609,7 @@ func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet [
 	return engine.CallCache(l.connMgr, ctx, l.cacheConns, caching, cacheArgs, cacheIDs, nil, false, l.ldrCfg.Tenant)
 }
 
-func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*config.FCTemplate, lType, action, caching string, dryRun, withIndex, partialRates, partial bool) (err error) {
+func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*config.FCTemplate, lType, action, caching string, withIndex, partialRates bool) (err error) {
 	var prevTntID *utils.TenantID
 	var lData []utils.MapStorage
 	for lineNr := 1; ; lineNr++ {
@@ -518,7 +633,7 @@ func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*confi
 		tntID := TenantIDFromMap(data)
 		if !prevTntID.Equal(tntID) {
 			if prevTntID != nil {
-				if err = l.process(ctx, prevTntID, lData, lType, action, caching, dryRun, withIndex, partialRates, partial); err != nil {
+				if err = l.process(ctx, prevTntID, lData, lType, action, caching, withIndex, partialRates); err != nil {
 					return
 				}
 			}
@@ -527,10 +642,10 @@ func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*confi
 		}
 		lData = append(lData, data)
 	}
-	return l.process(ctx, prevTntID, lData, lType, action, caching, dryRun, withIndex, partialRates, partial)
+	return l.process(ctx, prevTntID, lData, lType, action, caching, withIndex, partialRates)
 }
 
-func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action, caching string, dryRun, withIndex bool) (err error) {
+func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action, caching string, withIndex bool) (err error) {
 	csvType := utils.MetaFileCSV
 	switch {
 	case strings.HasPrefix(inPath, gprefix):
@@ -545,7 +660,7 @@ func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, i
 	}
 	defer csv.Close()
 	if err = l.processData(ctx, csv, cfg.Fields, cfg.Type, action, caching,
-		dryRun, withIndex, cfg.Flags.GetBool(utils.PartialRatesOpt), cfg.Flags.GetBool(utils.PartialOpt)); err != nil || // encounterd error
+		withIndex, cfg.Flags.GetBool(utils.PartialRatesOpt)); err != nil || // encounterd error
 		outPath == utils.EmptyString || // or no moving
 		csvType != utils.MetaFileCSV { // or the type can not be moved(e.g. url)
 		return
@@ -565,6 +680,9 @@ func (l *loader) getCfg(fileName string) (cfg *config.LoaderDataType) {
 func (l *loader) processIFile(_, fileName string) (err error) {
 	cfg := l.getCfg(fileName)
 	if cfg == nil {
+		if pathIn := path.Join(l.ldrCfg.TpInDir, fileName); l.IsLockFile(pathIn) && len(l.ldrCfg.TpOutDir) != 0 {
+			err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, fileName))
+		}
 		return
 	}
 
@@ -572,35 +690,36 @@ func (l *loader) processIFile(_, fileName string) (err error) {
 		return
 	}
 	defer l.Unlock()
-	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, l.ldrCfg.Caching, l.ldrCfg.DryRun, l.ldrCfg.WithIndex)
+	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, l.ldrCfg.Opts.Cache, l.ldrCfg.Opts.WithIndex)
 }
 
-func (l *loader) processFolder(ctx *context.Context, action, caching string, dryRun, withIndex, stopOnError bool) (err error) {
+func (l *loader) processFolder(ctx *context.Context, caching string, withIndex, stopOnError bool) (err error) {
 	if err = l.Lock(); err != nil {
 		return
 	}
 	defer l.Unlock()
-	proces := func(i int) (err error) {
-		cfg := l.ldrCfg.Data[i]
-		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, action, caching, dryRun, withIndex); err != nil && !stopOnError {
-			utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
-				utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))
-			err = nil
+	for _, cfg := range l.ldrCfg.Data {
+		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, caching, withIndex); err != nil {
+			if !stopOnError {
+				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
+					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))
+				err = nil
+			}
+			return
 		}
-		return
 	}
-	switch action {
-	case utils.MetaStore:
-		for i := range l.ldrCfg.Data {
-			if err = proces(i); err != nil {
-				return
-			}
+	if len(l.ldrCfg.TpOutDir) != 0 {
+		var fs []os.DirEntry
+		if fs, err = os.ReadDir(l.ldrCfg.TpInDir); err != nil {
+			return
 		}
-	case utils.MetaRemove:
-		for i := len(l.ldrCfg.Data) - 1; i >= 0; i-- {
-			if err = proces(i); err != nil {
-				return
+		for _, f := range fs {
+			if pathIn := path.Join(l.ldrCfg.TpInDir, f.Name()); !l.IsLockFile(pathIn) {
+				if err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, f.Name())); err != nil {
+					return
+				}
 			}
+
 		}
 	}
 	return
@@ -608,7 +727,7 @@ func (l *loader) processFolder(ctx *context.Context, action, caching string, dry
 
 func (l *loader) handleFolder(stopChan chan struct{}) {
 	for {
-		go l.processFolder(context.Background(), l.ldrCfg.Action, l.ldrCfg.Caching, l.ldrCfg.DryRun, l.ldrCfg.WithIndex, false)
+		go l.processFolder(context.Background(), l.ldrCfg.Opts.Cache, l.ldrCfg.Opts.WithIndex, false)
 		timer := time.NewTimer(l.ldrCfg.RunDelay)
 		select {
 		case <-stopChan:

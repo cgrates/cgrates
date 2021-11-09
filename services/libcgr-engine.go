@@ -145,10 +145,12 @@ func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string
 
 	var reply string
 	for _, loaderID := range strings.Split(loaderIDs, utils.FieldsSep) {
-		if err = loader.GetLoaderS().V1Load(ctx, &loaders.ArgsProcessFolder{
-			ForceLock:   true, // force lock will unlock the file in case is locked and return error
-			LoaderID:    loaderID,
-			StopOnError: true,
+		if err = loader.GetLoaderS().V1Run(ctx, &loaders.ArgsProcessFolder{
+			APIOpts: map[string]interface{}{
+				utils.MetaForceLock:   true, // force lock will unlock the file in case is locked and return error
+				utils.MetaStopOnError: true,
+			},
+			LoaderID: loaderID,
 		}, &reply); err != nil {
 			err = fmt.Errorf("<%s> preload failed on loadID <%s> , err: <%s>", utils.LoaderS, loaderID, err)
 			return

@@ -42,7 +42,9 @@ var (
 	getDftKamConnCfg = func() *KamConnCfg { return new(KamConnCfg) }           // returns default Kamailio Connection configuration
 	getDftAstConnCfg = func() *AsteriskConnCfg { return new(AsteriskConnCfg) } // returns default Asterisk Connection configuration
 
-	getDftLoaderCfg = func() *LoaderSCfg { return new(LoaderSCfg) }
+	getDftLoaderCfg = func() *LoaderSCfg {
+		return &LoaderSCfg{Opts: new(LoaderSOptsCfg), Cache: make(map[string]*CacheParamCfg)}
+	}
 	getDftRemHstCfg = func() *RemoteHost { return new(RemoteHost) }
 
 	getDftEvExpCfg = func() *EventExporterCfg { return &EventExporterCfg{Opts: &EventExporterOpts{}} }

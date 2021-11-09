@@ -644,6 +644,7 @@ const (
 	MetaRemove              = "*remove"
 	MetaRemoveAll           = "*removeall"
 	MetaStore               = "*store"
+	MetaParse               = "*parse"
 	MetaClear               = "*clear"
 	MetaExport              = "*export"
 	MetaExportID            = "*export_id"
@@ -2133,6 +2134,7 @@ const (
 	CacheDumpFieldsCfg     = "cache_dump_fields"
 	PartialCommitFieldsCfg = "partial_commit_fields"
 	PartialCacheTTLCfg     = "partial_cache_ttl"
+	ActionCfg              = "action"
 )
 
 // RegistrarCCfg
@@ -2311,6 +2313,10 @@ const (
 
 	RemoteHostOpt = "*rmtHost"
 	MetaCache     = "*cache"
+
+	MetaWithIndex   = "*withIndex"
+	MetaForceLock   = "*forceLock"
+	MetaStopOnError = "*stopOnError"
 )
 
 // Event Flags
