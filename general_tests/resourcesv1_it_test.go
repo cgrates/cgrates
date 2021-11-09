@@ -130,44 +130,40 @@ func testV1RsSetProfile(t *testing.T) {
 }
 
 func testV1RsAllocate(t *testing.T) {
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "chan_1",
-				utils.OptsResourcesUnits:   1,
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "chan_1",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	var reply string
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Account1Channels" {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	argsRU2 := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "chan_2",
-				utils.OptsResourcesUnits:   1,
-			},
+	cgrEv2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "chan_2",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU2, &reply); err != nil {
+		cgrEv2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Account1Channels" {
 		t.Error("Unexpected reply returned", reply)
@@ -176,17 +172,15 @@ func testV1RsAllocate(t *testing.T) {
 
 func testV1RsAuthorize(t *testing.T) {
 	var reply *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RandomUsageID",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomUsageID",
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent,
@@ -211,22 +205,20 @@ func testV1RsAuthorize(t *testing.T) {
 	}
 
 	var reply2 string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "chan_1",
-				utils.OptsResourcesUnits:   1,
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "chan_1",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
-		&argsRU, &reply2); err.Error() != "RESOURCE_UNAUTHORIZED" {
+		&cgrEv, &reply2); err.Error() != "RESOURCE_UNAUTHORIZED" {
 		t.Error(err)
 	}
 }

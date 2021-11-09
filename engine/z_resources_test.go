@@ -928,24 +928,20 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	var reply *string
-	argsMissingTenant := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID:    "id1",
-			Event: map[string]interface{}{},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "test1", // ResourceUsage Identifier
-				utils.OptsResourcesUnits:   20,
-			},
+	argsMissingTenant := &utils.CGREvent{
+		ID:    "id1",
+		Event: map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "test1", // ResourceUsage Identifier
+			utils.OptsResourcesUnits:   20,
 		},
 	}
-	argsMissingUsageID := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "id1",
-			Event:  map[string]interface{}{},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUnits: 20,
-			},
+	argsMissingUsageID := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "id1",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUnits: 20,
 		},
 	}
 	if err := resService.V1AuthorizeResources(argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
@@ -2652,16 +2648,14 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	}
 	var reply string
 	exp := rProf.ID
-	if err := rs.V1AllocateResources(utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ef0f554",
-			Event:  map[string]interface{}{"": ""},
-			APIOpts: map[string]interface{}{
-				"Resource":                 "RL_DB",
-				utils.OptsResourcesUsageID: "56156434-2e44-4f16-a766-086f10b413cd",
-				utils.OptsResourcesUnits:   1,
-			},
+	if err := rs.V1AllocateResources(&utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ef0f554",
+		Event:  map[string]interface{}{"": ""},
+		APIOpts: map[string]interface{}{
+			"Resource":                 "RL_DB",
+			utils.OptsResourcesUsageID: "56156434-2e44-4f16-a766-086f10b413cd",
+			utils.OptsResourcesUnits:   1,
 		},
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -3209,15 +3203,13 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "ResourcesForEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RU_TEST1",
-			},
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_TEST1",
 		},
 	}
 
@@ -3235,7 +3227,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 			},
 			dirty:  utils.BoolPointer(false),
 			tUsage: utils.Float64Pointer(10),
-			ttl:    utils.DurationPointer(time.Minute),
+			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
 		},
 	}
@@ -3286,16 +3278,14 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourcesForEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RU_TEST1",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_TEST1",
 		},
 	}
 
@@ -3344,24 +3334,20 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{}
-
 	experr := `MANDATORY_IE_MISSING: [Event]`
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(args, &reply); err == nil ||
+	if err := rS.V1ResourcesForEvent(nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RU_TEST2",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_TEST2",
 		},
 	}
 
@@ -3371,13 +3357,11 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourcesForEventTest",
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RU_TEST3",
-			},
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ResourcesForEventTest",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_TEST3",
 		},
 	}
 
@@ -3387,13 +3371,11 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourcesForEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 	}
 
@@ -3455,15 +3437,13 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "ResourcesForEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RU_TEST1",
-			},
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_TEST1",
 		},
 	}
 
@@ -3552,15 +3532,13 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "ResourcesForEventTest",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RU_TEST1",
-			},
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_TEST1",
 		},
 	}
 
@@ -3578,7 +3556,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 			},
 			dirty:  utils.BoolPointer(false),
 			tUsage: utils.Float64Pointer(10),
-			ttl:    utils.DurationPointer(time.Minute),
+			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
 		},
 	}
@@ -3593,7 +3571,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 		resp := itm.(*utils.CachedRPCResponse)
 		if !reflect.DeepEqual(*resp.Result.(*Resources), exp) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, *resp.Result.(*Resources))
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(*resp.Result.(*Resources)))
 		}
 	}
 
@@ -4117,17 +4095,15 @@ func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -4165,18 +4141,16 @@ func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -4213,18 +4187,16 @@ func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -4261,7 +4233,9 @@ func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{}
+	args := &utils.CGREvent{
+		ID: "Event",
+	}
 	experr := `MANDATORY_IE_MISSING: [Event]`
 	var reply string
 
@@ -4297,16 +4271,14 @@ func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	experr := `MANDATORY_IE_MISSING: [UsageID]`
@@ -4373,17 +4345,15 @@ func TestResourcesV1AuthorizeResourcesCacheReplyExists(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 
@@ -4456,17 +4426,15 @@ func TestResourcesV1AuthorizeResourcesCacheReplySet(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    2,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    2,
 		},
 	}
 
@@ -4514,17 +4482,15 @@ func TestResourcesV1AllocateResourcesOK(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -4562,17 +4528,15 @@ func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -4609,16 +4573,14 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -4629,14 +4591,12 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args = &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 
@@ -4646,28 +4606,18 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args = &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := rS.V1AllocateResources(args, &reply); err == nil ||
-		err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-
-	args = utils.ArgRSv1ResourceUsage{}
-
-	experr = `MANDATORY_IE_MISSING: [Event]`
 	if err := rS.V1AllocateResources(args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -4729,17 +4679,15 @@ func TestResourcesV1AllocateResourcesCacheReplyExists(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAllocateResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAllocateResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 
@@ -4812,17 +4760,15 @@ func TestResourcesV1AllocateResourcesCacheReplySet(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAllocateResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    2,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAllocateResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    2,
 		},
 	}
 
@@ -4869,17 +4815,15 @@ func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -4949,17 +4893,15 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, cM)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -4997,17 +4939,15 @@ func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -5050,17 +4990,15 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -5070,17 +5008,15 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 		t.Errorf("Unexpected reply returned: %q", reply)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test2",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args = &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test2",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 
@@ -5117,17 +5053,15 @@ func TestResourcesV1ReleaseResourcesNoMatch(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -5164,16 +5098,14 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -5184,14 +5116,12 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args = &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 
@@ -5201,36 +5131,18 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args = &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
-		err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-
-	args = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
-		},
-	}
-
-	experr = `MANDATORY_IE_MISSING: [Event]`
 	if err := rS.V1ReleaseResources(args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -5292,18 +5204,16 @@ func TestResourcesV1ReleaseResourcesCacheReplyExists(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EventReleaseResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventReleaseResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	cacheReply := "cacheReply"
@@ -5375,17 +5285,15 @@ func TestResourcesV1ReleaseResourcesCacheReplySet(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventReleaseResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    2,
-			},
+	args := &utils.CGREvent{
+		ID: "EventReleaseResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    2,
 		},
 	}
 
@@ -5466,17 +5374,15 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, cM)
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	var reply string
@@ -5531,17 +5437,15 @@ func TestResourcesStoreResourceError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	args := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			ID: "EventAuthorizeResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID:  "RU_Test",
-				utils.OptsResourcesUsageTTL: time.Minute,
-				utils.OptsResourcesUnits:    5,
-			},
+	args := &utils.CGREvent{
+		ID: "EventAuthorizeResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID:  "RU_Test",
+			utils.OptsResourcesUsageTTL: time.Minute,
+			utils.OptsResourcesUnits:    5,
 		},
 	}
 	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true

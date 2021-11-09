@@ -565,17 +565,15 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 
 	// Allocate 3 units for resource ResTest
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "3001",
-				"Destination": "3002"},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-				utils.OptsResourcesUnits:   3,
-			},
+	argsRU := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "3001",
+			"Destination": "3002"},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
+			utils.OptsResourcesUnits:   3,
 		},
 	}
 	if err := attrRPC.Call(utils.ResourceSv1AllocateResources,
@@ -583,17 +581,15 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 		t.Error(err)
 	}
 	// Allocate 2 units for resource ResTest
-	argsRU2 := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "3001",
-				"Destination": "3002"},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
-				utils.OptsResourcesUnits:   2,
-			},
+	argsRU2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "3001",
+			"Destination": "3002"},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
+			utils.OptsResourcesUnits:   2,
 		},
 	}
 	if err := attrRPC.Call(utils.ResourceSv1AllocateResources,

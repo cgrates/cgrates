@@ -47,10 +47,10 @@ type StatSv1Interface interface {
 }
 
 type ResourceSv1Interface interface {
-	GetResourcesForEvent(args *utils.ArgRSv1ResourceUsage, reply *engine.Resources) error
-	AuthorizeResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
-	AllocateResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
-	ReleaseResources(args *utils.ArgRSv1ResourceUsage, reply *string) error
+	GetResourcesForEvent(args *utils.CGREvent, reply *engine.Resources) error
+	AuthorizeResources(args *utils.CGREvent, reply *string) error
+	AllocateResources(args *utils.CGREvent, reply *string) error
+	ReleaseResources(args *utils.CGREvent, reply *string) error
 	GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error
 	GetResourceWithConfig(args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error
 	Ping(ign *utils.CGREvent, reply *string) error

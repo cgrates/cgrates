@@ -857,17 +857,15 @@ func testFltrRplResourceProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	rEv := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "dan",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   6,
-			},
+	rEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "dan",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
 	var rsIDs string

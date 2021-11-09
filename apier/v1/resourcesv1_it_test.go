@@ -207,21 +207,19 @@ func testV1RsFromFolder(t *testing.T) {
 
 func testV1RsGetResourcesForEvent(t *testing.T) {
 	var reply *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event1",
-			Event:  map[string]interface{}{"Unknown": "unknown"},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RandomUsageID",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event1",
+		Event:  map[string]interface{}{"Unknown": "unknown"},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomUsageID",
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	args.CGREvent.Event = map[string]interface{}{"Destination": "10", "Account": "1001"}
-	args.CGREvent.ID = utils.UUIDSha1Prefix()
+	args.Event = map[string]interface{}{"Destination": "10", "Account": "1001"}
+	args.ID = utils.UUIDSha1Prefix()
 	args.APIOpts[utils.OptsResourcesUsageID] = "RandomUsageID2"
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
@@ -240,15 +238,15 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", "ResGroup2", (*reply)[0].ID)
 	}
 
-	args.CGREvent.Event = map[string]interface{}{"Destination": "20"}
-	args.CGREvent.ID = utils.UUIDSha1Prefix()
+	args.Event = map[string]interface{}{"Destination": "20"}
+	args.ID = utils.UUIDSha1Prefix()
 	args.APIOpts[utils.OptsResourcesUsageID] = "RandomUsageID3"
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
-	args.CGREvent.Event = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1002"}
-	args.CGREvent.ID = utils.UUIDSha1Prefix()
+	args.Event = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1002"}
+	args.ID = utils.UUIDSha1Prefix()
 	args.APIOpts[utils.OptsResourcesUsageID] = "RandomUsageID5"
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
@@ -257,8 +255,8 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", 2, len(*reply))
 	}
 
-	args.CGREvent.Event = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1001"}
-	args.CGREvent.ID = utils.UUIDSha1Prefix()
+	args.Event = map[string]interface{}{"Account": "1002", "Subject": "test", "Destination": "1001"}
+	args.ID = utils.UUIDSha1Prefix()
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -269,8 +267,8 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", "ResGroup2", (*reply)[0].ID)
 	}
 
-	args.CGREvent.Tenant = utils.EmptyString
-	args.CGREvent.ID = utils.UUIDSha1Prefix()
+	args.Tenant = utils.EmptyString
+	args.ID = utils.UUIDSha1Prefix()
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -284,75 +282,67 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 
 func testV1RsTTL0(t *testing.T) {
 	// only matching Resource3
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "3001",
-				"Destination": "3002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-				utils.OptsResourcesUnits:   1,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "3001",
+			"Destination": "3002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	var reply string
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	}
 	// overwrite the first allocation
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "3001",
-				"Destination": "3002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-				utils.OptsResourcesUnits:   2,
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "3001",
+			"Destination": "3002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
+			utils.OptsResourcesUnits:   2,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err != nil {
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, ev, &reply); err != nil {
 		t.Error(err)
 	}
 	// too many units should be rejected
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "3001",
-				"Destination": "3002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
-				utils.OptsResourcesUnits:   4,
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "3001",
+			"Destination": "3002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
+			utils.OptsResourcesUnits:   4,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err == nil ||
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, ev, &reply); err == nil ||
 		err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
 	// check the record
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "3001",
-				"Destination": "3002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "3001",
+			"Destination": "3002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
 		},
 	}
 	expiryTime, err := utils.ParseTimeDetectLayout("0001-01-01T00:00:00Z", "")
@@ -388,27 +378,25 @@ func testV1RsTTL0(t *testing.T) {
 	}
 	// release should not give out errors
 	var releaseReply string
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "3001",
-				"Destination": "3002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e25", // same ID should be accepted by first group since the previous resource should be expired
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "3001",
+			"Destination": "3002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e25", // same ID should be accepted by first group since the previous resource should be expired
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
-		argsRU, &releaseReply); err != nil {
+		ev, &releaseReply); err != nil {
 		t.Error(err)
 	}
 
-	argsRU.Tenant = utils.EmptyString
+	ev.Tenant = utils.EmptyString
 	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
-		argsRU, &releaseReply); err != nil {
+		ev, &releaseReply); err != nil {
 		t.Error(err)
 	}
 }
@@ -416,23 +404,21 @@ func testV1RsTTL0(t *testing.T) {
 func testV1RsAllocateResource(t *testing.T) {
 	// first event matching Resource1
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
-				utils.OptsResourcesUnits:   3,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+			utils.OptsResourcesUnits:   3,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg := "ResGroup1"
@@ -440,23 +426,21 @@ func testV1RsAllocateResource(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 	// Second event to test matching of exact limit of first resource
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e52",
-				utils.OptsResourcesUnits:   4,
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e52",
+			utils.OptsResourcesUnits:   4,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
@@ -464,23 +448,21 @@ func testV1RsAllocateResource(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 	// Third event testing overflow to second resource which still has one resource available
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "dan",
-				"Subject":     "dan",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e53",
-				utils.OptsResourcesUnits:   1,
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "dan",
+			"Subject":     "dan",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e53",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "SPECIAL_1002"
@@ -488,45 +470,41 @@ func testV1RsAllocateResource(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 	// Test resource unavailable
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e54", // same ID should be accepted by first group since the previous resource should be expired
-				utils.OptsResourcesUnits:   1,
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e54", // same ID should be accepted by first group since the previous resource should be expired
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
+		ev, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
 	time.Sleep(time.Second) // Give time for allocations on first resource to expire
 
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
-				utils.OptsResourcesUnits:   1,
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
@@ -537,19 +515,17 @@ func testV1RsAllocateResource(t *testing.T) {
 
 func testV1RsAuthorizeResources(t *testing.T) {
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUnits:   6,
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-			},
+	argsRU := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUnits:   6,
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
@@ -557,19 +533,17 @@ func testV1RsAuthorizeResources(t *testing.T) {
 	} else if reply != "ResGroup1" { // already 3 usages active before allow call, we should have now more than allowed
 		t.Error("Unexpected reply returned", reply)
 	}
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   7,
-			},
+	argsRU = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   7,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
@@ -581,18 +555,16 @@ func testV1RsAuthorizeResources(t *testing.T) {
 func testV1RsReleaseResource(t *testing.T) {
 	// release the only resource active for Resource1
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
-			},
+	argsRU := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
@@ -601,19 +573,17 @@ func testV1RsReleaseResource(t *testing.T) {
 	}
 	// try reserving with full units for Resource1, case which did not work in previous test
 	// only match Resource1 since we don't want for storing of the resource2 bellow
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   7,
-			},
+	argsRU = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   7,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
@@ -622,18 +592,16 @@ func testV1RsReleaseResource(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event5",
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event5",
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
@@ -652,18 +620,16 @@ func testV1RsReleaseResource(t *testing.T) {
 		}
 	}
 	// release an empty resource should return error
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
-			},
+	argsRU = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources,
@@ -676,19 +642,17 @@ func testV1RsDBStore(t *testing.T) {
 	if rlsV1ConfDIR == "tutinternal" {
 		t.SkipNow()
 	}
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
-				utils.OptsResourcesUnits:   1,
-			},
+	argsRU := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	var reply string
@@ -699,18 +663,16 @@ func testV1RsDBStore(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event3",
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event3",
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
@@ -743,18 +705,16 @@ func testV1RsDBStore(t *testing.T) {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	rs = new(engine.Resources)
-	args = &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event4",
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
-			},
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event4",
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
@@ -925,18 +885,16 @@ func testV1RsMatchNotFound(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account": "CustomTest",
-				"Custom":  "",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "test",
-				utils.OptsResourcesUnits:   1,
-			},
+	argsRU := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account": "CustomTest",
+			"Custom":  "",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "test",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	var reply string
@@ -971,21 +929,19 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"CustomField": "UnlimitedEvent",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
-				utils.OptsResourcesUnits:   1,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"CustomField": "UnlimitedEvent",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "CustomUnlimitedMessage" {
 		t.Errorf("Expecting: %+v, received: %+v", "CustomUnlimitedMessage", reply)
@@ -1102,30 +1058,28 @@ func testV1RsSetResourceProfileWithOpts(t *testing.T) {
 
 func testV1RsAuthorizeResourcesWithOpts(t *testing.T) {
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TEST_WITH_OPTS",
-			Event: map[string]interface{}{
-				"Subject":     "1001",
-				"Destination": "1002",
-			},
-			APIOpts: map[string]interface{}{
-				"CustomField":              "1007",
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e45",
-				utils.OptsResourcesUnits:   6,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TEST_WITH_OPTS",
+		Event: map[string]interface{}{
+			"Subject":     "1001",
+			"Destination": "1002",
+		},
+		APIOpts: map[string]interface{}{
+			"CustomField":              "1007",
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e45",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AuthorizeResources,
-		&argsRU,
+		&ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != "TEST_WITH_OPTS" {
 		t.Error("Unexpected reply returned", reply)
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources,
-		&argsRU,
+		&ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != "TEST_WITH_OPTS" {
@@ -1302,20 +1256,18 @@ func testResourceSSetResourceProfile(t *testing.T) {
 
 func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EV_1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RU_1",
-				utils.OptsResourcesUnits:   5,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EV_1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_1",
+			utils.OptsResourcesUnits:   5,
 		},
 	}
-	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU,
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, ev,
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
@@ -1336,20 +1288,18 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 }
 
 func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
-	argsRU := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "EV_1",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RU_1",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EV_1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RU_1",
 		},
 	}
 	var reply string
-	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources, argsRU,
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources, ev,
 		&reply); err != nil {
 		t.Error(err)
 	}
