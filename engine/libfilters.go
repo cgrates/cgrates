@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -88,7 +87,6 @@ func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fil
 			continue
 		}
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
-			fmt.Println("yay3")
 			return utils.EmptyString, err
 		} else if pass {
 			return opt.Value, nil
