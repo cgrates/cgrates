@@ -1228,37 +1228,35 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 // ResourceProfile
 func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   6,
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		cgrEv, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		&argsRU, &reply); err.Error() != utils.ErrNotFound.Error() {
+		&cgrEv, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
-	argsRU.Tenant = utils.EmptyString
+	cgrEv.Tenant = utils.EmptyString
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		cgrEv, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		&argsRU, &reply); err.Error() != utils.ErrNotFound.Error() {
+		&cgrEv, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -1318,30 +1316,28 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Subject:      "1002",
-				utils.Destination:  "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   6,
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Subject:      "1002",
+			utils.Destination:  "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &result); err != nil {
+		cgrEv, &result); err != nil {
 		t.Error(err)
 	} else if result != "Approved" {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		&argsRU, &result); err != nil {
+		&cgrEv, &result); err != nil {
 		t.Error(err)
 	} else if result != "Approved" {
 		t.Error("Unexpected reply returned", result)
@@ -1350,51 +1346,47 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 
 func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Subject:      "1002",
-				utils.Destination:  "1001",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e63",
-				utils.OptsResourcesUnits:   6,
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Subject:      "1002",
+			utils.Destination:  "1001",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e63",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Error("Unexpected reply returned", reply)
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		&argsRU, &reply); err != nil {
+		&cgrEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Approved" {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	argsReU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   6,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		&argsReU, &reply); err != nil {
+		&ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)
@@ -1457,23 +1449,21 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	argsReU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "2002",
-				utils.Subject:      "2001",
-				utils.Destination:  "2002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   6,
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "2002",
+			utils.Subject:      "2001",
+			utils.Destination:  "2002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
-		&argsReU, &result); err != nil {
+		&cgrEv, &result); err != nil {
 		t.Error(err)
 	} else if result != "MessageAllocation" {
 		t.Error("Unexpected reply returned", result)
@@ -1526,22 +1516,20 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	argsReU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e65",
-				utils.OptsResourcesUnits:   6,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e65",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &argsReU, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &ev, &result); err != nil {
 		t.Error(err)
 	} else if result != "ResGroup1" {
 		t.Error("Unexpected reply returned", result)
@@ -1550,47 +1538,43 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 
 func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 	var resp string
-	argsReU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "2002",
-				utils.Subject:      "2001",
-				utils.Destination:  "2002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "653a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   6,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "2002",
+			utils.Subject:      "2001",
+			utils.Destination:  "2002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "653a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources, argsReU, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources, ev, &resp); err != nil {
 		t.Error(err)
 	} else if resp != "MessageAllocation" {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &argsReU, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &ev, &resp); err != nil {
 		t.Error(err)
 	} else if resp != "MessageAllocation" {
 		t.Error("Unexpected reply returned", resp)
 	}
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "654a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   6,
-			},
+	ev2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "654a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &resp); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, &ev2, &resp); err != nil {
 		t.Error(err)
 	} else if resp != "ResGroup1" {
 		t.Error("Unexpected reply returned", resp)

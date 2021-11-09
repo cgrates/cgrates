@@ -40,23 +40,23 @@ func (rsv1 *ResourceSv1) Call(serviceMethod string, args interface{}, reply inte
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSv1) GetResourcesForEvent(args *utils.ArgRSv1ResourceUsage, reply *engine.Resources) error {
-	return rsv1.rls.V1ResourcesForEvent(*args, reply)
+func (rsv1 *ResourceSv1) GetResourcesForEvent(args *utils.CGREvent, reply *engine.Resources) error {
+	return rsv1.rls.V1ResourcesForEvent(args, reply)
 }
 
 // AuthorizeResources checks if there are limits imposed for event
-func (rsv1 *ResourceSv1) AuthorizeResources(args *utils.ArgRSv1ResourceUsage, reply *string) error {
-	return rsv1.rls.V1AuthorizeResources(*args, reply)
+func (rsv1 *ResourceSv1) AuthorizeResources(args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1AuthorizeResources(args, reply)
 }
 
 // V1InitiateResourceUsage records usage for an event
-func (rsv1 *ResourceSv1) AllocateResources(args *utils.ArgRSv1ResourceUsage, reply *string) error {
-	return rsv1.rls.V1AllocateResources(*args, reply)
+func (rsv1 *ResourceSv1) AllocateResources(args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1AllocateResources(args, reply)
 }
 
 // V1TerminateResourceUsage releases usage for an event
-func (rsv1 *ResourceSv1) ReleaseResources(args *utils.ArgRSv1ResourceUsage, reply *string) error {
-	return rsv1.rls.V1ReleaseResources(*args, reply)
+func (rsv1 *ResourceSv1) ReleaseResources(args *utils.CGREvent, reply *string) error {
+	return rsv1.rls.V1ReleaseResources(args, reply)
 }
 
 // GetResource returns a resource configuration

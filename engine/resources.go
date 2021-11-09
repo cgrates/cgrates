@@ -671,11 +671,11 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 }
 
 // V1ResourcesForEvent returns active resource configs matching the event
-func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
-	if args.CGREvent == nil {
+func (rS *ResourceService) V1ResourcesForEvent(args *utils.CGREvent, reply *Resources) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
@@ -717,7 +717,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 	}
 	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, usageID, usageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args, usageID, usageTTL); err != nil {
 		return err
 	}
 	*reply = mtcRLs
@@ -726,11 +726,11 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 }
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
-func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if args.CGREvent == nil {
+func (rS *ResourceService) V1AuthorizeResources(args *utils.CGREvent, reply *string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
@@ -772,7 +772,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	}
 	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, usageID, usageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args, usageID, usageTTL); err != nil {
 		return err
 	}
 	defer mtcRLs.unlock()
@@ -799,11 +799,11 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 }
 
 // V1AllocateResources is called when a resource requires allocation
-func (rS *ResourceService) V1AllocateResources(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if args.CGREvent == nil {
+func (rS *ResourceService) V1AllocateResources(args *utils.CGREvent, reply *string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
@@ -845,7 +845,7 @@ func (rS *ResourceService) V1AllocateResources(args utils.ArgRSv1ResourceUsage, 
 	}
 	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, usageID,
+	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args, usageID,
 		usageTTL); err != nil {
 		return err
 	}
@@ -876,11 +876,11 @@ func (rS *ResourceService) V1AllocateResources(args utils.ArgRSv1ResourceUsage, 
 }
 
 // V1ReleaseResources is called when we need to clear an allocation
-func (rS *ResourceService) V1ReleaseResources(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if args.CGREvent == nil {
+func (rS *ResourceService) V1ReleaseResources(args *utils.CGREvent, reply *string) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
@@ -922,7 +922,7 @@ func (rS *ResourceService) V1ReleaseResources(args utils.ArgRSv1ResourceUsage, r
 	}
 	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, usageID,
+	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args, usageID,
 		usageTTL); err != nil {
 		return
 	}

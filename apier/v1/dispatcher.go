@@ -303,9 +303,9 @@ func (dRs *DispatcherResourceSv1) Ping(args *utils.CGREvent, reply *string) erro
 }
 
 // GetResourcesForEvent implements ResourceSv1GetResourcesForEvent
-func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *utils.CGREvent,
 	reply *engine.Resources) error {
-	return dRs.dRs.ResourceSv1GetResourcesForEvent(*args, reply)
+	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
 }
 
 func (dRs *DispatcherResourceSv1) GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
@@ -316,19 +316,19 @@ func (dRs *DispatcherResourceSv1) GetResourceWithConfig(args *utils.TenantIDWith
 	return dRs.dRs.ResourceSv1GetResourceWithConfig(args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AuthorizeResources(args *utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) AuthorizeResources(args *utils.CGREvent,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1AuthorizeResources(*args, reply)
+	return dRs.dRs.ResourceSv1AuthorizeResources(args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AllocateResources(args *utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) AllocateResources(args *utils.CGREvent,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1AllocateResources(*args, reply)
+	return dRs.dRs.ResourceSv1AllocateResources(args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) ReleaseResources(args *utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) ReleaseResources(args *utils.CGREvent,
 	reply *string) error {
-	return dRs.dRs.ResourceSv1ReleaseResources(*args, reply)
+	return dRs.dRs.ResourceSv1ReleaseResources(args, reply)
 }
 
 func NewDispatcherRouteSv1(dps *dispatchers.DispatcherService) *DispatcherRouteSv1 {

@@ -340,6 +340,7 @@ func TestForceSTerminatorReleaseSession(t *testing.T) {
 				NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
 			},
 		},
+		OptsStart:  engine.MapEvent{},
 		Chargeable: true,
 	}
 
@@ -937,6 +938,7 @@ func TestDebitLoopSessionWarningSessions(t *testing.T) {
 		debitStop:     make(chan struct{}),
 		EventStart:    engine.NewMapEvent(nil),
 		DebitInterval: 18,
+		OptsStart:     engine.MapEvent{},
 		SRuns: []*SRun{
 			{Event: engine.NewMapEvent(nil),
 				CD:            &engine.CallDescriptor{Category: "test"},
@@ -2498,7 +2500,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
-				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
+				if args.(*utils.CGREvent).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
@@ -2537,6 +2539,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Usage: "10s",
 		},
+		APIOpts: map[string]interface{}{},
 	}
 	args := NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, true,
@@ -2620,9 +2623,10 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
 				cgrEv := engine.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
-						ID:     "TestID",
-						Tenant: "cgrates.org",
-						Event:  map[string]interface{}{},
+						ID:      "TestID",
+						Tenant:  "cgrates.org",
+						Event:   map[string]interface{}{},
+						APIOpts: map[string]interface{}{},
 					},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = cgrEv
@@ -2637,6 +2641,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 							Event: map[string]interface{}{
 								utils.Usage: "10s",
 							},
+							APIOpts: map[string]interface{}{},
 						},
 					},
 				}
@@ -2644,7 +2649,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
-				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
+				if args.(*utils.CGREvent).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
@@ -2694,6 +2699,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Usage: "10s",
 		},
+		APIOpts: map[string]interface{}{},
 	}
 	args := NewV1AuthorizeArgs(true, []string{},
 		true, []string{}, true, []string{}, true, true,
@@ -2737,6 +2743,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 							Event: map[string]interface{}{
 								utils.Usage: "10s",
 							},
+							APIOpts: map[string]interface{}{},
 						},
 					},
 				}
@@ -2744,13 +2751,13 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
-				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
+				if args.(*utils.CGREvent).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
 			},
 			utils.ResourceSv1AllocateResources: func(args interface{}, reply interface{}) error {
-				usageID := utils.IfaceAsString(args.(*utils.ArgRSv1ResourceUsage).APIOpts[utils.OptsResourcesUsageID])
+				usageID := utils.IfaceAsString(args.(*utils.CGREvent).APIOpts[utils.OptsResourcesUsageID])
 				if usageID == "ORIGIN_ID" {
 					return utils.ErrNotImplemented
 				}
@@ -2761,6 +2768,17 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 					len(attrIDs) != 0 {
 					return utils.ErrNotImplemented
 				}
+				attrRply := engine.AttrSProcessEventReply{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "TestID",
+						Event: map[string]interface{}{
+							utils.Usage: "10s",
+						},
+						APIOpts: map[string]interface{}{},
+					},
+				}
+				*reply.(*engine.AttrSProcessEventReply) = attrRply
 				return nil
 			},
 		},
@@ -2786,6 +2804,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
+		APIOpts: map[string]interface{}{},
 	}
 	args := NewV1InitSessionArgs(true, []string{},
 		false, []string{}, false, []string{}, true, false,
@@ -2897,7 +2916,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args interface{}, reply interface{}) error {
-				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "new_tenant" {
+				if args.(*utils.CGREvent).Tenant == "new_tenant" {
 					return utils.ErrNotImplemented
 				}
 				return nil
@@ -2998,9 +3017,10 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
 				cgrEv := engine.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
-						ID:     "TestID",
-						Tenant: "cgrates.org",
-						Event:  map[string]interface{}{},
+						ID:      "TestID",
+						Tenant:  "cgrates.org",
+						Event:   map[string]interface{}{},
+						APIOpts: map[string]interface{}{},
 					},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = cgrEv
@@ -3015,6 +3035,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 							Event: map[string]interface{}{
 								utils.Usage: "10s",
 							},
+							APIOpts: map[string]interface{}{},
 						},
 					},
 				}
@@ -3070,6 +3091,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 			utils.Usage:    "10s",
 			utils.OriginID: "ORIGIND_ID",
 		},
+		APIOpts: map[string]interface{}{},
 	}
 
 	args := NewV1InitSessionArgs(true, []string{},
@@ -3408,7 +3430,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResourceSv1ReleaseResources: func(args interface{}, reply interface{}) error {
-				if args.(*utils.ArgRSv1ResourceUsage).Tenant == "CHANGED_ID" {
+				if args.(*utils.CGREvent).Tenant == "CHANGED_ID" {
 					return nil
 				}
 				return utils.ErrNotImplemented
@@ -3432,6 +3454,7 @@ func TestBiRPCv1TerminateSession2(t *testing.T) {
 			utils.Usage:    "10s",
 			utils.OriginID: "TEST_ID",
 		},
+		APIOpts: map[string]interface{}{},
 	}
 	args := NewV1TerminateSessionArgs(false, true, false, nil, false, nil, cgrEvent, true)
 	var reply string
@@ -3589,7 +3612,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResourceSv1AllocateResources: func(args interface{}, reply interface{}) error {
-				usageID := utils.IfaceAsString(args.(*utils.ArgRSv1ResourceUsage).APIOpts[utils.OptsResourcesUsageID])
+				usageID := utils.IfaceAsString(args.(*utils.CGREvent).APIOpts[utils.OptsResourcesUsageID])
 				if usageID == "ORIGIN_ID" {
 					return nil
 				}
@@ -3640,6 +3663,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Usage: "10s",
 		},
+		APIOpts: map[string]interface{}{},
 	}
 
 	args := NewV1ProcessMessageArgs(false, []string{},
@@ -3952,6 +3976,7 @@ func TestBiRPCv1ProcessEventResources(t *testing.T) {
 				utils.Subject:      "ANY2CNT",
 				utils.Destination:  "1002",
 			},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 

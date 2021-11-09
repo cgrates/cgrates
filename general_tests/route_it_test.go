@@ -341,23 +341,21 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 
 func testV1SplSPopulateResUsage(t *testing.T) {
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event1",
-			Event: map[string]interface{}{
-				"Account":  "1002",
-				"Supplier": "route1",
-				"ResID":    "ResourceSupplier1",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RandomID",
-				utils.OptsResourcesUnits:   4,
-			},
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event1",
+		Event: map[string]interface{}{
+			"Account":  "1002",
+			"Supplier": "route1",
+			"ResID":    "ResourceSupplier1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomID",
+			utils.OptsResourcesUnits:   4,
 		},
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		cgrEv, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg := "ResourceSupplier1"
@@ -365,23 +363,21 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event2",
-			Event: map[string]interface{}{
-				"Account":  "1002",
-				"Supplier": "route1",
-				"ResID":    "Resource2Supplier1",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RandomID2",
-				utils.OptsResourcesUnits:   7,
-			},
+	cgrEv = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event2",
+		Event: map[string]interface{}{
+			"Account":  "1002",
+			"Supplier": "route1",
+			"ResID":    "Resource2Supplier1",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomID2",
+			utils.OptsResourcesUnits:   7,
 		},
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		cgrEv, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "Resource2Supplier1"
@@ -389,23 +385,21 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event3",
-			Event: map[string]interface{}{
-				"Account":  "1002",
-				"Supplier": "route2",
-				"ResID":    "ResourceSupplier2",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RandomID3",
-				utils.OptsResourcesUnits:   7,
-			},
+	cgrEv = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event3",
+		Event: map[string]interface{}{
+			"Account":  "1002",
+			"Supplier": "route2",
+			"ResID":    "ResourceSupplier2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomID3",
+			utils.OptsResourcesUnits:   7,
 		},
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		cgrEv, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResourceSupplier2"
@@ -413,23 +407,21 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event4",
-			Event: map[string]interface{}{
-				"Account":  "1002",
-				"Supplier": "route3",
-				"ResID":    "ResourceSupplier3",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "RandomID4",
-				utils.OptsResourcesUnits:   7,
-			},
+	cgrEv = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event4",
+		Event: map[string]interface{}{
+			"Account":  "1002",
+			"Supplier": "route3",
+			"ResID":    "ResourceSupplier3",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "RandomID4",
+			utils.OptsResourcesUnits:   7,
 		},
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		cgrEv, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResourceSupplier3"

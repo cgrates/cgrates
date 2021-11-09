@@ -28,7 +28,7 @@ func init() {
 	c := &CmdResourceRelease{
 		name:      "resources_release",
 		rpcMethod: utils.ResourceSv1ReleaseResources,
-		rpcParams: &utils.ArgRSv1ResourceUsage{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +38,7 @@ func init() {
 type CmdResourceRelease struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ArgRSv1ResourceUsage
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -52,17 +52,14 @@ func (self *CmdResourceRelease) RpcMethod() string {
 
 func (self *CmdResourceRelease) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ArgRSv1ResourceUsage{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }
 
 func (self *CmdResourceRelease) PostprocessRpcParams() error {
-	if self.rpcParams != nil && self.rpcParams.CGREvent != nil &&
-		self.rpcParams.CGREvent.Time == nil {
-		self.rpcParams.CGREvent.Time = utils.TimePointer(time.Now())
+	if self.rpcParams != nil && self.rpcParams.Time == nil {
+		self.rpcParams.Time = utils.TimePointer(time.Now())
 	}
 	return nil
 }

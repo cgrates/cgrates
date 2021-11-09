@@ -45,6 +45,10 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		Opts: &ResourcesOpts{
+			UsageTTL: 72 * time.Hour,
+			Units:    1,
+		},
 	}
 	cfg := NewDefaultCGRConfig()
 	if err = cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -77,6 +81,11 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaUnitsCfg:    1.,
+			utils.MetaUsageTTLCfg: 72 * time.Hour,
+			utils.MetaUsageIDCfg:  "",
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -107,6 +116,11 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
+		utils.OptsCfg: map[string]interface{}{
+			utils.MetaUnitsCfg:    1.,
+			utils.MetaUsageTTLCfg: 72 * time.Hour,
+			utils.MetaUsageIDCfg:  "",
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -125,6 +139,7 @@ func TestResourceSConfigClone(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
+		Opts:                &ResourcesOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

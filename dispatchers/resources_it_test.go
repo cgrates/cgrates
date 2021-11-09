@@ -119,19 +119,16 @@ func testDspResPing(t *testing.T) {
 
 func testDspResTestAuthKey(t *testing.T) {
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-			},
-
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:           "12345",
-				utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:           "12345",
+			utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
 		},
 	}
 
@@ -143,18 +140,16 @@ func testDspResTestAuthKey(t *testing.T) {
 
 func testDspResTestAuthKey2(t *testing.T) {
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:           "res12345",
-				utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:           "res12345",
+			utils.OptsResourcesUsageID: utils.UUIDSha1Prefix(),
 		},
 	}
 	eRs := &engine.Resources{
@@ -176,23 +171,21 @@ func testDspResTestAuthKey2(t *testing.T) {
 func testDspResTestAuthKey3(t *testing.T) {
 	// first event matching Resource1
 	var reply string
-	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:           "res12345",
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
-				utils.OptsResourcesUnits:   1,
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002"},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:           "res12345",
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+			utils.OptsResourcesUnits:   1,
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AllocateResources,
-		argsRU, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	}
 	eAllocationMsg := "ResGroup1"
@@ -200,85 +193,77 @@ func testDspResTestAuthKey3(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != eAllocationMsg { // already 3 usages active before allow call, we should have now more than allowed
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:           "res12345",
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   17,
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002"},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:           "res12345",
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   17,
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources,
-		&argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnauthorized.Error() {
+		&ev, &reply); err == nil || err.Error() != utils.ErrResourceUnauthorized.Error() {
 		t.Error(err)
 	}
 
 	// relase the only resource active for Resource1
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:           "res12345",
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55",
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002"},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:           "res12345",
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1ReleaseResources,
-		argsRU, &reply); err != nil {
+		ev, &reply); err != nil {
 		t.Error(err)
 	}
 	// try reserving with full units for Resource1, case which did not work in previous test
 	// only match Resource1 since we don't want for storing of the resource2 bellow
-	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:           "res12345",
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-				utils.OptsResourcesUnits:   6,
-			},
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002"},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:           "res12345",
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			utils.OptsResourcesUnits:   6,
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, &argsRU, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event5",
-			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
-			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:           "res12345",
-				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event5",
+		Event: map[string]interface{}{
+			"Account":     "1002",
+			"Subject":     "1001",
+			"Destination": "1002"},
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:           "res12345",
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {

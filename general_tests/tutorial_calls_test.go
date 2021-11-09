@@ -306,18 +306,16 @@ func testCallStatMetricsBefore(t *testing.T) {
 
 func testCallCheckResourceBeforeAllocation(t *testing.T) {
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceEvent",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "OriginID",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ResourceEvent",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "OriginID",
 		},
 	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
@@ -459,18 +457,16 @@ func testCallCall1003To1001SecondTime(t *testing.T) {
 // Check if the resource was Allocated
 func testCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceAllocation",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "OriginID1",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ResourceAllocation",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "OriginID1",
 		},
 	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
@@ -651,18 +647,16 @@ func testCallStatMetrics(t *testing.T) {
 
 func testCallCheckResourceRelease(t *testing.T) {
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ResourceRelease",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "OriginID2",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ResourceRelease",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "OriginID2",
 		},
 	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
@@ -730,18 +724,16 @@ func testCallSyncSessions(t *testing.T) {
 	}
 	//check if resource was allocated for 2 calls(1001->1002;1001->1003)
 	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "AllocateResource",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-			},
-			APIOpts: map[string]interface{}{
-				utils.OptsResourcesUsageID: "OriginID3",
-			},
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AllocateResource",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Subject:      "1001",
+			utils.Destination:  "1002",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsResourcesUsageID: "OriginID3",
 		},
 	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
