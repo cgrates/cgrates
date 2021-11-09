@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"bytes"
+	"log"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc/context"
@@ -56,7 +59,19 @@ func TestLogEEExportEvent(t *testing.T) {
 		"field1": 2,
 		"field2": "value",
 	}
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
+
 	logEE.ExportEvent(context.Background(), mp, "")
+	exp := `CGRateS <> [INFO] <EEs> <*default> exported: <{"field1":2,"field2":"value"}>`
+	if !strings.Contains(buff.String(), exp) {
+		t.Errorf("Expected %v to contain %v", exp, buff.String())
+	}
 }
 
 func TestLogEEGetMetrics(t *testing.T) {
