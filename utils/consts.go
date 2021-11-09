@@ -2224,6 +2224,11 @@ const (
 	RateSuffixIndexedFieldsCfg = "rate_suffix_indexed_fields"
 	Verbosity                  = "verbosity"
 
+	// ResourceSCfg
+	MetaUsageIDCfg  = "*usageID"
+	MetaUsageTTLCfg = "*usageTTL"
+	MetaUnitsCfg    = "*units"
+
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"
 	IndexTypeCfg       = "index_type"
@@ -2399,7 +2404,8 @@ var CGROptionsSet = NewStringSet([]string{OptsSessionsTTL,
 	OptsAttributesProcessRuns, OptsAttributesProfileIDs, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
 	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount,
 	OptsAttributesProfileRuns, OptsAttributesProfileIgnoreFilters, OptsStatsProfileIDs,
-	OptsStatsProfileIgnoreFilters, OptsThresholdsProfileIDs, OptsThresholdsProfileIgnoreFilters})
+	OptsStatsProfileIgnoreFilters, OptsThresholdsProfileIDs, OptsThresholdsProfileIgnoreFilters,
+	OptsResourcesUsageID, OptsResourcesUsageTTL, OptsResourcesUnits})
 
 // EventExporter metrics
 const (
@@ -2447,6 +2453,10 @@ const (
 	OptsDispatchersProfilesCount = "*dispatchersProfilesCount"
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
+	// Resources
+	OptsResourcesUsageID  = "*rsUsageID"
+	OptsResourcesUsageTTL = "*rsUsageTTL"
+	OptsResourcesUnits    = "*rsUnits"
 	// Stats
 	OptsStatsProfileIDs           = "*stsProfileIDs"
 	OptsStatsProfileIgnoreFilters = "*stsProfileIgnoreFilters"

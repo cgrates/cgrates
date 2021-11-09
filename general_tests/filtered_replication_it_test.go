@@ -858,15 +858,17 @@ func testFltrRplResourceProfile(t *testing.T) {
 	}
 
 	rEv := utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.AccountField: "dan",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+				utils.OptsResourcesUnits:   6,
+			},
 		},
-		Units: 6,
 	}
 	var rsIDs string
 	//Testing ProcessEvent on set thresholdprofile using apier
@@ -879,15 +881,16 @@ func testFltrRplResourceProfile(t *testing.T) {
 	if err := fltrRplEngine1RPC.Call(utils.ResourceSv1GetResource, argsRs, &replyRs); err != nil {
 		t.Fatal(err)
 	}
-	rs.TTLIdx = []string{rEv.UsageID}
+	usageID := utils.IfaceAsString(rEv.APIOpts[utils.OptsResourcesUsageID])
+	rs.TTLIdx = []string{usageID}
 	rs.Usages = map[string]*engine.ResourceUsage{
-		rEv.UsageID: {
+		usageID: {
 			Tenant: "cgrates.org",
-			ID:     rEv.UsageID,
+			ID:     usageID,
 			Units:  6,
 		},
 	}
-	replyRs.Usages[rEv.UsageID].ExpiryTime = time.Time{}
+	replyRs.Usages[usageID].ExpiryTime = time.Time{}
 	if !reflect.DeepEqual(rs, replyRs) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(rs), utils.ToJSON(replyRs))
 	}

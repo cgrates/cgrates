@@ -663,12 +663,13 @@ func TestArgRSv1ResourceUsageCloneCase1(t *testing.T) {
 func TestArgRSv1ResourceUsageCloneCase2(t *testing.T) {
 	newArgRSv1 := &ArgRSv1ResourceUsage{
 		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			APIOpts: map[string]interface{}{},
+			Tenant: "*req.CGRID",
+			APIOpts: map[string]interface{}{
+				OptsResourcesUsageID:  "randomID",
+				OptsResourcesUsageTTL: "2",
+				OptsResourcesUnits:    1,
+			},
 		},
-		UsageID:  "randomID",
-		UsageTTL: DurationPointer(2),
-		Units:    1.0,
 	}
 	if replyArgRsv1, err := newArgRSv1.RPCClone(); err != nil {
 		t.Error(err)
@@ -680,14 +681,15 @@ func TestArgRSv1ResourceUsageCloneCase2(t *testing.T) {
 func TestArgRSv1ResourceUsageCloneCase3(t *testing.T) {
 	newArgRSv1 := &ArgRSv1ResourceUsage{
 		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
+			Tenant: "*req.CGRID",
+			Event:  map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				OptsResourcesUsageID:  "randomID",
+				OptsResourcesUsageTTL: "2",
+				OptsResourcesUnits:    1,
+			},
 		},
-		UsageID:  "randomID",
-		UsageTTL: DurationPointer(2),
-		Units:    1.0,
-		clnb:     true,
+		clnb: true,
 	}
 	if replyArgRsv1, err := newArgRSv1.RPCClone(); err != nil {
 		t.Error(err)

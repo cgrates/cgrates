@@ -342,7 +342,6 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 func testV1SplSPopulateResUsage(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
-		UsageID: "RandomID",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event1",
@@ -351,9 +350,11 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 				"Supplier": "route1",
 				"ResID":    "ResourceSupplier1",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RandomID",
+				utils.OptsResourcesUnits:   4,
+			},
 		},
-
-		Units: 4,
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
@@ -365,8 +366,6 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 	}
 
 	argsRU = utils.ArgRSv1ResourceUsage{
-		UsageID: "RandomID2",
-
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event2",
@@ -375,9 +374,11 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 				"Supplier": "route1",
 				"ResID":    "Resource2Supplier1",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RandomID2",
+				utils.OptsResourcesUnits:   7,
+			},
 		},
-
-		Units: 7,
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
@@ -389,7 +390,6 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 	}
 
 	argsRU = utils.ArgRSv1ResourceUsage{
-		UsageID: "RandomID3",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event3",
@@ -398,9 +398,11 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 				"Supplier": "route2",
 				"ResID":    "ResourceSupplier2",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RandomID3",
+				utils.OptsResourcesUnits:   7,
+			},
 		},
-
-		Units: 7,
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
@@ -412,7 +414,6 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 	}
 
 	argsRU = utils.ArgRSv1ResourceUsage{
-		UsageID: "RandomID4",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event4",
@@ -421,8 +422,11 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 				"Supplier": "route3",
 				"ResID":    "ResourceSupplier3",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RandomID4",
+				utils.OptsResourcesUnits:   7,
+			},
 		},
-		Units: 7,
 	}
 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {

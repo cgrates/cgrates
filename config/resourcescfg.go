@@ -24,6 +24,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type ResourcesOpts struct {
+	UsageID  string
+	UsageTTL time.Duration
+	Units    float64
+}
+
 // ResourceSConfig is resorces section config
 type ResourceSConfig struct {
 	Enabled             bool
@@ -34,11 +40,30 @@ type ResourceSConfig struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+	Opts                *ResourcesOpts
+}
+
+func (resOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.UsageID != nil {
+		resOpts.UsageID = *jsnCfg.UsageID
+	}
+	if jsnCfg.UsageTTL != nil {
+		if resOpts.UsageTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.UsageTTL); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Units != nil {
+		resOpts.Units = *jsnCfg.Units
+	}
+	return
 }
 
 func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Enabled != nil {
 		rlcfg.Enabled = *jsnCfg.Enabled
@@ -85,16 +110,25 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 	if jsnCfg.Nested_fields != nil {
 		rlcfg.NestedFields = *jsnCfg.Nested_fields
 	}
-	return nil
+	if jsnCfg.Opts != nil {
+		err = rlcfg.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.MetaUsageIDCfg:  rlcfg.Opts.UsageID,
+		utils.MetaUsageTTLCfg: rlcfg.Opts.UsageTTL,
+		utils.MetaUnitsCfg:    rlcfg.Opts.Units,
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        rlcfg.Enabled,
 		utils.IndexedSelectsCfg: rlcfg.IndexedSelects,
 		utils.NestedFieldsCfg:   rlcfg.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
+		utils.OptsCfg:           opts,
 	}
 	if rlcfg.ThresholdSConns != nil {
 		thresholdSConns := make([]string, len(rlcfg.ThresholdSConns))
@@ -133,6 +167,14 @@ func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]interface{}
 	return
 }
 
+func (resOpts *ResourcesOpts) Clone() *ResourcesOpts {
+	return &ResourcesOpts{
+		UsageID:  resOpts.UsageID,
+		UsageTTL: resOpts.UsageTTL,
+		Units:    resOpts.Units,
+	}
+}
+
 // Clone returns a deep copy of ResourceSConfig
 func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 	cln = &ResourceSConfig{
@@ -140,6 +182,7 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 		IndexedSelects: rlcfg.IndexedSelects,
 		StoreInterval:  rlcfg.StoreInterval,
 		NestedFields:   rlcfg.NestedFields,
+		Opts:           rlcfg.Opts.Clone(),
 	}
 	if rlcfg.ThresholdSConns != nil {
 		cln.ThresholdSConns = make([]string, len(rlcfg.ThresholdSConns))
