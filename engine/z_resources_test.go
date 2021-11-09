@@ -932,17 +932,21 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:    "id1",
 			Event: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "test1", // ResourceUsage Identifier
+				utils.OptsResourcesUnits:   20,
+			},
 		},
-		UsageID: "test1", // ResourceUsage Identifier
-		Units:   20,
 	}
 	argsMissingUsageID := utils.ArgRSv1ResourceUsage{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "id1",
 			Event:  map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUnits: 20,
+			},
 		},
-		Units: 20,
 	}
 	if err := resService.V1AuthorizeResources(argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
 		t.Error(err.Error())
@@ -2650,13 +2654,15 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	exp := rProf.ID
 	if err := rs.V1AllocateResources(utils.ArgRSv1ResourceUsage{
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "ef0f554",
-			Event:   map[string]interface{}{"": ""},
-			APIOpts: map[string]interface{}{"Resource": "RL_DB"},
+			Tenant: "cgrates.org",
+			ID:     "ef0f554",
+			Event:  map[string]interface{}{"": ""},
+			APIOpts: map[string]interface{}{
+				"Resource":                 "RL_DB",
+				utils.OptsResourcesUsageID: "56156434-2e44-4f16-a766-086f10b413cd",
+				utils.OptsResourcesUnits:   1,
+			},
 		},
-		UsageID: "56156434-2e44-4f16-a766-086f10b413cd",
-		Units:   1,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != exp {
@@ -3209,8 +3215,10 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RU_TEST1",
+			},
 		},
-		UsageID: "RU_TEST1",
 	}
 
 	exp := Resources{
@@ -3285,8 +3293,10 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1002",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RU_TEST1",
+			},
 		},
-		UsageID: "RU_TEST1",
 	}
 
 	var reply Resources
@@ -3334,9 +3344,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		UsageID: "RU_TEST1",
-	}
+	args := utils.ArgRSv1ResourceUsage{}
 
 	experr := `MANDATORY_IE_MISSING: [Event]`
 	var reply Resources
@@ -3351,8 +3359,10 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RU_TEST2",
+			},
 		},
-		UsageID: "RU_TEST2",
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
@@ -3365,8 +3375,10 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourcesForEventTest",
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RU_TEST3",
+			},
 		},
-		UsageID: "RU_TEST3",
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
@@ -3449,8 +3461,10 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RU_TEST1",
+			},
 		},
-		UsageID: "RU_TEST1",
 	}
 
 	cacheReply := Resources{
@@ -3544,8 +3558,10 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "RU_TEST1",
+			},
 		},
-		UsageID: "RU_TEST1",
 	}
 
 	exp := Resources{
@@ -4107,10 +4123,12 @@ func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -4154,10 +4172,12 @@ func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -4200,10 +4220,12 @@ func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1002",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -4239,11 +4261,7 @@ func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
 	fltrs := NewFilterS(cfg, nil, dm)
 	rS := NewResourceService(dm, cfg, fltrs, nil)
 
-	args := utils.ArgRSv1ResourceUsage{
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
-	}
+	args := utils.ArgRSv1ResourceUsage{}
 	experr := `MANDATORY_IE_MISSING: [Event]`
 	var reply string
 
@@ -4285,9 +4303,11 @@ func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	experr := `MANDATORY_IE_MISSING: [UsageID]`
 	var reply string
@@ -4359,10 +4379,12 @@ func TestResourcesV1AuthorizeResourcesCacheReplyExists(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 
 	cacheReply := "Approved"
@@ -4440,10 +4462,12 @@ func TestResourcesV1AuthorizeResourcesCacheReplySet(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    2,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    2,
 	}
 
 	var reply string
@@ -4496,10 +4520,12 @@ func TestResourcesV1AllocateResourcesOK(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -4542,10 +4568,12 @@ func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1002",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -4587,9 +4615,11 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -4602,10 +4632,12 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 	args = utils.ArgRSv1ResourceUsage{
 		CGREvent: &utils.CGREvent{
 			ID: "EventAuthorizeResource",
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
@@ -4619,10 +4651,12 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
@@ -4631,11 +4665,7 @@ func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	args = utils.ArgRSv1ResourceUsage{
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
-	}
+	args = utils.ArgRSv1ResourceUsage{}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
 	if err := rS.V1AllocateResources(args, &reply); err == nil ||
@@ -4705,10 +4735,12 @@ func TestResourcesV1AllocateResourcesCacheReplyExists(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 
 	cacheReply := "cacheApproved"
@@ -4786,10 +4818,12 @@ func TestResourcesV1AllocateResourcesCacheReplySet(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    2,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    2,
 	}
 
 	var reply string
@@ -4841,10 +4875,12 @@ func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -4919,10 +4955,12 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -4965,10 +5003,12 @@ func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 	if err := rS.V1AllocateResources(args, &reply); err != nil {
@@ -5016,10 +5056,12 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 	if err := rS.V1AllocateResources(args, &reply); err != nil {
@@ -5034,10 +5076,12 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test2",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test2",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 
 	experr := `cannot find usage record with id: RU_Test2`
@@ -5079,10 +5123,12 @@ func TestResourcesV1ReleaseResourcesNoMatch(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1002",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -5124,9 +5170,11 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 
@@ -5139,10 +5187,12 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 	args = utils.ArgRSv1ResourceUsage{
 		CGREvent: &utils.CGREvent{
 			ID: "EventAuthorizeResource",
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
@@ -5156,10 +5206,12 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
@@ -5169,9 +5221,13 @@ func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 	}
 
 	args = utils.ArgRSv1ResourceUsage{
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
+		CGREvent: &utils.CGREvent{
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
+		},
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
@@ -5243,10 +5299,12 @@ func TestResourcesV1ReleaseResourcesCacheReplyExists(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	cacheReply := "cacheReply"
 	Cache.Set(utils.CacheRPCResponses, cacheKey,
@@ -5323,10 +5381,12 @@ func TestResourcesV1ReleaseResourcesCacheReplySet(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    2,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    2,
 	}
 
 	var reply string
@@ -5412,10 +5472,12 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	var reply string
 	var resources Resources
@@ -5475,10 +5537,12 @@ func TestResourcesStoreResourceError(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID:  "RU_Test",
+				utils.OptsResourcesUsageTTL: time.Minute,
+				utils.OptsResourcesUnits:    5,
+			},
 		},
-		UsageID:  "RU_Test",
-		UsageTTL: utils.DurationPointer(time.Minute),
-		Units:    5,
 	}
 	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true
 	var reply string

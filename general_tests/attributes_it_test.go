@@ -572,11 +572,11 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 			Event: map[string]interface{}{
 				"Account":     "3001",
 				"Destination": "3002"},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
+				utils.OptsResourcesUnits:   3,
+			},
 		},
-
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-		Units:   3,
 	}
 	if err := attrRPC.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &result); err != nil {
@@ -590,11 +590,11 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 			Event: map[string]interface{}{
 				"Account":     "3001",
 				"Destination": "3002"},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
+				utils.OptsResourcesUnits:   2,
+			},
 		},
-
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
-		Units:   2,
 	}
 	if err := attrRPC.Call(utils.ResourceSv1AllocateResources,
 		argsRU2, &result); err != nil {

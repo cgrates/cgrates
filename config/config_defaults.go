@@ -736,6 +736,11 @@ const CGRATES_CFG_JSON = `
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"opts": {
+		"*usageID": "",
+		"*usageTTL": "72h",
+		"*units": 1,
+	},
 },
 
 

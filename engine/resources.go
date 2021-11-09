@@ -677,7 +677,12 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 	}
 	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.UsageID == "" {
+	}
+	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
+	if opt, has := args.APIOpts[utils.OptsResourcesUsageID]; has {
+		usageID = utils.IfaceAsString(opt)
+	}
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 	tnt := args.Tenant
@@ -704,8 +709,15 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 	}
 	// end of RPC caching
 
+	ttl := rS.cgrcfg.ResourceSCfg().Opts.UsageTTL
+	if opt, has := args.APIOpts[utils.OptsResourcesUsageTTL]; has {
+		if ttl, err = utils.IfaceAsDuration(opt); err != nil {
+			return
+		}
+	}
+	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, usageID, usageTTL); err != nil {
 		return err
 	}
 	*reply = mtcRLs
@@ -720,7 +732,12 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	}
 	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.UsageID == "" {
+	}
+	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
+	if opt, has := args.APIOpts[utils.OptsResourcesUsageID]; has {
+		usageID = utils.IfaceAsString(opt)
+	}
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 	tnt := args.Tenant
@@ -747,18 +764,31 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	}
 	// end of RPC caching
 
+	ttl := rS.cgrcfg.ResourceSCfg().Opts.UsageTTL
+	if opt, has := args.APIOpts[utils.OptsResourcesUsageTTL]; has {
+		if ttl, err = utils.IfaceAsDuration(opt); err != nil {
+			return
+		}
+	}
+	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, usageID, usageTTL); err != nil {
 		return err
 	}
 	defer mtcRLs.unlock()
 
+	units := rS.cgrcfg.ResourceSCfg().Opts.Units
+	if opt, has := args.APIOpts[utils.OptsResourcesUnits]; has {
+		if units, err = utils.IfaceAsFloat64(opt); err != nil {
+			return
+		}
+	}
 	var alcMessage string
 	if alcMessage, err = mtcRLs.allocateResource(
 		&ResourceUsage{
 			Tenant: tnt,
-			ID:     args.UsageID,
-			Units:  args.Units}, true); err != nil {
+			ID:     usageID,
+			Units:  units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			err = utils.ErrResourceUnauthorized
 		}
@@ -775,7 +805,12 @@ func (rS *ResourceService) V1AllocateResources(args utils.ArgRSv1ResourceUsage, 
 	}
 	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.UsageID == "" {
+	}
+	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
+	if opt, has := args.APIOpts[utils.OptsResourcesUsageID]; has {
+		usageID = utils.IfaceAsString(opt)
+	}
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 	tnt := args.Tenant
@@ -802,17 +837,30 @@ func (rS *ResourceService) V1AllocateResources(args utils.ArgRSv1ResourceUsage, 
 	}
 	// end of RPC caching
 
+	ttl := rS.cgrcfg.ResourceSCfg().Opts.UsageTTL
+	if opt, has := args.APIOpts[utils.OptsResourcesUsageTTL]; has {
+		if ttl, err = utils.IfaceAsDuration(opt); err != nil {
+			return
+		}
+	}
+	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, args.UsageID,
-		args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, usageID,
+		usageTTL); err != nil {
 		return err
 	}
 	defer mtcRLs.unlock()
 
+	units := rS.cgrcfg.ResourceSCfg().Opts.Units
+	if opt, has := args.APIOpts[utils.OptsResourcesUnits]; has {
+		if units, err = utils.IfaceAsFloat64(opt); err != nil {
+			return
+		}
+	}
 	var alcMsg string
 	if alcMsg, err = mtcRLs.allocateResource(
-		&ResourceUsage{Tenant: tnt, ID: args.UsageID,
-			Units: args.Units}, false); err != nil {
+		&ResourceUsage{Tenant: tnt, ID: usageID,
+			Units: units}, false); err != nil {
 		return
 	}
 
@@ -834,7 +882,12 @@ func (rS *ResourceService) V1ReleaseResources(args utils.ArgRSv1ResourceUsage, r
 	}
 	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.UsageID == "" {
+	}
+	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
+	if opt, has := args.APIOpts[utils.OptsResourcesUsageID]; has {
+		usageID = utils.IfaceAsString(opt)
+	}
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 	tnt := args.Tenant
@@ -861,14 +914,21 @@ func (rS *ResourceService) V1ReleaseResources(args utils.ArgRSv1ResourceUsage, r
 	}
 	// end of RPC caching
 
+	ttl := rS.cgrcfg.ResourceSCfg().Opts.UsageTTL
+	if opt, has := args.APIOpts[utils.OptsResourcesUsageTTL]; has {
+		if ttl, err = utils.IfaceAsDuration(opt); err != nil {
+			return
+		}
+	}
+	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, args.UsageID,
-		args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args.CGREvent, usageID,
+		usageTTL); err != nil {
 		return
 	}
 	defer mtcRLs.unlock()
 
-	if err = mtcRLs.clearUsage(args.UsageID); err != nil {
+	if err = mtcRLs.clearUsage(usageID); err != nil {
 		return
 	}
 

@@ -654,14 +654,17 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 	//not gonna match our vendor1 filter because 6 > 5
 	ev := &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1002"},
+				"Account": "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				utils.OptsResourcesUnits:   6,
+			},
 		},
-		Units: 6,
 	}
 	var reply string
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
@@ -756,14 +759,17 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 	// deallocate resources for matching vendor1
 	evRes := &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1002"},
+				"Account": "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				utils.OptsResourcesUnits:   4,
+			},
 		},
-		Units: 4,
 	}
 	var result string
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
@@ -1142,14 +1148,17 @@ func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 	ev := &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1002"},
+				"Account": "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				utils.OptsResourcesUnits:   6,
+			},
 		},
-		Units: 6,
 	}
 	var reply string
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
@@ -1160,14 +1169,17 @@ func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 	}
 
 	ev = &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1004"},
+				"Account": "1004",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
+				utils.OptsResourcesUnits:   7,
+			},
 		},
-		Units: 7,
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		ev, &reply); err != nil {
@@ -1221,14 +1233,17 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 	evRs := &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1002"},
+				"Account": "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				utils.OptsResourcesUnits:   9,
+			},
 		},
-		Units: 9,
 	}
 	var replyStr string
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
@@ -1465,14 +1480,17 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	// first we have to remove them
 	var result string
 	evRs := &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1004"},
+				"Account": "1004",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
+				utils.OptsResourcesUnits:   7,
+			},
 		},
-		Units: 7,
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1ReleaseResources,
 		evRs, &result); err != nil {
@@ -1482,14 +1500,17 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	}
 
 	evRs = &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1002"},
+				"Account": "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				utils.OptsResourcesUnits:   7,
+			},
 		},
-		Units: 7,
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1ReleaseResources,
 		evRs, &result); err != nil {
@@ -1499,14 +1520,17 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 	}
 
 	evRs = &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1004"},
+				"Account": "1004",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e31",
+				utils.OptsResourcesUnits:   1,
+			},
 		},
-		Units: 1,
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		evRs, &result); err != nil {
@@ -1517,14 +1541,17 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 
 	// also, to not match route2, totalUsage of RES_GRP1 must be lower than 9
 	evRs = &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
-				"Account": "1002"},
+				"Account": "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				utils.OptsResourcesUnits:   4,
+			},
 		},
-		Units: 4,
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
 		evRs, &result); err != nil {
@@ -1585,14 +1612,16 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 	//allocate for matching all routes
 	evRs := &utils.ArgRSv1ResourceUsage{
-		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				"Account": "1002"},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+				utils.OptsResourcesUnits:   9,
+			},
 		},
-		Units: 9,
 	}
 	var result string
 	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,

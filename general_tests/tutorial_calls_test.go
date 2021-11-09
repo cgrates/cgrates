@@ -307,7 +307,6 @@ func testCallStatMetricsBefore(t *testing.T) {
 func testCallCheckResourceBeforeAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		UsageID: "OriginID",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceEvent",
@@ -315,6 +314,9 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "OriginID",
 			},
 		},
 	}
@@ -458,7 +460,6 @@ func testCallCall1003To1001SecondTime(t *testing.T) {
 func testCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		UsageID: "OriginID1",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceAllocation",
@@ -466,6 +467,9 @@ func testCallCheckResourceAllocation(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "OriginID1",
 			},
 		},
 	}
@@ -648,7 +652,6 @@ func testCallStatMetrics(t *testing.T) {
 func testCallCheckResourceRelease(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		UsageID: "OriginID2",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceRelease",
@@ -656,6 +659,9 @@ func testCallCheckResourceRelease(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "OriginID2",
 			},
 		},
 	}
@@ -725,7 +731,6 @@ func testCallSyncSessions(t *testing.T) {
 	//check if resource was allocated for 2 calls(1001->1002;1001->1003)
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		UsageID: "OriginID3",
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AllocateResource",
@@ -733,6 +738,9 @@ func testCallSyncSessions(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsResourcesUsageID: "OriginID3",
 			},
 		},
 	}

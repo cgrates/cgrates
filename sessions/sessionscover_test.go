@@ -2750,7 +2750,8 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 				return nil
 			},
 			utils.ResourceSv1AllocateResources: func(args interface{}, reply interface{}) error {
-				if args.(*utils.ArgRSv1ResourceUsage).UsageID == "ORIGIN_ID" {
+				usageID := utils.IfaceAsString(args.(*utils.ArgRSv1ResourceUsage).APIOpts[utils.OptsResourcesUsageID])
+				if usageID == "ORIGIN_ID" {
 					return utils.ErrNotImplemented
 				}
 				return nil
@@ -3588,7 +3589,8 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.ResourceSv1AllocateResources: func(args interface{}, reply interface{}) error {
-				if args.(*utils.ArgRSv1ResourceUsage).UsageID == "ORIGIN_ID" {
+				usageID := utils.IfaceAsString(args.(*utils.ArgRSv1ResourceUsage).APIOpts[utils.OptsResourcesUsageID])
+				if usageID == "ORIGIN_ID" {
 					return nil
 				}
 				return utils.ErrNotImplemented
