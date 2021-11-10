@@ -50,9 +50,9 @@ func TestNewRateS(t *testing.T) {
 	dataManager := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	filters := engine.NewFilterS(cfg, nil, dataManager)
 	expected := &RateS{
-		cfg:     cfg,
-		filterS: filters,
-		dm:      dataManager,
+		cfg:   cfg,
+		fltrS: filters,
+		dm:    dataManager,
 	}
 	if newRateS := NewRateS(cfg, filters, dataManager); !reflect.DeepEqual(newRateS, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, newRateS)
@@ -282,9 +282,9 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	rate := RateS{
-		cfg:     cfg,
-		filterS: filters,
-		dm:      dm,
+		cfg:   cfg,
+		fltrS: filters,
+		dm:    dm,
 	}
 	t1 := time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC)
 	rpp := &utils.RateProfile{
@@ -495,9 +495,9 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	rateS := RateS{
-		cfg:     cfg,
-		filterS: filters,
-		dm:      dm,
+		cfg:   cfg,
+		fltrS: filters,
+		dm:    dm,
 	}
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
@@ -599,9 +599,9 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	rateS := RateS{
-		cfg:     cfg,
-		filterS: filters,
-		dm:      dm,
+		cfg:   cfg,
+		fltrS: filters,
+		dm:    dm,
 	}
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
@@ -892,9 +892,9 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	rateS := RateS{
-		cfg:     cfg,
-		filterS: filterS,
-		dm:      dm,
+		cfg:   cfg,
+		fltrS: filterS,
+		dm:    dm,
 	}
 
 	rPrf := &utils.RateProfile{

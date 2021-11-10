@@ -482,7 +482,7 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 	dmCharger := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dmCharger,
 			cfg: cfg,
 		},
@@ -528,7 +528,7 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 	dmCharger := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dmCharger,
 			cfg: cfg,
 		},
@@ -578,7 +578,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 	dmCharger := NewDataManager(dbm, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dmCharger,
 			cfg: cfg,
 		},

@@ -3455,9 +3455,9 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	alS := &AttributeService{
-		cgrcfg:  cfg,
-		dm:      dm,
-		filterS: NewFilterS(cfg, nil, dm),
+		cfg:   cfg,
+		dm:    dm,
+		fltrS: NewFilterS(cfg, nil, dm),
 	}
 
 	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
@@ -3528,9 +3528,9 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	alS := &AttributeService{
-		cgrcfg:  cfg,
-		dm:      dm,
-		filterS: NewFilterS(cfg, nil, dm),
+		cfg:   cfg,
+		dm:    dm,
+		fltrS: NewFilterS(cfg, nil, dm),
 	}
 
 	apNil := &AttributeProfile{}
@@ -3566,9 +3566,9 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	alS := &AttributeService{
-		cgrcfg:  cfg,
-		dm:      dm,
-		filterS: NewFilterS(cfg, nil, dm),
+		cfg:   cfg,
+		dm:    dm,
+		fltrS: NewFilterS(cfg, nil, dm),
 	}
 
 	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)

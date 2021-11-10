@@ -2290,8 +2290,8 @@ func TestThresholdsRunBackupStoreIntervalLessThanZero(t *testing.T) {
 	tS := &ThresholdService{
 		dm:          dm,
 		storedTdIDs: make(utils.StringSet),
-		cgrcfg:      cfg,
-		filterS:     filterS,
+		cfg:         cfg,
+		fltrS:       filterS,
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
@@ -2314,8 +2314,8 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 		storedTdIDs: utils.StringSet{
 			"Th1": struct{}{},
 		},
-		cgrcfg:      cfg,
-		filterS:     filterS,
+		cfg:         cfg,
+		fltrS:       filterS,
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
@@ -2363,10 +2363,10 @@ func TestThresholdsReload(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdService{
 		dm:          dm,
-		filterS:     filterS,
+		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
+		cfg:         cfg,
 	}
 	tS.loopStopped <- struct{}{}
 	tS.Reload(context.Background())
@@ -2381,10 +2381,10 @@ func TestThresholdsStartLoop(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdService{
 		dm:          dm,
-		filterS:     filterS,
+		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
+		cfg:         cfg,
 	}
 
 	tS.StartLoop(context.Background())

@@ -36,7 +36,7 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 	return &StatService{
 		dm:               dm,
 		connMgr:          connMgr,
-		filterS:          filterS,
+		fltrS:            filterS,
 		cfg:              cgrcfg,
 		storedStatQueues: make(utils.StringSet),
 		loopStopped:      make(chan struct{}),
@@ -48,7 +48,7 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 type StatService struct {
 	dm               *DataManager
 	connMgr          *ConnManager
-	filterS          *FilterS
+	fltrS            *FilterS
 	cfg              *config.CGRConfig
 	loopStopped      chan struct{}
 	stopBackup       chan struct{}
@@ -191,7 +191,7 @@ func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt stri
 		sqPrfl.lock(lkPrflID)
 		if !ignoreFilters {
 			var pass bool
-			if pass, err = sS.filterS.Pass(ctx, tnt, sqPrfl.FilterIDs,
+			if pass, err = sS.fltrS.Pass(ctx, tnt, sqPrfl.FilterIDs,
 				evNm); err != nil {
 				sqPrfl.unlock()
 				sqs.unlock()
@@ -311,12 +311,12 @@ func (sS *StatService) processThresholds(ctx *context.Context, sQs StatQueues, o
 func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
 	evNm := args.AsDataProvider()
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cfg.StatSCfg().Opts.ProfileIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.filterS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		config.StatsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -328,7 +328,7 @@ func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *util
 	statQueueIDs = matchSQs.IDs()
 	var withErrors bool
 	for _, sq := range matchSQs {
-		if err = sq.ProcessEvent(ctx, tnt, args.ID, sS.filterS, evNm); err != nil {
+		if err = sq.ProcessEvent(ctx, tnt, args.ID, sS.fltrS, evNm); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
 					sq.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
@@ -382,12 +382,12 @@ func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *utils
 		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.filterS, sS.cfg.StatSCfg().Opts.ProfileIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.filterS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		config.StatsProfileIgnoreFilters, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -445,7 +445,7 @@ func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils
 		return err
 	}
 	var rnd int
-	if rnd, err = GetIntOpts(ctx, tnt, &utils.CGREvent{Tenant: tnt}, sS.filterS,
+	if rnd, err = GetIntOpts(ctx, tnt, &utils.CGREvent{Tenant: tnt}, sS.fltrS,
 		sS.cfg.StatSCfg().Opts.RoundingDecimals, sS.cfg.GeneralCfg().RoundingDecimals,
 		utils.OptsRoundingDecimals); err != nil {
 		return

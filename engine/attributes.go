@@ -35,17 +35,17 @@ import (
 func NewAttributeService(dm *DataManager, filterS *FilterS,
 	cgrcfg *config.CGRConfig) *AttributeService {
 	return &AttributeService{
-		dm:      dm,
-		filterS: filterS,
-		cgrcfg:  cgrcfg,
+		dm:    dm,
+		fltrS: filterS,
+		cfg:   cgrcfg,
 	}
 }
 
 // AttributeService the service for the API
 type AttributeService struct {
-	dm      *DataManager
-	filterS *FilterS
-	cgrcfg  *config.CGRConfig
+	dm    *DataManager
+	fltrS *FilterS
+	cfg   *config.CGRConfig
 }
 
 // Shutdown is called to shutdown the service
@@ -60,12 +60,12 @@ func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt 
 	if len(attrIDs) == 0 {
 		ignoreFilters = false
 		aPrflIDs, err := MatchingItemIDsForEvent(ctx, evNm,
-			alS.cgrcfg.AttributeSCfg().StringIndexedFields,
-			alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
-			alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
+			alS.cfg.AttributeSCfg().StringIndexedFields,
+			alS.cfg.AttributeSCfg().PrefixIndexedFields,
+			alS.cfg.AttributeSCfg().SuffixIndexedFields,
 			alS.dm, utils.CacheAttributeFilterIndexes, tnt,
-			alS.cgrcfg.AttributeSCfg().IndexedSelects,
-			alS.cgrcfg.AttributeSCfg().NestedFields,
+			alS.cfg.AttributeSCfg().IndexedSelects,
+			alS.cfg.AttributeSCfg().NestedFields,
 		)
 		if err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt 
 		tntID := aPrfl.TenantIDInline()
 		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = tntID
 		if !ignoreFilters {
-			if pass, err := alS.filterS.Pass(ctx, tnt, aPrfl.FilterIDs,
+			if pass, err := alS.fltrS.Pass(ctx, tnt, aPrfl.FilterIDs,
 				evNm); err != nil {
 				return nil, err
 			} else if !pass {
@@ -133,12 +133,12 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *AttrSProcessEventReply, err error) {
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs,
+	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		config.AttributesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -156,7 +156,7 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
 			var pass bool
-			if pass, err = alS.filterS.Pass(ctx, tnt, attribute.FilterIDs,
+			if pass, err = alS.fltrS.Pass(ctx, tnt, attribute.FilterIDs,
 				evNm); err != nil {
 				return
 			} else if !pass {
@@ -164,7 +164,7 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 			}
 		}
 		var out interface{}
-		if out, err = ParseAttribute(dynDP, utils.FirstNonEmpty(attribute.Type, utils.MetaVariable), utils.DynamicDataPrefix+attribute.Path, attribute.Value, alS.cgrcfg.GeneralCfg().RoundingDecimals, alS.cgrcfg.GeneralCfg().DefaultTimezone, time.RFC3339, alS.cgrcfg.GeneralCfg().RSRSep); err != nil {
+		if out, err = ParseAttribute(dynDP, utils.FirstNonEmpty(attribute.Type, utils.MetaVariable), utils.DynamicDataPrefix+attribute.Path, attribute.Value, alS.cfg.GeneralCfg().RoundingDecimals, alS.cfg.GeneralCfg().DefaultTimezone, time.RFC3339, alS.cfg.GeneralCfg().RSRSep); err != nil {
 			rply = nil
 			return
 		}
@@ -210,15 +210,15 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = alS.cfg.GeneralCfg().DefaultTenant
 	}
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIDs,
+	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		config.AttributesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -244,17 +244,17 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CG
 	reply *AttrSProcessEventReply) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = alS.cfg.GeneralCfg().DefaultTenant
 	}
 
 	var processRuns int
-	if processRuns, err = GetIntOpts(ctx, tnt, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProcessRuns,
+	if processRuns, err = GetIntOpts(ctx, tnt, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProcessRuns,
 		config.AttributesProcessRunsDftOpt, utils.OptsAttributesProcessRuns); err != nil {
 		return
 	}
 
 	var profileRuns int
-	if profileRuns, err = GetIntOpts(ctx, tnt, args, alS.filterS, alS.cgrcfg.AttributeSCfg().Opts.ProfileRuns,
+	if profileRuns, err = GetIntOpts(ctx, tnt, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileRuns,
 		config.AttributesProfileRunsDftOpt, utils.OptsAttributesProfileRuns); err != nil {
 		return
 	}
@@ -278,8 +278,8 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CG
 	var lastID string
 	matchedIDs := make([]string, 0, processRuns)
 	alteredFields := make(utils.StringSet)
-	dynDP := newDynamicDP(ctx, alS.cgrcfg.AttributeSCfg().ResourceSConns,
-		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().AccountSConns, args.Tenant, eNV)
+	dynDP := newDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
+		alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.MetaProcessRunsCfg] = i + 1
 		var evRply *AttrSProcessEventReply

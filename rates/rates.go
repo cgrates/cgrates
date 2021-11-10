@@ -33,17 +33,17 @@ import (
 // NewRateS instantiates the RateS
 func NewRateS(cfg *config.CGRConfig, filterS *engine.FilterS, dm *engine.DataManager) *RateS {
 	return &RateS{
-		cfg:     cfg,
-		filterS: filterS,
-		dm:      dm,
+		cfg:   cfg,
+		fltrS: filterS,
+		dm:    dm,
 	}
 }
 
 // RateS calculates costs for events
 type RateS struct {
-	cfg     *config.CGRConfig
-	filterS *engine.FilterS
-	dm      *engine.DataManager
+	cfg   *config.CGRConfig
+	fltrS *engine.FilterS
+	dm    *engine.DataManager
 }
 
 // ListenAndServe keeps the service alive
@@ -103,7 +103,7 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 		}
 		if !ignoreFilters {
 			var pass bool
-			if pass, err = rS.filterS.Pass(ctx, tnt, rPf.FilterIDs, evNm); err != nil {
+			if pass, err = rS.fltrS.Pass(ctx, tnt, rPf.FilterIDs, evNm); err != nil {
 				return
 			} else if !pass {
 				continue
@@ -111,7 +111,7 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 		}
 		var rPfWeight float64
 		if rPfWeight, err = engine.WeightFromDynamics(ctx, rPf.Weights,
-			rS.filterS, tnt, evNm); err != nil {
+			rS.fltrS, tnt, evNm); err != nil {
 			return
 		}
 		if rpWw == nil || rpWw.weight < rPfWeight {
@@ -155,7 +155,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	for rtID := range rtIDs {
 		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID
 		var pass bool
-		if pass, err = rS.filterS.Pass(ctx, args.Tenant, rt.FilterIDs, evNm); err != nil {
+		if pass, err = rS.fltrS.Pass(ctx, args.Tenant, rt.FilterIDs, evNm); err != nil {
 			return
 		} else if !pass {
 			continue
@@ -166,17 +166,17 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	wghts := make([]float64, len(aRates))
 	for i, aRt := range aRates {
 		if wghts[i], err = engine.WeightFromDynamics(ctx, aRt.Weights,
-			rS.filterS, args.Tenant, evNm); err != nil {
+			rS.fltrS, args.Tenant, evNm); err != nil {
 			return
 		}
 	}
 	var sTime time.Time
-	if sTime, err = engine.GetTimeOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.StartTime,
+	if sTime, err = engine.GetTimeOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.StartTime,
 		rS.cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime, utils.MetaStartTime); err != nil {
 		return
 	}
 	var usage *decimal.Big
-	if usage, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.Usage,
+	if usage, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.Usage,
 		config.RatesUsageDftOpt, utils.OptsRatesUsage, utils.MetaUsage); err != nil {
 		return
 	}
@@ -195,7 +195,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		rpCost.MaxCost = rtPfl.MaxCost
 	}
 	var ivalStart *decimal.Big
-	if ivalStart, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.IntervalStart,
+	if ivalStart, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.IntervalStart,
 		config.RatesIntervalStartDftOpt, utils.OptsRatesIntervalStart); err != nil {
 		return
 	}
@@ -216,12 +216,12 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 // V1CostForEvent will be called to calculate the cost for an event
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string
-	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.ProfileIDs,
+	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIDs,
 		config.RatesProfileIDsDftOpt, utils.OptsRatesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, rS.filterS, rS.cfg.RateSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIgnoreFilters,
 		config.RatesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
