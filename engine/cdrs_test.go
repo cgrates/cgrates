@@ -45,7 +45,7 @@ func TestCDRsNewCDRServer(t *testing.T) {
 		cdrDB:      sent,
 		dm:         dm,
 		guard:      guardian.Guardian,
-		filterS:    fltrs,
+		fltrS:      fltrs,
 		connMgr:    connMng,
 		storDBChan: storDBChan,
 	}

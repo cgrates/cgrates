@@ -224,7 +224,7 @@ func TestNewStatService(t *testing.T) {
 	fltrS := &FilterS{dm: dm, cfg: cfg}
 	sSrv := &StatService{
 		dm:               dm,
-		filterS:          fltrS,
+		fltrS:            fltrS,
 		cfg:              cfg,
 		storedStatQueues: make(utils.StringSet),
 	}
@@ -232,8 +232,8 @@ func TestNewStatService(t *testing.T) {
 	if !reflect.DeepEqual(sSrv.dm, result.dm) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.dm, result.dm)
 	}
-	if !reflect.DeepEqual(sSrv.filterS, result.filterS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.filterS, result.filterS)
+	if !reflect.DeepEqual(sSrv.fltrS, result.fltrS) {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.fltrS, result.fltrS)
 	}
 	if !reflect.DeepEqual(sSrv.cfg, result.cfg) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", sSrv.cfg, result.cfg)
@@ -936,7 +936,7 @@ func TestStatQueueReload(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := &StatService{
 		dm:          dm,
-		filterS:     filterS,
+		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cfg:         cfg,
@@ -954,7 +954,7 @@ func TestStatQueueStartLoop(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := &StatService{
 		dm:          dm,
-		filterS:     filterS,
+		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cfg:         cfg,

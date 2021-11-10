@@ -366,8 +366,8 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 	filterS *FilterS, connMgr *ConnManager) *ResourceService {
 	return &ResourceService{dm: dm,
 		storedResources: make(utils.StringSet),
-		cgrcfg:          cgrcfg,
-		filterS:         filterS,
+		cfg:             cgrcfg,
+		fltrS:           filterS,
 		loopStopped:     make(chan struct{}),
 		stopBackup:      make(chan struct{}),
 		connMgr:         connMgr,
@@ -378,10 +378,10 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 // ResourceService is the service handling resources
 type ResourceService struct {
 	dm              *DataManager // So we can load the data in cache and index it
-	filterS         *FilterS
+	fltrS           *FilterS
 	storedResources utils.StringSet // keep a record of resources which need saving, map[resID]bool
 	srMux           sync.RWMutex    // protects storedResources
-	cgrcfg          *config.CGRConfig
+	cfg             *config.CGRConfig
 	stopBackup      chan struct{} // control storing process
 	loopStopped     chan struct{}
 	connMgr         *ConnManager
@@ -410,7 +410,7 @@ func (rS *ResourceService) Shutdown(ctx *context.Context) {
 
 // backup will regularly store resources changed to dataDB
 func (rS *ResourceService) runBackup(ctx *context.Context) {
-	storeInterval := rS.cgrcfg.ResourceSCfg().StoreInterval
+	storeInterval := rS.cfg.ResourceSCfg().StoreInterval
 	if storeInterval <= 0 {
 		rS.loopStopped <- struct{}{}
 		return
@@ -487,17 +487,17 @@ func (rS *ResourceService) storeResource(ctx *context.Context, r *Resource) (err
 
 // storeMatchedResources will store the list of resources based on the StoreInterval
 func (rS *ResourceService) storeMatchedResources(ctx *context.Context, mtcRLs Resources) (err error) {
-	if rS.cgrcfg.ResourceSCfg().StoreInterval == 0 {
+	if rS.cfg.ResourceSCfg().StoreInterval == 0 {
 		return
 	}
-	if rS.cgrcfg.ResourceSCfg().StoreInterval > 0 {
+	if rS.cfg.ResourceSCfg().StoreInterval > 0 {
 		rS.srMux.Lock()
 		defer rS.srMux.Unlock()
 	}
 	for _, r := range mtcRLs {
 		if r.dirty != nil {
 			*r.dirty = true // mark it to be saved
-			if rS.cgrcfg.ResourceSCfg().StoreInterval > 0 {
+			if rS.cfg.ResourceSCfg().StoreInterval > 0 {
 				rS.storedResources.Add(r.TenantID())
 				continue
 			}
@@ -512,7 +512,7 @@ func (rS *ResourceService) storeMatchedResources(ctx *context.Context, mtcRLs Re
 
 // processThresholds will pass the event for resource to ThresholdS
 func (rS *ResourceService) processThresholds(ctx *context.Context, rs Resources, opts map[string]interface{}) (err error) {
-	if len(rS.cgrcfg.ResourceSCfg().ThresholdSConns) == 0 {
+	if len(rS.cfg.ResourceSCfg().ThresholdSConns) == 0 {
 		return
 	}
 	if opts == nil {
@@ -539,7 +539,7 @@ func (rS *ResourceService) processThresholds(ctx *context.Context, rs Resources,
 			APIOpts: opts,
 		}
 		var tIDs []string
-		if err := rS.connMgr.Call(ctx, rS.cgrcfg.ResourceSCfg().ThresholdSConns,
+		if err := rS.connMgr.Call(ctx, rS.cfg.ResourceSCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			(len(r.rPrf.ThresholdIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
@@ -578,12 +578,12 @@ func (rS *ResourceService) matchingResourcesForEvent(ctx *context.Context, tnt s
 
 	} else { // select the resourceIDs out of dataDB
 		rIDs, err = MatchingItemIDsForEvent(ctx, evNm,
-			rS.cgrcfg.ResourceSCfg().StringIndexedFields,
-			rS.cgrcfg.ResourceSCfg().PrefixIndexedFields,
-			rS.cgrcfg.ResourceSCfg().SuffixIndexedFields,
+			rS.cfg.ResourceSCfg().StringIndexedFields,
+			rS.cfg.ResourceSCfg().PrefixIndexedFields,
+			rS.cfg.ResourceSCfg().SuffixIndexedFields,
 			rS.dm, utils.CacheResourceFilterIndexes, tnt,
-			rS.cgrcfg.ResourceSCfg().IndexedSelects,
-			rS.cgrcfg.ResourceSCfg().NestedFields,
+			rS.cfg.ResourceSCfg().IndexedSelects,
+			rS.cfg.ResourceSCfg().NestedFields,
 		)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -611,7 +611,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ctx *context.Context, tnt s
 		}
 		rPrf.lock(lkPrflID)
 		var pass bool
-		if pass, err = rS.filterS.Pass(ctx, tnt, rPrf.FilterIDs,
+		if pass, err = rS.fltrS.Pass(ctx, tnt, rPrf.FilterIDs,
 			evNm); err != nil {
 			rPrf.unlock()
 			rs.unlock()
@@ -672,13 +672,13 @@ func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args *utils
 	}
 
 	var usageID string
-	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageID,
+	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
 		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
 	var ttl time.Duration
-	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
 		config.ResourcesUsageTTLDftOpt, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -689,7 +689,7 @@ func (rS *ResourceService) V1ResourcesForEvent(ctx *context.Context, args *utils
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = rS.cfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
@@ -730,19 +730,19 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *util
 	}
 
 	var usageID string
-	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageID,
+	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
 		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
 	var units float64
-	if units, err = GetFloat64Opts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.Units,
+	if units, err = GetFloat64Opts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.Units,
 		config.ResourcesUnitsDftOpt, utils.OptsResourcesUnits); err != nil {
 		return
 	}
 
 	var ttl time.Duration
-	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
 		config.ResourcesUsageTTLDftOpt, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -754,7 +754,7 @@ func (rS *ResourceService) V1AuthorizeResources(ctx *context.Context, args *util
 
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = rS.cfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
@@ -806,19 +806,19 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *utils
 	}
 
 	var usageID string
-	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageID,
+	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
 		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
 	var units float64
-	if units, err = GetFloat64Opts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.Units,
+	if units, err = GetFloat64Opts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.Units,
 		config.ResourcesUnitsDftOpt, utils.OptsResourcesUnits); err != nil {
 		return
 	}
 
 	var ttl time.Duration
-	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
 		config.ResourcesUsageTTLDftOpt, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -830,7 +830,7 @@ func (rS *ResourceService) V1AllocateResources(ctx *context.Context, args *utils
 
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = rS.cfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
@@ -886,13 +886,13 @@ func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *utils.
 	}
 
 	var usageID string
-	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageID,
+	if usageID, err = GetStringOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
 		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
 	var ttl time.Duration
-	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.filterS, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+	if ttl, err = GetDurationOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
 		config.ResourcesUsageTTLDftOpt, utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -904,7 +904,7 @@ func (rS *ResourceService) V1ReleaseResources(ctx *context.Context, args *utils.
 
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = rS.cfg.GeneralCfg().DefaultTenant
 	}
 
 	// RPC caching
@@ -956,7 +956,7 @@ func (rS *ResourceService) V1GetResource(ctx *context.Context, arg *utils.Tenant
 	}
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
-		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = rS.cfg.GeneralCfg().DefaultTenant
 	}
 
 	// make sure resource is locked at process level
@@ -984,7 +984,7 @@ func (rS *ResourceService) V1GetResourceWithConfig(ctx *context.Context, arg *ut
 	}
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
-		tnt = rS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = rS.cfg.GeneralCfg().DefaultTenant
 	}
 
 	// make sure resource is locked at process level

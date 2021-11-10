@@ -2283,7 +2283,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 	for _, res := range resourceTest {
 		dmRES.SetResource(context.TODO(), res)
 	}
-	resService.cgrcfg.ResourceSCfg().IndexedSelects = false
+	resService.cfg.ResourceSCfg().IndexedSelects = false
 	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
 		"TestResourceMatchWithIndexFalse1", &timeDurationExample)
 	if err != nil {
@@ -3060,7 +3060,7 @@ func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
 func TestResourcesProcessThresholdsNoConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	rS := &ResourceService{
-		cgrcfg: cfg,
+		cfg: cfg,
 	}
 	r := &Resource{
 		Tenant: "cgrates.org",
@@ -3112,7 +3112,7 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	rS := &ResourceService{
-		cgrcfg:  cfg,
+		cfg:     cfg,
 		connMgr: NewConnManager(cfg),
 	}
 	rS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
@@ -3183,7 +3183,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 	rS := &ResourceService{
-		cgrcfg:  cfg,
+		cfg:     cfg,
 		connMgr: NewConnManager(cfg),
 	}
 	rS.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
@@ -3213,7 +3213,7 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().ThresholdSConns = []string{"connID"}
 	rS := &ResourceService{
-		cgrcfg: cfg,
+		cfg: cfg,
 	}
 	r := &Resource{
 		Tenant: "cgrates.org",
@@ -6143,8 +6143,8 @@ func TestResourcesRunBackupStoreIntervalLessThanZero(t *testing.T) {
 	rS := &ResourceService{
 		dm:              dm,
 		storedResources: make(utils.StringSet),
-		cgrcfg:          cfg,
-		filterS:         filterS,
+		cfg:             cfg,
+		fltrS:           filterS,
 		loopStopped:     make(chan struct{}, 1),
 		stopBackup:      make(chan struct{}),
 	}
@@ -6167,8 +6167,8 @@ func TestResourcesRunBackupStop(t *testing.T) {
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
-		cgrcfg:      cfg,
-		filterS:     filterS,
+		cfg:         cfg,
+		fltrS:       filterS,
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
@@ -6214,10 +6214,10 @@ func TestResourcesReload(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	rS := &ResourceService{
 		dm:          dm,
-		filterS:     filterS,
+		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
+		cfg:         cfg,
 	}
 	rS.loopStopped <- struct{}{}
 	rS.Reload(context.Background())
@@ -6232,10 +6232,10 @@ func TestResourcesStartLoop(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	rS := &ResourceService{
 		dm:          dm,
-		filterS:     filterS,
+		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
-		cgrcfg:      cfg,
+		cfg:         cfg,
 	}
 
 	rS.StartLoop(context.Background())

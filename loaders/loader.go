@@ -59,7 +59,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            dm,
 		timezone:      timezone,
-		filterS:       filterS,
+		fltrS:         filterS,
 		connMgr:       connMgr,
 		cacheConns:    cacheConns,
 	}
@@ -105,7 +105,7 @@ type Loader struct {
 	bufLoaderData map[string][]LoaderData // cache of data read, indexed on tenantID
 	dm            *engine.DataManager
 	timezone      string
-	filterS       *engine.FilterS
+	fltrS         *engine.FilterS
 	connMgr       *engine.ConnManager
 	cacheConns    []string
 }
@@ -259,7 +259,7 @@ func (ldr *Loader) processContent(ctx *context.Context, loaderType, caching stri
 			}
 
 			if err := lData.UpdateFromCSV(ctx, fName, record,
-				ldr.dataTpls[loaderType], ldr.tenant, ldr.filterS); err != nil {
+				ldr.dataTpls[loaderType], ldr.tenant, ldr.fltrS); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> <%s> line: %d, error: %s",
 						utils.LoaderS, ldr.ldrID, lineNr, err.Error()))
@@ -703,7 +703,7 @@ func (ldr *Loader) removeContent(ctx *context.Context, loaderType, caching strin
 			}
 
 			if err := lData.UpdateFromCSV(ctx, fName, record,
-				ldr.dataTpls[loaderType], ldr.tenant, ldr.filterS); err != nil {
+				ldr.dataTpls[loaderType], ldr.tenant, ldr.fltrS); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> <%s> line: %d, error: %s",
 						utils.LoaderS, ldr.ldrID, lineNr, err.Error()))

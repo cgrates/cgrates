@@ -55,7 +55,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 	dmFilter := NewDataManager(dbm, cfg.CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmFilter,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dmFilter,
 			cfg: cfg,
 		},
@@ -129,7 +129,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 
 	cS := &ChargerService{
 		dm: dm,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dm,
 			cfg: cfg,
 		},
@@ -205,7 +205,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 
 	cS := &ChargerService{
 		dm: dm,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dm,
 			cfg: cfg,
 		},
@@ -298,7 +298,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 
 	cS := &ChargerService{
 		dm: dm,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dm,
 			cfg: cfg,
 		},
@@ -368,7 +368,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 
 	cS := &ChargerService{
 		dm: dm,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dm,
 			cfg: cfg,
 		},
@@ -444,7 +444,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 
 	cS := &ChargerService{
 		dm: dm,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dm,
 			cfg: cfg,
 		},
@@ -510,7 +510,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 
 	cS := &ChargerService{
 		dm: dm,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dm,
 			cfg: cfg,
 		},
@@ -562,7 +562,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 
 	cS := &ChargerService{
 		dm: dm,
-		filterS: &FilterS{
+		fltrS: &FilterS{
 			dm:  dm,
 			cfg: cfg,
 		},

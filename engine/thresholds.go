@@ -204,8 +204,8 @@ func (ts Thresholds) unlock() {
 func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS, connMgr *ConnManager) (tS *ThresholdService) {
 	return &ThresholdService{
 		dm:          dm,
-		cgrcfg:      cgrcfg,
-		filterS:     filterS,
+		cfg:         cgrcfg,
+		fltrS:       filterS,
 		connMgr:     connMgr,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}),
@@ -216,8 +216,8 @@ func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *Fil
 // ThresholdService manages Threshold execution and storing them to dataDB
 type ThresholdService struct {
 	dm          *DataManager
-	cgrcfg      *config.CGRConfig
-	filterS     *FilterS
+	cfg         *config.CGRConfig
+	fltrS       *FilterS
 	connMgr     *ConnManager
 	stopBackup  chan struct{}
 	loopStopped chan struct{}
@@ -248,7 +248,7 @@ func (tS *ThresholdService) Shutdown(ctx *context.Context) {
 
 // backup will regularly store thresholds changed to dataDB
 func (tS *ThresholdService) runBackup(ctx *context.Context) {
-	storeInterval := tS.cgrcfg.ThresholdSCfg().StoreInterval
+	storeInterval := tS.cfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
 		tS.loopStopped <- struct{}{}
 		return
@@ -330,12 +330,12 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 		utils.MetaOpts: args.APIOpts,
 	}
 	var thIDs []string
-	if thIDs, err = GetStringSliceOpts(ctx, tnt, args, tS.filterS, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIDs,
+	if thIDs, err = GetStringSliceOpts(ctx, tnt, args, tS.fltrS, tS.cfg.ThresholdSCfg().Opts.ProfileIDs,
 		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, args, tS.filterS, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, args, tS.fltrS, tS.cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
 		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -344,12 +344,12 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 	if len(tIDs) == 0 {
 		ignFilters = false
 		tIDs, err = MatchingItemIDsForEvent(ctx, evNm,
-			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
-			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
-			tS.cgrcfg.ThresholdSCfg().SuffixIndexedFields,
+			tS.cfg.ThresholdSCfg().StringIndexedFields,
+			tS.cfg.ThresholdSCfg().PrefixIndexedFields,
+			tS.cfg.ThresholdSCfg().SuffixIndexedFields,
 			tS.dm, utils.CacheThresholdFilterIndexes, tnt,
-			tS.cgrcfg.ThresholdSCfg().IndexedSelects,
-			tS.cgrcfg.ThresholdSCfg().NestedFields,
+			tS.cfg.ThresholdSCfg().IndexedSelects,
+			tS.cfg.ThresholdSCfg().NestedFields,
 		)
 		if err != nil {
 			return nil, err
@@ -373,7 +373,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 		tPrfl.lock(lkPrflID)
 		if !ignFilters {
 			var pass bool
-			if pass, err = tS.filterS.Pass(ctx, tnt, tPrfl.FilterIDs,
+			if pass, err = tS.fltrS.Pass(ctx, tnt, tPrfl.FilterIDs,
 				evNm); err != nil {
 				tPrfl.unlock()
 				ts.unlock()
@@ -431,7 +431,7 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 		thresholdsIDs = append(thresholdsIDs, t.ID)
 		t.Hits++
 		if err = processEventWithThreshold(ctx, tS.connMgr,
-			tS.cgrcfg.ThresholdSCfg().ActionSConns, args, t); err != nil {
+			tS.cfg.ThresholdSCfg().ActionSConns, args, t); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
 					t.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
@@ -460,7 +460,7 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 		// recurrent threshold
 		*t.dirty = true // mark it to be saved
-		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
+		if tS.cfg.ThresholdSCfg().StoreInterval == -1 {
 			tS.StoreThreshold(ctx, t)
 		} else {
 			tS.stMux.Lock()
@@ -487,7 +487,7 @@ func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *utils.CGR
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = tS.cfg.GeneralCfg().DefaultTenant
 	}
 	var ids []string
 	if ids, err = tS.processEvent(ctx, tnt, args); err != nil {
@@ -509,7 +509,7 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = tS.cfg.GeneralCfg().DefaultTenant
 	}
 	var ts Thresholds
 	if ts, err = tS.matchingThresholdsForEvent(ctx, tnt, args); err == nil {
@@ -522,7 +522,7 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *
 // V1GetThresholdIDs returns list of thresholdIDs configured for a tenant
 func (tS *ThresholdService) V1GetThresholdIDs(ctx *context.Context, tenant string, tIDs *[]string) (err error) {
 	if tenant == utils.EmptyString {
-		tenant = tS.cgrcfg.GeneralCfg().DefaultTenant
+		tenant = tS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.ThresholdPrefix + tenant + utils.ConcatenatedKeySep
 	keys, err := tS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
@@ -542,7 +542,7 @@ func (tS *ThresholdService) V1GetThreshold(ctx *context.Context, tntID *utils.Te
 	var thd *Threshold
 	tnt := tntID.Tenant
 	if tnt == utils.EmptyString {
-		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = tS.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure threshold is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
@@ -561,7 +561,7 @@ func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.
 	var thd *Threshold
 	tnt := tntID.Tenant
 	if tnt == utils.EmptyString {
-		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+		tnt = tS.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure threshold is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
@@ -575,7 +575,7 @@ func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.
 		thd.Hits = 0
 		thd.Snooze = time.Time{}
 		thd.dirty = utils.BoolPointer(true) // mark it to be saved
-		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
+		if tS.cfg.ThresholdSCfg().StoreInterval == -1 {
 			if err = tS.StoreThreshold(ctx, thd); err != nil {
 				return
 			}

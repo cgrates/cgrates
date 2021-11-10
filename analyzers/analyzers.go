@@ -51,13 +51,13 @@ type AnalyzerService struct {
 	db  bleve.Index
 	cfg *config.CGRConfig
 
-	filterS *engine.FilterS
+	fltrS *engine.FilterS
 }
 
 // SetFilterS will set the filterS used in APIs
 // this function is called before the API is registerd
 func (aS *AnalyzerService) SetFilterS(fS *engine.FilterS) {
-	aS.filterS = fS
+	aS.fltrS = fS
 }
 
 func (aS *AnalyzerService) initDB() (err error) {
@@ -179,7 +179,7 @@ func (aS *AnalyzerService) V1StringQuery(ctx *context.Context, args *QueryArgs, 
 			if err != nil {
 				return err
 			}
-			if pass, err := aS.filterS.Pass(ctx, aS.cfg.GeneralCfg().DefaultTenant,
+			if pass, err := aS.fltrS.Pass(ctx, aS.cfg.GeneralCfg().DefaultTenant,
 				args.ContentFilters, dp); err != nil {
 				return err
 			} else if !pass {

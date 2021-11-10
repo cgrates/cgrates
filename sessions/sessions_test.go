@@ -1872,7 +1872,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 
 func TestBiRPCv1STIRAuthenticate(t *testing.T) {
 	sS := new(SessionS)
-	sS.cgrCfg = config.CgrConfig()
+	sS.cfg = config.CgrConfig()
 	pubkeyBuf := []byte(`-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESt8sEh55Yc579vLHjFRWVQO27p4Y
 aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
@@ -1913,7 +1913,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 
 func TestBiRPCv1STIRIdentity(t *testing.T) {
 	sS := new(SessionS)
-	sS.cgrCfg = config.CgrConfig()
+	sS.cfg = config.CgrConfig()
 	payload := &utils.PASSporTPayload{
 		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},
 		IAT:    1587019822,

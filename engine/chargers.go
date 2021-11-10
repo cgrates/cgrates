@@ -28,14 +28,14 @@ import (
 
 func NewChargerService(dm *DataManager, filterS *FilterS,
 	cfg *config.CGRConfig, connMgr *ConnManager) *ChargerService {
-	return &ChargerService{dm: dm, filterS: filterS,
+	return &ChargerService{dm: dm, fltrS: filterS,
 		cfg: cfg, connMgr: connMgr}
 }
 
 // ChargerService is performing charging
 type ChargerService struct {
 	dm      *DataManager
-	filterS *FilterS
+	fltrS   *FilterS
 	cfg     *config.CGRConfig
 	connMgr *ConnManager
 }
@@ -72,7 +72,7 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(ctx *context.Context, 
 			}
 			return nil, err
 		}
-		if pass, err := cS.filterS.Pass(ctx, tnt, cP.FilterIDs,
+		if pass, err := cS.fltrS.Pass(ctx, tnt, cP.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {

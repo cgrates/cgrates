@@ -4604,7 +4604,7 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	testMk := &mkCallForces{}
 	clntConn := make(chan birpc.ClientConnector, 1)
 	clntConn <- testMk
-	sessions.cgrCfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	sessions.cfg.SessionSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, clntConn)
 	sessions.connMgr = connMngr
@@ -4634,7 +4634,7 @@ func TestSyncSessionsSync(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, nil, connMgr)
 	sessions.aSessions = map[string]*Session{}
-	sessions.cgrCfg.GeneralCfg().ReplyTimeout = 1
+	sessions.cfg.GeneralCfg().ReplyTimeout = 1
 	cacheS := engine.NewCacheS(cfg, nil, nil)
 	engine.Cache = cacheS
 	engine.SetConnManager(connMgr)

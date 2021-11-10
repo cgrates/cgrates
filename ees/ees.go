@@ -40,7 +40,7 @@ func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (eeS *EventExporterS) {
 	eeS = &EventExporterS{
 		cfg:     cfg,
-		filterS: filterS,
+		fltrS:   filterS,
 		connMgr: connMgr,
 		eesChs:  make(map[string]*ltcache.Cache),
 	}
@@ -51,7 +51,7 @@ func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
 // EventExporterS is managing the EventExporters
 type EventExporterS struct {
 	cfg     *config.CGRConfig
-	filterS *engine.FilterS
+	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 
 	eesChs map[string]*ltcache.Cache // map[eeType]*ltcache.Cache
@@ -145,7 +145,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGR
 
 		if len(eeCfg.Filters) != 0 {
 			tnt := utils.FirstNonEmpty(cgrEv.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
-			if pass, errPass := eeS.filterS.Pass(ctx, tnt,
+			if pass, errPass := eeS.fltrS.Pass(ctx, tnt,
 				eeCfg.Filters, cgrDp); errPass != nil {
 				return errPass
 			} else if !pass {
@@ -172,7 +172,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGR
 			}
 		}
 		if !isCached {
-			if ee, err = NewEventExporter(eeS.cfg.EEsCfg().Exporters[cfgIdx], eeS.cfg, eeS.filterS, eeS.connMgr); err != nil {
+			if ee, err = NewEventExporter(eeS.cfg.EEsCfg().Exporters[cfgIdx], eeS.cfg, eeS.fltrS, eeS.connMgr); err != nil {
 				return
 			}
 			if hasCache {
@@ -196,7 +196,7 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGR
 					utils.EEs, ee.Cfg().ID))
 		}
 		go func(evict, sync bool, ee EventExporter) {
-			if err := exportEventWithExporter(ctx, ee, cgrEv.CGREvent, evict, eeS.cfg, eeS.filterS); err != nil {
+			if err := exportEventWithExporter(ctx, ee, cgrEv.CGREvent, evict, eeS.cfg, eeS.fltrS); err != nil {
 				withErr = true
 			}
 			if sync {

@@ -105,7 +105,7 @@ func NewRouteService(dm *DataManager,
 	filterS *FilterS, cfg *config.CGRConfig, connMgr *ConnManager) (rS *RouteService) {
 	rS = &RouteService{
 		dm:      dm,
-		filterS: filterS,
+		fltrS:   filterS,
 		cfg:     cfg,
 		connMgr: connMgr,
 		sorter: RouteSortDispatcher{
@@ -124,7 +124,7 @@ func NewRouteService(dm *DataManager,
 // RouteService is the service computing route queries
 type RouteService struct {
 	dm      *DataManager
-	filterS *FilterS
+	fltrS   *FilterS
 	cfg     *config.CGRConfig
 	sorter  RouteSortDispatcher
 	connMgr *ConnManager
@@ -163,7 +163,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt
 			return
 		}
 		var pass bool
-		if pass, err = rpS.filterS.Pass(ctx, tnt, rPrf.FilterIDs,
+		if pass, err = rpS.fltrS.Pass(ctx, tnt, rPrf.FilterIDs,
 			evNm); err != nil {
 			return
 		} else if !pass {
@@ -171,7 +171,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt
 		}
 		var weight float64
 		if weight, err = WeightFromDynamics(ctx, rPrf.Weights,
-			rpS.filterS, ev.Tenant, evNm); err != nil {
+			rpS.fltrS, ev.Tenant, evNm); err != nil {
 			return
 		}
 		matchingRPrf = append(matchingRPrf, &RouteProfileWithWeight{RouteProfile: rPrf, Weight: weight})
@@ -270,7 +270,7 @@ func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *utils.CGREvent,
 		}
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
 		var context string
-		if context, err = GetStringOpts(ctx, tnt, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts.Context,
+		if context, err = GetStringOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.Context,
 			config.RoutesContextDftOpt, utils.OptsContext); err != nil {
 			return
 		}
@@ -341,7 +341,7 @@ func (rpS *RouteService) sortedRoutesForProfile(ctx *context.Context, tnt string
 	for _, route := range rPrfl.Routes {
 		var pass bool
 		var lazyCheckRules []*FilterRule
-		if pass, lazyCheckRules, err = rpS.filterS.LazyPass(ctx, tnt,
+		if pass, lazyCheckRules, err = rpS.fltrS.LazyPass(ctx, tnt,
 			route.FilterIDs, nM, lazyRouteFltrPrfxs); err != nil {
 			return
 		} else if !pass {
@@ -349,7 +349,7 @@ func (rpS *RouteService) sortedRoutesForProfile(ctx *context.Context, tnt string
 		}
 		var weight float64
 		if weight, err = WeightFromDynamics(ctx, route.Weights,
-			rpS.filterS, ev.Tenant, nM); err != nil {
+			rpS.fltrS, ev.Tenant, nM); err != nil {
 			return
 		}
 		if prev, has := passedRoutes[route.ID]; !has || prev.Weight < weight {
@@ -387,7 +387,7 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
 	var prfCountOpt int
-	if prfCountOpt, err = GetIntOpts(ctx, tnt, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts.ProfileCount,
+	if prfCountOpt, err = GetIntOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.ProfileCount,
 		config.RoutesProfileCountDftOpt, utils.OptsRoutesProfileCount); err != nil {
 		return
 	}
@@ -395,7 +395,7 @@ func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, 
 		prfCount = prfCountOpt
 	}
 	var extraOpts *optsGetRoutes
-	if extraOpts, err = newOptsGetRoutes(ctx, args, rpS.filterS, rpS.cfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
+	if extraOpts, err = newOptsGetRoutes(ctx, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
 		return
 	}
 
