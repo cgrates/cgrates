@@ -66,7 +66,7 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 	}
 
 	actCdrLG.config.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	expected = "Closed unspilit syntax "
+	expected = "Closed unspilit syntax"
 	if err := actCdrLG.execute(context.Background(), dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

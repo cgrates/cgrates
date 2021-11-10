@@ -832,6 +832,7 @@ const (
 	DNSTtl                = "Ttl"
 	DNSRdlength           = "Rdlength"
 	DNSData               = "Data"
+	MetaTntID             = "*tntID"
 )
 
 // Migrator Action
@@ -1442,10 +1443,9 @@ const (
 
 // LoaderS APIs
 const (
-	LoaderSv1       = "LoaderSv1"
-	LoaderSv1Load   = "LoaderSv1.Load"
-	LoaderSv1Remove = "LoaderSv1.Remove"
-	LoaderSv1Ping   = "LoaderSv1.Ping"
+	LoaderSv1     = "LoaderSv1"
+	LoaderSv1Run  = "LoaderSv1.Run"
+	LoaderSv1Ping = "LoaderSv1.Ping"
 )
 
 // CacheS APIs

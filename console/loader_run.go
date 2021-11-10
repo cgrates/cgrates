@@ -24,42 +24,42 @@ import (
 )
 
 func init() {
-	c := &CmdLoaderRemove{
-		name:      "loader_remove",
-		rpcMethod: utils.LoaderSv1Remove,
+	c := &CmdLoaderLoad{
+		name:      "loader_run",
+		rpcMethod: utils.LoaderSv1Run,
 		rpcParams: &loaders.ArgsProcessFolder{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdLoaderRemove struct {
+type CmdLoaderLoad struct {
 	name      string
 	rpcMethod string
 	rpcParams *loaders.ArgsProcessFolder
 	*CommandExecuter
 }
 
-func (self *CmdLoaderRemove) Name() string {
+func (self *CmdLoaderLoad) Name() string {
 	return self.name
 }
 
-func (self *CmdLoaderRemove) RpcMethod() string {
+func (self *CmdLoaderLoad) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdLoaderRemove) RpcParams(reset bool) interface{} {
+func (self *CmdLoaderLoad) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &loaders.ArgsProcessFolder{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdLoaderRemove) PostprocessRpcParams() error {
+func (self *CmdLoaderLoad) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdLoaderRemove) RpcResult() interface{} {
+func (self *CmdLoaderLoad) RpcResult() interface{} {
 	var s string
 	return &s
 }

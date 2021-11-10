@@ -23,358 +23,116 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc/context"
-
-	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
-func TestDataUpdateFromCSVOneFile(t *testing.T) {
-	attrSFlds := []*config.FCTemplate{
-		{
-			Path:      "Tenant",
-			Type:      utils.MetaComposed,
-			Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-			Mandatory: true},
-		{
-			Path:      "ID",
-			Type:      utils.MetaComposed,
-			Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-			Mandatory: true},
-		{
-			Path:  "Contexts",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-		{
-			Path:  "FilterIDs",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-		{
-			Path:  "Weight",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-		{
-			Path:  "Path",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-		{
-			Path:  "Initial",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-		{
-			Path:  "Substitute",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-		{
-			Path:  "Append",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-	}
-
-	rows := [][]string{
-		{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:Account:1007", "10", "Account", "*any", "1001", "false"},
-		{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true"},
-	}
-	lData := make(LoaderData)
-	if err := lData.UpdateFromCSV(context.Background(), "Attributes.csv", rows[0], attrSFlds,
-		"cgrates.org", nil); err != nil {
-		t.Error(err)
-	}
-	eLData := LoaderData{"Tenant": "cgrates.org",
-		"ID":         "ATTR_1",
-		"Contexts":   "*sessions;*cdrs",
-		"FilterIDs":  "*string:Account:1007",
-		"Weight":     "10",
-		"Path":       "Account",
-		"Initial":    "*any",
-		"Substitute": "1001",
-		"Append":     "false",
-	}
-	if !reflect.DeepEqual(eLData, lData) {
-		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
-	}
-	lData = make(LoaderData)
-	if err := lData.UpdateFromCSV(context.Background(), "Attributes.csv", rows[1], attrSFlds,
-		"cgrates.org", nil); err != nil {
-		t.Error(err)
-	}
-	eLData = LoaderData{"Tenant": "cgrates.org",
-		"ID":         "ATTR_1",
-		"Contexts":   "",
-		"FilterIDs":  "",
-		"Weight":     "",
-		"Path":       "Subject",
-		"Initial":    "*any",
-		"Substitute": "1001",
-		"Append":     "true",
-	}
-	if !reflect.DeepEqual(eLData, lData) {
-		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
+func TestTenantIDFromMap(t *testing.T) {
+	exp := utils.NewTenantID("cgrates.org:ATTR1")
+	r := TenantIDFromMap(utils.MapStorage{
+		utils.Tenant: exp.Tenant,
+		utils.ID:     exp.ID,
+	})
+	if !reflect.DeepEqual(r, exp) {
+		t.Errorf("Expected %+v, received %+q", exp, r)
 	}
 }
 
-func TestDataUpdateFromCSVOneFile2(t *testing.T) {
-	attrSFlds := []*config.FCTemplate{
-		{
-			Path:      "Tenant",
-			Type:      utils.MetaVariable,
-			Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-			Mandatory: true},
-		{
-			Path:      "ID",
-			Type:      utils.MetaVariable,
-			Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-			Mandatory: true},
-		{
-			Path:  "Contexts",
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-		{
-			Path:  "FilterIDs",
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-		{
-			Path:  "Weight",
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-		{
-			Path:  "Path",
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-		{
-			Path:  "Initial",
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-		{
-			Path:  "Substitute",
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-		{
-			Path:  "Append",
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
+func TestRateIDsFromMap(t *testing.T) {
+	expErrMsg := "cannot find RateIDs in map"
+	if _, err := RateIDsFromMap(utils.MapStorage{}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-
-	rows := [][]string{
-		{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:Account:1007", "10", "Account", "*any", "1001", "false"},
-		{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true"},
+	exp := []string{"RT1", "RT2"}
+	r, err := RateIDsFromMap(utils.MapStorage{
+		utils.RateIDs: "RT1;RT2",
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	lData := make(LoaderData)
-	if err := lData.UpdateFromCSV(context.Background(), "Attributes.csv", rows[0], attrSFlds,
-		"cgrates.org", nil); err != nil {
-		t.Error(err)
-	}
-	eLData := LoaderData{"Tenant": "cgrates.org",
-		"ID":         "ATTR_1",
-		"Contexts":   "*sessions;*cdrs",
-		"FilterIDs":  "*string:Account:1007",
-		"Weight":     "10",
-		"Path":       "Account",
-		"Initial":    "*any",
-		"Substitute": "1001",
-		"Append":     "false",
-	}
-	if !reflect.DeepEqual(eLData, lData) {
-		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
-	}
-	lData = make(LoaderData)
-	if err := lData.UpdateFromCSV(context.Background(), "Attributes.csv", rows[1], attrSFlds,
-		"cgrates.org", nil); err != nil {
-		t.Error(err)
-	}
-	eLData = LoaderData{"Tenant": "cgrates.org",
-		"ID":         "ATTR_1",
-		"Contexts":   "",
-		"FilterIDs":  "",
-		"Weight":     "",
-		"Path":       "Subject",
-		"Initial":    "*any",
-		"Substitute": "1001",
-		"Append":     "true",
-	}
-	if !reflect.DeepEqual(eLData, lData) {
-		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
+	if !reflect.DeepEqual(r, exp) {
+		t.Errorf("Expected %+v, received %+q", exp, r)
 	}
 }
 
-func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
-	attrSFlds := []*config.FCTemplate{
-		{
-			Path:      "Tenant",
-			Type:      utils.MetaString,
-			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-			Mandatory: true},
-		{
-			Path:      "ID",
-			Type:      utils.MetaComposed,
-			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
-			Mandatory: true},
-		{
-			Path:  "Contexts",
-			Type:  utils.MetaString,
-			Value: config.NewRSRParsersMustCompile("*any", utils.InfieldSep)},
-		{
-			Path:  "Path",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).5", utils.InfieldSep)},
-		{
-			Path:  "Initial",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
-		{
-			Path:  "Substitute",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
-		{
-			Path:  "Append",
-			Type:  utils.MetaString,
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
-		{
-			Path:  "Weight",
-			Type:  utils.MetaString,
-			Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
-	}
-
-	loadRun1 := map[string][]string{
-		"File1.csv": {"ignored", "ignored", "ignored", "ignored", "ignored", "Subject", "*any", "1001", "ignored", "ignored"},
-		"File2.csv": {"ignored", "ATTR_1"},
-	}
-	lData := make(LoaderData)
-	for fName, record := range loadRun1 {
-		if err := lData.UpdateFromCSV(context.Background(), fName, record, attrSFlds,
-			"cgrates.org", nil); err != nil {
-			t.Error(err)
-		}
-	}
-
-	eLData := LoaderData{"Tenant": "cgrates.org",
-		"ID":         "ATTR_1",
-		"Contexts":   "*any",
-		"Path":       "Subject",
-		"Initial":    "*any",
-		"Substitute": "1001",
-		"Append":     "true",
-		"Weight":     "10",
-	}
-	if !reflect.DeepEqual(eLData, lData) {
-		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
-	}
-}
-
-func TestGetRateIDsLoaderData(t *testing.T) {
-	ldrData := LoaderData{
-		"File1.csv": []string{"Subject", "*any", "1001"},
-	}
-	expected := "cannot find RateIDs in <map[File1.csv:[Subject *any 1001]]>"
-	if _, err := ldrData.GetRateIDs(); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-// func TestUpdateFromCsvParseValueError(t *testing.T) {
-// 	ldrData := LoaderData{
-// 		"File1.csv": []string{"Subject", "*any", "1001"},
-// 	}
-// 	tnt := config.NewRSRParsersMustCompile("asd{*duration_seconds}", utils.InfieldSep)
-// 	// fmt.Println(utils.IfaceAsString(tnt))
-// 	expected := "time: invalid duration \"asd\""
-// 	if err := ldrData.UpdateFromCSV(context.Background(), "File1.csv", nil, nil, utils.IfaceAsString(tnt), nil); err == nil || err.Error() != expected {
-// 		t.Errorf("Expected %+v, received %+v", expected, err)
-// 	}
-// }
-
-func TestUpdateFromCsvWithFiltersError(t *testing.T) {
-	attrSFlds := []*config.FCTemplate{
-		{
-			Path:      "Tenant",
-			Type:      utils.MetaString,
-			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-			Filters:   []string{"*string:~*req.Account:10"},
-			Mandatory: true},
-		{
-			Path:      "ID",
-			Type:      utils.MetaComposed,
-			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
-			Filters:   []string{"*string:~*req.Account:10"},
-			Mandatory: true},
-	}
-	loadRunStr := map[string][]string{
-		"File1.csv": {"cgrates.org", "TEST_1"},
-	}
-	lData := make(LoaderData)
-
+func TestNewRecord(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filterS := engine.NewFilterS(cfg, nil, dm)
-
-	for fName, record := range loadRunStr {
-		expected := "Ignoring record: [\"cgrates.org\" \"TEST_1\"] with error : strconv.Atoi: parsing \"Account\": invalid syntax"
-		if err := lData.UpdateFromCSV(context.Background(), fName, record, attrSFlds,
-			"cgrates.org", filterS); err == nil || err.Error() != expected {
-			t.Errorf("Expected %+v, received %+v", expected, err)
-		}
+	fs := engine.NewFilterS(cfg, nil, nil)
+	expErrMsg := "inline parse error for string: <*string>"
+	if _, err := newRecord(context.Background(), utils.MapStorage{},
+		[]*config.FCTemplate{
+			{Filters: []string{"*exists:~*req.NoField:"}},
+			{Filters: []string{"*string"}},
+		},
+		"cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
 	}
+	r, err := newRecord(context.Background(), utils.MapStorage{}, []*config.FCTemplate{}, "cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	exp := utils.MapStorage{}
+	if !reflect.DeepEqual(r, exp) {
+		t.Errorf("Expected %+v, received %+q", exp, r)
+	}
+
 }
 
-func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
-	attrSFlds := []*config.FCTemplate{
-		{
-			Path:      "Tenant",
-			Type:      utils.MetaString,
-			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-			Filters:   []string{`*string:~*req.2:10`},
-			Mandatory: true},
-		{
-			Path:      "ID",
-			Type:      utils.MetaComposed,
-			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
-			Filters:   []string{`*string:~*req.2:10`},
-			Mandatory: true},
-	}
-	loadRunStr := map[string][]string{
-		"File1.csv": {"Subject", "*any", "1001"},
-	}
-	lData := make(LoaderData)
-
+func TestNewRecordErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	filterS := engine.NewFilterS(cfg, nil, dm)
+	fs := engine.NewFilterS(cfg, nil, nil)
+	expErrMsg := "unsupported type: <notSupported>"
+	if _, err := newRecord(context.Background(), utils.MapStorage{},
+		[]*config.FCTemplate{
+			{Type: "notSupported"},
+		},
+		"cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
+	}
 
-	for fName, record := range loadRunStr {
-		if err := lData.UpdateFromCSV(context.Background(), fName, record, attrSFlds,
-			"cgrates.org", filterS); err != nil {
-			t.Error(err)
-		}
+	r := &record{
+		data: utils.MapStorage{
+			"Tenant": []string{},
+		},
+		req:   utils.MapStorage{},
+		cfg:   cfg.GetDataProvider(),
+		cache: ltcache.NewCache(-1, 0, false, nil),
+	}
+	if exp, rply := "{}", r.String(); exp != rply {
+		t.Errorf("Expected %q, received %q", exp, rply)
+	}
+	fc := []*config.FCTemplate{
+		{Type: utils.MetaComposed, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*cfg.general.node_id", ";")},
+		{Type: utils.MetaComposed, Path: "Tenant.NewID", Value: config.NewRSRParsersMustCompile("10", ";")},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	if err := r.parseTemplates(context.Background(), fc,
+		"cgrates.org", fs, 0, "", ";"); err != utils.ErrWrongPath {
+		t.Errorf("Expeceted: %q, received: %v", utils.ErrWrongPath, err)
 	}
 }
 
-func TestLoadersFieldAsInterfaceError(t *testing.T) {
-	loadRun1 := map[string][]string{
-		"File1.csv": {"ignored", "ignored", "ignored", "ignored", "ignored", "Subject", "*any", "1001", "ignored", "ignored"},
+func TestNewRecordWithCahe(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fs := engine.NewFilterS(cfg, nil, nil)
+	fc := []*config.FCTemplate{
+		{Type: utils.MetaVariable, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*req.0", ";")},
+		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
+		{Type: utils.MetaComposed, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaVariable, Path: "Value", Value: config.NewRSRParsersMustCompile("~*uch.*tntID.Value", ";")},
 	}
-	csvProv := newCsvProvider(loadRun1["File1.csv"], "File1.csv")
-
-	csvString := csvProv.String()
-	expected := "{}"
-	if csvString != expected {
-		t.Errorf("Expected %+v, received %+v", expected, csvString)
+	for _, f := range fc {
+		f.ComputePath()
 	}
-
-	expected = "invalid prefix for : [File2.csv]"
-	if _, err := csvProv.FieldAsInterface([]string{"File2.csv"}); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-
-	expected = "filter rule <[*file() ]> needs to end in )"
-	if _, err := csvProv.FieldAsInterface([]string{"*file()", ""}); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+q", expected, err)
-	}
-
-	expected = "filter rule <[*file() File1.csv]> needs to end in )"
-	if _, err := csvProv.FieldAsInterface([]string{"*file()", "File1.csv"}); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+q", expected, err)
+	exp := utils.MapStorage{"ID": "Attr1", "Tenant": "cgrates.org", "Value": "0"}
+	if r, err := newRecord(context.Background(), config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil),
+		fc, "cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(r, exp) {
+		t.Errorf("Expected %+v, received %+q", exp, r)
 	}
 }

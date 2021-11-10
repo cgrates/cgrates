@@ -486,10 +486,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("ChargerProfiles:")
 	}
 	for _, tpTH := range tpr.chargerProfiles {
-		var th *ChargerProfile
-		if th, err = APItoChargerProfile(tpTH, tpr.timezone); err != nil {
-			return
-		}
+		th := APItoChargerProfile(tpTH, tpr.timezone)
 		if err = tpr.dm.SetChargerProfile(context.TODO(), th, true); err != nil {
 			return
 		}
@@ -504,10 +501,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("DispatcherProfiles:")
 	}
 	for _, tpTH := range tpr.dispatcherProfiles {
-		var th *DispatcherProfile
-		if th, err = APItoDispatcherProfile(tpTH, tpr.timezone); err != nil {
-			return
-		}
+		th := APItoDispatcherProfile(tpTH, tpr.timezone)
 		if err = tpr.dm.SetDispatcherProfile(context.TODO(), th, true); err != nil {
 			return
 		}

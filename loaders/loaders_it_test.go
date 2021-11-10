@@ -21,21 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package loaders
 
-import (
-	"encoding/csv"
-	"io"
-	"os"
-	"path"
-	"reflect"
-	"strings"
-	"testing"
-
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
-
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+/*
 
 var (
 	sTestItLoaders = []func(t *testing.T){
@@ -651,3 +637,4 @@ func testLoaderServiceReload(t *testing.T) {
 		t.Error("Expected to be populated")
 	}
 }
+*/

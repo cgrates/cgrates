@@ -324,10 +324,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Errorf("Failed GetChargerProfile, tenant: %s, id: %s,  error: %s ", cpp.Tenant, cpp.ID, err.Error())
 		}
-		cp, err := APItoChargerProfile(cpp, "UTC")
-		if err != nil {
-			t.Error(err)
-		}
+		cp := APItoChargerProfile(cpp, "UTC")
 		if !reflect.DeepEqual(cp, rcv) {
 			t.Errorf("Expecting: %v, received: %v", cp, rcv)
 		}
@@ -338,10 +335,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Errorf("Failed GetDispatcherProfile, tenant: %s, id: %s,  error: %s ", dpp.Tenant, dpp.ID, err.Error())
 		}
-		dp, err := APItoDispatcherProfile(dpp, "UTC")
-		if err != nil {
-			t.Error(err)
-		}
+		dp := APItoDispatcherProfile(dpp, "UTC")
 		if !reflect.DeepEqual(dp, rcv) {
 			t.Errorf("Expecting: %v, received: %v", dp, rcv)
 		}

@@ -19,23 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
-	"encoding/csv"
-	"io"
+	"bytes"
+	"log"
+	"os"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/rpcclient"
-
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
+/*
 var (
 	loaderDB = engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
 )
@@ -5193,3 +5190,458 @@ func TestLockFolderEmptyString(t *testing.T) {
 // 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.lockFilepath)
 // 	}
 // }
+*/
+
+func TestRemoveFromDB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	for _, lType := range []string{utils.MetaAttributes, utils.MetaResources, utils.MetaFilters, utils.MetaStats,
+		utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
+		utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccounts} {
+		if err := removeFromDB(context.Background(), dm, lType, "cgrates.org", "ID", true, false, utils.MapStorage{}); err != utils.ErrNotFound {
+			t.Error(err)
+		}
+	}
+	expErrMsg := "cannot find RateIDs in map"
+	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, "cgrates.org", "ID", true, true, utils.MapStorage{}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, "cgrates.org", "ID", true, true, utils.MapStorage{utils.RateIDs: "RT1"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := removeFromDB(context.Background(), dm, utils.EmptyString, "cgrates.org", "ID", true, false, utils.MapStorage{}); err != nil {
+		t.Error(err)
+	}
+}
+
+func testDryRunWithData(lType string, data []utils.MapStorage) (string, error) {
+	buf := bytes.NewBuffer([]byte{})
+	log.SetOutput(buf)
+	lgr := utils.Logger
+	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	utils.Logger.SetLogLevel(7)
+
+	err := dryRun(context.Background(), lType, "", "test", data)
+	return buf.String(), err
+}
+
+func testDryRun(t *testing.T, lType string) string {
+	buf, err := testDryRunWithData(lType, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return buf
+}
+
+func TestDryRun(t *testing.T) {
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Attributes\":[],\"Blocker\":false,\"Weight\":0}",
+		testDryRun(t, utils.MetaAttributes); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ResourceProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"UsageTTL\":0,\"Limit\":0,\"AllocationMessage\":\"\",\"Blocker\":false,\"Stored\":false,\"Weight\":0,\"ThresholdIDs\":[]}",
+		testDryRun(t, utils.MetaResources); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Filter: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"Rules\":[]}",
+		testDryRun(t, utils.MetaFilters); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: StatsQueueProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"QueueLength\":0,\"TTL\":0,\"MinItems\":0,\"Metrics\":[],\"Stored\":false,\"Blocker\":false,\"Weight\":0,\"ThresholdIDs\":[]}",
+		testDryRun(t, utils.MetaStats); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ThresholdProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"MaxHits\":0,\"MinHits\":0,\"MinSleep\":0,\"Blocker\":false,\"Weight\":0,\"ActionProfileIDs\":[],\"Async\":false}",
+		testDryRun(t, utils.MetaThresholds); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RouteProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Sorting\":\"\",\"SortingParameters\":[],\"Routes\":[],\"Weights\":null}",
+		testDryRun(t, utils.MetaRoutes); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ChargerProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"RunID\":\"\",\"AttributeIDs\":[],\"Weight\":0}",
+		testDryRun(t, utils.MetaChargers); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Strategy\":\"\",\"StrategyParams\":{},\"Weight\":0,\"Hosts\":[]}",
+		testDryRun(t, utils.MetaDispatchers); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RateProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Weights\":null,\"MinCost\":0,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"Rates\":{}}",
+		testDryRun(t, utils.MetaRateProfiles); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ActionProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Weight\":0,\"Schedule\":\"\",\"Targets\":{},\"Actions\":[]}",
+		testDryRun(t, utils.MetaActionProfiles); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Accounts: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Weights\":null,\"Opts\":null,\"Balances\":{},\"ThresholdIDs\":[]}",
+		testDryRun(t, utils.MetaAccounts); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+
+	rplyLog, err := testDryRunWithData(utils.MetaDispatcherHosts, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.Address: "127.0.0.1"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if expLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherHost: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"Address\":\"127.0.0.1\",\"Transport\":\"*json\",\"ConnectAttempts\":0,\"Reconnects\":0,\"ConnectTimeout\":0,\"ReplyTimeout\":0,\"TLS\":false,\"ClientKey\":\"\",\"ClientCertificate\":\"\",\"CaCertificate\":\"\"}"; !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+}
+
+func TestDryRunWithUpdateStructErrors(t *testing.T) {
+	expErrMsg := `strconv.ParseFloat: parsing "notWeight": invalid syntax`
+	if _, err := testDryRunWithData(utils.MetaAttributes, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if _, err := testDryRunWithData(utils.MetaResources, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaStats, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaThresholds, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if _, err := testDryRunWithData(utils.MetaChargers, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaDispatchers, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if _, err := testDryRunWithData(utils.MetaActionProfiles, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `cannot update unsupported struct field: 0`
+	if _, err := testDryRunWithData(utils.MetaFilters, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaRoutes, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaRateProfiles, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaAccounts, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}
+
+func TestDryRunWithModelsErrors(t *testing.T) {
+	expErrMsg := `Closed unspilit syntax`
+	if _, err := testDryRunWithData(utils.MetaAttributes, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Value": "`", "Path": "Test"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `strconv.ParseFloat: parsing "float": invalid syntax`
+	if _, err := testDryRunWithData(utils.MetaResources, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Limit": "float"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `emtpy RSRParser in rule: <>`
+	if _, err := testDryRunWithData(utils.MetaFilters, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Values": "`;", "Type": utils.MetaRSR}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `time: invalid duration "float"`
+	if _, err := testDryRunWithData(utils.MetaStats, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "TTL": "float"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaThresholds, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "MinSleep": "float"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	expErrMsg = `invalid Weight <float> in string: <;float>`
+	if _, err := testDryRunWithData(utils.MetaRoutes, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaRateProfiles, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaAccounts, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `time: invalid duration "float"`
+	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if _, err := testDryRunWithData(utils.MetaActionProfiles, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "ActionTTL": "float", "ActionID": "ACCT"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	expErrMsg = `invalid key: <1> for BalanceCostIncrements`
+	if _, err := testDryRunWithData(utils.MetaAccounts, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "BalanceCostIncrements": "1", "BalanceID": "BalID"}}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}
+
+func TestSetToDBWithUpdateStructErrors(t *testing.T) {
+	expErrMsg := `strconv.ParseFloat: parsing "notWeight": invalid syntax`
+	if err := setToDB(context.Background(), nil, utils.MetaAttributes, "", []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaResources, "", []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaStats, "", []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaThresholds, "", []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaChargers, "", []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, "", []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, "", []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `cannot update unsupported struct field: 0`
+	if err := setToDB(context.Background(), nil, utils.MetaFilters, "", []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaRoutes, "", []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, "", []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, "", []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, "", []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}
+
+func TestSetToDBWithModelsErrors(t *testing.T) {
+	expErrMsg := `Closed unspilit syntax`
+	if err := setToDB(context.Background(), nil, utils.MetaAttributes, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Value": "`", "Path": "Test"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `strconv.ParseFloat: parsing "float": invalid syntax`
+	if err := setToDB(context.Background(), nil, utils.MetaResources, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Limit": "float"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `emtpy RSRParser in rule: <>`
+	if err := setToDB(context.Background(), nil, utils.MetaFilters, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Values": "`;", "Type": utils.MetaRSR}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `time: invalid duration "float"`
+	if err := setToDB(context.Background(), nil, utils.MetaStats, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "TTL": "float"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaThresholds, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "MinSleep": "float"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	expErrMsg = `invalid Weight <float> in string: <;float>`
+	if err := setToDB(context.Background(), nil, utils.MetaRoutes, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `time: invalid duration "float"`
+	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "ActionTTL": "float", "ActionID": "ACCT"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	expErrMsg = `invalid key: <1> for BalanceCostIncrements`
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "BalanceCostIncrements": "1", "BalanceID": "BalID"}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}
+
+func TestSetToDBWithDBError(t *testing.T) {
+	if err := setToDB(context.Background(), nil, utils.MetaAttributes, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaResources, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaStats, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaThresholds, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaChargers, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaFilters, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaRoutes, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.RateIDs: "RT1;RT2"}}, true, true); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+}
+
+func TestSetToDB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	if err := setToDB(context.Background(), dm, utils.MetaAttributes, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v1, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaResources, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v2 := &engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ThresholdIDs: []string{}}
+	if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v2, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v2), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaStats, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v3 := &engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ThresholdIDs: []string{}, Metrics: []*engine.MetricWithFilters{}}
+	if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v3, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v3), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaThresholds, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v4 := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ActionProfileIDs: []string{}}
+	if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v4, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v4), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaChargers, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v5 := &engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, AttributeIDs: []string{}}
+	if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v5, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v5), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaDispatchers, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, StrategyParams: make(map[string]interface{}), Hosts: engine.DispatcherHostProfiles{}}
+	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v6, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v6), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaActionProfiles, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v7 := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Targets: map[string]utils.StringSet{}, Actions: []*engine.APAction{}}
+	if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v7, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v7), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaFilters, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v8 := &engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: []*engine.FilterRule{}}
+	if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v8, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v8), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaRoutes, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v9 := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, SortingParameters: []string{}, Routes: []*engine.Route{}}
+	if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v9, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v9), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaDispatcherHosts, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v10 := &engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}
+	if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v10, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v10), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v11 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
+	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v11, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v11), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaAccounts, "", []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+		t.Fatal(err)
+	}
+	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Balances: map[string]*utils.Balance{}, ThresholdIDs: []string{}}
+	if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v12, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v12), utils.ToJSON(prf))
+	}
+}

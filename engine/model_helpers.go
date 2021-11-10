@@ -1322,7 +1322,7 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 	return
 }
 
-func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *ChargerProfile, err error) {
+func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *ChargerProfile) {
 	cpp = &ChargerProfile{
 		Tenant:       tpCPP.Tenant,
 		ID:           tpCPP.ID,
@@ -1337,7 +1337,7 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 	for i, attribute := range tpCPP.AttributeIDs {
 		cpp.AttributeIDs[i] = attribute
 	}
-	return cpp, nil
+	return cpp
 }
 
 func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPChargerProfile) {
@@ -1519,7 +1519,7 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 	return
 }
 
-func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (dpp *DispatcherProfile, err error) {
+func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (dpp *DispatcherProfile) {
 	dpp = &DispatcherProfile{
 		Tenant:         tpDPP.Tenant,
 		ID:             tpDPP.ID,
@@ -1560,7 +1560,7 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 
 		}
 	}
-	return dpp, nil
+	return dpp
 }
 
 func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherProfile) {

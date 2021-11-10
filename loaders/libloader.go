@@ -39,31 +39,8 @@ func newRecord(ctx *context.Context, req utils.DataProvider, tmpls []*config.FCT
 		cfg:   cfg.GetDataProvider(),
 		cache: cache,
 	}
-	for _, fld := range tmpls {
-		// Make sure filters are matching
-		if len(fld.Filters) != 0 {
-			if pass, err := filterS.Pass(ctx, tnt,
-				fld.Filters, r); err != nil {
-				return nil, err
-			} else if !pass {
-				continue // Not passes filters, ignore this CDR
-			}
-		}
-
-		var out interface{}
-		if out, err = engine.ParseAttribute(r, utils.FirstNonEmpty(fld.Type, utils.MetaVariable), utils.DynamicDataPrefix+fld.Path, fld.Value,
-			cfg.GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(fld.Timezone, cfg.GeneralCfg().DefaultTimezone), fld.Layout, cfg.GeneralCfg().RSRSep); err != nil {
-			return
-		}
-		ps := fld.GetPathSlice()
-		if fld.Type == utils.MetaComposed {
-			if val, err := r.FieldAsString(ps); err == nil {
-				out = utils.IfaceAsString(out) + val
-			}
-		}
-		if err = r.Set(ps, out); err != nil {
-			return
-		}
+	if err = r.parseTemplates(ctx, tmpls, tnt, filterS, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone, cfg.GeneralCfg().RSRSep); err != nil {
+		return
 	}
 	return r.data, nil
 }
@@ -76,16 +53,46 @@ type record struct {
 	tntID *string
 }
 
+func (r *record) parseTemplates(ctx *context.Context, tmpls []*config.FCTemplate, tnt string, filterS *engine.FilterS, rndDec int, dftTmz, rsrSep string) (err error) {
+	for _, fld := range tmpls {
+		// Make sure filters are matching
+		if len(fld.Filters) != 0 {
+			if pass, err := filterS.Pass(ctx, tnt,
+				fld.Filters, r); err != nil {
+				return err
+			} else if !pass {
+				continue // Not passes filters, ignore this CDR
+			}
+		}
+		var out interface{}
+		if out, err = engine.ParseAttribute(r, utils.FirstNonEmpty(fld.Type, utils.MetaVariable), utils.DynamicDataPrefix+fld.Path, fld.Value,
+			rndDec, utils.FirstNonEmpty(fld.Timezone, dftTmz), fld.Layout, rsrSep); err != nil {
+			return
+		}
+		ps := fld.GetPathSlice()
+		if fld.Type == utils.MetaComposed {
+			if val, err := r.FieldAsString(ps); err == nil {
+				out = utils.IfaceAsString(out) + val
+			}
+		}
+		if err = r.Set(ps, out); err != nil {
+			return
+		}
+	}
+	return
+}
+
 func (r *record) String() string { return r.req.String() }
 
 func (r *record) FieldAsInterface(path []string) (val interface{}, err error) {
 	switch path[0] {
-	case utils.MetaCache:
-		if path[1] == "*id" {
-			path[1] = r.tenatID()
+	case utils.MetaUCH:
+		cp := strings.Join(path[1:], utils.NestingSep)
+		if path[1] == utils.MetaTntID {
+			cp = r.tenatID() + strings.TrimPrefix(cp, utils.MetaTntID)
 		}
 		var ok bool
-		if val, ok = r.cache.Get(strings.Join(path[1:], utils.NestingSep)); !ok || val == nil {
+		if val, ok = r.cache.Get(cp); !ok || val == nil {
 			err = utils.ErrNotFound
 		}
 		return
@@ -108,11 +115,12 @@ func (r *record) FieldAsString(path []string) (str string, err error) {
 
 func (r *record) Set(path []string, val interface{}) (err error) {
 	switch path[0] {
-	case utils.MetaCache:
-		if path[1] == "*id" {
-			path[1] = r.tenatID()
+	case utils.MetaUCH:
+		cp := strings.Join(path[1:], utils.NestingSep)
+		if path[1] == utils.MetaTntID {
+			cp = r.tenatID() + strings.TrimPrefix(cp, utils.MetaTntID)
 		}
-		r.cache.Set(strings.Join(path[1:], utils.NestingSep), val, nil)
+		r.cache.Set(cp, val, nil)
 		return
 	default:
 		return r.data.Set(path, val)
