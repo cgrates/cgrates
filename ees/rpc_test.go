@@ -21,6 +21,7 @@ package ees
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -224,5 +225,93 @@ func TestRPCPrepareMap(t *testing.T) {
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestRPCPrepareOrderMap(t *testing.T) {
+	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().GetDefaultExporter()
+	dc := &utils.SafeMapStorage{
+		MapStorage: utils.MapStorage{
+			"time":         "now",
+			"just_a_field": "just_a_value",
+		},
+	}
+	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
+	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
+	if err != nil {
+		t.Error(err)
+	}
+
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+
+	rcv, err := rpcEe.PrepareOrderMap(onm)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exp := map[string]interface{}{
+		utils.MetaReq + "." + utils.MetaTenant: val.Data,
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestRPCParseOpts(t *testing.T) {
+	eeSCfg := &config.EventExporterCfg{
+		Opts: &config.EventExporterOpts{
+			RPCCodec:        utils.StringPointer(utils.MetaJSON),
+			ServiceMethod:   utils.StringPointer(utils.APIerSv1ExportCDRs),
+			KeyPath:         utils.StringPointer("/key/path"),
+			CertPath:        utils.StringPointer("/cert/path"),
+			CAPath:          utils.StringPointer("/ca/path"),
+			TLS:             utils.BoolPointer(true),
+			ConnIDs:         &[]string{"*internal", "*birpc"},
+			RPCConnTimeout:  utils.DurationPointer(2 * time.Second),
+			RPCReplyTimeout: utils.DurationPointer(3 * time.Second),
+		},
+	}
+	dc := &utils.SafeMapStorage{
+		MapStorage: utils.MapStorage{
+			"time":         "now",
+			"just_a_field": "just_a_value",
+		},
+	}
+	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
+	rpcEe, err := NewRpcEE(eeSCfg, dc, connMgr)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exp := &RPCee{
+		cfg:           eeSCfg,
+		dc:            dc,
+		connMgr:       connMgr,
+		codec:         utils.MetaJSON,
+		serviceMethod: utils.APIerSv1ExportCDRs,
+		keyPath:       "/key/path",
+		certPath:      "/cert/path",
+		caPath:        "/ca/path",
+		tls:           true,
+		connIDs:       []string{"*internal", "*birpc"},
+		connTimeout:   2 * time.Second,
+		replyTimeout:  3 * time.Second,
+	}
+
+	if err := rpcEe.parseOpts(); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(rpcEe, exp) {
+		t.Errorf("Expected %+v \n but received \n %+v", exp, rpcEe)
 	}
 }
