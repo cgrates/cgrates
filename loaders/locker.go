@@ -21,8 +21,6 @@ package loaders
 import (
 	"io"
 	"os"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 type Locker interface {
@@ -33,7 +31,7 @@ type Locker interface {
 }
 
 func newLocker(path string) Locker {
-	if path != utils.EmptyString {
+	if len(path) != 0 {
 		return folderLock(path)
 	}
 	return new(nopLock)

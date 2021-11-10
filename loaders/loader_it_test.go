@@ -20,27 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package loaders
 
-import (
-	"encoding/csv"
-	"fmt"
-	"sort"
-
-	"io"
-	"os"
-	"path"
-	"reflect"
-	"strings"
-	"testing"
-	"time"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
-)
-
+/*
 var (
 	loaderCfgPath    string
 	loaderCfgDIR     string //run tests for specific configuration
@@ -1163,3 +1143,4 @@ func testNewIsFolderUnlock(t *testing.T) {
 		t.Error("Expected the file to be unlocked")
 	}
 }
+*/

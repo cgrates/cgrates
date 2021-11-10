@@ -44,14 +44,14 @@ func NewCSVReader(csvType, dPath, fn string, sep rune, nrFlds int) (CSVReader, e
 	case utils.MetaFileCSV:
 		return NewFileCSV(path.Join(dPath, fn), sep, nrFlds)
 	case utils.MetaUrl:
-		return NewURLCSV(path.Join(dPath, fn), sep, nrFlds)
+		return NewURLCSV(strings.TrimSuffix(dPath, utils.Slash)+utils.Slash+fn, sep, nrFlds)
 	case utils.MetaGoogleAPI: // TODO: Implement *gapi
+		return nil, nil
 	case utils.MetaString:
 		return NewStringCSV(fn, sep, nrFlds)
 	default:
 		return nil, fmt.Errorf("unsupported CSVReader type: <%q>", csvType)
 	}
-	return nil, nil
 }
 
 func NewCSVFile(rdr io.ReadCloser, path string, sep rune, nrFlds int) CSVReader {

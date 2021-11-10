@@ -190,11 +190,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz string, lD
 		}
 
 		for _, tpCPP := range cppModels.AsTPChargers() {
-			var cpp *engine.ChargerProfile
-			if cpp, err = engine.APItoChargerProfile(tpCPP, tmz); err != nil {
-				return
-			}
-			if err = dm.SetChargerProfile(ctx, cpp, withIndex); err != nil {
+			if err = dm.SetChargerProfile(ctx, engine.APItoChargerProfile(tpCPP, tmz), withIndex); err != nil {
 				return
 			}
 		}
@@ -207,11 +203,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz string, lD
 			}
 		}
 		for _, tpDsp := range dispModels.AsTPDispatcherProfiles() {
-			var dsp *engine.DispatcherProfile
-			if dsp, err = engine.APItoDispatcherProfile(tpDsp, tmz); err != nil {
-				return
-			}
-			if err = dm.SetDispatcherProfile(ctx, dsp, withIndex); err != nil {
+			if err = dm.SetDispatcherProfile(ctx, engine.APItoDispatcherProfile(tpDsp, tmz), withIndex); err != nil {
 				return
 			}
 		}
@@ -228,8 +220,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz string, lD
 			return
 		}
 		for _, tpDsp := range tpDsps {
-			dsp := engine.APItoDispatcherHost(tpDsp)
-			if err = dm.SetDispatcherHost(ctx, dsp); err != nil {
+			if err = dm.SetDispatcherHost(ctx, engine.APItoDispatcherHost(tpDsp)); err != nil {
 				return
 			}
 		}
@@ -298,7 +289,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz string, lD
 	return
 }
 
-func dryRun(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID string, lDataSet []utils.MapStorage) (err error) {
+func dryRun(ctx *context.Context, lType, tmz, ldrID string, lDataSet []utils.MapStorage) (err error) {
 	switch lType {
 	case utils.MetaAttributes:
 		attrModels := make(engine.AttributeMdls, len(lDataSet))
@@ -414,13 +405,9 @@ func dryRun(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID stri
 		}
 
 		for _, tpCPP := range cppModels.AsTPChargers() {
-			var cpp *engine.ChargerProfile
-			if cpp, err = engine.APItoChargerProfile(tpCPP, tmz); err != nil {
-				return
-			}
 			utils.Logger.Info(
 				fmt.Sprintf("<%s-%s> DRY_RUN: ChargerProfile: %s",
-					utils.LoaderS, ldrID, utils.ToJSON(cpp)))
+					utils.LoaderS, ldrID, utils.ToJSON(engine.APItoChargerProfile(tpCPP, tmz))))
 		}
 	case utils.MetaDispatchers:
 		dispModels := make(engine.DispatcherProfileMdls, len(lDataSet))
@@ -431,13 +418,9 @@ func dryRun(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID stri
 			}
 		}
 		for _, tpDsp := range dispModels.AsTPDispatcherProfiles() {
-			var dsp *engine.DispatcherProfile
-			if dsp, err = engine.APItoDispatcherProfile(tpDsp, tmz); err != nil {
-				return
-			}
 			utils.Logger.Info(
 				fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherProfile: %s",
-					utils.LoaderS, ldrID, utils.ToJSON(dsp)))
+					utils.LoaderS, ldrID, utils.ToJSON(engine.APItoDispatcherProfile(tpDsp, tmz))))
 		}
 	case utils.MetaDispatcherHosts:
 		dispModels := make(engine.DispatcherHostMdls, len(lDataSet))
@@ -452,10 +435,9 @@ func dryRun(ctx *context.Context, dm *engine.DataManager, lType, tmz, ldrID stri
 			return
 		}
 		for _, tpDsp := range tpDsps {
-			dsp := engine.APItoDispatcherHost(tpDsp)
 			utils.Logger.Info(
 				fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherHost: %s",
-					utils.LoaderS, ldrID, utils.ToJSON(dsp)))
+					utils.LoaderS, ldrID, utils.ToJSON(engine.APItoDispatcherHost(tpDsp))))
 		}
 	case utils.MetaRateProfiles:
 		rpMdls := make(engine.RateProfileMdls, len(lDataSet))
@@ -551,7 +533,7 @@ func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet [
 	case utils.MetaParse:
 		return
 	case utils.MetaDryRun:
-		return dryRun(ctx, l.dm, lType, l.timezone, l.ldrCfg.ID, lDataSet)
+		return dryRun(ctx, lType, l.timezone, l.ldrCfg.ID, lDataSet)
 	case utils.MetaStore:
 		err = setToDB(ctx, l.dm, lType, l.timezone, lDataSet, withIndex, partialRates)
 	case utils.MetaRemove:

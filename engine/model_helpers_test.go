@@ -1334,9 +1334,7 @@ func TestAPItoChargerProfile(t *testing.T) {
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
 	}
-	if rcv, err := APItoChargerProfile(tpCPP, "UTC"); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rcv) {
+	if rcv := APItoChargerProfile(tpCPP, "UTC"); !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
@@ -1701,9 +1699,7 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 			},
 		},
 	}
-	if rcv, err := APItoDispatcherProfile(tpDPP, "UTC"); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rcv) {
+	if rcv := APItoDispatcherProfile(tpDPP, "UTC"); !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
@@ -3392,7 +3388,7 @@ func TestAPItoDispatcherProfileCase2(t *testing.T) {
 		},
 		},
 	}
-	result, _ := APItoDispatcherProfile(structTest, "")
+	result := APItoDispatcherProfile(structTest, "")
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
@@ -4008,7 +4004,7 @@ func TestAPItoAttributeProfileError2(t *testing.T) {
 	}
 
 	_, err := APItoAttributeProfile(tpAlsPrf, "UTC")
-	expected := "Closed unspilit syntax "
+	expected := "Closed unspilit syntax"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, err)
 	}
