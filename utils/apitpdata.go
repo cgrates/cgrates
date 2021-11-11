@@ -926,7 +926,7 @@ type TPRate struct {
 	ID              string   // RateID
 	FilterIDs       []string // RateFilterIDs
 	ActivationTimes string
-	Weights         string // RateWeight will decide the winner per interval start
+	Weights         string // RateWeights will decide the winner per interval start
 	Blocker         bool   // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*TPIntervalRate
 }
