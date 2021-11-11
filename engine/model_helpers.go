@@ -1725,8 +1725,8 @@ type RateProfileMdls []*RateProfileMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (tps RateProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weight, utils.ConnectFee, utils.MinCost, utils.MaxCost, utils.MaxCostStrategy,
-		utils.RateID, utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight,
+		utils.Weights, utils.ConnectFee, utils.MinCost, utils.MaxCost, utils.MaxCostStrategy,
+		utils.RateID, utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeights,
 		utils.RateBlocker, utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee,
 		utils.RateUnit, utils.RateIncrement,
 	}

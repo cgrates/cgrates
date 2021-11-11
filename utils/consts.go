@@ -524,7 +524,7 @@ const (
 	RateIDs                  = "RateIDs"
 	RateFilterIDs            = "RateFilterIDs"
 	RateActivationStart      = "RateActivationStart"
-	RateWeight               = "RateWeight"
+	RateWeights              = "RateWeights"
 	RateIntervalStart        = "RateIntervalStart"
 	RateFixedFee             = "RateFixedFee"
 	RateRecurrentFee         = "RateRecurrentFee"

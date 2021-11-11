@@ -58,7 +58,7 @@ type Rate struct {
 	ID              string         // RateID
 	FilterIDs       []string       // RateFilterIDs
 	ActivationTimes string         // ActivationTimes is a cron formatted time interval
-	Weights         DynamicWeights // RateWeight will decide the winner per interval start
+	Weights         DynamicWeights // RateWeights will decide the winner per interval start
 	Blocker         bool           // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*IntervalRate
 
@@ -527,7 +527,7 @@ type APIRate struct {
 	ID              string   // RateID
 	FilterIDs       []string // RateFilterIDs
 	ActivationTimes string   // ActivationTimes is a cron formatted time interval
-	Weights         string   // RateWeight will decide the winner per interval start
+	Weights         string   // RateWeights will decide the winner per interval start
 	Blocker         bool     // RateBlocker will make this rate recurrent, deactivating further intervals
 	IntervalRates   []*APIIntervalRate
 }

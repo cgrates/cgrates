@@ -748,16 +748,26 @@ func testLoadersGetRateProfile(t *testing.T) {
 	}
 
 	expRatePrf := utils.RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"FLTR_ACCOUNT_1001"},
+		Tenant:    "cgrates.org",
+		ID:        "RP1",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 0,
+			},
+		},
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: utils.MetaMaxCostFree,
 		Rates: map[string]*utils.Rate{
 			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				FilterIDs:       []string{"FLTR_ACCOUNT_1001"},
+				ID:        "RT_WEEK",
+				FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.IntervalRate{
 					{

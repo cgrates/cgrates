@@ -3329,9 +3329,9 @@ func TestRateProfileMdlsCSVHeader(t *testing.T) {
 	testRPMdls := RateProfileMdls{}
 	result := testRPMdls.CSVHeader()
 	expected := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.Weight, utils.ConnectFee, utils.MinCost,
+		utils.Weights, utils.ConnectFee, utils.MinCost,
 		utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
-		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight, utils.RateBlocker,
+		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeights, utils.RateBlocker,
 		utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee, utils.RateUnit, utils.RateIncrement}
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
