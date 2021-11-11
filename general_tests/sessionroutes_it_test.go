@@ -132,7 +132,7 @@ func testSesRoutesAuthorizeEvent(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
+		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
 	}
 	args := sessions.NewV1AuthorizeArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
@@ -263,7 +263,7 @@ func testSesRoutesProcessMessage(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
+		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
 	}
 	args := sessions.NewV1ProcessMessageArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
@@ -396,7 +396,7 @@ func testSesRoutesProcessEvent(t *testing.T) {
 			utils.SetupTime:    time.Date(2018, 8, 24, 16, 00, 00, 0, time.UTC),
 			utils.Usage:        time.Minute,
 		},
-		APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
+		APIOpts: map[string]interface{}{utils.OptsRoutesProfileCount: 1},
 	}
 	args := sessions.V1ProcessEventArgs{
 		Flags:     []string{"*routes"},

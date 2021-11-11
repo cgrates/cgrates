@@ -71,10 +71,8 @@ func TestDspRouteSv1GetRoutesNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *engine.SortedRoutesList
 	result := dspSrv.RouteSv1GetRoutes(CGREvent, reply)
@@ -87,10 +85,8 @@ func TestDspRouteSv1GetRoutesNil(t *testing.T) {
 func TestDspRouteSv1GetRoutesErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *engine.SortedRoutesList
 	result := dspSrv.RouteSv1GetRoutes(CGREvent, reply)
@@ -104,10 +100,8 @@ func TestDspRouteSv1GetRoutesListNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]string
 	result := dspSrv.RouteSv1GetRoutesList(CGREvent, reply)
@@ -120,10 +114,8 @@ func TestDspRouteSv1GetRoutesListNil(t *testing.T) {
 func TestDspRouteSv1GetRoutesListErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
 	}
 	var reply *[]string
 	result := dspSrv.RouteSv1GetRoutesList(CGREvent, reply)

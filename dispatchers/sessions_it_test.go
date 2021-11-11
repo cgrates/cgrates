@@ -243,8 +243,8 @@ func testDspSessionAuthorize(t *testing.T) {
 			},
 
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey:              "ses12345",
-				utils.OptsRoutesProfilesCount: 1.,
+				utils.OptsAPIKey:             "ses12345",
+				utils.OptsRoutesProfileCount: 1.,
 			},
 		},
 	}

@@ -161,51 +161,47 @@ var (
 			Weight: 10,
 		},
 	}
-	testRoutesArgs = []*ArgsGetRoutes{
+	testRoutesArgs = []*utils.CGREvent{
 		{ //matching RouteProfile1
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
-					"Route":          "RouteProfile1",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					"PddInterval":    "1s",
-					utils.Weight:     "20.0",
-				},
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"Route":          "RouteProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
 			},
+			APIOpts: map[string]interface{}{},
 		},
 		{ //matching RouteProfile2
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
-					"Route":          "RouteProfile2",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-					"UsageInterval":  "1s",
-					"PddInterval":    "1s",
-					utils.Weight:     "20.0",
-				},
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"Route":          "RouteProfile2",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				utils.Weight:     "20.0",
 			},
+			APIOpts: map[string]interface{}{},
 		},
 		{ //matching RouteProfilePrefix
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "utils.CGREvent1",
-				Event: map[string]interface{}{
-					"Route": "RouteProfilePrefix",
-				},
+			Tenant: "cgrates.org",
+			ID:     "utils.CGREvent1",
+			Event: map[string]interface{}{
+				"Route": "RouteProfilePrefix",
 			},
+			APIOpts: map[string]interface{}{},
 		},
-		{ //matching
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "CGR",
-				Event: map[string]interface{}{
-					"UsageInterval": "1s",
-					"PddInterval":   "1s",
-				},
+		{
+			Tenant: "cgrates.org",
+			ID:     "CGR",
+			Event: map[string]interface{}{
+				"UsageInterval": "1s",
+				"PddInterval":   "1s",
 			},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 )
@@ -306,7 +302,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		dm: dmSPP, cfg: cfg}, cfg, nil)
 	prepareRoutesData(t, dmSPP)
 	for i, spp := range testRoutesPrfs {
-		sprf, err := routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[i].CGREvent)
+		sprf, err := routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[i])
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -460,12 +456,9 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 		},
 	}}
-	sprf, err := routeService.sortedRoutesForEvent("cgrates.org", &ArgsGetRoutes{
-		CGREvent: testRoutesArgs[1].CGREvent,
-		Paginator: utils.Paginator{
-			Limit: utils.IntPointer(2),
-		},
-	})
+	testRoutesArgs[1].APIOpts[utils.OptsRoutesLimit] = 2
+	delete(testRoutesArgs[1].APIOpts, utils.OptsRoutesOffset)
+	sprf, err := routeService.sortedRoutesForEvent("cgrates.org", testRoutesArgs[1])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -502,12 +495,9 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			},
 		},
 	}}
-	sprf, err := routeService.sortedRoutesForEvent("cgrates.org", &ArgsGetRoutes{
-		CGREvent: testRoutesArgs[1].CGREvent,
-		Paginator: utils.Paginator{
-			Offset: utils.IntPointer(2),
-		},
-	})
+	testRoutesArgs[1].APIOpts[utils.OptsRoutesOffset] = 2
+	delete(testRoutesArgs[1].APIOpts, utils.OptsRoutesLimit)
+	sprf, err := routeService.sortedRoutesForEvent("cgrates.org", testRoutesArgs[1])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -543,52 +533,14 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			},
 		},
 	}}
-	sprf, err := routeService.sortedRoutesForEvent("cgrates.org", &ArgsGetRoutes{
-		CGREvent: testRoutesArgs[1].CGREvent,
-		Paginator: utils.Paginator{
-			Limit:  utils.IntPointer(1),
-			Offset: utils.IntPointer(1),
-		},
-	})
+	testRoutesArgs[1].APIOpts[utils.OptsRoutesLimit] = 1
+	testRoutesArgs[1].APIOpts[utils.OptsRoutesLimit] = 1
+	sprf, err := routeService.sortedRoutesForEvent("cgrates.org", testRoutesArgs[1])
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(eFirstRouteProfile, sprf) {
 		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
-	}
-}
-
-func TestRoutesAsOptsGetRoutes(t *testing.T) {
-	s := &ArgsGetRoutes{
-		IgnoreErrors: true,
-		MaxCost:      "10.0",
-	}
-	spl := &optsGetRoutes{
-		ignoreErrors: true,
-		maxCost:      10.0,
-	}
-	sprf, err := s.asOptsGetRoutes()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(spl, sprf) {
-		t.Errorf("Expecting: %+v,received: %+v", spl, sprf)
-	}
-}
-
-func TestRoutesAsOptsGetRoutesIgnoreErrors(t *testing.T) {
-	s := &ArgsGetRoutes{
-		IgnoreErrors: true,
-	}
-	spl := &optsGetRoutes{
-		ignoreErrors: true,
-	}
-	sprf, err := s.asOptsGetRoutes()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(spl, sprf) {
-		t.Errorf("Expecting: %+v,received: %+v", spl, sprf)
 	}
 }
 
@@ -604,7 +556,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 	prepareRoutesData(t, dmSPP)
 
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[0].CGREvent)
+	sprf, err := routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -612,7 +564,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", testRoutesPrfs[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[1].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[1])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -620,7 +572,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", testRoutesPrfs[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[2].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[2])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -640,7 +592,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	prepareRoutesData(t, dmSPP)
 
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[0].CGREvent)
+	sprf, err := routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -648,7 +600,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", testRoutesPrfs[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[1].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[1])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -656,7 +608,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", testRoutesPrfs[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[2].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent("cgrates.org", testRoutesArgs[2])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -731,12 +683,12 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Weight: 0,
 		},
 	}
-	argsGetRoutes := &ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "utils.CGREvent1",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 3},
+	argsGetRoutes := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "utils.CGREvent1",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesProfileCount: 3,
 		},
 	}
 
@@ -794,10 +746,8 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			},
 		},
 	}
-	argsGetRoutes.Paginator = utils.Paginator{
-		Limit:  utils.IntPointer(2),
-		Offset: utils.IntPointer(1),
-	}
+	argsGetRoutes.APIOpts[utils.OptsRoutesLimit] = 2
+	argsGetRoutes.APIOpts[utils.OptsRoutesOffset] = 1
 	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes.Tenant, argsGetRoutes)
 	if err != nil {
 		t.Fatal(err)

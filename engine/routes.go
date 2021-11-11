@@ -499,47 +499,52 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	return sortedSpl, true, nil
 }
 
-// ArgsGetRoutes the argument for GetRoutes API
-type ArgsGetRoutes struct {
-	IgnoreErrors bool
-	MaxCost      string // toDo: try with interface{} here
-	*utils.CGREvent
-	utils.Paginator
-	clnb bool //rpcclonable
-}
-
-// SetCloneable sets if the args should be clonned on internal connections
-func (attr *ArgsGetRoutes) SetCloneable(rpcCloneable bool) {
-	attr.clnb = rpcCloneable
-}
-
-// RPCClone implements rpcclient.RPCCloner interface
-func (attr *ArgsGetRoutes) RPCClone() (interface{}, error) {
-	if !attr.clnb {
-		return attr, nil
+func newOptsGetRoutes(ev *utils.CGREvent, fS *FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
+	ignoreErrors := cfgOpts.IgnoreErrors
+	if opt, has := ev.APIOpts[utils.OptsRoutesIgnoreErrors]; has {
+		if ignoreErrors, err = utils.IfaceAsBool(opt); err != nil {
+			return
+		}
 	}
-	return attr.Clone(), nil
-}
-
-// Clone creates a clone of the object
-func (attr *ArgsGetRoutes) Clone() *ArgsGetRoutes {
-	return &ArgsGetRoutes{
-		IgnoreErrors: attr.IgnoreErrors,
-		MaxCost:      attr.MaxCost,
-		Paginator:    attr.Paginator.Clone(),
-		CGREvent:     attr.CGREvent.Clone(),
+	opts = &optsGetRoutes{
+		ignoreErrors: ignoreErrors,
+		paginator:    &utils.Paginator{},
 	}
-}
+	limit := cfgOpts.Limit
+	if opt, has := ev.APIOpts[utils.OptsRoutesLimit]; has {
+		var value int64
+		if value, err = utils.IfaceAsTInt64(opt); err != nil {
+			return
+		}
+		limit = utils.IntPointer(int(value))
+	}
+	if limit != nil {
+		opts.paginator.Limit = limit
+	}
+	offset := cfgOpts.Offset
+	if opt, has := ev.APIOpts[utils.OptsRoutesOffset]; has {
+		var value int64
+		if value, err = utils.IfaceAsTInt64(opt); err != nil {
+			return
+		}
+		offset = utils.IntPointer(int(value))
+	}
+	if offset != nil {
+		opts.paginator.Offset = offset
+	}
+	maxCost := cfgOpts.MaxCost
+	if opt, has := ev.APIOpts[utils.OptsRoutesMaxCost]; has {
+		maxCost = opt
+	}
 
-func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
-	opts = &optsGetRoutes{ignoreErrors: attr.IgnoreErrors}
-	if attr.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
-		if err = attr.CGREvent.CheckMandatoryFields([]string{utils.AccountField,
+	switch maxCost {
+	case utils.EmptyString, nil:
+	case utils.MetaEventCost: // dynamic cost needs to be calculated from event
+		if err = ev.CheckMandatoryFields([]string{utils.AccountField,
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}
-		cd, err := NewCallDescriptorFromCGREvent(attr.CGREvent,
-			config.CgrConfig().GeneralCfg().DefaultTimezone)
+		cd, err := NewCallDescriptorFromCGREvent(ev, config.CgrConfig().GeneralCfg().DefaultTimezone)
 		if err != nil {
 			return nil, err
 		}
@@ -548,9 +553,8 @@ func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
 			return nil, err
 		}
 		opts.maxCost = cc.Cost
-	} else if attr.MaxCost != "" {
-		if opts.maxCost, err = strconv.ParseFloat(attr.MaxCost,
-			64); err != nil {
+	default:
+		if opts.maxCost, err = utils.IfaceAsFloat64(maxCost); err != nil {
 			return nil, err
 		}
 	}
@@ -560,18 +564,19 @@ func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
 type optsGetRoutes struct {
 	ignoreErrors      bool
 	maxCost           float64
+	paginator         *utils.Paginator
 	sortingParameters []string //used for QOS strategy
 	sortingStragety   string
 }
 
 // V1GetRoutes returns the list of valid routes
-func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesList) (err error) {
-	if args.CGREvent == nil {
+func (rpS *RouteService) V1GetRoutes(args *utils.CGREvent, reply *SortedRoutesList) (err error) {
+	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.ID}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent.Event == nil {
+	} else if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant
@@ -583,14 +588,13 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesLis
 			args.APIOpts = make(map[string]interface{})
 		}
 		args.APIOpts[utils.Subsys] = utils.MetaRoutes
-		if args.CGREvent.APIOpts[utils.OptsContext] == utils.EmptyString {
-			args.CGREvent.APIOpts[utils.OptsContext] = utils.MetaRoutes
+		if args.APIOpts[utils.OptsContext] == utils.EmptyString {
+			args.APIOpts[utils.OptsContext] = utils.MetaRoutes
 		}
 		var rplyEv AttrSProcessEventReply
 		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().AttributeSConns, nil,
-			utils.AttributeSv1ProcessEvent, args.CGREvent, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
-			args.CGREvent = rplyEv.CGREvent
-			args.APIOpts = rplyEv.APIOpts
+			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+			args = rplyEv.CGREvent
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrRouteS(err)
 		}
@@ -679,41 +683,45 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (sortedRoutes SortedRoutesList, err error) {
-	if _, has := args.CGREvent.Event[utils.Usage]; !has {
-		args.CGREvent.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
+func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *utils.CGREvent) (sortedRoutes SortedRoutesList, err error) {
+	if _, has := args.Event[utils.Usage]; !has {
+		args.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
 	}
 	var rPrfs []*RouteProfile
-	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREvent); err != nil {
+	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args); err != nil {
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
-	if prfCountOpt, err := args.OptAsInt64(utils.OptsRoutesProfilesCount); err != nil {
-		if err != utils.ErrNotFound { // is an conversion error
-			return nil, err
+	prfCountOpt := rpS.cgrcfg.RouteSCfg().Opts.ProfileCount
+	if opt, has := args.APIOpts[utils.OptsRoutesProfileCount]; has {
+		var value int64
+		if value, err = utils.IfaceAsTInt64(opt); err != nil {
+			return
 		}
-	} else if prfCount > int(prfCountOpt) { // it has the option and is smaller that the current number of profiles
-		prfCount = int(prfCountOpt)
+		prfCountOpt = int(value)
+	}
+	if prfCount > prfCountOpt { // it has the option and is smaller that the current number of profiles
+		prfCount = prfCountOpt
 	}
 	var extraOpts *optsGetRoutes
-	if extraOpts, err = args.asOptsGetRoutes(); err != nil { // convert routes arguments into internal options used to limit data
+	if extraOpts, err = newOptsGetRoutes(args, rpS.filterS, rpS.cgrcfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
 		return
 	}
 
 	var startIdx, noSrtRoutes int
-	if args.Paginator.Offset != nil { // save the offset in a variable to not double check if we have offset and is still not 0
-		startIdx = *args.Paginator.Offset
+	if extraOpts.paginator.Offset != nil { // save the offset in a variable to not double check if we have offset and is still not 0
+		startIdx = *extraOpts.paginator.Offset
 	}
 	sortedRoutes = make(SortedRoutesList, 0, prfCount)
 	for _, rPrfl := range rPrfs {
 		var prfPag utils.Paginator
-		if args.Paginator.Limit != nil { // we have a limit
-			if noSrtRoutes >= *args.Paginator.Limit { // the limit was reached
+		if extraOpts.paginator.Limit != nil { // we have a limit
+			if noSrtRoutes >= *extraOpts.paginator.Limit { // the limit was reached
 				break
 			}
-			if noSrtRoutes+len(rPrfl.Routes) > *args.Paginator.Limit { // the limit will be reached in this profile
-				limit := *args.Paginator.Limit - noSrtRoutes // make it relative to current profile
-				prfPag.Limit = &limit                        // add the limit to the paginator
+			if noSrtRoutes+len(rPrfl.Routes) > *extraOpts.paginator.Limit { // the limit will be reached in this profile
+				limit := *extraOpts.paginator.Limit - noSrtRoutes // make it relative to current profile
+				prfPag.Limit = &limit                             // add the limit to the paginator
 			}
 		}
 		if startIdx > 0 { // we have offset
@@ -727,7 +735,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 			prfPag.Offset = &offset
 		}
 		var sr *SortedRoutes
-		if sr, err = rpS.sortedRoutesForProfile(tnt, rPrfl, args.CGREvent, prfPag, extraOpts); err != nil {
+		if sr, err = rpS.sortedRoutesForProfile(tnt, rPrfl, args, prfPag, extraOpts); err != nil {
 			return
 		}
 		if len(sr.Routes) != 0 {
@@ -745,7 +753,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 }
 
 // V1GetRoutesList returns the list of valid routes
-func (rpS *RouteService) V1GetRoutesList(args *ArgsGetRoutes, reply *[]string) (err error) {
+func (rpS *RouteService) V1GetRoutesList(args *utils.CGREvent, reply *[]string) (err error) {
 	sR := new(SortedRoutesList)
 	if err = rpS.V1GetRoutes(args, sR); err != nil {
 		return

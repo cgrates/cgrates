@@ -162,17 +162,15 @@ func testV1SplSSetRouteProfilesWithoutRatingPlanIDs(t *testing.T) {
 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
 	}
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetLeastCostSuppliers",
-			Event: map[string]interface{}{
-				utils.AccountField: "accc",
-				utils.Subject:      "1003",
-				utils.Destination:  "1002",
-				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-				utils.Usage:        "1m20s",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testV1SplSGetLeastCostSuppliers",
+		Event: map[string]interface{}{
+			utils.AccountField: "accc",
+			utils.Subject:      "1003",
+			utils.Destination:  "1002",
+			utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+			utils.Usage:        "1m20s",
 		},
 	}
 	var suplsReply engine.SortedRoutesList
@@ -432,13 +430,11 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 }
 
 func testV1SplSGetSortedRoutes(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetSortedRoutes",
-			Event: map[string]interface{}{
-				"CustomField": "ResourceTest",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testV1SplSGetSortedRoutes",
+		Event: map[string]interface{}{
+			"CustomField": "ResourceTest",
 		},
 	}
 	expSupplierIDs := []string{"route3", "route2", "route1"}
@@ -516,13 +512,11 @@ func testV1SplSAddNewRoutePrf2(t *testing.T) {
 }
 
 func testV1SplSGetSortedRoutes2(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetSortedSuppliers2",
-			Event: map[string]interface{}{
-				"CustomField": "ResourceDescendent",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testV1SplSGetSortedSuppliers2",
+		Event: map[string]interface{}{
+			"CustomField": "ResourceDescendent",
 		},
 	}
 	expSupplierIDs := []string{"route1", "route3", "route2"}
@@ -689,13 +683,11 @@ func testV1SplSPopulateStats(t *testing.T) {
 }
 
 func testV1SplSGetSoredRoutesWithLoad(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testV1SplSGetSoredSuppliersWithLoad",
-			Event: map[string]interface{}{
-				"DistinctMatch": "LoadDistStrategy",
-			},
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testV1SplSGetSoredSuppliersWithLoad",
+		Event: map[string]interface{}{
+			"DistinctMatch": "LoadDistStrategy",
 		},
 	}
 

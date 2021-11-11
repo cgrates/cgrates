@@ -133,7 +133,7 @@ func (rS *RouteSv1) Call(serviceMethod string, args interface{}, reply interface
 }
 
 // GetRoutes returns sorted list of routes for Event
-func (rS *RouteSv1) GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesList) error {
+func (rS *RouteSv1) GetRoutes(args *utils.CGREvent, reply *engine.SortedRoutesList) error {
 	return rS.rS.V1GetRoutes(args, reply)
 }
 
@@ -148,6 +148,6 @@ func (rS *RouteSv1) Ping(ign *utils.CGREvent, reply *string) error {
 }
 
 // GetRoutesList returns sorted list of routes for Event as a string slice
-func (rS *RouteSv1) GetRoutesList(args *engine.ArgsGetRoutes, reply *[]string) error {
+func (rS *RouteSv1) GetRoutesList(args *utils.CGREvent, reply *[]string) error {
 	return rS.rS.V1GetRoutesList(args, reply)
 }

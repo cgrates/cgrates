@@ -22,6 +22,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type RoutesOpts struct {
+	Context      string
+	IgnoreErrors bool
+	MaxCost      interface{}
+	Limit        *int
+	Offset       *int
+	ProfileCount int
+}
+
 // RouteSCfg is the configuration of route service
 type RouteSCfg struct {
 	Enabled             bool
@@ -35,6 +44,31 @@ type RouteSCfg struct {
 	RALsConns           []string
 	DefaultRatio        int
 	NestedFields        bool
+	Opts                *RoutesOpts
+}
+
+func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Context != nil {
+		rtsOpts.Context = *jsnCfg.Context
+	}
+	if jsnCfg.IgnoreErrors != nil {
+		rtsOpts.IgnoreErrors = *jsnCfg.IgnoreErrors
+	}
+	if jsnCfg.MaxCost != nil {
+		rtsOpts.MaxCost = jsnCfg.MaxCost
+	}
+	if jsnCfg.Limit != nil {
+		rtsOpts.Limit = jsnCfg.Limit
+	}
+	if jsnCfg.Offset != nil {
+		rtsOpts.Offset = jsnCfg.Offset
+	}
+	if jsnCfg.ProfileCount != nil {
+		rtsOpts.ProfileCount = *jsnCfg.ProfileCount
+	}
 }
 
 func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
@@ -114,16 +148,34 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		rts.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Opts != nil {
+		rts.Opts.loadFromJSONCfg(jsnCfg.Opts)
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
+	opts := map[string]interface{}{
+		utils.OptsContext:         rts.Opts.Context,
+		utils.MetaProfileCountCfg: rts.Opts.ProfileCount,
+		utils.MetaIgnoreErrorsCfg: rts.Opts.IgnoreErrors,
+	}
+	if rts.Opts.MaxCost != nil {
+		opts[utils.MetaMaxCostCfg] = rts.Opts.MaxCost
+	}
+	if rts.Opts.Limit != nil {
+		opts[utils.MetaLimitCfg] = *rts.Opts.Limit
+	}
+	if rts.Opts.Offset != nil {
+		opts[utils.MetaOffsetCfg] = *rts.Opts.Offset
+	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        rts.Enabled,
 		utils.IndexedSelectsCfg: rts.IndexedSelects,
 		utils.DefaultRatioCfg:   rts.DefaultRatio,
 		utils.NestedFieldsCfg:   rts.NestedFields,
+		utils.OptsCfg:           opts,
 	}
 	if rts.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*rts.StringIndexedFields))
@@ -189,6 +241,22 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
+func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
+	cln = &RoutesOpts{
+		Context:      rts.Context,
+		IgnoreErrors: rts.IgnoreErrors,
+		ProfileCount: rts.ProfileCount,
+		MaxCost:      rts.MaxCost,
+	}
+	if rts.Limit != nil {
+		cln.Limit = utils.IntPointer(*rts.Limit)
+	}
+	if rts.Offset != nil {
+		cln.Offset = utils.IntPointer(*rts.Offset)
+	}
+	return
+}
+
 // Clone returns a deep copy of RouteSCfg
 func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 	cln = &RouteSCfg{
@@ -196,6 +264,7 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		IndexedSelects: rts.IndexedSelects,
 		DefaultRatio:   rts.DefaultRatio,
 		NestedFields:   rts.NestedFields,
+		Opts:           rts.Opts.Clone(),
 	}
 	if rts.AttributeSConns != nil {
 		cln.AttributeSConns = make([]string, len(rts.AttributeSConns))
