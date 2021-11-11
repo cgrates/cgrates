@@ -20,5177 +20,26 @@ package loaders
 
 import (
 	"bytes"
+	"fmt"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"path"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
+	"github.com/cgrates/rpcclient"
 )
-
-/*
-var (
-	loaderDB = engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
-)
-
-func TestLoaderProcessContentSingleFile(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		bufLoaderData: make(map[string][]LoaderData),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAttributes: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "AttributeFilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{
-				Path:  "Path",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{
-				Path:  "Type",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{
-				Path:  "Value",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{
-				Path:  "Blocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: {
-			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-
-	//cannot set AttributeProfile when dryrun is true
-	ldr.dryRun = true
-	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//processContent context.Background(), successfully when dryrun is false
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: {
-			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	eAP := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ALS1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "*string:~*opts.*context:con1|con2|con3"},
-		Attributes: []*engine.Attribute{
-			{
-				FilterIDs: []string{"*string:~*req.Field1:Initial"},
-				Path:      utils.MetaReq + utils.NestingSep + "Field1",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
-			},
-			{
-				FilterIDs: []string{},
-				Path:      utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub2", utils.InfieldSep),
-			}},
-		Blocker: true,
-		Weight:  20,
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	if ap, err := ldr.dm.GetAttributeProfile(context.TODO(), "cgrates.org", "ALS1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
-		t.Errorf("expecting: %s, \n received: %s",
-			utils.ToJSON(eAP), utils.ToJSON(ap))
-	}
-
-	//cannot set AttributeProfile when dataManager is nil
-	ldr.dm = nil
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: {
-			utils.AttributesCsv: &openedCSVFile{fileName: utils.AttributesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	expectedErr := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err == nil || err != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoaderProcessContentMultiFiles(t *testing.T) {
-	file1CSV := `ignored,ignored,ignored,ignored,ignored,,*req.Subject,1001,ignored,ignored`
-	file2CSV := `ignored,TestLoader2`
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContentMultiFiles",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAttributes: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaString,
-				Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "Weight",
-				Type:  utils.MetaString,
-				Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
-			{
-				Path:  "Path",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
-			{
-				Path:  "Value",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
-		},
-	}
-	rdr1 := io.NopCloser(strings.NewReader(file1CSV))
-	csvRdr1 := csv.NewReader(rdr1)
-	csvRdr1.Comment = '#'
-	rdr2 := io.NopCloser(strings.NewReader(file2CSV))
-	csvRdr2 := csv.NewReader(rdr2)
-	csvRdr2.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: {
-			"File1.csv": &openedCSVFile{fileName: "File1.csv",
-				rdr: rdr1, csvRdr: csvRdr1},
-			"File2.csv": &openedCSVFile{fileName: "File2.csv",
-				rdr: rdr2, csvRdr: csvRdr2}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	eAP := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TestLoader2",
-		FilterIDs: []string{},
-		Attributes: []*engine.Attribute{
-			{
-				Path:      utils.MetaReq + utils.NestingSep + "Subject",
-				FilterIDs: []string{},
-				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
-			}},
-		Weight: 10.0,
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	if ap, err := ldr.dm.GetAttributeProfile(context.TODO(), "cgrates.org", "TestLoader2",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eAP, ap) {
-		t.Errorf("expecting: %s, \n received: %s",
-			utils.ToJSON(eAP), utils.ToJSON(ap))
-	}
-}
-
-func TestLoaderProcessResource(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessResources",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "UsageTTL",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{
-				Path:  "Limit",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{
-				Path:  "AllocationMessage",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{
-				Path:  "Blocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{
-				Path:  "Stored",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{
-				Path:  "Thresholds",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.ResourcesCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	eResPrf1 := &engine.ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ResGroup21",
-		FilterIDs:         []string{"*string:~*req.Account:1001"},
-		UsageTTL:          time.Second,
-		AllocationMessage: "call",
-		Weight:            10,
-		Limit:             2,
-		Blocker:           true,
-		Stored:            true,
-		ThresholdIDs:      []string{},
-	}
-	eResPrf2 := &engine.ResourceProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ResGroup22",
-		FilterIDs:         []string{"*string:~*req.Account:dan"},
-		UsageTTL:          3600 * time.Second,
-		AllocationMessage: "premium_call",
-		Weight:            10,
-		Limit:             2,
-		Blocker:           true,
-		Stored:            true,
-		ThresholdIDs:      []string{},
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	if resPrf, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "ResGroup21",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eResPrf1, resPrf) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(eResPrf1), utils.ToJSON(resPrf))
-	}
-	if resPrf, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "ResGroup22",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eResPrf2, resPrf) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(eResPrf2), utils.ToJSON(resPrf))
-	}
-}
-
-func TestLoaderProcessFilters(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessFilters",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaFilters: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "Type",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Element",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "Values",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaFilters: {
-			"Filters.csv": &openedCSVFile{fileName: "Filters.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-
-	//Cannot set filterProfile when dryrun is true
-	ldr.dryRun = true
-	if err := ldr.processContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//processContent context.Background(), when dryrun is false
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaFilters: {
-			"Filters.csv": &openedCSVFile{fileName: "Filters.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	eFltr1 := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
-				Values:  []string{"1001", "1002"},
-			},
-			{
-				Type:    utils.MetaPrefix,
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
-				Values:  []string{"10", "20"},
-			},
-			{
-				Type:    utils.MetaRSR,
-				Element: "~*req.Subject",
-				Values:  []string{"~^1.*1$"},
-			},
-			{
-				Type:    utils.MetaRSR,
-				Element: "~*req.Destination",
-				Values:  []string{"1002"},
-			},
-		},
-	}
-	if err := eFltr1.Compile(); err != nil {
-		t.Error(err)
-	}
-	// Compile Value for rsr fields
-	if err := eFltr1.Rules[2].CompileValues(); err != nil {
-		t.Error(err)
-	}
-	// Compile Value for rsr fields
-	if err := eFltr1.Rules[3].CompileValues(); err != nil {
-		t.Error(err)
-	}
-	eFltr2 := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_DST_DE",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    "*destinations",
-				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
-				Values:  []string{"DST_DE"},
-			},
-		},
-	}
-	if err := eFltr2.Compile(); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	if fltr, err := ldr.dm.GetFilter(context.TODO(), "cgrates.org", "FLTR_1",
-		true, true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eFltr1, fltr) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(eFltr1), utils.ToJSON(fltr))
-	}
-	if fltr, err := ldr.dm.GetFilter(context.TODO(), "cgrates.org", "FLTR_DST_DE",
-		true, true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eFltr2, fltr) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(eFltr2), utils.ToJSON(fltr))
-	}
-}
-
-func TestLoaderProcessThresholds(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaThresholds: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "MaxHits",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{
-				Path:  "MinHits",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{
-				Path:  "MinSleep",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{
-				Path:  "Blocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{
-				Path:  "ActionProfileIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{
-				Path:  "Async",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: {
-			utils.ThresholdsCsv: &openedCSVFile{fileName: utils.ThresholdsCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	eTh1 := &engine.ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "Threshold1",
-		FilterIDs:        []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
-		MaxHits:          12,
-		MinHits:          10,
-		MinSleep:         time.Second,
-		Blocker:          true,
-		Weight:           10,
-		ActionProfileIDs: []string{"THRESH1"},
-		Async:            true,
-	}
-	aps, err := ldr.dm.GetThresholdProfile(context.TODO(), "cgrates.org", "Threshold1",
-		true, false, utils.NonTransactional)
-	sort.Strings(eTh1.FilterIDs)
-	sort.Strings(aps.FilterIDs)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eTh1, aps) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(eTh1), utils.ToJSON(aps))
-	}
-
-	//cannot set thresholdProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: {
-			"Thresholds.csv": &openedCSVFile{fileName: "Thresholds.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderProcessStats(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaStats: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "QueueLength",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{
-				Path:  "TTL",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{
-				Path:  "MinItems",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{
-				Path:  "MetricIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{
-				Path:  "MetricFilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{
-				Path:  "Blocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{
-				Path:  "Stored",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{
-				Path:  "ThresholdIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.StatsCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{fileName: utils.StatsCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	eSt1 := &engine.StatQueueProfile{
-		Tenant:      "cgrates.org",
-		ID:          "TestStats",
-		FilterIDs:   []string{"*string:~*req.Account:1001"},
-		QueueLength: 100,
-		TTL:         time.Second,
-		Metrics: []*engine.MetricWithFilters{
-			{
-				MetricID: "*sum#~*req.Value",
-			},
-			{
-				MetricID: "*average#~*req.Value",
-			},
-			{
-				MetricID: "*sum#~*req.Usage",
-			},
-		},
-		ThresholdIDs: []string{"Th1", "Th2"},
-		Blocker:      true,
-		Stored:       true,
-		Weight:       20,
-		MinItems:     2,
-	}
-
-	aps, err := ldr.dm.GetStatQueueProfile(context.TODO(), "cgrates.org", "TestStats",
-		true, false, utils.NonTransactional)
-	//sort the slices of Metrics
-	sort.Slice(eSt1.Metrics, func(i, j int) bool { return eSt1.Metrics[i].MetricID < eSt1.Metrics[j].MetricID })
-	sort.Slice(aps.Metrics, func(i, j int) bool { return aps.Metrics[i].MetricID < aps.Metrics[j].MetricID })
-	sort.Strings(eSt1.ThresholdIDs)
-	sort.Strings(aps.ThresholdIDs)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eSt1, aps) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eSt1), utils.ToJSON(aps))
-	}
-
-	//cannot set statsProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.StatsCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			"Stats.csv": &openedCSVFile{fileName: "Stats.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderProcessStatsWrongMetrics(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessStatsWrongMetrics",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-		dataTpls: map[string][]*config.FCTemplate{
-			utils.MetaStats: {
-				{
-					Path:  "MetricIDs",
-					Type:  utils.MetaComposed,
-					Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-				{
-					Path:  "Stored",
-					Type:  utils.MetaComposed,
-					Value: config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep)},
-			},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(`#Metrics[0],Stored[1]
-not_a_valid_metric_type,true,`))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{fileName: utils.StatsCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	expected := "unsupported metric type <not_a_valid_metric_type>"
-	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//initialize again but with a valid metric and false stored field
-	rdr = io.NopCloser(strings.NewReader(`#Metrics[0],Stored[1]
-*sum#~*req.Value,false`))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{fileName: utils.StatsCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderProcessRoutes(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRoutes: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Weights",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "Sorting",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{
-				Path:  "SortingParameters",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{
-				Path:  "RouteID",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{
-				Path:  "RouteFilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{
-				Path:  "RouteAccountIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{
-				Path:  "RouteRateProfileIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{
-				Path:  "RouteResourceIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{
-				Path:  "RouteStatIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-			{
-				Path:  "RouteWeights",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
-			{
-				Path:  "RouteBlocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
-			{
-				Path:  "RouteParameters",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.RoutesCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRoutes: {
-			utils.RoutesCsv: &openedCSVFile{fileName: utils.RoutesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-
-	eSp := &engine.RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "RoutePrf1",
-		FilterIDs:         []string{"*string:~*req.Account:dan"},
-		Sorting:           utils.MetaLC,
-		SortingParameters: []string{},
-		Routes: []*engine.Route{
-			{
-				ID:              "route1",
-				FilterIDs:       []string{"FLTR_ACNT_dan"},
-				AccountIDs:      []string{"Account1", "Account1_1"},
-				RateProfileIDs:  []string{"RPL_1"},
-				ResourceIDs:     []string{"ResGroup1"},
-				StatIDs:         []string{"Stat1"},
-				Weights:         utils.DynamicWeights{{Weight: 10}},
-				Blocker:         true,
-				RouteParameters: "param1",
-			},
-			{
-				ID:              "route1",
-				FilterIDs:       []string{"FLTR_DST_DE"},
-				AccountIDs:      []string{"Account2"},
-				RateProfileIDs:  []string{"RPL_3"},
-				ResourceIDs:     []string{"ResGroup3"},
-				StatIDs:         []string{"Stat2"},
-				Weights:         utils.DynamicWeights{{Weight: 10}},
-				Blocker:         false,
-				RouteParameters: utils.EmptyString,
-			},
-			{
-				ID:              "route1",
-				RateProfileIDs:  []string{"RPL_2"},
-				ResourceIDs:     []string{"ResGroup2", "ResGroup4"},
-				StatIDs:         []string{"Stat3"},
-				Weights:         utils.DynamicWeights{{Weight: 10}},
-				Blocker:         false,
-				RouteParameters: utils.EmptyString,
-			},
-		},
-		Weights: utils.DynamicWeights{{Weight: 20}},
-	}
-	sort.Slice(eSp.Routes, func(i, j int) bool {
-		return strings.Compare(eSp.Routes[i].ID+strings.Join(eSp.Routes[i].FilterIDs, utils.ConcatenatedKeySep),
-			eSp.Routes[j].ID+strings.Join(eSp.Routes[j].FilterIDs, utils.ConcatenatedKeySep)) < 0
-	})
-
-	aps, err := ldr.dm.GetRouteProfile(context.Background(), "cgrates.org", "RoutePrf1",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Fatal(err)
-	}
-	sort.Slice(aps.Routes, func(i, j int) bool {
-		return strings.Compare(aps.Routes[i].ID+strings.Join(aps.Routes[i].FilterIDs, utils.ConcatenatedKeySep),
-			aps.Routes[j].ID+strings.Join(aps.Routes[j].FilterIDs, utils.ConcatenatedKeySep)) < 0
-	})
-	if !reflect.DeepEqual(eSp, aps) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(eSp), utils.ToJSON(aps))
-	}
-
-	//cannot set RoutesProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.RoutesCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRoutes: {
-			utils.RoutesCsv: &openedCSVFile{fileName: utils.RoutesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderProcessAccounts(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessAccounts",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccounts: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	actPrflCsv := `
-#Tenant[0],ID[1]
-cgrates.org,ACTPRF_ID1
-`
-	rdr := io.NopCloser(strings.NewReader(actPrflCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccounts: {
-			utils.AccountsCsv: &openedCSVFile{
-				fileName: utils.AccountsCsv, rdr: rdr,
-				csvRdr: csvRdr,
-			},
-		},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//cannot set an Account while dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(actPrflCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccounts: {
-			utils.AccountsCsv: &openedCSVFile{
-				fileName: utils.AccountsCsv, rdr: rdr,
-				csvRdr: csvRdr,
-			},
-		},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderProcessChargers(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaChargers: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "RunID",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{
-				Path:  "AttributeIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.ChargersCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaChargers: {
-			utils.ChargersCsv: &openedCSVFile{fileName: utils.ChargersCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	eCharger1 := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "Charger1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		RunID:        "*rated",
-		AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
-		Weight:       20,
-	}
-
-	if rcv, err := ldr.dm.GetChargerProfile(context.Background(), "cgrates.org", "Charger1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCharger1, rcv) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(eCharger1), utils.ToJSON(rcv))
-	}
-
-	//cannot set chargerProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.ChargersCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaChargers: {
-			utils.ChargersCsv: &openedCSVFile{fileName: utils.ChargersCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderProcessDispatches(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatchers: {
-			{
-				Tag:       "TenantID",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "ProfileID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:   "FilterIDs",
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
-			},
-			{
-				Tag:   "Weight",
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
-			},
-			{
-				Tag:   "Strategy",
-				Path:  "Strategy",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
-			},
-			{
-				Tag:   "StrategyParameters",
-				Path:  "StrategyParameters",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
-			},
-			{
-				Tag:   "ConnID",
-				Path:  "ConnID",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
-			},
-			{
-				Tag:   "ConnFilterIDs",
-				Path:  "ConnFilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
-			},
-			{
-				Tag:   "ConnWeight",
-				Path:  "ConnWeight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
-			},
-			{
-				Tag:   "ConnBlocker",
-				Path:  "ConnBlocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
-			},
-			{
-				Tag:   "ConnParameters",
-				Path:  "ConnParameters",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
-			},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatchers: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	eDisp := &engine.DispatcherProfile{
-		Tenant:         "cgrates.org",
-		ID:             "D1",
-		FilterIDs:      []string{"*string:~*req.Account:1001"},
-		StrategyParams: map[string]interface{}{},
-		Strategy:       "*first",
-		Weight:         20,
-		Hosts: engine.DispatcherHostProfiles{
-			&engine.DispatcherHostProfile{
-				ID:        "C1",
-				FilterIDs: []string{"*gt:~*req.Usage:10"},
-				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.56.203"},
-				Blocker:   false,
-			},
-			&engine.DispatcherHostProfile{
-				ID:        "C2",
-				FilterIDs: []string{"*lt:~*req.Usage:10"},
-				Weight:    10,
-				Params:    map[string]interface{}{"0": "192.168.56.204"},
-				Blocker:   false,
-			},
-		},
-	}
-
-	rcv, err := ldr.dm.GetDispatcherProfile(context.TODO(), "cgrates.org", "D1",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Fatal(err)
-	}
-	sort.Slice(eDisp.Hosts, func(i, j int) bool { return eDisp.Hosts[i].ID < eDisp.Hosts[j].ID })
-	sort.Slice(rcv.Hosts, func(i, j int) bool { return rcv.Hosts[i].ID < rcv.Hosts[j].ID })
-	if !reflect.DeepEqual(eDisp, rcv) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDisp), utils.ToJSON(rcv))
-	}
-
-	//cannot set DispatchersProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatchers: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderProcessDispatcheHosts(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatcherHosts: {
-			{
-				Tag:       "Tenant",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "ID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:   "Address",
-				Path:  "Address",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
-			},
-			{
-				Tag:   "Transport",
-				Path:  "Transport",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
-			},
-			{
-				Tag:       "ConnectAttempts",
-				Path:      "ConnectAttempts",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "Reconnects",
-				Path:      "Reconnects",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "ConnectTimeout",
-				Path:      "ConnectTimeout",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "ReplyTimeout",
-				Path:      "ReplyTimeout",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "TLS",
-				Path:      "TLS",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "ClientKey",
-				Path:      "ClientKey",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "ClientCertificate",
-				Path:      "ClientCertificate",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "CaCertificate",
-				Path:      "CaCertificate",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
-				Mandatory: true,
-			},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatcherHosts: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	eDispHost := &engine.DispatcherHost{
-		Tenant: "cgrates.org",
-		RemoteHost: &config.RemoteHost{
-			ID:              "ALL",
-			Address:         "127.0.0.1:6012",
-			Transport:       utils.MetaJSON,
-			ConnectAttempts: 1,
-			Reconnects:      3,
-			ConnectTimeout:  1 * time.Minute,
-			ReplyTimeout:    2 * time.Minute,
-			TLS:             false,
-		},
-	}
-
-	rcv, err := ldr.dm.GetDispatcherHost(context.TODO(), "cgrates.org", "ALL",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(eDispHost, rcv) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDispHost), utils.ToJSON(rcv))
-	}
-
-	//cannot set DispatcherHostProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatcherHosts: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderRemoveContentSingleFile(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAttributes: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: {
-			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	// Add two attributeProfiles
-	ap := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ALS1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:30:00Z", "*string:~*opts.*context:con1|con2|con3"},
-		Attributes: []*engine.Attribute{
-			{
-				FilterIDs: []string{"*string:~*req.Field1:Initial"},
-				Path:      utils.MetaReq + utils.NestingSep + "Field1",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
-			},
-			{
-				FilterIDs: []string{},
-				Path:      utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub2", utils.InfieldSep),
-			}},
-		Blocker: true,
-		Weight:  20,
-	}
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), ap, true); err != nil {
-		t.Error(err)
-	}
-	ap.ID = "Attr2"
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), ap, true); err != nil {
-		t.Error(err)
-	}
-
-	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	// make sure the first attribute is deleted
-	if _, err := ldr.dm.GetAttributeProfile(context.TODO(), "cgrates.org", "ALS1",
-		true, false, utils.NonTransactional); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	// the second should be there
-	if rcv, err := ldr.dm.GetAttributeProfile(context.TODO(), "cgrates.org", "Attr2",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ap, rcv) {
-		t.Errorf("expecting: %s, \n received: %s",
-			utils.ToJSON(ap), utils.ToJSON(rcv))
-	}
-
-	//now should be empty, nothing to remove
-	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: {
-			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderProcessRateProfile(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessRateProfile",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Weights",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "MinCost",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{
-				Path:  "MaxCost",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{
-				Path:  "MaxCostStrategy",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{
-				Path:  "RateID",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{
-				Path:  "RateFilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{
-				Path:  "RateActivationTimes",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{
-				Path:  "RateWeights",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{
-				Path:  "RateBlocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-			{
-				Path:  "RateIntervalStart",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
-			{
-				Path:  "RateFixedFee",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
-			{
-				Path:  "RateRecurrentFee",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
-			{
-				Path:  "RateUnit",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
-			{
-				Path:  "RateIncrement",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	minDecimal, err := utils.NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := utils.NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
-	eRatePrf := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MinCost:         utils.NewDecimal(1, 1),
-		MaxCost:         utils.NewDecimal(6, 1),
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(12, 2),
-						Unit:          minDecimal,
-						Increment:     minDecimal,
-					},
-					{
-						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-						FixedFee:      utils.NewDecimal(1234, 3),
-						RecurrentFee:  utils.NewDecimal(6, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
-					},
-				},
-			},
-			"RT_WEEKEND": {
-				ID: "RT_WEEKEND",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				ActivationTimes: "* * * * 0,6",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(89, 3),
-						RecurrentFee:  utils.NewDecimal(6, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
-					},
-				},
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 30,
-					},
-				},
-				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(564, 4),
-						RecurrentFee:  utils.NewDecimal(6, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
-					},
-				},
-			},
-		},
-	}
-	rcv, err := ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv.Compile()
-	eRatePrf.Compile()
-	if !reflect.DeepEqual(rcv, eRatePrf) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
-	}
-
-	//cannot set RateProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-}
-
-func TestLoaderProcessRateProfileRates(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessRateProfile",
-		bufLoaderData: make(map[string][]LoaderData),
-		flagsTpls:     make(map[string]utils.FlagsWithParams),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "FilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "Weights",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{
-				Path:  "MinCost",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{
-				Path:  "MaxCost",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{
-				Path:  "MaxCostStrategy",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
-			{
-				Path:  "RateID",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{
-				Path:  "RateFilterIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{
-				Path:  "RateActivationTimes",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{
-				Path:  "RateWeights",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{
-				Path:  "RateBlocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-			{
-				Path:  "RateIntervalStart",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
-			{
-				Path:  "RateFixedFee",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
-			{
-				Path:  "RateRecurrentFee",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
-			{
-				Path:  "RateUnit",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
-			{
-				Path:  "RateIncrement",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
-		},
-	}
-	ratePrfCnt1 := `
-#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP1,*string:~*req.Subject:1001,;0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",;0,false,0s,0.4,0.12,1m,1m
-cgrates.org,RP1,,,,,,RT_WEEK,,,,,1m,,0.06,1m,1s
-`
-	ratePrfCnt2 := `
-#Tenant,ID,FilterIDs,Weights,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeights,RateBlocker,RateIntervalStart,RateValue,RateUnit,RateIncrement
-cgrates.org,RP1,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,,0.06,1m,1s
-cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
-`
-	rdr1 := io.NopCloser(strings.NewReader(ratePrfCnt1))
-	csvRdr1 := csv.NewReader(rdr1)
-	csvRdr1.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
-				rdr: rdr1, csvRdr: csvRdr1}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	minDecimal, err := utils.NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := utils.NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
-	eRatePrf := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MinCost:         utils.NewDecimal(1, 1),
-		MaxCost:         utils.NewDecimal(6, 1),
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(4, 1),
-						RecurrentFee:  utils.NewDecimal(12, 2),
-						Unit:          minDecimal,
-						Increment:     minDecimal,
-					},
-					{
-						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(6, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
-					},
-				},
-			},
-		},
-	}
-	rcv, err := ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv.Compile()
-	eRatePrf.Compile()
-	if !reflect.DeepEqual(rcv, eRatePrf) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
-	}
-
-	rdr2 := io.NopCloser(strings.NewReader(ratePrfCnt2))
-	csvRdr2 := csv.NewReader(rdr2)
-	csvRdr2.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
-				rdr: rdr2, csvRdr: csvRdr2}},
-	}
-	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-	eRatePrf = &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MinCost:         utils.NewDecimal(1, 1),
-		MaxCost:         utils.NewDecimal(6, 1),
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(4, 1),
-						RecurrentFee:  utils.NewDecimal(12, 2),
-						Unit:          minDecimal,
-						Increment:     minDecimal,
-					},
-					{
-						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(6, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
-					},
-				},
-			},
-			"RT_WEEKEND": {
-				ID: "RT_WEEKEND",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				ActivationTimes: "* * * * 0,6",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(6, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
-					},
-				},
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 30,
-					},
-				},
-				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(6, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
-					},
-				},
-			},
-		},
-	}
-	rcv, err = ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv.Compile()
-	eRatePrf.Compile()
-	if !reflect.DeepEqual(rcv, eRatePrf) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
-	}
-
-}
-
-func TestLoaderRemoveRateProfileRates(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderRemoveRateProfileRates",
-		bufLoaderData: make(map[string][]LoaderData),
-		flagsTpls:     make(map[string]utils.FlagsWithParams),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "RateIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-		},
-	}
-
-	rPfr := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-					{
-						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-					},
-				},
-			},
-			"RT_WEEKEND": {
-				ID: "RT_WEEKEND",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				ActivationTimes: "* * * * 0,6",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-				},
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 30,
-					},
-				},
-				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-				},
-			},
-		},
-	}
-	if err := ldr.dm.SetRateProfile(context.Background(), rPfr, true); err != nil {
-		t.Error(err)
-	}
-	rPfr2 := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-					{
-						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-					},
-				},
-			},
-			"RT_WEEKEND": {
-				ID: "RT_WEEKEND",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				ActivationTimes: "* * * * 0,6",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-				},
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 30,
-					},
-				},
-				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-				},
-			},
-		},
-	}
-	if err := ldr.dm.SetRateProfile(context.Background(), rPfr2, true); err != nil {
-		t.Error(err)
-	}
-
-	ratePrfCnt1 := `
-#Tenant,ID,RateIDs
-cgrates.org,RP1,RT_WEEKEND
-`
-	ratePrfCnt2 := `
-#Tenant,ID,RateIDs
-cgrates.org,RP2,RT_WEEKEND;RT_CHRISTMAS
-cgrates.org,RP1,
-`
-	rdr1 := io.NopCloser(strings.NewReader(ratePrfCnt1))
-	csvRdr1 := csv.NewReader(rdr1)
-	csvRdr1.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
-				rdr: rdr1, csvRdr: csvRdr1}},
-	}
-	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-
-	eRatePrf := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-					{
-						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-					},
-				},
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 30,
-					},
-				},
-				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-				},
-			},
-		},
-	}
-	rcv, err := ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv.Compile()
-	eRatePrf.Compile()
-	if !reflect.DeepEqual(rcv, eRatePrf) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf), utils.ToJSON(rcv))
-	}
-
-	rdr2 := io.NopCloser(strings.NewReader(ratePrfCnt2))
-	csvRdr2 := csv.NewReader(rdr2)
-	csvRdr2.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
-				rdr: rdr2, csvRdr: csvRdr2}},
-	}
-	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-
-	eRatePrf2 := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP2",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-					},
-					{
-						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-					},
-				},
-			},
-		},
-	}
-	rcv, err = ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP2",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv.Compile()
-	eRatePrf2.Compile()
-	if !reflect.DeepEqual(rcv, eRatePrf2) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf2), utils.ToJSON(rcv))
-	}
-
-	eRatePrf3 := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MaxCostStrategy: "*free",
-		Rates:           map[string]*utils.Rate{},
-	}
-	rcv, err = ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv.Compile()
-	eRatePrf3.Compile()
-	if !reflect.DeepEqual(rcv, eRatePrf3) {
-		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eRatePrf3), utils.ToJSON(rcv))
-	}
-}
-
-func TestRemoveRateProfileFlagsError(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderRemoveRateProfileRates",
-		bufLoaderData: make(map[string][]LoaderData),
-		flagsTpls:     make(map[string]utils.FlagsWithParams),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	ratePrfCnt1 := `
-#Tenant,ID
-cgrates.org,RP2
-`
-	rPfr := &utils.RateProfile{
-		Tenant: "cgrates.org",
-		ID:     "RP1",
-	}
-	if err := ldr.dm.SetRateProfile(context.Background(), rPfr, true); err != nil {
-		t.Error(err)
-	}
-
-	rdr1 := io.NopCloser(strings.NewReader(ratePrfCnt1))
-	csvRdr1 := csv.NewReader(rdr1)
-	csvRdr1.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{fileName: utils.RatesCsv,
-				rdr: rdr1, csvRdr: csvRdr1}},
-	}
-	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	expectedErr := "cannot find RateIDs in <map[ID:RP2 Tenant:cgrates.org]>"
-	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestNewLoaderWithMultiFiles(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-
-	ldrCfg := cfg.LoaderCfg()[0].Clone()
-	ldrCfg.Data[0].Fields = []*config.FCTemplate{
-		{
-			Path:      "Tenant",
-			Type:      utils.MetaString,
-			Value:     config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-			Mandatory: true},
-		{
-			Path:      "ID",
-			Type:      utils.MetaComposed,
-			Value:     config.NewRSRParsersMustCompile("~*file(File2.csv).1", utils.InfieldSep),
-			Mandatory: true},
-		{
-			Path:  "Contexts",
-			Type:  utils.MetaString,
-			Value: config.NewRSRParsersMustCompile("*any", utils.InfieldSep)},
-		{
-			Path:  "Path",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
-		{
-			Path:  "Value",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
-		{
-			Path:  "Weight",
-			Type:  utils.MetaString,
-			Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
-	}
-	ldr := NewLoader(engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil), ldrCfg, "", nil, nil, nil)
-
-	openRdrs := make(utils.StringSet)
-	for _, rdr := range ldr.rdrs {
-		for fileName := range rdr {
-			openRdrs.Add(fileName)
-		}
-	}
-	expected := utils.StringSet{
-		utils.AttributesCsv:         {},
-		utils.ChargersCsv:           {},
-		utils.DispatcherHostsCsv:    {},
-		utils.DispatcherProfilesCsv: {},
-		"File1.csv":                 {},
-		"File2.csv":                 {},
-		utils.FiltersCsv:            {},
-		utils.RatesCsv:              {},
-		utils.ResourcesCsv:          {},
-		utils.RoutesCsv:             {},
-		utils.StatsCsv:              {},
-		utils.ThresholdsCsv:         {},
-		utils.ActionsCsv:            {},
-		utils.AccountsCsv:           {},
-	}
-	if !reflect.DeepEqual(expected, openRdrs) {
-		t.Errorf("Expected %s,received %s", utils.ToJSON(expected), utils.ToJSON(openRdrs))
-	}
-}
-
-func TestLoaderActionProfile(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaActionProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true,
-				Layout:    time.RFC3339},
-			{
-				Path:      "ID",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true,
-				Layout:    time.RFC3339},
-			{
-				Path:   "FilterIDs",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "Weight",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "Schedule",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "TargetType",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "TargetIDs",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionID",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionFilterIDs",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionBlocker",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionTTL",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionType",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionOpts",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionPath",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionValue",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep),
-				Layout: time.RFC3339},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.ActionProfileCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{fileName: utils.ActionsCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if len(ldr.bufLoaderData) != 0 {
-		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
-	}
-
-	expected := &engine.ActionProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ONE_TIME_ACT",
-		FilterIDs: []string{},
-		Weight:    10,
-		Schedule:  utils.MetaASAP,
-		Targets: map[string]utils.StringSet{
-			utils.MetaAccounts: utils.NewStringSet([]string{"1001", "1002"}),
-		},
-		Actions: []*engine.APAction{
-			{
-				ID:   "TOPUP",
-				Type: "*add_balance",
-				Diktats: []*engine.APDiktat{{
-					Path:  "*balance.TestBalance.Value",
-					Value: "10",
-				}},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_DATA",
-				Type: "*set_balance",
-				Diktats: []*engine.APDiktat{{
-					Path:  "*balance.TestDataBalance.Type",
-					Value: "*data",
-				}},
-			},
-			{
-				ID:   "TOPUP_TEST_DATA",
-				Type: "*add_balance",
-				Diktats: []*engine.APDiktat{{
-					Path:  "*balance.TestDataBalance.Value",
-					Value: "1024",
-				}},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_VOICE",
-				Type: "*set_balance",
-				Diktats: []*engine.APDiktat{{
-					Path:  "*balance.TestVoiceBalance.Type",
-					Value: "*voice",
-				}},
-			},
-			{
-				ID:   "TOPUP_TEST_VOICE",
-				Type: "*add_balance",
-				Diktats: []*engine.APDiktat{{
-					Path:  "*balance.TestVoiceBalance.Value",
-					Value: "15m15s",
-				}, {
-					Path:  "*balance.TestVoiceBalance2.Value",
-					Value: "15m15s",
-				}},
-			},
-		},
-	}
-
-	aps, err := ldr.dm.GetActionProfile(context.Background(), "cgrates.org", "ONE_TIME_ACT",
-		true, false, utils.NonTransactional)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(expected, aps) {
-		t.Errorf("expecting: %s, received: %s",
-			utils.ToJSON(expected), utils.ToJSON(aps))
-	}
-
-	//cannot set ActionProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.ActionProfileCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{fileName: utils.ActionsCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLoaderWrongCsv(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderWrongCsv",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaActionProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true,
-				Layout:    time.RFC3339},
-			{
-				Path:      "ID",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true,
-				Layout:    time.RFC3339},
-			{
-				Path:   "FilterIDs",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "Weight",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "Schedule",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "AccountIDs",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionID",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionFilterIDs",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionBlocker",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionTTL",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionType",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionOpts",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionPath",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
-				Layout: time.RFC3339},
-			{
-				Path:   "ActionValue",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
-				Layout: time.RFC3339},
-		},
-	}
-
-	//Not a valid comment beginning of csv
-	newCSVContentMiss := `
-//Tenant,ID,FilterIDs,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionBLocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,10,*asap,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
-`
-
-	rdr := io.NopCloser(strings.NewReader(newCSVContentMiss))
-	csvRdr := csv.NewReader(rdr)
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{
-				fileName: utils.ActionsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expectedErr := "invalid syntax"
-	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || !strings.Contains(err.Error(), expectedErr) {
-		t.Errorf("Expected %+q, received %+q", expectedErr, err)
-	}
-
-	//Missing fields in csv eg:ActionBLocker
-	newCSVContent := `
-//Tenant,ID,FilterIDs,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,10,*asap,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
-`
-	rdr = io.NopCloser(strings.NewReader(newCSVContent))
-	csvRdr = csv.NewReader(rdr)
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{
-				fileName: utils.ActionsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expectedErr = "invalid syntax"
-	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || !strings.Contains(err.Error(), expectedErr) {
-		t.Errorf("Expected %+q, received %+q", expectedErr, err)
-	}
-}
-
-func TestLoaderActionProfileAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderActionProfileAsStructErrType",
-		bufLoaderData: map[string][]LoaderData{},
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaActionProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true,
-				Layout:    time.RFC3339},
-			{
-				Path:      "ID",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true,
-				Layout:    time.RFC3339},
-			{
-				Path:   "ActionBlocker",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
-				Layout: time.RFC3339},
-		},
-	}
-	actPrfCsv := `
-#Tenant,ID,ActionBlocker
-cgrates.org,12,NOT_A_BOOLEAN
-`
-	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{fileName: utils.ActionsCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	expErr := `strconv.ParseBool: parsing "NOT_A_BOOLEAN": invalid syntax`
-	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+v, received %+v", expErr, err)
-	}
-}
-
-func TestLoaderAttributesAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderAttributesAsStructErrType",
-		bufLoaderData: map[string][]LoaderData{},
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAttributes: {
-			{
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	attributeCsv := `
-#Weight
-true
-`
-	rdr := io.NopCloser(strings.NewReader(attributeCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: {
-			utils.AttributesCsv: &openedCSVFile{fileName: utils.AttributesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	expectedErr := "strconv.ParseFloat: parsing \"true\": invalid syntax"
-	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Error(err)
-	}
-}
-
-func TestLoadResourcesAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadResourcesAsStructErr",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: {
-			{
-				Path:  "Blocker",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	resourcesCsv := `
-#Blocker
-NOT_A_BOOLEAN
-`
-	rdr := io.NopCloser(strings.NewReader(resourcesCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			utils.ResourcesCsv: &openedCSVFile{fileName: utils.ResourcesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	expectedErr := "strconv.ParseBool: parsing \"NOT_A_BOOLEAN\": invalid syntax"
-	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadResourcesAsStructErrConversion(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadResourcesAsStructErrConversion",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: {
-			{
-				Path:  "UsageTTL",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	resourcesCsv := `
-#UsageTTL
-12ss
-`
-	rdr := io.NopCloser(strings.NewReader(resourcesCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			utils.ResourcesCsv: &openedCSVFile{fileName: utils.ResourcesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	expectedErr := "time: unknown unit \"ss\" in duration \"12ss\""
-	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadFiltersAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadFiltersAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaFilters: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	filtersCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(filtersCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaFilters: {
-			utils.FiltersCsv: &openedCSVFile{
-				fileName: utils.FiltersCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadStatsAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadStatsAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaStats: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	statsCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(statsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{
-				fileName: utils.StatsCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadThresholdsAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadThresholdsAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaThresholds: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: {
-			utils.ThresholdsCsv: &openedCSVFile{
-				fileName: utils.ThresholdsCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadRoutesAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadRoutesAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRoutes: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRoutes: {
-			utils.RoutesCsv: &openedCSVFile{
-				fileName: utils.RoutesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadChargersAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadChargersAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaChargers: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaChargers: {
-			utils.ChargersCsv: &openedCSVFile{
-				fileName: utils.ChargersCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadDispatchersAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadDispatchersAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatchers: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatchers: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadDispatcherHostsAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadDispatcherHostsAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatcherHosts: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatcherHosts: {
-			utils.DispatcherHostsCsv: &openedCSVFile{
-				fileName: utils.DispatcherHostsCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadRateProfilesAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadRateProfilesAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{
-				fileName: utils.RatesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestProcessContentAccountAsTPError(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestProcessContentAccountAsTPError",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccounts: {
-			{
-				Path:  "Tenant",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-			{
-				Path:  "ID",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep)},
-			{
-				Path:  "BalanceID",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{
-				Path:  "BalanceUnitFactors",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-		},
-	}
-
-	accPrfCSv := `
-#Tenant,ID,BalanceID,BalanceUnitFactors
-cgrates.org,1001,MonetaryBalance,fltr1&fltr2;100;fltr3
-`
-	rdr := io.NopCloser(strings.NewReader(accPrfCSv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccounts: {
-			utils.AccountsCsv: &openedCSVFile{
-				fileName: utils.AccountsCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "invalid key: <fltr1&fltr2;100;fltr3> for BalanceUnitFactors"
-	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadAccountsAsStructErrType(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadAccountsAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccounts: {
-			{
-				Path:  "PK",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	actPrfCsv := `
-#PK
-NOT_UINT
-`
-	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccounts: {
-			utils.AccountsCsv: &openedCSVFile{
-				fileName: utils.AccountsCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadAndRemoveResources(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadAndRemoveResources",
-		bufLoaderData: make(map[string][]LoaderData),
-		dryRun:        true,
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	resourcesCSV := `
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`
-	rdr := io.NopCloser(strings.NewReader(resourcesCSV))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
-				rdr: rdr, csvRdr: rdrCsv}},
-	}
-	//empty database
-	if _, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//because of dryrun, database will be empty again
-	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	ldr.dryRun = false
-	//reinitialized reader because after first process the reader is at the end of the file
-	rdr = io.NopCloser(strings.NewReader(resourcesCSV))
-	rdrCsv = csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
-				rdr: rdr, csvRdr: rdrCsv}},
-	}
-
-	resPrf := &engine.ResourceProfile{
-		Tenant:       "cgrates.org",
-		ID:           "NewRes1",
-		FilterIDs:    []string{},
-		ThresholdIDs: []string{},
-	}
-	//NOT_FOUND because is resourceProfile is not set
-	if _, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	rcv, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "NewRes1", false, false, utils.NonTransactional)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(resPrf, rcv) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(resPrf), utils.ToJSON(rcv))
-	}
-
-	//reinitialized reader because seeker it s at the end of the file
-	rdr = io.NopCloser(strings.NewReader(resourcesCSV))
-	rdrCsv = csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
-				rdr: rdr, csvRdr: rdrCsv}},
-	}
-
-	//cannot remove when dryrun is on true
-	ldr.dryRun = true
-	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//remove successfully when dryrun is false
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(resourcesCSV))
-	rdrCsv = csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
-				rdr: rdr, csvRdr: rdrCsv}},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing in database
-	if _, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//nothing to remove
-	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot set again ResourceProfile when dataManager is nil
-	ldr.dm = nil
-	rdr = io.NopCloser(strings.NewReader(resourcesCSV))
-	rdrCsv = csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
-				rdr: rdr, csvRdr: rdrCsv}},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveFilterContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveFilterContents",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaFilters: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	filtersCsv := `
-#Tenant[0],ID[0]
-cgrates.org,FILTERS_REM_1
-`
-	rdr := io.NopCloser(strings.NewReader(filtersCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaFilters: {
-			utils.FiltersCsv: &openedCSVFile{
-				fileName: utils.FiltersCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	eFltr1 := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FILTERS_REM_1",
-	}
-	if err := ldr.dm.SetFilter(context.Background(), eFltr1, true); err != nil {
-		t.Error(err)
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remove from database
-	if err := ldr.removeContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove Filter when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(filtersCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaFilters: {
-			utils.FiltersCsv: &openedCSVFile{
-				fileName: utils.FiltersCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//cannot set again FiltersProfile when dataManager is nil
-	ldr.dm = nil
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(filtersCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaFilters: {
-			utils.FiltersCsv: &openedCSVFile{
-				fileName: utils.FiltersCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaFilters, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveStatsContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaStats: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	statsCsv := `
-#Tenant[0],ProfileID[1]
-cgrates.org,REM_STATS_1
-`
-	rdr := io.NopCloser(strings.NewReader(statsCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{
-				fileName: utils.StatsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expStats := &engine.StatQueueProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_STATS_1",
-	}
-	if err := ldr.dm.SetStatQueueProfile(context.TODO(), expStats, true); err != nil {
-		t.Error(err)
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remove from database
-	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove statsQueueProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(statsCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{
-				fileName: utils.StatsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//cannot set again StatsProfile when dataManager is nil
-	ldr.dm = nil
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(statsCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{
-				fileName: utils.StatsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveThresholdsContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveThresholdsContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaThresholds: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	thresholdsCsv := `
-#Tenant[0],ID[1]
-cgrates.org,REM_THRESHOLDS_1,
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: {
-			utils.ThresholdsCsv: &openedCSVFile{
-				fileName: utils.ThresholdsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expThresholdPrf := &engine.ThresholdProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_THRESHOLDS_1",
-	}
-	if err := ldr.dm.SetThresholdProfile(context.TODO(), expThresholdPrf, true); err != nil {
-		t.Error(err)
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remove from database
-	if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove statsQueueProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(thresholdsCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: {
-			utils.ThresholdsCsv: &openedCSVFile{
-				fileName: utils.ThresholdsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//cannot set again ThresholdsProfile when dataManager is nil
-	ldr.dm = nil
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(thresholdsCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: {
-			utils.ThresholdsCsv: &openedCSVFile{
-				fileName: utils.ThresholdsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveRoutesContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveRoutesContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRoutes: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	routesCsv := `
-#Tenant[0],ID[1]
-cgrates.org,ROUTES_REM_1
-`
-	rdr := io.NopCloser(strings.NewReader(routesCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRoutes: {
-			utils.RoutesCsv: &openedCSVFile{
-				fileName: routesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expRoutes := &engine.RouteProfile{
-		Tenant: "cgrates.org",
-		ID:     "ROUTES_REM_1",
-	}
-	if err := ldr.dm.SetRouteProfile(context.Background(), expRoutes, true); err != nil {
-		t.Error(err)
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remove from database
-	if err := ldr.removeContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove routeProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(routesCsv))
-	rdrCsv = csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRoutes: {
-			utils.RoutesCsv: &openedCSVFile{
-				fileName: routesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//cannot set again RoutesProfile when dataManager is nil
-	ldr.dm = nil
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(routesCsv))
-	rdrCsv = csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRoutes: {
-			utils.RoutesCsv: &openedCSVFile{
-				fileName: routesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveChargersContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveChargersContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaChargers: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	routesCsv := `
-#Tenant[0],ID[1]
-cgrates.org,REM_ROUTES_1
-`
-	rdr := io.NopCloser(strings.NewReader(routesCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaChargers: {
-			utils.ChargersCsv: &openedCSVFile{
-				fileName: utils.ChargersCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expChargers := &engine.ChargerProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_ROUTES_1",
-	}
-	if err := ldr.dm.SetChargerProfile(context.Background(), expChargers, true); err != nil {
-		t.Error(err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remvoe from database
-	if err := ldr.removeContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove ChargersProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(routesCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaChargers: {
-			utils.ChargersCsv: &openedCSVFile{
-				fileName: utils.ChargersCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//cannot set again ChargersProfile when dataManager is nil
-	ldr.dm = nil
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(routesCsv))
-	rdr = io.NopCloser(strings.NewReader(routesCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaChargers: {
-			utils.ChargersCsv: &openedCSVFile{
-				fileName: utils.ChargersCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaChargers, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveDispatchersContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveDispatchersContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatchers: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	dispatchersCsv := `
-#Tenant[0],ID[1]
-cgrates.org,REM_DISPATCHERS_1
-`
-	rdr := io.NopCloser(strings.NewReader(dispatchersCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatchers: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expDispatchers := &engine.DispatcherProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_DISPATCHERS_1",
-	}
-	if err := ldr.dm.SetDispatcherProfile(context.TODO(), expDispatchers, true); err != nil {
-		t.Error(err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remvoe from database
-	if err := ldr.removeContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove DispatchersProfile when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(dispatchersCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatchers: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//cannot set again DispatchersProfile when dataManager is nil
-	ldr.dm = nil
-	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(dispatchersCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatchers: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveDispatcherHostsContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveDispatcherHostsContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatcherHosts: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	dispatchersHostsCsv := `
-#Tenant[0],ID[1]
-cgrates.org,REM_DISPATCHERH_1
-`
-	rdr := io.NopCloser(strings.NewReader(dispatchersHostsCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatcherHosts: {
-			utils.DispatcherHostsCsv: &openedCSVFile{
-				fileName: utils.DispatcherHostsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expDispatchers := &engine.DispatcherHost{
-		Tenant: "cgrates.org",
-		RemoteHost: &config.RemoteHost{
-			ID: "REM_DISPATCHERH_1",
-		},
-	}
-	if err := ldr.dm.SetDispatcherHost(context.TODO(), expDispatchers); err != nil {
-		t.Error(err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remove from database
-	if err := ldr.removeContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove DispatcherHosts when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(dispatchersHostsCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatcherHosts: {
-			utils.DispatcherHostsCsv: &openedCSVFile{
-				fileName: utils.DispatcherHostsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestProcessContentEmptyDataBase(t *testing.T) {
-	ldr := &Loader{
-		ldrID:         "TestLoaderProcessContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            nil,
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatcherHosts: {
-			{
-				Tag:       "Tenant",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:       "ID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true,
-			},
-			{
-				Tag:   "Address",
-				Path:  "Address",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
-			},
-			{
-				Tag:   "Transport",
-				Path:  "Transport",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
-			},
-			{
-				Tag:   "TLS",
-				Path:  "TLS",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
-			},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatcherHosts: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expectedErr := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestRemoveRateProfileContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveRateProfileContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	rtPrfCsv := `
-#Tenant[0],ID[1]
-cgrates.org,REM_RATEPROFILE_1
-`
-	rdr := io.NopCloser(strings.NewReader(rtPrfCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{
-				fileName: utils.RatesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expRtPrf := &utils.RateProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_RATEPROFILE_1",
-	}
-	if err := ldr.dm.SetRateProfile(context.Background(), expRtPrf, true); err != nil {
-		t.Error(err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remvoe from database
-	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove DispatcherHosts when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(rtPrfCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{
-				fileName: utils.RatesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	ldr.dryRun = true
-	ldr.flagsTpls = map[string]utils.FlagsWithParams{
-		utils.MetaRateProfiles: {
-			utils.MetaPartial: nil,
-		},
-	}
-	rdr = io.NopCloser(strings.NewReader(rtPrfCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{
-				fileName: utils.RatesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-
-}
-
-func TestRemoveActionProfileContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveActionProfileContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaActionProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	actPrfCsv := `
-#Tenant[0],ID[1]
-cgrates.org,REM_ACTPROFILE_1
-`
-	//cannot set ActionProfile when dataManager is nil
-	ldr.dm = nil
-	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{
-				fileName: utils.ActionsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-
-	//set dataManager
-	ldr.dm = engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil)
-	actRtPrf := &engine.ActionProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_ACTPROFILE_1",
-	}
-	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
-		t.Error(err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remove from database
-	if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove DispatcherHosts when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(actPrfCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{
-				fileName: utils.ActionsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestRemoveAccountContent(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveAccountContent",
-		dm:            nil,
-		bufLoaderData: make(map[string][]LoaderData),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccounts: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	acntPrfCsv := `
-#Tenant[0],ID[1]
-cgrates.org,REM_ACTPROFILE_1
-`
-	rdr := io.NopCloser(strings.NewReader(acntPrfCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccounts: {
-			utils.AccountsCsv: &openedCSVFile{
-				fileName: utils.AccountsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-
-	//set dataManager
-	ldr.dm = engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil)
-	acntPrf := &utils.Account{
-		Tenant: "cgrates.org",
-		ID:     "REM_ACTPROFILE_1",
-	}
-	if err := ldr.dm.SetAccount(context.Background(), acntPrf, true); err != nil {
-		t.Error(err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-
-	//nothing to remove from database
-	if err := ldr.removeContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//cannot remove Account when dryrun is true
-	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(acntPrfCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccounts: {
-			utils.AccountsCsv: &openedCSVFile{
-				fileName: utils.AccountsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	if err := ldr.removeContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestRemoveContentError1(t *testing.T) {
-	//use actionProfile to generate an error by giving a wrong csv
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveActionProfileContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaActionProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	//wrong start at the beginning of csv
-	actPrfCsv := `
-//Tenant[0]
-cgrates.org,REM_ACTPROFILE_s
-`
-	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{
-				fileName: utils.ActionsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	actRtPrf := &engine.ActionProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_ACTPROFILE_s",
-	}
-	expectedErr := "NOT_FOUND"
-	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
-		t.Error(err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestRemoveContentError2(t *testing.T) {
-	//use actionProfile to generate an error by giving a wrong csv
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveActionProfileContent",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaActionProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-		},
-	}
-	//wrong start at the beginning of csv
-	actPrfCsv := `
-Tenant[0],ID[1]
-cgrates.org,REM_ACTPROFILE_s
-`
-	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionsCsv: &openedCSVFile{
-				fileName: utils.ActionsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	actRtPrf := &engine.ActionProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_ACTPROFILE_s",
-	}
-	expectedErr := "NOT_FOUND"
-	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
-		t.Error(err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoaderListenAndServe(t *testing.T) {
-	ldr := &Loader{}
-	stopChan := make(chan struct{}, 1)
-	go func() {
-		time.Sleep(10)
-		stopChan <- struct{}{}
-	}()
-
-	if err := ldr.ListenAndServe(stopChan); err != nil {
-		t.Error(err)
-	}
-
-	ldr.runDelay = -1
-	if err := ldr.ListenAndServe(stopChan); err != nil {
-		t.Error(err)
-	}
-
-	ldr.runDelay = 1
-	if err := ldr.ListenAndServe(stopChan); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestRemoveRateProfileRatesError(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveRateProfileRatesMockError",
-		bufLoaderData: make(map[string][]LoaderData),
-		flagsTpls:     make(map[string]utils.FlagsWithParams),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: {
-			{
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
-			{
-				Path:  "RateIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-		},
-	}
-	rtPrfCsv := `
-#Tenant[0],ID[1],RateIDs[2]
-cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
-`
-	rdr := io.NopCloser(strings.NewReader(rtPrfCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{
-				fileName: utils.RatesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	expRtPrf := &utils.RateProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_RATEPROFILE_1",
-	}
-	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	ldr.dm = nil
-	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
-	}
-
-	rdr = io.NopCloser(strings.NewReader(rtPrfCsv))
-	csvRdr = csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RatesCsv: &openedCSVFile{
-				fileName: utils.RatesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{"INVALID_FLAGS"})
-	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
-	}
-
-	ldr.dm = engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil)
-	if err := ldr.dm.SetRateProfile(context.Background(), expRtPrf, true); err != nil {
-		t.Error(err)
-	}
-
-	ldr.dm = nil
-	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
-	}
-}
-
-func TestRemoveThresholdsMockError(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveThresholdsMockError",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-		dataTpls: map[string][]*config.FCTemplate{
-			utils.MetaThresholds: {
-				{
-					Path:      "Tenant",
-					Type:      utils.MetaComposed,
-					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-					Mandatory: true},
-				{
-					Path:      "ID",
-					Type:      utils.MetaComposed,
-					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-					Mandatory: true},
-			},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(`#Tenant[0],ID[1]
-	cgrates.org,REM_THRESHOLDS_1,`))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: {
-			utils.ThresholdsCsv: &openedCSVFile{
-				fileName: utils.ThresholdsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-
-	expected := utils.ErrNoDatabaseConn
-	ldr.dm = engine.NewDataManager(&engine.DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *engine.ThresholdProfile, err error) {
-			return &engine.ThresholdProfile{
-				Tenant: "cgrates.org",
-				ID:     "REM_THRESHOLDS_1",
-			}, nil
-		},
-		SetThresholdProfileDrvF: func(ctx *context.Context, tp *engine.ThresholdProfile) (err error) { return expected },
-		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return expected },
-	}, cfg.CacheCfg(), nil)
-	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveStatQueueMockError(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestRemoveStatQueueError",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-		dataTpls: map[string][]*config.FCTemplate{
-			utils.MetaStats: {
-				{
-					Path:      "Tenant",
-					Type:      utils.MetaComposed,
-					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-					Mandatory: true},
-				{
-					Path:      "ID",
-					Type:      utils.MetaComposed,
-					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-					Mandatory: true},
-			},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(`#Tenant[0],ProfileID[1]
-cgrates.org,REM_STATS_1`))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{
-				fileName: utils.StatsCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
-		},
-	}
-
-	expected := utils.ErrNoDatabaseConn
-	ldr.dm = engine.NewDataManager(&engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *engine.StatQueueProfile, err error) {
-			return nil, nil
-		},
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *engine.StatQueueProfile) (err error) { return expected },
-		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return expected },
-	}, cfg.CacheCfg(), nil)
-
-	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestRemoveResourcesMockError(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	ldr := &Loader{
-		ldrID:         "TestLoadAndRemoveResources",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(loaderDB, cfg.CacheCfg(), nil),
-		timezone:      "UTC",
-		dataTpls: map[string][]*config.FCTemplate{
-			utils.MetaResources: {
-				{
-					Path:      "Tenant",
-					Type:      utils.MetaComposed,
-					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-					Mandatory: true},
-				{
-					Path:      "ID",
-					Type:      utils.MetaComposed,
-					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-					Mandatory: true},
-			},
-		},
-	}
-	rdr := io.NopCloser(strings.NewReader(`	#Tenant[0],ID[1]
-	cgrates.org,NewRes1`))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaResources: {
-			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
-				rdr: rdr, csvRdr: rdrCsv}},
-	}
-
-	expected := utils.ErrNoDatabaseConn
-	ldr.dm = engine.NewDataManager(&engine.DataDBMock{
-		GetResourceProfileDrvF:    func(ctx *context.Context, tnt, id string) (*engine.ResourceProfile, error) { return nil, nil },
-		SetResourceProfileDrvF:    func(ctx *context.Context, rp *engine.ResourceProfile) error { return expected },
-		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error { return expected },
-	}, cfg.CacheCfg(), nil)
-
-	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestLoaderHandleFolder(t *testing.T) {
-	stopChan := make(chan struct{}, 1)
-	stopChan <- struct{}{}
-	ldr := &Loader{
-		ldrID:    "TestLoaderHandleFolder",
-		runDelay: 1,
-	}
-	ldr.handleFolder(stopChan)
-}
-
-func TestLoaderServiceEnabled(t *testing.T) {
-	//THis is an empty loader, so there is not an active loader
-	ldrs := &LoaderService{}
-	if rcv := ldrs.Enabled(); rcv {
-		t.Errorf("Expected false, received %+v", rcv)
-	}
-}
-
-type ccMock struct {
-	calls map[string]func(ctx *context.Context, args interface{}, reply interface{}) error
-}
-
-func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
-	if call, has := ccM.calls[serviceMethod]; !has {
-		return rpcclient.ErrUnsupporteServiceMethod
-	} else {
-		return call(ctx, args, reply)
-	}
-}
-
-func TestStoreLoadedDataAttributes(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:             nil,
-		Tenant:              "",
-		AttributeProfileIDs: []string{"cgrates.org:attributesID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"Attributes": {
-			{
-				"Tenant": "cgrates.org",
-				"ID":     "attributesID",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaAttributes, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreLoadedDataResources(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:            nil,
-		Tenant:             "",
-		ResourceIDs:        []string{"cgrates.org:resourcesID"},
-		ResourceProfileIDs: []string{"cgrates.org:resourcesID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"Resources": {
-			{
-				"Tenant": "cgrates.org",
-				"ID":     "resourcesID",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaResources, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreLoadedDataFilters(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:   nil,
-		Tenant:    "",
-		FilterIDs: []string{"cgrates.org:filtersID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"Filters": {
-			{
-				"Tenant": "cgrates.org",
-				"ID":     "filtersID",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaFilters, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreLoadedDataStats(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:              nil,
-		Tenant:               "",
-		StatsQueueIDs:        []string{"cgrates.org:statsID"},
-		StatsQueueProfileIDs: []string{"cgrates.org:statsID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"StatsQueue": {
-			{
-				"Tenant": "cgrates.org",
-				"ID":     "statsID",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaStats, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreLoadedDataThresholds(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:             nil,
-		Tenant:              "",
-		ThresholdIDs:        []string{"cgrates.org:thresholdsID"},
-		ThresholdProfileIDs: []string{"cgrates.org:thresholdsID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"Thresholds": {
-			{
-				"Tenant": "cgrates.org",
-				"ID":     "thresholdsID",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaThresholds, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreLoadedDataRoutes(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:         nil,
-		Tenant:          "",
-		RouteProfileIDs: []string{"cgrates.org:routesID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"Routes": {
-			{
-				"Tenant": "cgrates.org",
-				"ID":     "routesID",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaRoutes, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreLoadedDataChargers(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:           nil,
-		Tenant:            "",
-		ChargerProfileIDs: []string{"cgrates.org:chargersID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"Chargers": {
-			{
-				"Tenant": "cgrates.org",
-				"ID":     "chargersID",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaChargers, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreLoadedDataDispatchers(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:              nil,
-		Tenant:               "",
-		DispatcherProfileIDs: []string{"cgrates.org:dispatchersID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"Dispatchers": {
-			{
-				"Tenant": "cgrates.org",
-				"ID":     "dispatchersID",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaDispatchers, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.StorDbCfg().Items)
-	argExpect := &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts:           nil,
-		Tenant:            "",
-		DispatcherHostIDs: []string{"cgrates.org:dispatcherHostsID"},
-	}
-	cM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				if !reflect.DeepEqual(args, argExpect) {
-					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
-				}
-				return nil
-			},
-			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
-				return nil
-			},
-		},
-	}
-
-	rpcInternal := make(chan birpc.ClientConnector, 1)
-	rpcInternal <- cM
-	connMgr := engine.NewConnManager(cfg)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), utils.CacheSv1, rpcInternal)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
-	// ldr := &Loader{
-
-	// }
-	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	loaderCfg := cfg.LoaderCfg()
-	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
-	lds := map[string][]LoaderData{
-		"DispatcherHosts": {
-			{
-				"Tenant":  "cgrates.org",
-				"ID":      "dispatcherHostsID",
-				"Address": "192.168.100.1",
-			},
-		},
-	}
-	if err := ldr.storeLoadedData(context.Background(), utils.MetaDispatcherHosts, lds, utils.MetaReload); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestLockFolderEmptyString(t *testing.T) {
-	ldr := &Loader{
-		enabled:      true,
-		tenant:       "cgrates.org",
-		dryRun:       false,
-		ldrID:        "ldrid",
-		tpInDir:      "/var/spool/cgrates/loader/in",
-		tpOutDir:     "/var/spool/cgrates/loader/out",
-		lockFilepath: utils.EmptyString,
-		fieldSep:     utils.InfieldSep,
-	}
-
-	if err := ldr.lockFolder(); err != nil {
-		t.Error(err)
-	}
-}
-
-// func TestLockFolderIsDir(t *testing.T) {
-// 	ldr := &Loader{
-// 		enabled:      true,
-// 		tenant:       "cgrates.org",
-// 		dryRun:       false,
-// 		ldrID:        "ldrid",
-// 		tpInDir:      "/var/spool/cgrates/loader/in",
-// 		tpOutDir:     "/var/spool/cgrates/loader/out",
-// 		lockFilepath: "/tmp",
-// 		fieldSep:     utils.InfieldSep,
-// 	}
-
-// 	expPath := path.Join(ldr.lockFilepath, ldr.ldrID+".lck")
-// 	ldr.lockFolder()
-
-// 	if ldr.lockFilepath != expPath {
-// 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.lockFilepath)
-// 	}
-// }
-*/
 
 func TestRemoveFromDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -5643,5 +492,827 @@ func TestSetToDB(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v12, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v12), utils.ToJSON(prf))
+	}
+}
+
+func TestLoaderProcess(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, nil)
+	if expLd := (&loader{
+		cfg:       cfg,
+		ldrCfg:    cfg.LoaderCfg()[0],
+		dm:        dm,
+		filterS:   fS,
+		connMgr:   cM,
+		dataCache: cache,
+		Locker:    newLocker(cfg.LoaderCfg()[0].GetLockFilePath()),
+	}); !reflect.DeepEqual(expLd, ld) {
+		t.Errorf("Expeceted: %+v, received: %+v", expLd, ld)
+	}
+
+	expErrMsg := `unsupported loader action: <"notSupported">`
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{}, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{}, utils.MetaAttributes, utils.MetaParse, utils.MetaNone, true, false); err != nil {
+		t.Error(err)
+	}
+
+	buf := bytes.NewBuffer([]byte{})
+	log.SetOutput(buf)
+	lgr := utils.Logger
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	utils.Logger.SetLogLevel(7)
+
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaDryRun, utils.MetaNone, true, false); err != nil {
+		t.Error(err)
+	}
+	utils.Logger = lgr
+	log.SetOutput(os.Stderr)
+
+	if expLog, rplyLog := "[INFO] <LoaderS-*default> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Attributes\":[],\"Blocker\":false,\"Weight\":0}",
+		buf.String(); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err != nil {
+		t.Error(err)
+	}
+	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v1, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
+	}
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaRemove, utils.MetaNone, true, false); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+}
+
+type ccMock map[string]func(ctx *context.Context, args interface{}, reply interface{}) error
+
+func (ccM ccMock) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
+	if call, has := ccM[serviceMethod]; has {
+		return call(ctx, args, reply)
+	}
+	return rpcclient.ErrUnsupporteServiceMethod
+}
+
+func TestLoaderProcessCallCahe(t *testing.T) {
+	var reloadCache, clearCache interface{}
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCache)
+	tntID := "cgrates.org:ID"
+	iCh := make(chan birpc.ClientConnector, 1)
+	iCh <- ccMock{
+		utils.CacheSv1ReloadCache: func(_ *context.Context, args, _ interface{}) error { reloadCache = args; return nil },
+		utils.CacheSv1Clear:       func(_ *context.Context, args, _ interface{}) error { clearCache = args; return nil },
+	}
+	cM.AddInternalConn(connID, utils.CacheSv1, iCh)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, []string{connID})
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{AttributeProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheAttributeFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaResources, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ThresholdIDs: []string{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{ResourceProfileIDs: []string{tntID}, ResourceIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheResourceFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaStats, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ThresholdIDs: []string{}, Metrics: []*engine.MetricWithFilters{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheStatFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaThresholds, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ActionProfileIDs: []string{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheThresholdFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaRoutes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.RouteProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, SortingParameters: []string{}, Routes: []*engine.Route{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{RouteProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheRouteFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaChargers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, AttributeIDs: []string{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{ChargerProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheChargerFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaDispatchers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, StrategyParams: make(map[string]interface{}), Hosts: engine.DispatcherHostProfiles{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaRateProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&utils.RateProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{RateProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaActionProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Targets: map[string]utils.StringSet{}, Actions: []*engine.APAction{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{ActionProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+
+	reloadCache, clearCache = nil, nil
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaFilters, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: []*engine.FilterRule{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{FilterIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if !reflect.DeepEqual(nil, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
+	}
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"}}, utils.MetaDispatcherHosts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherHostIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if !reflect.DeepEqual(nil, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
+	}
+
+	reloadCache, clearCache = nil, nil
+
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAccounts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+		t.Error(err)
+	}
+	if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
+		t.Fatal(err)
+	} else if v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Balances: map[string]*utils.Balance{}, ThresholdIDs: []string{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if exp := (&utils.AttrReloadCacheWithAPIOpts{}); !reflect.DeepEqual(exp, reloadCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+	}
+	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	}
+}
+
+func TestLoaderProcessData(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, nil)
+
+	fc := []*config.FCTemplate{
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
+cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err != nil {
+		t.Fatal(err)
+	}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID2", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID2", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+}
+
+type mockCSV struct{}
+
+func (mockCSV) Path() (_ string)        { return }
+func (mockCSV) Read() ([]string, error) { return nil, utils.ErrNotFound }
+func (mockCSV) Close() (_ error)        { return }
+
+func TestLoaderProcessDataErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, nil)
+
+	fc := []*config.FCTemplate{
+		{Filters: []string{"*string"}},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	expErrMsg := "inline parse error for string: <*string>"
+	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
+cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
+	}
+
+	fc = []*config.FCTemplate{
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	expErrMsg = `unsupported loader action: <"notSupported">`
+	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
+cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
+	}
+
+	if err := ld.processData(context.Background(), mockCSV{}, fc, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err != utils.ErrNotFound {
+		t.Errorf("Expeceted: %q, received: %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestLoaderProcessFileURL(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, nil)
+
+	fc := []*config.FCTemplate{
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle("/ok/", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { rw.Write([]byte(`cgrates.org,ID`)) }))
+	s := httptest.NewServer(mux)
+	defer s.Close()
+	runtime.Gosched()
+
+	if err := ld.processFile(context.Background(), &config.LoaderDataType{
+		Type:     utils.MetaAttributes,
+		Filename: utils.AttributesCsv,
+		Fields:   fc,
+	}, s.URL+"/ok", utils.EmptyString, utils.MetaStore, utils.MetaNone, true); err != nil {
+		t.Fatal(err)
+	}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+
+	if err := ld.processFile(context.Background(), &config.LoaderDataType{
+		Type:     utils.MetaAttributes,
+		Filename: utils.AttributesCsv,
+		Fields:   fc,
+	}, s.URL+"/notFound", utils.EmptyString, utils.MetaStore, utils.MetaNone, true); err != utils.ErrNotFound {
+		t.Errorf("Expeceted: %v, received: %v", utils.ErrNotFound, err)
+	}
+
+}
+
+type mockLock struct{}
+
+// lockFolder will attempt to lock the folder by creating the lock file
+func (mockLock) Lock() error                { return utils.ErrExists }
+func (mockLock) Unlock() (_ error)          { return }
+func (mockLock) Locked() (_ bool, _ error)  { return true, utils.ErrExists }
+func (mockLock) IsLockFile(string) (_ bool) { return }
+
+func TestLoaderProcessIFile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	fc := []*config.FCTemplate{
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	tmpIn, err := os.MkdirTemp(utils.EmptyString, "TestLoaderProcessIFileIn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpIn)
+	tmpOut, err := os.MkdirTemp(utils.EmptyString, "TestLoaderProcessIFileOut")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpOut)
+	ld := newLoader(cfg, &config.LoaderSCfg{
+		ID:       "test",
+		Enabled:  true,
+		TpInDir:  tmpIn,
+		TpOutDir: tmpOut,
+		Data: []*config.LoaderDataType{
+			{
+				Type:     utils.MetaAttributes,
+				Filename: utils.AttributesCsv,
+				Fields:   fc,
+			},
+		},
+		FieldSeparator: utils.FieldsSep,
+		Action:         utils.MetaStore,
+		Opts: &config.LoaderSOptsCfg{
+			WithIndex: true,
+			Cache:     utils.MetaNone,
+		},
+	}, dm, cache, "", fS, cM, nil)
+	expErrMsg := fmt.Sprintf(`rename %s/Chargers.csv %s/Chargers.csv: no such file or directory`, tmpIn, tmpOut)
+	if err := ld.processIFile(utils.EmptyString, utils.ChargersCsv); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.WriteString(`cgrates.org,ID`); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := ld.processIFile(utils.EmptyString, utils.AttributesCsv); err != nil {
+		t.Fatal(err)
+	}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+
+	if _, err := os.Stat(path.Join(tmpIn, utils.AttributesCsv)); err == nil {
+		t.Errorf("Expected file to be moved")
+	} else if !os.IsNotExist(err) {
+		t.Error(err)
+	}
+	if _, err := os.Stat(path.Join(tmpOut, utils.AttributesCsv)); err != nil {
+		t.Errorf("Expected file to be moved")
+	}
+
+	ld.Locker = mockLock{}
+	if err := ld.processIFile(utils.EmptyString, utils.AttributesCsv); err != utils.ErrExists {
+		t.Fatal(err)
+	}
+}
+
+func TestLoaderProcessFolder(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	fc := []*config.FCTemplate{
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	tmpIn, err := os.MkdirTemp(utils.EmptyString, "TestLoaderProcessFolderIn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpIn)
+	tmpOut, err := os.MkdirTemp(utils.EmptyString, "TestLoaderProcessFolderOut")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpOut)
+	ld := newLoader(cfg, &config.LoaderSCfg{
+		ID:       "test",
+		Enabled:  true,
+		TpInDir:  tmpIn,
+		TpOutDir: tmpOut,
+		Data: []*config.LoaderDataType{
+			{
+				Type:     utils.MetaAttributes,
+				Filename: utils.AttributesCsv,
+				Fields:   fc,
+			},
+		},
+		FieldSeparator: utils.FieldsSep,
+		Action:         utils.MetaStore,
+		Opts: &config.LoaderSOptsCfg{
+			WithIndex: true,
+			Cache:     utils.MetaNone,
+		},
+	}, dm, cache, "", fS, cM, nil)
+
+	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.WriteString(`cgrates.org,ID`); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	f, err = os.Create(path.Join(tmpIn, utils.ChargersCsv))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.WriteString(`cgrates.org,ID`); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+
+	if _, err := os.Stat(path.Join(tmpIn, utils.AttributesCsv)); err == nil {
+		t.Errorf("Expected file to be moved")
+	} else if !os.IsNotExist(err) {
+		t.Error(err)
+	}
+	if _, err := os.Stat(path.Join(tmpOut, utils.AttributesCsv)); err != nil {
+		t.Errorf("Expected file to be moved")
+	}
+
+	if _, err := os.Stat(path.Join(tmpIn, utils.ChargersCsv)); err == nil {
+		t.Errorf("Expected file to be moved")
+	} else if !os.IsNotExist(err) {
+		t.Error(err)
+	}
+	if _, err := os.Stat(path.Join(tmpOut, utils.ChargersCsv)); err != nil {
+		t.Errorf("Expected file to be moved")
+	}
+
+	ld.Locker = mockLock{}
+	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err != utils.ErrExists {
+		t.Fatal(err)
+	}
+}
+
+func TestLoaderProcessFolderErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	fc := []*config.FCTemplate{
+		{Filters: []string{"*string"}},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	tmpIn, err := os.MkdirTemp(utils.EmptyString, "TestLoaderProcessFolderErrorsIn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpIn)
+	tmpOut, err := os.MkdirTemp(utils.EmptyString, "TestLoaderProcessFolderErrorsOut")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpOut)
+	ld := newLoader(cfg, &config.LoaderSCfg{
+		ID:       "test",
+		Enabled:  true,
+		TpInDir:  tmpIn,
+		TpOutDir: tmpOut,
+		Data: []*config.LoaderDataType{
+			{
+				Type:     utils.MetaAttributes,
+				Filename: utils.AttributesCsv,
+				Fields:   fc,
+			},
+		},
+		FieldSeparator: utils.FieldsSep,
+		Action:         utils.MetaStore,
+		Opts: &config.LoaderSOptsCfg{
+			WithIndex: true,
+			Cache:     utils.MetaNone,
+		},
+	}, dm, cache, "", fS, cM, nil)
+
+	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.WriteString(`cgrates.org,ID`); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	expErrMsg := "inline parse error for string: <*string>"
+	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat(path.Join(tmpIn, utils.AttributesCsv)); err != nil {
+		t.Errorf("Expected file to not be moved because of template error: %v", err)
+	}
+
+	buf := bytes.NewBuffer([]byte{})
+	log.SetOutput(buf)
+	lgr := utils.Logger
+	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	utils.Logger.SetLogLevel(7)
+	if err := ld.processFolder(context.Background(), utils.MetaNone, true, false); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if expLog, rplyLog := "<LoaderS-test> loaderType: <*attributes> cannot open files, err: inline parse error for string: <*string>",
+		buf.String(); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+
+}
+
+func TestLoaderMoveUnprocessedFilesErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	ld := newLoader(cfg, &config.LoaderSCfg{
+		ID:      "test",
+		Enabled: true,
+		TpInDir: "notAFolder",
+	}, nil, nil, "", nil, nil, nil)
+
+	expErrMsg := "open notAFolder: no such file or directory"
+	if err := ld.moveUnprocessedFiles(); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	tmpIn, err := os.MkdirTemp(utils.EmptyString, "TestLoaderMoveUnprocessedFilesErrorsIn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpIn)
+	ld.ldrCfg.TpInDir = tmpIn
+	ld.ldrCfg.TpOutDir = "notAFolder"
+	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	expErrMsg = fmt.Sprintf("rename %s/Attributes.csv notAFolder/Attributes.csv: no such file or directory", tmpIn)
+	if err := ld.moveUnprocessedFiles(); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}
+
+func TestLoaderHandleFolder(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	ld := newLoader(cfg, &config.LoaderSCfg{
+		ID:       "test",
+		Enabled:  true,
+		RunDelay: time.Nanosecond,
+		TpInDir:  "/tmp/TestLoaderHandleFolder",
+		Opts:     &config.LoaderSOptsCfg{},
+	}, nil, nil, "", nil, nil, nil)
+	ld.Locker = mockLock{}
+	stop := make(chan struct{})
+	close(stop)
+
+	buf := bytes.NewBuffer([]byte{})
+	log.SetOutput(buf)
+	lgr := utils.Logger
+	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	utils.Logger.SetLogLevel(7)
+
+	ld.handleFolder(stop)
+
+	if expLog, rplyLog := "[INFO] <LoaderS-test> stop monitoring path </tmp/TestLoaderHandleFolder>",
+		buf.String(); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+}
+
+func TestLoaderListenAndServe(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	ld := newLoader(cfg, &config.LoaderSCfg{
+		ID:       "test",
+		Enabled:  true,
+		RunDelay: time.Nanosecond,
+		TpInDir:  "/tmp/TestLoaderListenAndServe",
+		Opts:     &config.LoaderSOptsCfg{},
+	}, nil, nil, "", nil, nil, nil)
+	ld.Locker = mockLock{}
+	stop := make(chan struct{})
+	close(stop)
+
+	buf := bytes.NewBuffer([]byte{})
+	log.SetOutput(buf)
+	lgr := utils.Logger
+	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	utils.Logger.SetLogLevel(7)
+
+	ld.ListenAndServe(stop)
+	runtime.Gosched()
+	time.Sleep(time.Nanosecond)
+	if expLog, rplyLog := "[INFO] Starting <LoaderS-test>",
+		buf.String(); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+}
+
+func TestLoaderListenAndServeI(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	ld := newLoader(cfg, &config.LoaderSCfg{
+		ID:       "test",
+		Enabled:  true,
+		TpInDir:  "/tmp/TestLoaderListenAndServeI",
+		RunDelay: -1,
+		Opts:     &config.LoaderSOptsCfg{},
+	}, nil, nil, "", nil, nil, nil)
+	ld.Locker = mockLock{}
+	stop := make(chan struct{})
+	close(stop)
+
+	buf := bytes.NewBuffer([]byte{})
+	log.SetOutput(buf)
+	lgr := utils.Logger
+	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	utils.Logger.SetLogLevel(7)
+
+	ld.ListenAndServe(stop)
+	runtime.Gosched()
+	time.Sleep(time.Nanosecond)
+	if expLog, rplyLog := "[INFO] Starting <LoaderS-test>",
+		buf.String(); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 }

@@ -48,7 +48,7 @@ func NewCSVReader(csvType, dPath, fn string, sep rune, nrFlds int) (CSVReader, e
 	case utils.MetaGoogleAPI: // TODO: Implement *gapi
 		return nil, nil
 	case utils.MetaString:
-		return NewStringCSV(fn, sep, nrFlds)
+		return NewStringCSV(fn, sep, nrFlds), nil
 	default:
 		return nil, fmt.Errorf("unsupported CSVReader type: <%q>", csvType)
 	}
@@ -75,8 +75,8 @@ func NewFileCSV(path string, sep rune, nrFlds int) (_ CSVReader, err error) {
 	return NewCSVFile(file, path, sep, nrFlds), nil
 }
 
-func NewStringCSV(data string, sep rune, nrFlds int) (_ CSVReader, err error) {
-	return NewCSVFile(io.NopCloser(strings.NewReader(data)), data, sep, nrFlds), nil
+func NewStringCSV(data string, sep rune, nrFlds int) (_ CSVReader) {
+	return NewCSVFile(io.NopCloser(strings.NewReader(data)), data, sep, nrFlds)
 }
 
 func NewURLCSV(path string, sep rune, nrFlds int) (_ CSVReader, err error) {

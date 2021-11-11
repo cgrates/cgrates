@@ -69,20 +69,21 @@ var (
 		testLoadersGetStatQueueProfile,
 		testLoadersGetThresholdProfile,
 
-		testLoadersRemove,
-		testLoadersGetAccountAfterRemove,
-		testLoadersGetActionProfileAfterRemove,
-		testLoadersGetAttributeProfileAfterRemove,
-		testLoadersGetChargerProfileAfterRemove,
-		// testLoadersGetDispatcherProfileAfterRemove,
-		// testLoadersGetDispatcherHostAfterRemove,
-		testLoadersGetFilterAfterRemove,
-		testLoadersGetRateProfileAfterRemove,
-		testLoadersGetResourceProfileAfterRemove,
-		testLoadersGetRouteProfileAfterRemove,
-		testLoadersGetStatQueueProfileAfterRemove,
-		testLoadersGetThresholdProfileAfterRemove,
-
+		/*
+			testLoadersRemove,
+			testLoadersGetAccountAfterRemove,
+			testLoadersGetActionProfileAfterRemove,
+			testLoadersGetAttributeProfileAfterRemove,
+			testLoadersGetChargerProfileAfterRemove,
+			// testLoadersGetDispatcherProfileAfterRemove,
+			// testLoadersGetDispatcherHostAfterRemove,
+			testLoadersGetFilterAfterRemove,
+			testLoadersGetRateProfileAfterRemove,
+			testLoadersGetResourceProfileAfterRemove,
+			testLoadersGetRouteProfileAfterRemove,
+			testLoadersGetStatQueueProfileAfterRemove,
+			testLoadersGetThresholdProfileAfterRemove,
+		*/
 		testLoadersRemoveFolders,
 
 		testLoadersPing,
@@ -262,10 +263,12 @@ cgrates.org,THD_ACNT_1001,FLTR_ACCOUNT_1001,10,-1,0,0,false,ACT_PRF,false`); err
 
 func testLoadersLoad(t *testing.T) {
 	var reply string
-	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Load,
+	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			StopOnError: true,
-			Caching:     utils.StringPointer(utils.MetaReload),
+			APIOpts: map[string]interface{}{
+				utils.MetaCache:       utils.MetaReload,
+				utils.MetaStopOnError: true,
+			},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -805,10 +808,12 @@ func testLoadersGetThresholdProfile(t *testing.T) {
 
 func testLoadersRemove(t *testing.T) {
 	var reply string
-	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Remove,
+	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run, //Remove,
 		&loaders.ArgsProcessFolder{
-			StopOnError: true,
-			Caching:     utils.StringPointer(utils.MetaReload),
+			APIOpts: map[string]interface{}{
+				utils.MetaCache:       utils.MetaReload,
+				utils.MetaStopOnError: true,
+			},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1100,6 +1105,7 @@ func TestLoadersLoad(t *testing.T) {
 		FieldSeparator: ";",
 		TpInDir:        dirPathIn,
 		TpOutDir:       dirPathOut,
+		Opts:           &config.LoaderSOptsCfg{},
 	}
 
 	cfg.LoaderCfg()[0] = loaderCfg
@@ -1113,11 +1119,11 @@ func TestLoadersLoad(t *testing.T) {
 		LoaderID: "LoaderID",
 	}
 	var reply string
-	if err := lSv1.Load(context.Background(), args, &reply); err != nil {
+	if err := lSv1.Run(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 
-	if err := lSv1.Remove(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	}
+	// if err := lSv1.Remove(context.Background(), args, &reply); err != nil {
+	// t.Error(err)
+	// }
 }
