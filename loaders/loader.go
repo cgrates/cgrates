@@ -710,6 +710,16 @@ func (l *loader) moveUnprocessedFiles() (err error) {
 				return
 			}
 
+func (l *loader) moveUnprocessedFiles() (err error) {
+	var fs []os.DirEntry
+	if fs, err = os.ReadDir(l.ldrCfg.TpInDir); err != nil {
+		return
+	}
+	for _, f := range fs {
+		if pathIn := path.Join(l.ldrCfg.TpInDir, f.Name()); !l.IsLockFile(pathIn) {
+			if err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, f.Name())); err != nil {
+				return
+			}
 		}
 
 	}
