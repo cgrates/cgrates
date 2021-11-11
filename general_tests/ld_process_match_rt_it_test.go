@@ -135,10 +135,12 @@ func testLdPrMatchRtRPCConn(t *testing.T) {
 
 func testLdPrMatchRtLoadTP(t *testing.T) {
 	var reply string
-	if err := testLdPrMatchRtRPC.Call(context.Background(), utils.LoaderSv1Load,
+	if err := testLdPrMatchRtRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			StopOnError: true,
-			Caching:     utils.StringPointer(utils.MetaReload),
+			APIOpts: map[string]interface{}{
+				utils.MetaStopOnError: true,
+				utils.MetaCache:       utils.MetaReload,
+			},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -170,8 +172,12 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := "OK"
-	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
+	if expected != rply {
+		t.Errorf("Expecting : %q, received: %q", expected, rply)
+	}
+	time.Sleep(50 * time.Millisecond)
+	if testRPC1.Event == nil {
+		t.Fatal("The rpc was not called")
 	}
 	costIntervalRatesID := testRPCrt1.Event.Event["*rateSCost"].(map[string]interface{})["CostIntervals"].([]interface{})[0].(map[string]interface{})["Increments"].([]interface{})[0].(map[string]interface{})["RateID"]
 	expected2 := &utils.CGREventWithEeIDs{

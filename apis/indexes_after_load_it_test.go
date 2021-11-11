@@ -109,10 +109,10 @@ func testIdxLoadRPCConn(t *testing.T) {
 
 func testIdxLoadTariffPlan(t *testing.T) {
 	var reply string
-	if err := idxLoadBiRPC.Call(context.Background(), utils.LoaderSv1Load,
+	if err := idxLoadBiRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
-			Caching: utils.StringPointer(utils.MetaReload), // after laod, we got CacheIDs and it will be called Cachesv1.Clear, so indexes will be removed
+			APIOpts: map[string]interface{}{utils.MetaCache: utils.MetaReload}, // after laod, we got CacheIDs and it will be called Cachesv1.Clear, so indexes will be removed
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

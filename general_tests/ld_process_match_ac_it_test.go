@@ -139,10 +139,12 @@ func testLdPrMatchAcLoadTP(t *testing.T) {
 		caching = utils.MetaNone
 	}
 	var reply string
-	if err := testLdPrMatchAcRPC.Call(context.Background(), utils.LoaderSv1Load,
+	if err := testLdPrMatchAcRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			StopOnError: true,
-			Caching:     utils.StringPointer(caching),
+			APIOpts: map[string]interface{}{
+				utils.MetaCache:       caching,
+				utils.MetaStopOnError: true,
+			},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

@@ -23,7 +23,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -511,7 +510,7 @@ func newLoader(cfg *config.CGRConfig, ldrCfg *config.LoaderSCfg, dm *engine.Data
 		connMgr:    connMgr,
 		cacheConns: cacheConns,
 		dataCache:  dataCache,
-		Locker:     newLocker(ldrCfg.LockFilePath),
+		Locker:     newLocker(ldrCfg.GetLockFilePath()),
 	}
 }
 
@@ -576,13 +575,12 @@ func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet [
 		cacheArgs[utils.CacheDispatcherProfiles] = []string{tntId}
 	case utils.MetaDispatcherHosts:
 		cacheArgs[utils.CacheDispatcherHosts] = []string{tntId}
-
 	case utils.MetaRateProfiles:
 		cacheIDs = []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}
 		cacheArgs[utils.CacheRateProfiles] = []string{tntId}
 	case utils.MetaActionProfiles:
 		cacheIDs = []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}
-		cacheArgs[utils.CacheRateProfiles] = []string{tntId}
+		cacheArgs[utils.CacheActionProfiles] = []string{tntId}
 	case utils.MetaAccounts:
 		cacheIDs = []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}
 
@@ -598,6 +596,7 @@ func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*confi
 		var record []string
 		if record, err = csv.Read(); err != nil {
 			if err == io.EOF {
+				err = nil
 				break
 			}
 			utils.Logger.Warning(
@@ -624,15 +623,18 @@ func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*confi
 		}
 		lData = append(lData, data)
 	}
-	return l.process(ctx, prevTntID, lData, lType, action, caching, withIndex, partialRates)
+	if prevTntID != nil {
+		err = l.process(ctx, prevTntID, lData, lType, action, caching, withIndex, partialRates)
+	}
+	return
 }
 
 func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action, caching string, withIndex bool) (err error) {
 	csvType := utils.MetaFileCSV
 	switch {
-	case strings.HasPrefix(inPath, gprefix):
-		csvType = utils.MetaGoogleAPI
-		inPath = strings.TrimPrefix(inPath, gprefix)
+	// case strings.HasPrefix(inPath, gprefix): // uncomment this after *gapi is implemented
+	// 	csvType = utils.MetaGoogleAPI
+	// 	inPath = strings.TrimPrefix(inPath, gprefix)
 	case utils.IsURL(inPath):
 		csvType = utils.MetaUrl
 	}
@@ -656,13 +658,13 @@ func (l *loader) getCfg(fileName string) (cfg *config.LoaderDataType) {
 			return
 		}
 	}
-	return
+	return nil
 }
 
 func (l *loader) processIFile(_, fileName string) (err error) {
 	cfg := l.getCfg(fileName)
 	if cfg == nil {
-		if pathIn := path.Join(l.ldrCfg.TpInDir, fileName); l.IsLockFile(pathIn) && len(l.ldrCfg.TpOutDir) != 0 {
+		if pathIn := path.Join(l.ldrCfg.TpInDir, fileName); !l.IsLockFile(pathIn) && len(l.ldrCfg.TpOutDir) != 0 {
 			err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, fileName))
 		}
 		return
@@ -686,23 +688,29 @@ func (l *loader) processFolder(ctx *context.Context, caching string, withIndex, 
 				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))
 				err = nil
+				continue
 			}
 			return
 		}
 	}
 	if len(l.ldrCfg.TpOutDir) != 0 {
-		var fs []os.DirEntry
-		if fs, err = os.ReadDir(l.ldrCfg.TpInDir); err != nil {
-			return
-		}
-		for _, f := range fs {
-			if pathIn := path.Join(l.ldrCfg.TpInDir, f.Name()); !l.IsLockFile(pathIn) {
-				if err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, f.Name())); err != nil {
-					return
-				}
-			}
+		err = l.moveUnprocessedFiles()
+	}
+	return
+}
 
+func (l *loader) moveUnprocessedFiles() (err error) {
+	var fs []os.DirEntry
+	if fs, err = os.ReadDir(l.ldrCfg.TpInDir); err != nil {
+		return
+	}
+	for _, f := range fs {
+		if pathIn := path.Join(l.ldrCfg.TpInDir, f.Name()); !l.IsLockFile(pathIn) {
+			if err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, f.Name())); err != nil {
+				return
+			}
 		}
+
 	}
 	return
 }

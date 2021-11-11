@@ -152,10 +152,9 @@ func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	// 	t.Error("Unexpected reply returned", reply)
 	// }
 	// time.Sleep(100 * time.Millisecond)
-	args := &loaders.ArgsProcessFolder{
-		Caching: utils.StringPointer(utils.MetaReload),
-	}
-	if err := anzRPC.Call(utils.LoaderSv1Load, args, &reply); err != nil {
+	if err := anzRPC.Call(utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
+		APIOpts: map[string]interface{}{utils.MetaCache: utils.MetaReload},
+	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
