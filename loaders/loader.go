@@ -720,7 +720,6 @@ func (l *loader) moveUnprocessedFiles() (err error) {
 			if err = os.Rename(pathIn, path.Join(l.ldrCfg.TpOutDir, f.Name())); err != nil {
 				return
 			}
-
 		}
 
 	}
