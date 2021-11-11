@@ -21,23 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-// import (
-// 	"net/rpc"
-// 	"path"
-// 	"reflect"
-// 	"testing"
-// 	"time"
-
-// 	"github.com/cgrates/cgrates/config"
-// 	"github.com/cgrates/cgrates/engine"
-// 	"github.com/cgrates/cgrates/utils"
-// )
-
 // var (
 // 	splSv1CfgPath string
 // 	splSv1Cfg     *config.CGRConfig
-// 	splSv1Rpc     *rpc.Client
-// 	splPrf        *v1.RouteWithAPIOpts
+// 	splSv1Rpc     *birpc.Client
+// 	splPrf        *engine.APIRouteProfileWithAPIOpts
 // 	splSv1ConfDIR string //run tests for specific configuration
 
 // 	sTestsSupplierSV1 = []func(t *testing.T){
@@ -46,7 +34,6 @@ package general_tests
 // 		testV1SplSResetStorDb,
 // 		testV1SplSStartEngine,
 // 		testV1SplSRpcConn,
-// 		testV1SplSFromFolder,
 // 		testV1SplSSetSupplierProfilesWithoutRateProfileIDs,
 // 		//tests for *reas sorting strategy
 // 		testV1SplSAddNewSplPrf,
@@ -85,7 +72,7 @@ package general_tests
 // func testV1SplSLoadConfig(t *testing.T) {
 // 	var err error
 // 	splSv1CfgPath = path.Join(*dataDir, "conf", "samples", splSv1ConfDIR)
-// 	if splSv1Cfg, err = config.NewCGRConfigFromPath(splSv1CfgPath); err != nil {
+// 	if splSv1Cfg, err = config.NewCGRConfigFromPath(context.Background(), splSv1CfgPath); err != nil {
 // 		t.Error(err)
 // 	}
 // }
@@ -111,55 +98,52 @@ package general_tests
 
 // func testV1SplSRpcConn(t *testing.T) {
 // 	var err error
-// 	splSv1Rpc, err = newRPCClient(splSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+// 	splSv1Rpc, err = newRPCClient(splSv1Cfg.ListenCfg())
 // 	if err != nil {
 // 		t.Fatal("Could not connect to rater: ", err.Error())
 // 	}
 // }
 
-// func testV1SplSFromFolder(t *testing.T) {
-// 	var reply string
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-// 	if err := splSv1Rpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-// 		t.Error(err)
-// 	}
-// 	time.Sleep(100 * time.Millisecond)
-// }
-
 // func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
-// 	var reply *engine.RouteProfile
-// 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-// 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err == nil ||
+// 	var reply *engine.APIRouteProfile
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
+// 		&utils.TenantIDWithAPIOpts{
+// 			TenantID: &utils.TenantID{
+// 				Tenant: "cgrates.org", ID: "TEST_PROFILE2",
+// 			},
+// 		}, &reply); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Error(err)
 // 	}
-// 	splPrf = &v1.RouteWithAPIOpts{
-// 		RouteProfile: &engine.RouteProfile{
+// 	splPrf = &engine.APIRouteProfileWithAPIOpts{
+// 		APIRouteProfile: &engine.APIRouteProfile{
 // 			Tenant:  "cgrates.org",
 // 			ID:      "TEST_PROFILE2",
 // 			Sorting: utils.MetaLC,
-// 			Routes: []*engine.Route{
+// 			Routes: []*engine.ExternalRoute{
 // 				{
 // 					ID:         "ROUTE1",
 // 					AccountIDs: []string{"accc"},
-// 					Weights:    20,
+// 					Weights:    ";20",
 // 					Blocker:    false,
 // 				},
 // 			},
-// 			Weights: 10,
+// 			Weights: ";10",
 // 		},
 // 	}
 // 	var result string
-// 	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1SetRouteProfile, splPrf, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-// 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
+// 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+// 			Tenant: "cgrates.org", ID: "TEST_PROFILE2",
+// 		}}, &reply); err != nil {
 // 		t.Error(err)
-// 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
-// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
+// 	} else if !reflect.DeepEqual(splPrf.APIRouteProfile, reply) {
+// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.APIRouteProfile, reply)
 // 	}
 // 	ev := &utils.CGREvent{
 // 		Tenant: "cgrates.org",
@@ -173,11 +157,11 @@ package general_tests
 // 		},
 // 	}
 // 	var suplsReply engine.SortedRoutesList
-// 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 // 		ev, &suplsReply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrAccountNotFound).Error() {
 // 		t.Error(err)
 // 	}
-// 	if err := splSv1Rpc.Call(utils.APIerSv1RemoveRouteProfile, utils.TenantID{
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1RemoveRouteProfile, utils.TenantID{
 // 		Tenant: splPrf.Tenant,
 // 		ID:     splPrf.ID,
 // 	}, &result); err != nil {
@@ -189,54 +173,54 @@ package general_tests
 
 // func testV1SplSAddNewSplPrf(t *testing.T) {
 // 	var reply *engine.RouteProfile
-// 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Error(err)
 // 	}
 // 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-// 	splPrf = &v1.RouteWithAPIOpts{
-// 		RouteProfile: &engine.RouteProfile{
+// 	splPrf = &engine.APIRouteProfileWithAPIOpts{
+// 		APIRouteProfile: &engine.APIRouteProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        "ROUTE_ResourceTest",
 // 			Sorting:   utils.MetaReas,
 // 			FilterIDs: []string{"*string:~*req.CustomField:ResourceTest"},
-// 			Routes: []*engine.Route{
+// 			Routes: []*engine.ExternalRoute{
 // 				//route1 will have ResourceUsage = 11
 // 				{
 // 					ID:          "route1",
 // 					ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
-// 					Weights:     20,
+// 					Weights:     ";20",
 // 					Blocker:     false,
 // 				},
 // 				//route2 and route3 will have the same ResourceUsage = 7
 // 				{
 // 					ID:          "route2",
 // 					ResourceIDs: []string{"ResourceSupplier2"},
-// 					Weights:     20,
+// 					Weights:     ";20",
 // 					Blocker:     false,
 // 				},
 // 				{
 // 					ID:          "route3",
 // 					ResourceIDs: []string{"ResourceSupplier3"},
-// 					Weights:     35,
+// 					Weights:     ";35",
 // 					Blocker:     false,
 // 				},
 // 			},
-// 			Weights: 10,
+// 			Weights: "10",
 // 		},
 // 	}
 // 	var result string
-// 	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1SetRouteProfile, splPrf, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err != nil {
 // 		t.Error(err)
-// 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
-// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
+// 	} else if !reflect.DeepEqual(splPrf.APIRouteProfile, reply) {
+// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.APIRouteProfile, reply)
 // 	}
 // }
 
@@ -256,7 +240,7 @@ package general_tests
 // 		},
 // 	}
 
-// 	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf, &result); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1SetResourceProfile, rPrf, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
@@ -275,7 +259,7 @@ package general_tests
 // 		},
 // 	}
 
-// 	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf2, &result); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1SetResourceProfile, rPrf2, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
@@ -294,7 +278,7 @@ package general_tests
 // 		},
 // 	}
 
-// 	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf3, &result); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1SetResourceProfile, rPrf3, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
@@ -313,7 +297,7 @@ package general_tests
 // 		},
 // 	}
 
-// 	if err := splSv1Rpc.Call(utils.APIerSv1SetResourceProfile, rPrf4, &result); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1SetResourceProfile, rPrf4, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
@@ -335,7 +319,7 @@ package general_tests
 // 			utils.OptsResourcesUnits:   4,
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 // 		argsRU, &reply); err != nil {
 // 		t.Error(err)
 // 	}
@@ -357,7 +341,7 @@ package general_tests
 // 			utils.OptsResourcesUnits:   7,
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 // 		argsRU, &reply); err != nil {
 // 		t.Error(err)
 // 	}
@@ -379,7 +363,7 @@ package general_tests
 // 			utils.OptsResourcesUnits:   7,
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 // 		argsRU, &reply); err != nil {
 // 		t.Error(err)
 // 	}
@@ -401,7 +385,7 @@ package general_tests
 // 			utils.OptsResourcesUnits:   7,
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.ResourceSv1AllocateResources,
 // 		argsRU, &reply); err != nil {
 // 		t.Error(err)
 // 	}
@@ -422,7 +406,7 @@ package general_tests
 // 	}
 // 	expSupplierIDs := []string{"route3", "route2", "route1"}
 // 	var suplsReply engine.SortedRoutesList
-// 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 // 		ev, &suplsReply); err != nil {
 // 		t.Error(err)
 // 	} else {
@@ -443,54 +427,54 @@ package general_tests
 
 // func testV1SplSAddNewSplPrf2(t *testing.T) {
 // 	var reply *engine.RouteProfile
-// 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Error(err)
 // 	}
 // 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-// 	splPrf = &v1.RouteWithAPIOpts{
-// 		RouteProfile: &engine.RouteProfile{
+// 	splPrf = &engine.APIRouteProfileWithAPIOpts{
+// 		APIRouteProfile: &engine.APIRouteProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        "ROUTE_ResourceDescendent",
 // 			Sorting:   utils.MetaReds,
 // 			FilterIDs: []string{"*string:~*req.CustomField:ResourceDescendent"},
-// 			Routes: []*engine.Route{
+// 			Routes: []*engine.ExternalRoute{
 // 				//route1 will have ResourceUsage = 11
 // 				{
 // 					ID:          "route1",
 // 					ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
-// 					Weights:     20,
+// 					Weights:     "20",
 // 					Blocker:     false,
 // 				},
 // 				//route2 and route3 will have the same ResourceUsage = 7
 // 				{
 // 					ID:          "route2",
 // 					ResourceIDs: []string{"ResourceSupplier2"},
-// 					Weights:     20,
+// 					Weights:     "20",
 // 					Blocker:     false,
 // 				},
 // 				{
 // 					ID:          "route3",
 // 					ResourceIDs: []string{"ResourceSupplier3"},
-// 					Weights:     35,
+// 					Weights:     "35",
 // 					Blocker:     false,
 // 				},
 // 			},
-// 			Weights: 10,
+// 			Weights: "10",
 // 		},
 // 	}
 // 	var result string
-// 	if err := splSv1Rpc.Call(utils.APIerSv1SetRouteProfile, splPrf, &result); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1SetRouteProfile, splPrf, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err != nil {
 // 		t.Error(err)
-// 	} else if !reflect.DeepEqual(splPrf.RouteProfile, reply) {
-// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.RouteProfile, reply)
+// 	} else if !reflect.DeepEqual(splPrf.APIRouteProfile, reply) {
+// 		t.Errorf("Expecting: %+v, received: %+v", splPrf.APIRouteProfile, reply)
 // 	}
 // }
 
@@ -504,7 +488,7 @@ package general_tests
 // 	}
 // 	expSupplierIDs := []string{"route1", "route3", "route2"}
 // 	var suplsReply engine.SortedRoutesList
-// 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 // 		ev, &suplsReply); err != nil {
 // 		t.Error(err)
 // 	} else {
@@ -528,34 +512,30 @@ package general_tests
 // 	// so we can check the metrics in Suppliers for *load strategy
 // 	var reply []string
 // 	expected := []string{"Stat_Supplier1"}
-// 	ev1 := &engine.StatsArgsProcessEvent{
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "event1",
-// 			Event: map[string]interface{}{
-// 				"LoadReq": 1,
-// 				"StatID":  "Stat_Supplier1",
-// 			},
+// 	ev1 := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "event1",
+// 		Event: map[string]interface{}{
+// 			"LoadReq": 1,
+// 			"StatID":  "Stat_Supplier1",
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if !reflect.DeepEqual(reply, expected) {
 // 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 // 	}
 
 // 	expected = []string{"Stat_Supplier1"}
-// 	ev1 = &engine.StatsArgsProcessEvent{
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "event2",
-// 			Event: map[string]interface{}{
-// 				"LoadReq": 1,
-// 				"StatID":  "Stat_Supplier1",
-// 			},
+// 	ev1 = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "event2",
+// 		Event: map[string]interface{}{
+// 			"LoadReq": 1,
+// 			"StatID":  "Stat_Supplier1",
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if !reflect.DeepEqual(reply, expected) {
 // 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -565,7 +545,7 @@ package general_tests
 // 	expectedMetrics := map[string]string{
 // 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "LoadReq": "2",
 // 	}
-// 	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 // 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier1"}},
 // 		&metrics); err != nil {
 // 		t.Error(err)
@@ -574,40 +554,36 @@ package general_tests
 // 	}
 
 // 	expected = []string{"Stat_Supplier2"}
-// 	ev1 = &engine.StatsArgsProcessEvent{
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "event3",
-// 			Event: map[string]interface{}{
-// 				"LoadReq": 1,
-// 				"StatID":  "Stat_Supplier2",
-// 			},
+// 	ev1 = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "event3",
+// 		Event: map[string]interface{}{
+// 			"LoadReq": 1,
+// 			"StatID":  "Stat_Supplier2",
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if !reflect.DeepEqual(reply, expected) {
 // 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 // 	}
 
 // 	expected = []string{"Stat_Supplier2"}
-// 	ev1 = &engine.StatsArgsProcessEvent{
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "event4",
-// 			Event: map[string]interface{}{
-// 				"LoadReq": 1,
-// 				"StatID":  "Stat_Supplier2",
-// 			},
+// 	ev1 = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "event4",
+// 		Event: map[string]interface{}{
+// 			"LoadReq": 1,
+// 			"StatID":  "Stat_Supplier2",
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if !reflect.DeepEqual(reply, expected) {
 // 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 // 	}
 
-// 	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 // 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier2"}},
 // 		&metrics); err != nil {
 // 		t.Error(err)
@@ -616,51 +592,45 @@ package general_tests
 // 	}
 
 // 	expected = []string{"Stat_Supplier3"}
-// 	ev1 = &engine.StatsArgsProcessEvent{
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "event5",
-// 			Event: map[string]interface{}{
-// 				"LoadReq": 1,
-// 				"StatID":  "Stat_Supplier3",
-// 			},
+// 	ev1 = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "event5",
+// 		Event: map[string]interface{}{
+// 			"LoadReq": 1,
+// 			"StatID":  "Stat_Supplier3",
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if !reflect.DeepEqual(reply, expected) {
 // 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 // 	}
 
 // 	expected = []string{"Stat_Supplier3"}
-// 	ev1 = &engine.StatsArgsProcessEvent{
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "event6",
-// 			Event: map[string]interface{}{
-// 				"LoadReq": 1,
-// 				"StatID":  "Stat_Supplier3",
-// 			},
+// 	ev1 = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "event6",
+// 		Event: map[string]interface{}{
+// 			"LoadReq": 1,
+// 			"StatID":  "Stat_Supplier3",
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if !reflect.DeepEqual(reply, expected) {
 // 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 // 	}
 
 // 	expected = []string{"Stat_Supplier3"}
-// 	ev1 = &engine.StatsArgsProcessEvent{
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "event7",
-// 			Event: map[string]interface{}{
-// 				"LoadReq": 1,
-// 				"StatID":  "Stat_Supplier3",
-// 			},
+// 	ev1 = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "event7",
+// 		Event: map[string]interface{}{
+// 			"LoadReq": 1,
+// 			"StatID":  "Stat_Supplier3",
 // 		},
 // 	}
-// 	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 // 		t.Error(err)
 // 	} else if !reflect.DeepEqual(reply, expected) {
 // 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -670,7 +640,7 @@ package general_tests
 // 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "LoadReq": "3",
 // 	}
 
-// 	if err := splSv1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 // 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_Supplier3"}},
 // 		&metrics); err != nil {
 // 		t.Error(err)
@@ -716,7 +686,7 @@ package general_tests
 // 	}
 
 // 	var suplsReply engine.SortedRoutesList
-// 	if err := splSv1Rpc.Call(utils.RouteSv1GetRoutes,
+// 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 // 		ev, &suplsReply); err != nil {
 // 		t.Error(err)
 // 	} else {
