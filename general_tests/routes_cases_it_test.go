@@ -394,13 +394,11 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "WEIGHT_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-			},
+	ev := &utils.CGREvent{
+		ID:     "WEIGHT_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -433,14 +431,12 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesWeightAllRoutes(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "WEIGHT_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Destination:  "1003",
-			},
+	ev := &utils.CGREvent{
+		ID:     "WEIGHT_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  "1003",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -503,14 +499,12 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 		t.Errorf("Unexpected result returned")
 	}
 
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "WEIGHT_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1001",
-				utils.Destination:  "1003",
-			},
+	ev := &utils.CGREvent{
+		ID:     "WEIGHT_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  "1003",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -549,16 +543,14 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Destination:  "1003",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.Usage:        "2m30s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Destination:  "1003",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.Usage:        "2m30s",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -597,16 +589,14 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 	// default usage given by routes is 1m
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Destination:  "1003",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Destination:  "1003",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -699,17 +689,15 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 	//not gonna match vendor1 because of its TotalUsage by allocating resources
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Destination:  "1003",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Usage:        "2m30s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Destination:  "1003",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Usage:        "2m30s",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -775,17 +763,15 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 		t.Errorf("Unexpected result returned: %s", result)
 	}
 
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Destination:  "1003",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Usage:        "2m30s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Destination:  "1003",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Usage:        "2m30s",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -838,18 +824,18 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		MaxCost: "0.35",
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Destination:  "1003",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Usage:        "2m30s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Destination:  "1003",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Usage:        "2m30s",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesMaxCost: 0.35,
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -894,18 +880,18 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesLowestCosMaxCostNotMatch(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		MaxCost: "0.05",
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-				utils.Destination:  "1003",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Usage:        "2m30s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+			utils.Destination:  "1003",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Usage:        "2m30s",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesMaxCost: 0.05,
 		},
 	}
 	var reply *engine.SortedRoutesList
@@ -985,17 +971,15 @@ func testV1RtsCasesSortingRoutesProcessMetrics(t *testing.T) {
 
 func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 	//not gonna match vendor3 because *tcc is not bigger that 6
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1003",
-				utils.Destination:  "1007",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Usage:        "50s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+			utils.Destination:  "1007",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Usage:        "50s",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -1057,17 +1041,15 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 	}
 
 	// match all 3 routes
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1003",
-				utils.Destination:  "1007",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Usage:        "50s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1003",
+			utils.Destination:  "1007",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Usage:        "50s",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -1122,17 +1104,15 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1008",
-				utils.Destination:  "1007",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.AnswerTime:   "2013-06-01T05:00:00Z",
-				utils.Usage:        "50s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1008",
+			utils.Destination:  "1007",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.AnswerTime:   "2013-06-01T05:00:00Z",
+			utils.Usage:        "50s",
 		},
 	}
 	var reply *engine.SortedRoutesList
@@ -1182,14 +1162,12 @@ func testV1RtsCasesSortingRoutesAllocateResources(t *testing.T) {
 }
 
 func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Destination:  "1007",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Destination:  "1007",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -1243,14 +1221,12 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 		t.Errorf("Unexpected reply returned: %s", replyStr)
 	}
 	//allocate more resources for matching
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1004",
-				utils.Destination:  "1007",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1004",
+			utils.Destination:  "1007",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -1366,14 +1342,12 @@ func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
 }
 
 func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1005",
-				//utils.Destination:  "1007",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1005",
+			//utils.Destination:  "1007",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -1418,16 +1392,14 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 }
 
 func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1008",
-				utils.Destination:  "1007",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.Usage:        "3m25s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1008",
+			utils.Destination:  "1007",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.Usage:        "3m25s",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -1544,16 +1516,14 @@ func testV1RtsCasesSortRoutesHigherCostAllocateRes(t *testing.T) {
 }
 
 func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1008",
-				utils.Destination:  "1007",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.Usage:        "3m25s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1008",
+			utils.Destination:  "1007",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.Usage:        "3m25s",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{
@@ -1610,16 +1580,14 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 	} else if result != "RES_GRP1" {
 		t.Errorf("Unexpected result returned: %s", result)
 	}
-	ev := &engine.ArgsGetRoutes{
-		CGREvent: &utils.CGREvent{
-			ID:     "LC_SORT",
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.AccountField: "1008",
-				utils.Destination:  "1007",
-				utils.SetupTime:    "2013-06-01T00:00:00Z",
-				utils.Usage:        "3m25s",
-			},
+	ev := &utils.CGREvent{
+		ID:     "LC_SORT",
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "1008",
+			utils.Destination:  "1007",
+			utils.SetupTime:    "2013-06-01T00:00:00Z",
+			utils.Usage:        "3m25s",
 		},
 	}
 	expSrtdRoutes := &engine.SortedRoutesList{

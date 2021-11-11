@@ -3748,7 +3748,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 				return utils.ErrNotImplemented
 			},
 			utils.RouteSv1GetRoutes: func(args interface{}, reply interface{}) error {
-				if args.(*engine.ArgsGetRoutes).ID == "SECOND_ID" {
+				if args.(*utils.CGREvent).ID == "SECOND_ID" {
 					*reply.(*engine.SortedRoutesList) = engine.SortedRoutesList{{
 						ProfileID: "ROUTE_PRFID",
 						Routes: []*engine.SortedRoute{

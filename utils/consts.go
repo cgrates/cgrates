@@ -2229,6 +2229,13 @@ const (
 	MetaUsageTTLCfg = "*usageTTL"
 	MetaUnitsCfg    = "*units"
 
+	// RoutesCfg
+	MetaProfileCountCfg = "*profileCount"
+	MetaIgnoreErrorsCfg = "*ignoreErrors"
+	MetaMaxCostCfg      = "*maxCost"
+	MetaLimitCfg        = "*limit"
+	MetaOffsetCfg       = "*offset"
+
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"
 	IndexTypeCfg       = "index_type"
@@ -2401,11 +2408,12 @@ var CGROptionsSet = NewStringSet([]string{OptsSessionsTTL,
 	OptsDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
-	OptsAttributesProcessRuns, OptsAttributesProfileIDs, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
-	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount,
-	OptsAttributesProfileRuns, OptsAttributesProfileIgnoreFilters, OptsStatsProfileIDs,
-	OptsStatsProfileIgnoreFilters, OptsThresholdsProfileIDs, OptsThresholdsProfileIgnoreFilters,
-	OptsResourcesUsageID, OptsResourcesUsageTTL, OptsResourcesUnits})
+	OptsAttributesProcessRuns, OptsAttributesProfileIDs, OptsRoutesLimit, OptsRoutesOffset,
+	OptsRoutesIgnoreErrors, OptsRoutesMaxCost, OptsChargeable, RemoteHostOpt, CacheOpt,
+	OptsRoutesProfileCount, OptsDispatchersProfilesCount, OptsAttributesProfileRuns,
+	OptsAttributesProfileIgnoreFilters, OptsStatsProfileIDs, OptsStatsProfileIgnoreFilters,
+	OptsThresholdsProfileIDs, OptsThresholdsProfileIgnoreFilters, OptsResourcesUsageID, OptsResourcesUsageTTL,
+	OptsResourcesUnits})
 
 // EventExporter metrics
 const (
@@ -2427,9 +2435,6 @@ const (
 
 // Event Opts
 const (
-	OptsRoutesProfilesCount  = "*routesProfilesCount"
-	OptsRoutesLimit          = "*routes_limit"
-	OptsRoutesOffset         = "*routes_offset"
 	OptsSessionsTTL          = "*sessionsTTL"
 	OptsSessionsTTLMaxDelay  = "*sessionsTTLMaxDelay"
 	OptsSessionsTTLLastUsed  = "*sessionsTTLLastUsed"
@@ -2457,6 +2462,12 @@ const (
 	OptsResourcesUsageID  = "*rsUsageID"
 	OptsResourcesUsageTTL = "*rsUsageTTL"
 	OptsResourcesUnits    = "*rsUnits"
+	// Routes
+	OptsRoutesProfileCount = "*rouProfileCount"
+	OptsRoutesLimit        = "*rouLimit"
+	OptsRoutesOffset       = "*rouOffset"
+	OptsRoutesIgnoreErrors = "*rouIgnoreErrors"
+	OptsRoutesMaxCost      = "*rouMaxCost"
 	// Stats
 	OptsStatsProfileIDs           = "*stsProfileIDs"
 	OptsStatsProfileIgnoreFilters = "*stsProfileIgnoreFilters"

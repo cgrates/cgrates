@@ -29,7 +29,7 @@ func init() {
 	c := &CmdRoutesSort{
 		name:      "routes",
 		rpcMethod: utils.RouteSv1GetRoutes,
-		rpcParams: &engine.ArgsGetRoutes{},
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +38,7 @@ func init() {
 type CmdRoutesSort struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ArgsGetRoutes
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -52,17 +52,14 @@ func (self *CmdRoutesSort) RpcMethod() string {
 
 func (self *CmdRoutesSort) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ArgsGetRoutes{
-			CGREvent: new(utils.CGREvent),
-		}
+		self.rpcParams = new(utils.CGREvent)
 	}
 	return self.rpcParams
 }
 
 func (self *CmdRoutesSort) PostprocessRpcParams() error {
-	if self.rpcParams != nil && self.rpcParams.CGREvent != nil &&
-		self.rpcParams.CGREvent.Time == nil {
-		self.rpcParams.CGREvent.Time = utils.TimePointer(time.Now())
+	if self.rpcParams != nil && self.rpcParams.Time == nil {
+		self.rpcParams.Time = utils.TimePointer(time.Now())
 	}
 	return nil
 }

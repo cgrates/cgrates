@@ -50,6 +50,12 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
+		Opts: &RoutesOpts{
+			Context:      utils.MetaRoutes,
+			IgnoreErrors: false,
+			MaxCost:      utils.EmptyString,
+			ProfileCount: 1,
+		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.routeSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -74,6 +80,12 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.StatSConnsCfg:          []string{},
 		utils.RALsConnsCfg:           []string{},
 		utils.DefaultRatioCfg:        1,
+		utils.OptsCfg: map[string]interface{}{
+			utils.OptsContext:         utils.MetaRoutes,
+			utils.MetaProfileCountCfg: 1,
+			utils.MetaIgnoreErrorsCfg: false,
+			utils.MetaMaxCostCfg:      utils.EmptyString,
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -110,6 +122,12 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.StatSConnsCfg:          []string{utils.MetaInternal, "conn1"},
 		utils.RALsConnsCfg:           []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
+		utils.OptsCfg: map[string]interface{}{
+			utils.OptsContext:         utils.MetaRoutes,
+			utils.MetaProfileCountCfg: 1,
+			utils.MetaIgnoreErrorsCfg: false,
+			utils.MetaMaxCostCfg:      utils.EmptyString,
+		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -131,6 +149,7 @@ func TestRouteSCfgClone(t *testing.T) {
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
+		Opts:                &RoutesOpts{},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

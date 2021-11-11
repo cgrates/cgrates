@@ -787,7 +787,15 @@ const CGRATES_CFG_JSON = `
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"rals_conns": [],						// connections to Rater for calculating cost, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"default_ratio":1						// default ratio used in case of *load strategy
+	"default_ratio":1,						// default ratio used in case of *load strategy
+	"opts": {
+		"*context": "*routes",
+		"*profileCount": 1,
+		"*ignoreErrors": false,
+		"*maxCost": "",
+		// "*limit": 1,
+		// "*offset": 1,
+	},
 },
 
 

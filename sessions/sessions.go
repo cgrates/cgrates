@@ -3827,15 +3827,9 @@ func (sS *SessionS) getRoutes(cgrEv *utils.CGREvent, pag utils.Paginator, ignore
 	if acd, has := cgrEv.Event[utils.ACD]; has {
 		cgrEv.Event[utils.Usage] = acd
 	}
-	sArgs := &engine.ArgsGetRoutes{
-		CGREvent:     cgrEv,
-		Paginator:    pag,
-		IgnoreErrors: ignoreErrors,
-		MaxCost:      maxCost,
-	}
-	sArgs.SetCloneable(clnb)
+	cgrEv.SetCloneable(clnb)
 	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RouteSConns, nil, utils.RouteSv1GetRoutes,
-		sArgs, &routesReply); err != nil {
+		cgrEv, &routesReply); err != nil {
 		return routesReply, utils.NewErrRouteS(err)
 	}
 	return

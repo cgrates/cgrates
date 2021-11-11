@@ -486,6 +486,15 @@ type ThresholdSJsonCfg struct {
 	Opts                  *ThresholdsOptsJson
 }
 
+type RoutesOptsJson struct {
+	Context      *string     `json:"*context"`
+	IgnoreErrors *bool       `json:"*ignoreErrors"`
+	MaxCost      interface{} `json:"*maxCost"`
+	Limit        *int        `json:"*limit"`
+	Offset       *int        `json:"*offset"`
+	ProfileCount *int        `json:"*profileCount"`
+}
+
 // Route service config section
 type RouteSJsonCfg struct {
 	Enabled               *bool
@@ -499,6 +508,7 @@ type RouteSJsonCfg struct {
 	Stats_conns           *[]string
 	Rals_conns            *[]string
 	Default_ratio         *int
+	Opts                  *RoutesOptsJson
 }
 
 type LoaderJsonDataType struct {
