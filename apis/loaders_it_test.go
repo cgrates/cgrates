@@ -1132,5 +1132,4 @@ func TestLoadersLoad(t *testing.T) {
 	if err := lSv1.Run(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
-
 }
