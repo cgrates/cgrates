@@ -255,7 +255,8 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				"Password":         "CGRateS.org",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -599,7 +600,8 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				"Password":         "CGRateS.com",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}

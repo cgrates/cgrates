@@ -938,7 +938,8 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.Destination:  "999",
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys: utils.MetaChargers,
+					utils.Subsys:                   utils.MetaChargers,
+					utils.OptsAttributesProfileIDs: []string{"*constant:*req.Subject:intraState"},
 				},
 			},
 		},
@@ -975,7 +976,8 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.Destination:  "999",
 				},
 				APIOpts: map[string]interface{}{
-					utils.Subsys: utils.MetaChargers,
+					utils.Subsys:                   utils.MetaChargers,
+					utils.OptsAttributesProfileIDs: []string{"*constant:*req.Subject:interState"},
 				},
 			},
 		},
@@ -1034,7 +1036,9 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 				"CustomField2":    "+2007",
 				utils.Destination: "+1207",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: "prefix",
+			},
 		},
 	}
 	cgrEv := &utils.CGREvent{
@@ -1139,7 +1143,10 @@ func testV1FltrPopulateTimings(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AnswerTime: "2021-04-29T10:45:00Z",
 			},
-			APIOpts: make(map[string]interface{}),
+			APIOpts: map[string]interface{}{
+				utils.OptsAttributesProfileIDs: []string{"FltrTest"},
+				utils.OptsContext:              utils.MetaAny,
+			},
 		},
 	}
 

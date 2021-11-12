@@ -229,7 +229,9 @@ func testAttributeSetFltr2(t *testing.T) {
 				"Subject": "4444",
 				"FL1":     "Al1",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
