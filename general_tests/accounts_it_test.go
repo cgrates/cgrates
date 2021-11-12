@@ -137,10 +137,12 @@ func testV1AccLoadTarrifPlans(t *testing.T) {
 		caching = utils.MetaNone
 	}
 	var reply string
-	if err := accRpc.Call(context.Background(), utils.LoaderSv1Load,
+	if err := accRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
-			StopOnError: true,
-			Caching:     utils.StringPointer(caching),
+			APIOpts: map[string]interface{}{
+				utils.MetaStopOnError: true,
+				utils.MetaCache:       caching,
+			},
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
