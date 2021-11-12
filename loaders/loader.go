@@ -674,7 +674,7 @@ func (l *loader) processIFile(_, fileName string) (err error) {
 		return
 	}
 	defer l.Unlock()
-	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, l.ldrCfg.Opts.Cache, l.ldrCfg.Opts.WithIndex)
+	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, utils.FirstNonEmpty(l.ldrCfg.Opts.Cache, l.cfg.GeneralCfg().DefaultCaching), l.ldrCfg.Opts.WithIndex)
 }
 
 func (l *loader) processFolder(ctx *context.Context, caching string, withIndex, stopOnError bool) (err error) {
