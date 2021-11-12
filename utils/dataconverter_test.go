@@ -1251,3 +1251,27 @@ func TestDataConverterE164Convert(t *testing.T) {
 		t.Errorf("Expected 'unknown format' error")
 	}
 }
+
+func TestJoinConverter(t *testing.T) {
+	d, err := NewDataConverter(MetaJoin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expVal := "1,2,3,5"
+	if i, err := d.Convert("1;2;3;5"); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %q, received: %q", expVal, i)
+	}
+
+	d, err = NewDataConverter(MetaJoin + ":|")
+	if err != nil {
+		t.Fatal(err)
+	}
+	expVal = "1|2|3|5"
+	if i, err := d.Convert("1;2;3;5"); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %q, received: %q", expVal, i)
+	}
+}
