@@ -93,7 +93,6 @@ func testRateStartEngine(t *testing.T) {
 }
 
 func testRateConfigSReloadRates(t *testing.T) {
-
 	var replyPingBf string
 	if err := testRateRPC.Call(context.Background(), utils.RateSv1CostForEvent, &utils.CGREvent{}, &replyPingBf); err == nil || err.Error() != "rpc: can't find service RateSv1.CostForEvent" {
 		t.Error(err)
@@ -107,7 +106,7 @@ func testRateConfigSReloadRates(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"rates\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"rate_indexed_selects\":true,\"rate_nested_fields\":false,\"rate_prefix_indexed_fields\":[],\"rate_suffix_indexed_fields\":[],\"suffix_indexed_fields\":[],\"verbosity\":1000}}"
+	cfgStr := "{\"rates\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"opts\":{\"*intervalStart\":[],\"*profileIDs\":[],\"*profileIgnoreFilters\":[],\"*startTime\":[],\"*usage\":[]},\"prefix_indexed_fields\":[],\"rate_indexed_selects\":true,\"rate_nested_fields\":false,\"rate_prefix_indexed_fields\":[],\"rate_suffix_indexed_fields\":[],\"suffix_indexed_fields\":[],\"verbosity\":1000}}"
 	var rpl string
 	if err := testRateRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

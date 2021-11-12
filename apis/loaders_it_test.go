@@ -60,8 +60,8 @@ var (
 		testLoadersGetActionProfile,
 		testLoadersGetAttributeProfile,
 		testLoadersGetChargerProfile,
-		// testLoadersGetDispatcherProfile,
-		// testLoadersGetDispatcherHost,
+		testLoadersGetDispatcherProfile,
+		testLoadersGetDispatcherHost,
 		testLoadersGetFilter,
 		testLoadersGetRateProfile,
 		testLoadersGetResourceProfile,
@@ -69,21 +69,20 @@ var (
 		testLoadersGetStatQueueProfile,
 		testLoadersGetThresholdProfile,
 
-		/*
-			testLoadersRemove,
-			testLoadersGetAccountAfterRemove,
-			testLoadersGetActionProfileAfterRemove,
-			testLoadersGetAttributeProfileAfterRemove,
-			testLoadersGetChargerProfileAfterRemove,
-			// testLoadersGetDispatcherProfileAfterRemove,
-			// testLoadersGetDispatcherHostAfterRemove,
-			testLoadersGetFilterAfterRemove,
-			testLoadersGetRateProfileAfterRemove,
-			testLoadersGetResourceProfileAfterRemove,
-			testLoadersGetRouteProfileAfterRemove,
-			testLoadersGetStatQueueProfileAfterRemove,
-			testLoadersGetThresholdProfileAfterRemove,
-		*/
+		testLoadersRemove,
+		testLoadersGetAccountAfterRemove,
+		testLoadersGetActionProfileAfterRemove,
+		testLoadersGetAttributeProfileAfterRemove,
+		testLoadersGetChargerProfileAfterRemove,
+		testLoadersGetDispatcherProfileAfterRemove,
+		testLoadersGetDispatcherHostAfterRemove,
+		testLoadersGetFilterAfterRemove,
+		testLoadersGetRateProfileAfterRemove,
+		testLoadersGetResourceProfileAfterRemove,
+		testLoadersGetRouteProfileAfterRemove,
+		testLoadersGetStatQueueProfileAfterRemove,
+		testLoadersGetThresholdProfileAfterRemove,
+
 		testLoadersRemoveFolders,
 
 		testLoadersPing,
@@ -472,77 +471,87 @@ func testLoadersGetChargerProfile(t *testing.T) {
 	}
 }
 
-// func testLoadersGetDispatcherProfile(t *testing.T) {
-// 	expIDs := []string{"DSP1"}
-// 	var dspPrfIDs []string
-// 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs,
-// 		&utils.PaginatorWithTenant{
-// 			Tenant:    "cgrates.org",
-// 			Paginator: utils.Paginator{},
-// 		}, &dspPrfIDs); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(dspPrfIDs, expIDs) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, dspPrfIDs)
-// 	}
+func testLoadersGetDispatcherProfile(t *testing.T) {
+	expIDs := []string{"DSP1"}
+	var dspPrfIDs []string
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs,
+		&utils.PaginatorWithTenant{
+			Tenant:    "cgrates.org",
+			Paginator: utils.Paginator{},
+		}, &dspPrfIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dspPrfIDs, expIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, dspPrfIDs)
+	}
 
-// 	expDspPrf := engine.DispatcherProfile{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "DSP1",
-// 		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-// 		Strategy:  utils.MetaWeight,
-// 		Hosts: engine.DispatcherHostProfiles{
-// 			{
-// 				ID:        "ALL",
-// 				FilterIDs: []string{},
-// 				Weight:    20,
-// 				Params:    map[string]interface{}{},
-// 			},
-// 		},
-// 		Weight: 10,
-// 	}
+	expDspPrf := engine.DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "DSP1",
+		FilterIDs:      []string{"FLTR_ACCOUNT_1001"},
+		Strategy:       utils.MetaWeight,
+		StrategyParams: make(map[string]interface{}),
+		Hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "ALL",
+				FilterIDs: []string{},
+				Weight:    20,
+				Params:    map[string]interface{}{},
+			},
+		},
+		Weight: 10,
+	}
 
-// 	var rplyDspPrf engine.ChargerProfile
-// 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
-// 		utils.TenantID{
-// 			Tenant: "cgrates.org",
-// 			ID:     expIDs[0],
-// 		}, &rplyDspPrf); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rplyDspPrf, expDspPrf) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(expDspPrf), utils.ToJSON(rplyDspPrf))
-// 	}
-// }
+	var rplyDspPrf engine.DispatcherProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
+		utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     expIDs[0],
+		}, &rplyDspPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyDspPrf, expDspPrf) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expDspPrf), utils.ToJSON(rplyDspPrf))
+	}
+}
 
-// func testLoadersGetDispatcherHost(t *testing.T) {
-// 	expIDs := []string{"DSPHOST1"}
-// 	var dspHostIDs []string
-// 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs,
-// 		&utils.PaginatorWithTenant{
-// 			Tenant:    "cgrates.org",
-// 			Paginator: utils.Paginator{},
-// 		}, &dspHostIDs); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(dspHostIDs, expIDs) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, dspHostIDs)
-// 	}
+func testLoadersGetDispatcherHost(t *testing.T) {
+	expIDs := []string{"DSPHOST1"}
+	var dspHostIDs []string
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs,
+		&utils.PaginatorWithTenant{
+			Tenant:    "cgrates.org",
+			Paginator: utils.Paginator{},
+		}, &dspHostIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dspHostIDs, expIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, dspHostIDs)
+	}
 
-// 	expDspHost := engine.DispatcherHost{
-// 		Tenant: "cgrates.org",
-// 	}
+	expDspHost := engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:              expIDs[0],
+			Address:         utils.MetaInternal,
+			Transport:       utils.MetaJSON,
+			ConnectAttempts: 1,
+			Reconnects:      3,
+			ConnectTimeout:  time.Minute,
+			ReplyTimeout:    2 * time.Minute,
+		},
+	}
 
-// 	var rplyDspHost engine.DispatcherHost
-// 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
-// 		utils.TenantID{
-// 			Tenant: "cgrates.org",
-// 			ID:     expIDs[0],
-// 		}, &rplyDspHost); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rplyDspHost, expDspHost) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(expDspHost), utils.ToJSON(rplyDspHost))
-// 	}
-// }
+	var rplyDspHost engine.DispatcherHost
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
+		utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     expIDs[0],
+		}, &rplyDspHost); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyDspHost, expDspHost) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expDspHost), utils.ToJSON(rplyDspHost))
+	}
+}
 
 func testLoadersGetFilter(t *testing.T) {
 	expIDs := []string{"FLTR_ACCOUNT_1001"}
@@ -810,6 +819,7 @@ func testLoadersRemove(t *testing.T) {
 	var reply string
 	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run, //Remove,
 		&loaders.ArgsProcessFolder{
+			LoaderID: "remove",
 			APIOpts: map[string]interface{}{
 				utils.MetaCache:       utils.MetaReload,
 				utils.MetaStopOnError: true,
@@ -901,45 +911,45 @@ func testLoadersGetChargerProfileAfterRemove(t *testing.T) {
 	}
 }
 
-// func testLoadersGetDispatcherProfileAfterRemove(t *testing.T) {
-// 	var dspPrfIDs []string
-// 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs,
-// 		&utils.PaginatorWithTenant{
-// 			Tenant:    "cgrates.org",
-// 			Paginator: utils.Paginator{},
-// 		}, &dspPrfIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-// 	}
+func testLoadersGetDispatcherProfileAfterRemove(t *testing.T) {
+	var dspPrfIDs []string
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs,
+		&utils.PaginatorWithTenant{
+			Tenant:    "cgrates.org",
+			Paginator: utils.Paginator{},
+		}, &dspPrfIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
 
-// 	var rplyDspPrf engine.ChargerProfile
-// 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
-// 		utils.TenantID{
-// 			Tenant: "cgrates.org",
-// 			ID:     "DSP1",
-// 		}, &rplyDspPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-// 	}
-// }
+	var rplyDspPrf engine.ChargerProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
+		utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "DSP1",
+		}, &rplyDspPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
 
-// func testLoadersGetDispatcherHostAfterRemove(t *testing.T) {
-// 	var dspHostIDs []string
-// 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs,
-// 		&utils.PaginatorWithTenant{
-// 			Tenant:    "cgrates.org",
-// 			Paginator: utils.Paginator{},
-// 		}, &dspHostIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-// 	}
+func testLoadersGetDispatcherHostAfterRemove(t *testing.T) {
+	var dspHostIDs []string
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs,
+		&utils.PaginatorWithTenant{
+			Tenant:    "cgrates.org",
+			Paginator: utils.Paginator{},
+		}, &dspHostIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
 
-// 	var rplyDspHost engine.DispatcherHost
-// 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
-// 		utils.TenantID{
-// 			Tenant: "cgrates.org",
-// 			ID:     "DSPHOST1",
-// 		}, &rplyDspHost); err == nil || err.Error() != utils.ErrNotFound.Error() {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-// 	}
-// }
+	var rplyDspHost engine.DispatcherHost
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
+		utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "DSPHOST1",
+		}, &rplyDspHost); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
 
 func testLoadersGetFilterAfterRemove(t *testing.T) {
 	var fltrIDs []string
@@ -1123,7 +1133,4 @@ func TestLoadersLoad(t *testing.T) {
 		t.Error(err)
 	}
 
-	// if err := lSv1.Remove(context.Background(), args, &reply); err != nil {
-	// t.Error(err)
-	// }
 }
