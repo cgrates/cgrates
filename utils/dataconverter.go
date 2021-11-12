@@ -115,6 +115,11 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			return NewRandomConverter(EmptyString)
 		}
 		return NewRandomConverter(params[len(MetaRandom)+1:])
+	case strings.HasPrefix(params, MetaJoin):
+		if len(params) == len(MetaJoin) { // no extra params, defaults implied
+			return joinConverter(FieldsSep), nil
+		}
+		return joinConverter(params[len(MetaJoin)+1:]), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -572,4 +577,14 @@ func (e164Converter) Convert(in interface{}) (interface{}, error) {
 	}
 	return ReverseString(
 		strings.Replace(name[:i], ".", "", -1)), nil
+}
+
+type joinConverter string
+
+func (j joinConverter) Convert(in interface{}) (interface{}, error) {
+	slice, err := IfaceAsStringSlice(in)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Join(slice, string(j)), nil
 }
