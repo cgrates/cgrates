@@ -378,7 +378,9 @@ func testAttributeSProcessEvent(t *testing.T) {
 				utils.Subject:      "1001",
 				utils.Destination:  "+491511231234",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -505,7 +507,9 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Destination:  "+491511231234",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
@@ -574,7 +578,9 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Destination:  "+491511231234",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
@@ -588,7 +594,9 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.Destination:  "+491511231234",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -657,7 +665,9 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 				utils.Subject:      "1001",
 				utils.Destination:  "+491511231234",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -703,7 +713,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 			"Field1": "Value1",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: 1,
+			utils.OptsAttributesProcessRuns: 1.,
 			utils.OptsContext:               utils.MetaSessionS,
 		},
 	}
@@ -718,7 +728,8 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 				"Field2": "Value1",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 1,
+				utils.OptsAttributesProcessRuns: 1.,
+				utils.OptsContext:               utils.MetaSessionS,
 			},
 		},
 	}
@@ -1044,6 +1055,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 			},
 			APIOpts: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: 1,
+				utils.OptsContext:               utils.MetaSessionS,
 			},
 		},
 	}

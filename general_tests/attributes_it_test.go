@@ -149,7 +149,9 @@ func testAttributeSProcessEvent(t *testing.T) {
 				utils.Category:  utils.MetaVoice,
 				utils.ToR:       utils.MetaVoice,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -230,7 +232,9 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 				"EventName": "AddAccountInfo",
 				"Balance":   "10",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -439,7 +443,9 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 				"EventName": "AddStatEvent",
 				"AcdMetric": "11000000000",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -520,7 +526,9 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 				"EventName":  "AddFullStats",
 				"AllMetrics": "{\"*acd\":11000000000,\"*asr\":100,\"*tcd\":22000000000}",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -660,7 +668,9 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 				"EventName":           "AddResourceUsages",
 				"ResourceTotalUsages": "5",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -834,7 +844,9 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 				"Destination":        "+447779330921",
 				"DestinationCarrier": "Orange",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -935,7 +947,9 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 				"Destination":        "+447779330921",
 				"DestinationCarrier": "Orange;44",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -1018,7 +1032,9 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 				"Destination":        "+447779330921",
 				"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":0,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)

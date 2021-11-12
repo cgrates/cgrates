@@ -534,7 +534,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		},
 	}}
 	testRoutesArgs[1].APIOpts[utils.OptsRoutesLimit] = 1
-	testRoutesArgs[1].APIOpts[utils.OptsRoutesLimit] = 1
+	testRoutesArgs[1].APIOpts[utils.OptsRoutesOffset] = 1
 	sprf, err := routeService.sortedRoutesForEvent("cgrates.org", testRoutesArgs[1])
 	if err != nil {
 		t.Fatal(err)

@@ -235,6 +235,9 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
+		Opts: &ThresholdsOpts{
+			ProfileIDs: []string{},
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ThresholdSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ThresholdSCfg()))
@@ -262,6 +265,9 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
+		Opts: &StatsOpts{
+			ProfileIDs: []string{},
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.StatSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.StatSCfg()))
@@ -289,6 +295,11 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
+		Opts: &ResourcesOpts{
+			UsageID:  utils.EmptyString,
+			UsageTTL: 72 * time.Hour,
+			Units:    1,
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ResourceSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ResourceSCfg()))
@@ -320,6 +331,12 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		RALsConns:           []string{},
 		IndexedSelects:      true,
 		DefaultRatio:        1,
+		Opts: &RoutesOpts{
+			Context:      utils.MetaRoutes,
+			IgnoreErrors: false,
+			MaxCost:      utils.EmptyString,
+			ProfileCount: 1,
+		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RouteSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RouteSCfg()))

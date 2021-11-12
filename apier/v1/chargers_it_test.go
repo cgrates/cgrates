@@ -330,7 +330,11 @@ func testChargerSProcessEvent(t *testing.T) {
 					"Password":         "CGRateS.org",
 					"RunID":            utils.MetaDefault,
 				},
-				APIOpts: map[string]interface{}{utils.OptsContext: "simpleauth", utils.Subsys: utils.MetaChargers},
+				APIOpts: map[string]interface{}{
+					utils.OptsContext:              "simpleauth",
+					utils.Subsys:                   utils.MetaChargers,
+					utils.OptsAttributesProfileIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+				},
 			},
 		},
 	}
@@ -359,7 +363,11 @@ func testChargerSProcessEvent(t *testing.T) {
 					utils.Category:     "call",
 					utils.RunID:        utils.MetaDefault,
 				},
-				APIOpts: map[string]interface{}{utils.OptsContext: "simpleauth", utils.Subsys: utils.MetaChargers},
+				APIOpts: map[string]interface{}{
+					utils.OptsContext:              "simpleauth",
+					utils.Subsys:                   utils.MetaChargers,
+					utils.OptsAttributesProfileIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call"},
+				},
 			},
 		},
 	}
@@ -533,7 +541,10 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 					"CustomField":      "WithoutAttributes",
 					"RunID":            "CustomRun",
 				},
-				APIOpts: map[string]interface{}{utils.Subsys: utils.MetaChargers},
+				APIOpts: map[string]interface{}{
+					utils.Subsys:                   utils.MetaChargers,
+					utils.OptsAttributesProfileIDs: nil,
+				},
 			},
 		},
 	}
@@ -597,7 +608,8 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 				},
 				APIOpts: map[string]interface{}{
 					utils.Subsys:                    utils.MetaChargers,
-					utils.OptsAttributesProcessRuns: 1.,
+					utils.OptsAttributesProfileIDs:  []string{"*constant:*req.Account:1002", "*constant:*req.Account:1003"},
+					utils.OptsAttributesProcessRuns: 1,
 				},
 			},
 		},
@@ -608,7 +620,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1010",
 		},
-		APIOpts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
+		APIOpts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1},
 	}
 	var result2 []*engine.ChrgSProcessEventReply
 	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {

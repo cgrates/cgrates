@@ -192,7 +192,10 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 					"RunID":       "*raw",
 					"Subject":     "Something_inter",
 				},
-				APIOpts: map[string]interface{}{"*subsys": "*chargers"},
+				APIOpts: map[string]interface{}{
+					"*subsys":                      "*chargers",
+					utils.OptsAttributesProfileIDs: []string{"*constant:*req.RequestType:*none"},
+				},
 			},
 		},
 	}

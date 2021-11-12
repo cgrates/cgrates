@@ -902,7 +902,7 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"attributes\":{\"any_context\":true,\"apiers_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"process_runs\":1,\"profile_runs\":0,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*internal\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
+	cfgStr := "{\"attributes\":{\"any_context\":true,\"apiers_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*processRuns\":1,\"*profileIDs\":[],\"*profileIgnoreFilters\":false,\"*profileRuns\":0},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*internal\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
 
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
@@ -981,7 +981,7 @@ func testSectConfigSReloadResources(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"resources\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"-1ns\",\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"],\"thresholds_conns\":[\"*internal\"]}}"
+	cfgStr := "{\"resources\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*units\":1,\"*usageID\":\"\",\"*usageTTL\":259200000000000},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"-1ns\",\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"],\"thresholds_conns\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1022,7 +1022,7 @@ func testSectConfigSReloadStats(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"stats\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"-1ns\",\"store_uncompressed_limit\":1,\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"],\"thresholds_conns\":[\"*internal\"]}}"
+	cfgStr := "{\"stats\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*profileIDs\":[],\"*profileIgnoreFilters\":false},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"-1ns\",\"store_uncompressed_limit\":1,\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"],\"thresholds_conns\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1052,7 +1052,7 @@ func testSectConfigSReloadThresholds(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"thresholds\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"-1ns\",\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
+	cfgStr := "{\"thresholds\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*profileIDs\":[],\"*profileIgnoreFilters\":false},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"-1ns\",\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1095,7 +1095,7 @@ func testSectConfigSReloadRoutes(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"routes\":{\"attributes_conns\":[\"*localhost\"],\"default_ratio\":1,\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"rals_conns\":[\"*localhost\"],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
+	cfgStr := "{\"routes\":{\"attributes_conns\":[\"*localhost\"],\"default_ratio\":1,\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*context\":\"*routes\",\"*ignoreErrors\":false,\"*maxCost\":\"\",\"*profileCount\":1},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"rals_conns\":[\"*localhost\"],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
