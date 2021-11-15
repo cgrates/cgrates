@@ -639,6 +639,7 @@ const (
 	E164DomainConverter     = "*e164Domain"
 	E164Converter           = "*e164"
 	MetaJoin                = "*join"
+	MetaSplit               = "*split"
 	MetaReload              = "*reload"
 	MetaLoad                = "*load"
 	MetaFloat64             = "*float64"
