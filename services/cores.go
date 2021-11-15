@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -82,9 +81,12 @@ func (cS *CoreService) Start(_ *context.Context, shtDw context.CancelFunc) (_ er
 	cS.stopChan = make(chan struct{})
 	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.stopMemPrf, cS.shdWg, shtDw)
 	cS.csCh <- cS.cS
-	srv, _ := birpc.NewService(apis.NewCoreSv1(cS.cS), utils.EmptyString, false)
+	srv, _ := engine.NewService(cS.cS)
+	// srv, _ := birpc.NewService(apis.NewCoreSv1(cS.cS), utils.EmptyString, false)
 	if !cS.cfg.DispatcherSCfg().Enabled {
-		cS.server.RpcRegister(srv)
+		for _, s := range srv {
+			cS.server.RpcRegister(s)
+		}
 	}
 	cS.connChan <- cS.anz.GetInternalCodec(srv, utils.CoreS)
 	return

@@ -72,7 +72,7 @@ func TestDspAAccountsForEventNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*utils.Account
-	result := dspSrv.AccountsForEvent(CGREvent, reply)
+	result := dspSrv.AccountSv1AccountsForEvent(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -87,7 +87,7 @@ func TestDspAccountsForEventErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*utils.Account
-	result := dspSrv.AccountsForEvent(CGREvent, reply)
+	result := dspSrv.AccountSv1AccountsForEvent(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -101,7 +101,7 @@ func TestDspMaxAbstractsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.MaxAbstracts(CGREvent, reply)
+	result := dspSrv.AccountSv1MaxAbstracts(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -116,7 +116,7 @@ func TestDspMaxAbstractsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.MaxAbstracts(CGREvent, reply)
+	result := dspSrv.AccountSv1MaxAbstracts(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -130,7 +130,7 @@ func TestDspDebitAbstractsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.DebitAbstracts(CGREvent, reply)
+	result := dspSrv.AccountSv1DebitAbstracts(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -145,7 +145,7 @@ func TestDspDebitAbstractsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.DebitAbstracts(CGREvent, reply)
+	result := dspSrv.AccountSv1DebitAbstracts(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -159,7 +159,7 @@ func TestDspMaxConcretesNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.MaxConcretes(CGREvent, reply)
+	result := dspSrv.AccountSv1MaxConcretes(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -174,7 +174,7 @@ func TestDspMaxConcretesErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.MaxConcretes(CGREvent, reply)
+	result := dspSrv.AccountSv1MaxConcretes(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -188,7 +188,7 @@ func TestDspDebitConcretesNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.DebitConcretes(CGREvent, reply)
+	result := dspSrv.AccountSv1DebitConcretes(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -203,7 +203,7 @@ func TestDspDebitConcretesErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.DebitConcretes(CGREvent, reply)
+	result := dspSrv.AccountSv1DebitConcretes(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

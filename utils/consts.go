@@ -1247,6 +1247,7 @@ const (
 
 // ConfigSv1 APIs
 const (
+	ConfigS                    = "ConfigS"
 	ConfigSv1                  = "ConfigSv1"
 	ConfigSv1ReloadConfig      = "ConfigSv1.ReloadConfig"
 	ConfigSv1GetConfig         = "ConfigSv1.GetConfig"

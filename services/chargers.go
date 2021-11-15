@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
@@ -93,9 +92,12 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	defer chrS.Unlock()
 	chrS.chrS = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
-	srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
+	srv, _ := engine.NewService(chrS.chrS)
+	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
 	if !chrS.cfg.DispatcherSCfg().Enabled {
-		chrS.server.RpcRegister(srv)
+		for _, s := range srv {
+			chrS.server.RpcRegister(s)
+		}
 	}
 	chrS.connChan <- chrS.anz.GetInternalCodec(srv, utils.ChargerS)
 	return

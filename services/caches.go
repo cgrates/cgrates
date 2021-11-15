@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -76,11 +75,14 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 
 	cS.cacheCh <- engine.Cache
 
-	chSv1, _ := birpc.NewService(apis.NewCacheSv1(engine.Cache), "", false)
+	srv, _ := engine.NewService(engine.Cache)
+	// srv, _ := birpc.NewService(apis.NewCacheSv1(engine.Cache), "", false)
 	if !cS.cfg.DispatcherSCfg().Enabled {
-		cS.server.RpcRegister(chSv1)
+		for _, s := range srv {
+			cS.server.RpcRegister(s)
+		}
 	}
-	cS.rpc <- cS.anz.GetInternalCodec(chSv1, utils.CacheS)
+	cS.rpc <- cS.anz.GetInternalCodec(srv, utils.CacheS)
 	return
 }
 

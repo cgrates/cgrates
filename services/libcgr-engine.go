@@ -31,7 +31,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -201,11 +200,14 @@ func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
 
 func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
 	cfg *config.CGRConfig, server *cores.Server, anz *AnalyzerService) {
-	cfgSv1, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
+	srv, _ := engine.NewService(cfg)
+	// srv, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
 	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(cfgSv1)
+		for _, s := range srv {
+			server.RpcRegister(s)
+		}
 	}
-	iConfigCh <- anz.GetInternalCodec(cfgSv1, utils.ConfigSv1)
+	iConfigCh <- anz.GetInternalCodec(srv, utils.ConfigSv1)
 }
 
 func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,

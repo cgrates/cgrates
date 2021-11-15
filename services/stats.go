@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -97,9 +96,12 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.StatS))
 	sts.sts.StartLoop(ctx)
-	srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
+	srv, _ := engine.NewService(sts.sts)
+	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
 	if !sts.cfg.DispatcherSCfg().Enabled {
-		sts.server.RpcRegister(srv)
+		for _, s := range srv {
+			sts.server.RpcRegister(s)
+		}
 	}
 	sts.connChan <- sts.anz.GetInternalCodec(srv, utils.StatS)
 	return

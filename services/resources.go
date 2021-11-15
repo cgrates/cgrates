@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -96,9 +95,12 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	reS.reS = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	reS.reS.StartLoop(ctx)
-	srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
+	srv, _ := engine.NewService(reS.reS)
+	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
 	if !reS.cfg.DispatcherSCfg().Enabled {
-		reS.server.RpcRegister(srv)
+		for _, s := range srv {
+			reS.server.RpcRegister(s)
+		}
 	}
 	reS.connChan <- reS.anz.GetInternalCodec(srv, utils.ResourceS)
 	return
