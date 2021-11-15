@@ -19,12 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/dispatchers"
@@ -100,72 +98,14 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 
 	dspS.unregisterAllDispatchedSubsystems() // unregister all rpc services that can be dispatched
 
-	srv, _ := birpc.NewService(apis.NewDispatcherSv1(dspS.dspS), "", false)
-	dspS.server.RpcRegister(srv)
-
-	attrsv1, _ := birpc.NewServiceWithMethodsRename(dspS.dspS, utils.AttributeSv1, true, func(oldFn string) (newFn string) {
-		if strings.HasPrefix(oldFn, utils.AttributeSv1) {
-			return strings.TrimPrefix(oldFn, utils.AttributeSv1)
-		}
-		return
-	})
-	dspS.server.RpcRegisterName(utils.AttributeSv1, attrsv1)
+	srv, _ := engine.NewDispatcherService(dspS.dspS)
+	// srv, _ := birpc.NewService(apis.NewDispatcherSv1(dspS.dspS), "", false)
+	for _, s := range srv {
+		dspS.server.RpcRegister(s)
+	}
 	// for the moment we dispable Apier through dispatcher
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
-	/*
-
-		dspS.server.RpcRegisterName(utils.ThresholdSv1,
-			v1.NewDispatcherThresholdSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.StatSv1,
-			v1.NewDispatcherStatSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.ResourceSv1,
-			v1.NewDispatcherResourceSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.RouteSv1,
-			v1.NewDispatcherRouteSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.AttributeSv1,
-			v1.NewDispatcherAttributeSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.SessionSv1,
-			v1.NewDispatcherSessionSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.ChargerSv1,
-			v1.NewDispatcherChargerSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.CacheSv1,
-			v1.NewDispatcherCacheSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.GuardianSv1,
-			v1.NewDispatcherGuardianSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.CDRsV1,
-			v1.NewDispatcherSCDRsV1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.ConfigSv1,
-			v1.NewDispatcherConfigSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.CoreSv1,
-			v1.NewDispatcherCoreSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.ReplicatorSv1,
-			v1.NewDispatcherReplicatorSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.CDRsV2,
-			v2.NewDispatcherSCDRsV2(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.RateSv1,
-			v1.NewDispatcherRateSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.ActionSv1,
-			v1.NewDispatcherActionSv1(dspS.dspS))
-
-		dspS.server.RpcRegisterName(utils.AccountSv1,
-			v1.NewDispatcherAccountSv1(dspS.dspS))
-	*/
 	dspS.connChan <- dspS.anz.GetInternalCodec(srv, utils.DispatcherS)
 
 	return

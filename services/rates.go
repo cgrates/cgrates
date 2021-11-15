@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -135,9 +134,12 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	rs.stopChan = make(chan struct{})
 	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
 
-	srv, _ := birpc.NewService(apis.NewRateSv1(rs.rateS), "", false)
+	srv, _ := engine.NewService(rs.rateS)
+	// srv, _ := birpc.NewService(apis.NewRateSv1(rs.rateS), "", false)
 	if !rs.cfg.DispatcherSCfg().Enabled {
-		rs.server.RpcRegister(srv)
+		for _, s := range srv {
+			rs.server.RpcRegister(s)
+		}
 	}
 	rs.intConnChan <- rs.anz.GetInternalCodec(srv, utils.RateS)
 	return

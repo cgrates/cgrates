@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/cores"
@@ -96,9 +95,12 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	// Pass internal connection via BiRPCClient
 
 	// Register RPC handler
-	srv, _ := birpc.NewService(apis.NewSessionSv1(smg.sm), utils.EmptyString, false) // methods with multiple options
+	srv, _ := engine.NewService(smg.sm) // methods with multiple options
+	// srv, _ := birpc.NewService(apis.NewSessionSv1(smg.sm), utils.EmptyString, false) // methods with multiple options
 	if !smg.cfg.DispatcherSCfg().Enabled {
-		smg.server.RpcRegister(srv)
+		for _, s := range srv {
+			smg.server.RpcRegister(s)
+		}
 	}
 	smg.connChan <- smg.anz.GetInternalCodec(srv, utils.SessionS)
 	// Register BiRpc handlers

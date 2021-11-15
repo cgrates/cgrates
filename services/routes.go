@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
@@ -94,9 +93,12 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	routeS.routeS = engine.NewRouteService(datadb, filterS, routeS.cfg, routeS.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
-	srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
+	srv, _ := engine.NewService(routeS.routeS)
+	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
 	if !routeS.cfg.DispatcherSCfg().Enabled {
-		routeS.server.RpcRegister(srv)
+		for _, s := range srv {
+			routeS.server.RpcRegister(s)
+		}
 	}
 	routeS.connChan <- routeS.anz.GetInternalCodec(srv, utils.RouteS)
 	return

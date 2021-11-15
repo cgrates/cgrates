@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
@@ -93,9 +92,12 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if err = ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
 		return
 	}
-	srv, _ := birpc.NewService(apis.NewLoaderSv1(ldrs.ldrs), "", false)
+	srv, _ := engine.NewService(ldrs.ldrs)
+	// srv, _ := birpc.NewService(apis.NewLoaderSv1(ldrs.ldrs), "", false)
 	if !ldrs.cfg.DispatcherSCfg().Enabled {
-		ldrs.server.RpcRegister(srv)
+		for _, s := range srv {
+			ldrs.server.RpcRegister(s)
+		}
 	}
 	ldrs.connChan <- ldrs.anz.GetInternalCodec(srv, utils.LoaderS)
 	return

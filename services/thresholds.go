@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -96,9 +95,12 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	thrs.thrs.StartLoop(ctx)
-	srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
+	srv, _ := engine.NewService(thrs.thrs)
+	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
 	if !thrs.cfg.DispatcherSCfg().Enabled {
-		thrs.server.RpcRegister(srv)
+		for _, s := range srv {
+			thrs.server.RpcRegister(s)
+		}
 	}
 	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
 	return

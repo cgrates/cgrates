@@ -96,14 +96,17 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 
 	// go apiService.api.ListenAndServe(apiService.stopChan)
 	// runtime.Gosched()
-	srv, _ := birpc.NewService(apiService.api, "", false)
+	srv, _ := engine.NewService(apiService.api)
+	// srv, _ := birpc.NewService(apiService.api, "", false)
 
 	if !apiService.cfg.DispatcherSCfg().Enabled {
-		apiService.server.RpcRegister(srv)
+		for _, s := range srv {
+			apiService.server.RpcRegister(s)
+		}
 	}
 
 	//backwards compatible
-	apiService.connChan <- apiService.anz.GetInternalCodec(srv, srv.Name)
+	apiService.connChan <- apiService.anz.GetInternalCodec(srv, utils.AdminSv1)
 
 	return
 }

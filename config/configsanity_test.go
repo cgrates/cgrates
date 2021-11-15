@@ -151,25 +151,6 @@ func TestConfigSanityLoaders(t *testing.T) {
 			Data: []*LoaderDataType{{
 				Type: utils.MetaStats,
 				Fields: []*FCTemplate{{
-					Type: utils.MetaStats,
-					Tag:  "test1",
-				}},
-			}},
-		},
-	}
-	expected = "<LoaderS> invalid field type *stats for *stats at test1"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.loaderCfg = LoaderSCfgs{
-		&LoaderSCfg{
-			Enabled:  true,
-			TpInDir:  "/",
-			TpOutDir: "/",
-			Data: []*LoaderDataType{{
-				Type: utils.MetaStats,
-				Fields: []*FCTemplate{{
 					Type: utils.MetaComposed,
 					Tag:  "test1",
 					Path: utils.EmptyString,

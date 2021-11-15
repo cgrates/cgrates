@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/accounts"
@@ -103,9 +102,12 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AccountS))
-	srv, _ := birpc.NewService(apis.NewAccountSv1(acts.acts), "", false)
+	srv, _ := engine.NewService(acts.acts)
+	// srv, _ := birpc.NewService(apis.NewAccountSv1(acts.acts), "", false)
 	if !acts.cfg.DispatcherSCfg().Enabled {
-		acts.server.RpcRegister(srv)
+		for _, s := range srv {
+			acts.server.RpcRegister(s)
+		}
 	}
 	acts.connChan <- acts.anz.GetInternalCodec(srv, utils.AccountS)
 	return

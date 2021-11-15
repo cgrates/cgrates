@@ -95,9 +95,12 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	attrS.attrS = engine.NewAttributeService(datadb, filterS, attrS.cfg)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
-	srv, _ := birpc.NewService(attrS.rpc, "", false)
+	srv, _ := engine.NewService(attrS.rpc)
+	// srv, _ := birpc.NewService(attrS.rpc, "", false)
 	if !attrS.cfg.DispatcherSCfg().Enabled {
-		attrS.server.RpcRegister(srv)
+		for _, s := range srv {
+			attrS.server.RpcRegister(s)
+		}
 	}
 	dspShtdChan := attrS.dspS.RegisterShutdownChan(attrS.ServiceName())
 	go func() {

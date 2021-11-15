@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -99,9 +98,12 @@ func (cdrService *CDRServer) Start(ctx *context.Context, _ context.CancelFunc) (
 	go cdrService.cdrS.ListenAndServe(cdrService.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")
-	srv, _ := birpc.NewService(apis.NewCDRsV1(cdrService.cdrS), "", false)
+	srv, _ := engine.NewService(cdrService.cdrS)
+	// srv, _ := birpc.NewService(apis.NewCDRsV1(cdrService.cdrS), "", false)
 	if !cdrService.cfg.DispatcherSCfg().Enabled {
-		cdrService.server.RpcRegister(srv)
+		for _, s := range srv {
+			cdrService.server.RpcRegister(s)
+		}
 	}
 	cdrService.connChan <- cdrService.anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
 	return

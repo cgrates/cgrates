@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -97,9 +96,12 @@ func (anz *AnalyzerService) start(ctx *context.Context) {
 	anz.Lock()
 	anz.anz.SetFilterS(fS)
 
-	srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
+	srv, _ := engine.NewService(anz.anz)
+	// srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
 	if !anz.cfg.DispatcherSCfg().Enabled {
-		anz.server.RpcRegister(srv)
+		for _, s := range srv {
+			anz.server.RpcRegister(s)
+		}
 	}
 	anz.Unlock()
 	anz.connChan <- anz.GetInternalCodec(srv, utils.AnalyzerS)
