@@ -58,7 +58,7 @@ type TestRPC struct {
 	Event *utils.CGREventWithEeIDs
 }
 
-var testRPC1 TestRPC
+var testRPCrt1 TestRPC
 
 func (rpc *TestRPC) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
 	rpc.Event = cgrEv
@@ -66,7 +66,7 @@ func (rpc *TestRPC) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWith
 }
 
 func TestLdPrMatchRtChange(t *testing.T) {
-	birpc.RegisterName(utils.EeSv1, &testRPC1)
+	birpc.RegisterName(utils.EeSv1, &testRPCrt1)
 	l, err := net.Listen(utils.TCP, ":22012")
 	if err != nil {
 		t.Fatal(err)
@@ -173,7 +173,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
 	}
-	costIntervalRatesID := testRPC1.Event.Event["*rateSCost"].(map[string]interface{})["CostIntervals"].([]interface{})[0].(map[string]interface{})["Increments"].([]interface{})[0].(map[string]interface{})["RateID"]
+	costIntervalRatesID := testRPCrt1.Event.Event["*rateSCost"].(map[string]interface{})["CostIntervals"].([]interface{})[0].(map[string]interface{})["Increments"].([]interface{})[0].(map[string]interface{})["RateID"]
 	expected2 := &utils.CGREventWithEeIDs{
 		EeIDs: nil,
 		CGREvent: &utils.CGREvent{
@@ -225,8 +225,8 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(testRPC1.Event)) {
-		t.Errorf("\nExpecting : %+v \n,received: %+v", utils.ToJSON(expected2), utils.ToJSON(testRPC1.Event))
+	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(testRPCrt1.Event)) {
+		t.Errorf("\nExpecting : %+v \n,received: %+v", utils.ToJSON(expected2), utils.ToJSON(testRPCrt1.Event))
 	}
 
 }

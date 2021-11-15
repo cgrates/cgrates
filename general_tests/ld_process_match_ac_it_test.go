@@ -58,7 +58,7 @@ type TestRPC1 struct {
 	Event *utils.CGREventWithEeIDs
 }
 
-var testRPC2 TestRPC
+var testRPC2 TestRPC1
 
 func (rpc *TestRPC1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
 	rpc.Event = cgrEv
