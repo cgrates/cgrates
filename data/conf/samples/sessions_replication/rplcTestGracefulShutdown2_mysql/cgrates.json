@@ -37,7 +37,7 @@
 	"listen_bijson": "127.0.0.1:2014",
 },
 
-"apiers": {
+"admins": {
 	"enabled": true,
 },
 

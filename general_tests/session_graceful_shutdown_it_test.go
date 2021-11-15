@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 // import (
-// 	"net/rpc"
 // 	"os/exec"
 // 	"path"
 // 	"reflect"
@@ -29,6 +28,9 @@ package general_tests
 // 	"testing"
 // 	"time"
 
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/apis"
 // 	"github.com/cgrates/cgrates/sessions"
 
 // 	"github.com/cgrates/cgrates/engine"
@@ -41,7 +43,7 @@ package general_tests
 // 	smgRplcCfgPath1, smgRplcCfgPath2 string
 // 	smgRplcCfgDIR1, smgRplcCfgDIR2   string
 // 	smgRplCfg1, smgRplCfg2           *config.CGRConfig
-// 	smgRplcRPC1, smgRplcRPC2         *rpc.Client
+// 	smgRplcRPC1, smgRplcRPC2         *birpc.Client
 // 	testEngine1, testEngine2         *exec.Cmd
 // 	sTestsSession1                   = []func(t *testing.T){
 // 		testSessionSRplcInitCfg,
@@ -84,11 +86,11 @@ package general_tests
 // //Init Config
 // func testSessionSRplcInitCfg(t *testing.T) {
 // 	smgRplcCfgPath1 = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR1)
-// 	if smgRplCfg1, err = config.NewCGRConfigFromPath(smgRplcCfgPath1); err != nil {
+// 	if smgRplCfg1, err = config.NewCGRConfigFromPath(context.Background(), smgRplcCfgPath1); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	smgRplcCfgPath2 = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR2)
-// 	if smgRplCfg2, err = config.NewCGRConfigFromPath(smgRplcCfgPath2); err != nil {
+// 	if smgRplCfg2, err = config.NewCGRConfigFromPath(context.Background(), smgRplcCfgPath2); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -127,17 +129,17 @@ package general_tests
 // func testSessionSRplcApierGetActiveSessionsNotFound(t *testing.T) {
 // 	aSessions1 := make([]*sessions.ExternalSession, 0)
 // 	expected := "NOT_FOUND"
-// 	if err := smgRplcRPC1.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions1); err == nil || err.Error() != expected {
+// 	if err := smgRplcRPC1.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions1); err == nil || err.Error() != expected {
 // 		t.Error(err)
 // 	}
 // 	aSessions2 := make([]*sessions.ExternalSession, 0)
-// 	if err := smgRplcRPC2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions2); err == nil || err.Error() != expected {
+// 	if err := smgRplcRPC2.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions2); err == nil || err.Error() != expected {
 // 		t.Error(err)
 // 	}
 // }
 
 // func testSessionSRplcApierSetChargerS(t *testing.T) {
-// 	chargerProfile1 := &v1.ChargerWithAPIOpts{
+// 	chargerProfile1 := &apis.ChargerWithAPIOpts{
 // 		ChargerProfile: &engine.ChargerProfile{
 // 			Tenant:       "cgrates.org",
 // 			ID:           "Default",
@@ -147,13 +149,13 @@ package general_tests
 // 		},
 // 	}
 // 	var result1 string
-// 	if err := smgRplcRPC1.Call(utils.AdminSv1SetChargerProfile, chargerProfile1, &result1); err != nil {
+// 	if err := smgRplcRPC1.Call(context.Background(), utils.AdminSv1SetChargerProfile, chargerProfile1, &result1); err != nil {
 // 		t.Error(err)
 // 	} else if result1 != utils.OK {
 // 		t.Error("Unexpected reply returned", result1)
 // 	}
 
-// 	chargerProfile2 := &v1.ChargerWithAPIOpts{
+// 	chargerProfile2 := &apis.ChargerWithAPIOpts{
 // 		ChargerProfile: &engine.ChargerProfile{
 // 			Tenant:       "cgrates.org",
 // 			ID:           "Default",
@@ -163,7 +165,7 @@ package general_tests
 // 		},
 // 	}
 // 	var result2 string
-// 	if err := smgRplcRPC2.Call(utils.AdminSv1SetChargerProfile, chargerProfile2, &result2); err != nil {
+// 	if err := smgRplcRPC2.Call(context.Background(), utils.AdminSv1SetChargerProfile, chargerProfile2, &result2); err != nil {
 // 		t.Error(err)
 // 	} else if result2 != utils.OK {
 // 		t.Error("Unexpected reply returned", result2)
@@ -171,21 +173,18 @@ package general_tests
 // }
 
 // func testSessionSRplcApierGetInitateSessions(t *testing.T) {
-// 	args := &sessions.V1InitSessionArgs{
-// 		InitSession: true,
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "TestSSv1ItInitiateSession",
-// 			Event: map[string]interface{}{
-// 				utils.Tenant:      "cgrates.org",
-// 				utils.RequestType: utils.MetaNone,
-// 				utils.CGRID:       "testSessionRplCGRID",
-// 				utils.OriginID:    "testSessionRplORIGINID",
-// 			},
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TestSSv1ItInitiateSession",
+// 		Event: map[string]interface{}{
+// 			utils.Tenant:      "cgrates.org",
+// 			utils.RequestType: utils.MetaNone,
+// 			utils.CGRID:       "testSessionRplCGRID",
+// 			utils.OriginID:    "testSessionRplORIGINID",
 // 		},
 // 	}
 // 	var rply sessions.V1InitSessionReply
-// 	if err := smgRplcRPC2.Call(utils.SessionSv1InitiateSession,
+// 	if err := smgRplcRPC2.Call(context.Background(), utils.SessionSv1InitiateSession,
 // 		args, &rply); err != nil {
 // 		t.Error(err)
 // 	}
@@ -221,11 +220,11 @@ package general_tests
 // 		},
 // 	}
 // 	aSessions2 := make([]*sessions.ExternalSession, 0)
-// 	if err := smgRplcRPC2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
+// 	if err := smgRplcRPC2.Call(context.Background(), utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
 // 		t.Error(err)
 // 	}
 // 	if !reflect.DeepEqual(&aSessions2, &expected) {
-// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(&aSessions2), utils.ToJSON(&expected))
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(&expected), utils.ToJSON(&aSessions2))
 
 // 	}
 // }
@@ -260,11 +259,11 @@ package general_tests
 // 		},
 // 	}
 // 	aSessions2 := make([]*sessions.ExternalSession, 0)
-// 	if err := smgRplcRPC1.Call(utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
+// 	if err := smgRplcRPC1.Call(context.Background(), utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
 // 		t.Error(err)
 // 	}
 // 	if !reflect.DeepEqual(&aSessions2, &expected) {
-// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(&aSessions2), utils.ToJSON(&expected))
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(&expected), utils.ToJSON(&aSessions2))
 
 // 	}
 // }
@@ -310,11 +309,11 @@ package general_tests
 // 		},
 // 	}
 // 	aSessions2 := make([]*sessions.ExternalSession, 0)
-// 	if err := smgRplcRPC1.Call(utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
+// 	if err := smgRplcRPC1.Call(context.Background(), utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &aSessions2); err != nil {
 // 		t.Error(err)
 // 	}
 // 	if !reflect.DeepEqual(&aSessions2, &expected) {
-// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(&aSessions2), utils.ToJSON(&expected))
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(&expected), utils.ToJSON(&aSessions2))
 
 // 	}
 // }
