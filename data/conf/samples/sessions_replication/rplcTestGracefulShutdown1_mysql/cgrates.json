@@ -28,7 +28,7 @@
 		"chargers_conns": ["*internal"],
 	},
 
-	"apiers": {
+	"admins": {
 		"enabled": true,
 	},
 
