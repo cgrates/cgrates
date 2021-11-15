@@ -115,9 +115,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 
 			for _, field := range data.Fields {
-				if field.Type != utils.MetaComposed && field.Type != utils.MetaString && field.Type != utils.MetaVariable {
-					return fmt.Errorf("<%s> invalid field type %s for %s at %s", utils.LoaderS, field.Type, data.Type, field.Tag)
-				}
 				if field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, utils.NewErrMandatoryIeMissing(utils.Path), data.Type, field.Tag)
 				}

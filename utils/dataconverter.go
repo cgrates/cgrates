@@ -120,6 +120,11 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			return joinConverter(FieldsSep), nil
 		}
 		return joinConverter(params[len(MetaJoin)+1:]), nil
+	case strings.HasPrefix(params, MetaSplit):
+		if len(params) == len(MetaSplit) { // no extra params, defaults implied
+			return splitConverter(FieldsSep), nil
+		}
+		return splitConverter(params[len(MetaSplit)+1:]), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -587,4 +592,10 @@ func (j joinConverter) Convert(in interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return strings.Join(slice, string(j)), nil
+}
+
+type splitConverter string
+
+func (j splitConverter) Convert(in interface{}) (interface{}, error) {
+	return strings.Split(IfaceAsString(in), string(j)), nil
 }
