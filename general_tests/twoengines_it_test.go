@@ -245,7 +245,7 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 			Async:            true,
 		},
 		APIOpts: map[string]interface{}{
-			utils.CacheOpt: utils.MetaReload,
+			utils.MetaCache: utils.MetaReload,
 		},
 	}
 	if err := engineOneRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile, tPrfl, &result); err != nil {

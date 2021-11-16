@@ -176,7 +176,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 		t.Errorf("Expecting : %q, received: %q", expected, rply)
 	}
 	time.Sleep(50 * time.Millisecond)
-	if testRPC1.Event == nil {
+	if testRPCrt1.Event == nil {
 		t.Fatal("The rpc was not called")
 	}
 	costIntervalRatesID := testRPCrt1.Event.Event["*rateSCost"].(map[string]interface{})["CostIntervals"].([]interface{})[0].(map[string]interface{})["Increments"].([]interface{})[0].(map[string]interface{})["RateID"]
