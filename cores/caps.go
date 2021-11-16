@@ -37,7 +37,7 @@ type conn interface {
 	RemoteAddr() net.Addr
 }
 
-func newCapsGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r birpc.ServerCodec) {
+func newCapsGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerS) (r birpc.ServerCodec) {
 	r = newCapsServerCodec(birpc.NewServerCodec(conn), caps)
 	if anz != nil {
 		from := conn.RemoteAddr()
@@ -55,7 +55,7 @@ func newCapsGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerServic
 	return
 }
 
-func newCapsJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r birpc.ServerCodec) {
+func newCapsJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerS) (r birpc.ServerCodec) {
 	r = newCapsServerCodec(jsonrpc.NewServerCodec(conn), caps)
 	if anz != nil {
 		from := conn.RemoteAddr()
@@ -108,7 +108,7 @@ func (c *capsServerCodec) WriteResponse(r *birpc.Response, x interface{}) error 
 }
 func (c *capsServerCodec) Close() error { return c.sc.Close() }
 
-func newCapsBiRPCGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r birpc.BirpcCodec) {
+func newCapsBiRPCGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerS) (r birpc.BirpcCodec) {
 	r = newCapsBiRPCCodec(birpc.NewGobBirpcCodec(conn), caps)
 	if anz != nil {
 		from := conn.RemoteAddr()
@@ -126,7 +126,7 @@ func newCapsBiRPCGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerS
 	return
 }
 
-func newCapsBiRPCJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r birpc.BirpcCodec) {
+func newCapsBiRPCJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerS) (r birpc.BirpcCodec) {
 	r = newCapsBiRPCCodec(jsonrpc.NewJSONBirpcCodec(conn), caps)
 	if anz != nil {
 		from := conn.RemoteAddr()

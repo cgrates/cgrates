@@ -200,7 +200,7 @@ func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
 
 func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
 	cfg *config.CGRConfig, server *cores.Server, anz *AnalyzerService) {
-	srv, _ := engine.NewService(cfg)
+	srv, _ := engine.NewServiceWithName(cfg, utils.ConfigS, true)
 	// srv, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
 	if !cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {

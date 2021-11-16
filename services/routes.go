@@ -61,7 +61,7 @@ type RouteService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	routeS   *engine.RouteService
+	routeS   *engine.RouteS
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup

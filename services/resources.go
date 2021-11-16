@@ -59,7 +59,7 @@ type ResourceService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	reS      *engine.ResourceService
+	reS      *engine.ResourceS
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService

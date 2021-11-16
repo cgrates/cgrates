@@ -47,7 +47,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Serv
 		server:     server,
 		anz:        anz,
 		srvDep:     srvDep,
-		csCh:       make(chan *cores.CoreService, 1),
+		csCh:       make(chan *cores.CoreS, 1),
 	}
 }
 
@@ -62,11 +62,11 @@ type CoreService struct {
 	stopMemPrf chan struct{}
 	fileCpu    io.Closer
 	fileMem    string
-	cS         *cores.CoreService
+	cS         *cores.CoreS
 	connChan   chan birpc.ClientConnector
 	anz        *AnalyzerService
 	srvDep     map[string]*sync.WaitGroup
-	csCh       chan *cores.CoreService
+	csCh       chan *cores.CoreS
 }
 
 // Start should handle the service start
@@ -128,7 +128,7 @@ func (cS *CoreService) ShouldRun() bool {
 }
 
 // GetCoreS returns the coreS
-func (cS *CoreService) WaitForCoreS(ctx *context.Context) (cs *cores.CoreService, err error) {
+func (cS *CoreService) WaitForCoreS(ctx *context.Context) (cs *cores.CoreS, err error) {
 	cS.RLock()
 	cSCh := cS.csCh
 	cS.RUnlock()

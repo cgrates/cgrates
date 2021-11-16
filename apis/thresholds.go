@@ -138,19 +138,19 @@ func (adms *AdminSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.T
 }
 
 // NewThresholdSv1 initializes ThresholdSV1
-func NewThresholdSv1(tS *engine.ThresholdService) *ThresholdSv1 {
+func NewThresholdSv1(tS *engine.ThresholdS) *ThresholdSv1 {
 	return &ThresholdSv1{tS: tS}
 }
 
 // ThresholdSv1 exports RPC from RLs
 type ThresholdSv1 struct {
 	ping
-	tS *engine.ThresholdService
+	tS *engine.ThresholdS
 }
 
 // GetThresholdIDs returns list of threshold IDs registered for a tenant
-func (tSv1 *ThresholdSv1) GetThresholdIDs(ctx *context.Context, tenant *utils.TenantWithAPIOpts, tIDs *[]string) error {
-	return tSv1.tS.V1GetThresholdIDs(ctx, tenant.Tenant, tIDs)
+func (tSv1 *ThresholdSv1) GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, tIDs *[]string) error {
+	return tSv1.tS.V1GetThresholdIDs(ctx, args, tIDs)
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
@@ -160,7 +160,7 @@ func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *util
 
 // GetThreshold queries a Threshold
 func (tSv1 *ThresholdSv1) GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *engine.Threshold) error {
-	return tSv1.tS.V1GetThreshold(ctx, tntID.TenantID, t)
+	return tSv1.tS.V1GetThreshold(ctx, tntID, t)
 }
 
 // ProcessEvent will process an Event
@@ -170,5 +170,5 @@ func (tSv1 *ThresholdSv1) ProcessEvent(ctx *context.Context, args *utils.CGREven
 
 // ResetThreshold resets the threshold hits
 func (tSv1 *ThresholdSv1) ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
-	return tSv1.tS.V1ResetThreshold(ctx, tntID.TenantID, reply)
+	return tSv1.tS.V1ResetThreshold(ctx, tntID, reply)
 }

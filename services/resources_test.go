@@ -56,7 +56,7 @@ func TestResourceSCoverage(t *testing.T) {
 		connMgr:     nil,
 		anz:         anz,
 		srvDep:      srvDep,
-		reS:         &engine.ResourceService{},
+		reS:         &engine.ResourceS{},
 	}
 	if !reS2.IsRunning() {
 		t.Errorf("Expected service to be running")

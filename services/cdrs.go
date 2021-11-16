@@ -98,7 +98,7 @@ func (cdrService *CDRServer) Start(ctx *context.Context, _ context.CancelFunc) (
 	go cdrService.cdrS.ListenAndServe(cdrService.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")
-	srv, _ := engine.NewService(cdrService.cdrS)
+	srv, _ := engine.NewServiceWithName(cdrService.cdrS, utils.CDRs, true)
 	// srv, _ := birpc.NewService(apis.NewCDRsV1(cdrService.cdrS), "", false)
 	if !cdrService.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {

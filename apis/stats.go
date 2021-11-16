@@ -138,19 +138,19 @@ func (adms *AdminSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.T
 }
 
 // NewStatSv1 initializes StatSV1
-func NewStatSv1(sS *engine.StatService) *StatSv1 {
+func NewStatSv1(sS *engine.StatS) *StatSv1 {
 	return &StatSv1{sS: sS}
 }
 
 // StatSv1 exports RPC from RLs
 type StatSv1 struct {
 	ping
-	sS *engine.StatService
+	sS *engine.StatS
 }
 
 // GetQueueIDs returns list of queueIDs registered for a tenant
-func (stsv1 *StatSv1) GetQueueIDs(ctx *context.Context, tenant *utils.TenantWithAPIOpts, qIDs *[]string) error {
-	return stsv1.sS.V1GetQueueIDs(ctx, tenant.Tenant, qIDs)
+func (stsv1 *StatSv1) GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) error {
+	return stsv1.sS.V1GetQueueIDs(ctx, args, qIDs)
 }
 
 // ProcessEvent returns processes a new Event
@@ -185,5 +185,5 @@ func (stsv1 *StatSv1) GetQueueDecimalMetrics(ctx *context.Context, args *utils.T
 
 // ResetStatQueue resets the stat queue
 func (stsv1 *StatSv1) ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
-	return stsv1.sS.V1ResetStatQueue(ctx, tntID.TenantID, reply)
+	return stsv1.sS.V1ResetStatQueue(ctx, tntID, reply)
 }

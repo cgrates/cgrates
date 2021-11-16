@@ -60,7 +60,7 @@ type StatService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	sts      *engine.StatService
+	sts      *engine.StatS
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup

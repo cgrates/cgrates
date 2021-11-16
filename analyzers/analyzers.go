@@ -38,16 +38,16 @@ import (
 )
 
 // NewAnalyzerService initializes a AnalyzerService
-func NewAnalyzerService(cfg *config.CGRConfig) (aS *AnalyzerService, err error) {
-	aS = &AnalyzerService{
+func NewAnalyzerService(cfg *config.CGRConfig) (aS *AnalyzerS, err error) {
+	aS = &AnalyzerS{
 		cfg: cfg,
 	}
 	err = aS.initDB()
 	return
 }
 
-// AnalyzerService is the service handling analyzer
-type AnalyzerService struct {
+// AnalyzerS is the service handling analyzer
+type AnalyzerS struct {
 	db  bleve.Index
 	cfg *config.CGRConfig
 
@@ -56,11 +56,11 @@ type AnalyzerService struct {
 
 // SetFilterS will set the filterS used in APIs
 // this function is called before the API is registerd
-func (aS *AnalyzerService) SetFilterS(fS *engine.FilterS) {
+func (aS *AnalyzerS) SetFilterS(fS *engine.FilterS) {
 	aS.fltrS = fS
 }
 
-func (aS *AnalyzerService) initDB() (err error) {
+func (aS *AnalyzerS) initDB() (err error) {
 	if aS.cfg.AnalyzerSCfg().IndexType == utils.MetaInternal {
 		aS.db, err = bleve.NewMemOnly(bleve.NewIndexMapping())
 		return
@@ -76,7 +76,7 @@ func (aS *AnalyzerService) initDB() (err error) {
 	return
 }
 
-func (aS *AnalyzerService) clenaUp() (err error) {
+func (aS *AnalyzerS) clenaUp() (err error) {
 	t2 := bleve.NewDateRangeQuery(time.Time{}, time.Now().Add(-aS.cfg.AnalyzerSCfg().TTL))
 	t2.SetField(utils.RequestStartTime)
 	searchReq := bleve.NewSearchRequest(t2)
@@ -88,7 +88,7 @@ func (aS *AnalyzerService) clenaUp() (err error) {
 }
 
 // extracted as function in order to test this
-func (aS *AnalyzerService) deleteHits(hits search.DocumentMatchCollection) (err error) {
+func (aS *AnalyzerS) deleteHits(hits search.DocumentMatchCollection) (err error) {
 	hasErr := false
 	for _, hit := range hits {
 		if err = aS.db.Delete(hit.ID); err != nil {
@@ -102,7 +102,7 @@ func (aS *AnalyzerService) deleteHits(hits search.DocumentMatchCollection) (err 
 }
 
 // ListenAndServe will initialize the service
-func (aS *AnalyzerService) ListenAndServe(ctx *context.Context) (err error) {
+func (aS *AnalyzerS) ListenAndServe(ctx *context.Context) (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AnalyzerS))
 	if err = aS.clenaUp(); err != nil { // clean up the data at the system start
 		return
@@ -120,14 +120,14 @@ func (aS *AnalyzerService) ListenAndServe(ctx *context.Context) (err error) {
 }
 
 // Shutdown is called to shutdown the service
-func (aS *AnalyzerService) Shutdown() error {
+func (aS *AnalyzerS) Shutdown() error {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.AnalyzerS))
 	aS.db.Close()
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.AnalyzerS))
 	return nil
 }
 
-func (aS *AnalyzerService) logTrafic(id uint64, method string,
+func (aS *AnalyzerS) logTrafic(id uint64, method string,
 	params, result, err interface{},
 	enc, from, to string, sTime, eTime time.Time) error {
 	if strings.HasPrefix(method, utils.AnalyzerSv1) {
@@ -146,7 +146,7 @@ type QueryArgs struct {
 }
 
 // V1StringQuery returns a list of API that match the query
-func (aS *AnalyzerService) V1StringQuery(ctx *context.Context, args *QueryArgs, reply *[]map[string]interface{}) error {
+func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply *[]map[string]interface{}) error {
 	var q query.Query
 	if args.HeaderFilters == utils.EmptyString {
 		q = bleve.NewMatchAllQuery()

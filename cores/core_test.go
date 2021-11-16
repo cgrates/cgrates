@@ -36,7 +36,7 @@ func TestNewCoreService(t *testing.T) {
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopchan)
 	stopMemChan := make(chan struct{})
-	expected := &CoreService{
+	expected := &CoreS{
 		stopMemPrf: stopchan,
 		cfg:        cfgDflt,
 		CapsStats:  sts,
@@ -53,14 +53,9 @@ func TestNewCoreService(t *testing.T) {
 }
 
 func TestCoreServiceStatus(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
-	cfgDflt.CoreSCfg().CapsStatsInterval = 1
-	caps := engine.NewCaps(1, utils.MetaBusy)
-	cores := NewCoreService(cfgDflt, caps, nil, "/tmp", nil, nil, nil, func() {})
-	args := &utils.TenantWithAPIOpts{
-		Tenant:  "cgrates.org",
-		APIOpts: map[string]interface{}{},
-	}
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CoreSCfg().CapsStatsInterval = 1
+	cores := NewCoreService(cfg, engine.NewCaps(1, utils.MetaBusy), nil, "/tmp", nil, nil, nil, func() {})
 
 	var reply map[string]interface{}
 	cfgVrs, err := utils.GetCGRVersion()
@@ -74,9 +69,9 @@ func TestCoreServiceStatus(t *testing.T) {
 		utils.VersionName:      cfgVrs,
 		utils.ActiveGoroutines: runtime.NumGoroutine(),
 		utils.MemoryUsage:      "CHANGED_MEMORY_USAGE",
-		utils.NodeID:           cfgDflt.GeneralCfg().NodeID,
+		utils.NodeID:           cfg.GeneralCfg().NodeID,
 	}
-	if err := cores.Status(args, &reply); err != nil {
+	if err := cores.V1Status(nil, nil, &reply); err != nil {
 		t.Error(err)
 	} else {
 		reply[utils.RunningSince] = "TIME_CHANGED"
@@ -100,7 +95,7 @@ func TestCoreServiceStatus(t *testing.T) {
 	}
 	utils.GitLastLog = `Date: wrong format
 `
-	if err := cores.Status(args, &reply); err != nil {
+	if err := cores.V1Status(nil, nil, &reply); err != nil {
 		t.Error(err)
 	}
 

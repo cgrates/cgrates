@@ -59,7 +59,7 @@ type LoaderService struct {
 	server      *cores.Server
 	stopChan    chan struct{}
 
-	ldrs     *loaders.LoaderService
+	ldrs     *loaders.LoaderS
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
@@ -153,7 +153,7 @@ func (ldrs *LoaderService) ShouldRun() bool {
 }
 
 // GetLoaderS returns the initialized LoaderService
-func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderService {
+func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderS {
 	return ldrs.ldrs
 }
 

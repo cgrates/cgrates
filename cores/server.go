@@ -60,7 +60,7 @@ type Server struct {
 	httpsMux        *http.ServeMux
 	httpMux         *http.ServeMux
 	caps            *engine.Caps
-	anz             *analyzers.AnalyzerService
+	anz             *analyzers.AnalyzerS
 
 	rpcServer   *birpc.Server
 	rpcJSONl    net.Listener
@@ -72,7 +72,7 @@ type Server struct {
 	startSrv    sync.Once
 }
 
-func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerService) {
+func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerS) {
 	s.anz = anz
 }
 

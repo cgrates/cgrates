@@ -23,13 +23,13 @@ import (
 	"github.com/cgrates/cgrates/loaders"
 )
 
-func NewLoaderSv1(ldrS *loaders.LoaderService) *LoaderSv1 {
+func NewLoaderSv1(ldrS *loaders.LoaderS) *LoaderSv1 {
 	return &LoaderSv1{ldrS: ldrS}
 }
 
 // LoaderSv1 Exports RPC from LoaderService
 type LoaderSv1 struct {
-	ldrS *loaders.LoaderService
+	ldrS *loaders.LoaderS
 	ping
 }
 

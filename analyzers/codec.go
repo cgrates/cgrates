@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/birpc"
 )
 
-func NewAnalyzerServerCodec(sc birpc.ServerCodec, aS *AnalyzerService, enc, from, to string) birpc.ServerCodec {
+func NewAnalyzerServerCodec(sc birpc.ServerCodec, aS *AnalyzerS, enc, from, to string) birpc.ServerCodec {
 	return &AnalyzerServerCodec{
 		sc:   sc,
 		reqs: make(map[uint64]*rpcAPI),
@@ -43,7 +43,7 @@ type AnalyzerServerCodec struct {
 	reqs   map[uint64]*rpcAPI
 	reqIdx uint64
 	reqsLk sync.RWMutex
-	aS     *AnalyzerService
+	aS     *AnalyzerS
 	enc    string
 	from   string
 	to     string
@@ -81,7 +81,7 @@ func (c *AnalyzerServerCodec) WriteResponse(r *birpc.Response, x interface{}) er
 
 func (c *AnalyzerServerCodec) Close() error { return c.sc.Close() }
 
-func NewAnalyzerBiRPCCodec(sc birpc.BirpcCodec, aS *AnalyzerService, enc, from, to string) birpc.BirpcCodec {
+func NewAnalyzerBiRPCCodec(sc birpc.BirpcCodec, aS *AnalyzerS, enc, from, to string) birpc.BirpcCodec {
 	return &AnalyzerBiRPCCodec{
 		sc:   sc,
 		reqs: make(map[uint64]*rpcAPI),
@@ -104,7 +104,7 @@ type AnalyzerBiRPCCodec struct {
 	repIdx uint64
 	repsLk sync.RWMutex
 
-	aS   *AnalyzerService
+	aS   *AnalyzerS
 	enc  string
 	from string
 	to   string

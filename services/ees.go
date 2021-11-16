@@ -61,7 +61,7 @@ type EventExporterService struct {
 	rldChan     chan struct{}
 	stopChan    chan struct{}
 
-	eeS    *ees.EventExporterS
+	eeS    *ees.EeS
 	anz    *AnalyzerService
 	srvDep map[string]*sync.WaitGroup
 }

@@ -95,7 +95,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	// Pass internal connection via BiRPCClient
 
 	// Register RPC handler
-	srv, _ := engine.NewService(smg.sm) // methods with multiple options
+	srv, _ := engine.NewServiceWithName(smg.sm, utils.SessionS, true) // methods with multiple options
 	// srv, _ := birpc.NewService(apis.NewSessionSv1(smg.sm), utils.EmptyString, false) // methods with multiple options
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {

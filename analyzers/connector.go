@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/birpc/context"
 )
 
-func (aS *AnalyzerService) NewAnalyzerConnector(sc birpc.ClientConnector, enc, from, to string) birpc.ClientConnector {
+func (aS *AnalyzerS) NewAnalyzerConnector(sc birpc.ClientConnector, enc, from, to string) birpc.ClientConnector {
 	return &AnalyzerConnector{
 		conn: sc,
 		aS:   aS,
@@ -38,7 +38,7 @@ func (aS *AnalyzerService) NewAnalyzerConnector(sc birpc.ClientConnector, enc, f
 type AnalyzerConnector struct {
 	conn birpc.ClientConnector
 
-	aS   *AnalyzerService
+	aS   *AnalyzerS
 	enc  string
 	from string
 	to   string

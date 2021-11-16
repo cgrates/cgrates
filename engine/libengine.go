@@ -20,8 +20,10 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -127,25 +129,42 @@ func (s RPCClientSet) Call(ctx *context.Context, method string, args interface{}
 }
 
 func NewService(val interface{}) (_ IntService, err error) {
+	return NewServiceWithName(val, utils.EmptyString, false)
+}
+
+func NewServiceWithName(val interface{}, name string, useName bool) (_ IntService, err error) {
 	var srv *birpc.Service
-	if srv, err = birpc.NewService(val, utils.EmptyString, false); err != nil {
+	if srv, err = birpc.NewService(val, name, useName); err != nil {
 		return
 	}
 	s := IntService{srv.Name: srv}
 	for m, v := range srv.Methods {
-		if len(m) < 2 || m[0] != 'V' {
+		m = strings.TrimPrefix(m, "BiRPC")
+		if len(m) < 2 || unicode.ToLower(rune(m[0])) != 'v' {
 			continue
 		}
-		key := srv.Name + "v" + string(m[1])
+
+		key := srv.Name
+		if unicode.IsLower(rune(key[len(key)-1])) {
+			key += "V"
+		} else {
+			key += "v"
+		}
+		key += string(m[1])
 		srv2, has := s[key]
 		if !has {
 			srv2 = new(birpc.Service)
 			*srv2 = *srv
-			srv2.Methods = make(map[string]*birpc.MethodType)
+			srv2.Name = key
+			srv2.Methods = map[string]*birpc.MethodType{"Ping": pingM}
 			s[key] = srv2
 		}
 		srv2.Methods[m[2:]] = v
-
+	}
+	for _, s := range s {
+		for m := range s.Methods {
+			utils.Logger.Crit(fmt.Sprintf("===>%s.%s", s.Name, m))
+		}
 	}
 	return s, nil
 }
@@ -160,52 +179,52 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 		key := srv.Name
 		switch {
 		case strings.HasPrefix(m, utils.AccountS):
-			m = strings.TrimRight(m, utils.AccountS)
+			m = strings.TrimPrefix(m, utils.AccountS)
 			key = utils.AccountS
 		case strings.HasPrefix(m, utils.ActionS):
-			m = strings.TrimRight(m, utils.ActionS)
+			m = strings.TrimPrefix(m, utils.ActionS)
 			key = utils.ActionS
 		case strings.HasPrefix(m, utils.AttributeS):
-			m = strings.TrimRight(m, utils.AttributeS)
+			m = strings.TrimPrefix(m, utils.AttributeS)
 			key = utils.AttributeS
 		case strings.HasPrefix(m, utils.CacheS):
-			m = strings.TrimRight(m, utils.CacheS)
+			m = strings.TrimPrefix(m, utils.CacheS)
 			key = utils.CacheS
 		case strings.HasPrefix(m, utils.ChargerS):
-			m = strings.TrimRight(m, utils.ChargerS)
+			m = strings.TrimPrefix(m, utils.ChargerS)
 			key = utils.ChargerS
 		case strings.HasPrefix(m, utils.ConfigS):
-			m = strings.TrimRight(m, utils.ConfigS)
+			m = strings.TrimPrefix(m, utils.ConfigS)
 			key = utils.ConfigS
 		case strings.HasPrefix(m, utils.DispatcherS):
-			m = strings.TrimRight(m, utils.DispatcherS)
+			m = strings.TrimPrefix(m, utils.DispatcherS)
 			key = utils.DispatcherS
 		case strings.HasPrefix(m, utils.GuardianS):
-			m = strings.TrimRight(m, utils.GuardianS)
+			m = strings.TrimPrefix(m, utils.GuardianS)
 			key = utils.GuardianS
 		case strings.HasPrefix(m, utils.RateS):
-			m = strings.TrimRight(m, utils.RateS)
+			m = strings.TrimPrefix(m, utils.RateS)
 			key = utils.RateS
 		// case strings.HasPrefix(m, utils.ReplicatorS):
-		// 	m = strings.TrimRight(m, utils.ReplicatorS)
+		// 	m = strings.TrimPrefix(m, utils.ReplicatorS)
 		// 	key = utils.ReplicatorS
 		case strings.HasPrefix(m, utils.ResourceS):
-			m = strings.TrimRight(m, utils.ResourceS)
+			m = strings.TrimPrefix(m, utils.ResourceS)
 			key = utils.ResourceS
 		case strings.HasPrefix(m, utils.RouteS):
-			m = strings.TrimRight(m, utils.RouteS)
+			m = strings.TrimPrefix(m, utils.RouteS)
 			key = utils.RouteS
 		case strings.HasPrefix(m, utils.SessionS):
-			m = strings.TrimRight(m, utils.SessionS)
+			m = strings.TrimPrefix(m, utils.SessionS)
 			key = utils.SessionS
 		case strings.HasPrefix(m, utils.StatS):
-			m = strings.TrimRight(m, utils.StatS)
+			m = strings.TrimPrefix(m, utils.StatS)
 			key = utils.StatS
 		case strings.HasPrefix(m, utils.ThresholdS):
-			m = strings.TrimRight(m, utils.ThresholdS)
+			m = strings.TrimPrefix(m, utils.ThresholdS)
 			key = utils.ThresholdS
 		case strings.HasPrefix(m, utils.CDRs):
-			m = strings.TrimRight(m, utils.CDRs)
+			m = strings.TrimPrefix(m, utils.CDRs)
 			key = utils.CDRs
 
 		case len(m) < 2 || m[0] != 'V':
@@ -216,7 +235,8 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 		if !has {
 			srv2 = new(birpc.Service)
 			*srv2 = *srv
-			srv2.Methods = make(map[string]*birpc.MethodType)
+			srv2.Name = key
+			srv2.Methods = map[string]*birpc.MethodType{"Ping": pingM}
 			s[key] = srv2
 		}
 		srv2.Methods[m[2:]] = v
@@ -229,4 +249,19 @@ type IntService map[string]*birpc.Service
 
 func (s IntService) Call(ctx *context.Context, method string, args, reply interface{}) error {
 	return s[strings.Split(method, utils.NestingSep)[0]].Call(ctx, method, args, reply)
+}
+
+func ping(_ interface{}, _ *context.Context, _ *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}
+
+var pingM = &birpc.MethodType{
+	Method: reflect.Method{
+		Name: "Ping",
+		Type: reflect.TypeOf(ping),
+		Func: reflect.ValueOf(ping),
+	},
+	ArgType:   reflect.TypeOf(new(utils.CGREvent)),
+	ReplyType: reflect.TypeOf(new(string)),
 }

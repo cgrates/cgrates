@@ -36,12 +36,12 @@ import (
 )
 
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU io.Closer, fileMem string, stopChan chan struct{},
-	stopMemPrf chan struct{}, shdWg *sync.WaitGroup, shtDw context.CancelFunc) *CoreService {
+	stopMemPrf chan struct{}, shdWg *sync.WaitGroup, shtDw context.CancelFunc) *CoreS {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
 		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
 	}
-	return &CoreService{
+	return &CoreS{
 		shdWg:      shdWg,
 		stopMemPrf: stopMemPrf,
 		shtDw:      shtDw,
@@ -52,7 +52,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU io.Closer,
 	}
 }
 
-type CoreService struct {
+type CoreS struct {
 	cfg        *config.CGRConfig
 	CapsStats  *engine.CapsStats
 	shdWg      *sync.WaitGroup
@@ -63,12 +63,12 @@ type CoreService struct {
 	shtDw      context.CancelFunc
 }
 
-func (cS *CoreService) ShutdownEngine() {
+func (cS *CoreS) ShutdownEngine() {
 	cS.shtDw()
 }
 
 // Shutdown is called to shutdown the service
-func (cS *CoreService) Shutdown() {
+func (cS *CoreS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
 	cS.stopChanMemProf()
 	cS.StopCPUProfiling()
@@ -77,7 +77,7 @@ func (cS *CoreService) Shutdown() {
 
 // stopChanMemProf will stop the MemoryProfiling Channel in order to create
 // the final MemoryProfiling when CoreS subsystem will stop.
-func (cS *CoreService) stopChanMemProf() {
+func (cS *CoreS) stopChanMemProf() {
 	if cS.stopMemPrf != nil {
 		MemProfFile(cS.fileMEM)
 		close(cS.stopMemPrf)
@@ -132,8 +132,8 @@ func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg 
 	}
 }
 
-// Status returns the status of the engine
-func (cS *CoreService) Status(_ *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+// V1Status returns the status of the engine
+func (cS *CoreS) V1Status(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
@@ -151,7 +151,7 @@ func (cS *CoreService) Status(_ *utils.TenantWithAPIOpts, reply *map[string]inte
 }
 
 // StartCPUProfiling is used to start CPUProfiling in the given path
-func (cS *CoreService) StartCPUProfiling(argPath string) (err error) {
+func (cS *CoreS) StartCPUProfiling(argPath string) (err error) {
 	cS.fileMx.Lock()
 	defer cS.fileMx.Unlock()
 	if cS.fileCPU != nil {
@@ -165,7 +165,7 @@ func (cS *CoreService) StartCPUProfiling(argPath string) (err error) {
 }
 
 // StopCPUProfiling is used to stop CPUProfiling in the given path
-func (cS *CoreService) StopCPUProfiling() (err error) {
+func (cS *CoreS) StopCPUProfiling() (err error) {
 	cS.fileMx.Lock()
 	defer cS.fileMx.Unlock()
 	if cS.fileCPU != nil {
@@ -178,7 +178,7 @@ func (cS *CoreService) StopCPUProfiling() (err error) {
 }
 
 // StartMemoryProfiling is used to start MemoryProfiling in the given path
-func (cS *CoreService) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
+func (cS *CoreS) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 	if args.DirPath == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("Path")
 	}
@@ -199,11 +199,62 @@ func (cS *CoreService) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 }
 
 // StopMemoryProfiling is used to stop MemoryProfiling
-func (cS *CoreService) StopMemoryProfiling() (err error) {
+func (cS *CoreS) StopMemoryProfiling() (err error) {
 	if cS.stopMemPrf == nil {
 		return errors.New(" Memory Profiling is not started")
 	}
 	cS.fileMEM = path.Join(cS.fileMEM, utils.MemProfFileCgr)
 	cS.stopChanMemProf()
 	return
+}
+
+// Sleep is used to test the concurrent requests mechanism
+func (cS *CoreS) V1Sleep(_ *context.Context, arg *utils.DurationArgs, reply *string) error {
+	time.Sleep(arg.Duration)
+	*reply = utils.OK
+	return nil
+}
+
+func (cS *CoreS) V1Shutdown(_ *context.Context, _ *utils.CGREvent, reply *string) error {
+	cS.ShutdownEngine()
+	*reply = utils.OK
+	return nil
+}
+
+// StartCPUProfiling is used to start CPUProfiling in the given path
+func (cS *CoreS) V1StartCPUProfiling(_ *context.Context, args *utils.DirectoryArgs, reply *string) error {
+	if err := cS.StartCPUProfiling(path.Join(args.DirPath, utils.CpuPathCgr)); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StopCPUProfiling is used to stop CPUProfiling. The file should be written on the path
+// where the CPUProfiling already started
+func (cS *CoreS) V1StopCPUProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
+	if err := cS.StopCPUProfiling(); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StartMemoryProfiling is used to start MemoryProfiling in the given path
+func (cS *CoreS) V1StartMemoryProfiling(_ *context.Context, args *utils.MemoryPrf, reply *string) error {
+	if err := cS.StartMemoryProfiling(args); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
+// where the MemoryProfiling already started
+func (cS *CoreS) V1StopMemoryProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
+	if err := cS.StopMemoryProfiling(); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
 }

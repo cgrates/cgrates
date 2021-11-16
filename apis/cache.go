@@ -56,15 +56,15 @@ func (chSv1 *CacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts
 }
 
 // RemoveItem removes the Item with ID from cache
-func (chSv1 *CacheSv1) RemoveItem(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
+func (chSv1 *CacheSv1) RemoveItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *string) error {
-	return chSv1.cacheS.V1RemoveItem(args, reply)
+	return chSv1.cacheS.V1RemoveItem(ctx, args, reply)
 }
 
 // RemoveItems removes the Items with ID from cache
-func (chSv1 *CacheSv1) RemoveItems(_ *context.Context, args *utils.AttrReloadCacheWithAPIOpts,
+func (chSv1 *CacheSv1) RemoveItems(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) error {
-	return chSv1.cacheS.V1RemoveItems(args, reply)
+	return chSv1.cacheS.V1RemoveItems(ctx, args, reply)
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
@@ -74,9 +74,9 @@ func (chSv1 *CacheSv1) Clear(ctx *context.Context, args *utils.AttrCacheIDsWithA
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (chSv1 *CacheSv1) GetCacheStats(_ *context.Context, args *utils.AttrCacheIDsWithAPIOpts, //
+func (chSv1 *CacheSv1) GetCacheStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, //
 	rply *map[string]*ltcache.CacheStats) error {
-	return chSv1.cacheS.V1GetCacheStats(args, rply)
+	return chSv1.cacheS.V1GetCacheStats(ctx, args, rply)
 }
 
 // PrecacheStatus checks status of active precache processes

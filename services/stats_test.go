@@ -53,7 +53,7 @@ func TestStatSCoverage(t *testing.T) {
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     nil,
-		sts:         &engine.StatService{},
+		sts:         &engine.StatS{},
 		connChan:    make(chan birpc.ClientConnector, 1),
 		anz:         anz,
 		srvDep:      srvDep,

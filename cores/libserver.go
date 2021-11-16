@@ -45,12 +45,12 @@ type rpcRequest struct {
 	rw         io.ReadWriter // holds the JSON formated RPC response
 	remoteAddr net.Addr
 	caps       *engine.Caps
-	anzWarpper *analyzers.AnalyzerService
+	anzWarpper *analyzers.AnalyzerS
 	srv        *birpc.Server
 }
 
 // newRPCRequest returns a new rpcRequest.
-func newRPCRequest(srv *birpc.Server, r io.ReadCloser, remoteAddr net.Addr, caps *engine.Caps, anz *analyzers.AnalyzerService) *rpcRequest {
+func newRPCRequest(srv *birpc.Server, r io.ReadCloser, remoteAddr net.Addr, caps *engine.Caps, anz *analyzers.AnalyzerS) *rpcRequest {
 	return &rpcRequest{
 		r:          r,
 		rw:         new(bytes.Buffer),

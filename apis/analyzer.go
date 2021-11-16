@@ -23,12 +23,12 @@ import (
 	"github.com/cgrates/cgrates/analyzers"
 )
 
-func NewAnalyzerSv1(aS *analyzers.AnalyzerService) *AnalyzerSv1 {
+func NewAnalyzerSv1(aS *analyzers.AnalyzerS) *AnalyzerSv1 {
 	return &AnalyzerSv1{aS: aS}
 }
 
 type AnalyzerSv1 struct {
-	aS *analyzers.AnalyzerService
+	aS *analyzers.AnalyzerS
 	ping
 }
 
