@@ -173,6 +173,12 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 }
 
 func testSessionSRplcApierGetInitateSessions(t *testing.T) {
+	smgRplCfg1.SessionSCfg().Opts.Initiate = []*utils.DynamicBoolOpt{
+		{
+			Value:  true,
+			Tenant: "cgrates.org",
+		},
+	}
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItInitiateSession",
@@ -181,6 +187,9 @@ func testSessionSRplcApierGetInitateSessions(t *testing.T) {
 			utils.RequestType: utils.MetaNone,
 			utils.CGRID:       "testSessionRplCGRID",
 			utils.OriginID:    "testSessionRplORIGINID",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsSesInitiate: true,
 		},
 	}
 	var rply sessions.V1InitSessionReply
@@ -233,7 +242,7 @@ func testSessionSRplcApierGetPassiveSessions(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
 			CGRID:         "testSessionRplCGRID",
-			RunID:         "*default",
+			RunID:         "",
 			ToR:           "",
 			OriginID:      "testSessionRplORIGINID",
 			OriginHost:    "",
@@ -283,7 +292,7 @@ func testSessionSRplcApierGetPassiveSessionsAfterStop(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
 			CGRID:         "testSessionRplCGRID",
-			RunID:         "*default",
+			RunID:         "",
 			ToR:           "",
 			OriginID:      "testSessionRplORIGINID",
 			OriginHost:    "",
