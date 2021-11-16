@@ -47,7 +47,7 @@ func TestCoreSCoverage(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	srv.cS = &cores.CoreService{}
+	srv.cS = &cores.CoreS{}
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}

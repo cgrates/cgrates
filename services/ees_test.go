@@ -53,7 +53,7 @@ func TestEventExporterSCoverage(t *testing.T) {
 		anz:         anz,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
-		eeS:         &ees.EventExporterS{},
+		eeS:         &ees.EeS{},
 		stopChan:    make(chan struct{}, 1),
 	}
 	if !srv2.IsRunning() {

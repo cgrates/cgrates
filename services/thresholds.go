@@ -60,7 +60,7 @@ type ThresholdService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	thrs     *engine.ThresholdService
+	thrs     *engine.ThresholdS
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup

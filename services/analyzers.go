@@ -54,7 +54,7 @@ type AnalyzerService struct {
 	ctx         *context.Context
 	cancelFunc  context.CancelFunc
 
-	anz      *analyzers.AnalyzerService
+	anz      *analyzers.AnalyzerS
 	connChan chan birpc.ClientConnector
 	srvDep   map[string]*sync.WaitGroup
 }
@@ -72,7 +72,7 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 		return
 	}
 	anz.ctx, anz.cancelFunc = context.WithCancel(ctx)
-	go func(a *analyzers.AnalyzerService) {
+	go func(a *analyzers.AnalyzerS) {
 		if err := a.ListenAndServe(anz.ctx); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
 			shtDwn()

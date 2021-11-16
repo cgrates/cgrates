@@ -263,14 +263,14 @@ func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
 	return
 }
 
-func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (chS *CacheS) V1RemoveItem(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *string) (err error) {
 	chS.tCache.Remove(args.CacheID, args.ItemID, true, utils.NonTransactional)
 	*reply = utils.OK
 	return
 }
 
-func (chS *CacheS) V1RemoveItems(args *utils.AttrReloadCacheWithAPIOpts,
+func (chS *CacheS) V1RemoveItems(_ *context.Context, args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) (err error) {
 	for cacheID, ids := range args.Map() {
 		for _, id := range ids {
@@ -288,7 +288,7 @@ func (chS *CacheS) V1Clear(ctx *context.Context, args *utils.AttrCacheIDsWithAPI
 	return
 }
 
-func (chS *CacheS) V1GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts,
+func (chS *CacheS) V1GetCacheStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
 	rply *map[string]*ltcache.CacheStats) (err error) {
 	cs := chS.tCache.GetCacheStats(args.CacheIDs)
 	*rply = cs

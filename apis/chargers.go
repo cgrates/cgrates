@@ -141,14 +141,14 @@ func (adms *AdminSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.Tena
 }
 
 // NewChargerSv1 returns the RPC Object for ChargerS
-func NewChargerSv1(cS *engine.ChargerService) *ChargerSv1 {
+func NewChargerSv1(cS *engine.ChargerS) *ChargerSv1 {
 	return &ChargerSv1{cS: cS}
 }
 
 // ChargerSv1 Exports RPC from ChargerS
 type ChargerSv1 struct {
 	ping
-	cS *engine.ChargerService
+	cS *engine.ChargerS
 }
 
 // GetChargersForEvent returns matching ChargerProfile for Event

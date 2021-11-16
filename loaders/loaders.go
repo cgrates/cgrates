@@ -32,8 +32,8 @@ import (
 
 func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
 	timezone string, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) (ldrS *LoaderService) {
-	ldrS = &LoaderService{cfg: cfg, cache: make(map[string]*ltcache.Cache)}
+	connMgr *engine.ConnManager) (ldrS *LoaderS) {
+	ldrS = &LoaderS{cfg: cfg, cache: make(map[string]*ltcache.Cache)}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		ldrS.cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
@@ -41,8 +41,8 @@ func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
 	return
 }
 
-// LoaderService is the Loader service handling independent Loaders
-type LoaderService struct {
+// LoaderS is the Loader service handling independent Loaders
+type LoaderS struct {
 	sync.RWMutex
 	cfg   *config.CGRConfig
 	cache map[string]*ltcache.Cache
@@ -50,11 +50,11 @@ type LoaderService struct {
 }
 
 // Enabled returns true if at least one loader is enabled
-func (ldrS *LoaderService) Enabled() bool {
+func (ldrS *LoaderS) Enabled() bool {
 	return len(ldrS.ldrs) != 0
 }
 
-func (ldrS *LoaderService) ListenAndServe(stopChan chan struct{}) (err error) {
+func (ldrS *LoaderS) ListenAndServe(stopChan chan struct{}) (err error) {
 	for _, ldr := range ldrS.ldrs {
 		if err = ldr.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s-%s> error: <%s>", utils.LoaderS, ldr.ldrCfg.ID, err.Error()))
@@ -69,7 +69,7 @@ type ArgsProcessFolder struct {
 	APIOpts  map[string]interface{}
 }
 
-func (ldrS *LoaderService) V1Run(ctx *context.Context, args *ArgsProcessFolder,
+func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 	rply *string) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()
@@ -120,7 +120,7 @@ func (ldrS *LoaderService) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 }
 
 // Reload recreates the loaders map thread safe
-func (ldrS *LoaderService) Reload(dm *engine.DataManager,
+func (ldrS *LoaderS) Reload(dm *engine.DataManager,
 	timezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) {
 	ldrS.Lock()
 	ldrS.createLoaders(dm, timezone, filterS, connMgr)
@@ -128,7 +128,7 @@ func (ldrS *LoaderService) Reload(dm *engine.DataManager,
 }
 
 // Reload recreates the loaders map thread safe
-func (ldrS *LoaderService) createLoaders(dm *engine.DataManager,
+func (ldrS *LoaderS) createLoaders(dm *engine.DataManager,
 	timezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) {
 	ldrS.ldrs = make(map[string]*loader)
 	for _, ldrCfg := range ldrS.cfg.LoaderCfg() {

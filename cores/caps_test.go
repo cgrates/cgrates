@@ -111,7 +111,7 @@ func (*mockConn) RemoteAddr() net.Addr              { return utils.LocalAddr() }
 func TestNewCapsGOBCodec(t *testing.T) {
 	conn := new(mockConn)
 	cr := engine.NewCaps(0, utils.MetaBusy)
-	anz := &analyzers.AnalyzerService{}
+	anz := &analyzers.AnalyzerS{}
 	exp := birpc.NewServerCodec(conn)
 	if r := newCapsGOBCodec(conn, cr, nil); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
@@ -125,7 +125,7 @@ func TestNewCapsGOBCodec(t *testing.T) {
 func TestNewCapsJSONCodec(t *testing.T) {
 	conn := new(mockConn)
 	cr := engine.NewCaps(0, utils.MetaBusy)
-	anz := &analyzers.AnalyzerService{}
+	anz := &analyzers.AnalyzerS{}
 	exp := jsonrpc.NewServerCodec(conn)
 	if r := newCapsJSONCodec(conn, cr, nil); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
@@ -216,7 +216,7 @@ func TestNewCapsBiRPCCodec(t *testing.T) {
 func TestNewCapsGOBBiRPCCodec(t *testing.T) {
 	conn := new(mockConn)
 	cr := engine.NewCaps(0, utils.MetaBusy)
-	anz := &analyzers.AnalyzerService{}
+	anz := &analyzers.AnalyzerS{}
 	exp := birpc.NewGobBirpcCodec(conn)
 	if r := newCapsBiRPCGOBCodec(conn, cr, nil); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
@@ -230,7 +230,7 @@ func TestNewCapsGOBBiRPCCodec(t *testing.T) {
 func TestNewCapsJSONBiRPCCodec(t *testing.T) {
 	conn := new(mockConn)
 	cr := engine.NewCaps(0, utils.MetaBusy)
-	anz := &analyzers.AnalyzerService{}
+	anz := &analyzers.AnalyzerS{}
 	exp := jsonrpc.NewJSONBirpcCodec(conn)
 	if r := newCapsBiRPCJSONCodec(conn, cr, nil); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)

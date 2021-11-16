@@ -53,7 +53,7 @@ func TestSupplierSCoverage(t *testing.T) {
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     nil,
-		routeS:      &engine.RouteService{},
+		routeS:      &engine.RouteS{},
 		// rpc:         nil,
 		connChan: make(chan birpc.ClientConnector, 1),
 		anz:      anz,

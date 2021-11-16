@@ -62,7 +62,7 @@ func TestChargerSCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 
-	chrS.chrS = &engine.ChargerService{}
+	chrS.chrS = &engine.ChargerS{}
 	if !chrS.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}

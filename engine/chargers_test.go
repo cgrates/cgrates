@@ -140,7 +140,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 
 func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	var chargerSrv *ChargerService
+	var chargerSrv *ChargerS
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
 		&ChargerProfile{
@@ -298,7 +298,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 
 func TestChargerProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	var chargerSrv *ChargerService
+	var chargerSrv *ChargerS
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
 		&ChargerProfile{
@@ -480,7 +480,7 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dmCharger := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dmCharger,
 		fltrS: &FilterS{
 			dm:  dmCharger,
@@ -526,7 +526,7 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dmCharger := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dmCharger,
 		fltrS: &FilterS{
 			dm:  dmCharger,
@@ -576,7 +576,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 		},
 	}
 	dmCharger := NewDataManager(dbm, cfg.CacheCfg(), nil)
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dmCharger,
 		fltrS: &FilterS{
 			dm:  dmCharger,
@@ -613,7 +613,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 
 func TestChargersprocessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cS := &ChargerService{
+	cS := &ChargerS{
 		cfg: cfg,
 	}
 	cgrEv := &utils.CGREvent{
@@ -636,7 +636,7 @@ func TestChargersprocessEvent(t *testing.T) {
 }
 
 func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
-	cS := &ChargerService{}
+	cS := &ChargerS{}
 	args := &utils.CGREvent{}
 	var reply *[]*ChrgSProcessEventReply
 
@@ -649,7 +649,7 @@ func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
 }
 
 func TestChargersShutdown(t *testing.T) {
-	cS := &ChargerService{}
+	cS := &ChargerS{}
 
 	utils.Logger.SetLogLevel(6)
 	utils.Logger.SetSyslog(nil)

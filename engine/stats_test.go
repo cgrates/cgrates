@@ -222,7 +222,7 @@ func TestNewStatService(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := &FilterS{dm: dm, cfg: cfg}
-	sSrv := &StatService{
+	sSrv := &StatS{
 		dm:               dm,
 		fltrS:            fltrS,
 		cfg:              cfg,
@@ -934,7 +934,7 @@ func TestStatQueueReload(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	sS := &StatService{
+	sS := &StatS{
 		dm:          dm,
 		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
@@ -952,7 +952,7 @@ func TestStatQueueStartLoop(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	sS := &StatService{
+	sS := &StatS{
 		dm:          dm,
 		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
@@ -1598,7 +1598,7 @@ func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 
 	expIDs := []string{"SQ1", "SQ3"}
 	var qIDs []string
-	if err := sS.V1GetQueueIDs(context.Background(), utils.EmptyString, &qIDs); err != nil {
+	if err := sS.V1GetQueueIDs(context.Background(), &utils.TenantWithAPIOpts{}, &qIDs); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(qIDs)
@@ -1624,7 +1624,7 @@ func TestStatQueueV1GetQueueIDsGetKeysForPrefixErr(t *testing.T) {
 	sS := NewStatService(dm, cfg, filterS, nil)
 
 	var qIDs []string
-	if err := sS.V1GetQueueIDs(context.Background(), utils.EmptyString, &qIDs); err == nil ||
+	if err := sS.V1GetQueueIDs(context.Background(), &utils.TenantWithAPIOpts{}, &qIDs); err == nil ||
 		err.Error() != utils.ErrNotImplemented.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
 	}
@@ -2046,8 +2046,10 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 	}
 	var reply string
 
-	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{
-		ID: "SQ1",
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "SQ1",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -2116,8 +2118,10 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 	}
 
 	var reply string
-	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{
-		ID: "SQ2",
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "SQ2",
+		},
 	}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -2181,7 +2185,7 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [ID]`
 	var reply string
-	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{}, &reply); err == nil ||
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{}}, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -2246,8 +2250,10 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 	experr := `unsupported metric type <testMetricType>`
 	var reply string
 
-	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantID{
-		ID: "SQ1",
+	if err := sS.V1ResetStatQueue(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "SQ1",
+		},
 	}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}

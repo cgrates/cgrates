@@ -201,8 +201,8 @@ func (ts Thresholds) unlock() {
 }
 
 // NewThresholdService the constructor for ThresoldS service
-func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS, connMgr *ConnManager) (tS *ThresholdService) {
-	return &ThresholdService{
+func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS, connMgr *ConnManager) (tS *ThresholdS) {
+	return &ThresholdS{
 		dm:          dm,
 		cfg:         cgrcfg,
 		fltrS:       filterS,
@@ -213,8 +213,8 @@ func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *Fil
 	}
 }
 
-// ThresholdService manages Threshold execution and storing them to dataDB
-type ThresholdService struct {
+// ThresholdS manages Threshold execution and storing them to dataDB
+type ThresholdS struct {
 	dm          *DataManager
 	cfg         *config.CGRConfig
 	fltrS       *FilterS
@@ -226,7 +226,7 @@ type ThresholdService struct {
 }
 
 // Reload stops the backupLoop and restarts it
-func (tS *ThresholdService) Reload(ctx *context.Context) {
+func (tS *ThresholdS) Reload(ctx *context.Context) {
 	close(tS.stopBackup)
 	<-tS.loopStopped // wait until the loop is done
 	tS.stopBackup = make(chan struct{})
@@ -234,12 +234,12 @@ func (tS *ThresholdService) Reload(ctx *context.Context) {
 }
 
 // StartLoop starts the gorutine with the backup loop
-func (tS *ThresholdService) StartLoop(ctx *context.Context) {
+func (tS *ThresholdS) StartLoop(ctx *context.Context) {
 	go tS.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
-func (tS *ThresholdService) Shutdown(ctx *context.Context) {
+func (tS *ThresholdS) Shutdown(ctx *context.Context) {
 	utils.Logger.Info("<ThresholdS> shutdown initialized")
 	close(tS.stopBackup)
 	tS.storeThresholds(ctx)
@@ -247,7 +247,7 @@ func (tS *ThresholdService) Shutdown(ctx *context.Context) {
 }
 
 // backup will regularly store thresholds changed to dataDB
-func (tS *ThresholdService) runBackup(ctx *context.Context) {
+func (tS *ThresholdS) runBackup(ctx *context.Context) {
 	storeInterval := tS.cfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
 		tS.loopStopped <- struct{}{}
@@ -265,7 +265,7 @@ func (tS *ThresholdService) runBackup(ctx *context.Context) {
 }
 
 // storeThresholds represents one task of complete backup
-func (tS *ThresholdService) storeThresholds(ctx *context.Context) {
+func (tS *ThresholdS) storeThresholds(ctx *context.Context) {
 	var failedTdIDs []string
 	for { // don't stop until we store all dirty thresholds
 		tS.stMux.Lock()
@@ -299,7 +299,7 @@ func (tS *ThresholdService) storeThresholds(ctx *context.Context) {
 }
 
 // StoreThreshold stores the threshold in DB and corrects dirty flag
-func (tS *ThresholdService) StoreThreshold(ctx *context.Context, t *Threshold) (err error) {
+func (tS *ThresholdS) StoreThreshold(ctx *context.Context, t *Threshold) (err error) {
 	if t.dirty == nil || !*t.dirty {
 		return
 	}
@@ -324,7 +324,7 @@ func (tS *ThresholdService) StoreThreshold(ctx *context.Context, t *Threshold) (
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (ts Thresholds, err error) {
+func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (ts Thresholds, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
@@ -420,7 +420,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(ctx *context.Context, tnt
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (thresholdsIDs []string, err error) {
+func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (thresholdsIDs []string, err error) {
 	var matchTs Thresholds
 	if matchTs, err = tS.matchingThresholdsForEvent(ctx, tnt, args); err != nil {
 		return nil, err
@@ -476,7 +476,7 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (tS *ThresholdS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -498,7 +498,7 @@ func (tS *ThresholdService) V1ProcessEvent(ctx *context.Context, args *utils.CGR
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *Thresholds) (err error) {
+func (tS *ThresholdS) V1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *Thresholds) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -520,7 +520,8 @@ func (tS *ThresholdService) V1GetThresholdsForEvent(ctx *context.Context, args *
 }
 
 // V1GetThresholdIDs returns list of thresholdIDs configured for a tenant
-func (tS *ThresholdService) V1GetThresholdIDs(ctx *context.Context, tenant string, tIDs *[]string) (err error) {
+func (tS *ThresholdS) V1GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, tIDs *[]string) (err error) {
+	tenant := args.Tenant
 	if tenant == utils.EmptyString {
 		tenant = tS.cfg.GeneralCfg().DefaultTenant
 	}
@@ -538,7 +539,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(ctx *context.Context, tenant strin
 }
 
 // V1GetThreshold retrieves a Threshold
-func (tS *ThresholdService) V1GetThreshold(ctx *context.Context, tntID *utils.TenantID, t *Threshold) (err error) {
+func (tS *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, t *Threshold) (err error) {
 	var thd *Threshold
 	tnt := tntID.Tenant
 	if tnt == utils.EmptyString {
@@ -557,7 +558,7 @@ func (tS *ThresholdService) V1GetThreshold(ctx *context.Context, tntID *utils.Te
 }
 
 // V1ResetThreshold resets the threshold hits
-func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantID, rply *string) (err error) {
+func (tS *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) (err error) {
 	var thd *Threshold
 	tnt := tntID.Tenant
 	if tnt == utils.EmptyString {

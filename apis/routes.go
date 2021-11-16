@@ -137,14 +137,14 @@ func (adms *AdminSv1) RemoveRouteProfile(ctx *context.Context, args *utils.Tenan
 	return nil
 }
 
-func NewRouteSv1(rS *engine.RouteService) *RouteSv1 {
+func NewRouteSv1(rS *engine.RouteS) *RouteSv1 {
 	return &RouteSv1{rS: rS}
 }
 
 // RouteSv1 exports RPC from RouteS
 type RouteSv1 struct {
 	ping
-	rS *engine.RouteService
+	rS *engine.RouteS
 }
 
 // GetRoutes returns sorted list of routes for Event

@@ -23,13 +23,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewEeSv1(eesV1 *ees.EventExporterS) *EeSv1 {
+func NewEeSv1(eesV1 *ees.EeS) *EeSv1 {
 	return &EeSv1{ees: eesV1}
 }
 
 // EeSv1 exports RPC from RLs
 type EeSv1 struct {
-	ees *ees.EventExporterS
+	ees *ees.EeS
 	ping
 }
 

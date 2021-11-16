@@ -60,7 +60,7 @@ type ChargerService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	chrS     *engine.ChargerService
+	chrS     *engine.ChargerS
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup

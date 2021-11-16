@@ -53,7 +53,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 		},
 	}
 	dmFilter := NewDataManager(dbm, cfg.CacheCfg(), nil)
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dmFilter,
 		fltrS: &FilterS{
 			dm:  dmFilter,
@@ -127,7 +127,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
 			dm:  dm,
@@ -203,7 +203,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
 			dm:  dm,
@@ -296,7 +296,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
 			dm:  dm,
@@ -366,7 +366,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
 			dm:  dm,
@@ -442,7 +442,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
 
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
 			dm:  dm,
@@ -508,7 +508,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
 			dm:  dm,
@@ -560,7 +560,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 	}
 	dm := NewDataManager(dbm, cfg.CacheCfg(), nil)
 
-	cS := &ChargerService{
+	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
 			dm:  dm,

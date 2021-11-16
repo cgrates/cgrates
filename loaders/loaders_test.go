@@ -49,7 +49,7 @@ func TestNewLoaderService(t *testing.T) {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
 	ld := NewLoaderService(cfg, dm, "", fS, cM)
-	if exp := (&LoaderService{
+	if exp := (&LoaderS{
 		cfg:   cfg,
 		cache: cache,
 		ldrs: map[string]*loader{

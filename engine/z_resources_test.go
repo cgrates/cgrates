@@ -2858,7 +2858,7 @@ func TestResourcesShutdown(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 
-	rS := &ResourceService{
+	rS := &ResourceS{
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
@@ -2913,7 +2913,7 @@ func TestResourcesStoreResources(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 
-	rS := &ResourceService{
+	rS := &ResourceS{
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
@@ -2930,7 +2930,7 @@ func TestResourcesStoreResources(t *testing.T) {
 
 	explog := fmt.Sprintf("CGRateS <> [WARNING] <%s> failed saving Resource with ID: %s, error: %s\n",
 		utils.ResourceS, value.ID, utils.ErrNoDatabaseConn.Error())
-	exp := &ResourceService{
+	exp := &ResourceS{
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
 		},
@@ -2949,7 +2949,7 @@ func TestResourcesStoreResources(t *testing.T) {
 }
 
 func TestResourcesStoreResourceNotDirty(t *testing.T) {
-	rS := &ResourceService{}
+	rS := &ResourceS{}
 	r := &Resource{
 		dirty: utils.BoolPointer(false),
 	}
@@ -2963,7 +2963,7 @@ func TestResourcesStoreResourceNotDirty(t *testing.T) {
 
 func TestResourcesStoreResourceOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rS := &ResourceService{
+	rS := &ResourceS{
 		dm: NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil),
 	}
 	r := &Resource{
@@ -3059,7 +3059,7 @@ func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
 
 func TestResourcesProcessThresholdsNoConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rS := &ResourceService{
+	rS := &ResourceS{
 		cfg: cfg,
 	}
 	r := &Resource{
@@ -3111,7 +3111,7 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	rS := &ResourceService{
+	rS := &ResourceS{
 		cfg:     cfg,
 		connMgr: NewConnManager(cfg),
 	}
@@ -3182,7 +3182,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	}
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- ccM
-	rS := &ResourceService{
+	rS := &ResourceS{
 		cfg:     cfg,
 		connMgr: NewConnManager(cfg),
 	}
@@ -3212,7 +3212,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().ThresholdSConns = []string{"connID"}
-	rS := &ResourceService{
+	rS := &ResourceS{
 		cfg: cfg,
 	}
 	r := &Resource{
@@ -3444,7 +3444,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 		},
 	}
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err != nil {
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3502,7 +3502,7 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 	}
 
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -3548,7 +3548,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 
 	experr := `MANDATORY_IE_MISSING: [Event]`
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(context.Background(), nil, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), nil, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3564,7 +3564,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [ID]`
-	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3578,7 +3578,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [Event]`
-	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3592,7 +3592,7 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	}
 
 	experr = `MANDATORY_IE_MISSING: [UsageID]`
-	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -3683,7 +3683,7 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 		&utils.CachedRPCResponse{Result: &cacheReply, Error: nil},
 		nil, true, utils.NonTransactional)
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err != nil {
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, cacheReply) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -3775,7 +3775,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 		},
 	}
 	var reply Resources
-	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err != nil {
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, *exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -6140,7 +6140,7 @@ func TestResourcesRunBackupStoreIntervalLessThanZero(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	rS := &ResourceService{
+	rS := &ResourceS{
 		dm:              dm,
 		storedResources: make(utils.StringSet),
 		cfg:             cfg,
@@ -6162,7 +6162,7 @@ func TestResourcesRunBackupStop(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	rS := &ResourceService{
+	rS := &ResourceS{
 		dm: dm,
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
@@ -6212,7 +6212,7 @@ func TestResourcesReload(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	rS := &ResourceService{
+	rS := &ResourceS{
 		dm:          dm,
 		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
@@ -6230,7 +6230,7 @@ func TestResourcesStartLoop(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	rS := &ResourceService{
+	rS := &ResourceS{
 		dm:          dm,
 		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),

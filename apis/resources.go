@@ -139,19 +139,19 @@ func (adms *AdminSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.Ten
 	return nil
 }
 
-func NewResourceSv1(rls *engine.ResourceService) *ResourceSv1 {
+func NewResourceSv1(rls *engine.ResourceS) *ResourceSv1 {
 	return &ResourceSv1{rls: rls}
 }
 
 // Exports RPC from RLs
 type ResourceSv1 struct {
 	ping
-	rls *engine.ResourceService
+	rls *engine.ResourceS
 }
 
 // GetResourcesForEvent returns Resources matching a specific event
 func (rsv1 *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Resources) error {
-	return rsv1.rls.V1ResourcesForEvent(ctx, args, reply)
+	return rsv1.rls.V1GetResourcesForEvent(ctx, args, reply)
 }
 
 // AuthorizeResources checks if there are limits imposed for event

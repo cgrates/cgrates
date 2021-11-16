@@ -37,8 +37,8 @@ func onCacheEvicted(_ string, value interface{}) {
 
 // NewEventExporterS instantiates the EventExporterS
 func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) (eeS *EventExporterS) {
-	eeS = &EventExporterS{
+	connMgr *engine.ConnManager) (eeS *EeS) {
+	eeS = &EeS{
 		cfg:     cfg,
 		fltrS:   filterS,
 		connMgr: connMgr,
@@ -48,8 +48,8 @@ func NewEventExporterS(cfg *config.CGRConfig, filterS *engine.FilterS,
 	return
 }
 
-// EventExporterS is managing the EventExporters
-type EventExporterS struct {
+// EeS is managing the EventExporters
+type EeS struct {
 	cfg     *config.CGRConfig
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
@@ -59,7 +59,7 @@ type EventExporterS struct {
 }
 
 // ListenAndServe keeps the service alive
-func (eeS *EventExporterS) ListenAndServe(stopChan, cfgRld chan struct{}) {
+func (eeS *EeS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 	for {
 		select {
 		case <-stopChan: // global exit
@@ -74,13 +74,13 @@ func (eeS *EventExporterS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 }
 
 // Shutdown is called to shutdown the service
-func (eeS *EventExporterS) Shutdown() {
+func (eeS *EeS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EEs))
 	eeS.setupCache(nil) // cleanup exporters
 }
 
 // setupCache deals with cleanup and initialization of the cache of EventExporters
-func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
+func (eeS *EeS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Lock()
 	for chID, ch := range eeS.eesChs { // cleanup
 		ch.Clear()
@@ -96,7 +96,7 @@ func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Unlock()
 }
 
-func (eeS *EventExporterS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, attrIDs []string, attributeSCtx string) (err error) {
+func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, attrIDs []string, attributeSCtx string) (err error) {
 	var rplyEv engine.AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]interface{})
@@ -121,7 +121,7 @@ func (eeS *EventExporterS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.
 
 // V1ProcessEvent will be called each time a new event is received from readers
 // rply -> map[string]map[string]interface{}
-func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
+func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
 	eeS.cfg.RLocks(config.EEsJSON)
 	defer eeS.cfg.RUnlocks(config.EEsJSON)
 

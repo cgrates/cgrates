@@ -192,7 +192,7 @@ func TestThresholdsCache(t *testing.T) {
 
 func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	var dmTH *DataManager
-	var thServ *ThresholdService
+	var thServ *ThresholdS
 	var tPrfls = []*ThresholdProfile{
 		{
 			Tenant:           "cgrates.org",
@@ -1888,8 +1888,10 @@ func TestThresholdsV1GetThresholdOK(t *testing.T) {
 		Hits:   0,
 	}
 	var rplyTh Threshold
-	if err := tS.V1GetThreshold(context.Background(), &utils.TenantID{
-		ID: "TH1",
+	if err := tS.V1GetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TH1",
+		},
 	}, &rplyTh); err != nil {
 		t.Error(err)
 	} else {
@@ -1930,8 +1932,10 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 	}
 
 	var rplyTh Threshold
-	if err := tS.V1GetThreshold(context.Background(), &utils.TenantID{
-		ID: "TH2",
+	if err := tS.V1GetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TH2",
+		},
 	}, &rplyTh); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -2287,7 +2291,7 @@ func TestThresholdsRunBackupStoreIntervalLessThanZero(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := &ThresholdService{
+	tS := &ThresholdS{
 		dm:          dm,
 		storedTdIDs: make(utils.StringSet),
 		cfg:         cfg,
@@ -2309,7 +2313,7 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := &ThresholdService{
+	tS := &ThresholdS{
 		dm: dm,
 		storedTdIDs: utils.StringSet{
 			"Th1": struct{}{},
@@ -2361,7 +2365,7 @@ func TestThresholdsReload(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := &ThresholdService{
+	tS := &ThresholdS{
 		dm:          dm,
 		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
@@ -2379,7 +2383,7 @@ func TestThresholdsStartLoop(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := &ThresholdService{
+	tS := &ThresholdS{
 		dm:          dm,
 		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
@@ -2550,7 +2554,7 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 
 	expIDs := []string{"TH1", "TH2"}
 	var reply []string
-	if err := tS.V1GetThresholdIDs(context.Background(), "", &reply); err != nil {
+	if err := tS.V1GetThresholdIDs(context.Background(), &utils.TenantWithAPIOpts{}, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply)
@@ -2576,7 +2580,7 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	var reply []string
-	if err := tS.V1GetThresholdIDs(context.Background(), "", &reply); err == nil ||
+	if err := tS.V1GetThresholdIDs(context.Background(), &utils.TenantWithAPIOpts{}, &reply); err == nil ||
 		err != utils.ErrNotImplemented {
 		t.Error(err)
 	}
@@ -2622,8 +2626,10 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 		"cgrates.org:TH1": {},
 	}
 	var reply string
-	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantID{
-		ID: "TH1",
+	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TH1",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -2672,8 +2678,10 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 	}
 
 	var reply string
-	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantID{
-		ID: "TH1",
+	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TH1",
+		},
 	}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -2717,8 +2725,10 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
 	}
 
 	var reply string
-	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantID{
-		ID: "TH1",
+	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TH1",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -2766,8 +2776,10 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 	}
 
 	var reply string
-	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantID{
-		ID: "TH1",
+	if err := tS.V1ResetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "TH1",
+		},
 	}, &reply); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNoDatabaseConn, err)
 	}
