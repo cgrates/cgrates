@@ -20,6 +20,7 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -107,5 +108,135 @@ func TestLibengineNewRPCConnectionInternal(t *testing.T) {
 	}
 	if !reflect.DeepEqual(exp, conn) {
 		t.Error("Connections don't match")
+	}
+}
+
+type TestRPCSrvMock struct{} // exported for service
+
+func (TestRPCSrvMock) Do(*context.Context, interface{}, *string) error   { return nil }
+func (TestRPCSrvMock) V1Do(*context.Context, interface{}, *string) error { return nil }
+func (TestRPCSrvMock) V2Do(*context.Context, interface{}, *string) error { return nil }
+
+type TestRPCSrvMockS struct{} // exported for service
+
+func (TestRPCSrvMockS) Do(*context.Context, interface{}, *string) error   { return nil }
+func (TestRPCSrvMockS) V1Do(*context.Context, interface{}, *string) error { return nil }
+func (TestRPCSrvMockS) V2Do(*context.Context, interface{}, *string) error { return nil }
+
+func getMethods(s IntService) (methods map[string][]string) {
+	methods = map[string][]string{}
+	for _, v := range s {
+		for m := range v.Methods {
+			methods[v.Name] = append(methods[v.Name], m)
+		}
+	}
+	for k := range methods {
+		sort.Strings(methods[k])
+	}
+	return
+}
+
+func TestIntServiceNewService(t *testing.T) {
+	expErrMsg := `rpc.Register: no service name for type struct {}`
+	if _, err := NewService(struct{}{}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	s, err := NewService(new(TestRPCSrvMock))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(s) != 3 {
+		t.Errorf("Not all rpc APIs were registerd")
+	}
+	methods := getMethods(s)
+	exp := map[string][]string{
+		"TestRPCSrvMock":   {"Do", "Ping", "V1Do", "V2Do"},
+		"TestRPCSrvMockV1": {"Do", "Ping"},
+		"TestRPCSrvMockV2": {"Do", "Ping"},
+	}
+	if !reflect.DeepEqual(exp, methods) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(methods))
+	}
+
+	s, err = NewService(new(TestRPCSrvMockS))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(s) != 3 {
+		t.Errorf("Not all rpc APIs were registerd")
+	}
+	methods = getMethods(s)
+	exp = map[string][]string{
+		"TestRPCSrvMockS":   {"Do", "Ping", "V1Do", "V2Do"},
+		"TestRPCSrvMockSv1": {"Do", "Ping"},
+		"TestRPCSrvMockSv2": {"Do", "Ping"},
+	}
+	if !reflect.DeepEqual(exp, methods) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(methods))
+	}
+
+	var rply string
+	if err := s.Call(context.Background(), "TestRPCSrvMockSv1.Ping", new(utils.CGREvent), &rply); err != nil {
+		t.Fatal(err)
+	} else if rply != utils.Pong {
+		t.Errorf("Expeceted: %q, received: %q", utils.Pong, rply)
+	}
+
+	expErrMsg = `rpc: can't find service TestRPCSrvMockv1.Ping`
+	if err := s.Call(context.Background(), "TestRPCSrvMockv1.Ping", new(utils.CGREvent), &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+}
+
+type TestRPCDspMock struct{} // exported for service
+
+func (TestRPCDspMock) AccountSv1Do(*context.Context, interface{}, *string) error    { return nil }
+func (TestRPCDspMock) ActionSv1Do(*context.Context, interface{}, *string) error     { return nil }
+func (TestRPCDspMock) AttributeSv1Do(*context.Context, interface{}, *string) error  { return nil }
+func (TestRPCDspMock) CacheSv1Do(*context.Context, interface{}, *string) error      { return nil }
+func (TestRPCDspMock) ChargerSv1Do(*context.Context, interface{}, *string) error    { return nil }
+func (TestRPCDspMock) ConfigSv1Do(*context.Context, interface{}, *string) error     { return nil }
+func (TestRPCDspMock) DispatcherSv1Do(*context.Context, interface{}, *string) error { return nil }
+func (TestRPCDspMock) GuardianSv1Do(*context.Context, interface{}, *string) error   { return nil }
+func (TestRPCDspMock) RateSv1Do(*context.Context, interface{}, *string) error       { return nil }
+func (TestRPCDspMock) ReplicatorSv1Do(*context.Context, interface{}, *string) error { return nil }
+func (TestRPCDspMock) ResourceSv1Do(*context.Context, interface{}, *string) error   { return nil }
+func (TestRPCDspMock) RouteSv1Do(*context.Context, interface{}, *string) error      { return nil }
+func (TestRPCDspMock) SessionSv1Do(*context.Context, interface{}, *string) error    { return nil }
+func (TestRPCDspMock) StatSv1Do(*context.Context, interface{}, *string) error       { return nil }
+func (TestRPCDspMock) ThresholdSv1Do(*context.Context, interface{}, *string) error  { return nil }
+func (TestRPCDspMock) CDRsv1Do(*context.Context, interface{}, *string) error        { return nil }
+func TestIntServiceNewDispatcherService(t *testing.T) {
+	expErrMsg := `rpc.Register: no service name for type struct {}`
+	if _, err := NewDispatcherService(struct{}{}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	s, err := NewDispatcherService(new(TestRPCDspMock))
+	if err != nil {
+		t.Fatal(err)
+	}
+	methods := getMethods(s)
+	exp := map[string][]string{
+		"AccountSv1":     {"Do", "Ping"},
+		"ActionSv1":      {"Do", "Ping"},
+		"AttributeSv1":   {"Do", "Ping"},
+		"CDRsV1":         {"Do", "Ping"},
+		"CacheSv1":       {"Do", "Ping"},
+		"ChargerSv1":     {"Do", "Ping"},
+		"ConfigSv1":      {"Do", "Ping"},
+		"DispatcherSv1":  {"Do", "Ping"},
+		"GuardianSv1":    {"Do", "Ping"},
+		"RateSv1":        {"Do", "Ping"},
+		"ResourceSv1":    {"Do", "Ping"},
+		"RouteSv1":       {"Do", "Ping"},
+		"SessionSv1":     {"Do", "Ping"},
+		"StatSv1":        {"Do", "Ping"},
+		"TestRPCDspMock": {"AccountSv1Do", "ActionSv1Do", "AttributeSv1Do", "CDRsv1Do", "CacheSv1Do", "ChargerSv1Do", "ConfigSv1Do", "DispatcherSv1Do", "GuardianSv1Do", "Ping", "RateSv1Do", "ReplicatorSv1Do", "ResourceSv1Do", "RouteSv1Do", "SessionSv1Do", "StatSv1Do", "ThresholdSv1Do"},
+		"ThresholdSv1":   {"Do", "Ping"},
+	}
+	if !reflect.DeepEqual(exp, methods) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(methods))
 	}
 }

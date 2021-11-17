@@ -163,7 +163,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 	}()
 
 	err = dbConn.SetVersions(engine.Versions{
-		utils.StatS:      4,
+		utils.Stats:      4,
 		utils.Accounts:   3,
 		utils.Actions:    2,
 		utils.Thresholds: 4,
@@ -309,7 +309,7 @@ func TestDataDBStartVersion(t *testing.T) {
 		dbConn.Close()
 	}()
 	err = dbConn.SetVersions(engine.Versions{
-		utils.StatS:      4,
+		utils.Stats:      4,
 		utils.Accounts:   3,
 		utils.Actions:    2,
 		utils.Thresholds: 4,
@@ -363,7 +363,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 	}()
 
 	err = dbConn.SetVersions(engine.Versions{
-		utils.StatS:      4,
+		utils.Stats:      4,
 		utils.Accounts:   3,
 		utils.Actions:    2,
 		utils.Thresholds: 4,

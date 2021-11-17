@@ -404,7 +404,7 @@ func testUpdateVersionsRoutes(t *testing.T) {
 
 func testUpdateVersionsStats(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions[utils.StatS] = 3
+	newVersions[utils.Stats] = 3
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}

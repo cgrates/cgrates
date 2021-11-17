@@ -92,7 +92,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		if err := m.dmIN.DataManager().RemoveStatQueueProfile(context.TODO(), tntID[0], tntID[1], false); err != nil {
 			return err
 		}
-		m.stats[utils.StatS]++
+		m.stats[utils.Stats]++
 	}
 	return
 }
@@ -141,7 +141,7 @@ func (m *Migrator) migrateV2Stats(v2Stats *engine.StatQueue) (v3Stats *engine.St
 func (m *Migrator) migrateStats() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	if vrs, err = m.getVersions(utils.StatS); err != nil {
+	if vrs, err = m.getVersions(utils.Stats); err != nil {
 		return
 	}
 	migrated := true
@@ -151,12 +151,12 @@ func (m *Migrator) migrateStats() (err error) {
 	var v2Stats *engine.StatQueue
 	var v3Stats *engine.StatQueue
 	for {
-		version := vrs[utils.StatS]
+		version := vrs[utils.Stats]
 		for {
 			switch version {
 			default:
 				return fmt.Errorf("Unsupported version %v", version)
-			case current[utils.StatS]:
+			case current[utils.Stats]:
 				migrated = false
 				if m.sameDataDB {
 					break
@@ -187,7 +187,7 @@ func (m *Migrator) migrateStats() (err error) {
 				}
 				version = 4
 			}
-			if version == current[utils.StatS] || err == utils.ErrNoMoreData {
+			if version == current[utils.Stats] || err == utils.ErrNoMoreData {
 				break
 			}
 		}
@@ -195,7 +195,7 @@ func (m *Migrator) migrateStats() (err error) {
 			break
 		}
 		if !m.dryRun {
-			if vrs[utils.StatS] == 1 {
+			if vrs[utils.Stats] == 1 {
 				if err = m.dmOut.DataManager().SetFilter(context.TODO(), filter, true); err != nil {
 					return
 				}
@@ -210,7 +210,7 @@ func (m *Migrator) migrateStats() (err error) {
 				}
 			}
 		}
-		m.stats[utils.StatS]++
+		m.stats[utils.Stats]++
 	}
 	if m.dryRun || !migrated {
 		return nil
@@ -218,7 +218,7 @@ func (m *Migrator) migrateStats() (err error) {
 	// call the remove function here
 
 	// All done, update version wtih current one
-	if err = m.setVersions(utils.StatS); err != nil {
+	if err = m.setVersions(utils.Stats); err != nil {
 		return err
 	}
 	return m.ensureIndexesDataDB(engine.ColSqs)

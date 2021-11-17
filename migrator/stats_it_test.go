@@ -376,7 +376,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Error("Error when setting v1Stat ", err.Error())
 	}
 
-	if err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.StatS: 1}, true); err != nil {
+	if err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(engine.Versions{utils.Stats: 1}, true); err != nil {
 		t.Errorf("error: <%s> when updating Stats version into dataDB", err.Error())
 	}
 
@@ -384,10 +384,10 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Error(err)
 	}
 
-	if vrs, err := stsMigrator.dmOut.DataManager().DataDB().GetVersions(utils.StatS); err != nil {
+	if vrs, err := stsMigrator.dmOut.DataManager().DataDB().GetVersions(utils.Stats); err != nil {
 		t.Errorf("error: <%s> when updating Stats version into dataDB", err.Error())
-	} else if vrs[utils.StatS] != 4 {
-		t.Errorf("Expecting: 4, received: %+v", vrs[utils.StatS])
+	} else if vrs[utils.Stats] != 4 {
+		t.Errorf("Expecting: 4, received: %+v", vrs[utils.Stats])
 	}
 
 	//from V1 to V2

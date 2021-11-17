@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -137,6 +138,7 @@ func NewServiceWithName(val interface{}, name string, useName bool) (_ IntServic
 	if srv, err = birpc.NewService(val, name, useName); err != nil {
 		return
 	}
+	srv.Methods["Ping"] = pingM
 	s := IntService{srv.Name: srv}
 	for m, v := range srv.Methods {
 		m = strings.TrimPrefix(m, "BiRPC")
@@ -174,6 +176,7 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 	if srv, err = birpc.NewService(val, utils.EmptyString, false); err != nil {
 		return
 	}
+	srv.Methods["Ping"] = pingM
 	s := IntService{srv.Name: srv}
 	for m, v := range srv.Methods {
 		key := srv.Name
@@ -226,11 +229,16 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 		case strings.HasPrefix(m, utils.CDRs):
 			m = strings.TrimPrefix(m, utils.CDRs)
 			key = utils.CDRs
-
-		case len(m) < 2 || m[0] != 'V':
+		}
+		if len(m) < 2 || unicode.ToLower(rune(m[0])) != 'v' {
 			continue
 		}
-		key += "v" + string(m[1])
+		if unicode.IsLower(rune(key[len(key)-1])) {
+			key += "V"
+		} else {
+			key += "v"
+		}
+		key += string(m[1])
 		srv2, has := s[key]
 		if !has {
 			srv2 = new(birpc.Service)
@@ -247,8 +255,12 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 
 type IntService map[string]*birpc.Service
 
-func (s IntService) Call(ctx *context.Context, method string, args, reply interface{}) error {
-	return s[strings.Split(method, utils.NestingSep)[0]].Call(ctx, method, args, reply)
+func (s IntService) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
+	service, has := s[strings.Split(serviceMethod, utils.NestingSep)[0]]
+	if !has {
+		return errors.New("rpc: can't find service " + serviceMethod)
+	}
+	return service.Call(ctx, serviceMethod, args, reply)
 }
 
 func ping(_ interface{}, _ *context.Context, _ *utils.CGREvent, reply *string) error {
