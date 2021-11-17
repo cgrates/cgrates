@@ -35,6 +35,7 @@ func newRecord(ctx *context.Context, req utils.DataProvider, tmpls []*config.FCT
 	cfg *config.CGRConfig, cache *ltcache.Cache) (_ utils.MapStorage, err error) {
 	r := &record{
 		data:  make(utils.MapStorage),
+		tmp:   make(utils.MapStorage),
 		req:   req,
 		cfg:   cfg.GetDataProvider(),
 		cache: cache,
@@ -47,6 +48,7 @@ func newRecord(ctx *context.Context, req utils.DataProvider, tmpls []*config.FCT
 
 type record struct {
 	data  utils.MapStorage
+	tmp   utils.MapStorage
 	req   utils.DataProvider
 	cfg   utils.DataProvider
 	cache *ltcache.Cache
@@ -100,6 +102,8 @@ func (r *record) FieldAsInterface(path []string) (val interface{}, err error) {
 		return r.cfg.FieldAsInterface(path[1:])
 	case utils.MetaReq:
 		return r.req.FieldAsInterface(path[1:])
+	case utils.MetaTmp:
+		return r.tmp.FieldAsInterface(path[1:])
 	default:
 		return r.data.FieldAsInterface(path)
 	}
@@ -122,6 +126,8 @@ func (r *record) Set(path []string, val interface{}) (err error) {
 		}
 		r.cache.Set(cp, val, nil)
 		return
+	case utils.MetaTmp:
+		return r.tmp.Set(path[1:], val)
 	default:
 		return r.data.Set(path, val)
 	}

@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -510,8 +511,50 @@ func (LengthConverter) Convert(in interface{}) (out interface{}, err error) {
 		return len(val), nil
 	case []complex128:
 		return len(val), nil
+	case map[string]string:
+		return len(val), nil
+	case map[string]interface{}:
+		return len(val), nil
+	case map[string]bool:
+		return len(val), nil
+	case map[string]int:
+		return len(val), nil
+	case map[string]int8:
+		return len(val), nil
+	case map[string]int16:
+		return len(val), nil
+	case map[string]int32:
+		return len(val), nil
+	case map[string]int64:
+		return len(val), nil
+	case map[string]uint:
+		return len(val), nil
+	case map[string]uint8:
+		return len(val), nil
+	case map[string]uint16:
+		return len(val), nil
+	case map[string]uint32:
+		return len(val), nil
+	case map[string]uint64:
+		return len(val), nil
+	case map[string]uintptr:
+		return len(val), nil
+	case map[string]float32:
+		return len(val), nil
+	case map[string]float64:
+		return len(val), nil
+	case map[string]complex64:
+		return len(val), nil
+	case map[string]complex128:
+		return len(val), nil
 	default:
-		return len(IfaceAsString(val)), nil
+		vl := reflect.ValueOf(val)
+		switch vl.Kind() {
+		case reflect.Array, reflect.Map, reflect.Slice:
+			return vl.Len(), nil
+		default:
+			return len(IfaceAsString(val)), nil
+		}
 	}
 }
 
