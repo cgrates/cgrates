@@ -163,11 +163,6 @@ func NewServiceWithName(val interface{}, name string, useName bool) (_ IntServic
 		}
 		srv2.Methods[m[2:]] = v
 	}
-	for _, s := range s {
-		for m := range s.Methods {
-			utils.Logger.Crit(fmt.Sprintf("===>%s.%s", s.Name, m))
-		}
-	}
 	return s, nil
 }
 

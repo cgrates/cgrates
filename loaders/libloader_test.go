@@ -136,3 +136,24 @@ func TestNewRecordWithCahe(t *testing.T) {
 		t.Errorf("Expected %+v, received %+q", exp, r)
 	}
 }
+
+func TestNewRecordWithTmp(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fs := engine.NewFilterS(cfg, nil, nil)
+	fc := []*config.FCTemplate{
+		{Type: utils.MetaVariable, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*req.0", ";")},
+		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
+		{Type: utils.MetaComposed, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaVariable, Path: "Value", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	exp := utils.MapStorage{"ID": "Attr1", "Tenant": "cgrates.org", "Value": "0"}
+	if r, err := newRecord(context.Background(), config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil),
+		fc, "cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(r, exp) {
+		t.Errorf("Expected %+v, received %+q", exp, r)
+	}
+}
