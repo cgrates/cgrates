@@ -434,7 +434,7 @@ const (
 	Attributes  = "Attributes"
 	Chargers    = "Chargers"
 	Dispatchers = "Dispatchers"
-	StatS       = "Stats"
+	StatS       = "StatS"
 	LoadIDsVrs  = "LoadIDs"
 	GlobalVarS  = "GlobalVarS"
 	CostSource  = "CostSource"

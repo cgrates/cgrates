@@ -137,7 +137,7 @@ func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) st
 // CurrentDataDBVersions returns the needed DataDB versions
 func CurrentDataDBVersions() Versions {
 	return Versions{
-		utils.StatS:          4,
+		utils.Stats:          4,
 		utils.Accounts:       3,
 		utils.Actions:        2,
 		utils.Thresholds:     4,

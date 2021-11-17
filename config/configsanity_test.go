@@ -1031,12 +1031,12 @@ func TestConfigSanityStatS(t *testing.T) {
 		Enabled:         true,
 		ThresholdSConns: []string{utils.MetaInternal},
 	}
-	expected := "<ThresholdS> not enabled but requested by <Stats> component"
+	expected := "<ThresholdS> not enabled but requested by <StatS> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.ThresholdSConns = []string{"test"}
-	expected = "<Stats> connection with id: <test> not defined"
+	expected = "<StatS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1619,7 +1619,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 	cfg.resourceSCfg.Enabled = false
 
 	cfg.statsCfg.Enabled = true
-	expected = "<Stats> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
+	expected = "<StatS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1749,7 +1749,7 @@ func TestConfigSanityFilterS(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 	cfg.filterSCfg.StatSConns = []string{utils.MetaInternal}
 
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<Stats> not enabled but requested by <FilterS> component" {
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<StatS> not enabled but requested by <FilterS> component" {
 		t.Error(err)
 	}
 	cfg.filterSCfg.StatSConns = []string{"test"}
