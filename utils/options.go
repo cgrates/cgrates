@@ -25,7 +25,7 @@ import (
 )
 
 // GetFloat64Opts checks the specified option names in order among the keys in APIOpts returning the first value it finds as float64, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetFloat64Opts(ev *CGREvent, dftOpt float64, optNames ...string) (cfgOpt float64, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -36,7 +36,7 @@ func GetFloat64Opts(ev *CGREvent, dftOpt float64, optNames ...string) (cfgOpt fl
 }
 
 // GetDurationOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Duration, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetDurationOpts(ev *CGREvent, dftOpt time.Duration, optNames ...string) (cfgOpt time.Duration, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -47,7 +47,7 @@ func GetDurationOpts(ev *CGREvent, dftOpt time.Duration, optNames ...string) (cf
 }
 
 // GetStringOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as string, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetStringOpts(ev *CGREvent, dftOpt string, optNames ...string) (cfgOpt string) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -58,7 +58,7 @@ func GetStringOpts(ev *CGREvent, dftOpt string, optNames ...string) (cfgOpt stri
 }
 
 // GetStringSliceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as []string, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetStringSliceOpts(ev *CGREvent, dftOpt []string, optNames ...string) (cfgOpt []string, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -69,7 +69,7 @@ func GetStringSliceOpts(ev *CGREvent, dftOpt []string, optNames ...string) (cfgO
 }
 
 // GetIntOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as int, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetIntOpts(ev *CGREvent, dftOpt int, optNames ...string) (cfgOpt int, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -84,7 +84,7 @@ func GetIntOpts(ev *CGREvent, dftOpt int, optNames ...string) (cfgOpt int, err e
 }
 
 // GetBoolOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as bool, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetBoolOpts(ev *CGREvent, dftOpt bool, optNames ...string) (cfgOpt bool, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -95,7 +95,7 @@ func GetBoolOpts(ev *CGREvent, dftOpt bool, optNames ...string) (cfgOpt bool, er
 }
 
 // GetDecimalBigOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *decimal.Big, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetDecimalBigOpts(ev *CGREvent, dftOpt *decimal.Big, optNames ...string) (cfgOpt *decimal.Big, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -106,7 +106,7 @@ func GetDecimalBigOpts(ev *CGREvent, dftOpt *decimal.Big, optNames ...string) (c
 }
 
 // GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as interface{}, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetInterfaceOpts(ev *CGREvent, dftOpt interface{}, optNames ...string) (cfgOpt interface{}) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -117,7 +117,7 @@ func GetInterfaceOpts(ev *CGREvent, dftOpt interface{}, optNames ...string) (cfg
 }
 
 // GetIntPointerOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *int, otherwise it
-// returns the default option
+// returns the default option (usually the value specified in config)
 func GetIntPointerOpts(ev *CGREvent, dftOpt *int, optNames ...string) (cfgOpt *int, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
