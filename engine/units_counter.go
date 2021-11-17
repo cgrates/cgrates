@@ -151,3 +151,31 @@ func (ucs UnitCounters) resetCounters(a *Action) {
 		}
 	}
 }
+
+/*
+func (uc *UnitCounter) String() string {
+	return utils.ToJSON(uc)
+}
+
+func (uc *UnitCounter) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if uc == nil || len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.CounterType:
+	case utils.Counters:
+
+	}
+}
+
+func (uc *UnitCounter) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = uc.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
+}
+*/

@@ -213,3 +213,96 @@ func (atpl ActionTriggers) Clone() ActionTriggers {
 	}
 	return clone
 }
+
+func (at *ActionTrigger) String() string {
+	return utils.ToJSON(at)
+}
+
+func (at *ActionTrigger) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if at == nil || len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.ID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.ID, nil
+	case utils.UniqueID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.UniqueID, nil
+	case utils.ThresholdType:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.ThresholdType, nil
+	case utils.ThresholdValue:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.ThresholdValue, nil
+	case utils.Recurrent:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.Recurrent, nil
+	case utils.MinSleep:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.MinSleep, nil
+	case utils.ExpirationDate:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.ExpirationDate, nil
+	case utils.ActivationDate:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.ActivationDate, nil
+	case utils.BalanceField:
+		if len(fldPath) == 1 {
+			return at.Balance, nil
+		}
+		return at.Balance.FieldAsInterface(fldPath[1:])
+	case utils.Weight:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.Weight, nil
+	case utils.ActionsID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.ActionsID, nil
+	case utils.MinQueuedItems:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.MinQueuedItems, nil
+	case utils.Executed:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.Executed, nil
+	case utils.LastExecutionTime:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return at.LastExecutionTime, nil
+	}
+}
+
+func (at *ActionTrigger) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = at.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
+}
