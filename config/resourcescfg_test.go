@@ -46,7 +46,7 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		Opts: &ResourcesOpts{
-			UsageTTL: 72 * time.Hour,
+			UsageTTL: utils.DurationPointer(72 * time.Hour),
 			Units:    1,
 		},
 	}

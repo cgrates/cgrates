@@ -720,7 +720,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		Opts: &ResourcesOpts{
 			UsageID:  utils.EmptyString,
-			UsageTTL: 72 * time.Hour,
+			UsageTTL: utils.DurationPointer(72 * time.Hour),
 			Units:    1,
 		},
 	}
@@ -2003,7 +2003,7 @@ func TestResourceSConfig(t *testing.T) {
 		NestedFields:        false,
 		Opts: &ResourcesOpts{
 			UsageID:  "",
-			UsageTTL: 72 * time.Hour,
+			UsageTTL: utils.DurationPointer(72 * time.Hour),
 			Units:    1,
 		},
 	}

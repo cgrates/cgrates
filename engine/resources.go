@@ -706,13 +706,11 @@ func (rS *ResourceService) V1ResourcesForEvent(args *utils.CGREvent, reply *Reso
 	}
 	// end of RPC caching
 
-	ttl := rS.cgrcfg.ResourceSCfg().Opts.UsageTTL
-	if opt, has := args.APIOpts[utils.OptsResourcesUsageTTL]; has {
-		if ttl, err = utils.IfaceAsDuration(opt); err != nil {
-			return
-		}
+	var usageTTL *time.Duration
+	if usageTTL, err = utils.GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+		utils.OptsResourcesUsageTTL); err != nil {
+		return
 	}
-	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
 	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args, usageID, usageTTL); err != nil {
 		return err
@@ -758,13 +756,11 @@ func (rS *ResourceService) V1AuthorizeResources(args *utils.CGREvent, reply *str
 	}
 	// end of RPC caching
 
-	ttl := rS.cgrcfg.ResourceSCfg().Opts.UsageTTL
-	if opt, has := args.APIOpts[utils.OptsResourcesUsageTTL]; has {
-		if ttl, err = utils.IfaceAsDuration(opt); err != nil {
-			return
-		}
+	var usageTTL *time.Duration
+	if usageTTL, err = utils.GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+		utils.OptsResourcesUsageTTL); err != nil {
+		return
 	}
-	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
 	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args, usageID, usageTTL); err != nil {
 		return err
@@ -827,13 +823,11 @@ func (rS *ResourceService) V1AllocateResources(args *utils.CGREvent, reply *stri
 	}
 	// end of RPC caching
 
-	ttl := rS.cgrcfg.ResourceSCfg().Opts.UsageTTL
-	if opt, has := args.APIOpts[utils.OptsResourcesUsageTTL]; has {
-		if ttl, err = utils.IfaceAsDuration(opt); err != nil {
-			return
-		}
+	var usageTTL *time.Duration
+	if usageTTL, err = utils.GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+		utils.OptsResourcesUsageTTL); err != nil {
+		return
 	}
-	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
 	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args, usageID,
 		usageTTL); err != nil {
@@ -900,13 +894,11 @@ func (rS *ResourceService) V1ReleaseResources(args *utils.CGREvent, reply *strin
 	}
 	// end of RPC caching
 
-	ttl := rS.cgrcfg.ResourceSCfg().Opts.UsageTTL
-	if opt, has := args.APIOpts[utils.OptsResourcesUsageTTL]; has {
-		if ttl, err = utils.IfaceAsDuration(opt); err != nil {
-			return
-		}
+	var usageTTL *time.Duration
+	if usageTTL, err = utils.GetDurationPointerOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageTTL,
+		utils.OptsResourcesUsageTTL); err != nil {
+		return
 	}
-	usageTTL := utils.DurationPointer(ttl)
 	var mtcRLs Resources
 	if mtcRLs, err = rS.matchingResourcesForEvent(tnt, args, usageID,
 		usageTTL); err != nil {

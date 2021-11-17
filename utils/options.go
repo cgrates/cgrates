@@ -130,3 +130,18 @@ func GetIntPointerOpts(ev *CGREvent, dftOpt *int, optNames ...string) (cfgOpt *i
 	}
 	return dftOpt, nil
 }
+
+// GetDurationPointerOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *time.Duration, otherwise it
+// returns the default option (usually the value specified in config)
+func GetDurationPointerOpts(ev *CGREvent, dftOpt *time.Duration, optNames ...string) (cfgOpt *time.Duration, err error) {
+	for _, optName := range optNames {
+		if opt, has := ev.APIOpts[optName]; has {
+			var value time.Duration
+			if value, err = IfaceAsDuration(opt); err != nil {
+				return
+			}
+			return DurationPointer(value), nil
+		}
+	}
+	return dftOpt, nil
+}

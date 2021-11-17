@@ -26,7 +26,7 @@ import (
 
 type ResourcesOpts struct {
 	UsageID  string
-	UsageTTL time.Duration
+	UsageTTL *time.Duration
 	Units    float64
 }
 
@@ -51,9 +51,11 @@ func (resOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err er
 		resOpts.UsageID = *jsnCfg.UsageID
 	}
 	if jsnCfg.UsageTTL != nil {
-		if resOpts.UsageTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.UsageTTL); err != nil {
+		var ttl time.Duration
+		if ttl, err = utils.ParseDurationWithNanosecs(*jsnCfg.UsageTTL); err != nil {
 			return err
 		}
+		resOpts.UsageTTL = utils.DurationPointer(ttl)
 	}
 	if jsnCfg.Units != nil {
 		resOpts.Units = *jsnCfg.Units
@@ -119,9 +121,11 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 // AsMapInterface returns the config as a map[string]interface{}
 func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]interface{}) {
 	opts := map[string]interface{}{
-		utils.MetaUsageIDCfg:  rlcfg.Opts.UsageID,
-		utils.MetaUsageTTLCfg: rlcfg.Opts.UsageTTL,
-		utils.MetaUnitsCfg:    rlcfg.Opts.Units,
+		utils.MetaUsageIDCfg: rlcfg.Opts.UsageID,
+		utils.MetaUnitsCfg:   rlcfg.Opts.Units,
+	}
+	if rlcfg.Opts.UsageTTL != nil {
+		opts[utils.MetaUsageTTLCfg] = *rlcfg.Opts.UsageTTL
 	}
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:        rlcfg.Enabled,
@@ -167,12 +171,15 @@ func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]interface{}
 	return
 }
 
-func (resOpts *ResourcesOpts) Clone() *ResourcesOpts {
-	return &ResourcesOpts{
-		UsageID:  resOpts.UsageID,
-		UsageTTL: resOpts.UsageTTL,
-		Units:    resOpts.Units,
+func (resOpts *ResourcesOpts) Clone() (cln *ResourcesOpts) {
+	cln = &ResourcesOpts{
+		UsageID: resOpts.UsageID,
+		Units:   resOpts.Units,
 	}
+	if resOpts.UsageTTL != nil {
+		cln.UsageTTL = utils.DurationPointer(*resOpts.UsageTTL)
+	}
+	return
 }
 
 // Clone returns a deep copy of ResourceSConfig
