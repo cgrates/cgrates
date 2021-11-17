@@ -326,17 +326,15 @@ func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueue
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	stsIDs := sS.cgrcfg.StatSCfg().Opts.ProfileIDs
-	if opt, has := args.APIOpts[utils.OptsStatsProfileIDs]; has {
-		if stsIDs, err = utils.IfaceAsSliceString(opt); err != nil {
-			return
-		}
+	var stsIDs []string
+	if stsIDs, err = utils.GetStringSliceOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
+		utils.OptsStatsProfileIDs); err != nil {
+		return
 	}
-	ignFilters := sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters
-	if opt, has := args.APIOpts[utils.OptsStatsProfileIgnoreFilters]; has {
-		if ignFilters, err = utils.IfaceAsBool(opt); err != nil {
-			return
-		}
+	var ignFilters bool
+	if ignFilters, err = utils.GetBoolOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
+		utils.OptsStatsProfileIgnoreFilters); err != nil {
+		return
 	}
 	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, stsIDs, args.Time, evNm, ignFilters)
 	if err != nil {
@@ -399,17 +397,15 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *utils.CGREvent, reply *[]st
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	stsIDs := sS.cgrcfg.StatSCfg().Opts.ProfileIDs
-	if opt, has := args.APIOpts[utils.OptsStatsProfileIDs]; has {
-		if stsIDs, err = utils.IfaceAsSliceString(opt); err != nil {
-			return
-		}
+	var stsIDs []string
+	if stsIDs, err = utils.GetStringSliceOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIDs,
+		utils.OptsStatsProfileIDs); err != nil {
+		return
 	}
-	ignFilters := sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters
-	if opt, has := args.APIOpts[utils.OptsStatsProfileIgnoreFilters]; has {
-		if ignFilters, err = utils.IfaceAsBool(opt); err != nil {
-			return
-		}
+	var ignFilters bool
+	if ignFilters, err = utils.GetBoolOpts(args, sS.cgrcfg.StatSCfg().Opts.ProfileIgnoreFilters,
+		utils.OptsStatsProfileIgnoreFilters); err != nil {
+		return
 	}
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(tnt, stsIDs, args.Time, utils.MapStorage{

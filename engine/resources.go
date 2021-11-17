@@ -678,10 +678,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args *utils.CGREvent, reply *Reso
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
-	if opt, has := args.APIOpts[utils.OptsResourcesUsageID]; has {
-		usageID = utils.IfaceAsString(opt)
-	}
+	usageID := utils.GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -733,10 +730,7 @@ func (rS *ResourceService) V1AuthorizeResources(args *utils.CGREvent, reply *str
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
-	if opt, has := args.APIOpts[utils.OptsResourcesUsageID]; has {
-		usageID = utils.IfaceAsString(opt)
-	}
+	usageID := utils.GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -777,11 +771,10 @@ func (rS *ResourceService) V1AuthorizeResources(args *utils.CGREvent, reply *str
 	}
 	defer mtcRLs.unlock()
 
-	units := rS.cgrcfg.ResourceSCfg().Opts.Units
-	if opt, has := args.APIOpts[utils.OptsResourcesUnits]; has {
-		if units, err = utils.IfaceAsFloat64(opt); err != nil {
-			return
-		}
+	var units float64
+	if units, err = utils.GetFloat64Opts(args, rS.cgrcfg.ResourceSCfg().Opts.Units,
+		utils.OptsResourcesUnits); err != nil {
+		return
 	}
 	var alcMessage string
 	if alcMessage, err = mtcRLs.allocateResource(
@@ -806,10 +799,7 @@ func (rS *ResourceService) V1AllocateResources(args *utils.CGREvent, reply *stri
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
-	if opt, has := args.APIOpts[utils.OptsResourcesUsageID]; has {
-		usageID = utils.IfaceAsString(opt)
-	}
+	usageID := utils.GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
@@ -851,11 +841,10 @@ func (rS *ResourceService) V1AllocateResources(args *utils.CGREvent, reply *stri
 	}
 	defer mtcRLs.unlock()
 
-	units := rS.cgrcfg.ResourceSCfg().Opts.Units
-	if opt, has := args.APIOpts[utils.OptsResourcesUnits]; has {
-		if units, err = utils.IfaceAsFloat64(opt); err != nil {
-			return
-		}
+	var units float64
+	if units, err = utils.GetFloat64Opts(args, rS.cgrcfg.ResourceSCfg().Opts.Units,
+		utils.OptsResourcesUnits); err != nil {
+		return
 	}
 	var alcMsg string
 	if alcMsg, err = mtcRLs.allocateResource(
@@ -883,10 +872,7 @@ func (rS *ResourceService) V1ReleaseResources(args *utils.CGREvent, reply *strin
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	usageID := rS.cgrcfg.ResourceSCfg().Opts.UsageID
-	if opt, has := args.APIOpts[utils.OptsResourcesUsageID]; has {
-		usageID = utils.IfaceAsString(opt)
-	}
+	usageID := utils.GetStringOpts(args, rS.cgrcfg.ResourceSCfg().Opts.UsageID, utils.OptsResourcesUsageID)
 	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}

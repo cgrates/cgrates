@@ -329,17 +329,15 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.C
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	thdIDs := tS.cgrcfg.ThresholdSCfg().Opts.ProfileIDs
-	if opt, has := args.APIOpts[utils.OptsThresholdsProfileIDs]; has {
-		if thdIDs, err = utils.IfaceAsSliceString(opt); err != nil {
-			return
-		}
+	var thdIDs []string
+	if thdIDs, err = utils.GetStringSliceOpts(args, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIDs,
+		utils.OptsThresholdsProfileIDs); err != nil {
+		return
 	}
-	ignFilters := tS.cgrcfg.ThresholdSCfg().Opts.ProfileIgnoreFilters
-	if opt, has := args.APIOpts[utils.OptsThresholdsProfileIgnoreFilters]; has {
-		if ignFilters, err = utils.IfaceAsBool(opt); err != nil {
-			return
-		}
+	var ignFilters bool
+	if ignFilters, err = utils.GetBoolOpts(args, tS.cgrcfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
+		utils.OptsThresholdsProfileIgnoreFilters); err != nil {
+		return
 	}
 	tIDs := utils.NewStringSet(thdIDs)
 	if len(tIDs) == 0 {

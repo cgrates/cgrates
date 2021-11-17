@@ -500,42 +500,29 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 }
 
 func newOptsGetRoutes(ev *utils.CGREvent, fS *FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
-	ignoreErrors := cfgOpts.IgnoreErrors
-	if opt, has := ev.APIOpts[utils.OptsRoutesIgnoreErrors]; has {
-		if ignoreErrors, err = utils.IfaceAsBool(opt); err != nil {
-			return
-		}
+	var ignoreErrors bool
+	if ignoreErrors, err = utils.GetBoolOpts(ev, cfgOpts.IgnoreErrors, utils.OptsRoutesIgnoreErrors); err != nil {
+		return
 	}
 	opts = &optsGetRoutes{
 		ignoreErrors: ignoreErrors,
 		paginator:    &utils.Paginator{},
 	}
-	limit := cfgOpts.Limit
-	if opt, has := ev.APIOpts[utils.OptsRoutesLimit]; has {
-		var value int64
-		if value, err = utils.IfaceAsTInt64(opt); err != nil {
-			return
-		}
-		limit = utils.IntPointer(int(value))
+	var limit *int
+	if limit, err = utils.GetIntPointerOpts(ev, cfgOpts.Limit, utils.OptsRoutesLimit); err != nil {
+		return
 	}
 	if limit != nil {
 		opts.paginator.Limit = limit
 	}
-	offset := cfgOpts.Offset
-	if opt, has := ev.APIOpts[utils.OptsRoutesOffset]; has {
-		var value int64
-		if value, err = utils.IfaceAsTInt64(opt); err != nil {
-			return
-		}
-		offset = utils.IntPointer(int(value))
+	var offset *int
+	if offset, err = utils.GetIntPointerOpts(ev, cfgOpts.Offset, utils.OptsRoutesOffset); err != nil {
+		return
 	}
 	if offset != nil {
 		opts.paginator.Offset = offset
 	}
-	maxCost := cfgOpts.MaxCost
-	if opt, has := ev.APIOpts[utils.OptsRoutesMaxCost]; has {
-		maxCost = opt
-	}
+	maxCost := utils.GetInterfaceOpts(ev, cfgOpts.MaxCost, utils.OptsRoutesMaxCost)
 
 	switch maxCost {
 	case utils.EmptyString, nil:
@@ -692,13 +679,10 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *utils.CGREvent) 
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
-	prfCountOpt := rpS.cgrcfg.RouteSCfg().Opts.ProfileCount
-	if opt, has := args.APIOpts[utils.OptsRoutesProfileCount]; has {
-		var value int64
-		if value, err = utils.IfaceAsTInt64(opt); err != nil {
-			return
-		}
-		prfCountOpt = int(value)
+	var prfCountOpt int
+	if prfCountOpt, err = utils.GetIntOpts(args, rpS.cgrcfg.RouteSCfg().Opts.ProfileCount,
+		utils.OptsRoutesProfileCount); err != nil {
+		return
 	}
 	if prfCount > prfCountOpt { // it has the option and is smaller that the current number of profiles
 		prfCount = prfCountOpt
