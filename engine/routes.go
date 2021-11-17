@@ -417,7 +417,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	//calculate metrics
 	//in case we have *load strategy we use statMetricsForLoadDistribution function to calculate the result
 	if len(route.StatIDs) != 0 {
-		if extraOpts.sortingStragety == utils.MetaLoad {
+		if extraOpts.sortingStrategy == utils.MetaLoad {
 			metricSum, err := rpS.statMetricsForLoadDistribution(route.StatIDs, ev.Tenant) //create metric map for route
 			if err != nil {
 				if extraOpts.ignoreErrors {
@@ -553,7 +553,7 @@ type optsGetRoutes struct {
 	maxCost           float64
 	paginator         *utils.Paginator
 	sortingParameters []string //used for QOS strategy
-	sortingStragety   string
+	sortingStrategy   string
 }
 
 // V1GetRoutes returns the list of valid routes
@@ -624,7 +624,7 @@ func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply 
 func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile, ev *utils.CGREvent,
 	pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
-	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
+	extraOpts.sortingStrategy = rPrfl.Sorting             // populate sortingStrategy in extraOpts
 	//construct the DP and pass it to filterS
 	nM := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
