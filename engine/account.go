@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1272,4 +1273,115 @@ func (as *AccountSummary) AsMapInterface() map[string]interface{} {
 		utils.Disabled:         as.Disabled,
 		utils.BalanceSummaries: as.BalanceSummaries,
 	}
+}
+
+func (acc *Account) String() string {
+	return utils.ToJSON(acc)
+}
+
+func (acc *Account) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if acc == nil || len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		opath, indx := utils.GetPathIndexString(fldPath[0])
+		if indx != nil {
+			switch opath {
+			case utils.BalanceMap:
+				bl, has := acc.BalanceMap[*indx]
+				if !has {
+					return nil, utils.ErrNotFound
+				}
+				if len(fldPath) == 1 {
+					return bl, nil
+				}
+				return bl.FieldAsInterface(fldPath[1:])
+			case utils.UnitCounters:
+				uc, has := acc.UnitCounters[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return uc, nil
+			case utils.ActionTriggers:
+				var idx int
+				if idx, err = strconv.Atoi(*indx); err != nil {
+					return
+				}
+				if len(acc.ActionTriggers) <= idx {
+					return nil, utils.ErrNotFound
+				}
+				at := acc.ActionTriggers[idx]
+				if len(fldPath) == 1 {
+					return at, nil
+				}
+				return at.FieldAsInterface(fldPath[1:])
+			}
+		}
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.ID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return acc.ID, nil
+	case utils.BalanceMap:
+		if len(fldPath) != 1 {
+			return acc.BalanceMap, nil
+		}
+		if bc, has := acc.BalanceMap[fldPath[1]]; has {
+			if len(fldPath) == 2 {
+				return bc, nil
+			}
+			return bc.FieldAsInterface(fldPath[2:])
+		}
+		return nil, utils.ErrNotFound
+	case utils.UnitCounters:
+		if len(fldPath) != 1 {
+			return acc.UnitCounters, nil
+		}
+		if uc, has := acc.UnitCounters[fldPath[1]]; has {
+			if len(fldPath) == 2 {
+				return uc, nil
+			}
+			return uc.FieldAsInterface(fldPath[2:])
+		}
+		return nil, utils.ErrNotFound
+	case utils.ActionTriggers:
+		if len(fldPath) != 1 {
+			return acc.ActionTriggers, nil
+		}
+		for _, at := range acc.ActionTriggers {
+			if at.ID == fldPath[1] {
+				if len(fldPath) == 2 {
+					return at, nil
+				}
+				return at.FieldAsInterface(fldPath[2:])
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.AllowNegative:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return acc.AllowNegative, nil
+	case utils.Disabled:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return acc.Disabled, nil
+	case utils.UpdateTime:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return acc.UpdateTime, nil
+	}
+}
+
+func (acc *Account) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = acc.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
 }
