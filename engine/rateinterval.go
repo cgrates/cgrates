@@ -40,14 +40,15 @@ type RateInterval struct {
 
 // Separate structure used for rating plan size optimization
 type RITiming struct {
-	ID                 string
-	Years              utils.Years
-	Months             utils.Months
-	MonthDays          utils.MonthDays
-	WeekDays           utils.WeekDays
-	StartTime, EndTime string // ##:##:## format
-	cronString         string
-	tag                string // loading validation only
+	ID         string
+	Years      utils.Years
+	Months     utils.Months
+	MonthDays  utils.MonthDays
+	WeekDays   utils.WeekDays
+	StartTime  string // ##:##:## format
+	EndTime    string // ##:##:## format
+	cronString string
+	tag        string // loading validation only
 }
 
 func (rit *RITiming) CronString() string {
@@ -526,4 +527,131 @@ func (r *RGRate) Clone() (cln *RGRate) {
 		RateUnit:           r.RateUnit,
 	}
 	return
+}
+
+func (rit *RITiming) String() string {
+	return utils.ToJSON(rit)
+}
+
+func (rit *RITiming) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if rit == nil || len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		opath, indx := utils.GetPathIndex(fldPath[0])
+		if indx != nil {
+			switch opath {
+			case utils.YearsFieldName:
+				if len(fldPath) != 1 || len(rit.Years) <= *indx {
+					return nil, utils.ErrNotFound
+				}
+				return rit.Years[*indx], nil
+			case utils.MonthsFieldName:
+				if len(fldPath) != 1 || len(rit.Months) <= *indx {
+					return nil, utils.ErrNotFound
+				}
+				return rit.Months[*indx], nil
+			case utils.MonthDaysFieldName:
+				if len(fldPath) != 1 || len(rit.MonthDays) <= *indx {
+					return nil, utils.ErrNotFound
+				}
+				return rit.MonthDays[*indx], nil
+			case utils.WeekDaysFieldName:
+				if len(fldPath) != 1 || len(rit.WeekDays) <= *indx {
+					return nil, utils.ErrNotFound
+				}
+				return rit.WeekDays[*indx], nil
+			}
+		}
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.ID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return rit.ID, nil
+	case utils.StartTime:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return rit.StartTime, nil
+	case utils.EndTime:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return rit.EndTime, nil
+	case utils.YearsFieldName:
+		switch len(fldPath) {
+		case 1:
+			return rit.Years, nil
+		case 2:
+			var idx int
+			if idx, err = strconv.Atoi(fldPath[1]); err != nil {
+				return
+			}
+			if len(rit.Years) <= idx {
+				return nil, utils.ErrNotFound
+			}
+			return rit.Years[idx], nil
+		default:
+			return nil, utils.ErrNotFound
+		}
+	case utils.MonthsFieldName:
+		switch len(fldPath) {
+		case 1:
+			return rit.Months, nil
+		case 2:
+			var idx int
+			if idx, err = strconv.Atoi(fldPath[1]); err != nil {
+				return
+			}
+			if len(rit.Months) <= idx {
+				return nil, utils.ErrNotFound
+			}
+			return rit.Months[idx], nil
+		default:
+			return nil, utils.ErrNotFound
+		}
+	case utils.MonthDaysFieldName:
+		switch len(fldPath) {
+		case 1:
+			return rit.MonthDays, nil
+		case 2:
+			var idx int
+			if idx, err = strconv.Atoi(fldPath[1]); err != nil {
+				return
+			}
+			if len(rit.MonthDays) <= idx {
+				return nil, utils.ErrNotFound
+			}
+			return rit.MonthDays[idx], nil
+		default:
+			return nil, utils.ErrNotFound
+		}
+	case utils.WeekDaysFieldName:
+		switch len(fldPath) {
+		case 1:
+			return rit.WeekDays, nil
+		case 2:
+			var idx int
+			if idx, err = strconv.Atoi(fldPath[1]); err != nil {
+				return
+			}
+			if len(rit.WeekDays) <= idx {
+				return nil, utils.ErrNotFound
+			}
+			return rit.WeekDays[idx], nil
+		default:
+			return nil, utils.ErrNotFound
+		}
+	}
+}
+
+func (rit *RITiming) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = rit.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
 }

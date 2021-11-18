@@ -21,6 +21,7 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -121,4 +122,42 @@ func incrementalFormula(params map[string]interface{}) float64 {
 		}
 	}
 	return 0.0
+}
+
+func (vf *ValueFormula) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if vf == nil || len(fldPath) == 0 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		opath, indx := GetPathIndexString(fldPath[0])
+		if indx != nil && opath == Params {
+			return MapStorage(vf.Params).FieldAsInterface(append([]string{*indx}, fldPath[1:]...))
+		}
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case Method:
+		if len(fldPath) != 1 {
+			return nil, ErrNotFound
+		}
+		return vf.Method, nil
+	case Static:
+		if len(fldPath) != 1 {
+			return nil, ErrNotFound
+		}
+		return vf.Static, nil
+	case Params:
+		if len(fldPath) == 1 {
+			return vf.Params, nil
+		}
+		return MapStorage(vf.Params).FieldAsInterface(fldPath[1:])
+	}
+}
+
+func (vf *ValueFormula) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = vf.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return IfaceAsString(iface), nil
 }

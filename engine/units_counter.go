@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -152,7 +155,6 @@ func (ucs UnitCounters) resetCounters(a *Action) {
 	}
 }
 
-/*
 func (uc *UnitCounter) String() string {
 	return utils.ToJSON(uc)
 }
@@ -163,10 +165,39 @@ func (uc *UnitCounter) FieldAsInterface(fldPath []string) (val interface{}, err 
 	}
 	switch fldPath[0] {
 	default:
+		opath, indx := utils.GetPathIndex(fldPath[0])
+		if opath == utils.Counters && indx != nil {
+			if len(uc.Counters) <= *indx {
+				return nil, utils.ErrNotFound
+			}
+			c := uc.Counters[*indx]
+			if len(fldPath) == 1 {
+				return c, nil
+			}
+			return c.FieldAsInterface(fldPath[1:])
+		}
 		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 	case utils.CounterType:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return uc.CounterType, nil
 	case utils.Counters:
-
+		if len(fldPath) == 1 {
+			return uc.Counters, nil
+		}
+		var indx int
+		if indx, err = strconv.Atoi(fldPath[1]); err != nil {
+			return
+		}
+		if len(uc.Counters) <= indx {
+			return nil, utils.ErrNotFound
+		}
+		c := uc.Counters[indx]
+		if len(fldPath) == 2 {
+			return c, nil
+		}
+		return c.FieldAsInterface(fldPath[2:])
 	}
 }
 
@@ -178,4 +209,36 @@ func (uc *UnitCounter) FieldAsString(fldPath []string) (val string, err error) {
 	}
 	return utils.IfaceAsString(iface), nil
 }
-*/
+
+func (cfs *CounterFilter) String() string {
+	return utils.ToJSON(cfs)
+}
+
+func (cfs *CounterFilter) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if cfs == nil || len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.Value:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return cfs.Value, nil
+	case utils.Filter:
+		if len(fldPath) == 1 {
+			return cfs.Filter, nil
+		}
+		return cfs.Filter.FieldAsInterface(fldPath[1:])
+	}
+}
+
+func (cfs *CounterFilter) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = cfs.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
+}
