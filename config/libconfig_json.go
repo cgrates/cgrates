@@ -59,6 +59,23 @@ type ListenJsonCfg struct {
 	Http_tls     *string
 }
 
+type HTTPClientOptsJson struct {
+	SkipTLSVerify         *bool   `json:"skipTlsVerify"`
+	TLSHandshakeTimeout   *string `json:"tlsHandshakeTimeout"`
+	DisableKeepAlives     *bool   `json:"disableKeepAlives"`
+	DisableCompression    *bool   `json:"disableCompression"`
+	MaxIdleConns          *int    `json:"maxIdleConns"`
+	MaxIdleConnsPerHost   *int    `json:"maxIdleConnsPerHost"`
+	MaxConnsPerHost       *int    `json:"maxConnsPerHost"`
+	IdleConnTimeout       *string `json:"IdleConnTimeout"`
+	ResponseHeaderTimeout *string `json:"responseHeaderTimeout"`
+	ExpectContinueTimeout *string `json:"expectContinueTimeout"`
+	ForceAttemptHTTP2     *bool   `json:"forceAttemptHttp2"`
+	DialTimeout           *string `json:"dialTimeout"`
+	DialFallbackDelay     *string `json:"dialFallbackDelay"`
+	DialKeepAlive         *string `json:"dialKeepAlive"`
+}
+
 // HTTP config section
 type HTTPJsonCfg struct {
 	Json_rpc_url        *string
@@ -68,7 +85,7 @@ type HTTPJsonCfg struct {
 	Http_Cdrs           *string
 	Use_basic_auth      *bool
 	Auth_users          *map[string]string
-	Client_opts         map[string]interface{}
+	Client_opts         *HTTPClientOptsJson
 }
 
 type TlsJsonCfg struct {

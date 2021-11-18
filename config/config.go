@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -131,7 +132,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.cacheCfg.Partitions = make(map[string]*CacheParamCfg)
 	cfg.listenCfg = new(ListenCfg)
 	cfg.httpCfg = new(HTTPCfg)
-	cfg.httpCfg.ClientOpts = make(map[string]interface{})
+	cfg.httpCfg.dialer = &net.Dialer{}
+	cfg.httpCfg.ClientOpts = &http.Transport{}
 	cfg.filterSCfg = new(FilterSCfg)
 	cfg.ralsCfg = new(RalsCfg)
 	cfg.ralsCfg.MaxComputedUsage = make(map[string]time.Duration)
