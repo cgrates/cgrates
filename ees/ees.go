@@ -108,7 +108,8 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 	}
 	cgrEv.APIOpts[utils.Subsys] = utils.MetaEEs
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
-	cgrEv.APIOpts[utils.OptsContext] = ctx
+	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(ctx,
+		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]), utils.MetaEEs)
 	if err = eeS.connMgr.Call(eeS.cfg.EEsNoLksCfg().AttributeSConns, nil, utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
