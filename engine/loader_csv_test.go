@@ -600,7 +600,7 @@ func TestLoadRatingPlans(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(csvr.ratingPlans["ANY_PLAN"].Timings["b9b78731"], anyTiming) {
-		t.Errorf("Error using *any timing in rating plans: %+v : %+v", csvr.ratingPlans["ANY_PLAN"].Timings["b9b78731"], anyTiming)
+		t.Errorf("Error using *any timing in rating plans: %+v : %+v", utils.ToJSON(csvr.ratingPlans["ANY_PLAN"].Timings["b9b78731"]), utils.ToJSON(anyTiming))
 	}
 }
 

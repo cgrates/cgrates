@@ -220,7 +220,7 @@ func (at *ActionTiming) Execute(fltrS *FilterS) (err error) {
 				// check action filter
 				if len(a.Filters) > 0 {
 					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant, a.Filters,
-						utils.MapStorage{utils.MetaReq: config.NewObjectDP(acc)}); err != nil {
+						utils.MapStorage{utils.MetaReq: acc}); err != nil {
 						return err
 					} else if !pass {
 						continue
