@@ -289,3 +289,23 @@ func (fWp FlagsWithParams) Clone() (cln FlagsWithParams) {
 	}
 	return
 }
+
+func (sm StringMap) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if sm == nil || len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	bl, has := sm[fldPath[0]]
+	if !has {
+		return nil, ErrNotFound
+	}
+	return bl, nil
+}
+
+func (sm StringMap) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = sm.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return IfaceAsString(iface), nil
+}

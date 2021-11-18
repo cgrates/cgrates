@@ -1325,10 +1325,21 @@ func (acc *Account) FieldAsInterface(fldPath []string) (val interface{}, err err
 		}
 		return acc.ID, nil
 	case utils.BalanceMap:
-		if len(fldPath) != 1 {
+		if len(fldPath) == 1 {
 			return acc.BalanceMap, nil
 		}
-		if bc, has := acc.BalanceMap[fldPath[1]]; has {
+		opath, indx := utils.GetPathIndex(fldPath[1])
+		if bc, has := acc.BalanceMap[opath]; has {
+			if indx != nil {
+				if len(bc) <= *indx {
+					return nil, utils.ErrNotFound
+				}
+				c := bc[*indx]
+				if len(fldPath) == 2 {
+					return c, nil
+				}
+				return c.FieldAsInterface(fldPath[2:])
+			}
 			if len(fldPath) == 2 {
 				return bc, nil
 			}
@@ -1336,18 +1347,29 @@ func (acc *Account) FieldAsInterface(fldPath []string) (val interface{}, err err
 		}
 		return nil, utils.ErrNotFound
 	case utils.UnitCounters:
-		if len(fldPath) != 1 {
+		if len(fldPath) == 1 {
 			return acc.UnitCounters, nil
 		}
 		if uc, has := acc.UnitCounters[fldPath[1]]; has {
 			if len(fldPath) == 2 {
 				return uc, nil
 			}
-			return uc.FieldAsInterface(fldPath[2:])
+			var indx int
+			if indx, err = strconv.Atoi(fldPath[2]); err != nil {
+				return
+			}
+			if len(uc) <= indx {
+				return nil, utils.ErrNotFound
+			}
+			c := uc[indx]
+			if len(fldPath) == 1 {
+				return c, nil
+			}
+			return c.FieldAsInterface(fldPath[3:])
 		}
 		return nil, utils.ErrNotFound
 	case utils.ActionTriggers:
-		if len(fldPath) != 1 {
+		if len(fldPath) == 1 {
 			return acc.ActionTriggers, nil
 		}
 		for _, at := range acc.ActionTriggers {

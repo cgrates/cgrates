@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"math"
 	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -416,4 +418,212 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 		b.Disabled = *bf.Disabled
 	}
 	b.SetDirty() // Mark the balance as dirty since we have modified and it should be checked by action triggers
+}
+
+func (bp *BalanceFilter) String() string {
+	return utils.ToJSON(bp)
+}
+
+func (bp *BalanceFilter) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if bp == nil || len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		opath, indx := utils.GetPathIndexString(fldPath[0])
+		if indx != nil {
+			switch opath {
+			case utils.DestinationIDs:
+				if bp.DestinationIDs == nil {
+					return nil, utils.ErrNotFound
+				}
+				val, has := (*bp.DestinationIDs)[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			case utils.Categories:
+				if bp.Categories == nil {
+					return nil, utils.ErrNotFound
+				}
+				val, has := (*bp.Categories)[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			case utils.SharedGroups:
+				if bp.SharedGroups == nil {
+					return nil, utils.ErrNotFound
+				}
+				val, has := (*bp.SharedGroups)[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			case utils.TimingIDs:
+				if bp.TimingIDs == nil {
+					return nil, utils.ErrNotFound
+				}
+				val, has := (*bp.TimingIDs)[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			case utils.Timings:
+				var idx int
+				if idx, err = strconv.Atoi(*indx); err != nil {
+					return
+				}
+				if len(bp.Timings) <= idx {
+					return nil, utils.ErrNotFound
+				}
+				tm := bp.Timings[idx]
+				if len(fldPath) == 1 {
+					return tm, nil
+				}
+				return tm.FieldAsInterface(fldPath[1:])
+			case utils.Factor:
+				if bp.Factor == nil {
+					return nil, utils.ErrNotFound
+				}
+				val, has := (*bp.Factor)[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			}
+		}
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.Uuid:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		if bp.Uuid == nil {
+			return
+		}
+		return *bp.Uuid, nil
+	case utils.ID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		if bp.ID == nil {
+			return
+		}
+		return *bp.ID, nil
+	case utils.Type:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		if bp.Type == nil {
+			return
+		}
+		return *bp.Type, nil
+	case utils.ExpirationDate:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		if bp.ExpirationDate == nil {
+			return
+		}
+		return *bp.ExpirationDate, nil
+	case utils.Weight:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		if bp.Weight == nil {
+			return
+		}
+		return *bp.Weight, nil
+	case utils.RatingSubject:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		if bp.RatingSubject == nil {
+			return
+		}
+		return *bp.RatingSubject, nil
+	case utils.Disabled:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		if bp.Disabled == nil {
+			return
+		}
+		return *bp.Disabled, nil
+	case utils.Blocker:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		if bp.Blocker == nil {
+			return
+		}
+		return *bp.Blocker, nil
+	case utils.DestinationIDs:
+		if len(fldPath) == 1 {
+			return bp.DestinationIDs, nil
+		}
+		if bp.DestinationIDs == nil {
+			return nil, utils.ErrNotFound
+		}
+		return bp.DestinationIDs.FieldAsInterface(fldPath[1:])
+	case utils.Categories:
+		if len(fldPath) == 1 {
+			return bp.Categories, nil
+		}
+		if bp.Categories == nil {
+			return nil, utils.ErrNotFound
+		}
+		return bp.Categories.FieldAsInterface(fldPath[1:])
+	case utils.SharedGroups:
+		if len(fldPath) == 1 {
+			return bp.SharedGroups, nil
+		}
+		if bp.SharedGroups == nil {
+			return nil, utils.ErrNotFound
+		}
+		return bp.SharedGroups.FieldAsInterface(fldPath[1:])
+	case utils.Timings:
+		if len(fldPath) == 1 {
+			return bp.Timings, nil
+		}
+		for _, tm := range bp.Timings {
+			if tm.ID == fldPath[1] {
+				if len(fldPath) == 2 {
+					return tm, nil
+				}
+				return tm.FieldAsInterface(fldPath[2:])
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.TimingIDs:
+		if len(fldPath) == 1 {
+			return bp.TimingIDs, nil
+		}
+		if bp.TimingIDs == nil {
+			return nil, utils.ErrNotFound
+		}
+		return bp.TimingIDs.FieldAsInterface(fldPath[1:])
+	case utils.Factor:
+		if len(fldPath) == 1 {
+			return bp.Factor, nil
+		}
+		if bp.Factor == nil {
+			return nil, utils.ErrNotFound
+		}
+		return bp.Factor.FieldAsInterface(fldPath[1:])
+	case utils.Value:
+		if len(fldPath) == 1 {
+			return bp.Value, nil
+		}
+		return bp.Value.FieldAsInterface(fldPath[1:])
+	}
+}
+
+func (bp *BalanceFilter) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = bp.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
 }

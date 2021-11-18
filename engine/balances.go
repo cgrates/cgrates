@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1096,4 +1097,216 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 		cc = nil
 	}
 	return
+}
+
+func (bc Balances) String() string {
+	return utils.ToJSON(bc)
+}
+
+func (bc Balances) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if bc == nil || len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	for _, at := range bc {
+		if at.ID == fldPath[0] {
+			if len(fldPath) == 1 {
+				return at, nil
+			}
+			return at.FieldAsInterface(fldPath[1:])
+		}
+	}
+	var indx int
+	if indx, err = strconv.Atoi(fldPath[0]); err != nil {
+		return
+	}
+	if len(bc) <= indx {
+		return nil, utils.ErrNotFound
+	}
+	c := bc[indx]
+	if len(fldPath) == 1 {
+		return c, nil
+	}
+	return c.FieldAsInterface(fldPath[1:])
+}
+
+func (bc Balances) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = bc.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
+}
+
+func (b *Balance) String() string {
+	return utils.ToJSON(b)
+}
+
+func (b *Balance) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if b == nil || len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		opath, indx := utils.GetPathIndexString(fldPath[0])
+		if indx != nil {
+			switch opath {
+			case utils.DestinationIDs:
+				val, has := b.DestinationIDs[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			case utils.Categories:
+				val, has := b.Categories[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			case utils.SharedGroups:
+				val, has := b.SharedGroups[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			case utils.TimingIDs:
+				val, has := b.TimingIDs[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			case utils.Timings:
+				var idx int
+				if idx, err = strconv.Atoi(*indx); err != nil {
+					return
+				}
+				if len(b.Timings) <= idx {
+					return nil, utils.ErrNotFound
+				}
+				tm := b.Timings[idx]
+				if len(fldPath) == 1 {
+					return tm, nil
+				}
+				return tm.FieldAsInterface(fldPath[1:])
+			case utils.Factor:
+				val, has := b.Factor[*indx]
+				if !has || len(fldPath) != 1 {
+					return nil, utils.ErrNotFound
+				}
+				return val, nil
+			}
+		}
+		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+	case utils.Uuid:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return b.Uuid, nil
+	case utils.ID:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return b.ID, nil
+	case utils.Value:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return b.Value, nil
+	case utils.ExpirationDate:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return b.ExpirationDate, nil
+	case utils.Weight:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return b.Weight, nil
+	case utils.DestinationIDs:
+		if len(fldPath) == 1 {
+			return b.DestinationIDs, nil
+		}
+		return b.DestinationIDs.FieldAsInterface(fldPath[1:])
+	case utils.RatingSubject:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return b.RatingSubject, nil
+	case utils.Categories:
+		if len(fldPath) == 1 {
+			return b.Categories, nil
+		}
+		return b.Categories.FieldAsInterface(fldPath[1:])
+	case utils.SharedGroups:
+		if len(fldPath) == 1 {
+			return b.SharedGroups, nil
+		}
+		return b.SharedGroups.FieldAsInterface(fldPath[1:])
+	case utils.Timings:
+		if len(fldPath) == 1 {
+			return b.Timings, nil
+		}
+		for _, tm := range b.Timings {
+			if tm.ID == fldPath[1] {
+				if len(fldPath) == 2 {
+					return tm, nil
+				}
+				return tm.FieldAsInterface(fldPath[2:])
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.TimingIDs:
+		if len(fldPath) == 1 {
+			return b.TimingIDs, nil
+		}
+		return b.TimingIDs.FieldAsInterface(fldPath[1:])
+	case utils.Disabled:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return b.Disabled, nil
+	case utils.Factor:
+		if len(fldPath) == 1 {
+			return b.Factor, nil
+		}
+		return b.Factor.FieldAsInterface(fldPath[1:])
+	case utils.Blocker:
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return b.Blocker, nil
+	}
+}
+
+func (b *Balance) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = b.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
+}
+
+func (f ValueFactor) String() string {
+	return utils.ToJSON(f)
+}
+
+func (f ValueFactor) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if f == nil || len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	c, has := f[fldPath[0]]
+	if !has {
+		return nil, utils.ErrNotFound
+	}
+	return c, nil
+}
+
+func (f ValueFactor) FieldAsString(fldPath []string) (val string, err error) {
+	var iface interface{}
+	iface, err = f.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface), nil
 }
