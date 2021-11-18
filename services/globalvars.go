@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
-	"net/http"
 	"sync"
 
 	"github.com/cgrates/cgrates/ees"
@@ -50,12 +48,14 @@ type GlobalVarS struct {
 func (gv *GlobalVarS) Start() (err error) {
 	engine.SetRoundingDecimals(gv.cfg.GeneralCfg().RoundingDecimals)
 	ees.SetFailedPostCacheTTL(gv.cfg.GeneralCfg().FailedPostsTTL)
-	return gv.initHTTPTransport()
+	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
+	return nil
 }
 
 // Reload handles the change of config
 func (gv *GlobalVarS) Reload() (err error) {
-	return gv.initHTTPTransport()
+	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
+	return nil
 }
 
 // Shutdown stops the service
@@ -76,14 +76,4 @@ func (gv *GlobalVarS) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (gv *GlobalVarS) ShouldRun() bool {
 	return true
-}
-
-func (gv *GlobalVarS) initHTTPTransport() (err error) {
-	var trsp *http.Transport
-	if trsp, err = engine.NewHTTPTransport(gv.cfg.HTTPCfg().ClientOpts); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("Could not configure the http transport: %s exiting!", err))
-		return
-	}
-	engine.SetHTTPPstrTransport(trsp)
-	return
 }

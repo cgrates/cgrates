@@ -18,8 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"crypto/tls"
+	"net"
+	"net/http"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -42,28 +46,34 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		HTTPCDRsURL:           "/cdr_http",
 		HTTPUseBasicAuth:      false,
 		HTTPAuthUsers:         map[string]string{},
-		ClientOpts: map[string]interface{}{
-			utils.HTTPClientTLSClientConfigCfg:       false,
-			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
-			utils.HTTPClientDisableKeepAlivesCfg:     false,
-			utils.HTTPClientDisableCompressionCfg:    false,
-			utils.HTTPClientMaxIdleConnsCfg:          100.,
-			utils.HTTPClientMaxIdleConnsPerHostCfg:   2.,
-			utils.HTTPClientMaxConnsPerHostCfg:       0.,
-			utils.HTTPClientIdleConnTimeoutCfg:       "90s",
-			utils.HTTPClientResponseHeaderTimeoutCfg: "0",
-			utils.HTTPClientExpectContinueTimeoutCfg: "0",
-			utils.HTTPClientForceAttemptHTTP2Cfg:     true,
-			utils.HTTPClientDialTimeoutCfg:           "30s",
-			utils.HTTPClientDialFallbackDelayCfg:     "300ms",
-			utils.HTTPClientDialKeepAliveCfg:         "30s",
+		ClientOpts: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: false,
+			},
+			TLSHandshakeTimeout:   10 * time.Second,
+			DisableKeepAlives:     false,
+			DisableCompression:    false,
+			MaxIdleConns:          100,
+			MaxIdleConnsPerHost:   2,
+			MaxConnsPerHost:       0,
+			IdleConnTimeout:       90 * time.Second,
+			ResponseHeaderTimeout: 0,
+			ExpectContinueTimeout: 0,
+			ForceAttemptHTTP2:     true,
+		},
+		dialer: &net.Dialer{
+			Timeout:       30 * time.Second,
+			FallbackDelay: 300 * time.Millisecond,
+			KeepAlive:     30 * time.Second,
+			DualStack:     true,
 		},
 	}
 	cfgJsn := NewDefaultCGRConfig()
 	if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, cfgJsn.httpCfg) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfgJsn.httpCfg))
+	} else if !reflect.DeepEqual(expected.AsMapInterface(), cfgJsn.httpCfg.AsMapInterface()) {
+		t.Errorf("Expected %+v \n, received %+v", expected.AsMapInterface(), cfgJsn.httpCfg.AsMapInterface())
 	}
 }
 
@@ -84,12 +94,12 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 			utils.HTTPClientDisableKeepAlivesCfg:     false,
 			utils.HTTPClientDisableCompressionCfg:    false,
-			utils.HTTPClientMaxIdleConnsCfg:          100.,
-			utils.HTTPClientMaxIdleConnsPerHostCfg:   2.,
-			utils.HTTPClientMaxConnsPerHostCfg:       0.,
-			utils.HTTPClientIdleConnTimeoutCfg:       "90s",
-			utils.HTTPClientResponseHeaderTimeoutCfg: "0",
-			utils.HTTPClientExpectContinueTimeoutCfg: "0",
+			utils.HTTPClientMaxIdleConnsCfg:          100,
+			utils.HTTPClientMaxIdleConnsPerHostCfg:   2,
+			utils.HTTPClientMaxConnsPerHostCfg:       0,
+			utils.HTTPClientIdleConnTimeoutCfg:       "1m30s",
+			utils.HTTPClientResponseHeaderTimeoutCfg: "0s",
+			utils.HTTPClientExpectContinueTimeoutCfg: "0s",
 			utils.HTTPClientForceAttemptHTTP2Cfg:     true,
 			utils.HTTPClientDialTimeoutCfg:           "30s",
 			utils.HTTPClientDialFallbackDelayCfg:     "300ms",
@@ -128,12 +138,12 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
 			utils.HTTPClientDisableKeepAlivesCfg:     false,
 			utils.HTTPClientDisableCompressionCfg:    false,
-			utils.HTTPClientMaxIdleConnsCfg:          100.,
-			utils.HTTPClientMaxIdleConnsPerHostCfg:   2.,
-			utils.HTTPClientMaxConnsPerHostCfg:       0.,
-			utils.HTTPClientIdleConnTimeoutCfg:       "90s",
-			utils.HTTPClientResponseHeaderTimeoutCfg: "0",
-			utils.HTTPClientExpectContinueTimeoutCfg: "0",
+			utils.HTTPClientMaxIdleConnsCfg:          100,
+			utils.HTTPClientMaxIdleConnsPerHostCfg:   2,
+			utils.HTTPClientMaxConnsPerHostCfg:       0,
+			utils.HTTPClientIdleConnTimeoutCfg:       "1m30s",
+			utils.HTTPClientResponseHeaderTimeoutCfg: "0s",
+			utils.HTTPClientExpectContinueTimeoutCfg: "0s",
 			utils.HTTPClientForceAttemptHTTP2Cfg:     true,
 			utils.HTTPClientDialTimeoutCfg:           "30s",
 			utils.HTTPClientDialFallbackDelayCfg:     "300ms",
@@ -143,7 +153,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.httpCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -158,15 +168,35 @@ func TestHTTPCfgClone(t *testing.T) {
 		HTTPAuthUsers: map[string]string{
 			"user": "pass",
 		},
-		ClientOpts: map[string]interface{}{
-			utils.HTTPClientTLSClientConfigCfg: false,
+		ClientOpts: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: false,
+			},
+			TLSHandshakeTimeout:   10 * time.Second,
+			DisableKeepAlives:     false,
+			DisableCompression:    false,
+			MaxIdleConns:          100,
+			MaxIdleConnsPerHost:   2,
+			MaxConnsPerHost:       0,
+			IdleConnTimeout:       90 * time.Second,
+			ResponseHeaderTimeout: 0,
+			ExpectContinueTimeout: 0,
+			ForceAttemptHTTP2:     true,
+		},
+		dialer: &net.Dialer{
+			Timeout:       30 * time.Second,
+			FallbackDelay: 300 * time.Millisecond,
+			KeepAlive:     30 * time.Second,
+			DualStack:     true,
 		},
 	}
 	rcv := ban.Clone()
-	if !reflect.DeepEqual(ban, rcv) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
+	if !reflect.DeepEqual(rcv.AsMapInterface(), ban.AsMapInterface()) {
+		t.Errorf("Expected: %+v\nReceived: %+v", ban.AsMapInterface(),
+			rcv.AsMapInterface())
 	}
-	if rcv.ClientOpts[utils.HTTPClientTLSClientConfigCfg] = ""; ban.ClientOpts[utils.HTTPClientTLSClientConfigCfg] != false {
+	if rcv.ClientOpts.MaxIdleConns = 50; ban.ClientOpts.MaxIdleConns != 100 {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.HTTPAuthUsers["user"] = ""; ban.HTTPAuthUsers["user"] != "pass" {

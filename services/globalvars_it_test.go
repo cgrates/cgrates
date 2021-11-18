@@ -53,13 +53,6 @@ func TestGlobalVarsReload(t *testing.T) {
 	if err3 != true {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", true, err3)
 	}
-	cfg.HTTPCfg().ClientOpts = map[string]interface{}{
-		utils.HTTPClientTLSHandshakeTimeoutCfg: false,
-	}
-	err = srv.(*GlobalVarS).initHTTPTransport()
-	if err == nil || err.Error() != "cannot convert field: false to time.Duration" {
-		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)
-	}
 	err = srv.Shutdown()
 	if err != nil {
 		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)

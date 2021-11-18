@@ -19,6 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"crypto/tls"
+	"net"
+	"net/http"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,7 +35,81 @@ type HTTPCfg struct {
 	HTTPCDRsURL           string            // CDRS relative URL ("" to disable)
 	HTTPUseBasicAuth      bool              // Use basic auth for HTTP API
 	HTTPAuthUsers         map[string]string // Basic auth user:password map (base64 passwords)
-	ClientOpts            map[string]interface{}
+	ClientOpts            *http.Transport
+	dialer                *net.Dialer
+}
+
+func newDialer(dialer *net.Dialer, jsnCfg *HTTPClientOptsJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	dialer.DualStack = true
+	if jsnCfg.DialTimeout != nil {
+		if dialer.Timeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.DialTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.DialFallbackDelay != nil {
+		if dialer.FallbackDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.DialFallbackDelay); err != nil {
+			return
+		}
+	}
+	if jsnCfg.DialKeepAlive != nil {
+		if dialer.KeepAlive, err = utils.ParseDurationWithNanosecs(*jsnCfg.DialKeepAlive); err != nil {
+			return
+		}
+	}
+	return
+}
+
+func loadTransportFromJSONCfg(httpOpts *http.Transport, httpDialer *net.Dialer, jsnCfg *HTTPClientOptsJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	httpOpts.Proxy = http.ProxyFromEnvironment
+	if jsnCfg.SkipTLSVerify != nil {
+		httpOpts.TLSClientConfig = &tls.Config{InsecureSkipVerify: *jsnCfg.SkipTLSVerify}
+	}
+	if jsnCfg.TLSHandshakeTimeout != nil {
+		if httpOpts.TLSHandshakeTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.TLSHandshakeTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.DisableKeepAlives != nil {
+		httpOpts.DisableKeepAlives = *jsnCfg.DisableKeepAlives
+	}
+	if jsnCfg.DisableCompression != nil {
+		httpOpts.DisableCompression = *jsnCfg.DisableCompression
+	}
+	if jsnCfg.MaxIdleConns != nil {
+		httpOpts.MaxIdleConns = *jsnCfg.MaxIdleConns
+	}
+	if jsnCfg.MaxIdleConnsPerHost != nil {
+		httpOpts.MaxIdleConnsPerHost = *jsnCfg.MaxIdleConnsPerHost
+	}
+	if jsnCfg.MaxConnsPerHost != nil {
+		httpOpts.MaxConnsPerHost = *jsnCfg.MaxConnsPerHost
+	}
+	if jsnCfg.IdleConnTimeout != nil {
+		if httpOpts.IdleConnTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.IdleConnTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.ResponseHeaderTimeout != nil {
+		if httpOpts.ResponseHeaderTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ResponseHeaderTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.ExpectContinueTimeout != nil {
+		if httpOpts.ExpectContinueTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.ExpectContinueTimeout); err != nil {
+			return
+		}
+	}
+	if jsnCfg.ForceAttemptHTTP2 != nil {
+		httpOpts.ForceAttemptHTTP2 = *jsnCfg.ForceAttemptHTTP2
+	}
+	httpOpts.DialContext = httpDialer.DialContext
+	return
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
@@ -61,18 +139,34 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 		httpcfg.HTTPAuthUsers = *jsnHTTPCfg.Auth_users
 	}
 	if jsnHTTPCfg.Client_opts != nil {
-		for k, v := range jsnHTTPCfg.Client_opts {
-			httpcfg.ClientOpts[k] = v
+		if err = newDialer(httpcfg.dialer, jsnHTTPCfg.Client_opts); err != nil {
+			return
 		}
+		err = loadTransportFromJSONCfg(httpcfg.ClientOpts, httpcfg.dialer, jsnHTTPCfg.Client_opts)
 	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
-	clientOpts := make(map[string]interface{})
-	for k, v := range httpcfg.ClientOpts {
-		clientOpts[k] = v
+	clientOpts := map[string]interface{}{
+		utils.HTTPClientTLSClientConfigCfg:       false,
+		utils.HTTPClientTLSHandshakeTimeoutCfg:   httpcfg.ClientOpts.TLSHandshakeTimeout.String(),
+		utils.HTTPClientDisableKeepAlivesCfg:     httpcfg.ClientOpts.DisableKeepAlives,
+		utils.HTTPClientDisableCompressionCfg:    httpcfg.ClientOpts.DisableCompression,
+		utils.HTTPClientMaxIdleConnsCfg:          httpcfg.ClientOpts.MaxIdleConns,
+		utils.HTTPClientMaxIdleConnsPerHostCfg:   httpcfg.ClientOpts.MaxIdleConnsPerHost,
+		utils.HTTPClientMaxConnsPerHostCfg:       httpcfg.ClientOpts.MaxConnsPerHost,
+		utils.HTTPClientIdleConnTimeoutCfg:       httpcfg.ClientOpts.IdleConnTimeout.String(),
+		utils.HTTPClientResponseHeaderTimeoutCfg: httpcfg.ClientOpts.ResponseHeaderTimeout.String(),
+		utils.HTTPClientExpectContinueTimeoutCfg: httpcfg.ClientOpts.ExpectContinueTimeout.String(),
+		utils.HTTPClientForceAttemptHTTP2Cfg:     httpcfg.ClientOpts.ForceAttemptHTTP2,
+		utils.HTTPClientDialTimeoutCfg:           httpcfg.dialer.Timeout.String(),
+		utils.HTTPClientDialFallbackDelayCfg:     httpcfg.dialer.FallbackDelay.String(),
+		utils.HTTPClientDialKeepAliveCfg:         httpcfg.dialer.KeepAlive.String(),
+	}
+	if httpcfg.ClientOpts.TLSClientConfig != nil {
+		clientOpts[utils.HTTPClientTLSClientConfigCfg] = httpcfg.ClientOpts.TLSClientConfig.InsecureSkipVerify
 	}
 	return map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.HTTPJsonRPCURL,
@@ -88,6 +182,12 @@ func (httpcfg *HTTPCfg) AsMapInterface() map[string]interface{} {
 
 // Clone returns a deep copy of HTTPCfg
 func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
+	dialer := &net.Dialer{
+		Timeout:       httpcfg.dialer.Timeout,
+		DualStack:     httpcfg.dialer.DualStack,
+		KeepAlive:     httpcfg.dialer.KeepAlive,
+		FallbackDelay: httpcfg.dialer.FallbackDelay,
+	}
 	cln = &HTTPCfg{
 		HTTPJsonRPCURL:        httpcfg.HTTPJsonRPCURL,
 		RegistrarSURL:         httpcfg.RegistrarSURL,
@@ -96,13 +196,11 @@ func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
 		HTTPCDRsURL:           httpcfg.HTTPCDRsURL,
 		HTTPUseBasicAuth:      httpcfg.HTTPUseBasicAuth,
 		HTTPAuthUsers:         make(map[string]string),
-		ClientOpts:            make(map[string]interface{}),
+		ClientOpts:            httpcfg.ClientOpts.Clone(),
+		dialer:                dialer,
 	}
 	for u, a := range httpcfg.HTTPAuthUsers {
 		cln.HTTPAuthUsers[u] = a
-	}
-	for o, val := range httpcfg.ClientOpts {
-		cln.ClientOpts[o] = val
 	}
 	return
 }
