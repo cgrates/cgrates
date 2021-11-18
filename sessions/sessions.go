@@ -3846,9 +3846,9 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, attrIDs []string,
 	}
 	cgrEv.APIOpts[utils.Subsys] = utils.MetaSessionS
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
-	if cgrEv.APIOpts[utils.OptsContext] == utils.EmptyString {
-		cgrEv.APIOpts[utils.OptsContext] = utils.MetaSessionS
-	}
+	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
+		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+		utils.MetaSessionS)
 	cgrEv.SetCloneable(clnb)
 	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv)
