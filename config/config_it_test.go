@@ -297,7 +297,7 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		ThresholdSConns:     []string{utils.MetaLocalHost},
 		Opts: &ResourcesOpts{
 			UsageID:  utils.EmptyString,
-			UsageTTL: 72 * time.Hour,
+			UsageTTL: utils.DurationPointer(72 * time.Hour),
 			Units:    1,
 		},
 	}
