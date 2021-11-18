@@ -49,15 +49,15 @@ var (
 		testAttributeSRPCConn,
 		testAttributeSLoadFromFolder,
 		testAttributeSProcessEvent,
-		// testAttributeSProcessEventWithAccount,
-		// testAttributeSProcessEventWithAccountFull,
-		// testAttributeSProcessEventWithStat,
-		// testAttributeSProcessEventWithStatFull,
-		// testAttributeSProcessEventWithResource,
-		// testAttributeSProcessEventWithResourceFull,
-		// testAttributeSProcessEventWithLibPhoneNumber,
-		// testAttributeSProcessEventWithLibPhoneNumberComposed,
-		// testAttributeSProcessEventWithLibPhoneNumberFull,
+		testAttributeSProcessEventWithAccount,
+		testAttributeSProcessEventWithAccountFull,
+		testAttributeSProcessEventWithStat,
+		testAttributeSProcessEventWithStatFull,
+		testAttributeSProcessEventWithResource,
+		testAttributeSProcessEventWithResourceFull,
+		testAttributeSProcessEventWithLibPhoneNumber,
+		testAttributeSProcessEventWithLibPhoneNumberComposed,
+		testAttributeSProcessEventWithLibPhoneNumberFull,
 		testAttributeSStopEngine,
 	}
 )
@@ -187,12 +187,12 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT",
-			FilterIDs: []string{"*string:~*req.EventName:AddAccountInfo", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
+			FilterIDs: []string{"*string:~*req.EventName:AddAccountInfo"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Balance",
 					Type:  utils.MetaVariable,
-					Value: "~*accounts.1001.BalanceMap.*monetary[0].Value",
+					Value: "10",
 				},
 			},
 			Blocker: false,
@@ -219,9 +219,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 		Event: map[string]interface{}{
 			"EventName": "AddAccountInfo",
 		},
-		APIOpts: map[string]interface{}{
-			utils.OptsContext: utils.MetaSessionS,
-		},
+		APIOpts: map[string]interface{}{},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
@@ -251,42 +249,35 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 }
 
 func testAttributeSProcessEventWithAccountFull(t *testing.T) {
-	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT2",
-			FilterIDs: []string{"*string:~*req.EventName:AddFullAccount", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			Attributes: []*engine.Attribute{
+			FilterIDs: []string{"*string:~*req.EventName:AddFullAccount"},
+			Attributes: []*engine.ExternalAttribute{
 				{
-					Path: utils.MetaReq + utils.NestingSep + "FullAccount",
-					Type: utils.MetaVariable,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*accounts.1001",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "FullAccount",
+					Type:  utils.MetaVariable,
+					Value: "~*accounts.1001",
 				},
 			},
 			Blocker: false,
 			Weight:  10,
 		},
 	}
-	alsPrf.Compile()
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACCOUNT2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	replyAttr.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	if !reflect.DeepEqual(alsPrf.APIAttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.APIAttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -325,15 +316,6 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 	} else if !reflect.DeepEqual(rplyEv.AlteredFields, eRply.AlteredFields) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply.AlteredFields), utils.ToJSON(rplyEv.AlteredFields))
-	}
-	// some fields are generated(e.g. BalanceID) and compare only some part of the string
-	strAcc := utils.IfaceAsString(rplyEv.CGREvent.Event["FullAccount"])
-	if !strings.Contains(strAcc, "\"ID\":\"cgrates.org:1001\"") {
-		t.Errorf("Expecting: %s, received: %s",
-			"\"ID\":\"cgrates.org:1001\"", strAcc)
-	} else if !strings.Contains(strAcc, "\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false") {
-		t.Errorf("Expecting: %s, received: %s",
-			"\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false", strAcc)
 	}
 }
 
@@ -375,41 +357,35 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	}
 
 	// add new attribute profile
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS",
-			FilterIDs: []string{"*string:~*req.EventName:AddStatEvent", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			Attributes: []*engine.Attribute{
+			FilterIDs: []string{"*string:~*req.EventName:AddStatEvent"},
+			Attributes: []*engine.ExternalAttribute{
 				{
-					Path: utils.MetaReq + utils.NestingSep + "AcdMetric",
-					Type: utils.MetaVariable,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*stats.Stat_1.*acd",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "AcdMetric",
+					Type:  utils.MetaVariable,
+					Value: "~*stats.Stat_1.*acd",
 				},
 			},
 			Blocker: false,
 			Weight:  10,
 		},
 	}
-	alsPrf.Compile()
 	var result string
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	replyAttr.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	if !reflect.DeepEqual(alsPrf.APIAttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.APIAttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -418,9 +394,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 		Event: map[string]interface{}{
 			"EventName": "AddStatEvent",
 		},
-		APIOpts: map[string]interface{}{
-			utils.OptsContext: utils.MetaSessionS,
-		},
+		APIOpts: map[string]interface{}{},
 	}
 
 	eRply := engine.AttrSProcessEventReply{
@@ -431,7 +405,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 			ID:     "testAttributeSProcessEventWithStat",
 			Event: map[string]interface{}{
 				"EventName": "AddStatEvent",
-				"AcdMetric": "11000000000",
+				"AcdMetric": "1.1E+10",
 			},
 			APIOpts: map[string]interface{}{},
 		},
@@ -451,41 +425,35 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 
 func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	// add new attribute profile
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS2",
-			FilterIDs: []string{"*string:~*req.EventName:AddFullStats", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			Attributes: []*engine.Attribute{
+			FilterIDs: []string{"*string:~*req.EventName:AddFullStats"},
+			Attributes: []*engine.ExternalAttribute{
 				{
-					Path: utils.MetaReq + utils.NestingSep + "AllMetrics",
-					Type: utils.MetaVariable,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*stats.Stat_1",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "AllMetrics",
+					Type:  utils.MetaVariable,
+					Value: "~*stats.Stat_1",
 				},
 			},
 			Blocker: false,
 			Weight:  10,
 		},
 	}
-	alsPrf.Compile()
 	var result string
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_STATS2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	replyAttr.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	if !reflect.DeepEqual(alsPrf.APIAttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.APIAttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -507,9 +475,11 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 			ID:     "testAttributeSProcessEventWithStat",
 			Event: map[string]interface{}{
 				"EventName":  "AddFullStats",
-				"AllMetrics": "{\"*acd\":11000000000,\"*asr\":100,\"*tcd\":22000000000}",
+				"AllMetrics": "{\"*acd\":1.1E+10,\"*asr\":100,\"*tcd\":22000000000}",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -587,40 +557,34 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 
 	// add new attribute profile
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE",
-			FilterIDs: []string{"*string:~*req.EventName:AddResourceUsages", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			Attributes: []*engine.Attribute{
+			FilterIDs: []string{"*string:~*req.EventName:AddResourceUsages"},
+			Attributes: []*engine.ExternalAttribute{
 				{
-					Path: utils.MetaReq + utils.NestingSep + "ResourceTotalUsages",
-					Type: utils.MetaVariable,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*resources.ResTest.TotalUsage",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "ResourceTotalUsages",
+					Type:  utils.MetaVariable,
+					Value: "~*resources.ResTest.TotalUsage",
 				},
 			},
 			Blocker: false,
 			Weight:  10,
 		},
 	}
-	alsPrf.Compile()
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	replyAttr.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	if !reflect.DeepEqual(alsPrf.APIAttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.APIAttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -644,7 +608,9 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 				"EventName":           "AddResourceUsages",
 				"ResourceTotalUsages": "5",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -663,40 +629,34 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE2",
-			FilterIDs: []string{"*string:~*req.EventName:AddFullResource", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			Attributes: []*engine.Attribute{
+			FilterIDs: []string{"*string:~*req.EventName:AddFullResource"},
+			Attributes: []*engine.ExternalAttribute{
 				{
-					Path: utils.MetaReq + utils.NestingSep + "FullResource",
-					Type: utils.MetaVariable,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*resources.ResTest",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "FullResource",
+					Type:  utils.MetaVariable,
+					Value: "~*resources.ResTest",
 				},
 			},
 			Blocker: false,
 			Weight:  10,
 		},
 	}
-	alsPrf.Compile()
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_RESOURCE2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	replyAttr.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	if !reflect.DeepEqual(alsPrf.APIAttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.APIAttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -749,40 +709,34 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER2",
-			FilterIDs: []string{"*string:~*req.EventName:AddDestinationCarrier", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			Attributes: []*engine.Attribute{
+			FilterIDs: []string{"*string:~*req.EventName:AddDestinationCarrier"},
+			Attributes: []*engine.ExternalAttribute{
 				{
-					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
-					Type: utils.MetaVariable,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*libphonenumber.<~*req.Destination>.Carrier",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "DestinationCarrier",
+					Type:  utils.MetaVariable,
+					Value: "~*libphonenumber.<~*req.Destination>.Carrier",
 				},
 			},
 			Blocker: false,
 			Weight:  10,
 		},
 	}
-	alsPrf.Compile()
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER2"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	replyAttr.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	if !reflect.DeepEqual(alsPrf.APIAttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.APIAttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -808,7 +762,9 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 				"Destination":        "+447779330921",
 				"DestinationCarrier": "Orange",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -827,58 +783,44 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER_COMPOSED",
-			FilterIDs: []string{"*string:~*req.EventName:AddComposedInfo", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			Attributes: []*engine.Attribute{
+			FilterIDs: []string{"*string:~*req.EventName:AddComposedInfo"},
+			Attributes: []*engine.ExternalAttribute{
 				{
-					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
-					Type: utils.MetaComposed,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*libphonenumber.<~*req.Destination>.Carrier",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "DestinationCarrier",
+					Type:  utils.MetaComposed,
+					Value: "~*libphonenumber.<~*req.Destination>.Carrier",
 				},
+				// {
+				// 	Path:  utils.MetaReq + utils.NestingSep + "DestinationCarrier",
+				// 	Type:  utils.MetaComposed,
+				// 	Value: ";",
+				// },
 				{
-					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
-					Type: utils.MetaComposed,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: ";",
-						},
-					},
-				},
-				{
-					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
-					Type: utils.MetaComposed,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*libphonenumber.<~*req.Destination>.CountryCode",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "DestinationCarrier",
+					Type:  utils.MetaComposed,
+					Value: "~*libphonenumber.<~*req.Destination>.CountryCode",
 				},
 			},
 			Blocker: false,
 			Weight:  10,
 		},
 	}
-	alsPrf.Compile()
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER_COMPOSED"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	replyAttr.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	if !reflect.DeepEqual(alsPrf.APIAttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.APIAttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -902,9 +844,11 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 			Event: map[string]interface{}{
 				"EventName":          "AddComposedInfo",
 				"Destination":        "+447779330921",
-				"DestinationCarrier": "Orange;44",
+				"DestinationCarrier": "Orange44",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -923,40 +867,34 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER",
-			FilterIDs: []string{"*string:~*req.EventName:AddDestinationDetails", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			Attributes: []*engine.Attribute{
+			FilterIDs: []string{"*string:~*req.EventName:AddDestinationDetails"},
+			Attributes: []*engine.ExternalAttribute{
 				{
-					Path: utils.MetaReq + utils.NestingSep + "DestinationDetails",
-					Type: utils.MetaVariable,
-					Value: config.RSRParsers{
-						&config.RSRParser{
-							Rules: "~*libphonenumber.<~*req.Destination>",
-						},
-					},
+					Path:  utils.MetaReq + utils.NestingSep + "DestinationDetails",
+					Type:  utils.MetaVariable,
+					Value: "~*libphonenumber.<~*req.Destination>",
 				},
 			},
 			Blocker: false,
 			Weight:  10,
 		},
 	}
-	alsPrf.Compile()
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var replyAttr *engine.AttributeProfile
+	var replyAttr *engine.APIAttributeProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_LIBPHONENUMBER"}}, &replyAttr); err != nil {
 		t.Fatal(err)
 	}
-	replyAttr.Compile()
-	if !reflect.DeepEqual(alsPrf.AttributeProfile, replyAttr) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, replyAttr)
+	if !reflect.DeepEqual(alsPrf.APIAttributeProfile, replyAttr) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.APIAttributeProfile, replyAttr)
 	}
 
 	ev := &utils.CGREvent{
@@ -982,7 +920,9 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 				"Destination":        "+447779330921",
 				"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":0,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
