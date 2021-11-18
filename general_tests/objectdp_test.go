@@ -20,7 +20,6 @@ package general_tests
 import (
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,18 +36,18 @@ func TestAccountNewObjectDPFieldAsInterface(t *testing.T) {
 			},
 		},
 	}
-	accDP := config.NewObjectDP(acc)
+	accDP := acc
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]", "Value"}); err != nil {
 		t.Error(err)
 	} else if data != 20. {
 		t.Errorf("Expected: %+v ,received: %+v", 20., data)
 	}
 	if _, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[1]", "Value"}); err == nil ||
-		err.Error() != "index out of range" {
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if _, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]", "InexistentField"}); err == nil ||
-		err != utils.ErrNotFound {
+		err.Error() != `unsupported field prefix: <InexistentField>` {
 		t.Error(err)
 	}
 }
@@ -65,7 +64,7 @@ func TestAccountNewObjectDPFieldAsInterfaceFromCache(t *testing.T) {
 			},
 		},
 	}
-	accDP := config.NewObjectDP(acc)
+	accDP := acc
 
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]", "Value"}); err != nil {
 		t.Error(err)

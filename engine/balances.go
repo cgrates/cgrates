@@ -1107,6 +1107,13 @@ func (bc Balances) FieldAsInterface(fldPath []string) (val interface{}, err erro
 	if bc == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
+
+	if fldPath[0] == utils.GetTotalValue {
+		if len(fldPath) != 1 {
+			return nil, utils.ErrNotFound
+		}
+		return bc.GetTotalValue(), nil
+	}
 	for _, at := range bc {
 		if at.ID == fldPath[0] {
 			if len(fldPath) == 1 {

@@ -96,9 +96,8 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 			return
 		}
 		//construct dataProvider from account and set it further
-		dp := config.NewObjectDP(account)
-		dDP.cache.Set(fldPath[:2], dp)
-		return dp.FieldAsInterface(fldPath[2:])
+		dDP.cache.Set(fldPath[:2], account)
+		return account.FieldAsInterface(fldPath[2:])
 	case utils.MetaResources:
 		// sample of fieldName : ~*resources.ResourceID.Field
 		var reply ResourceWithConfig

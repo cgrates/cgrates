@@ -858,6 +858,7 @@ const (
 	Method                  = "Method"
 	Static                  = "Static"
 	Params                  = "Params"
+	GetTotalValue           = "GetTotalValue"
 	Increment               = "Increment"
 	FixedFee                = "FixedFee"
 	RecurrentFee            = "RecurrentFee"

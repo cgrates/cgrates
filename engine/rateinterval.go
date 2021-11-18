@@ -529,10 +529,6 @@ func (r *RGRate) Clone() (cln *RGRate) {
 	return
 }
 
-func (rit *RITiming) String() string {
-	return utils.ToJSON(rit)
-}
-
 func (rit *RITiming) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if rit == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound

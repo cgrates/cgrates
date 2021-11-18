@@ -70,7 +70,7 @@ func (at *ActionTrigger) Execute(ub *Account, fltrS *FilterS) (err error) {
 		// check action filter
 		if len(a.Filters) > 0 {
 			if pass, err := fltrS.Pass(utils.NewTenantID(a.Id).Tenant, a.Filters,
-				utils.MapStorage{utils.MetaReq: config.NewObjectDP(ub)}); err != nil {
+				utils.MapStorage{utils.MetaReq: ub}); err != nil {
 				return err
 			} else if !pass {
 				continue
