@@ -359,7 +359,7 @@ func (cgr *CGREngine) Stop(memPrfDir, pidFile string) {
 		close(cgr.memPrfStop)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), cgr.cfg.CoreSCfg().ShutdownTimeout*10)
+	ctx, cancel := context.WithTimeout(context.Background(), cgr.cfg.CoreSCfg().ShutdownTimeout)
 	go func() {
 		cgr.shdWg.Wait()
 		cancel()
