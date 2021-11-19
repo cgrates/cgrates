@@ -296,9 +296,8 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
 		Opts: &ResourcesOpts{
-			UsageID:  utils.EmptyString,
-			UsageTTL: utils.DurationPointer(72 * time.Hour),
-			Units:    1,
+			UsageID: utils.EmptyString,
+			Units:   1,
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ResourceSCfg()) {

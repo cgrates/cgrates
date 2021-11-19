@@ -374,13 +374,17 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 		cgrEv.APIOpts = make(map[string]interface{})
 	}
 	cgrEv.APIOpts[utils.Subsys] = utils.MetaCDRs
+	ctx, has := cgrEv.APIOpts[utils.OptsContext]
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
-		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+		utils.IfaceAsString(ctx),
 		utils.MetaCDRs)
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
+		if !has && utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]) == utils.MetaCDRs {
+			delete(cgrEv.APIOpts, utils.OptsContext)
+		}
 	} else if err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound

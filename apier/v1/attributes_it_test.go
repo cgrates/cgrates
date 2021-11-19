@@ -1040,7 +1040,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 			"Category": "call",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: 1,
+			utils.OptsAttributesProcessRuns: 1.,
 			utils.OptsContext:               utils.MetaSessionS,
 		},
 	}
@@ -1054,7 +1054,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 				"Category": "call_suffix",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProcessRuns: 1,
+				utils.OptsAttributesProcessRuns: 1.,
 				utils.OptsContext:               utils.MetaSessionS,
 			},
 		},
