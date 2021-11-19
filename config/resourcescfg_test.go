@@ -46,8 +46,7 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		Opts: &ResourcesOpts{
-			UsageTTL: utils.DurationPointer(72 * time.Hour),
-			Units:    1,
+			Units: 1,
 		},
 	}
 	cfg := NewDefaultCGRConfig()
@@ -82,9 +81,8 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUnitsCfg:    1.,
-			utils.MetaUsageTTLCfg: 72 * time.Hour,
-			utils.MetaUsageIDCfg:  "",
+			utils.MetaUnitsCfg:   1.,
+			utils.MetaUsageIDCfg: "",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -117,9 +115,8 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MetaUnitsCfg:    1.,
-			utils.MetaUsageTTLCfg: 72 * time.Hour,
-			utils.MetaUsageIDCfg:  "",
+			utils.MetaUnitsCfg:   1.,
+			utils.MetaUsageIDCfg: "",
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

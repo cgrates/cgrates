@@ -609,7 +609,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 				APIOpts: map[string]interface{}{
 					utils.Subsys:                    utils.MetaChargers,
 					utils.OptsAttributesProfileIDs:  []string{"*constant:*req.Account:1002", "*constant:*req.Account:1003"},
-					utils.OptsAttributesProcessRuns: 1,
+					utils.OptsAttributesProcessRuns: 1.,
 				},
 			},
 		},

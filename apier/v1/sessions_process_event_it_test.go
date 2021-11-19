@@ -246,7 +246,12 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 				utils.SetupTime:    "2018-01-07T17:00:00Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{
+				utils.Subsys:                   utils.MetaSessionS,
+				utils.OptsResourcesUnits:       1.,
+				utils.OptsResourcesUsageID:     "testSSv1ItProcessEvent",
+				utils.OptsAttributesProfileIDs: nil,
+			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes[utils.MetaRaw]) {
@@ -320,7 +325,12 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{
+				utils.Subsys:                   utils.MetaSessionS,
+				utils.OptsResourcesUnits:       1.,
+				utils.OptsResourcesUsageID:     "testSSv1ItProcessEvent",
+				utils.OptsAttributesProfileIDs: nil,
+			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes[utils.MetaRaw]) {
@@ -383,7 +393,10 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{
+				utils.Subsys:                   utils.MetaSessionS,
+				utils.OptsAttributesProfileIDs: nil,
+			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes[utils.MetaRaw]) {

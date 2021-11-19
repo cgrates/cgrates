@@ -124,8 +124,9 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 			continue // AttributeS disabled
 		}
 		clonedEv.APIOpts[utils.OptsAttributesProfileIDs] = cP.AttributeIDs
+		ctx, has := clonedEv.APIOpts[utils.OptsContext]
 		clonedEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
-			utils.IfaceAsString(clonedEv.APIOpts[utils.OptsContext]),
+			utils.IfaceAsString(ctx),
 			utils.MetaChargers)
 		var evReply AttrSProcessEventReply
 		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,
@@ -139,6 +140,9 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 		if len(evReply.AlteredFields) != 0 {
 			rply[i].AlteredFields = append(rply[i].AlteredFields, evReply.AlteredFields...)
 			rply[i].CGREvent = evReply.CGREvent
+		}
+		if !has && utils.IfaceAsString(rply[i].CGREvent.APIOpts[utils.OptsContext]) == utils.MetaChargers {
+			delete(rply[i].CGREvent.APIOpts, utils.OptsContext)
 		}
 	}
 	return

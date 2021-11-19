@@ -1097,9 +1097,8 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &ResourcesOptsJson{
-			UsageID:  utils.StringPointer(utils.EmptyString),
-			UsageTTL: utils.StringPointer("72h"),
-			Units:    utils.Float64Pointer(1),
+			UsageID: utils.StringPointer(utils.EmptyString),
+			Units:   utils.Float64Pointer(1),
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

@@ -282,7 +282,12 @@ func testSSv1ItAuth(t *testing.T) {
 				utils.SetupTime:    "2018-01-07T17:00:00Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{
+				utils.Subsys:                   utils.MetaSessionS,
+				utils.OptsAttributesProfileIDs: nil,
+				utils.OptsResourcesUsageID:     "TestSSv1It1",
+				utils.OptsResourcesUnits:       1.,
+			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -394,7 +399,12 @@ func testSSv1ItInitiateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{
+				utils.Subsys:                   utils.MetaSessionS,
+				utils.OptsAttributesProfileIDs: nil,
+				utils.OptsResourcesUnits:       1.,
+				utils.OptsResourcesUsageID:     "TestSSv1It1",
+			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -506,7 +516,10 @@ func testSSv1ItUpdateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{
+				utils.Subsys:                   utils.MetaSessionS,
+				utils.OptsAttributesProfileIDs: nil,
+			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -650,7 +663,12 @@ func testSSv1ItProcessEvent(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{
+				utils.Subsys:                   utils.MetaSessionS,
+				utils.OptsAttributesProfileIDs: nil,
+				utils.OptsResourcesUnits:       1.,
+				utils.OptsResourcesUsageID:     "TestSSv1It2",
+			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -829,7 +847,10 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{
+				utils.Subsys:                   utils.MetaSessionS,
+				utils.OptsAttributesProfileIDs: nil,
+			},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {

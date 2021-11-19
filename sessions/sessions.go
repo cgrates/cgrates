@@ -391,6 +391,9 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 			Event:   s.EventStart,
 			APIOpts: s.OptsStart,
 		}
+		if cgrEv.APIOpts == nil {
+			cgrEv.APIOpts = make(map[string]interface{})
+		}
 		cgrEv.APIOpts[utils.OptsResourcesUsageID] = s.ResourceID
 		cgrEv.APIOpts[utils.OptsResourcesUnits] = 1
 		cgrEv.SetCloneable(true)
@@ -2014,6 +2017,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 			originID = utils.UUIDSha1Prefix()
 		}
 		var allocMsg string
+		if args.APIOpts == nil {
+			args.APIOpts = make(map[string]interface{})
+		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
@@ -2277,6 +2283,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		}
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
+		}
+		if args.APIOpts == nil {
+			args.APIOpts = make(map[string]interface{})
 		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
@@ -2691,6 +2700,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		var reply string
+		if args.APIOpts == nil {
+			args.APIOpts = make(map[string]interface{})
+		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID // same ID should be accepted by first group since the previous resource should be expired
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
@@ -2966,6 +2978,9 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		}
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
+		}
+		if args.APIOpts == nil {
+			args.APIOpts = make(map[string]interface{})
 		}
 		args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
@@ -3318,6 +3333,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				originID := engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.OriginID)
 				if originID == "" {
 					return utils.NewErrMandatoryIeMissing(utils.OriginID)
+				}
+				if args.APIOpts == nil {
+					args.APIOpts = make(map[string]interface{})
 				}
 				args.CGREvent.APIOpts[utils.OptsResourcesUsageID] = originID
 				args.CGREvent.APIOpts[utils.OptsResourcesUnits] = 1
@@ -3792,6 +3810,9 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, thIDs []string, clnb
 	if len(sS.cgrCfg.SessionSCfg().ThreshSConns) == 0 {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
 	}
+	if cgrEv.APIOpts == nil {
+		cgrEv.APIOpts = make(map[string]interface{})
+	}
 	// check if we have thresholdIDs
 	if len(thIDs) != 0 {
 		cgrEv.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
@@ -3807,7 +3828,9 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, stsIDs []string, clnb bo
 	if len(sS.cgrCfg.SessionSCfg().StatSConns) == 0 {
 		return sIDs, utils.NewErrNotConnected(utils.StatS)
 	}
-
+	if cgrEv.APIOpts == nil {
+		cgrEv.APIOpts = make(map[string]interface{})
+	}
 	// check in case we have StatIDs inside flags
 	if len(stsIDs) != 0 {
 		cgrEv.APIOpts[utils.OptsStatsProfileIDs] = stsIDs
@@ -3846,12 +3869,16 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, attrIDs []string,
 	}
 	cgrEv.APIOpts[utils.Subsys] = utils.MetaSessionS
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = attrIDs
+	ctx, has := cgrEv.APIOpts[utils.OptsContext]
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
-		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+		utils.IfaceAsString(ctx),
 		utils.MetaSessionS)
 	cgrEv.SetCloneable(clnb)
 	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv)
+	if err == nil && !has && utils.IfaceAsString(rplyEv.APIOpts[utils.OptsContext]) == utils.MetaSessionS {
+		delete(rplyEv.APIOpts, utils.OptsContext)
+	}
 	return
 }
 

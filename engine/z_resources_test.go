@@ -3227,7 +3227,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 			},
 			dirty:  utils.BoolPointer(false),
 			tUsage: utils.Float64Pointer(10),
-			ttl:    utils.DurationPointer(72 * time.Hour),
+			ttl:    utils.DurationPointer(time.Minute),
 			TTLIdx: []string{},
 		},
 	}
@@ -3554,9 +3554,9 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 					Units:  10,
 				},
 			},
+			ttl:    utils.DurationPointer(time.Minute),
 			dirty:  utils.BoolPointer(false),
 			tUsage: utils.Float64Pointer(10),
-			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
 		},
 	}

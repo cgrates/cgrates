@@ -738,7 +738,7 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {
 		"*usageID": "",
-		"*usageTTL": "72h",
+		// "*usageTTL": "72h",
 		"*units": 1,
 	},
 },

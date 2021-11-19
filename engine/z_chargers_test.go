@@ -374,7 +374,6 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 				},
 				APIOpts: map[string]interface{}{
 					utils.Subsys:                   utils.MetaChargers,
-					utils.OptsContext:              utils.MetaChargers,
 					utils.OptsAttributesProfileIDs: []string(nil),
 				},
 			},
