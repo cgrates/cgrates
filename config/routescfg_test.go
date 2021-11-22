@@ -54,7 +54,6 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 			Context:      utils.MetaRoutes,
 			IgnoreErrors: false,
 			MaxCost:      utils.EmptyString,
-			ProfileCount: 1,
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -82,7 +81,6 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.DefaultRatioCfg:        1,
 		utils.OptsCfg: map[string]interface{}{
 			utils.OptsContext:         utils.MetaRoutes,
-			utils.MetaProfileCountCfg: 1,
 			utils.MetaIgnoreErrorsCfg: false,
 			utils.MetaMaxCostCfg:      utils.EmptyString,
 		},
@@ -124,7 +122,6 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.DefaultRatioCfg:        2,
 		utils.OptsCfg: map[string]interface{}{
 			utils.OptsContext:         utils.MetaRoutes,
-			utils.MetaProfileCountCfg: 1,
 			utils.MetaIgnoreErrorsCfg: false,
 			utils.MetaMaxCostCfg:      utils.EmptyString,
 		},
