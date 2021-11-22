@@ -188,6 +188,13 @@ func IfaceAsInt64(itm interface{}) (i int64, err error) {
 	}
 	return
 }
+func IfaceAsTInt(itm interface{}) (_ int, err error) {
+	var val int64
+	if val, err = IfaceAsTInt64(itm); err != nil {
+		return
+	}
+	return int(val), nil
+}
 
 // same function as IfaceAsInt64 but if the value is float round it to int64 instead of returning error
 func IfaceAsTInt64(itm interface{}) (i int64, err error) {

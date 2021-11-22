@@ -589,3 +589,35 @@ func (tS *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.Tenant
 	*rply = utils.OK
 	return
 }
+
+func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string) (err error) {
+	if len(path) != 1 {
+		return utils.ErrWrongPath
+	}
+
+	switch path[0] {
+	default:
+		return utils.ErrWrongPath
+	case utils.Tenant:
+		tp.Tenant = utils.IfaceAsString(val)
+	case utils.ID:
+		tp.ID = utils.IfaceAsString(val)
+	case utils.Blocker:
+		tp.Blocker, err = utils.IfaceAsBool(val)
+	case utils.Weight:
+		tp.Weight, err = utils.IfaceAsFloat64(val)
+	case utils.FilterIDs:
+		tp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+	case utils.MaxHits:
+		tp.MaxHits, err = utils.IfaceAsTInt(val)
+	case utils.MinHits:
+		tp.MinHits, err = utils.IfaceAsTInt(val)
+	case utils.MinSleep:
+		tp.MinSleep, err = utils.IfaceAsDuration(val)
+	case utils.ActionProfileIDs:
+		tp.ActionProfileIDs, err = utils.IfaceAsStringSlice(val)
+	case utils.Async:
+		tp.Async, err = utils.IfaceAsBool(val)
+	}
+	return
+}

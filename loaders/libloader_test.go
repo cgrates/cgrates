@@ -42,11 +42,11 @@ func TestTenantIDFromMap(t *testing.T) {
 
 func TestRateIDsFromMap(t *testing.T) {
 	expErrMsg := "cannot find RateIDs in map"
-	if _, err := RateIDsFromMap(utils.MapStorage{}); err == nil || err.Error() != expErrMsg {
+	if _, err := RateIDsFromDataProvider(utils.MapStorage{}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 	exp := []string{"RT1", "RT2"}
-	r, err := RateIDsFromMap(utils.MapStorage{
+	r, err := RateIDsFromDataProvider(utils.MapStorage{
 		utils.RateIDs: "RT1;RT2",
 	})
 	if err != nil {
