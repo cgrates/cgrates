@@ -36,7 +36,7 @@ const (
 	gprefix = utils.MetaGoogleAPI + utils.ConcatenatedKeySep
 )
 
-func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id string, withIndex, ratesPartial bool, ratesData utils.MapStorage) (_ error) {
+func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id string, withIndex, ratesPartial bool, ratesData utils.DataProvider) (_ error) {
 	switch lType {
 	case utils.MetaAttributes:
 		return dm.RemoveAttributeProfile(ctx, tnt, id, withIndex)
@@ -58,7 +58,7 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id s
 		return dm.RemoveDispatcherHost(ctx, tnt, id)
 	case utils.MetaRateProfiles:
 		if ratesPartial {
-			rateIDs, err := RateIDsFromMap(ratesData)
+			rateIDs, err := RateIDsFromDataProvider(ratesData)
 			if err != nil {
 				return err
 			}
@@ -73,112 +73,65 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id s
 	return
 }
 
-func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz string, lDataSet []utils.MapStorage, withIndex, ratesPartial bool) (err error) {
+func setToDB(ctx *context.Context, dm *engine.DataManager, lType, rsrSep, tmz string, tntID *utils.TenantID, lDataSet []*utils.OrderedNavigableMap, withIndex, ratesPartial bool) (err error) {
 	switch lType {
 	case utils.MetaAttributes:
-		attrModels := make(engine.AttributeMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			attrModels[i] = new(engine.AttributeMdl)
-			if err = utils.UpdateStructWithIfaceMap(attrModels[i], ld); err != nil {
-				return
-			}
+		apf := &engine.AttributeProfile{
+			Tenant: tntID.Tenant,
+			ID:     tntID.ID,
 		}
-		for _, tpApf := range attrModels.AsTPAttributes() {
-			var apf *engine.AttributeProfile
-			if apf, err = engine.APItoAttributeProfile(tpApf, tmz); err != nil {
-				return
-			}
-			if err = dm.SetAttributeProfile(ctx, apf, withIndex); err != nil {
-				return
-			}
+		if err = prepareData(apf, lDataSet, rsrSep); err != nil {
+			return
 		}
+		return dm.SetAttributeProfile(ctx, apf, withIndex)
 	case utils.MetaResources:
-		resModels := make(engine.ResourceMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			resModels[i] = new(engine.ResourceMdl)
-			if err = utils.UpdateStructWithIfaceMap(resModels[i], ld); err != nil {
-				return
-			}
+		res := &engine.ResourceProfile{
+			Tenant: tntID.Tenant,
+			ID:     tntID.ID,
 		}
-		for _, tpRes := range resModels.AsTPResources() {
-			var res *engine.ResourceProfile
-			if res, err = engine.APItoResource(tpRes, tmz); err != nil {
-				return
-			}
-			if err = dm.SetResourceProfile(ctx, res, withIndex); err != nil {
-				return
-			}
+		if err = prepareData(res, lDataSet, rsrSep); err != nil {
+			return
 		}
+		return dm.SetResourceProfile(ctx, res, withIndex)
 	case utils.MetaFilters:
-		fltrModels := make(engine.FilterMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			fltrModels[i] = new(engine.FilterMdl)
-			if err = utils.UpdateStructWithIfaceMap(fltrModels[i], ld); err != nil {
-				return
-			}
+		fltr := &engine.Filter{
+			Tenant: tntID.Tenant,
+			ID:     tntID.ID,
 		}
-
-		for _, tpFltr := range fltrModels.AsTPFilter() {
-			var fltrPrf *engine.Filter
-			if fltrPrf, err = engine.APItoFilter(tpFltr, tmz); err != nil {
-				return
-			}
-			if err = dm.SetFilter(ctx, fltrPrf, withIndex); err != nil {
-				return
-			}
+		if err = prepareData(fltr, lDataSet, rsrSep); err != nil {
+			return
 		}
+		if err = fltr.Compile(); err != nil {
+			return
+		}
+		return dm.SetFilter(ctx, fltr, withIndex)
 	case utils.MetaStats:
-		stsModels := make(engine.StatMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			stsModels[i] = new(engine.StatMdl)
-			if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
-				return
-			}
+		stsPrf := &engine.StatQueueProfile{
+			Tenant: tntID.Tenant,
+			ID:     tntID.ID,
 		}
-		for _, tpSts := range stsModels.AsTPStats() {
-			var stsPrf *engine.StatQueueProfile
-			if stsPrf, err = engine.APItoStats(tpSts, tmz); err != nil {
-				return
-			}
-			if err = dm.SetStatQueueProfile(ctx, stsPrf, withIndex); err != nil {
-				return
-			}
+		if err = prepareData(stsPrf, lDataSet, rsrSep); err != nil {
+			return
 		}
+		return dm.SetStatQueueProfile(ctx, stsPrf, withIndex)
 	case utils.MetaThresholds:
-		thModels := make(engine.ThresholdMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			thModels[i] = new(engine.ThresholdMdl)
-			if err = utils.UpdateStructWithIfaceMap(thModels[i], ld); err != nil {
-				return
-			}
+		tpTh := &engine.ThresholdProfile{
+			Tenant: tntID.Tenant,
+			ID:     tntID.ID,
 		}
-		for _, tpTh := range thModels.AsTPThreshold() {
-			var thPrf *engine.ThresholdProfile
-			if thPrf, err = engine.APItoThresholdProfile(tpTh, tmz); err != nil {
-				return
-			}
-			if err = dm.SetThresholdProfile(ctx, thPrf, withIndex); err != nil {
-				return
-			}
+		if err = prepareData(tpTh, lDataSet, rsrSep); err != nil {
+			return
 		}
+		return dm.SetThresholdProfile(ctx, tpTh, withIndex)
 	case utils.MetaRoutes:
-		sppModels := make(engine.RouteMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			sppModels[i] = new(engine.RouteMdl)
-			if err = utils.UpdateStructWithIfaceMap(sppModels[i], ld); err != nil {
-				return
-			}
+		spPrf := &engine.RouteProfile{
+			Tenant: tntID.Tenant,
+			ID:     tntID.ID,
 		}
-
-		for _, tpSpp := range sppModels.AsTPRouteProfile() {
-			var spPrf *engine.RouteProfile
-			if spPrf, err = engine.APItoRouteProfile(tpSpp, tmz); err != nil {
-				return
-			}
-			if err = dm.SetRouteProfile(ctx, spPrf, withIndex); err != nil {
-				return
-			}
+		if err = prepareData(spPrf, lDataSet, rsrSep); err != nil {
+			return
 		}
+		return dm.SetRouteProfile(ctx, spPrf, withIndex)
 	case utils.MetaChargers:
 		cppModels := make(engine.ChargerMdls, len(lDataSet))
 		for i, ld := range lDataSet {
@@ -288,60 +241,32 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, tmz string, lD
 	return
 }
 
-func dryRun(ctx *context.Context, lType, tmz, ldrID string, lDataSet []utils.MapStorage) (err error) {
+func dryRun(ctx *context.Context, lType, rsrSep, tmz, ldrID string, tntID *utils.TenantID, lDataSet []utils.MapStorage) (err error) {
 	switch lType {
 	case utils.MetaAttributes:
-		attrModels := make(engine.AttributeMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			attrModels[i] = new(engine.AttributeMdl)
-			if err = utils.UpdateStructWithIfaceMap(attrModels[i], ld); err != nil {
-				return
-			}
+		var apf *engine.AttributeProfile
+		if apf, err = NewAttributeProfile(tntID, lDataSet, rsrSep); err != nil {
+			return
 		}
-		for _, tpApf := range attrModels.AsTPAttributes() {
-			var apf *engine.AttributeProfile
-			if apf, err = engine.APItoAttributeProfile(tpApf, tmz); err != nil {
-				return
-			}
-			utils.Logger.Info(
-				fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
-					utils.LoaderS, ldrID, utils.ToJSON(apf)))
-		}
+		utils.Logger.Info(
+			fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
+				utils.LoaderS, ldrID, utils.ToJSON(apf)))
 	case utils.MetaResources:
-		resModels := make(engine.ResourceMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			resModels[i] = new(engine.ResourceMdl)
-			if err = utils.UpdateStructWithIfaceMap(resModels[i], ld); err != nil {
-				return
-			}
+		var res *engine.ResourceProfile
+		if res, err = NewResourceProfile(tntID, lDataSet); err != nil {
+			return
 		}
-		for _, tpRes := range resModels.AsTPResources() {
-			var res *engine.ResourceProfile
-			if res, err = engine.APItoResource(tpRes, tmz); err != nil {
-				return
-			}
-			utils.Logger.Info(
-				fmt.Sprintf("<%s-%s> DRY_RUN: ResourceProfile: %s",
-					utils.LoaderS, ldrID, utils.ToJSON(res)))
-		}
+		utils.Logger.Info(
+			fmt.Sprintf("<%s-%s> DRY_RUN: ResourceProfile: %s",
+				utils.LoaderS, ldrID, utils.ToJSON(res)))
 	case utils.MetaFilters:
-		fltrModels := make(engine.FilterMdls, len(lDataSet))
-		for i, ld := range lDataSet {
-			fltrModels[i] = new(engine.FilterMdl)
-			if err = utils.UpdateStructWithIfaceMap(fltrModels[i], ld); err != nil {
-				return
-			}
+		var fltrPrf *engine.Filter
+		if fltrPrf, err = NewFilter(tntID, lDataSet); err != nil {
+			return
 		}
-
-		for _, tpFltr := range fltrModels.AsTPFilter() {
-			var fltrPrf *engine.Filter
-			if fltrPrf, err = engine.APItoFilter(tpFltr, tmz); err != nil {
-				return
-			}
-			utils.Logger.Info(
-				fmt.Sprintf("<%s-%s> DRY_RUN: Filter: %s",
-					utils.LoaderS, ldrID, utils.ToJSON(fltrPrf)))
-		}
+		utils.Logger.Info(
+			fmt.Sprintf("<%s-%s> DRY_RUN: Filter: %s",
+				utils.LoaderS, ldrID, utils.ToJSON(fltrPrf)))
 	case utils.MetaStats:
 		stsModels := make(engine.StatMdls, len(lDataSet))
 		for i, ld := range lDataSet {
@@ -532,9 +457,9 @@ func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet [
 	case utils.MetaParse:
 		return
 	case utils.MetaDryRun:
-		return dryRun(ctx, lType, l.timezone, l.ldrCfg.ID, lDataSet)
+		return dryRun(ctx, lType, l.cfg.GeneralCfg().RSRSep, l.timezone, l.ldrCfg.ID, tntID, lDataSet)
 	case utils.MetaStore:
-		err = setToDB(ctx, l.dm, lType, l.timezone, lDataSet, withIndex, partialRates)
+		err = setToDB(ctx, l.dm, lType, l.cfg.GeneralCfg().RSRSep, l.timezone, tntID, lDataSet, withIndex, partialRates)
 	case utils.MetaRemove:
 		err = removeFromDB(ctx, l.dm, lType, tntID.Tenant, tntID.ID, withIndex, partialRates, lDataSet[0])
 	default:
