@@ -186,3 +186,45 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 	}
 	return
 }
+
+func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, rsrSep string) (err error) {
+	switch len(path) {
+	case 1:
+		switch path[0] {
+		case utils.Tenant:
+			ap.Tenant = utils.IfaceAsString(val)
+		case utils.ID:
+			ap.ID = utils.IfaceAsString(val)
+		case utils.FilterIDs:
+			ap.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.Blocker:
+			ap.Blocker, err = utils.IfaceAsBool(val)
+		case utils.Weight:
+			ap.Weight, err = utils.IfaceAsFloat64(val)
+		default:
+			return utils.ErrWrongPath
+		}
+	case 2:
+		if path[0] != utils.Attributes {
+			return utils.ErrWrongPath
+		}
+		if len(ap.Attributes) == 0 || newBranch {
+			ap.Attributes = append(ap.Attributes, new(Attribute))
+		}
+		switch path[1] {
+		case utils.FilterIDs:
+			ap.Attributes[len(ap.Attributes)-1].FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.Path:
+			ap.Attributes[len(ap.Attributes)-1].Path = utils.IfaceAsString(val)
+		case utils.Type:
+			ap.Attributes[len(ap.Attributes)-1].Type = utils.IfaceAsString(val)
+		case utils.Value:
+			ap.Attributes[len(ap.Attributes)-1].Value, err = config.NewRSRParsers(utils.IfaceAsString(val), rsrSep)
+		default:
+			return utils.ErrWrongPath
+		}
+	default:
+		return utils.ErrWrongPath
+	}
+	return
+}

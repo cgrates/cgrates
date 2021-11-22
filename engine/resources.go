@@ -1021,3 +1021,32 @@ func (rS *ResourceS) V1GetResourceWithConfig(ctx *context.Context, arg *utils.Te
 
 	return
 }
+
+func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string) (err error) {
+	if len(path) != 0 {
+		return utils.ErrWrongPath
+	}
+	switch path[0] {
+	case utils.Tenant:
+		rp.Tenant = utils.IfaceAsString(val)
+	case utils.ID:
+		rp.ID = utils.IfaceAsString(val)
+	case utils.FilterIDs:
+		rp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+	case utils.UsageTTL:
+		rp.UsageTTL, err = utils.IfaceAsDuration(val)
+	case utils.Limit:
+		rp.Limit, err = utils.IfaceAsFloat64(val)
+	case utils.AllocationMessage:
+		rp.AllocationMessage = utils.IfaceAsString(val)
+	case utils.Blocker:
+		rp.Blocker, err = utils.IfaceAsBool(val)
+	case utils.Stored:
+		rp.Stored, err = utils.IfaceAsBool(val)
+	case utils.Weight:
+		rp.Weight, err = utils.IfaceAsFloat64(val)
+	case utils.ThresholdIDs:
+		rp.ThresholdIDs, err = utils.IfaceAsStringSlice(val)
+	}
+	return
+}
