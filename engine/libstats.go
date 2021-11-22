@@ -551,3 +551,52 @@ func (ssq *StatQueueWithAPIOpts) UnmarshalJSON(data []byte) (err error) {
 	ssq.APIOpts = i.APIOpts
 	return
 }
+
+func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	switch len(path) {
+	default:
+		return utils.ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			return utils.ErrWrongPath
+		case utils.Tenant:
+			sqp.Tenant = utils.IfaceAsString(val)
+		case utils.ID:
+			sqp.ID = utils.IfaceAsString(val)
+
+		case utils.QueueLength:
+			sqp.QueueLength, err = utils.IfaceAsTInt(val)
+		case utils.MinItems:
+			sqp.MinItems, err = utils.IfaceAsTInt(val)
+		case utils.TTL:
+			sqp.TTL, err = utils.IfaceAsDuration(val)
+		case utils.Stored:
+			sqp.Stored, err = utils.IfaceAsBool(val)
+		case utils.Blocker:
+			sqp.Blocker, err = utils.IfaceAsBool(val)
+		case utils.Weight:
+			sqp.Weight, err = utils.IfaceAsFloat64(val)
+		case utils.FilterIDs:
+			sqp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.ThresholdIDs:
+			sqp.ThresholdIDs, err = utils.IfaceAsStringSlice(val)
+		}
+	case 2:
+		if path[0] != utils.Metrics {
+			return utils.ErrWrongPath
+		}
+		if len(sqp.Metrics) == 0 || newBranch {
+			sqp.Metrics = append(sqp.Metrics, new(MetricWithFilters))
+		}
+		switch path[1] {
+		case utils.FilterIDs:
+			sqp.Metrics[len(sqp.Metrics)-1].FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.MetricID:
+			sqp.Metrics[len(sqp.Metrics)-1].MetricID = utils.IfaceAsString(val)
+		default:
+			return utils.ErrWrongPath
+		}
+	}
+	return
+}

@@ -162,7 +162,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Attributes: []*engine.Attribute{}}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 }

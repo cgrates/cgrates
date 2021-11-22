@@ -452,3 +452,57 @@ func (rpS *RouteS) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, r
 	*reply = sR.RoutesWithParams()
 	return
 }
+
+func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	switch len(path) {
+	default:
+		return utils.ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			return utils.ErrWrongPath
+		case utils.Tenant:
+			rp.Tenant = utils.IfaceAsString(val)
+		case utils.ID:
+			rp.ID = utils.IfaceAsString(val)
+		case utils.FilterIDs:
+			rp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.SortingParameters:
+			rp.SortingParameters, err = utils.IfaceAsStringSlice(val)
+		case utils.Sorting:
+			rp.Sorting = utils.IfaceAsString(val)
+		case utils.Weights:
+			rp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+		}
+	case 2:
+		if path[0] != utils.Routes {
+			return utils.ErrWrongPath
+		}
+		if len(rp.Routes) == 0 || newBranch {
+			rp.Routes = append(rp.Routes, new(Route))
+		}
+		switch path[1] {
+		case utils.ID:
+			rp.Routes[len(rp.Routes)-1].ID = utils.IfaceAsString(val)
+		case utils.FilterIDs:
+			rp.Routes[len(rp.Routes)-1].FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.AccountIDs:
+			rp.Routes[len(rp.Routes)-1].AccountIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.RateProfileIDs:
+			rp.Routes[len(rp.Routes)-1].RateProfileIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.ResourceIDs:
+			rp.Routes[len(rp.Routes)-1].ResourceIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.StatIDs:
+			rp.Routes[len(rp.Routes)-1].StatIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.Weights:
+			rp.Routes[len(rp.Routes)-1].Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+		case utils.Blocker:
+			rp.Routes[len(rp.Routes)-1].Blocker, err = utils.IfaceAsBool(val)
+		case utils.RouteParameters:
+			rp.Routes[len(rp.Routes)-1].RouteParameters = utils.IfaceAsString(val)
+		default:
+			return utils.ErrWrongPath
+		}
+	}
+	return
+}

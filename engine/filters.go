@@ -688,3 +688,37 @@ func (fltr *FilterRule) passRegex(dDP utils.DataProvider) (bool, error) {
 func (fltr *FilterRule) passNever(dDP utils.DataProvider) (bool, error) {
 	return false, nil
 }
+
+func (fltr *Filter) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	switch len(path) {
+	default:
+		return utils.ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			return utils.ErrWrongPath
+		case utils.Tenant:
+			fltr.Tenant = utils.IfaceAsString(val)
+		case utils.ID:
+			fltr.ID = utils.IfaceAsString(val)
+		}
+	case 2:
+		if path[0] != utils.Rules {
+			return utils.ErrWrongPath
+		}
+		if len(fltr.Rules) == 0 || newBranch {
+			fltr.Rules = append(fltr.Rules, new(FilterRule))
+		}
+		switch path[1] {
+		case utils.Type:
+			fltr.Rules[len(fltr.Rules)-1].Type = utils.IfaceAsString(val)
+		case utils.Element:
+			fltr.Rules[len(fltr.Rules)-1].Element = utils.IfaceAsString(val)
+		case utils.Values:
+			fltr.Rules[len(fltr.Rules)-1].Values, err = utils.IfaceAsStringSlice(val)
+		default:
+			return utils.ErrWrongPath
+		}
+	}
+	return
+}
