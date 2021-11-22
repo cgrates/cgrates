@@ -5,5 +5,6 @@
 
 DROP DATABASE IF EXISTS cgrates;
 CREATE DATABASE cgrates;
-
-GRANT ALL on cgrates.* TO 'cgrates'@'localhost' IDENTIFIED BY 'CGRateS.org';
+CREATE USER 'cgrates'@'localhost' IDENTIFIED BY 'CGRateS.org';
+GRANT ALL PRIVILEGES ON cgrates.* TO 'cgrates'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
