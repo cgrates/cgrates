@@ -345,7 +345,7 @@ func testChargerSProcessEvent(t *testing.T) {
 	}
 	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, chargerEvent[0], &result); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result, processedEv) {
+	} else if utils.ToJSON(result) != utils.ToJSON(processedEv) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result))
 	}
 	result = []*engine.ChrgSProcessEventReply{}
@@ -375,7 +375,7 @@ func testChargerSProcessEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	sort.Strings(result[0].AlteredFields)
-	if !reflect.DeepEqual(result, processedEv) {
+	if utils.ToJSON(result) != utils.ToJSON(processedEv) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result))
 	}
 
@@ -384,7 +384,7 @@ func testChargerSProcessEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	sort.Strings(result[0].AlteredFields)
-	if !reflect.DeepEqual(result, processedEv) {
+	if utils.ToJSON(result) != utils.ToJSON(processedEv) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result))
 	}
 }
@@ -625,7 +625,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 	var result2 []*engine.ChrgSProcessEventReply
 	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result2, processedEv) {
+	} else if utils.ToJSON(result2) != utils.ToJSON(processedEv) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
 	}
 }
