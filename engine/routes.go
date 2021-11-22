@@ -678,13 +678,13 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *utils.CGREvent) 
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
-	var prfCountOpt int
-	if prfCountOpt, err = utils.GetIntOpts(args, rpS.cgrcfg.RouteSCfg().Opts.ProfileCount,
+	var prfCountOpt *int
+	if prfCountOpt, err = utils.GetIntPointerOpts(args, rpS.cgrcfg.RouteSCfg().Opts.ProfileCount,
 		utils.OptsRoutesProfileCount); err != nil {
 		return
 	}
-	if prfCount > prfCountOpt { // it has the option and is smaller that the current number of profiles
-		prfCount = prfCountOpt
+	if prfCountOpt != nil && prfCount > *prfCountOpt { // it has the option and is smaller that the current number of profiles
+		prfCount = *prfCountOpt
 	}
 	var extraOpts *optsGetRoutes
 	if extraOpts, err = newOptsGetRoutes(args, rpS.filterS, rpS.cgrcfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
