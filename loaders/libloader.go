@@ -66,10 +66,12 @@ func (r *record) FieldAsString(path []string) (str string, err error) {
 	return utils.IfaceAsString(val), nil
 }
 
-func TenantIDFromMap(data utils.MapStorage) *utils.TenantID {
+func TenantIDFromDataProvider(data utils.DataProvider) *utils.TenantID {
+	tnt, _ := data.FieldAsString([]string{utils.Tenant})
+	id, _ := data.FieldAsString([]string{utils.ID})
 	return &utils.TenantID{
-		Tenant: utils.IfaceAsString(data[utils.Tenant]),
-		ID:     utils.IfaceAsString(data[utils.ID]),
+		Tenant: tnt,
+		ID:     id,
 	}
 }
 
@@ -196,7 +198,7 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 func (ar *record) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf) (err error) {
 	switch fullPath.PathSlice[0] {
 	default:
-		return ar.data.Set(fullPath, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
+		return ar.data.SetAsSlice(fullPath, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaTmp:
 		_, err = ar.tmp.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 		return
@@ -292,16 +294,18 @@ type profile interface {
 
 func prepareData(prf profile, lData []*utils.OrderedNavigableMap, rsrSep string) (err error) {
 	for _, mp := range lData {
+		newRow := true
 		for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 			path := el.Value
 			nmIt, _ := mp.Field(path)
 			if nmIt == nil {
 				continue // all attributes, not writable to diameter packet
 			}
-			path = path[:len(path)-1] // remove the last index
-			if err = prf.Set(path, nmIt.Data, nmIt.NewBranch, rsrSep); err != nil {
+			// path = path[:len(path)-1] // remove the last index
+			if err = prf.Set(path, nmIt.Data, nmIt.NewBranch || newRow, rsrSep); err != nil {
 				return
 			}
+			newRow = false
 		}
 	}
 	return

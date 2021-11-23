@@ -63,7 +63,7 @@ func TestLoaderSCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	srv.ldrs = loaders.NewLoaderService(cfg, &engine.DataManager{},
-		"", &engine.FilterS{}, nil)
+		&engine.FilterS{}, nil)
 	if !srv.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
