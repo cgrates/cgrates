@@ -251,20 +251,29 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 
 	return
 }
+
 func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFunc, preload string) (err error) {
+	defer func() {
+		if err != nil {
+			cgr.srvManager.ShutdownServices()
+		}
+	}()
 	cgr.shdWg.Add(1)
 	if err = cgr.gvS.Start(ctx, shtDw); err != nil {
+		cgr.shdWg.Done()
 		return
 	}
 	if cgr.dmS.ShouldRun() { // Some services can run without db, ie:  ERs
 		cgr.shdWg.Add(1)
 		if err = cgr.dmS.Start(ctx, shtDw); err != nil {
+			cgr.shdWg.Done()
 			return
 		}
 	}
 	if cgr.sdbS.ShouldRun() { // Some services can run without db, ie:  ERs
 		cgr.shdWg.Add(1)
 		if err = cgr.sdbS.Start(ctx, shtDw); err != nil {
+			cgr.shdWg.Done()
 			return
 		}
 	}
@@ -272,16 +281,19 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 	if cgr.anzS.ShouldRun() {
 		cgr.shdWg.Add(1)
 		if err = cgr.anzS.Start(ctx, shtDw); err != nil {
+			cgr.shdWg.Done()
 			return
 		}
 	}
 
 	cgr.shdWg.Add(1)
 	if err = cgr.coreS.Start(ctx, shtDw); err != nil {
+		cgr.shdWg.Done()
 		return
 	}
 	cgr.shdWg.Add(1)
 	if err = cgr.cacheS.Start(ctx, shtDw); err != nil {
+		cgr.shdWg.Done()
 		return
 	}
 	cgr.srvManager.StartServices(ctx, shtDw)
@@ -359,7 +371,7 @@ func (cgr *CGREngine) Stop(memPrfDir, pidFile string) {
 		close(cgr.memPrfStop)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), cgr.cfg.CoreSCfg().ShutdownTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cgr.cfg.CoreSCfg().ShutdownTimeout*10)
 	go func() {
 		cgr.shdWg.Wait()
 		cancel()

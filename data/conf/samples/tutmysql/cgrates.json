@@ -25,21 +25,6 @@
 	"db_password": "CGRateS.org",
 },
 
-
-"rals": {
-	"enabled": true,
-	"thresholds_conns": ["*internal"],
-	"max_increments":3000000,
-},
-
-
-"schedulers": {
-	"enabled": true,
-	"cdrs_conns": ["*internal"],
-	"stats_conns": ["*localhost"],
-},
-
-
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":["*internal"],
