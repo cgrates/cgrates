@@ -63,7 +63,7 @@ func TestRemoveFromDB(t *testing.T) {
 	}
 }
 
-func testDryRunWithData(lType string, data []utils.MapStorage) (string, error) {
+func testDryRunWithData(lType string, data []*utils.OrderedNavigableMap) (string, error) {
 	buf := bytes.NewBuffer([]byte{})
 	log.SetOutput(buf)
 	lgr := utils.Logger
@@ -71,18 +71,28 @@ func testDryRunWithData(lType string, data []utils.MapStorage) (string, error) {
 	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
 	utils.Logger.SetLogLevel(7)
 
-	err := dryRun(context.Background(), lType, utils.InfieldSep, "", "test", TenantIDFromMap(data[0]), data)
+	err := dryRun(context.Background(), lType, utils.InfieldSep, "test", TenantIDFromDataProvider(data[0]), data)
 	return buf.String(), err
 }
 
 func testDryRun(t *testing.T, lType string) string {
-	buf, err := testDryRunWithData(lType, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}})
+	data := utils.NewOrderedNavigableMap()
+	data.Set(utils.NewFullPath(utils.Tenant), "cgrates.org")
+	data.Set(utils.NewFullPath(utils.ID), "ID")
+	buf, err := testDryRunWithData(lType, []*utils.OrderedNavigableMap{data})
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(lType, err)
 	}
 	return buf
 }
 
+func newOrderNavMap(mp utils.MapStorage) (o *utils.OrderedNavigableMap) {
+	o = utils.NewOrderedNavigableMap()
+	for k, v := range mp {
+		o.Set(utils.NewFullPath(k), v)
+	}
+	return
+}
 func TestDryRun(t *testing.T) {
 	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Attributes\":null,\"Blocker\":false,\"Weight\":0}",
 		testDryRun(t, utils.MetaAttributes); !strings.Contains(rplyLog, expLog) {
@@ -96,41 +106,41 @@ func TestDryRun(t *testing.T) {
 		testDryRun(t, utils.MetaFilters); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: StatsQueueProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"QueueLength\":0,\"TTL\":0,\"MinItems\":0,\"Metrics\":[],\"Stored\":false,\"Blocker\":false,\"Weight\":0,\"ThresholdIDs\":[]}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: StatsQueueProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"QueueLength\":0,\"TTL\":0,\"MinItems\":0,\"Metrics\":null,\"Stored\":false,\"Blocker\":false,\"Weight\":0,\"ThresholdIDs\":null}",
 		testDryRun(t, utils.MetaStats); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ThresholdProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"MaxHits\":0,\"MinHits\":0,\"MinSleep\":0,\"Blocker\":false,\"Weight\":0,\"ActionProfileIDs\":[],\"Async\":false}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ThresholdProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"MaxHits\":0,\"MinHits\":0,\"MinSleep\":0,\"Blocker\":false,\"Weight\":0,\"ActionProfileIDs\":null,\"Async\":false}",
 		testDryRun(t, utils.MetaThresholds); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RouteProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Sorting\":\"\",\"SortingParameters\":[],\"Routes\":[],\"Weights\":null}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RouteProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Sorting\":\"\",\"SortingParameters\":null,\"Routes\":null,\"Weights\":null}",
 		testDryRun(t, utils.MetaRoutes); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ChargerProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"RunID\":\"\",\"AttributeIDs\":[],\"Weight\":0}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ChargerProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"RunID\":\"\",\"AttributeIDs\":null,\"Weight\":0}",
 		testDryRun(t, utils.MetaChargers); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Strategy\":\"\",\"StrategyParams\":{},\"Weight\":0,\"Hosts\":[]}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Strategy\":\"\",\"StrategyParams\":{},\"Weight\":0,\"Hosts\":null}",
 		testDryRun(t, utils.MetaDispatchers); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RateProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Weights\":null,\"MinCost\":0,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"Rates\":{}}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RateProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Weights\":null,\"MinCost\":0,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"Rates\":{}}",
 		testDryRun(t, utils.MetaRateProfiles); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ActionProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Weight\":0,\"Schedule\":\"\",\"Targets\":{},\"Actions\":[]}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ActionProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Weight\":0,\"Schedule\":\"\",\"Targets\":{},\"Actions\":null}",
 		testDryRun(t, utils.MetaActionProfiles); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Accounts: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Weights\":null,\"Opts\":null,\"Balances\":{},\"ThresholdIDs\":[]}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Accounts: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Weights\":null,\"Opts\":{},\"Balances\":{},\"ThresholdIDs\":null}",
 		testDryRun(t, utils.MetaAccounts); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	rplyLog, err := testDryRunWithData(utils.MetaDispatcherHosts, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.Address: "127.0.0.1"}})
+	rplyLog, err := testDryRunWithData(utils.MetaDispatcherHosts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.Address: "127.0.0.1"})})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,226 +151,205 @@ func TestDryRun(t *testing.T) {
 
 func TestDryRunWithUpdateStructErrors(t *testing.T) {
 	expErrMsg := `strconv.ParseFloat: parsing "notWeight": invalid syntax`
-	if _, err := testDryRunWithData(utils.MetaAttributes, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaAttributes, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if _, err := testDryRunWithData(utils.MetaResources, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaResources, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if _, err := testDryRunWithData(utils.MetaStats, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaStats, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if _, err := testDryRunWithData(utils.MetaThresholds, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if _, err := testDryRunWithData(utils.MetaChargers, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaDispatchers, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaThresholds, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if _, err := testDryRunWithData(utils.MetaActionProfiles, []utils.MapStorage{{utils.Weight: "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaChargers, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := testDryRunWithData(utils.MetaDispatchers, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if _, err := testDryRunWithData(utils.MetaActionProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	expErrMsg = `cannot update unsupported struct field: 0`
-	if _, err := testDryRunWithData(utils.MetaRoutes, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaRoutes, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if _, err := testDryRunWithData(utils.MetaRateProfiles, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaRateProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if _, err := testDryRunWithData(utils.MetaAccounts, []utils.MapStorage{{"PK": "notWeight"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaAccounts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
 
 func TestDryRunWithModelsErrors(t *testing.T) {
-	expErrMsg := `Closed unspilit syntax`
-	if _, err := testDryRunWithData(utils.MetaAttributes, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.Attributes: utils.MapStorage{"Value": "`", "Path": "Test"}}}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	expErrMsg = `strconv.ParseFloat: parsing "float": invalid syntax`
-	if _, err := testDryRunWithData(utils.MetaResources, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Limit": "float"}}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	expErrMsg = `emtpy RSRParser in rule: <>`
-	if _, err := testDryRunWithData(utils.MetaFilters, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.Rules: utils.MapStorage{"Values": "`;", "Type": utils.MetaRSR}}}); err == nil || err.Error() != expErrMsg {
+	expErrMsg := `strconv.ParseFloat: parsing "float": invalid syntax`
+	if _, err := testDryRunWithData(utils.MetaResources, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Limit": "float"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	expErrMsg = `time: invalid duration "float"`
-	if _, err := testDryRunWithData(utils.MetaStats, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "TTL": "float"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaStats, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "TTL": "float"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if _, err := testDryRunWithData(utils.MetaThresholds, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "MinSleep": "float"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaThresholds, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "MinSleep": "float"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 	expErrMsg = `invalid Weight <float> in string: <;float>`
-	if _, err := testDryRunWithData(utils.MetaRoutes, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaRoutes, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if _, err := testDryRunWithData(utils.MetaRateProfiles, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaRateProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if _, err := testDryRunWithData(utils.MetaAccounts, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaAccounts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	expErrMsg = `time: invalid duration "float"`
-	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if _, err := testDryRunWithData(utils.MetaActionProfiles, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "ActionTTL": "float", "ActionID": "ACCT"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaActionProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ActionTTL": "float", "ActionID": "ACCT"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 	expErrMsg = `invalid key: <1> for BalanceCostIncrements`
-	if _, err := testDryRunWithData(utils.MetaAccounts, []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "BalanceCostIncrements": "1", "BalanceID": "BalID"}}); err == nil || err.Error() != expErrMsg {
+	if _, err := testDryRunWithData(utils.MetaAccounts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "BalanceCostIncrements": "1", "BalanceID": "BalID"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
 
 func TestSetToDBWithUpdateStructErrors(t *testing.T) {
 	expErrMsg := `strconv.ParseFloat: parsing "notWeight": invalid syntax`
-	if err := setToDB(context.Background(), nil, utils.MetaAttributes, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaAttributes, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if err := setToDB(context.Background(), nil, utils.MetaChargers, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{utils.Weight: "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaChargers, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	expErrMsg = `cannot update unsupported struct field: 0`
-	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, "", utils.NewTenantID(""), []utils.MapStorage{{"PK": "notWeight"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
 
 func TestSetToDBWithModelsErrors(t *testing.T) {
-	expErrMsg := `Closed unspilit syntax`
-	if err := setToDB(context.Background(), nil, utils.MetaAttributes, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.Attributes: utils.MapStorage{"Value": "`", "Path": "Test"}}}, true, false); err == nil || err.Error() != expErrMsg {
+	expErrMsg := `strconv.ParseFloat: parsing "float": invalid syntax`
+	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Limit": "float"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-
-	expErrMsg = `strconv.ParseFloat: parsing "float": invalid syntax`
-	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Limit": "float"}}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	expErrMsg = `emtpy RSRParser in rule: <>`
-	if err := setToDB(context.Background(), nil, utils.MetaFilters, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.Rules: utils.MapStorage{"Values": "`;", "Type": utils.MetaRSR}}}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
 	expErrMsg = `time: invalid duration "float"`
-	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "TTL": "float"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "TTL": "float"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "MinSleep": "float"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "MinSleep": "float"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 	expErrMsg = `invalid Weight <float> in string: <;float>`
-	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	expErrMsg = `time: invalid duration "float"`
-	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "ActionTTL": "float", "ActionID": "ACCT"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ActionTTL": "float", "ActionID": "ACCT"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 	expErrMsg = `invalid key: <1> for BalanceCostIncrements`
-	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "BalanceCostIncrements": "1", "BalanceID": "BalID"}}, true, false); err == nil || err.Error() != expErrMsg {
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "BalanceCostIncrements": "1", "BalanceID": "BalID"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
 
 func TestSetToDBWithDBError(t *testing.T) {
-	if err := setToDB(context.Background(), nil, utils.MetaAttributes, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaAttributes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
-		t.Fatal(err)
-	}
-
-	if err := setToDB(context.Background(), nil, utils.MetaChargers, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
-		t.Fatal(err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaChargers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaFilters, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+
+	if err := setToDB(context.Background(), nil, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.RateIDs: "RT1;RT2"}}, true, true); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.RateIDs: "RT1;RT2"})}, true, true); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 }
@@ -368,7 +357,7 @@ func TestSetToDBWithDBError(t *testing.T) {
 func TestSetToDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
-	if err := setToDB(context.Background(), dm, utils.MetaAttributes, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaAttributes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
@@ -378,7 +367,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaResources, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaResources, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v2 := &engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"}
@@ -388,7 +377,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v2), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaStats, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaStats, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v3 := &engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ThresholdIDs: []string{}, Metrics: []*engine.MetricWithFilters{}}
@@ -398,7 +387,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v3), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaThresholds, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v4 := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ActionProfileIDs: []string{}}
@@ -408,7 +397,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v4), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaChargers, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaChargers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v5 := &engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, AttributeIDs: []string{}}
@@ -418,7 +407,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v5), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaDispatchers, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaDispatchers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, StrategyParams: make(map[string]interface{}), Hosts: engine.DispatcherHostProfiles{}}
@@ -428,7 +417,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v6), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaActionProfiles, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v7 := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Targets: map[string]utils.StringSet{}, Actions: []*engine.APAction{}}
@@ -438,7 +427,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v7), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaFilters, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v8 := &engine.Filter{Tenant: "cgrates.org", ID: "ID"}
@@ -449,7 +438,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v8), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaRoutes, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v9 := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, SortingParameters: []string{}, Routes: []*engine.Route{}}
@@ -459,7 +448,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v9), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaDispatcherHosts, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v10 := &engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}
@@ -469,7 +458,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v10), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v11 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
@@ -479,7 +468,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v11), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaAccounts, utils.InfieldSep, "", utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, true, false); err != nil {
+	if err := setToDB(context.Background(), dm, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
 	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Balances: map[string]*utils.Balance{}, ThresholdIDs: []string{}}
@@ -499,7 +488,7 @@ func TestLoaderProcess(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, nil)
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
 	if expLd := (&loader{
 		cfg:       cfg,
 		ldrCfg:    cfg.LoaderCfg()[0],
@@ -513,11 +502,11 @@ func TestLoaderProcess(t *testing.T) {
 	}
 
 	expErrMsg := `unsupported loader action: <"notSupported">`
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{}, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{}, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{}, utils.MetaAttributes, utils.MetaParse, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{}, utils.MetaAttributes, utils.MetaParse, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
 
@@ -527,7 +516,7 @@ func TestLoaderProcess(t *testing.T) {
 	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
 	utils.Logger.SetLogLevel(7)
 
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaDryRun, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAttributes, utils.MetaDryRun, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
 	utils.Logger = lgr
@@ -538,7 +527,7 @@ func TestLoaderProcess(t *testing.T) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
 	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
@@ -547,7 +536,7 @@ func TestLoaderProcess(t *testing.T) {
 	} else if !reflect.DeepEqual(v1, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
 	}
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaRemove, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAttributes, utils.MetaRemove, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
 	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
@@ -582,9 +571,9 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, []string{connID})
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, []string{connID})
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAttributes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -599,7 +588,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaResources, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaResources, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -614,7 +603,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaStats, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaStats, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -629,7 +618,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaThresholds, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaThresholds, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -644,7 +633,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaRoutes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaRoutes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -659,7 +648,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaChargers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaChargers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -674,7 +663,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaDispatchers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaDispatchers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -689,7 +678,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaRateProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaRateProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -704,7 +693,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaActionProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaActionProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -721,7 +710,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 
 	reloadCache, clearCache = nil, nil
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaFilters, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaFilters, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -736,7 +725,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"}}, utils.MetaDispatcherHosts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"})}, utils.MetaDispatcherHosts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -753,7 +742,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 
 	reloadCache, clearCache = nil, nil
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAccounts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAccounts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
 		t.Error(err)
 	}
 	if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
@@ -778,7 +767,7 @@ func TestLoaderProcessData(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, nil)
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
 
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
@@ -818,7 +807,7 @@ func TestLoaderProcessDataErrors(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, nil)
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
 
 	fc := []*config.FCTemplate{
 		{Filters: []string{"*string"}},
@@ -859,7 +848,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, "", fS, cM, nil)
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
 
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
@@ -950,7 +939,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 			WithIndex: true,
 			Cache:     utils.MetaNone,
 		},
-	}, dm, cache, "", fS, cM, nil)
+	}, dm, cache, fS, cM, nil)
 	expErrMsg := fmt.Sprintf(`rename %s/Chargers.csv %s/Chargers.csv: no such file or directory`, tmpIn, tmpOut)
 	if err := ld.processIFile(utils.EmptyString, utils.ChargersCsv); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
@@ -1037,7 +1026,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 			WithIndex: true,
 			Cache:     utils.MetaNone,
 		},
-	}, dm, cache, "", fS, cM, nil)
+	}, dm, cache, fS, cM, nil)
 
 	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
 	if err != nil {
@@ -1143,7 +1132,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 			WithIndex: true,
 			Cache:     utils.MetaNone,
 		},
-	}, dm, cache, "", fS, cM, nil)
+	}, dm, cache, fS, cM, nil)
 
 	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
 	if err != nil {
@@ -1199,7 +1188,7 @@ func TestLoaderMoveUnprocessedFilesErrors(t *testing.T) {
 		ID:      "test",
 		Enabled: true,
 		TpInDir: "notAFolder",
-	}, nil, nil, "", nil, nil, nil)
+	}, nil, nil, nil, nil, nil)
 
 	expErrMsg := "open notAFolder: no such file or directory"
 	if err := ld.moveUnprocessedFiles(); err == nil || err.Error() != expErrMsg {
@@ -1234,7 +1223,7 @@ func TestLoaderHandleFolder(t *testing.T) {
 		RunDelay: time.Nanosecond,
 		TpInDir:  "/tmp/TestLoaderHandleFolder",
 		Opts:     &config.LoaderSOptsCfg{},
-	}, nil, nil, "", nil, nil, nil)
+	}, nil, nil, nil, nil, nil)
 	ld.Locker = mockLock{}
 	stop := make(chan struct{})
 	close(stop)
@@ -1262,7 +1251,7 @@ func TestLoaderListenAndServe(t *testing.T) {
 		RunDelay: time.Nanosecond,
 		TpInDir:  "/tmp/TestLoaderListenAndServe",
 		Opts:     &config.LoaderSOptsCfg{},
-	}, nil, nil, "", nil, nil, nil)
+	}, nil, nil, nil, nil, nil)
 	ld.Locker = mockLock{}
 	stop := make(chan struct{})
 	close(stop)
@@ -1291,7 +1280,7 @@ func TestLoaderListenAndServeI(t *testing.T) {
 		TpInDir:  "/tmp/TestLoaderListenAndServeI",
 		RunDelay: -1,
 		Opts:     &config.LoaderSOptsCfg{},
-	}, nil, nil, "", nil, nil, nil)
+	}, nil, nil, nil, nil, nil)
 	ld.Locker = mockLock{}
 	stop := make(chan struct{})
 	close(stop)

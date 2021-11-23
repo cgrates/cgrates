@@ -31,7 +31,7 @@ import (
 
 func TestTenantIDFromMap(t *testing.T) {
 	exp := utils.NewTenantID("cgrates.org:ATTR1")
-	r := TenantIDFromMap(utils.MapStorage{
+	r := TenantIDFromDataProvider(utils.MapStorage{
 		utils.Tenant: exp.Tenant,
 		utils.ID:     exp.ID,
 	})
@@ -73,47 +73,11 @@ func TestNewRecord(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	exp := utils.MapStorage{}
+	exp := utils.NewOrderedNavigableMap()
 	if !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected %+v, received %+q", exp, r)
 	}
 
-}
-
-func TestNewRecordErrors(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	fs := engine.NewFilterS(cfg, nil, nil)
-	expErrMsg := "unsupported type: <notSupported>"
-	if _, err := newRecord(context.Background(), utils.MapStorage{},
-		[]*config.FCTemplate{
-			{Type: "notSupported"},
-		},
-		"cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
-	}
-
-	r := &record{
-		data: utils.MapStorage{
-			"Tenant": []string{},
-		},
-		req:   utils.MapStorage{},
-		cfg:   cfg.GetDataProvider(),
-		cache: ltcache.NewCache(-1, 0, false, nil),
-	}
-	if exp, rply := "{}", r.String(); exp != rply {
-		t.Errorf("Expected %q, received %q", exp, rply)
-	}
-	fc := []*config.FCTemplate{
-		{Type: utils.MetaComposed, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*cfg.general.node_id", ";")},
-		{Type: utils.MetaComposed, Path: "Tenant.NewID", Value: config.NewRSRParsersMustCompile("10", ";")},
-	}
-	for _, f := range fc {
-		f.ComputePath()
-	}
-	if err := r.parseTemplates(context.Background(), fc,
-		"cgrates.org", fs, 0, "", ";"); err != utils.ErrWrongPath {
-		t.Errorf("Expeceted: %q, received: %v", utils.ErrWrongPath, err)
-	}
 }
 
 func TestNewRecordWithCahe(t *testing.T) {
@@ -128,12 +92,16 @@ func TestNewRecordWithCahe(t *testing.T) {
 	for _, f := range fc {
 		f.ComputePath()
 	}
-	exp := utils.MapStorage{"ID": "Attr1", "Tenant": "cgrates.org", "Value": "0"}
+	exp := utils.NewOrderedNavigableMap()
+	exp.SetAsSlice(utils.NewFullPath(utils.Tenant), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
+	exp.SetAsSlice(utils.NewFullPath(utils.ID), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "Attr1"}}})
+	exp.SetAsSlice(utils.NewFullPath(utils.Value), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0"}}})
 	if r, err := newRecord(context.Background(), config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil),
 		fc, "cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
-		t.Errorf("Expected %+v, received %+q", exp, r)
+		t.Errorf("Expected %+v, received %+v", exp, r)
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp.GetOrder()), utils.ToJSON(r.GetOrder()))
 	}
 }
 
@@ -149,7 +117,10 @@ func TestNewRecordWithTmp(t *testing.T) {
 	for _, f := range fc {
 		f.ComputePath()
 	}
-	exp := utils.MapStorage{"ID": "Attr1", "Tenant": "cgrates.org", "Value": "0"}
+	exp := utils.NewOrderedNavigableMap()
+	exp.SetAsSlice(utils.NewFullPath(utils.Tenant), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
+	exp.SetAsSlice(utils.NewFullPath(utils.ID), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "Attr1"}}})
+	exp.SetAsSlice(utils.NewFullPath(utils.Value), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0"}}})
 	if r, err := newRecord(context.Background(), config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil),
 		fc, "cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err != nil {
 		t.Error(err)
