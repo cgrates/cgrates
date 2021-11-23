@@ -20,6 +20,7 @@ package engine
 
 import (
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -84,4 +85,117 @@ func (dk *APDiktat) RSRValues(sep string) (v config.RSRParsers, err error) {
 type ActionProfileWithAPIOpts struct {
 	*ActionProfile
 	APIOpts map[string]interface{}
+}
+
+func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	switch len(path) {
+	case 0:
+		return utils.ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			if strings.HasPrefix(path[0], utils.Targets) &&
+				path[0][7] == '[' && path[0][len(path[0])-1] == ']' {
+				var valA []string
+				valA, err = utils.IfaceAsStringSlice(val)
+				aP.Targets[path[0][8:len(path[0])-1]] = utils.NewStringSet(valA)
+				return
+			}
+			return utils.ErrWrongPath
+		case utils.Tenant:
+			aP.Tenant = utils.IfaceAsString(val)
+		case utils.ID:
+			aP.ID = utils.IfaceAsString(val)
+		case utils.Schedule:
+			aP.Schedule = utils.IfaceAsString(val)
+		case utils.FilterIDs:
+			aP.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.Weight:
+			aP.Weight, err = utils.IfaceAsFloat64(val)
+		}
+		return
+	case 2:
+		if path[0] == utils.Targets {
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			aP.Targets[path[1]] = utils.NewStringSet(valA)
+			return
+		}
+	default:
+	}
+
+	var acID string
+	if strings.HasPrefix(path[0], utils.Actions) &&
+		path[0][5] == '[' && path[0][len(path[0])-1] == ']' {
+		acID = path[0][6 : len(path[0])-1]
+	} else if path[0] == utils.Actions {
+		acID = path[1]
+		path = path[1:]
+	}
+	if acID == utils.EmptyString {
+		return utils.ErrWrongPath
+	}
+
+	var ac *APAction
+	for _, a := range aP.Actions {
+		if a.ID == acID {
+			ac = a
+			break
+		}
+	}
+	if ac == nil {
+		ac = &APAction{ID: acID, Opts: make(map[string]interface{})}
+		aP.Actions = append(aP.Actions, ac)
+	}
+
+	return ac.Set(path[1:], val, newBranch)
+}
+
+func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err error) {
+	switch len(path) {
+	default:
+		if path[0] == utils.Opts {
+			return utils.MapStorage(aP.Opts).Set(path[1:], val)
+		}
+		return utils.ErrWrongPath
+	case 0:
+		return utils.ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			if strings.HasPrefix(path[0], utils.Opts) &&
+				path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
+				aP.Opts[path[0][5:len(path[0])-1]] = val
+			}
+			return utils.ErrWrongPath
+		case utils.ID:
+			aP.ID = utils.IfaceAsString(val)
+		case utils.Type:
+			aP.Type = utils.IfaceAsString(val)
+		case utils.FilterIDs:
+			aP.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.Blocker:
+			aP.Blocker, err = utils.IfaceAsBool(val)
+		case utils.TTL:
+			aP.TTL, err = utils.IfaceAsDuration(val)
+		}
+	case 2:
+		switch path[0] {
+		default:
+			return utils.ErrWrongPath
+		case utils.Opts:
+			return utils.MapStorage(aP.Opts).Set(path[1:], val)
+		case utils.Diktats:
+			if len(aP.Diktats) == 0 || newBranch {
+				aP.Diktats = append(aP.Diktats, new(APDiktat))
+			}
+			switch path[1] {
+			case utils.Path:
+				aP.Diktats[len(aP.Diktats)-1].Path = utils.IfaceAsString(val)
+			case utils.Value:
+				aP.Diktats[len(aP.Diktats)-1].Value = utils.IfaceAsString(val)
+			}
+		}
+	}
+	return
 }

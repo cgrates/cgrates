@@ -47,7 +47,7 @@ func TestNewLoaderService(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
-	ld := NewLoaderService(cfg, dm, "", fS, cM)
+	ld := NewLoaderService(cfg, dm, fS, cM)
 	if exp := (&LoaderS{
 		cfg:   cfg,
 		cache: cache,
@@ -90,7 +90,7 @@ func TestNewLoaderService(t *testing.T) {
 	}
 
 	cfg.LoaderCfg()[0].Enabled = false
-	ld.Reload(dm, "", fS, cM)
+	ld.Reload(dm, fS, cM)
 	if ld.Enabled() {
 		t.Error("Expected loader to not be enabled")
 	}
@@ -145,7 +145,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderService(cfg, dm, "", fS, cM)
+	ld := NewLoaderService(cfg, dm, fS, cM)
 	var rply string
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
 		APIOpts: map[string]interface{}{
@@ -221,7 +221,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderService(cfg, dm, "", fS, cM)
+	ld := NewLoaderService(cfg, dm, fS, cM)
 	var rply string
 
 	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
@@ -296,7 +296,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	}
 
 	cfg.LoaderCfg()[0].Enabled = false
-	ld.Reload(dm, "", fS, cM)
+	ld.Reload(dm, fS, cM)
 	expErrMsg = `UNKNOWN_LOADER: *default`
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{}, &rply); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)

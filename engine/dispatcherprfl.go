@@ -21,6 +21,7 @@ package engine
 import (
 	"math/rand"
 	"sort"
+	"strings"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -185,5 +186,105 @@ func (dHPrflIDs DispatcherHostIDs) Shuffle() {
 func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
 	cln = make(DispatcherHostIDs, len(dHPrflIDs))
 	copy(cln, dHPrflIDs)
+	return
+}
+
+func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	switch len(path) {
+	default:
+		return utils.ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			if strings.HasPrefix(path[0], utils.StrategyParams) &&
+				path[0][14] == '[' && path[0][len(path[0])-1] == ']' {
+				dP.StrategyParams[path[0][15:len(path[0])-1]] = val
+				return
+			}
+			return utils.ErrWrongPath
+		case utils.Tenant:
+			dP.Tenant = utils.IfaceAsString(val)
+		case utils.ID:
+			dP.ID = utils.IfaceAsString(val)
+		case utils.FilterIDs:
+			dP.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		case utils.Strategy:
+			dP.Strategy = utils.IfaceAsString(val)
+		case utils.Weight:
+			dP.Weight, err = utils.IfaceAsFloat64(val)
+		}
+	case 2:
+		switch path[0] {
+		default:
+			return utils.ErrWrongPath
+		case utils.StrategyParams:
+			dP.StrategyParams[path[1]] = val
+		case utils.Hosts:
+			if len(dP.Hosts) == 0 || newBranch {
+				dP.Hosts = append(dP.Hosts, &DispatcherHostProfile{Params: make(map[string]interface{})})
+			}
+			switch path[1] {
+			case utils.ID:
+				dP.Hosts[len(dP.Hosts)-1].ID = utils.IfaceAsString(val)
+			case utils.FilterIDs:
+				dP.Hosts[len(dP.Hosts)-1].FilterIDs, err = utils.IfaceAsStringSlice(val)
+			case utils.Weights:
+				dP.Hosts[len(dP.Hosts)-1].Weight, err = utils.IfaceAsFloat64(val)
+			case utils.Blocker:
+				dP.Hosts[len(dP.Hosts)-1].Blocker, err = utils.IfaceAsBool(val)
+			default:
+				if strings.HasPrefix(path[0], utils.Params) &&
+					path[0][6] == '[' && path[0][len(path[0])-1] == ']' {
+					dP.Hosts[len(dP.Hosts)-1].Params[path[0][7:len(path[0])-1]] = val
+					return
+				}
+				return utils.ErrWrongPath
+			}
+		}
+	case 3:
+		if path[0] != utils.Hosts ||
+			path[1] != utils.Params {
+			return utils.ErrWrongPath
+		}
+		if len(dP.Hosts) == 0 || newBranch {
+			dP.Hosts = append(dP.Hosts, new(DispatcherHostProfile))
+		}
+		dP.Hosts[len(dP.Hosts)-1].Params[path[2]] = val
+	}
+	return
+}
+
+func (dH *DispatcherHost) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	if len(path) != 1 {
+		return utils.ErrWrongPath
+	}
+	switch path[0] {
+	default:
+		return utils.ErrWrongPath
+	case utils.Tenant:
+		dH.Tenant = utils.IfaceAsString(val)
+	case utils.ID:
+		dH.ID = utils.IfaceAsString(val)
+	case utils.Address:
+		dH.Address = utils.IfaceAsString(val)
+	case utils.Transport:
+		dH.Transport = utils.IfaceAsString(val)
+	case utils.ClientKey:
+		dH.ClientKey = utils.IfaceAsString(val)
+	case utils.ClientCertificate:
+		dH.ClientCertificate = utils.IfaceAsString(val)
+	case utils.CaCertificate:
+		dH.CaCertificate = utils.IfaceAsString(val)
+	case utils.ConnectAttempts:
+		dH.ConnectAttempts, err = utils.IfaceAsTInt(val)
+	case utils.Reconnects:
+		dH.Reconnects, err = utils.IfaceAsTInt(val)
+	case utils.ConnectTimeout:
+		dH.ConnectTimeout, err = utils.IfaceAsDuration(val)
+	case utils.ReplyTimeout:
+		dH.ReplyTimeout, err = utils.IfaceAsDuration(val)
+	case utils.TLS:
+		dH.TLS, err = utils.IfaceAsBool(val)
+	}
 	return
 }

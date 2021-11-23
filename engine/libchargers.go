@@ -51,3 +51,26 @@ type ChargerProfiles []*ChargerProfile
 func (cps ChargerProfiles) Sort() {
 	sort.Slice(cps, func(i, j int) bool { return cps[i].Weight > cps[j].Weight })
 }
+
+func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	if len(path) != 1 {
+		return utils.ErrWrongPath
+	}
+	switch path[0] {
+	default:
+		return utils.ErrWrongPath
+	case utils.Tenant:
+		cp.Tenant = utils.IfaceAsString(val)
+	case utils.ID:
+		cp.ID = utils.IfaceAsString(val)
+	case utils.FilterIDs:
+		cp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+	case utils.RunID:
+		cp.RunID = utils.IfaceAsString(val)
+	case utils.AttributeIDs:
+		cp.AttributeIDs, err = utils.IfaceAsStringSlice(val)
+	case utils.Weight:
+		cp.Weight, err = utils.IfaceAsFloat64(val)
+	}
+	return
+}
