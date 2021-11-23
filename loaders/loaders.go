@@ -31,13 +31,13 @@ import (
 )
 
 func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
-	timezone string, filterS *engine.FilterS,
+	filterS *engine.FilterS,
 	connMgr *engine.ConnManager) (ldrS *LoaderS) {
 	ldrS = &LoaderS{cfg: cfg, cache: make(map[string]*ltcache.Cache)}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		ldrS.cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
-	ldrS.createLoaders(dm, timezone, filterS, connMgr)
+	ldrS.createLoaders(dm, filterS, connMgr)
 	return
 }
 
@@ -121,19 +121,19 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 
 // Reload recreates the loaders map thread safe
 func (ldrS *LoaderS) Reload(dm *engine.DataManager,
-	timezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) {
+	filterS *engine.FilterS, connMgr *engine.ConnManager) {
 	ldrS.Lock()
-	ldrS.createLoaders(dm, timezone, filterS, connMgr)
+	ldrS.createLoaders(dm, filterS, connMgr)
 	ldrS.Unlock()
 }
 
 // Reload recreates the loaders map thread safe
 func (ldrS *LoaderS) createLoaders(dm *engine.DataManager,
-	timezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) {
+	filterS *engine.FilterS, connMgr *engine.ConnManager) {
 	ldrS.ldrs = make(map[string]*loader)
 	for _, ldrCfg := range ldrS.cfg.LoaderCfg() {
 		if ldrCfg.Enabled {
-			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, ldrS.cache, timezone, filterS, connMgr, ldrCfg.CacheSConns)
+			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, ldrS.cache, filterS, connMgr, ldrCfg.CacheSConns)
 		}
 	}
 }

@@ -21,6 +21,7 @@ package utils
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cron"
@@ -565,4 +566,107 @@ type RemoveRPrfRates struct {
 	ID      string
 	RateIDs []string
 	APIOpts map[string]interface{}
+}
+
+func (rp *RateProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	if len(path) == 0 {
+		return ErrWrongPath
+	}
+	var rtID string
+	if strings.HasPrefix(path[0], Rates) &&
+		path[0][5] == '[' && path[0][len(path[0])-1] == ']' {
+		rtID = path[0][6 : len(path[0])-1]
+	} else if len(path) != 1 && path[0] == Rates {
+		rtID = path[1]
+		path = path[1:]
+	}
+	if rtID != EmptyString {
+		if _, has := rp.Rates[rtID]; !has {
+			rp.Rates[rtID] = &Rate{
+				ID: rtID,
+			}
+		}
+		return rp.Rates[rtID].Set(path[1:], val, newBranch)
+	}
+	if len(path) != 1 {
+		return ErrWrongPath
+	}
+	switch path[0] {
+	default:
+		return ErrWrongPath
+	case Tenant:
+		rp.Tenant = IfaceAsString(val)
+	case ID:
+		rp.ID = IfaceAsString(val)
+	case FilterIDs:
+		rp.FilterIDs, err = IfaceAsStringSlice(val)
+	case Weights:
+		rp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+	case MinCost:
+		var valB *decimal.Big
+		valB, err = IfaceAsBig(val)
+		rp.MinCost = &Decimal{valB}
+	case MaxCost:
+		var valB *decimal.Big
+		valB, err = IfaceAsBig(val)
+		rp.MaxCost = &Decimal{valB}
+	case MaxCostStrategy:
+		rp.MaxCostStrategy = IfaceAsString(val)
+	}
+	return
+
+}
+
+func (rt *Rate) Set(path []string, val interface{}, newBranch bool) (err error) {
+	switch len(path) {
+	default:
+		return ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			return ErrWrongPath
+		case ID:
+			rt.ID = IfaceAsString(val)
+		case FilterIDs:
+			rt.FilterIDs, err = IfaceAsStringSlice(val)
+		case Weights:
+			rt.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+		case ActivationTimes:
+			rt.ActivationTimes = IfaceAsString(val)
+		case Blocker:
+			rt.Blocker, err = IfaceAsBool(val)
+		}
+	case 2:
+		if path[0] != IntervalRates {
+			return ErrWrongPath
+		}
+		if len(rt.IntervalRates) == 0 || newBranch {
+			rt.IntervalRates = append(rt.IntervalRates, new(IntervalRate))
+		}
+		switch path[1] {
+		case IntervalStart:
+			var valB *decimal.Big
+			valB, err = IfaceAsBig(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].IntervalStart = &Decimal{valB}
+		case FixedFee:
+			var valB *decimal.Big
+			valB, err = IfaceAsBig(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].FixedFee = &Decimal{valB}
+		case RecurrentFee:
+			var valB *decimal.Big
+			valB, err = IfaceAsBig(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].RecurrentFee = &Decimal{valB}
+		case Unit:
+			var valB *decimal.Big
+			valB, err = IfaceAsBig(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].Unit = &Decimal{valB}
+		case Increment:
+			var valB *decimal.Big
+			valB, err = IfaceAsBig(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].Increment = &Decimal{valB}
+		default:
+			return ErrWrongPath
+		}
+	}
+	return
 }

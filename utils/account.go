@@ -20,6 +20,7 @@ package utils
 
 import (
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/ericlagergren/decimal"
@@ -639,4 +640,149 @@ type ArgsActRemoveBalances struct {
 	AccountID  string
 	BalanceIDs []string
 	APIOpts    map[string]interface{}
+}
+
+func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	switch len(path) {
+	case 0:
+		return ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			if strings.HasPrefix(path[0], Opts) &&
+				path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
+				ap.Opts[path[0][5:len(path[0])-1]] = val
+			}
+			if strings.HasPrefix(path[0], Balances) &&
+				path[0][8] == '[' && path[0][len(path[0])-1] == ']' {
+				id := path[0][9 : len(path[0])-1]
+				if _, has := ap.Balances[id]; !has {
+					ap.Balances[id] = &Balance{ID: id, Opts: make(map[string]interface{}), Units: NewDecimal(0, 0)}
+				}
+				return ap.Balances[id].Set(path[1:], val, newBranch)
+			}
+			return ErrWrongPath
+		case Tenant:
+			ap.Tenant = IfaceAsString(val)
+		case ID:
+			ap.ID = IfaceAsString(val)
+		case FilterIDs:
+			ap.FilterIDs, err = IfaceAsStringSlice(val)
+		case ThresholdIDs:
+			ap.ThresholdIDs, err = IfaceAsStringSlice(val)
+		case Weights:
+			ap.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+		}
+		return
+	default:
+	}
+	if strings.HasPrefix(path[0], Opts) &&
+		path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
+		return MapStorage(ap.Opts).Set(append([]string{path[0][5 : len(path[0])-1]}, path[1:]...), val)
+	}
+	if path[0] == Opts {
+		return MapStorage(ap.Opts).Set(path[1:], val)
+	}
+	var id string
+	if strings.HasPrefix(path[0], Balances) &&
+		path[0][8] == '[' && path[0][len(path[0])-1] == ']' {
+		id = path[0][9 : len(path[0])-1]
+	} else if path[0] == Balances {
+		id = path[1]
+		path = path[1:]
+	}
+	if id == EmptyString {
+		if _, has := ap.Balances[id]; !has {
+			ap.Balances[id] = &Balance{ID: path[0], Opts: make(map[string]interface{}), Units: NewDecimal(0, 0)}
+		}
+		return ap.Balances[id].Set(path[1:], val, newBranch)
+	}
+	return ErrWrongPath
+}
+
+func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err error) {
+	switch len(path) {
+	default:
+	case 0:
+		return ErrWrongPath
+	case 1:
+		switch path[0] {
+		default:
+			if strings.HasPrefix(path[0], Opts) &&
+				path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
+				bL.Opts[path[0][5:len(path[0])-1]] = val
+			}
+			return ErrWrongPath
+		case ID:
+			bL.ID = IfaceAsString(val)
+		case Type:
+			bL.Type = IfaceAsString(val)
+		case FilterIDs:
+			bL.FilterIDs, err = IfaceAsStringSlice(val)
+		case AttributeIDs:
+			bL.AttributeIDs, err = IfaceAsStringSlice(val)
+		case RateProfileIDs:
+			bL.RateProfileIDs, err = IfaceAsStringSlice(val)
+		case Units:
+			var valB *decimal.Big
+			valB, err = IfaceAsBig(val)
+			bL.Units = &Decimal{valB}
+		case Weights:
+			bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+		}
+		return
+	case 2:
+		switch path[0] {
+		default:
+		case UnitFactors:
+			if len(bL.UnitFactors) == 0 || newBranch {
+				bL.UnitFactors = append(bL.UnitFactors, &UnitFactor{Factor: NewDecimal(0, 0)})
+			}
+			uf := bL.UnitFactors[len(bL.UnitFactors)-1]
+			switch path[1] {
+			default:
+				return ErrWrongPath
+			case FilterIDs:
+				uf.FilterIDs, err = IfaceAsStringSlice(val)
+			case Factor:
+				var valB *decimal.Big
+				valB, err = IfaceAsBig(val)
+				uf.Factor = &Decimal{valB}
+			}
+			return
+		case CostIncrements:
+			if len(bL.CostIncrements) == 0 || newBranch {
+				bL.CostIncrements = append(bL.CostIncrements, new(CostIncrement))
+			}
+			cI := bL.CostIncrements[len(bL.CostIncrements)-1]
+			switch path[1] {
+			default:
+				return ErrWrongPath
+			case FilterIDs:
+				cI.FilterIDs, err = IfaceAsStringSlice(val)
+			case Increment:
+				var valB *decimal.Big
+				valB, err = IfaceAsBig(val)
+				cI.Increment = &Decimal{valB}
+			case FixedFee:
+				var valB *decimal.Big
+				valB, err = IfaceAsBig(val)
+				cI.FixedFee = &Decimal{valB}
+			case RecurrentFee:
+				var valB *decimal.Big
+				valB, err = IfaceAsBig(val)
+				cI.RecurrentFee = &Decimal{valB}
+			}
+			return
+		}
+	}
+
+	if strings.HasPrefix(path[0], Opts) &&
+		path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
+		return MapStorage(bL.Opts).Set(append([]string{path[0][5 : len(path[0])-1]}, path[1:]...), val)
+	}
+	if path[0] == Opts {
+		return MapStorage(bL.Opts).Set(path[1:], val)
+	}
+	return ErrWrongPath
 }
