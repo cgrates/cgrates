@@ -818,6 +818,62 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 }
 
+func TestPassRsr(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	passEvent1 := map[string]interface{}{
+		"8": "0045664",
+	}
+	pEv1 := utils.MapStorage{}
+	pEv1.Set([]string{utils.MetaReq}, passEvent1)
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~*req.8(~^004)"}, pEv1); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+
+	passEvent1 = map[string]interface{}{
+		"5": "0",
+	}
+	pEv1 = utils.MapStorage{}
+	pEv1.Set([]string{utils.MetaReq}, passEvent1)
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~*req.5(~^0$)"}, pEv1); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+}
+
+func TestPassRsr2(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	dmFilterPass := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	pEv1 := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"8": "00545664",
+		},
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~*req.8(~^004)"}, pEv1); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+}
+
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
