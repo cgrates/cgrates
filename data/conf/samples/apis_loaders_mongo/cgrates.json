@@ -74,7 +74,6 @@
             "file_name": "DispatcherHosts.csv",					
             "fields": [
                 {"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"},
-                {"tag": "Address", "path": "Address", "type": "*variable", "value": "~*req.2"},
             ],
         },
         {

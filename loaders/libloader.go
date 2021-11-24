@@ -66,17 +66,17 @@ func (r *record) FieldAsString(path []string) (str string, err error) {
 	return utils.IfaceAsString(val), nil
 }
 
-func TenantIDFromDataProvider(data utils.DataProvider) *utils.TenantID {
-	tnt, _ := data.FieldAsString([]string{utils.Tenant})
-	id, _ := data.FieldAsString([]string{utils.ID})
+func TenantIDFromOrderedNavigableMap(data *utils.OrderedNavigableMap) *utils.TenantID {
+	tnt, _ := data.FieldAsString([]string{utils.Tenant, "0"})
+	id, _ := data.FieldAsString([]string{utils.ID, "0"})
 	return &utils.TenantID{
 		Tenant: tnt,
 		ID:     id,
 	}
 }
 
-func RateIDsFromDataProvider(data utils.DataProvider) ([]string, error) {
-	val, err := data.FieldAsInterface([]string{utils.RateIDs})
+func RateIDsFromOrderedNavigableMap(data *utils.OrderedNavigableMap) ([]string, error) {
+	val, err := data.FieldAsInterface([]string{utils.RateIDs, "0"})
 	if err != nil {
 		return nil, fmt.Errorf("cannot find RateIDs in map")
 	}
@@ -294,18 +294,16 @@ type profile interface {
 
 func prepareData(prf profile, lData []*utils.OrderedNavigableMap, rsrSep string) (err error) {
 	for _, mp := range lData {
-		newRow := true
 		for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 			path := el.Value
 			nmIt, _ := mp.Field(path)
 			if nmIt == nil {
-				continue // all attributes, not writable to diameter packet
+				continue
 			}
-			// path = path[:len(path)-1] // remove the last index
-			if err = prf.Set(path, nmIt.Data, nmIt.NewBranch || newRow, rsrSep); err != nil {
+			path = path[:len(path)-1] // remove the last index
+			if err = prf.Set(path, nmIt.Data, nmIt.NewBranch, rsrSep); err != nil {
 				return
 			}
-			newRow = false
 		}
 	}
 	return

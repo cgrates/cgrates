@@ -566,9 +566,13 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 		case utils.Weight:
 			sqp.Weight, err = utils.IfaceAsFloat64(val)
 		case utils.FilterIDs:
-			sqp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			sqp.FilterIDs = append(sqp.FilterIDs, valA...)
 		case utils.ThresholdIDs:
-			sqp.ThresholdIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			sqp.ThresholdIDs = append(sqp.ThresholdIDs, valA...)
 		}
 	case 2:
 		if path[0] != utils.Metrics {
@@ -579,9 +583,15 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 		}
 		switch path[1] {
 		case utils.FilterIDs:
-			sqp.Metrics[len(sqp.Metrics)-1].FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			sqp.Metrics[len(sqp.Metrics)-1].FilterIDs = append(sqp.Metrics[len(sqp.Metrics)-1].FilterIDs, valA...)
 		case utils.MetricID:
-			sqp.Metrics[len(sqp.Metrics)-1].MetricID = utils.IfaceAsString(val)
+			valA := utils.InfieldSplit(utils.IfaceAsString(val))
+			sqp.Metrics[len(sqp.Metrics)-1].MetricID = valA[0]
+			for _, mID := range valA[1:] { // add the rest of the metrics
+				sqp.Metrics = append(sqp.Metrics, &MetricWithFilters{MetricID: mID})
+			}
 		default:
 			return utils.ErrWrongPath
 		}

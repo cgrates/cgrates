@@ -1032,7 +1032,9 @@ func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string)
 	case utils.ID:
 		rp.ID = utils.IfaceAsString(val)
 	case utils.FilterIDs:
-		rp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		rp.FilterIDs = append(rp.FilterIDs, valA...)
 	case utils.UsageTTL:
 		rp.UsageTTL, err = utils.IfaceAsDuration(val)
 	case utils.Limit:
@@ -1046,7 +1048,9 @@ func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string)
 	case utils.Weight:
 		rp.Weight, err = utils.IfaceAsFloat64(val)
 	case utils.ThresholdIDs:
-		rp.ThresholdIDs, err = utils.IfaceAsStringSlice(val)
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		rp.ThresholdIDs = append(rp.ThresholdIDs, valA...)
 	}
 	return
 }

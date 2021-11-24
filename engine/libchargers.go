@@ -64,11 +64,15 @@ func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ 
 	case utils.ID:
 		cp.ID = utils.IfaceAsString(val)
 	case utils.FilterIDs:
-		cp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		cp.FilterIDs = append(cp.FilterIDs, valA...)
 	case utils.RunID:
 		cp.RunID = utils.IfaceAsString(val)
 	case utils.AttributeIDs:
-		cp.AttributeIDs, err = utils.IfaceAsStringSlice(val)
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		cp.AttributeIDs = append(cp.AttributeIDs, valA...)
 	case utils.Weight:
 		cp.Weight, err = utils.IfaceAsFloat64(val)
 	}
