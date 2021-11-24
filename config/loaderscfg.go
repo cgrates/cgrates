@@ -276,6 +276,7 @@ func (lData LoaderDataType) Clone() (cln *LoaderDataType) {
 
 // Clone itself into a new LoadersConfig
 func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
+	opts := *l.Opts
 	cln = &LoaderSCfg{
 		ID:             l.ID,
 		Enabled:        l.Enabled,
@@ -288,7 +289,7 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		TpOutDir:       l.TpOutDir,
 		Data:           make([]*LoaderDataType, len(l.Data)),
 		Action:         l.Action,
-		Opts:           &(*l.Opts),
+		Opts:           &opts,
 		Cache:          make(map[string]*CacheParamCfg),
 	}
 	for idx, fld := range l.Data {

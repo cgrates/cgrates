@@ -722,3 +722,17 @@ func (fltr *Filter) Set(path []string, val interface{}, newBranch bool, _ string
 	}
 	return
 }
+
+func (fltr *Filter) Compress() {
+	newRules := make([]*FilterRule, 0, len(fltr.Rules))
+	for i, flt := range fltr.Rules {
+		if i == 0 ||
+			newRules[len(newRules)-1].Type != flt.Type ||
+			newRules[len(newRules)-1].Element != flt.Element {
+			newRules = append(newRules, flt)
+			continue
+		}
+		newRules[len(newRules)-1].Values = append(newRules[len(newRules)-1].Values, flt.Values...)
+	}
+	fltr.Rules = newRules
+}

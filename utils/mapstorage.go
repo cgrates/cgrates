@@ -36,6 +36,21 @@ type DataStorage interface {
 	GetKeys(nested bool, nesteedLimit int, prefix string) []string
 }
 
+func NewMapFromCSV(str string) (MapStorage, error) {
+	m := make(MapStorage)
+	if len(str) == 0 {
+		return nil, nil
+	}
+	for _, opt := range InfieldSplit(str) {
+		keyVal := strings.SplitN(opt, ConcatenatedKeySep, 2)
+		if len(keyVal) != 2 {
+			return nil, fmt.Errorf("malformed map pair: <%q>", opt)
+		}
+		m[keyVal[0]] = keyVal[1]
+	}
+	return m, nil
+}
+
 // MapStorage is the basic dataStorage
 type MapStorage map[string]interface{}
 

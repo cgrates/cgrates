@@ -207,11 +207,15 @@ func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool,
 		case utils.ID:
 			dP.ID = utils.IfaceAsString(val)
 		case utils.FilterIDs:
-			dP.FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			dP.FilterIDs = append(dP.FilterIDs, valA...)
 		case utils.Strategy:
 			dP.Strategy = utils.IfaceAsString(val)
 		case utils.Weight:
 			dP.Weight, err = utils.IfaceAsFloat64(val)
+		case utils.StrategyParams:
+			dP.StrategyParams, err = utils.NewMapFromCSV(utils.IfaceAsString(val))
 		}
 	case 2:
 		switch path[0] {
@@ -227,11 +231,15 @@ func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool,
 			case utils.ID:
 				dP.Hosts[len(dP.Hosts)-1].ID = utils.IfaceAsString(val)
 			case utils.FilterIDs:
-				dP.Hosts[len(dP.Hosts)-1].FilterIDs, err = utils.IfaceAsStringSlice(val)
-			case utils.Weights:
+				var valA []string
+				valA, err = utils.IfaceAsStringSlice(val)
+				dP.Hosts[len(dP.Hosts)-1].FilterIDs = append(dP.Hosts[len(dP.Hosts)-1].FilterIDs, valA...)
+			case utils.Weight:
 				dP.Hosts[len(dP.Hosts)-1].Weight, err = utils.IfaceAsFloat64(val)
 			case utils.Blocker:
 				dP.Hosts[len(dP.Hosts)-1].Blocker, err = utils.IfaceAsBool(val)
+			case utils.Params:
+				dP.Hosts[len(dP.Hosts)-1].Params, err = utils.NewMapFromCSV(utils.IfaceAsString(val))
 			default:
 				if strings.HasPrefix(path[0], utils.Params) &&
 					path[0][6] == '[' && path[0][len(path[0])-1] == ']' {

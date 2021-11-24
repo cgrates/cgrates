@@ -238,10 +238,9 @@ func testLoaderCheckAttributes(t *testing.T) {
 			Type:      utils.MetaVariable,
 			Value:     "Sub1",
 		}, {
-			FilterIDs: []string{},
-			Path:      utils.MetaReq + utils.NestingSep + "Field2",
-			Type:      utils.MetaVariable,
-			Value:     "Sub2",
+			Path:  utils.MetaReq + utils.NestingSep + "Field2",
+			Type:  utils.MetaVariable,
+			Value: "Sub2",
 		}},
 		Blocker: true,
 		Weight:  20,
@@ -284,10 +283,9 @@ func testLoaderCheckForCustomSep(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Destination:12012000001"},
 		Attributes: []*engine.ExternalAttribute{
 			{
-				FilterIDs: []string{},
-				Path:      "*req.Destination",
-				Type:      utils.MetaConstant,
-				Value:     "12018209998",
+				Path:  "*req.Destination",
+				Type:  utils.MetaConstant,
+				Value: "12018209998",
 			},
 		},
 	}

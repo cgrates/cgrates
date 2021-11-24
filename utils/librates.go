@@ -574,12 +574,12 @@ func (rp *RateProfile) Set(path []string, val interface{}, newBranch bool, _ str
 		return ErrWrongPath
 	}
 	var rtID string
-	if strings.HasPrefix(path[0], Rates) &&
-		path[0][5] == '[' && path[0][len(path[0])-1] == ']' {
-		rtID = path[0][6 : len(path[0])-1]
-	} else if len(path) != 1 && path[0] == Rates {
+	if len(path) != 1 && path[0] == Rates {
 		rtID = path[1]
 		path = path[1:]
+	} else if strings.HasPrefix(path[0], Rates) &&
+		path[0][5] == '[' && path[0][len(path[0])-1] == ']' {
+		rtID = path[0][6 : len(path[0])-1]
 	}
 	if rtID != EmptyString {
 		if _, has := rp.Rates[rtID]; !has {
@@ -600,17 +600,23 @@ func (rp *RateProfile) Set(path []string, val interface{}, newBranch bool, _ str
 	case ID:
 		rp.ID = IfaceAsString(val)
 	case FilterIDs:
-		rp.FilterIDs, err = IfaceAsStringSlice(val)
+		var valA []string
+		valA, err = IfaceAsStringSlice(val)
+		rp.FilterIDs = append(rp.FilterIDs, valA...)
 	case Weights:
 		rp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 	case MinCost:
-		var valB *decimal.Big
-		valB, err = IfaceAsBig(val)
-		rp.MinCost = &Decimal{valB}
+		if val != EmptyString {
+			var valB *decimal.Big
+			valB, err = IfaceAsBig(val)
+			rp.MinCost = &Decimal{valB}
+		}
 	case MaxCost:
-		var valB *decimal.Big
-		valB, err = IfaceAsBig(val)
-		rp.MaxCost = &Decimal{valB}
+		if val != EmptyString {
+			var valB *decimal.Big
+			valB, err = IfaceAsBig(val)
+			rp.MaxCost = &Decimal{valB}
+		}
 	case MaxCostStrategy:
 		rp.MaxCostStrategy = IfaceAsString(val)
 	}
@@ -629,7 +635,9 @@ func (rt *Rate) Set(path []string, val interface{}, newBranch bool) (err error) 
 		case ID:
 			rt.ID = IfaceAsString(val)
 		case FilterIDs:
-			rt.FilterIDs, err = IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = IfaceAsStringSlice(val)
+			rt.FilterIDs = append(rt.FilterIDs, valA...)
 		case Weights:
 			rt.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 		case ActivationTimes:

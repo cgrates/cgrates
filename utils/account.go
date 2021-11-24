@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -667,11 +668,17 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 		case ID:
 			ap.ID = IfaceAsString(val)
 		case FilterIDs:
-			ap.FilterIDs, err = IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = IfaceAsStringSlice(val)
+			ap.FilterIDs = append(ap.FilterIDs, valA...)
 		case ThresholdIDs:
-			ap.ThresholdIDs, err = IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = IfaceAsStringSlice(val)
+			ap.ThresholdIDs = append(ap.ThresholdIDs, valA...)
 		case Weights:
 			ap.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+		case Opts:
+			ap.Opts, err = NewMapFromCSV(IfaceAsString(val))
 		}
 		return
 	default:
@@ -684,14 +691,14 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 		return MapStorage(ap.Opts).Set(path[1:], val)
 	}
 	var id string
-	if strings.HasPrefix(path[0], Balances) &&
-		path[0][8] == '[' && path[0][len(path[0])-1] == ']' {
-		id = path[0][9 : len(path[0])-1]
-	} else if path[0] == Balances {
+	if path[0] == Balances {
 		id = path[1]
 		path = path[1:]
+	} else if strings.HasPrefix(path[0], Balances) &&
+		path[0][8] == '[' && path[0][len(path[0])-1] == ']' {
+		id = path[0][9 : len(path[0])-1]
 	}
-	if id == EmptyString {
+	if id != EmptyString {
 		if _, has := ap.Balances[id]; !has {
 			ap.Balances[id] = &Balance{ID: path[0], Opts: make(map[string]interface{}), Units: NewDecimal(0, 0)}
 		}
@@ -718,17 +725,70 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 		case Type:
 			bL.Type = IfaceAsString(val)
 		case FilterIDs:
-			bL.FilterIDs, err = IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = IfaceAsStringSlice(val)
+			bL.FilterIDs = append(bL.FilterIDs, valA...)
 		case AttributeIDs:
-			bL.AttributeIDs, err = IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = IfaceAsStringSlice(val)
+			bL.AttributeIDs = append(bL.AttributeIDs, valA...)
 		case RateProfileIDs:
-			bL.RateProfileIDs, err = IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = IfaceAsStringSlice(val)
+			bL.RateProfileIDs = append(bL.RateProfileIDs, valA...)
 		case Units:
 			var valB *decimal.Big
 			valB, err = IfaceAsBig(val)
 			bL.Units = &Decimal{valB}
 		case Weights:
 			bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+		case UnitFactors:
+			sls := strings.Split(IfaceAsString(val), InfieldSep)
+			if len(sls)%2 != 0 {
+				return fmt.Errorf("invalid key: <%s> for BalanceUnitFactors", IfaceAsString(val))
+			}
+			for j := 0; j < len(sls); j += 2 {
+				uf := new(UnitFactor)
+				if len(sls[j]) != 0 {
+					uf.FilterIDs = strings.Split(sls[j], ANDSep)
+				}
+
+				var valB *decimal.Big
+				if valB, err = IfaceAsBig(sls[j+1]); err != nil {
+					return
+				}
+				uf.Factor = &Decimal{valB}
+				bL.UnitFactors = append(bL.UnitFactors, uf)
+			}
+		case CostIncrements:
+			sls := strings.Split(IfaceAsString(val), InfieldSep)
+			if len(sls)%4 != 0 {
+				return fmt.Errorf("invalid key: <%s> for BalanceCostIncrements", IfaceAsString(val))
+			}
+			for j := 0; j < len(sls); j += 4 {
+				cI := new(CostIncrement)
+				if len(sls[j]) != 0 {
+					cI.FilterIDs = strings.Split(sls[j], ANDSep)
+				}
+				if len(sls[j+1]) != 0 {
+					if cI.Increment, err = NewDecimalFromString(sls[j+1]); err != nil {
+						return
+					}
+				}
+				if len(sls[j+2]) != 0 {
+					if cI.FixedFee, err = NewDecimalFromString(sls[j+2]); err != nil {
+						return
+					}
+				}
+				if len(sls[j+3]) != 0 {
+					if cI.RecurrentFee, err = NewDecimalFromString(sls[j+3]); err != nil {
+						return
+					}
+				}
+				bL.CostIncrements = append(bL.CostIncrements, cI)
+			}
+		case Opts:
+			bL.Opts, err = NewMapFromCSV(IfaceAsString(val))
 		}
 		return
 	case 2:
@@ -743,35 +803,47 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 			default:
 				return ErrWrongPath
 			case FilterIDs:
-				uf.FilterIDs, err = IfaceAsStringSlice(val)
+				var valA []string
+				valA, err = IfaceAsStringSlice(val)
+				uf.FilterIDs = append(uf.FilterIDs, valA...)
 			case Factor:
-				var valB *decimal.Big
-				valB, err = IfaceAsBig(val)
-				uf.Factor = &Decimal{valB}
+				if val != EmptyString {
+					var valB *decimal.Big
+					valB, err = IfaceAsBig(val)
+					uf.Factor = &Decimal{valB}
+				}
 			}
 			return
 		case CostIncrements:
 			if len(bL.CostIncrements) == 0 || newBranch {
-				bL.CostIncrements = append(bL.CostIncrements, new(CostIncrement))
+				bL.CostIncrements = append(bL.CostIncrements, &CostIncrement{FixedFee: NewDecimal(0, 0)})
 			}
 			cI := bL.CostIncrements[len(bL.CostIncrements)-1]
 			switch path[1] {
 			default:
 				return ErrWrongPath
 			case FilterIDs:
-				cI.FilterIDs, err = IfaceAsStringSlice(val)
+				var valA []string
+				valA, err = IfaceAsStringSlice(val)
+				cI.FilterIDs = append(cI.FilterIDs, valA...)
 			case Increment:
-				var valB *decimal.Big
-				valB, err = IfaceAsBig(val)
-				cI.Increment = &Decimal{valB}
+				if val != EmptyString {
+					var valB *decimal.Big
+					valB, err = IfaceAsBig(val)
+					cI.Increment = &Decimal{valB}
+				}
 			case FixedFee:
-				var valB *decimal.Big
-				valB, err = IfaceAsBig(val)
-				cI.FixedFee = &Decimal{valB}
+				if val != EmptyString {
+					var valB *decimal.Big
+					valB, err = IfaceAsBig(val)
+					cI.FixedFee = &Decimal{valB}
+				}
 			case RecurrentFee:
-				var valB *decimal.Big
-				valB, err = IfaceAsBig(val)
-				cI.RecurrentFee = &Decimal{valB}
+				if val != EmptyString {
+					var valB *decimal.Big
+					valB, err = IfaceAsBig(val)
+					cI.RecurrentFee = &Decimal{valB}
+				}
 			}
 			return
 		}

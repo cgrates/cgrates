@@ -36,7 +36,7 @@ const (
 	gprefix = utils.MetaGoogleAPI + utils.ConcatenatedKeySep
 )
 
-func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id string, withIndex, ratesPartial bool, ratesData utils.DataProvider) (_ error) {
+func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id string, withIndex, ratesPartial bool, ratesData *utils.OrderedNavigableMap) (_ error) {
 	switch lType {
 	case utils.MetaAttributes:
 		return dm.RemoveAttributeProfile(ctx, tnt, id, withIndex)
@@ -58,7 +58,7 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id s
 		return dm.RemoveDispatcherHost(ctx, tnt, id)
 	case utils.MetaRateProfiles:
 		if ratesPartial {
-			rateIDs, err := RateIDsFromDataProvider(ratesData)
+			rateIDs, err := RateIDsFromOrderedNavigableMap(ratesData)
 			if err != nil {
 				return err
 			}
@@ -101,6 +101,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, rsrSep string,
 		if err = prepareData(fltr, lDataSet, rsrSep); err != nil {
 			return
 		}
+		fltr.Compress()
 		if err = fltr.Compile(); err != nil {
 			return
 		}
@@ -237,6 +238,7 @@ func dryRun(ctx *context.Context, lType, rsrSep, ldrID string, tntID *utils.Tena
 		if err = prepareData(fltr, lDataSet, rsrSep); err != nil {
 			return
 		}
+		fltr.Compress()
 		if err = fltr.Compile(); err != nil {
 			return
 		}
@@ -467,7 +469,7 @@ func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*confi
 					utils.LoaderS, l.ldrCfg.ID, csv.Path(), lineNr, err))
 			return
 		}
-		tntID := TenantIDFromDataProvider(data)
+		tntID := TenantIDFromOrderedNavigableMap(data)
 		if !prevTntID.Equal(tntID) {
 			if prevTntID != nil {
 				if err = l.process(ctx, prevTntID, lData, lType, action, caching, withIndex, partialRates); err != nil {
