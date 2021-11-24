@@ -120,7 +120,7 @@ func openDB(dialect gorm.Dialector, opts map[string]interface{}) (db *gorm.DB, s
 		}
 		sqlDB.SetMaxOpenConns(int(val))
 	}
-	if iface, has := opts[utils.SQLMaxConnLifetime]; has {
+	if iface, has := opts[utils.SQLConnMaxLifetime]; has {
 		val, err := utils.IfaceAsDuration(iface)
 		if err != nil {
 			return nil, nil, err

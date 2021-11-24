@@ -508,12 +508,12 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-				// "sqlMaxConnLifetime": 0,						// SQLMaxConnLifetime 
+				// "sqlConnMaxLifetime": 0,						// SQLConnMaxLifetime 
 
 
 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
 				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
-				// "sslmode": "disable",						// the postgresSSLMode for postgres            				
+				// "sslMode": "disable",						// the postgresSSLMode for postgres            				
 				
 				
 				// Kafka
