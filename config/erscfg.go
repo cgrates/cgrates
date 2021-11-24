@@ -928,65 +928,65 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 }
 
 type EventReaderOptsJson struct {
-	PartialPath                       *string
-	PartialCacheAction                *string
-	PartialOrderField                 *string
-	PartialCSVFieldSeparator          *string
-	CSVRowLength                      *int
-	CSVFieldSeparator                 *string
-	CSVHeaderDefineChar               *string
-	CSVLazyQuotes                     *bool
-	XMLRootPath                       *string
-	AMQPQueueID                       *string
-	AMQPQueueIDProcessed              *string
-	AMQPConsumerTag                   *string
-	AMQPExchange                      *string
-	AMQPExchangeType                  *string
-	AMQPRoutingKey                    *string
-	AMQPExchangeProcessed             *string
-	AMQPExchangeTypeProcessed         *string
-	AMQPRoutingKeyProcessed           *string
-	KafkaTopic                        *string
-	KafkaGroupID                      *string
-	KafkaMaxWait                      *string
-	KafkaTopicProcessed               *string
-	SQLDBName                         *string
-	SQLTableName                      *string
-	SSLMode                           *string
-	SQLDBNameProcessed                *string
-	SQLTableNameProcessed             *string
-	SSLModeProcessed                  *string
-	AWSRegion                         *string
-	AWSKey                            *string
-	AWSSecret                         *string
-	AWSToken                          *string
-	AWSRegionProcessed                *string
-	AWSKeyProcessed                   *string
-	AWSSecretProcessed                *string
-	AWSTokenProcessed                 *string
-	SQSQueueID                        *string
-	SQSQueueIDProcessed               *string
-	S3BucketID                        *string
-	S3FolderPathProcessed             *string
-	S3BucketIDProcessed               *string
-	NATSJetStream                     *bool
-	NATSConsumerName                  *string
-	NATSSubject                       *string
-	NATSQueueID                       *string
-	NATSJWTFile                       *string
-	NATSSeedFile                      *string
-	NATSCertificateAuthority          *string
-	NATSClientCertificate             *string
-	NATSClientKey                     *string
-	NATSJetStreamMaxWait              *string
-	NATSJetStreamProcessed            *bool
-	NATSSubjectProcessed              *string
-	NATSJWTFileProcessed              *string
-	NATSSeedFileProcessed             *string
-	NATSCertificateAuthorityProcessed *string
-	NATSClientCertificateProcessed    *string
-	NATSClientKeyProcessed            *string
-	NATSJetStreamMaxWaitProcessed     *string
+	PartialPath                       *string `json:"partialPath"`
+	PartialCacheAction                *string `json:"partialCacheAction"`
+	PartialOrderField                 *string `json:"partialOrderField"`
+	PartialCSVFieldSeparator          *string `json:"partialcsvFieldSeparator"`
+	CSVRowLength                      *int    `json:"csvRowLength"`
+	CSVFieldSeparator                 *string `json:"csvFieldSeparator"`
+	CSVHeaderDefineChar               *string `json:"csvHeaderDefineChar"`
+	CSVLazyQuotes                     *bool   `json:"csvLazyQuotes"`
+	XMLRootPath                       *string `json:"xmlRootPath"`
+	AMQPQueueID                       *string `json:"amqpQueueID"`
+	AMQPQueueIDProcessed              *string `json:"amqpQueueIDProcessed"`
+	AMQPConsumerTag                   *string `json:"amqpConsumerTag"`
+	AMQPExchange                      *string `json:"amqpExchange"`
+	AMQPExchangeType                  *string `json:"amqpExchangeType"`
+	AMQPRoutingKey                    *string `json:"amqpRoutingKey"`
+	AMQPExchangeProcessed             *string `json:"amqpExchangeProcessed"`
+	AMQPExchangeTypeProcessed         *string `json:"amqpExchangeTypeProcessed"`
+	AMQPRoutingKeyProcessed           *string `json:"amqpRoutingKeyProcessed"`
+	KafkaTopic                        *string `json:"kafkaTopic"`
+	KafkaGroupID                      *string `json:"kafkaGroupID"`
+	KafkaMaxWait                      *string `json:"kafkaMaxWait"`
+	KafkaTopicProcessed               *string `json:"kafkaTopicProcessed"`
+	SQLDBName                         *string `json:"sqlDBName"`
+	SQLTableName                      *string `json:"sqlTableName"`
+	SSLMode                           *string `json:"sslMode"`
+	SQLDBNameProcessed                *string `json:"sqlDBNameProcessed"`
+	SQLTableNameProcessed             *string `json:"sqlTableNameProcessed"`
+	SSLModeProcessed                  *string `json:"sslModeProcessed"`
+	AWSRegion                         *string `json:"awsRegion"`
+	AWSKey                            *string `json:"awsKey"`
+	AWSSecret                         *string `json:"awsSecret"`
+	AWSToken                          *string `json:"awsToken"`
+	AWSRegionProcessed                *string `json:"awsRegionProcessed"`
+	AWSKeyProcessed                   *string `json:"awsKeyProcessed"`
+	AWSSecretProcessed                *string `json:"awsSecretProcessed"`
+	AWSTokenProcessed                 *string `json:"awsTokenProcessed"`
+	SQSQueueID                        *string `json:"sqsQueueID"`
+	SQSQueueIDProcessed               *string `json:"sqsQueueIDProcessed"`
+	S3BucketID                        *string `json:"s3BucketID"`
+	S3FolderPathProcessed             *string `json:"s3FolderPathProcessed"`
+	S3BucketIDProcessed               *string `json:"s3BucketIDProcessed"`
+	NATSJetStream                     *bool   `json:"natsJetStream"`
+	NATSConsumerName                  *string `json:"natsConsumerName"`
+	NATSSubject                       *string `json:"natsSubject"`
+	NATSQueueID                       *string `json:"natsQueueID"`
+	NATSJWTFile                       *string `json:"natsJWTFile"`
+	NATSSeedFile                      *string `json:"natsSeedFile"`
+	NATSCertificateAuthority          *string `json:"natsCertificateAuthority"`
+	NATSClientCertificate             *string `json:"natsClientCertificate"`
+	NATSClientKey                     *string `json:"natsClientKey"`
+	NATSJetStreamMaxWait              *string `json:"natsJetStreamMaxWait"`
+	NATSJetStreamProcessed            *bool   `json:"natsJetStreamProcessed"`
+	NATSSubjectProcessed              *string `json:"natsSubjectProcessed"`
+	NATSJWTFileProcessed              *string `json:"natsJWTFileProcessed"`
+	NATSSeedFileProcessed             *string `json:"natsSeedFileProcessed"`
+	NATSCertificateAuthorityProcessed *string `json:"natsCertificateAuthorityProcessed"`
+	NATSClientCertificateProcessed    *string `json:"natsClientCertificateProcessed"`
+	NATSClientKeyProcessed            *string `json:"natsClientKeyProcessed"`
+	NATSJetStreamMaxWaitProcessed     *string `json:"natsJetStreamMaxWaitProcessed"`
 }
 
 // EventReaderSJsonCfg is the configuration of a single EventReader
