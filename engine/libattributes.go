@@ -196,11 +196,15 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 		case utils.ID:
 			ap.ID = utils.IfaceAsString(val)
 		case utils.FilterIDs:
-			ap.FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			ap.FilterIDs = append(ap.FilterIDs, valA...)
 		case utils.Blocker:
 			ap.Blocker, err = utils.IfaceAsBool(val)
 		case utils.Weight:
-			ap.Weight, err = utils.IfaceAsFloat64(val)
+			if val != utils.EmptyString {
+				ap.Weight, err = utils.IfaceAsFloat64(val)
+			}
 		default:
 			return utils.ErrWrongPath
 		}
@@ -213,7 +217,9 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 		}
 		switch path[1] {
 		case utils.FilterIDs:
-			ap.Attributes[len(ap.Attributes)-1].FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			ap.Attributes[len(ap.Attributes)-1].FilterIDs = append(ap.Attributes[len(ap.Attributes)-1].FilterIDs, valA...)
 		case utils.Path:
 			ap.Attributes[len(ap.Attributes)-1].Path = utils.IfaceAsString(val)
 		case utils.Type:

@@ -31,10 +31,11 @@ import (
 
 func TestTenantIDFromMap(t *testing.T) {
 	exp := utils.NewTenantID("cgrates.org:ATTR1")
-	r := TenantIDFromDataProvider(utils.MapStorage{
-		utils.Tenant: exp.Tenant,
-		utils.ID:     exp.ID,
-	})
+	r := TenantIDFromOrderedNavigableMap(
+		newOrderNavMap(utils.MapStorage{
+			utils.Tenant: exp.Tenant,
+			utils.ID:     exp.ID,
+		}))
 	if !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected %+v, received %+q", exp, r)
 	}
@@ -42,13 +43,13 @@ func TestTenantIDFromMap(t *testing.T) {
 
 func TestRateIDsFromMap(t *testing.T) {
 	expErrMsg := "cannot find RateIDs in map"
-	if _, err := RateIDsFromDataProvider(utils.MapStorage{}); err == nil || err.Error() != expErrMsg {
+	if _, err := RateIDsFromOrderedNavigableMap(newOrderNavMap(utils.MapStorage{})); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 	exp := []string{"RT1", "RT2"}
-	r, err := RateIDsFromDataProvider(utils.MapStorage{
+	r, err := RateIDsFromOrderedNavigableMap(newOrderNavMap(utils.MapStorage{
 		utils.RateIDs: "RT1;RT2",
-	})
+	}))
 	if err != nil {
 		t.Fatal(err)
 	}

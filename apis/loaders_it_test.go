@@ -296,7 +296,6 @@ func testLoadersGetAccount(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		FilterIDs: []string{},
 		Balances: map[string]*utils.Balance{
 			"MonetaryBalance": {
 				ID: "MonetaryBalance",
@@ -358,10 +357,9 @@ func testLoadersGetActionProfile(t *testing.T) {
 	}
 
 	expActPrf := engine.ActionProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ACT_PRF",
-		FilterIDs: []string{},
-		Schedule:  utils.MetaASAP,
+		Tenant:   "cgrates.org",
+		ID:       "ACT_PRF",
+		Schedule: utils.MetaASAP,
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts: {
 				"1001": {},
@@ -415,10 +413,9 @@ func testLoadersGetAttributeProfile(t *testing.T) {
 		Weight:    10,
 		Attributes: []*engine.ExternalAttribute{
 			{
-				FilterIDs: []string{},
-				Path:      "*req.OfficeGroup",
-				Type:      utils.MetaConstant,
-				Value:     "Marketing",
+				Path:  "*req.OfficeGroup",
+				Type:  utils.MetaConstant,
+				Value: "Marketing",
 			},
 		},
 	}
@@ -485,17 +482,14 @@ func testLoadersGetDispatcherProfile(t *testing.T) {
 	}
 
 	expDspPrf := engine.DispatcherProfile{
-		Tenant:         "cgrates.org",
-		ID:             "DSP1",
-		FilterIDs:      []string{"FLTR_ACCOUNT_1001"},
-		Strategy:       utils.MetaWeight,
-		StrategyParams: make(map[string]interface{}),
+		Tenant:    "cgrates.org",
+		ID:        "DSP1",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		Strategy:  utils.MetaWeight,
 		Hosts: engine.DispatcherHostProfiles{
 			{
-				ID:        "ALL",
-				FilterIDs: []string{},
-				Weight:    20,
-				Params:    map[string]interface{}{},
+				ID:     "ALL",
+				Weight: 20,
 			},
 		},
 		Weight: 10,
@@ -532,7 +526,6 @@ func testLoadersGetDispatcherHost(t *testing.T) {
 		RemoteHost: &config.RemoteHost{
 			ID:              expIDs[0],
 			Address:         utils.MetaInternal,
-			Transport:       utils.MetaJSON,
 			ConnectAttempts: 1,
 			Reconnects:      3,
 			ConnectTimeout:  time.Minute,
@@ -666,13 +659,12 @@ func testLoadersGetResourceProfile(t *testing.T) {
 	}
 
 	expRsPrf := engine.ResourceProfile{
-		Tenant:       "cgrates.org",
-		ID:           "RES_ACNT_1001",
-		FilterIDs:    []string{"FLTR_ACCOUNT_1001"},
-		Weight:       10,
-		UsageTTL:     3600000000000,
-		Limit:        1,
-		ThresholdIDs: []string{},
+		Tenant:    "cgrates.org",
+		ID:        "RES_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		Weight:    10,
+		UsageTTL:  3600000000000,
+		Limit:     1,
 	}
 
 	var rplyRsPrf engine.ResourceProfile
@@ -702,11 +694,10 @@ func testLoadersGetRouteProfile(t *testing.T) {
 	}
 
 	expRtPrf := engine.APIRouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ROUTE_ACNT_1001",
-		FilterIDs:         []string{"FLTR_ACCOUNT_1001"},
-		Sorting:           utils.MetaWeight,
-		SortingParameters: []string{},
+		Tenant:    "cgrates.org",
+		ID:        "ROUTE_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
+		Sorting:   utils.MetaWeight,
 		Routes: []*engine.ExternalRoute{
 			{
 				ID:      "route1",

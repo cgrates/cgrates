@@ -1033,19 +1033,19 @@ type TPBalanceCostIncrement struct {
 
 func (costIncr *TPBalanceCostIncrement) AsString() (s string) {
 	if len(costIncr.FilterIDs) != 0 {
-		s = s + strings.Join(costIncr.FilterIDs, ANDSep)
+		s += strings.Join(costIncr.FilterIDs, ANDSep)
 	}
-	s = s + InfieldSep
+	s += InfieldSep
 	if costIncr.Increment != EmptyString {
-		s = s + costIncr.Increment
+		s += costIncr.Increment
 	}
-	s = s + InfieldSep
+	s += InfieldSep
 	if costIncr.FixedFee != nil {
-		s = s + strconv.FormatFloat(*costIncr.FixedFee, 'f', -1, 64)
+		s += strconv.FormatFloat(*costIncr.FixedFee, 'f', -1, 64)
 	}
-	s = s + InfieldSep
+	s += InfieldSep
 	if costIncr.RecurrentFee != nil {
-		s = s + strconv.FormatFloat(*costIncr.RecurrentFee, 'f', -1, 64)
+		s += strconv.FormatFloat(*costIncr.RecurrentFee, 'f', -1, 64)
 	}
 	return
 }
@@ -1054,9 +1054,7 @@ func NewTPBalanceUnitFactor(filtersStr, factorStr string) (unitFactor *TPBalance
 	unitFactor = &TPBalanceUnitFactor{
 		FilterIDs: strings.Split(filtersStr, ANDSep),
 	}
-	if unitFactor.Factor, err = strconv.ParseFloat(factorStr, 64); err != nil {
-		return
-	}
+	unitFactor.Factor, err = strconv.ParseFloat(factorStr, 64)
 	return
 }
 
@@ -1065,10 +1063,6 @@ type TPBalanceUnitFactor struct {
 	Factor    float64
 }
 
-func (unitFactor *TPBalanceUnitFactor) AsString() (s string) {
-	if len(unitFactor.FilterIDs) != 0 {
-		s = s + strings.Join(unitFactor.FilterIDs, ANDSep)
-	}
-	s = s + InfieldSep + strconv.FormatFloat(unitFactor.Factor, 'f', -1, 64)
-	return
+func (unitFactor *TPBalanceUnitFactor) AsString() string {
+	return strings.Join(unitFactor.FilterIDs, ANDSep) + InfieldSep + strconv.FormatFloat(unitFactor.Factor, 'f', -1, 64)
 }

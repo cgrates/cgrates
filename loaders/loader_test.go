@@ -47,18 +47,18 @@ func TestRemoveFromDB(t *testing.T) {
 	for _, lType := range []string{utils.MetaAttributes, utils.MetaResources, utils.MetaFilters, utils.MetaStats,
 		utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
 		utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccounts} {
-		if err := removeFromDB(context.Background(), dm, lType, "cgrates.org", "ID", true, false, utils.MapStorage{}); err != utils.ErrNotFound {
+		if err := removeFromDB(context.Background(), dm, lType, "cgrates.org", "ID", true, false, utils.NewOrderedNavigableMap()); err != utils.ErrNotFound {
 			t.Error(err)
 		}
 	}
 	expErrMsg := "cannot find RateIDs in map"
-	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, "cgrates.org", "ID", true, true, utils.MapStorage{}); err == nil || err.Error() != expErrMsg {
+	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, "cgrates.org", "ID", true, true, utils.NewOrderedNavigableMap()); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, "cgrates.org", "ID", true, true, utils.MapStorage{utils.RateIDs: "RT1"}); err != utils.ErrNotFound {
+	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, "cgrates.org", "ID", true, true, newOrderNavMap(utils.MapStorage{utils.RateIDs: "RT1"})); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := removeFromDB(context.Background(), dm, utils.EmptyString, "cgrates.org", "ID", true, false, utils.MapStorage{}); err != nil {
+	if err := removeFromDB(context.Background(), dm, utils.EmptyString, "cgrates.org", "ID", true, false, utils.NewOrderedNavigableMap()); err != nil {
 		t.Error(err)
 	}
 }
@@ -71,14 +71,14 @@ func testDryRunWithData(lType string, data []*utils.OrderedNavigableMap) (string
 	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
 	utils.Logger.SetLogLevel(7)
 
-	err := dryRun(context.Background(), lType, utils.InfieldSep, "test", TenantIDFromDataProvider(data[0]), data)
+	err := dryRun(context.Background(), lType, utils.InfieldSep, "test", TenantIDFromOrderedNavigableMap(data[0]), data)
 	return buf.String(), err
 }
 
 func testDryRun(t *testing.T, lType string) string {
 	data := utils.NewOrderedNavigableMap()
-	data.Set(utils.NewFullPath(utils.Tenant), "cgrates.org")
-	data.Set(utils.NewFullPath(utils.ID), "ID")
+	data.SetAsSlice(utils.NewFullPath(utils.Tenant), []*utils.DataNode{utils.NewLeafNode("cgrates.org")})
+	data.SetAsSlice(utils.NewFullPath(utils.ID), []*utils.DataNode{utils.NewLeafNode("ID")})
 	buf, err := testDryRunWithData(lType, []*utils.OrderedNavigableMap{data})
 	if err != nil {
 		t.Fatal(lType, err)
@@ -89,7 +89,7 @@ func testDryRun(t *testing.T, lType string) string {
 func newOrderNavMap(mp utils.MapStorage) (o *utils.OrderedNavigableMap) {
 	o = utils.NewOrderedNavigableMap()
 	for k, v := range mp {
-		o.Set(utils.NewFullPath(k), v)
+		o.SetAsSlice(utils.NewFullPath(k), []*utils.DataNode{utils.NewLeafNode(v)})
 	}
 	return
 }
@@ -102,7 +102,7 @@ func TestDryRun(t *testing.T) {
 		testDryRun(t, utils.MetaResources); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Filter: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"Rules\":null}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Filter: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"Rules\":[]}",
 		testDryRun(t, utils.MetaFilters); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
@@ -175,20 +175,6 @@ func TestDryRunWithUpdateStructErrors(t *testing.T) {
 	if _, err := testDryRunWithData(utils.MetaActionProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-
-	expErrMsg = `cannot update unsupported struct field: 0`
-	if _, err := testDryRunWithData(utils.MetaRoutes, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaRateProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaAccounts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
 }
 
 func TestDryRunWithModelsErrors(t *testing.T) {
@@ -217,14 +203,6 @@ func TestDryRunWithModelsErrors(t *testing.T) {
 
 	expErrMsg = `time: invalid duration "float"`
 	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if _, err := testDryRunWithData(utils.MetaActionProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ActionTTL": "float", "ActionID": "ACCT"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	expErrMsg = `invalid key: <1> for BalanceCostIncrements`
-	if _, err := testDryRunWithData(utils.MetaAccounts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "BalanceCostIncrements": "1", "BalanceID": "BalID"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
@@ -256,19 +234,6 @@ func TestSetToDBWithUpdateStructErrors(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	expErrMsg = `cannot update unsupported struct field: 0`
-	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{"PK": "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
 }
 
 func TestSetToDBWithModelsErrors(t *testing.T) {
@@ -296,14 +261,6 @@ func TestSetToDBWithModelsErrors(t *testing.T) {
 
 	expErrMsg = `time: invalid duration "float"`
 	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ActionTTL": "float", "ActionID": "ACCT"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	expErrMsg = `invalid key: <1> for BalanceCostIncrements`
-	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "BalanceCostIncrements": "1", "BalanceID": "BalID"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
@@ -346,9 +303,6 @@ func TestSetToDBWithDBError(t *testing.T) {
 	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.RateIDs: "RT1;RT2"})}, true, true); err != utils.ErrNoDatabaseConn {
-		t.Fatal(err)
-	}
 	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
@@ -380,7 +334,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaStats, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v3 := &engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ThresholdIDs: []string{}, Metrics: []*engine.MetricWithFilters{}}
+	v3 := &engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v3, prf) {
@@ -390,7 +344,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v4 := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ActionProfileIDs: []string{}}
+	v4 := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v4, prf) {
@@ -400,7 +354,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaChargers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v5 := &engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, AttributeIDs: []string{}}
+	v5 := &engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v5, prf) {
@@ -410,7 +364,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaDispatchers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, StrategyParams: make(map[string]interface{}), Hosts: engine.DispatcherHostProfiles{}}
+	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})}
 	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v6, prf) {
@@ -420,7 +374,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v7 := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Targets: map[string]utils.StringSet{}, Actions: []*engine.APAction{}}
+	v7 := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}}
 	if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v7, prf) {
@@ -430,7 +384,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v8 := &engine.Filter{Tenant: "cgrates.org", ID: "ID"}
+	v8 := &engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)}
 	v8.Compile()
 	if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
@@ -441,7 +395,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v9 := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, SortingParameters: []string{}, Routes: []*engine.Route{}}
+	v9 := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v9, prf) {
@@ -461,7 +415,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v11 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
+	v11 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
 	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v11, prf) {
@@ -471,7 +425,7 @@ func TestSetToDB(t *testing.T) {
 	if err := setToDB(context.Background(), dm, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Balances: map[string]*utils.Balance{}, ThresholdIDs: []string{}}
+	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})}
 	if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v12, prf) {
@@ -608,7 +562,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ThresholdIDs: []string{}, Metrics: []*engine.MetricWithFilters{}}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -623,7 +577,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, ActionProfileIDs: []string{}}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -638,7 +592,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.RouteProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, SortingParameters: []string{}, Routes: []*engine.Route{}}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{RouteProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -653,7 +607,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, AttributeIDs: []string{}}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{ChargerProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -668,7 +622,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, StrategyParams: make(map[string]interface{}), Hosts: engine.DispatcherHostProfiles{}}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -683,7 +637,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&utils.RateProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{RateProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -698,7 +652,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Targets: map[string]utils.StringSet{}, Actions: []*engine.APAction{}}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{ActionProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -715,7 +669,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
-	} else if v := (&engine.Filter{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{FilterIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
@@ -747,7 +701,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
 		t.Fatal(err)
-	} else if v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", FilterIDs: []string{}, Balances: map[string]*utils.Balance{}, ThresholdIDs: []string{}}); !reflect.DeepEqual(v, prf) {
+	} else if v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})}); !reflect.DeepEqual(v, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 	}
 	if exp := (&utils.AttrReloadCacheWithAPIOpts{}); !reflect.DeepEqual(exp, reloadCache) {

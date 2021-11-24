@@ -607,7 +607,9 @@ func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string
 	case utils.Weight:
 		tp.Weight, err = utils.IfaceAsFloat64(val)
 	case utils.FilterIDs:
-		tp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.FilterIDs = append(tp.FilterIDs, valA...)
 	case utils.MaxHits:
 		tp.MaxHits, err = utils.IfaceAsTInt(val)
 	case utils.MinHits:
@@ -615,7 +617,9 @@ func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string
 	case utils.MinSleep:
 		tp.MinSleep, err = utils.IfaceAsDuration(val)
 	case utils.ActionProfileIDs:
-		tp.ActionProfileIDs, err = utils.IfaceAsStringSlice(val)
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.ActionProfileIDs = append(tp.ActionProfileIDs, valA...)
 	case utils.Async:
 		tp.Async, err = utils.IfaceAsBool(val)
 	}

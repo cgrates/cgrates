@@ -466,9 +466,13 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 		case utils.ID:
 			rp.ID = utils.IfaceAsString(val)
 		case utils.FilterIDs:
-			rp.FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			rp.FilterIDs = append(rp.FilterIDs, valA...)
 		case utils.SortingParameters:
-			rp.SortingParameters, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			rp.SortingParameters = append(rp.SortingParameters, valA...)
 		case utils.Sorting:
 			rp.Sorting = utils.IfaceAsString(val)
 		case utils.Weights:
@@ -481,25 +485,36 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 		if len(rp.Routes) == 0 || newBranch {
 			rp.Routes = append(rp.Routes, new(Route))
 		}
+		rt := rp.Routes[len(rp.Routes)-1]
 		switch path[1] {
 		case utils.ID:
-			rp.Routes[len(rp.Routes)-1].ID = utils.IfaceAsString(val)
+			rt.ID = utils.IfaceAsString(val)
 		case utils.FilterIDs:
-			rp.Routes[len(rp.Routes)-1].FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			rt.FilterIDs = append(rt.FilterIDs, valA...)
 		case utils.AccountIDs:
-			rp.Routes[len(rp.Routes)-1].AccountIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			rt.AccountIDs = append(rt.AccountIDs, valA...)
 		case utils.RateProfileIDs:
-			rp.Routes[len(rp.Routes)-1].RateProfileIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			rt.RateProfileIDs = append(rt.RateProfileIDs, valA...)
 		case utils.ResourceIDs:
-			rp.Routes[len(rp.Routes)-1].ResourceIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			rt.ResourceIDs = append(rt.ResourceIDs, valA...)
 		case utils.StatIDs:
-			rp.Routes[len(rp.Routes)-1].StatIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			rt.StatIDs = append(rt.StatIDs, valA...)
 		case utils.Weights:
-			rp.Routes[len(rp.Routes)-1].Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			rt.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 		case utils.Blocker:
-			rp.Routes[len(rp.Routes)-1].Blocker, err = utils.IfaceAsBool(val)
+			rt.Blocker, err = utils.IfaceAsBool(val)
 		case utils.RouteParameters:
-			rp.Routes[len(rp.Routes)-1].RouteParameters = utils.IfaceAsString(val)
+			rt.RouteParameters = utils.IfaceAsString(val)
 		default:
 			return utils.ErrWrongPath
 		}

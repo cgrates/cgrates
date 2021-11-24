@@ -73,6 +73,9 @@ func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
 }
 
 func StringAsBig(itm string) (b *decimal.Big, err error) {
+	if len(itm) == 0 {
+		return decimal.New(0, 0), nil
+	}
 	if strings.HasSuffix(itm, NsSuffix) ||
 		strings.HasSuffix(itm, UsSuffix) ||
 		strings.HasSuffix(itm, µSuffix) ||
@@ -242,6 +245,9 @@ func IfaceAsBool(itm interface{}) (b bool, err error) {
 	case bool:
 		return v, nil
 	case string:
+		if len(v) == 0 {
+			return
+		}
 		return strconv.ParseBool(v)
 	case int:
 		return v > 0, nil
@@ -749,7 +755,9 @@ func IfaceAsStringSlice(fld interface{}) (ss []string, err error) {
 			ss[i] = IfaceAsString(v)
 		}
 	case string:
-		ss = strings.Split(value, InfieldSep)
+		if value != EmptyString {
+			ss = strings.Split(value, InfieldSep)
+		}
 	default: // Maybe we are lucky and the value converts to string
 		err = fmt.Errorf("cannot convert field: %+v to []string", value)
 	}
