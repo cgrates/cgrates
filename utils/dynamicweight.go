@@ -26,14 +26,16 @@ import (
 
 // NewDynamicWeightsFromString creates a DynamicWeight list based on the string received from .csv/StorDB
 func NewDynamicWeightsFromString(s, dWSep, fltrSep string) (dWs DynamicWeights, err error) {
-	nrFlds := 2
+	if len(s) == 0 {
+		return DynamicWeights{{}}, nil
+	}
 	dwStrs := strings.Split(s, dWSep)
 	lnDwStrs := len(dwStrs)
-	if lnDwStrs%nrFlds != 0 { // need to have multiples of number of fields in one DynamicWeight
+	if lnDwStrs%2 != 0 { // need to have multiples of number of fields in one DynamicWeight
 		return nil, fmt.Errorf("invalid DynamicWeight format for string <%s>", s)
 	}
-	dWs = make([]*DynamicWeight, 0, lnDwStrs/nrFlds)
-	for i := 0; i < lnDwStrs; i += nrFlds {
+	dWs = make([]*DynamicWeight, 0, lnDwStrs/2)
+	for i := 0; i < lnDwStrs; i += 2 {
 		var fltrIDs []string
 		if len(dwStrs[i]) != 0 {
 			fltrIDs = strings.Split(dwStrs[i], fltrSep)

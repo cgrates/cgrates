@@ -98,7 +98,7 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 				path[0][7] == '[' && path[0][len(path[0])-1] == ']' {
 				var valA []string
 				valA, err = utils.IfaceAsStringSlice(val)
-				aP.Targets[path[0][8:len(path[0])-1]] = utils.NewStringSet(valA)
+				aP.Targets[path[0][8:len(path[0])-1]] = utils.JoinStringSet(aP.Targets[path[0][8:len(path[0])-1]], utils.NewStringSet(valA))
 				return
 			}
 			return utils.ErrWrongPath
@@ -109,16 +109,20 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 		case utils.Schedule:
 			aP.Schedule = utils.IfaceAsString(val)
 		case utils.FilterIDs:
-			aP.FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			aP.FilterIDs = append(aP.FilterIDs, valA...)
 		case utils.Weight:
-			aP.Weight, err = utils.IfaceAsFloat64(val)
+			if val != utils.EmptyString {
+				aP.Weight, err = utils.IfaceAsFloat64(val)
+			}
 		}
 		return
 	case 2:
 		if path[0] == utils.Targets {
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)
-			aP.Targets[path[1]] = utils.NewStringSet(valA)
+			aP.Targets[path[1]] = utils.JoinStringSet(aP.Targets[path[1]], utils.NewStringSet(valA))
 			return
 		}
 	default:
@@ -173,11 +177,15 @@ func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err err
 		case utils.Type:
 			aP.Type = utils.IfaceAsString(val)
 		case utils.FilterIDs:
-			aP.FilterIDs, err = utils.IfaceAsStringSlice(val)
+			var valA []string
+			valA, err = utils.IfaceAsStringSlice(val)
+			aP.FilterIDs = append(aP.FilterIDs, valA...)
 		case utils.Blocker:
 			aP.Blocker, err = utils.IfaceAsBool(val)
 		case utils.TTL:
 			aP.TTL, err = utils.IfaceAsDuration(val)
+		case utils.Opts:
+			aP.Opts, err = utils.NewMapFromCSV(utils.IfaceAsString(val))
 		}
 	case 2:
 		switch path[0] {
