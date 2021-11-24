@@ -2551,7 +2551,7 @@ const (
 	SQLTableNameOpt = "sqlTableName"
 
 	SQLMaxOpenConns    = "sqlMaxOpenConns"
-	SQLMaxConnLifetime = "sqlMaxConnLifetime"
+	SQLConnMaxLifetime = "sqlConnMaxLifetime"
 
 	// fileCSV
 	CSVRowLengthOpt     = "csvRowLength"
@@ -2611,6 +2611,37 @@ const (
 	NatsCertificateAuthority = "natsCertificateAuthority"
 	NatsJetStream            = "natsJetStream"
 	NatsJetStreamMaxWait     = "natsJetStreamMaxWait"
+
+	// processed opts
+	AMQPQueueIDProcessedCfg      = "amqpQueueIDProcessed"
+	AMQPExchangeProcessedCfg     = "amqpExchangeProcessed"
+	AMQPExchangeTypeProcessedCfg = "amqpExchangeTypeProcessed"
+	AMQPRoutingKeyProcessedCfg   = "amqpRoutingKeyProcessed"
+
+	KafkaTopicProcessedCfg = "kafkaTopicProcessed"
+
+	SQLDBNameProcessedCfg    = "sqlDBNameProcessed"
+	SQLTableNameProcessedCfg = "sqlTableNameProcessed"
+	SSLModeProcessedCfg      = "sslModeProcessed"
+
+	AWSRegionProcessedCfg = "awsRegionProcessed"
+	AWSKeyProcessedCfg    = "awsKeyProcessed"
+	AWSSecretProcessedCfg = "awsSecretProcessed"
+	AWSTokenProcessedCfg  = "awsTokenProcessed"
+
+	SQSQueueIDProcessedCfg = "sqsQueueIDProcessed"
+
+	S3FolderPathProcessedCfg = "s3FolderPathProcessed"
+	S3BucketIDProcessedCfg   = "s3BucketIDProcessed"
+
+	NATSJetStreamProcessedCfg            = "natsJetStreamProcessed"
+	NATSSubjectProcessedCfg              = "natsSubjectProcessed"
+	NATSJWTFileProcessedCfg              = "natsJWTFileProcessed"
+	NATSSeedFileProcessedCfg             = "natsSeedFileProcessed"
+	NATSCertificateAuthorityProcessedCfg = "natsCertificateAuthorityProcessed"
+	NATSClientCertificateProcessed       = "natsClientCertificateProcessed"
+	NATSClientKeyProcessedCfg            = "natsClientKeyProcessed"
+	NATSJetStreamMaxWaitProcessedCfg     = "natsJetStreamMaxWaitProcessed"
 )
 
 // Analyzers constants
