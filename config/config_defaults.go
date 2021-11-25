@@ -1211,7 +1211,7 @@ const CGRATES_CFG_JSON = `
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "Type", "path": "Rules.Type", "type": "*variable", "value": "~*req.2"},
+					{"tag": "Type", "path": "Rules.Type", "type": "*variable", "value": "~*req.2", "new_branch":true},
 					{"tag": "Element", "path": "Rules.Element", "type": "*variable", "value": "~*req.3"},
 					{"tag": "Values", "path": "Rules.Values", "type": "*variable", "value": "~*req.4"},
 				],

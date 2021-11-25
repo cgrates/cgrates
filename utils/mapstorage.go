@@ -39,7 +39,7 @@ type DataStorage interface {
 func NewMapFromCSV(str string) (MapStorage, error) {
 	m := make(MapStorage)
 	if len(str) == 0 {
-		return nil, nil
+		return m, nil
 	}
 	for _, opt := range InfieldSplit(str) {
 		keyVal := strings.SplitN(opt, ConcatenatedKeySep, 2)

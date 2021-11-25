@@ -152,11 +152,10 @@ func testV1RtsCaseFromFolder(t *testing.T) {
 func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 	// ROUTE_ACNT_1001
 	expRt1 := &engine.APIRouteProfile{
-		ID:                "ROUTE_ACNT_1001",
-		Tenant:            "cgrates.org",
-		FilterIDs:         []string{"*string:~*req.Account:1001"},
-		Sorting:           "*weight",
-		SortingParameters: []string{},
+		ID:        "ROUTE_ACNT_1001",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Sorting:   "*weight",
 		Routes: []*engine.ExternalRoute{
 			{
 				ID:        "vendor1",
@@ -195,11 +194,10 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 
 	// ROUTE_ACNT_1002
 	expRt2 := &engine.APIRouteProfile{
-		ID:                "ROUTE_ACNT_1002",
-		Tenant:            "cgrates.org",
-		FilterIDs:         []string{"*string:~*req.Account:1002"},
-		Sorting:           "*lc",
-		SortingParameters: []string{},
+		ID:        "ROUTE_ACNT_1002",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1002"},
+		Sorting:   "*lc",
 		Routes: []*engine.ExternalRoute{
 			{
 				ID:             "vendor1",
@@ -283,11 +281,10 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 
 	// ROUTE_ACNT_1004
 	expRt4 := &engine.APIRouteProfile{
-		ID:                "ROUTE_ACNT_1004",
-		Tenant:            "cgrates.org",
-		FilterIDs:         []string{"*string:~*req.Account:1004"},
-		Sorting:           "*reas",
-		SortingParameters: []string{},
+		ID:        "ROUTE_ACNT_1004",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Sorting:   "*reas",
 		Routes: []*engine.ExternalRoute{
 			{
 				ID:          "vendor1",
@@ -360,11 +357,10 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 
 	// ROUTE_STATS1
 	expRt6 := &engine.APIRouteProfile{
-		ID:                "ROUTE_HC1",
-		Tenant:            "cgrates.org",
-		FilterIDs:         []string{"Fltr_tcc"},
-		Sorting:           "*hc",
-		SortingParameters: []string{},
+		ID:        "ROUTE_HC1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"Fltr_tcc"},
+		Sorting:   "*hc",
 		Routes: []*engine.ExternalRoute{
 			{
 				ID:             "route1",
