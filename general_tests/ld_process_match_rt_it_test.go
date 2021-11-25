@@ -208,7 +208,7 @@ func testLdPrMatchRtCDRSProcessEvent(t *testing.T) {
 					"MinCost":         0,
 					"Rates": map[string]interface{}{
 						utils.IfaceAsString(costIntervalRatesID): map[string]interface{}{
-							"FixedFee":      0,
+							"FixedFee":      nil,
 							"Increment":     30000000000,
 							"IntervalStart": 0,
 							"RecurrentFee":  0.4,

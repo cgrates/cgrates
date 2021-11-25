@@ -649,7 +649,7 @@ func (rt *Rate) Set(path []string, val interface{}, newBranch bool) (err error) 
 			return ErrWrongPath
 		}
 		if len(rt.IntervalRates) == 0 || newBranch {
-			rt.IntervalRates = append(rt.IntervalRates, new(IntervalRate))
+			rt.IntervalRates = append(rt.IntervalRates, &IntervalRate{IntervalStart: NewDecimal(0, 0), FixedFee: NewDecimal(0, 0)})
 		}
 		switch path[1] {
 		case IntervalStart:
