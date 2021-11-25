@@ -56,7 +56,9 @@ func TestInitClient(t *testing.T) {
 func TestInitCase1(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsIndex: "test"},
+			Opts: &config.EventExporterOpts{
+				ElsIndex: utils.StringPointer("test"),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {
@@ -71,7 +73,9 @@ func TestInitCase1(t *testing.T) {
 func TestInitCase2(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsIfPrimaryTerm: 20},
+			Opts: &config.EventExporterOpts{
+				ElsIfPrimaryTerm: utils.IntPointer(20),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {
@@ -83,22 +87,12 @@ func TestInitCase2(t *testing.T) {
 	}
 }
 
-func TestInitCase2Err(t *testing.T) {
-	ee := &ElasticEE{
-		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsIfPrimaryTerm: "test"},
-		},
-	}
-	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
-	if err := ee.prepareOpts(); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
-	}
-}
-
 func TestInitCase3(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsIfSeqNo: 20},
+			Opts: &config.EventExporterOpts{
+				ElsIfSeqNo: utils.IntPointer(20),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {
@@ -110,22 +104,12 @@ func TestInitCase3(t *testing.T) {
 	}
 }
 
-func TestInitCase3Err(t *testing.T) {
-	ee := &ElasticEE{
-		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsIfSeqNo: "test"},
-		},
-	}
-	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
-	if err := ee.prepareOpts(); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
-	}
-}
-
 func TestInitCase4(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsOpType: "test"},
+			Opts: &config.EventExporterOpts{
+				ElsOpType: utils.StringPointer("test"),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {
@@ -140,7 +124,9 @@ func TestInitCase4(t *testing.T) {
 func TestInitCase5(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsPipeline: "test"},
+			Opts: &config.EventExporterOpts{
+				ElsPipeline: utils.StringPointer("test"),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {
@@ -155,7 +141,9 @@ func TestInitCase5(t *testing.T) {
 func TestInitCase6(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsRouting: "test"},
+			Opts: &config.EventExporterOpts{
+				ElsRouting: utils.StringPointer("test"),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {
@@ -167,22 +155,12 @@ func TestInitCase6(t *testing.T) {
 	}
 }
 
-func TestInitCase7(t *testing.T) {
-	ee := &ElasticEE{
-		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsTimeout: "test"},
-		},
-	}
-	errExpect := "time: invalid duration \"test\""
-	if err := ee.prepareOpts(); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
-	}
-}
-
 func TestInitCase8(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsVersionLow: 20},
+			Opts: &config.EventExporterOpts{
+				ElsVersion: utils.IntPointer(20),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {
@@ -194,22 +172,12 @@ func TestInitCase8(t *testing.T) {
 	}
 }
 
-func TestInitCase8Err(t *testing.T) {
-	ee := &ElasticEE{
-		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsVersionLow: "test"},
-		},
-	}
-	errExpect := "strconv.ParseInt: parsing \"test\": invalid syntax"
-	if err := ee.prepareOpts(); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
-	}
-}
-
 func TestInitCase9(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsVersionType: "test"},
+			Opts: &config.EventExporterOpts{
+				ElsVersionType: utils.StringPointer("test"),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {
@@ -224,7 +192,9 @@ func TestInitCase9(t *testing.T) {
 func TestInitCase10(t *testing.T) {
 	ee := &ElasticEE{
 		cfg: &config.EventExporterCfg{
-			Opts: map[string]interface{}{utils.ElsWaitForActiveShards: "test"},
+			Opts: &config.EventExporterOpts{
+				ElsWaitForActiveShards: utils.StringPointer("test"),
+			},
 		},
 	}
 	if err := ee.prepareOpts(); err != nil {

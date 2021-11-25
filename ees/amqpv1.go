@@ -35,8 +35,8 @@ func NewAMQPv1EE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *AMQPv1
 		queueID: "/" + utils.DefaultQueueID,
 		reqs:    newConcReq(cfg.ConcurrentRequests),
 	}
-	if vals, has := cfg.Opts[utils.AMQPQueueID]; has {
-		pstr.queueID = "/" + utils.IfaceAsString(vals)
+	if cfg.Opts.AMQPQueueID != nil {
+		pstr.queueID = "/" + *cfg.Opts.AMQPQueueID
 	}
 	return pstr
 }

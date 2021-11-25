@@ -73,7 +73,7 @@ func TestParseOpt(t *testing.T) {
 		Attempts:           2,
 		ConcurrentRequests: 2,
 	}
-	opts := map[string]interface{}{}
+	opts := &config.EventExporterOpts{}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
 	dc, err := newEEMetrics("Local")
@@ -99,8 +99,8 @@ func TestParseOptJetStream(t *testing.T) {
 		Attempts:           2,
 		ConcurrentRequests: 2,
 	}
-	opts := map[string]interface{}{
-		utils.NatsJetStream: true,
+	opts := &config.EventExporterOpts{
+		NATSJetStream: utils.BoolPointer(true),
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
@@ -121,17 +121,6 @@ func TestParseOptJetStream(t *testing.T) {
 	if !pstr.jetStream {
 		t.Error("Expected jetStream to be true")
 	}
-
-	//test error on converson
-	opts = map[string]interface{}{
-		utils.NatsJetStream: uint16(2),
-	}
-
-	err = pstr.parseOpt(opts, nodeID, connTimeout)
-
-	if err.Error() != "cannot convert field: 2 to bool" {
-		t.Error("The conversion shouldn't have been possible")
-	}
 }
 
 func TestParseOptJetStreamMaxWait(t *testing.T) {
@@ -141,9 +130,9 @@ func TestParseOptJetStreamMaxWait(t *testing.T) {
 		Attempts:           2,
 		ConcurrentRequests: 2,
 	}
-	opts := map[string]interface{}{
-		utils.NatsJetStream:        true,
-		utils.NatsJetStreamMaxWait: "2ns",
+	opts := &config.EventExporterOpts{
+		NATSJetStream:        utils.BoolPointer(true),
+		NATSJetStreamMaxWait: utils.DurationPointer(2),
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
@@ -164,17 +153,6 @@ func TestParseOptJetStreamMaxWait(t *testing.T) {
 	if !reflect.DeepEqual(pstr.jsOpts, exp) {
 		t.Errorf("Expected %v \n but received \n %v", exp, pstr.jsOpts)
 	}
-
-	//test conversion error
-	opts = map[string]interface{}{
-		utils.NatsJetStream:        true,
-		utils.NatsJetStreamMaxWait: true,
-	}
-
-	err = pstr.parseOpt(opts, nodeID, connTimeout)
-	if err.Error() != "cannot convert field: true to time.Duration" {
-		t.Errorf("The conversion shouldn't have been possible: %v", err.Error())
-	}
 }
 
 func TestParseOptSubject(t *testing.T) {
@@ -184,8 +162,8 @@ func TestParseOptSubject(t *testing.T) {
 		Attempts:           2,
 		ConcurrentRequests: 2,
 	}
-	opts := map[string]interface{}{
-		utils.NatsSubject: "nats_subject",
+	opts := &config.EventExporterOpts{
+		NATSSubject: utils.StringPointer("nats_subject"),
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
@@ -203,15 +181,14 @@ func TestParseOptSubject(t *testing.T) {
 		t.Error(err)
 	}
 
-	if pstr.subject != opts[utils.NatsSubject] {
-		t.Errorf("Expected %v \n but received \n %v", opts[utils.NatsSubject], pstr.subject)
+	if opts.NATSSubject == nil || pstr.subject != *opts.NATSSubject {
+		t.Errorf("Expected %v \n but received \n %v", *opts.NATSSubject, pstr.subject)
 	}
 }
 
 func TestGetNatsOptsJWT(t *testing.T) {
-	opts := map[string]interface{}{
-		utils.NatsJWTFile: "jwtfile",
-		// utils.NatsSeedFile: "file",
+	opts := &config.EventExporterOpts{
+		NATSJWTFile: utils.StringPointer("jwtfile"),
 	}
 
 	nodeID := "node_id1"
@@ -224,9 +201,9 @@ func TestGetNatsOptsJWT(t *testing.T) {
 }
 
 func TestGetNatsOptsClientCert(t *testing.T) {
-	opts := map[string]interface{}{
-		utils.NatsClientCertificate: "client_cert",
-		utils.NatsClientKey:         "client_key",
+	opts := &config.EventExporterOpts{
+		NATSClientCertificate: utils.StringPointer("client_cert"),
+		NATSClientKey:         utils.StringPointer("client_key"),
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
@@ -245,8 +222,8 @@ func TestGetNatsOptsClientCert(t *testing.T) {
 	// }
 
 	// no key error
-	opts = map[string]interface{}{
-		utils.NatsClientCertificate: "client_cert",
+	opts = &config.EventExporterOpts{
+		NATSClientCertificate: utils.StringPointer("client_cert"),
 	}
 	_, err = GetNatsOpts(opts, nodeID, connTimeout)
 	if err.Error() != "has certificate but no key" {
@@ -254,8 +231,8 @@ func TestGetNatsOptsClientCert(t *testing.T) {
 	}
 
 	// no certificate error
-	opts = map[string]interface{}{
-		utils.NatsClientKey: "client_key",
+	opts = &config.EventExporterOpts{
+		NATSClientKey: utils.StringPointer("client_key"),
 	}
 	_, err = GetNatsOpts(opts, nodeID, connTimeout)
 	if err.Error() != "has key but no certificate" {

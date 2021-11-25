@@ -88,7 +88,7 @@ func TestEESClone(t *testing.T) {
 				contentFields:  []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -166,8 +166,8 @@ func TestEESClone(t *testing.T) {
 						Layout: time.RFC3339,
 					},
 				},
-				Opts: map[string]interface{}{
-					utils.MetaDefault: "randomVal",
+				Opts: &EventExporterOpts{
+					CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
 				},
 			},
 		},
@@ -283,7 +283,7 @@ func TestEventExporterSameID(t *testing.T) {
 				contentFields:  []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -305,7 +305,7 @@ func TestEventExporterSameID(t *testing.T) {
 				},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 		},
@@ -405,7 +405,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				Fields:         []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -429,7 +429,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 						Layout: time.RFC3339,
 					},
 				},
-				Opts: make(map[string]interface{}),
+				Opts: &EventExporterOpts{},
 				Fields: []*FCTemplate{
 					{Tag: utils.CGRID, Path: "*exp.CGRID", Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep), Layout: time.RFC3339},
 				},
@@ -518,7 +518,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Fields:         []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 			{
@@ -543,7 +543,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 					},
 				},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				Fields: []*FCTemplate{
 					{
 						Tag:    utils.CGRID,

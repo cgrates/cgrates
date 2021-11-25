@@ -314,7 +314,7 @@ type EventExporterJsonCfg struct {
 	Id                  *string
 	Type                *string
 	Export_path         *string
-	Opts                map[string]interface{}
+	Opts                *EventExporterOptsJson
 	Timezone            *string
 	Filters             *[]string
 	Flags               *[]string

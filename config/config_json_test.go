@@ -2035,7 +2035,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Synchronous:         utils.BoolPointer(false),
 				Attempts:            utils.IntPointer(1),
 				Fields:              &[]*FcTemplateJsonCfg{},
-				Opts:                make(map[string]interface{}),
+				Opts:                &EventExporterOptsJson{},
 				Concurrent_requests: utils.IntPointer(0),
 				Failed_posts_dir:    utils.StringPointer("/var/spool/cgrates/failed_posts"),
 			},

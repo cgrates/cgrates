@@ -55,21 +55,21 @@ type AMQPee struct {
 	bytePreparing
 }
 
-func (pstr *AMQPee) parseOpts(dialURL map[string]interface{}) {
+func (pstr *AMQPee) parseOpts(dialURL *config.EventExporterOpts) {
 	pstr.queueID = utils.DefaultQueueID
 	pstr.routingKey = utils.DefaultQueueID
-	if vals, has := dialURL[utils.AMQPQueueID]; has {
-		pstr.queueID = utils.IfaceAsString(vals)
+	if dialURL.AMQPQueueID != nil {
+		pstr.queueID = *dialURL.AMQPQueueID
 	}
-	if vals, has := dialURL[utils.AMQPRoutingKey]; has {
-		pstr.routingKey = utils.IfaceAsString(vals)
+	if dialURL.AMQPRoutingKey != nil {
+		pstr.routingKey = *dialURL.AMQPRoutingKey
 	}
-	if vals, has := dialURL[utils.AMQPExchange]; has {
-		pstr.exchange = utils.IfaceAsString(vals)
+	if dialURL.AMQPExchange != nil {
+		pstr.exchange = *dialURL.AMQPExchange
 		pstr.exchangeType = utils.DefaultExchangeType
 	}
-	if vals, has := dialURL[utils.AMQPExchangeType]; has {
-		pstr.exchangeType = utils.IfaceAsString(vals)
+	if dialURL.AMQPExchangeType != nil {
+		pstr.exchangeType = *dialURL.AMQPExchangeType
 	}
 }
 
