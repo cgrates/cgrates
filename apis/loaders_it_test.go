@@ -296,9 +296,11 @@ func testLoadersGetAccount(t *testing.T) {
 				Weight: 20,
 			},
 		},
+		Opts: make(map[string]interface{}),
 		Balances: map[string]*utils.Balance{
 			"MonetaryBalance": {
-				ID: "MonetaryBalance",
+				ID:   "MonetaryBalance",
+				Opts: make(map[string]interface{}),
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 10,
@@ -370,6 +372,7 @@ func testLoadersGetActionProfile(t *testing.T) {
 			{
 				ID:   "TOPUP",
 				Type: utils.MetaAddBalance,
+				Opts: make(map[string]interface{}),
 				Diktats: []*engine.APDiktat{
 					{
 						Path:  "*balance.TestBalance.Units",
@@ -482,14 +485,16 @@ func testLoadersGetDispatcherProfile(t *testing.T) {
 	}
 
 	expDspPrf := engine.DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "DSP1",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Strategy:  utils.MetaWeight,
+		Tenant:         "cgrates.org",
+		ID:             "DSP1",
+		FilterIDs:      []string{"FLTR_ACCOUNT_1001"},
+		Strategy:       utils.MetaWeight,
+		StrategyParams: make(map[string]interface{}),
 		Hosts: engine.DispatcherHostProfiles{
 			{
 				ID:     "ALL",
 				Weight: 20,
+				Params: make(map[string]interface{}),
 			},
 		},
 		Weight: 10,

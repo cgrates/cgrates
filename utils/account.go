@@ -743,49 +743,53 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 		case Weights:
 			bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 		case UnitFactors:
-			sls := strings.Split(IfaceAsString(val), InfieldSep)
-			if len(sls)%2 != 0 {
-				return fmt.Errorf("invalid key: <%s> for BalanceUnitFactors", IfaceAsString(val))
-			}
-			for j := 0; j < len(sls); j += 2 {
-				uf := new(UnitFactor)
-				if len(sls[j]) != 0 {
-					uf.FilterIDs = strings.Split(sls[j], ANDSep)
+			if ufStr := IfaceAsString(val); len(ufStr) != 0 {
+				sls := strings.Split(ufStr, InfieldSep)
+				if len(sls)%2 != 0 {
+					return fmt.Errorf("invalid key: <%s> for BalanceUnitFactors", IfaceAsString(val))
 				}
+				for j := 0; j < len(sls); j += 2 {
+					uf := new(UnitFactor)
+					if len(sls[j]) != 0 {
+						uf.FilterIDs = strings.Split(sls[j], ANDSep)
+					}
 
-				var valB *decimal.Big
-				if valB, err = IfaceAsBig(sls[j+1]); err != nil {
-					return
+					var valB *decimal.Big
+					if valB, err = IfaceAsBig(sls[j+1]); err != nil {
+						return
+					}
+					uf.Factor = &Decimal{valB}
+					bL.UnitFactors = append(bL.UnitFactors, uf)
 				}
-				uf.Factor = &Decimal{valB}
-				bL.UnitFactors = append(bL.UnitFactors, uf)
 			}
 		case CostIncrements:
-			sls := strings.Split(IfaceAsString(val), InfieldSep)
-			if len(sls)%4 != 0 {
-				return fmt.Errorf("invalid key: <%s> for BalanceCostIncrements", IfaceAsString(val))
-			}
-			for j := 0; j < len(sls); j += 4 {
-				cI := new(CostIncrement)
-				if len(sls[j]) != 0 {
-					cI.FilterIDs = strings.Split(sls[j], ANDSep)
+			if ciStr := IfaceAsString(val); len(ciStr) != 0 {
+				sls := strings.Split(ciStr, InfieldSep)
+				if len(sls)%4 != 0 {
+					return fmt.Errorf("invalid key: <%s> for BalanceCostIncrements", IfaceAsString(val))
 				}
-				if len(sls[j+1]) != 0 {
-					if cI.Increment, err = NewDecimalFromString(sls[j+1]); err != nil {
-						return
+				for j := 0; j < len(sls); j += 4 {
+					cI := new(CostIncrement)
+					if len(sls[j]) != 0 {
+						cI.FilterIDs = strings.Split(sls[j], ANDSep)
 					}
-				}
-				if len(sls[j+2]) != 0 {
-					if cI.FixedFee, err = NewDecimalFromString(sls[j+2]); err != nil {
-						return
+					if len(sls[j+1]) != 0 {
+						if cI.Increment, err = NewDecimalFromString(sls[j+1]); err != nil {
+							return
+						}
 					}
-				}
-				if len(sls[j+3]) != 0 {
-					if cI.RecurrentFee, err = NewDecimalFromString(sls[j+3]); err != nil {
-						return
+					if len(sls[j+2]) != 0 {
+						if cI.FixedFee, err = NewDecimalFromString(sls[j+2]); err != nil {
+							return
+						}
 					}
+					if len(sls[j+3]) != 0 {
+						if cI.RecurrentFee, err = NewDecimalFromString(sls[j+3]); err != nil {
+							return
+						}
+					}
+					bL.CostIncrements = append(bL.CostIncrements, cI)
 				}
-				bL.CostIncrements = append(bL.CostIncrements, cI)
 			}
 		case Opts:
 			bL.Opts, err = NewMapFromCSV(IfaceAsString(val))
