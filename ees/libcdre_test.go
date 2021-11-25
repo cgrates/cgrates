@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,7 +39,7 @@ func TestSetFldPostCacheTTL(t *testing.T) {
 
 func TestAddFldPost(t *testing.T) {
 	SetFailedPostCacheTTL(5 * time.Second)
-	AddFailedPost("", "path1", "format1", "1", make(map[string]interface{}))
+	AddFailedPost("", "path1", "format1", "1", &config.EventExporterOpts{})
 	x, ok := failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -55,13 +56,15 @@ func TestAddFldPost(t *testing.T) {
 		Path:   "path1",
 		Format: "format1",
 		Events: []interface{}{"1"},
-		Opts:   make(map[string]interface{}),
+		Opts:   &config.EventExporterOpts{},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
-	AddFailedPost("", "path1", "format1", "2", make(map[string]interface{}))
-	AddFailedPost("", "path2", "format2", "3", map[string]interface{}{utils.SQSQueueID: "qID"})
+	AddFailedPost("", "path1", "format1", "2", &config.EventExporterOpts{})
+	AddFailedPost("", "path2", "format2", "3", &config.EventExporterOpts{
+		SQSQueueID: utils.StringPointer("qID"),
+	})
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("", "path1", "format1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -77,7 +80,7 @@ func TestAddFldPost(t *testing.T) {
 		Path:   "path1",
 		Format: "format1",
 		Events: []interface{}{"1", "2"},
-		Opts:   make(map[string]interface{}),
+		Opts:   &config.EventExporterOpts{},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
@@ -97,7 +100,9 @@ func TestAddFldPost(t *testing.T) {
 		Path:   "path2",
 		Format: "format2",
 		Events: []interface{}{"3"},
-		Opts:   map[string]interface{}{utils.SQSQueueID: "qID"},
+		Opts: &config.EventExporterOpts{
+			SQSQueueID: utils.StringPointer("qID"),
+		},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))

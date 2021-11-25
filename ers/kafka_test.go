@@ -138,7 +138,7 @@ func TestKafkaERServe2(t *testing.T) {
 		poster: ees.NewKafkaEE(&config.EventExporterCfg{
 			ExportPath: "url",
 			Attempts:   1,
-			Opts:       make(map[string]interface{}),
+			Opts:       &config.EventExporterOpts{},
 		}, nil),
 	}
 	rdr.rdrExit <- struct{}{}

@@ -59,22 +59,22 @@ type SQSee struct {
 	bytePreparing
 }
 
-func (pstr *SQSee) parseOpts(opts map[string]interface{}) {
+func (pstr *SQSee) parseOpts(opts *config.EventExporterOpts) {
 	pstr.queueID = utils.DefaultQueueID
-	if val, has := opts[utils.SQSQueueID]; has {
-		pstr.queueID = utils.IfaceAsString(val)
+	if opts.SQSQueueID != nil {
+		pstr.queueID = *opts.SQSQueueID
 	}
-	if val, has := opts[utils.AWSRegion]; has {
-		pstr.awsRegion = utils.IfaceAsString(val)
+	if opts.AWSRegion != nil {
+		pstr.awsRegion = *opts.AWSRegion
 	}
-	if val, has := opts[utils.AWSKey]; has {
-		pstr.awsID = utils.IfaceAsString(val)
+	if opts.AWSKey != nil {
+		pstr.awsID = *opts.AWSKey
 	}
-	if val, has := opts[utils.AWSSecret]; has {
-		pstr.awsKey = utils.IfaceAsString(val)
+	if opts.AWSSecret != nil {
+		pstr.awsKey = *opts.AWSSecret
 	}
-	if val, has := opts[utils.AWSToken]; has {
-		pstr.awsToken = utils.IfaceAsString(val)
+	if opts.AWSToken != nil {
+		pstr.awsToken = *opts.AWSToken
 	}
 }
 

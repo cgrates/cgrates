@@ -34,8 +34,8 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *KafkaEE
 		topic: utils.DefaultQueueID,
 		reqs:  newConcReq(cfg.ConcurrentRequests),
 	}
-	if vals, has := cfg.Opts[utils.KafkaTopic]; has {
-		kfkPstr.topic = utils.IfaceAsString(vals)
+	if cfg.Opts.KafkaTopic != nil {
+		kfkPstr.topic = *cfg.Opts.KafkaTopic
 	}
 	return kfkPstr
 }

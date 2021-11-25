@@ -56,14 +56,27 @@ func writeFailedPosts(_ string, value interface{}) {
 	}
 }
 
-func AddFailedPost(failedPostsDir, expPath, format string, ev interface{}, opts map[string]interface{}) {
+func AddFailedPost(failedPostsDir, expPath, format string, ev interface{}, opts *config.EventExporterOpts) {
 	key := utils.ConcatenatedKey(failedPostsDir, expPath, format)
 	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
-	if qID := utils.FirstNonEmpty(
-		utils.IfaceAsString(opts[utils.AMQPQueueID]),
-		utils.IfaceAsString(opts[utils.S3Bucket]),
-		utils.IfaceAsString(opts[utils.SQSQueueID]),
-		utils.IfaceAsString(opts[utils.KafkaTopic])); len(qID) != 0 {
+	var amqpQueueID string
+	var s3BucketID string
+	var sqsQueueID string
+	var kafkaTopic string
+	if opts.AMQPQueueID != nil {
+		amqpQueueID = *opts.AMQPQueueID
+	}
+	if opts.S3BucketID != nil {
+		s3BucketID = *opts.S3BucketID
+	}
+	if opts.SQSQueueID != nil {
+		sqsQueueID = *opts.SQSQueueID
+	}
+	if opts.KafkaTopic != nil {
+		kafkaTopic = *opts.KafkaTopic
+	}
+	if qID := utils.FirstNonEmpty(amqpQueueID, s3BucketID, sqsQueueID,
+		kafkaTopic); len(qID) != 0 {
 		key = utils.ConcatenatedKey(key, qID)
 	}
 	var failedPost *ExportEvents
@@ -107,7 +120,7 @@ func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
 type ExportEvents struct {
 	lk             sync.RWMutex
 	Path           string
-	Opts           map[string]interface{}
+	Opts           *config.EventExporterOpts
 	Format         string
 	Events         []interface{}
 	failedPostsDir string

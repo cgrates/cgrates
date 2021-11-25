@@ -2391,7 +2391,7 @@ func TestEEsNoLksConfig(t *testing.T) {
 				Fields:         []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 		},
@@ -5378,7 +5378,7 @@ func TestCgrCdfEventExporter(t *testing.T) {
 				contentFields:  []*FCTemplate{},
 				headerFields:   []*FCTemplate{},
 				trailerFields:  []*FCTemplate{},
-				Opts:           make(map[string]interface{}),
+				Opts:           &EventExporterOpts{},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
 		},
@@ -5459,7 +5459,7 @@ func TestCgrCfgEventExporterDefault(t *testing.T) {
 		Fields:         []*FCTemplate{},
 		headerFields:   []*FCTemplate{},
 		trailerFields:  []*FCTemplate{},
-		Opts:           make(map[string]interface{}),
+		Opts:           &EventExporterOpts{},
 		FailedPostsDir: "/var/spool/cgrates/failed_posts",
 	}
 	if !reflect.DeepEqual(cgrCfg.dfltEvExp, eCfg) {

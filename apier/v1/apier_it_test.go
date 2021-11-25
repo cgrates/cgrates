@@ -2172,8 +2172,8 @@ func testApierReplayFldPosts(t *testing.T) {
 	fileInPath := path.Join(*args.FailedRequestsInDir, fileName)
 	ev = &ees.ExportEvents{
 		Path: "amqp://guest:guest@localhost:5672/",
-		Opts: map[string]interface{}{
-			utils.AMQPQueueID: "cgrates_cdrs",
+		Opts: &config.EventExporterOpts{
+			AMQPQueueID: utils.StringPointer("cgrates_cdrs"),
 		},
 		Format: utils.MetaAMQPjsonMap,
 		Events: []interface{}{bev},

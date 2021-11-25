@@ -37,11 +37,11 @@ func TestAMQPeeParseURL(t *testing.T) {
 		exchangeType: "fanout",
 		routingKey:   "CGRCDR",
 	}
-	opts := map[string]interface{}{
-		utils.AMQPQueueID:      "q1",
-		utils.AMQPExchange:     "E1",
-		utils.AMQPRoutingKey:   "CGRCDR",
-		utils.AMQPExchangeType: "fanout",
+	opts := &config.EventExporterOpts{
+		AMQPQueueID:      utils.StringPointer("q1"),
+		AMQPExchange:     utils.StringPointer("E1"),
+		AMQPRoutingKey:   utils.StringPointer("CGRCDR"),
+		AMQPExchangeType: utils.StringPointer("fanout"),
 	}
 	amqp.parseOpts(opts)
 	if !reflect.DeepEqual(expected, amqp) {
@@ -53,7 +53,9 @@ func TestKafkaParseURL(t *testing.T) {
 	cfg := &config.EventExporterCfg{
 		ExportPath: "127.0.0.1:9092",
 		Attempts:   10,
-		Opts:       map[string]interface{}{utils.KafkaTopic: "cdr_billing"},
+		Opts: &config.EventExporterOpts{
+			KafkaTopic: utils.StringPointer("cdr_billing"),
+		},
 	}
 	exp := &KafkaEE{
 		cfg:   cfg,

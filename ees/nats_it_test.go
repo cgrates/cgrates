@@ -196,9 +196,8 @@ func TestGetNatsOptsSeedFile(t *testing.T) {
 	nkey := "SUACSSL3UAHUDXKFSNVUZRF5UHPMWZ6BFDTJ7M6USDXIEDNPPQYYYCU3VY"
 	os.WriteFile("/tmp/nkey.txt", []byte(nkey), 0777)
 
-	opts := map[string]interface{}{
-		utils.NatsSeedFile: "/tmp/nkey.txt",
-		// utils.NatsSeedFile: "file",
+	opts := &config.EventExporterOpts{
+		NATSSeedFile: utils.StringPointer("/tmp/nkey.txt"),
 	}
 
 	nodeID := "node_id1"
