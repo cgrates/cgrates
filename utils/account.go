@@ -653,15 +653,16 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 			if strings.HasPrefix(path[0], Opts) &&
 				path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
 				ap.Opts[path[0][5:len(path[0])-1]] = val
+				return
 			}
-			if strings.HasPrefix(path[0], Balances) &&
-				path[0][8] == '[' && path[0][len(path[0])-1] == ']' {
-				id := path[0][9 : len(path[0])-1]
-				if _, has := ap.Balances[id]; !has {
-					ap.Balances[id] = &Balance{ID: id, Opts: make(map[string]interface{}), Units: NewDecimal(0, 0)}
-				}
-				return ap.Balances[id].Set(path[1:], val, newBranch)
-			}
+			// if strings.HasPrefix(path[0], Balances) &&
+			// 	path[0][8] == '[' && path[0][len(path[0])-1] == ']' {
+			// 	id := path[0][9 : len(path[0])-1]
+			// 	if _, has := ap.Balances[id]; !has {
+			// 		ap.Balances[id] = &Balance{ID: id, Opts: make(map[string]interface{}), Units: NewDecimal(0, 0)}
+			// 	}
+			// 	return ap.Balances[id].Set(path[1:], val, newBranch)
+			// }
 			return ErrWrongPath
 		case Tenant:
 			ap.Tenant = IfaceAsString(val)
@@ -683,12 +684,12 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 		return
 	default:
 	}
+	if path[0] == Opts {
+		return MapStorage(ap.Opts).Set(path[1:], val)
+	}
 	if strings.HasPrefix(path[0], Opts) &&
 		path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
 		return MapStorage(ap.Opts).Set(append([]string{path[0][5 : len(path[0])-1]}, path[1:]...), val)
-	}
-	if path[0] == Opts {
-		return MapStorage(ap.Opts).Set(path[1:], val)
 	}
 	var id string
 	if path[0] == Balances {
@@ -718,6 +719,7 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 			if strings.HasPrefix(path[0], Opts) &&
 				path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
 				bL.Opts[path[0][5:len(path[0])-1]] = val
+				return
 			}
 			return ErrWrongPath
 		case ID:
@@ -853,12 +855,12 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 		}
 	}
 
+	if path[0] == Opts {
+		return MapStorage(bL.Opts).Set(path[1:], val)
+	}
 	if strings.HasPrefix(path[0], Opts) &&
 		path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
 		return MapStorage(bL.Opts).Set(append([]string{path[0][5 : len(path[0])-1]}, path[1:]...), val)
-	}
-	if path[0] == Opts {
-		return MapStorage(bL.Opts).Set(path[1:], val)
 	}
 	return ErrWrongPath
 }
