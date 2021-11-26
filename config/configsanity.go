@@ -767,6 +767,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			switch exp.Type {
 			case utils.MetaFileCSV:
 				for _, dir := range []string{exp.ExportPath} {
+					if dir == utils.MetaBuffer {
+						break
+					}
 					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 						return fmt.Errorf("<%s> nonexistent folder: %s for exporter with ID: %s", utils.EEs, dir, exp.ID)
 					}
@@ -776,6 +779,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 			case utils.MetaFileFWV:
 				for _, dir := range []string{exp.ExportPath} {
+					if dir == utils.MetaBuffer {
+						break
+					}
 					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 						return fmt.Errorf("<%s> nonexistent folder: %s for exporter with ID: %s", utils.EEs, dir, exp.ID)
 					}

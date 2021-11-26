@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"archive/zip"
+	"bytes"
 	"fmt"
+	"io"
 	"sync"
 	"time"
 
@@ -317,5 +320,81 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 			fmt.Sprintf("<%s> Exporter <%s> could not export because err: <%s>",
 				utils.EEs, exp.Cfg().ID, err.Error()))
 	}
+	return
+}
+
+type ArchiveEventsArgs struct {
+	Tenant  string
+	APIOpts map[string]interface{}
+	Events  []*utils.CGREvent
+}
+
+// V1ArchiveEventsAsReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.
+func (eeS *EeS) V1ArchiveEventsAsReply(ctx *context.Context, args *ArchiveEventsArgs, reply *[]byte) (err error) {
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = eeS.cfg.GeneralCfg().DefaultTenant
+	}
+	expID, has := args.APIOpts[utils.MetaExporterID]
+	if !has {
+		return fmt.Errorf("ExporterID is missing from argument's options: <%v>", utils.ToJSON(args))
+	}
+	//var validExporter bool
+	var eesCfg *config.EventExporterCfg
+	for _, exporter := range eeS.cfg.EEsCfg().Exporters {
+		if exporter.ID == expID {
+			eesCfg = exporter
+			break
+		}
+	}
+	if eesCfg == nil {
+		return fmt.Errorf("exporter config with ID: <%v> is missing", expID)
+	}
+	if !eesCfg.Synchronous {
+		return fmt.Errorf("exporter with ID: <%v> is not synchronous", expID)
+	}
+	if eesCfg.ExportPath != utils.MetaBuffer {
+		return fmt.Errorf("exporter with ID: <%v> has an invalid ExportPath for archiving", expID)
+	}
+	var dc *utils.SafeMapStorage
+	if dc, err = newEEMetrics(utils.FirstNonEmpty(
+		eesCfg.Timezone,
+		eeS.cfg.GeneralCfg().DefaultTimezone)); err != nil {
+		return
+	}
+	var ee EventExporter
+
+	buff := new(bytes.Buffer)
+	zBuff := zip.NewWriter(buff)
+	//
+	var wrtr io.Writer
+	if wrtr, err = zBuff.Create("events.csv"); err != nil {
+		return err
+	}
+	switch eesCfg.Type {
+	case utils.MetaFileCSV:
+		ee, err = NewFileCSVee(eesCfg, eeS.cfg, eeS.fltrS, dc, &buffer{buff})
+	case utils.MetaFileFWV:
+		ee, err = NewFileFWVee(eesCfg, eeS.cfg, eeS.fltrS, dc, wrtr)
+	default:
+		err = fmt.Errorf("unsupported exporter type: <%s>", eesCfg.Type)
+	}
+	if err != nil {
+		return err
+	}
+	for _, event := range args.Events {
+		if err := exportEventWithExporter(ctx, ee, event, false, eeS.cfg, eeS.fltrS); err != nil {
+			return err
+		}
+	}
+	if err = ee.Close(); err != nil {
+		return err
+	}
+
+	*reply = buff.Bytes()
+	if err = zBuff.Close(); err != nil {
+		return err
+	}
+
+	buff.Reset()
 	return
 }

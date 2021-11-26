@@ -565,6 +565,7 @@ const (
 	MetaEventCost            = "*event_cost"
 	MetaPositiveExports      = "*positive_exports"
 	MetaNegativeExports      = "*negative_exports"
+	MetaBuffer               = "*buffer"
 	MetaRoutesEventCost      = "*routesEventCost"
 	Freeswitch               = "freeswitch"
 	Kamailio                 = "kamailio"
@@ -772,6 +773,7 @@ const (
 	MetaCdrLog              = "*cdrLog"
 	MetaCDR                 = "*cdr"
 	MetaExporterIDs         = "*exporterIDs"
+	MetaExporterID          = "*exporterID"
 	MetaAsync               = "*async"
 	MetaUsage               = "*usage"
 	MetaStartTime           = "*startTime"
@@ -1498,9 +1500,10 @@ const (
 
 // EEs
 const (
-	EeSv1             = "EeSv1"
-	EeSv1Ping         = "EeSv1.Ping"
-	EeSv1ProcessEvent = "EeSv1.ProcessEvent"
+	EeSv1                     = "EeSv1"
+	EeSv1Ping                 = "EeSv1.Ping"
+	EeSv1ProcessEvent         = "EeSv1.ProcessEvent"
+	EeSv1ArchiveEventsAsReply = "EeSv1.ArchiveEventsAsReply"
 )
 
 // ActionProfile APIs

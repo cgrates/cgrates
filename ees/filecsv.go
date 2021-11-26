@@ -35,15 +35,15 @@ import (
 
 func NewFileCSVee(cfg *config.EventExporterCfg,
 	cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	dc *utils.SafeMapStorage) (fCsv *FileCSVee, err error) {
+	dc *utils.SafeMapStorage, wrtr io.WriteCloser) (fCsv *FileCSVee, err error) {
 	fCsv = &FileCSVee{
 		cfg: cfg,
 		dc:  dc,
-
+		//wrtr:    wrtr,
 		cgrCfg:  cgrCfg,
 		filterS: filterS,
 	}
-	err = fCsv.init()
+	err = fCsv.init(wrtr)
 	return
 }
 
@@ -51,7 +51,7 @@ func NewFileCSVee(cfg *config.EventExporterCfg,
 type FileCSVee struct {
 	cfg       *config.EventExporterCfg
 	dc        *utils.SafeMapStorage
-	file      io.WriteCloser
+	wrtr      io.WriteCloser // writer for the csv
 	csvWriter *csv.Writer
 	sync.Mutex
 	slicePreparing
@@ -60,7 +60,7 @@ type FileCSVee struct {
 	filterS *engine.FilterS
 }
 
-func (fCsv *FileCSVee) init() (err error) {
+func (fCsv *FileCSVee) init(wrtr io.WriteCloser) (err error) {
 	fCsv.Lock()
 	defer fCsv.Unlock()
 	// create the file
@@ -69,10 +69,12 @@ func (fCsv *FileCSVee) init() (err error) {
 	fCsv.dc.Lock()
 	fCsv.dc.MapStorage[utils.ExportPath] = filePath
 	fCsv.dc.Unlock()
-	if fCsv.file, err = os.Create(filePath); err != nil {
+	if fCsv.cfg.ExportPath == utils.MetaBuffer {
+		fCsv.wrtr = wrtr
+	} else if fCsv.wrtr, err = os.Create(filePath); err != nil {
 		return
 	}
-	fCsv.csvWriter = csv.NewWriter(fCsv.file)
+	fCsv.csvWriter = csv.NewWriter(fCsv.wrtr)
 	fCsv.csvWriter.Comma = utils.CSVSep
 	if fCsv.Cfg().Opts.CSVFieldSeparator != nil {
 		fCsv.csvWriter.Comma = rune((*fCsv.Cfg().Opts.CSVFieldSeparator)[0])
@@ -123,7 +125,7 @@ func (fCsv *FileCSVee) Close() (err error) {
 			utils.EEs, fCsv.Cfg().ID, err.Error()))
 	}
 	fCsv.csvWriter.Flush()
-	if err = fCsv.file.Close(); err != nil {
+	if err = fCsv.wrtr.Close(); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when closing the file",
 			utils.EEs, fCsv.Cfg().ID, err.Error()))
 	}
@@ -131,3 +133,12 @@ func (fCsv *FileCSVee) Close() (err error) {
 }
 
 func (fCsv *FileCSVee) GetMetrics() *utils.SafeMapStorage { return fCsv.dc }
+
+// Buffers cannot be closed, they just Reset. We implement our struct and used it for writer field in FileCSVee to be available for WriterCloser interface
+type buffer struct {
+	io.Writer
+}
+
+func (buf *buffer) Close() (err error) {
+	return
+}
