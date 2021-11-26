@@ -1280,7 +1280,10 @@ func (acc *Account) String() string {
 }
 
 func (acc *Account) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if acc == nil || len(fldPath) == 0 {
+	if len(fldPath) == 0 {
+		return acc, nil
+	}
+	if acc == nil {
 		return nil, utils.ErrNotFound
 	}
 	switch fldPath[0] {

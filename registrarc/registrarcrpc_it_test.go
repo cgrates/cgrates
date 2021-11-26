@@ -160,8 +160,8 @@ func testRPCChargerSWithAttr(t *testing.T) {
 					"RunID":   "CustomerCharges",
 				},
 				APIOpts: map[string]interface{}{
-					"*processRuns": 1.,
-					"*subsys":      "*chargers",
+					utils.OptsAttributesProcessRuns: 1.,
+					"*subsys":                       "*chargers",
 				},
 			},
 		}, {
@@ -176,8 +176,8 @@ func testRPCChargerSWithAttr(t *testing.T) {
 					"RunID":       "raw",
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsAttributesProcessRuns: 1,
-					utils.OptsAttributesProfileIDs:  []string{"*constant:*req.RequestType:*none"},
+					utils.OptsAttributesProcessRuns: 1.,
+					utils.OptsAttributesProfileIDs:  []interface{}{"*constant:*req.RequestType:*none"},
 					"*subsys":                       "*chargers",
 				},
 			},
@@ -193,7 +193,8 @@ func testRPCChargerSWithAttr(t *testing.T) {
 					"Subject": "SUPPLIER1",
 				},
 				APIOpts: map[string]interface{}{
-					utils.OptsAttributesProcessRuns: 1,
+					utils.OptsAttributesProcessRuns: 1.,
+					"*attrProfileIDs":               []interface{}{"ATTR_SUPPLIER1"},
 					"*subsys":                       "*chargers",
 				},
 			},

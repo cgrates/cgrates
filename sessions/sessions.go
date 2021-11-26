@@ -1846,6 +1846,8 @@ type V1AuthorizeArgs struct {
 	utils.Paginator
 }
 
+func (V1AuthorizeArgs) RPCClone() {}
+
 // ParseFlags will populate the V1AuthorizeArgs flags
 func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
 	for _, subsystem := range strings.Split(flags, sep) {
@@ -2145,6 +2147,8 @@ type V1InitSessionArgs struct {
 	*utils.CGREvent
 }
 
+func (V1InitSessionArgs) RPCClone() {}
+
 // ParseFlags will populate the V1InitSessionArgs flags
 func (args *V1InitSessionArgs) ParseFlags(flags, sep string) {
 	for _, subsystem := range strings.Split(flags, sep) {
@@ -2424,6 +2428,8 @@ type V1UpdateSessionArgs struct {
 	*utils.CGREvent
 }
 
+func (V1UpdateSessionArgs) RPCClone() {}
+
 // V1UpdateSessionReply contains options for session update reply
 type V1UpdateSessionReply struct {
 	Attributes *engine.AttrSProcessEventReply `json:",omitempty"`
@@ -2580,6 +2586,8 @@ type V1TerminateSessionArgs struct {
 	StatIDs           []string
 	*utils.CGREvent
 }
+
+func (V1TerminateSessionArgs) RPCClone() {}
 
 // ParseFlags will populate the V1TerminateSessionArgs flags
 func (args *V1TerminateSessionArgs) ParseFlags(flags, sep string) {
@@ -2829,6 +2837,8 @@ type V1ProcessMessageArgs struct {
 	utils.Paginator
 }
 
+func (V1ProcessMessageArgs) RPCClone() {}
+
 // ParseFlags will populate the V1ProcessMessageArgs flags
 func (args *V1ProcessMessageArgs) ParseFlags(flags, sep string) {
 	for _, subsystem := range strings.Split(flags, sep) {
@@ -3042,6 +3052,9 @@ type V1ProcessEventArgs struct {
 	*utils.CGREvent
 	utils.Paginator
 }
+
+// RPCClone implements rpcclient.RPCCloner interface
+func (V1ProcessEventArgs) RPCClone() {}
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
