@@ -78,7 +78,6 @@ func TestNewRecord(t *testing.T) {
 	if !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected %+v, received %+q", exp, r)
 	}
-
 }
 
 func TestNewRecordWithCahe(t *testing.T) {

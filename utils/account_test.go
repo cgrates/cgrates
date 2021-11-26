@@ -1092,3 +1092,101 @@ func TestAccountClone(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestAccountSet(t *testing.T) {
+	acc := Account{Balances: map[string]*Balance{}}
+	exp := Account{
+		Tenant:       "cgrates.org",
+		ID:           "ID",
+		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:      DynamicWeights{{}},
+		ThresholdIDs: []string{"TH1"},
+		Opts: map[string]interface{}{
+			"bal":  "val",
+			"bal2": "val2",
+			"bal3": "val2",
+			"bal4": "val2",
+			"bal5": MapStorage{"bal6": "val3"},
+		},
+		Balances: map[string]*Balance{
+			"bal1": {
+				ID:   "bal1",
+				Type: MetaConcrete,
+				Opts: map[string]interface{}{
+					"bal7":  "val3",
+					"bal8":  MapStorage{"bal9": "val3"},
+					"bal10": "val3",
+				},
+				Units: NewDecimal(0, 0),
+			},
+		},
+	}
+	if err := acc.Set([]string{}, "", false, EmptyString); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{"NotAField"}, "", false, EmptyString); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{"NotAField", "1"}, "", false, EmptyString); err != ErrWrongPath {
+		t.Error(err)
+	}
+	expErr := `malformed map pair: <"bal">`
+	if err := acc.Set([]string{Opts}, "bal", false, EmptyString); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Opts}, "bal:val;bal2:val2", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Opts, "bal3"}, "val2", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Opts + "[bal4]"}, "val2", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Opts + "[bal5]", "bal6"}, "val3", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	if err := acc.Set([]string{Tenant}, "cgrates.org", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{ID}, "ID", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{FilterIDs}, "fltr1;*string:~*req.Account:1001", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{ThresholdIDs}, "TH1", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Weights}, "", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances + "[bal1]", ID}, "bal1", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Type}, MetaConcrete, false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Opts}, "", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Opts + "bal7]"}, "val3", false, EmptyString); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Opts + "bal7]", ""}, "val3", false, EmptyString); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Opts + "[bal7]"}, "val3", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Opts + "[bal8]", "bal9"}, "val3", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Opts, "bal10"}, "val3", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(exp, acc) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(acc))
+	}
+}
