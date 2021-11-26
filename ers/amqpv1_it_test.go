@@ -152,7 +152,7 @@ func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 			SourcePath:     "/var/spool/cgrates/ers/in",
 			ProcessedPath:  "/var/spool/cgrates/ers/out",
 			Filters:        []string{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 	}
 
@@ -183,7 +183,7 @@ func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
 			SourcePath:     "/var/spool/cgrates/ers/in",
 			ProcessedPath:  "/var/spool/cgrates/ers/out",
 			Filters:        []string{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 	}
 

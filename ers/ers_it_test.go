@@ -791,9 +791,9 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
-				utils.PartialPathOpt:        dirPath,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
+				PartialPath:        utils.StringPointer(dirPath),
 			},
 			CacheDumpFields: []*config.FCTemplate{
 				{
@@ -874,10 +874,10 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt:      utils.MetaDumpToFile,
-				utils.PartialPathOpt:             dirPath,
-				utils.PartialCSVFieldSepartorOpt: "\"",
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction:       utils.StringPointer(utils.MetaDumpToFile),
+				PartialPath:              utils.StringPointer(dirPath),
+				PartialCSVFieldSeparator: utils.StringPointer("\""),
 			},
 		},
 	}
@@ -931,9 +931,9 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
-				utils.PartialPathOpt:        dirPath + "/non-existent",
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
+				PartialPath:        utils.StringPointer(dirPath + "/non-existent"),
 			},
 		},
 	}
@@ -990,10 +990,10 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{ // CacheDumpFields will be empty
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToJSON,
-				utils.PartialPathOpt:        dirPath,
-				utils.PartialOrderFieldOpt:  2,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToJSON),
+				PartialPath:        utils.StringPointer(dirPath),
+				PartialOrderField:  utils.StringPointer("2"),
 			},
 		},
 	}
@@ -1074,10 +1074,10 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{ // CacheDumpFields will be empty
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToJSON,
-				utils.PartialPathOpt:        dirPath,
-				utils.PartialOrderFieldOpt:  2,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToJSON),
+				PartialPath:        utils.StringPointer(dirPath),
+				PartialOrderField:  utils.StringPointer("2"),
 			},
 		},
 	}
@@ -1152,9 +1152,9 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{ // CacheDumpFields will be empty
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToJSON,
-				utils.PartialPathOpt:        dirPath,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToJSON),
+				PartialPath:        utils.StringPointer(dirPath),
 			},
 		},
 	}
@@ -1219,10 +1219,10 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{ // CacheDumpFields will be empty
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToJSON,
-				utils.PartialPathOpt:        dirPath,
-				utils.PartialOrderFieldOpt:  2,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToJSON),
+				PartialPath:        utils.StringPointer(dirPath),
+				PartialOrderField:  utils.StringPointer("2"),
 			},
 			CacheDumpFields: []*config.FCTemplate{
 				{
@@ -1291,10 +1291,10 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{ // CacheDumpFields will be empty
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToJSON,
-				utils.PartialPathOpt:        dirPath,
-				utils.PartialOrderFieldOpt:  2,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToJSON),
+				PartialPath:        utils.StringPointer(dirPath),
+				PartialOrderField:  utils.StringPointer("2"),
 			},
 			Fields: []*config.FCTemplate{
 				{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
@@ -1391,10 +1391,10 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{ // CacheDumpFields will be empty
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToJSON,
-				utils.PartialPathOpt:        "invalid_path",
-				utils.PartialOrderFieldOpt:  2,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToJSON),
+				PartialPath:        utils.StringPointer(dirPath),
+				PartialOrderField:  utils.StringPointer("2"),
 			},
 		},
 	}
@@ -1462,10 +1462,10 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{ // CacheDumpFields will be empty
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToJSON,
-				utils.PartialPathOpt:        dirPath,
-				utils.PartialOrderFieldOpt:  2,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToJSON),
+				PartialPath:        utils.StringPointer(dirPath),
+				PartialOrderField:  utils.StringPointer("2"),
 			},
 		},
 	}

@@ -381,8 +381,8 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 	}
 	eEvs := value.(*erEvents)
 	var action string
-	if cAct, has := eEvs.rdrCfg.Opts[utils.PartialCacheActionOpt]; has { // if the option is present overwrite the global cache action
-		action = utils.IfaceAsString(cAct)
+	if eEvs.rdrCfg.Opts.PartialCacheAction != nil {
+		action = *eEvs.rdrCfg.Opts.PartialCacheAction
 	}
 	switch action {
 	case utils.MetaNone: // do nothing with the events
@@ -400,8 +400,8 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 		erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: eEvs.rdrCfg}
 	case utils.MetaDumpToFile: // apply the cacheDumpFields to the united events and write the record to file
 		expPath := eEvs.rdrCfg.ProcessedPath
-		if pathVal, has := eEvs.rdrCfg.Opts[utils.PartialPathOpt]; has {
-			expPath = utils.IfaceAsString(pathVal)
+		if eEvs.rdrCfg.Opts.PartialPath != nil {
+			expPath = *eEvs.rdrCfg.Opts.PartialPath
 		}
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
@@ -457,8 +457,8 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 			return
 		}
 		csvWriter := csv.NewWriter(fileOut)
-		if fldSep, has := eEvs.rdrCfg.Opts[utils.PartialCSVFieldSepartorOpt]; has {
-			csvWriter.Comma = rune(utils.IfaceAsString(fldSep)[0])
+		if eEvs.rdrCfg.Opts.PartialCSVFieldSeparator != nil {
+			csvWriter.Comma = rune((*eEvs.rdrCfg.Opts.PartialCSVFieldSeparator)[0])
 		}
 
 		if err = csvWriter.Write(record); err != nil {
@@ -469,8 +469,8 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 		fileOut.Close()
 	case utils.MetaDumpToJSON: // apply the cacheDumpFields to the united events and write the record to file
 		expPath := eEvs.rdrCfg.ProcessedPath
-		if pathVal, has := eEvs.rdrCfg.Opts[utils.PartialPathOpt]; has {
-			expPath = utils.IfaceAsString(pathVal)
+		if eEvs.rdrCfg.Opts.PartialPath != nil {
+			expPath = *eEvs.rdrCfg.Opts.PartialPath
 		}
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return

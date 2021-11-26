@@ -236,7 +236,7 @@ func TestFWVFileConfig(t *testing.T) {
 			Timezone:       utils.EmptyString,
 			Filters:        []string{},
 			Flags:          utils.FlagsWithParams{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 		{
 			ID:             "file_reader2",
@@ -249,7 +249,7 @@ func TestFWVFileConfig(t *testing.T) {
 			Timezone:       utils.EmptyString,
 			Filters:        []string{},
 			Flags:          utils.FlagsWithParams{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 	}
 	expected := cfg.ERsCfg().Readers[0]

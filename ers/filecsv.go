@@ -133,28 +133,28 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	}
 	defer file.Close()
 	csvReader := csv.NewReader(file)
-	var rowLength int64
-	if rowLength, err = utils.IfaceAsTInt64(rdr.Config().Opts[utils.CSVRowLengthOpt]); err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<%s> failed creating CSV reader for <%s>, due to option parsing error: <%s>",
-				utils.ERs, rdr.Config().ID, err.Error()))
-		return
+	var rowLength int
+	if rdr.Config().Opts.CSVRowLength != nil {
+		rowLength = *rdr.Config().Opts.CSVRowLength
 	}
-	csvReader.FieldsPerRecord = int(rowLength)
+	csvReader.FieldsPerRecord = rowLength
 	csvReader.Comment = utils.CommentChar
 	csvReader.Comma = utils.CSVSep
-	if fieldSep, has := rdr.Config().Opts[utils.CSVFieldSepOpt]; has {
-		csvReader.Comma = rune(utils.IfaceAsString(fieldSep)[0])
+	if rdr.Config().Opts.CSVFieldSeparator != nil {
+		csvReader.Comma = rune((*rdr.Config().Opts.CSVFieldSeparator)[0])
 	}
-	if val, has := rdr.Config().Opts[utils.CSVLazyQuotes]; has {
-		csvReader.LazyQuotes, err = utils.IfaceAsBool(val)
+	if rdr.Config().Opts.CSVLazyQuotes != nil {
+		csvReader.LazyQuotes = *rdr.Config().Opts.CSVLazyQuotes
 	}
 	var indxAls map[string]int
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
-	hdrDefChar := utils.IfaceAsString(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts[utils.HeaderDefineCharOpt])
+	var hdrDefChar string
+	if rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts.CSVHeaderDefineChar != nil {
+		hdrDefChar = *rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts.CSVHeaderDefineChar
+	}
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {

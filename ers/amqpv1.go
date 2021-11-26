@@ -51,8 +51,8 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	if vals, has := rdr.Config().Opts[utils.AMQPQueueID]; has {
-		rdr.queueID = "/" + utils.IfaceAsString(vals)
+	if rdr.Config().Opts.AMQPQueueID != nil {
+		rdr.queueID = "/" + *rdr.Config().Opts.AMQPQueueID
 	}
 	rdr.createPoster()
 	return rdr, nil
@@ -202,9 +202,11 @@ func (rdr *AMQPv1ER) close() (err error) {
 
 func (rdr *AMQPv1ER) createPoster() {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if len(processedOpt) == 0 &&
-		len(rdr.Config().ProcessedPath) == 0 {
-		return
+	if processedOpt == nil {
+		if len(rdr.Config().ProcessedPath) == 0 {
+			return
+		}
+		processedOpt = new(config.EventExporterOpts)
 	}
 	rdr.poster = ees.NewAMQPv1EE(&config.EventExporterCfg{
 		ID:             rdr.Config().ID,

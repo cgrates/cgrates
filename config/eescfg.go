@@ -657,7 +657,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		opts[utils.SQLDBNameOpt] = *eeC.Opts.SQLDBName
 	}
 	if eeC.Opts.SSLMode != nil {
-		opts[utils.SSLModeCfg] = *eeC.Opts.SSLMode
+		opts[utils.SSLMode] = *eeC.Opts.SSLMode
 	}
 	if eeC.Opts.KafkaTopic != nil {
 		opts[utils.KafkaTopic] = *eeC.Opts.KafkaTopic

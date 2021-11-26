@@ -77,7 +77,7 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 				rdr = dfltRdrCfg.Clone()
 			} else {
 				rdr = new(EventReaderCfg)
-				rdr.Opts = make(map[string]interface{})
+				rdr.Opts = &EventReaderOpts{}
 			}
 			erS.Readers = append(erS.Readers, rdr)
 		}
@@ -205,7 +205,7 @@ type EventReaderCfg struct {
 	ConcurrentReqs      int
 	SourcePath          string
 	ProcessedPath       string
-	Opts                map[string]interface{}
+	Opts                *EventReaderOpts
 	Tenant              RSRParsers
 	Timezone            string
 	Filters             []string
@@ -483,9 +483,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		}
 	}
 	if jsnCfg.Opts != nil {
-		for k, v := range jsnCfg.Opts {
-			er.Opts[k] = v
-		}
+		err = er.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	return
 }
@@ -684,7 +682,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		Tenant:         er.Tenant.Clone(),
 		Timezone:       er.Timezone,
 		Flags:          er.Flags.Clone(),
-		Opts:           make(map[string]interface{}),
+		Opts:           er.Opts.Clone(),
 	}
 	if er.Filters != nil {
 		cln.Filters = make([]string, len(er.Filters))
@@ -710,193 +708,190 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 			cln.PartialCommitFields[idx] = fld.Clone()
 		}
 	}
-	for k, v := range er.Opts {
-		cln.Opts[k] = v
-	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
-	// opts := map[string]interface{}{}
+	opts := map[string]interface{}{}
 
-	// if er.Opts.PartialPath != nil {
-	// 	opts[utils.PartialPathOpt] = *er.Opts.PartialPath
-	// }
-	// if er.Opts.PartialCacheAction != nil {
-	// 	opts[utils.PartialCacheActionOpt] = *er.Opts.PartialCacheAction
-	// }
-	// if er.Opts.PartialOrderField != nil {
-	// 	opts[utils.PartialOrderFieldOpt] = *er.Opts.PartialOrderField
-	// }
-	// if er.Opts.PartialCSVFieldSeparator != nil {
-	// 	opts[utils.PartialCSVFieldSepartorOpt] = *er.Opts.PartialCSVFieldSeparator
-	// }
-	// if er.Opts.CSVRowLength != nil {
-	// 	opts[utils.CSVRowLengthOpt] = *er.Opts.CSVRowLength
-	// }
-	// if er.Opts.CSVFieldSeparator != nil {
-	// 	opts[utils.CSVFieldSepOpt] = *er.Opts.CSVFieldSeparator
-	// }
-	// if er.Opts.CSVHeaderDefineChar != nil {
-	// 	opts[utils.HeaderDefineCharOpt] = *er.Opts.CSVHeaderDefineChar
-	// }
-	// if er.Opts.CSVLazyQuotes != nil {
-	// 	opts[utils.CSVLazyQuotes] = *er.Opts.CSVLazyQuotes
-	// }
-	// if er.Opts.XMLRootPath != nil {
-	// 	opts[utils.XMLRootPathOpt] = *er.Opts.XMLRootPath
-	// }
-	// if er.Opts.AMQPQueueID != nil {
-	// 	opts[utils.AMQPQueueID] = *er.Opts.AMQPQueueID
-	// }
-	// if er.Opts.AMQPQueueIDProcessed != nil {
-	// 	opts[utils.AMQPQueueIDProcessedCfg] = *er.Opts.AMQPQueueIDProcessed
-	// }
-	// if er.Opts.AMQPConsumerTag != nil {
-	// 	opts[utils.AMQPConsumerTag] = *er.Opts.AMQPConsumerTag
-	// }
-	// if er.Opts.AMQPExchange != nil {
-	// 	opts[utils.AMQPExchange] = *er.Opts.AMQPExchange
-	// }
-	// if er.Opts.AMQPExchangeType != nil {
-	// 	opts[utils.AMQPExchangeType] = *er.Opts.AMQPExchangeType
-	// }
-	// if er.Opts.AMQPRoutingKey != nil {
-	// 	opts[utils.AMQPRoutingKey] = *er.Opts.AMQPRoutingKey
-	// }
-	// if er.Opts.AMQPExchangeProcessed != nil {
-	// 	opts[utils.AMQPExchangeProcessedCfg] = *er.Opts.AMQPExchangeProcessed
-	// }
-	// if er.Opts.AMQPExchangeTypeProcessed != nil {
-	// 	opts[utils.AMQPExchangeTypeProcessedCfg] = *er.Opts.AMQPExchangeTypeProcessed
-	// }
-	// if er.Opts.AMQPRoutingKeyProcessed != nil {
-	// 	opts[utils.AMQPRoutingKeyProcessedCfg] = *er.Opts.AMQPRoutingKeyProcessed
-	// }
-	// if er.Opts.KafkaTopic != nil {
-	// 	opts[utils.KafkaTopic] = *er.Opts.KafkaTopic
-	// }
-	// if er.Opts.KafkaGroupID != nil {
-	// 	opts[utils.KafkaGroupID] = *er.Opts.KafkaGroupID
-	// }
-	// if er.Opts.KafkaMaxWait != nil {
-	// 	opts[utils.KafkaMaxWait] = er.Opts.KafkaMaxWait.String()
-	// }
-	// if er.Opts.KafkaTopicProcessed != nil {
-	// 	opts[utils.KafkaTopicProcessedCfg] = *er.Opts.KafkaTopicProcessed
-	// }
-	// if er.Opts.SQLDBName != nil {
-	// 	opts[utils.SQLDBNameOpt] = *er.Opts.SQLDBName
-	// }
-	// if er.Opts.SQLTableName != nil {
-	// 	opts[utils.SQLTableNameOpt] = *er.Opts.SQLTableName
-	// }
-	// if er.Opts.SSLMode != nil {
-	// 	opts[utils.SSLModeCfg] = *er.Opts.SSLMode
-	// }
-	// if er.Opts.SQLDBNameProcessed != nil {
-	// 	opts[utils.SQLDBNameProcessedCfg] = *er.Opts.SQLDBNameProcessed
-	// }
-	// if er.Opts.SQLTableNameProcessed != nil {
-	// 	opts[utils.SQLTableNameProcessedCfg] = *er.Opts.SQLTableNameProcessed
-	// }
-	// if er.Opts.SSLModeProcessed != nil {
-	// 	opts[utils.SSLModeProcessedCfg] = *er.Opts.SSLModeProcessed
-	// }
-	// if er.Opts.AWSRegion != nil {
-	// 	opts[utils.AWSRegion] = *er.Opts.AWSRegion
-	// }
-	// if er.Opts.AWSKey != nil {
-	// 	opts[utils.AWSKey] = *er.Opts.AWSKey
-	// }
-	// if er.Opts.AWSSecret != nil {
-	// 	opts[utils.AWSSecret] = *er.Opts.AWSSecret
-	// }
-	// if er.Opts.AWSToken != nil {
-	// 	opts[utils.AWSToken] = *er.Opts.AWSToken
-	// }
-	// if er.Opts.AWSRegionProcessed != nil {
-	// 	opts[utils.AWSRegionProcessedCfg] = *er.Opts.AWSRegionProcessed
-	// }
-	// if er.Opts.AWSKeyProcessed != nil {
-	// 	opts[utils.AWSKeyProcessedCfg] = *er.Opts.AWSKeyProcessed
-	// }
-	// if er.Opts.AWSSecretProcessed != nil {
-	// 	opts[utils.AWSSecretProcessedCfg] = *er.Opts.AWSSecretProcessed
-	// }
-	// if er.Opts.AWSTokenProcessed != nil {
-	// 	opts[utils.AWSTokenProcessedCfg] = *er.Opts.AWSTokenProcessed
-	// }
-	// if er.Opts.SQSQueueID != nil {
-	// 	opts[utils.SQSQueueID] = *er.Opts.SQSQueueID
-	// }
-	// if er.Opts.SQSQueueIDProcessed != nil {
-	// 	opts[utils.SQSQueueIDProcessedCfg] = *er.Opts.SQSQueueIDProcessed
-	// }
-	// if er.Opts.S3BucketID != nil {
-	// 	opts[utils.S3Bucket] = *er.Opts.S3BucketID
-	// }
-	// if er.Opts.S3FolderPathProcessed != nil {
-	// 	opts[utils.S3FolderPathProcessedCfg] = *er.Opts.S3FolderPathProcessed
-	// }
-	// if er.Opts.S3BucketIDProcessed != nil {
-	// 	opts[utils.S3BucketIDProcessedCfg] = *er.Opts.S3BucketIDProcessed
-	// }
-	// if er.Opts.NATSJetStream != nil {
-	// 	opts[utils.NatsJetStream] = *er.Opts.NATSJetStream
-	// }
-	// if er.Opts.NATSConsumerName != nil {
-	// 	opts[utils.NatsConsumerName] = *er.Opts.NATSConsumerName
-	// }
-	// if er.Opts.NATSSubject != nil {
-	// 	opts[utils.NatsSubject] = *er.Opts.NATSSubject
-	// }
-	// if er.Opts.NATSQueueID != nil {
-	// 	opts[utils.NatsQueueID] = *er.Opts.NATSQueueID
-	// }
-	// if er.Opts.NATSJWTFile != nil {
-	// 	opts[utils.NatsJWTFile] = *er.Opts.NATSJWTFile
-	// }
-	// if er.Opts.NATSSeedFile != nil {
-	// 	opts[utils.NatsSeedFile] = *er.Opts.NATSSeedFile
-	// }
-	// if er.Opts.NATSCertificateAuthority != nil {
-	// 	opts[utils.NatsCertificateAuthority] = *er.Opts.NATSCertificateAuthority
-	// }
-	// if er.Opts.NATSClientCertificate != nil {
-	// 	opts[utils.NatsClientCertificate] = *er.Opts.NATSClientCertificate
-	// }
-	// if er.Opts.NATSClientKey != nil {
-	// 	opts[utils.NatsClientKey] = *er.Opts.NATSClientKey
-	// }
-	// if er.Opts.NATSJetStreamMaxWait != nil {
-	// 	opts[utils.NatsJetStreamMaxWait] = er.Opts.NATSJetStreamMaxWait.String()
-	// }
-	// if er.Opts.NATSJetStreamProcessed != nil {
-	// 	opts[utils.NATSJetStreamProcessedCfg] = *er.Opts.NATSJetStreamProcessed
-	// }
-	// if er.Opts.NATSSubjectProcessed != nil {
-	// 	opts[utils.NATSSubjectProcessedCfg] = *er.Opts.NATSSubjectProcessed
-	// }
-	// if er.Opts.NATSJWTFileProcessed != nil {
-	// 	opts[utils.NATSJWTFileProcessedCfg] = *er.Opts.NATSJWTFileProcessed
-	// }
-	// if er.Opts.NATSSeedFileProcessed != nil {
-	// 	opts[utils.NATSSeedFileProcessedCfg] = *er.Opts.NATSSeedFileProcessed
-	// }
-	// if er.Opts.NATSCertificateAuthorityProcessed != nil {
-	// 	opts[utils.NATSCertificateAuthorityProcessedCfg] = *er.Opts.NATSCertificateAuthorityProcessed
-	// }
-	// if er.Opts.NATSClientCertificateProcessed != nil {
-	// 	opts[utils.NATSClientCertificateProcessed] = *er.Opts.NATSClientCertificateProcessed
-	// }
-	// if er.Opts.NATSClientKeyProcessed != nil {
-	// 	opts[utils.NATSClientKeyProcessedCfg] = *er.Opts.NATSClientKeyProcessed
-	// }
-	// if er.Opts.NATSJetStreamMaxWaitProcessed != nil {
-	// 	opts[utils.NATSJetStreamMaxWaitProcessedCfg] = er.Opts.NATSJetStreamMaxWaitProcessed.String()
-	// }
+	if er.Opts.PartialPath != nil {
+		opts[utils.PartialPathOpt] = *er.Opts.PartialPath
+	}
+	if er.Opts.PartialCacheAction != nil {
+		opts[utils.PartialCacheActionOpt] = *er.Opts.PartialCacheAction
+	}
+	if er.Opts.PartialOrderField != nil {
+		opts[utils.PartialOrderFieldOpt] = *er.Opts.PartialOrderField
+	}
+	if er.Opts.PartialCSVFieldSeparator != nil {
+		opts[utils.PartialCSVFieldSepartorOpt] = *er.Opts.PartialCSVFieldSeparator
+	}
+	if er.Opts.CSVRowLength != nil {
+		opts[utils.CSVRowLengthOpt] = *er.Opts.CSVRowLength
+	}
+	if er.Opts.CSVFieldSeparator != nil {
+		opts[utils.CSVFieldSepOpt] = *er.Opts.CSVFieldSeparator
+	}
+	if er.Opts.CSVHeaderDefineChar != nil {
+		opts[utils.HeaderDefineCharOpt] = *er.Opts.CSVHeaderDefineChar
+	}
+	if er.Opts.CSVLazyQuotes != nil {
+		opts[utils.CSVLazyQuotes] = *er.Opts.CSVLazyQuotes
+	}
+	if er.Opts.XMLRootPath != nil {
+		opts[utils.XMLRootPathOpt] = *er.Opts.XMLRootPath
+	}
+	if er.Opts.AMQPQueueID != nil {
+		opts[utils.AMQPQueueID] = *er.Opts.AMQPQueueID
+	}
+	if er.Opts.AMQPQueueIDProcessed != nil {
+		opts[utils.AMQPQueueIDProcessedCfg] = *er.Opts.AMQPQueueIDProcessed
+	}
+	if er.Opts.AMQPConsumerTag != nil {
+		opts[utils.AMQPConsumerTag] = *er.Opts.AMQPConsumerTag
+	}
+	if er.Opts.AMQPExchange != nil {
+		opts[utils.AMQPExchange] = *er.Opts.AMQPExchange
+	}
+	if er.Opts.AMQPExchangeType != nil {
+		opts[utils.AMQPExchangeType] = *er.Opts.AMQPExchangeType
+	}
+	if er.Opts.AMQPRoutingKey != nil {
+		opts[utils.AMQPRoutingKey] = *er.Opts.AMQPRoutingKey
+	}
+	if er.Opts.AMQPExchangeProcessed != nil {
+		opts[utils.AMQPExchangeProcessedCfg] = *er.Opts.AMQPExchangeProcessed
+	}
+	if er.Opts.AMQPExchangeTypeProcessed != nil {
+		opts[utils.AMQPExchangeTypeProcessedCfg] = *er.Opts.AMQPExchangeTypeProcessed
+	}
+	if er.Opts.AMQPRoutingKeyProcessed != nil {
+		opts[utils.AMQPRoutingKeyProcessedCfg] = *er.Opts.AMQPRoutingKeyProcessed
+	}
+	if er.Opts.KafkaTopic != nil {
+		opts[utils.KafkaTopic] = *er.Opts.KafkaTopic
+	}
+	if er.Opts.KafkaGroupID != nil {
+		opts[utils.KafkaGroupID] = *er.Opts.KafkaGroupID
+	}
+	if er.Opts.KafkaMaxWait != nil {
+		opts[utils.KafkaMaxWait] = er.Opts.KafkaMaxWait.String()
+	}
+	if er.Opts.KafkaTopicProcessed != nil {
+		opts[utils.KafkaTopicProcessedCfg] = *er.Opts.KafkaTopicProcessed
+	}
+	if er.Opts.SQLDBName != nil {
+		opts[utils.SQLDBNameOpt] = *er.Opts.SQLDBName
+	}
+	if er.Opts.SQLTableName != nil {
+		opts[utils.SQLTableNameOpt] = *er.Opts.SQLTableName
+	}
+	if er.Opts.SSLMode != nil {
+		opts[utils.SSLModeCfg] = *er.Opts.SSLMode
+	}
+	if er.Opts.SQLDBNameProcessed != nil {
+		opts[utils.SQLDBNameProcessedCfg] = *er.Opts.SQLDBNameProcessed
+	}
+	if er.Opts.SQLTableNameProcessed != nil {
+		opts[utils.SQLTableNameProcessedCfg] = *er.Opts.SQLTableNameProcessed
+	}
+	if er.Opts.SSLModeProcessed != nil {
+		opts[utils.SSLModeProcessedCfg] = *er.Opts.SSLModeProcessed
+	}
+	if er.Opts.AWSRegion != nil {
+		opts[utils.AWSRegion] = *er.Opts.AWSRegion
+	}
+	if er.Opts.AWSKey != nil {
+		opts[utils.AWSKey] = *er.Opts.AWSKey
+	}
+	if er.Opts.AWSSecret != nil {
+		opts[utils.AWSSecret] = *er.Opts.AWSSecret
+	}
+	if er.Opts.AWSToken != nil {
+		opts[utils.AWSToken] = *er.Opts.AWSToken
+	}
+	if er.Opts.AWSRegionProcessed != nil {
+		opts[utils.AWSRegionProcessedCfg] = *er.Opts.AWSRegionProcessed
+	}
+	if er.Opts.AWSKeyProcessed != nil {
+		opts[utils.AWSKeyProcessedCfg] = *er.Opts.AWSKeyProcessed
+	}
+	if er.Opts.AWSSecretProcessed != nil {
+		opts[utils.AWSSecretProcessedCfg] = *er.Opts.AWSSecretProcessed
+	}
+	if er.Opts.AWSTokenProcessed != nil {
+		opts[utils.AWSTokenProcessedCfg] = *er.Opts.AWSTokenProcessed
+	}
+	if er.Opts.SQSQueueID != nil {
+		opts[utils.SQSQueueID] = *er.Opts.SQSQueueID
+	}
+	if er.Opts.SQSQueueIDProcessed != nil {
+		opts[utils.SQSQueueIDProcessedCfg] = *er.Opts.SQSQueueIDProcessed
+	}
+	if er.Opts.S3BucketID != nil {
+		opts[utils.S3Bucket] = *er.Opts.S3BucketID
+	}
+	if er.Opts.S3FolderPathProcessed != nil {
+		opts[utils.S3FolderPathProcessedCfg] = *er.Opts.S3FolderPathProcessed
+	}
+	if er.Opts.S3BucketIDProcessed != nil {
+		opts[utils.S3BucketIDProcessedCfg] = *er.Opts.S3BucketIDProcessed
+	}
+	if er.Opts.NATSJetStream != nil {
+		opts[utils.NatsJetStream] = *er.Opts.NATSJetStream
+	}
+	if er.Opts.NATSConsumerName != nil {
+		opts[utils.NatsConsumerName] = *er.Opts.NATSConsumerName
+	}
+	if er.Opts.NATSSubject != nil {
+		opts[utils.NatsSubject] = *er.Opts.NATSSubject
+	}
+	if er.Opts.NATSQueueID != nil {
+		opts[utils.NatsQueueID] = *er.Opts.NATSQueueID
+	}
+	if er.Opts.NATSJWTFile != nil {
+		opts[utils.NatsJWTFile] = *er.Opts.NATSJWTFile
+	}
+	if er.Opts.NATSSeedFile != nil {
+		opts[utils.NatsSeedFile] = *er.Opts.NATSSeedFile
+	}
+	if er.Opts.NATSCertificateAuthority != nil {
+		opts[utils.NatsCertificateAuthority] = *er.Opts.NATSCertificateAuthority
+	}
+	if er.Opts.NATSClientCertificate != nil {
+		opts[utils.NatsClientCertificate] = *er.Opts.NATSClientCertificate
+	}
+	if er.Opts.NATSClientKey != nil {
+		opts[utils.NatsClientKey] = *er.Opts.NATSClientKey
+	}
+	if er.Opts.NATSJetStreamMaxWait != nil {
+		opts[utils.NatsJetStreamMaxWait] = er.Opts.NATSJetStreamMaxWait.String()
+	}
+	if er.Opts.NATSJetStreamProcessed != nil {
+		opts[utils.NATSJetStreamProcessedCfg] = *er.Opts.NATSJetStreamProcessed
+	}
+	if er.Opts.NATSSubjectProcessed != nil {
+		opts[utils.NATSSubjectProcessedCfg] = *er.Opts.NATSSubjectProcessed
+	}
+	if er.Opts.NATSJWTFileProcessed != nil {
+		opts[utils.NATSJWTFileProcessedCfg] = *er.Opts.NATSJWTFileProcessed
+	}
+	if er.Opts.NATSSeedFileProcessed != nil {
+		opts[utils.NATSSeedFileProcessedCfg] = *er.Opts.NATSSeedFileProcessed
+	}
+	if er.Opts.NATSCertificateAuthorityProcessed != nil {
+		opts[utils.NATSCertificateAuthorityProcessedCfg] = *er.Opts.NATSCertificateAuthorityProcessed
+	}
+	if er.Opts.NATSClientCertificateProcessed != nil {
+		opts[utils.NATSClientCertificateProcessed] = *er.Opts.NATSClientCertificateProcessed
+	}
+	if er.Opts.NATSClientKeyProcessed != nil {
+		opts[utils.NATSClientKeyProcessedCfg] = *er.Opts.NATSClientKeyProcessed
+	}
+	if er.Opts.NATSJetStreamMaxWaitProcessed != nil {
+		opts[utils.NATSJetStreamMaxWaitProcessedCfg] = er.Opts.NATSJetStreamMaxWaitProcessed.String()
+	}
 
 	initialMP = map[string]interface{}{
 		utils.IDCfg:                 er.ID,
@@ -909,12 +904,9 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.FiltersCfg:            er.Filters,
 		utils.FlagsCfg:              []string{},
 		utils.RunDelayCfg:           "0",
+		utils.OptsCfg:               opts,
 	}
 
-	opts := make(map[string]interface{})
-	for k, v := range er.Opts {
-		opts[k] = v
-	}
 	initialMP[utils.OptsCfg] = opts
 
 	if flags := er.Flags.SliceFlags(); flags != nil {

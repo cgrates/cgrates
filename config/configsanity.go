@@ -700,7 +700,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			if !possibleReaderTypes.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
 			}
-			pAct := utils.IfaceAsString(rdr.Opts[utils.PartialCacheActionOpt])
+			var pAct string
+			if rdr.Opts.PartialCacheAction != nil {
+				pAct = *rdr.Opts.PartialCacheAction
+			}
 			if pAct != utils.MetaDumpToFile &&
 				pAct != utils.MetaNone &&
 				pAct != utils.MetaPostCDR &&
@@ -708,23 +711,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
 			}
 			if pAct != utils.MetaNone { // if is *none we do not process the evicted events
-				if fldSep, has := rdr.Opts[utils.PartialOrderFieldOpt]; has && // the field we order after must not be empty
-					utils.IfaceAsString(fldSep) == utils.EmptyString {
+				if rdr.Opts.PartialOrderField != nil && *rdr.Opts.PartialOrderField == utils.EmptyString { // the field we order after must not be empty
 					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.PartialOrderFieldOpt, rdr.ID)
 				}
 			}
 			if pAct == utils.MetaDumpToFile ||
 				pAct == utils.MetaDumpToJSON { // only if the action is *dump_to_file
 				path := rdr.ProcessedPath
-				if pathVal, has := rdr.Opts[utils.PartialPathOpt]; has { // the path from options needs to exists if overwriten by reader
-					path = utils.IfaceAsString(pathVal)
+				if rdr.Opts.PartialPath != nil {
+					path = *rdr.Opts.PartialPath
 				}
-				if _, err := os.Stat(utils.IfaceAsString(path)); err != nil && os.IsNotExist(err) {
+				if _, err := os.Stat(path); err != nil && os.IsNotExist(err) {
 					return fmt.Errorf("<%s> nonexistent partial folder: %s for reader with ID: %s", utils.ERs, path, rdr.ID)
 				}
 				if pAct == utils.MetaDumpToFile {
-					if fldSep, has := rdr.Opts[utils.PartialCSVFieldSepartorOpt]; has && // the separtor must not be empty
-						utils.IfaceAsString(fldSep) == utils.EmptyString {
+					if rdr.Opts.PartialCSVFieldSeparator != nil && // the separtor must not be empty
+						*rdr.Opts.PartialCSVFieldSeparator == utils.EmptyString {
 						return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.PartialCSVFieldSepartorOpt, rdr.ID)
 					}
 				}
@@ -740,19 +742,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 						return fmt.Errorf("<%s> nonexistent folder: %s for reader with ID: %s", utils.ERs, dir, rdr.ID)
 					}
 				}
-				if fldSep, has := rdr.Opts[utils.CSVFieldSepOpt]; has &&
-					utils.IfaceAsString(fldSep) == utils.EmptyString {
+				if rdr.Opts.CSVFieldSeparator != nil &&
+					*rdr.Opts.CSVFieldSeparator == utils.EmptyString {
 					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.CSVFieldSepOpt, rdr.ID)
-				}
-				if rowl, has := rdr.Opts[utils.CSVRowLengthOpt]; has {
-					if _, err := utils.IfaceAsTInt64(rowl); err != nil {
-						return fmt.Errorf("<%s> error when converting %s: <%s> for reader with ID: %s", utils.ERs, utils.CSVRowLengthOpt, err.Error(), rdr.ID)
-					}
-				}
-				if lq, has := rdr.Opts[utils.CSVLazyQuotes]; has {
-					if _, err := utils.IfaceAsBool(lq); err != nil {
-						return fmt.Errorf("<%s> error when converting %s: <%s> for reader with ID: %s", utils.ERs, utils.CSVLazyQuotes, err.Error(), rdr.ID)
-					}
 				}
 			case utils.MetaKafkajsonMap:
 				if rdr.RunDelay > 0 {
