@@ -939,7 +939,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 				},
 				APIOpts: map[string]interface{}{
 					utils.Subsys:                   utils.MetaChargers,
-					utils.OptsAttributesProfileIDs: []string{"*constant:*req.Subject:intraState"},
+					utils.OptsAttributesProfileIDs: []interface{}{"*constant:*req.Subject:intraState"},
 				},
 			},
 		},
@@ -977,7 +977,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 				},
 				APIOpts: map[string]interface{}{
 					utils.Subsys:                   utils.MetaChargers,
-					utils.OptsAttributesProfileIDs: []string{"*constant:*req.Subject:interState"},
+					utils.OptsAttributesProfileIDs: []interface{}{"*constant:*req.Subject:interState"},
 				},
 			},
 		},
@@ -1144,7 +1144,7 @@ func testV1FltrPopulateTimings(t *testing.T) {
 				utils.AnswerTime: "2021-04-29T10:45:00Z",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAttributesProfileIDs: []string{"FltrTest"},
+				utils.OptsAttributesProfileIDs: []interface{}{"FltrTest"},
 				utils.OptsContext:              utils.MetaAny,
 			},
 		},

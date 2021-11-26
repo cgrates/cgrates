@@ -403,8 +403,9 @@ func testDspSessionUpdate(t *testing.T) {
 				utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "ses12345",
-				utils.Subsys:     utils.MetaSessionS,
+				utils.OptsAPIKey:  "ses12345",
+				"*attrProfileIDs": nil,
+				utils.Subsys:      utils.MetaSessionS,
 			},
 		},
 	}
@@ -477,8 +478,9 @@ func testDspSessionUpdate2(t *testing.T) {
 				utils.Usage:        float64(reqUsage),
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "ses12345",
-				utils.Subsys:     utils.MetaSessionS,
+				utils.OptsAPIKey:  "ses12345",
+				"*attrProfileIDs": nil,
+				utils.Subsys:      utils.MetaSessionS,
 			},
 		},
 	}
@@ -631,8 +633,11 @@ func testDspSessionProcessEvent(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "ses12345",
-				utils.Subsys:     utils.MetaSessionS,
+				utils.OptsAPIKey:  "ses12345",
+				"*attrProfileIDs": nil,
+				"*rsUnits":        1.,
+				"*rsUsageID":      "TestSSv1It2",
+				utils.Subsys:      utils.MetaSessionS,
 			},
 		},
 	}
@@ -709,8 +714,11 @@ func testDspSessionProcessEvent2(t *testing.T) {
 				utils.Usage:        300000000000.0,
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "pse12345",
-				utils.Subsys:     utils.MetaSessionS,
+				utils.OptsAPIKey:  "pse12345",
+				"*attrProfileIDs": nil,
+				"*rsUnits":        1.,
+				"*rsUsageID":      "TestSSv1It2",
+				utils.Subsys:      utils.MetaSessionS,
 			},
 		},
 	}

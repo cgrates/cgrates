@@ -312,7 +312,7 @@ func testSectConfigSReloadHTTP(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"http\":{\"auth_users\":{},\"client_opts\":{\"dialFallbackDelay\":\"300ms\",\"dialKeepAlive\":\"30s\",\"dialTimeout\":\"30s\",\"disableCompression\":false,\"disableKeepAlives\":false,\"expectContinueTimeout\":\"0\",\"forceAttemptHttp2\":true,\"idleConnTimeout\":\"90s\",\"maxConnsPerHost\":0,\"maxIdleConns\":100,\"maxIdleConnsPerHost\":2,\"responseHeaderTimeout\":\"0\",\"skipTlsVerify\":false,\"tlsHandshakeTimeout\":\"10s\"},\"freeswitch_cdrs_url\":\"/freeswitch_json\",\"http_cdrs\":\"/cdr_http\",\"json_rpc_url\":\"/jsonrpc\",\"registrars_url\":\"/registrar\",\"use_basic_auth\":false,\"ws_url\":\"/ws\"}}"
+	cfgStr := "{\"http\":{\"auth_users\":{},\"client_opts\":{\"dialFallbackDelay\":\"300ms\",\"dialKeepAlive\":\"30s\",\"dialTimeout\":\"30s\",\"disableCompression\":false,\"disableKeepAlives\":false,\"expectContinueTimeout\":\"0s\",\"forceAttemptHttp2\":true,\"idleConnTimeout\":\"1m30s\",\"maxConnsPerHost\":0,\"maxIdleConns\":100,\"maxIdleConnsPerHost\":2,\"responseHeaderTimeout\":\"0s\",\"skipTlsVerify\":false,\"tlsHandshakeTimeout\":\"10s\"},\"freeswitch_cdrs_url\":\"/freeswitch_json\",\"http_cdrs\":\"/cdr_http\",\"json_rpc_url\":\"/jsonrpc\",\"registrars_url\":\"/registrar\",\"use_basic_auth\":false,\"ws_url\":\"/ws\"}}"
 
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
@@ -981,7 +981,7 @@ func testSectConfigSReloadResources(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"resources\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*units\":1,\"*usageID\":\"\",\"*usageTTL\":259200000000000},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"-1ns\",\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"],\"thresholds_conns\":[\"*internal\"]}}"
+	cfgStr := "{\"resources\":{\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*units\":1,\"*usageID\":\"\"},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"store_interval\":\"-1ns\",\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"],\"thresholds_conns\":[\"*internal\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -1095,7 +1095,7 @@ func testSectConfigSReloadRoutes(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"routes\":{\"attributes_conns\":[\"*localhost\"],\"default_ratio\":1,\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*context\":\"*routes\",\"*ignoreErrors\":false,\"*maxCost\":\"\",\"*profileCount\":1},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"rals_conns\":[\"*localhost\"],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
+	cfgStr := "{\"routes\":{\"attributes_conns\":[\"*localhost\"],\"default_ratio\":1,\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":true,\"opts\":{\"*context\":\"*routes\",\"*ignoreErrors\":false,\"*maxCost\":\"\"},\"prefix_indexed_fields\":[\"prefix_indexed_fields\"],\"rals_conns\":[\"*localhost\"],\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"string_indexed_fields\":[\"string_indexed_fields\"],\"suffix_indexed_fields\":[\"suffix_indexed_fields\"]}}"
 	var rpl string
 	if err := testSectRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",

@@ -188,6 +188,9 @@ func testSes3ItProcessEvent(t *testing.T) {
 				utils.Subsys:        utils.MetaSessionS,
 				utils.OptsAPIKey:    "ses12345",
 				utils.MetaEventType: utils.StatUpdate,
+				"*attrProfileIDs":   nil,
+				"*rsUnits":          1.,
+				"*rsUsageID":        "TestSSv1It2",
 			},
 		},
 	}

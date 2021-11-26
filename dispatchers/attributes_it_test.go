@@ -450,7 +450,8 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 				"Password":         "CGRateS.org",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -564,6 +565,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
 
+	eRply.APIOpts[utils.OptsContext] = "simpleauth"
 	// To ALL
 	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
