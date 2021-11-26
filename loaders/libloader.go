@@ -237,21 +237,6 @@ func (ar *record) Remove(fullPath *utils.FullPath) error {
 	}
 }
 
-// ParseField outputs the value based on the template item
-func (ar *record) ParseField(
-	cfgFld *config.FCTemplate) (out interface{}, err error) {
-
-	if err != nil &&
-		!strings.HasPrefix(err.Error(), "Could not find") {
-		return
-	}
-	if utils.StringTmplType.Has(cfgFld.Type) { // format the string additionally with fmtFieldWidth
-		out, err = utils.FmtFieldWidth(cfgFld.Tag, out.(string), cfgFld.Width,
-			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
-	}
-	return
-}
-
 // Append sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
 func (ar *record) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
