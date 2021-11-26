@@ -204,6 +204,17 @@ func TestDryRunWithModelsErrors(t *testing.T) {
 	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"})}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
+
+	if _, err := testDryRunWithData(utils.MetaFilters, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float"})}); err != utils.ErrWrongPath {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `emtpy RSRParser in rule: <>`
+	data := newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})
+	data.SetAsSlice(utils.NewFullPath("Rules.Type"), []*utils.DataNode{utils.NewLeafNode("*no")})
+	if _, err := testDryRunWithData(utils.MetaFilters, []*utils.OrderedNavigableMap{data}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
 }
 
 func TestSetToDBWithUpdateStructErrors(t *testing.T) {
@@ -261,6 +272,20 @@ func TestSetToDBWithModelsErrors(t *testing.T) {
 	expErrMsg = `time: invalid duration "float"`
 	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"})}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if err := setToDB(context.Background(), nil, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float"})}, true, false); err != utils.ErrWrongPath {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `emtpy RSRParser in rule: <>`
+	data := newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})
+	data.SetAsSlice(utils.NewFullPath("Rules.Type"), []*utils.DataNode{utils.NewLeafNode("*no")})
+	if err := setToDB(context.Background(), nil, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{data}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := setToDB(context.Background(), nil, utils.EmptyString, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -429,6 +454,16 @@ func TestSetToDB(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v12, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v12), utils.ToJSON(prf))
+	}
+
+	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, true); err != nil {
+		t.Fatal(err)
+	}
+	v13 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
+	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(v13, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v13), utils.ToJSON(prf))
 	}
 }
 

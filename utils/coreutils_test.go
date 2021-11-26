@@ -1107,6 +1107,11 @@ func TestNewTenantID(t *testing.T) {
 	if rcv := NewTenantID("cgrates.org:id"); *rcv != *eOut {
 		t.Errorf("Expecting: %+v, received %+v", eOut, rcv)
 	}
+
+	eOut = &TenantID{Tenant: "cgrates.org", ID: "id"}
+	if rcv := NewTenantID("cgrates.org:id"); !eOut.Equal(rcv) {
+		t.Errorf("Expecting: %+v, received %+v", eOut, rcv)
+	}
 }
 
 func TestTenantID(t *testing.T) {
