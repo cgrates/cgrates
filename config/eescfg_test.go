@@ -40,8 +40,8 @@ func TestEESClone(t *testing.T) {
 			"type": "*none",									
 			"export_path": "/var/spool/cgrates/ees",			
 			"opts": {
-              "*default": "randomVal"
-             },											
+				"csvFieldSeparator": ";",					// separator used when reading the fields
+			},											
 			"timezone": "local",										
 			"filters": ["randomFiletrs"],										
 			"flags": [],										
@@ -607,7 +607,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			      "type": "*file_csv",									
                   "export_path": "/tmp/testCSV",			
 			      "opts": {
-					"kafkaGroupID": "test",
+					"kafkaTopic": "test",
 				  },											
 			      "timezone": "UTC",										
 			      "filters": [],										
@@ -641,7 +641,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.TypeCfg:       "*file_csv",
 				utils.ExportPathCfg: "/tmp/testCSV",
 				utils.OptsCfg: map[string]interface{}{
-					utils.KafkaGroupID: "test",
+					utils.KafkaTopic: "test",
 				},
 				utils.TimezoneCfg:           "UTC",
 				utils.FiltersCfg:            []string{},
@@ -679,7 +679,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		if !reflect.DeepEqual(rcv[utils.ExportersCfg].([]map[string]interface{})[1],
 			eMap[utils.ExportersCfg].([]map[string]interface{})[0]) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]interface{})[0]),
-				utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[0]))
+				utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[1]))
 		}
 		rcv[utils.ExportersCfg] = nil
 		eMap[utils.ExportersCfg] = nil

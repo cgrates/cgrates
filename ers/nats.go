@@ -19,8 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -185,9 +188,11 @@ func (rdr *NatsER) processMessage(msg []byte) (err error) {
 
 func (rdr *NatsER) createPoster() (err error) {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if len(processedOpt) == 0 &&
-		len(rdr.Config().ProcessedPath) == 0 {
-		return
+	if processedOpt == nil {
+		if len(rdr.Config().ProcessedPath) == 0 {
+			return
+		}
+		processedOpt = new(config.EventExporterOpts)
 	}
 	rdr.poster, err = ees.NewNatsEE(&config.EventExporterCfg{
 		ID: rdr.Config().ID,
@@ -202,27 +207,86 @@ func (rdr *NatsER) createPoster() (err error) {
 }
 
 func (rdr *NatsER) processOpts() (err error) {
-	rdr.subject = utils.IfaceAsString(rdr.Config().Opts[utils.NatsSubject])
-	rdr.queueID = utils.FirstNonEmpty(utils.IfaceAsString(rdr.Config().Opts[utils.NatsQueueID]),
-		rdr.cgrCfg.GeneralCfg().NodeID)
-	rdr.consumerName = utils.FirstNonEmpty(utils.IfaceAsString(rdr.Config().Opts[utils.NatsConsumerName]),
-		utils.CGRateSLwr)
-	if useJetStreamVal, has := rdr.Config().Opts[utils.NatsJetStream]; has {
-		if rdr.jetStream, err = utils.IfaceAsBool(useJetStreamVal); err != nil {
-			return
-		}
+	if rdr.Config().Opts.NATSSubject != nil {
+		rdr.subject = *rdr.Config().Opts.NATSSubject
+	}
+	var queueID string
+	if rdr.Config().Opts.NATSQueueID != nil {
+		queueID = *rdr.Config().Opts.NATSQueueID
+	}
+	rdr.queueID = utils.FirstNonEmpty(queueID, rdr.cgrCfg.GeneralCfg().NodeID)
+	var consumerName string
+	if rdr.Config().Opts.NATSConsumerName != nil {
+		consumerName = *rdr.Config().Opts.NATSConsumerName
+	}
+	rdr.consumerName = utils.FirstNonEmpty(consumerName, utils.CGRateSLwr)
+	if rdr.Config().Opts.NATSJetStream != nil {
+		rdr.jetStream = *rdr.Config().Opts.NATSJetStream
 	}
 	if rdr.jetStream {
-		if maxWaitVal, has := rdr.Config().Opts[utils.NatsJetStreamMaxWait]; has {
-			var maxWait time.Duration
-			if maxWait, err = utils.IfaceAsDuration(maxWaitVal); err != nil {
-				return
-			}
-			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(maxWait)}
+		if rdr.Config().Opts.NATSJetStreamMaxWait != nil {
+			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(*rdr.Config().Opts.NATSJetStreamMaxWait)}
 		}
 	}
-	rdr.opts, err = ees.GetNatsOpts(rdr.Config().Opts,
+	rdr.opts, err = GetNatsOpts(rdr.Config().Opts,
 		rdr.cgrCfg.GeneralCfg().NodeID,
 		rdr.cgrCfg.GeneralCfg().ConnectTimeout)
+	return
+}
+
+func GetNatsOpts(opts *config.EventReaderOpts, nodeID string, connTimeout time.Duration) (nop []nats.Option, err error) {
+	nop = make([]nats.Option, 0, 7)
+	nop = append(nop, nats.Name(utils.CGRateSLwr+nodeID),
+		nats.Timeout(connTimeout),
+		nats.DrainTimeout(time.Second))
+	if opts.NATSJWTFile != nil {
+		keys := make([]string, 0, 1)
+		if opts.NATSSeedFile != nil {
+			keys = append(keys, *opts.NATSSeedFile)
+		}
+		nop = append(nop, nats.UserCredentials(*opts.NATSJWTFile, keys...))
+	}
+	if opts.NATSSeedFile != nil {
+		opt, err := nats.NkeyOptionFromSeed(*opts.NATSSeedFile)
+		if err != nil {
+			return nil, err
+		}
+		nop = append(nop, opt)
+	}
+	if opts.NATSClientCertificate != nil {
+		if opts.NATSClientKey == nil {
+			err = fmt.Errorf("has certificate but no key")
+			return
+		}
+		nop = append(nop, nats.ClientCert(*opts.NATSClientCertificate, *opts.NATSClientKey))
+	} else if opts.NATSClientKey != nil {
+		err = fmt.Errorf("has key but no certificate")
+		return
+	}
+
+	if opts.NATSCertificateAuthority != nil {
+		nop = append(nop,
+			func(o *nats.Options) error {
+				pool, err := x509.SystemCertPool()
+				if err != nil {
+					return err
+				}
+				rootPEM, err := ioutil.ReadFile(*opts.NATSCertificateAuthority)
+				if err != nil || rootPEM == nil {
+					return fmt.Errorf("nats: error loading or parsing rootCA file: %v", err)
+				}
+				ok := pool.AppendCertsFromPEM(rootPEM)
+				if !ok {
+					return fmt.Errorf("nats: failed to parse root certificate from %q",
+						*opts.NATSCertificateAuthority)
+				}
+				if o.TLSConfig == nil {
+					o.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
+				}
+				o.TLSConfig.RootCAs = pool
+				o.Secure = true
+				return nil
+			})
+	}
 	return
 }

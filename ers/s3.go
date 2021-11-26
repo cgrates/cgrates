@@ -150,22 +150,22 @@ func (rdr *S3ER) processMessage(body []byte) (err error) {
 	return
 }
 
-func (rdr *S3ER) parseOpts(opts map[string]interface{}) {
+func (rdr *S3ER) parseOpts(opts *config.EventReaderOpts) {
 	rdr.bucket = utils.DefaultQueueID
-	if val, has := opts[utils.S3Bucket]; has {
-		rdr.bucket = utils.IfaceAsString(val)
+	if opts.S3BucketID != nil {
+		rdr.bucket = *opts.S3BucketID
 	}
-	if val, has := opts[utils.AWSRegion]; has {
-		rdr.awsRegion = utils.IfaceAsString(val)
+	if opts.AWSRegion != nil {
+		rdr.awsRegion = *opts.AWSRegion
 	}
-	if val, has := opts[utils.AWSKey]; has {
-		rdr.awsID = utils.IfaceAsString(val)
+	if opts.AWSKey != nil {
+		rdr.awsID = *opts.AWSKey
 	}
-	if val, has := opts[utils.AWSSecret]; has {
-		rdr.awsKey = utils.IfaceAsString(val)
+	if opts.AWSSecret != nil {
+		rdr.awsKey = *opts.AWSSecret
 	}
-	if val, has := opts[utils.AWSToken]; has {
-		rdr.awsToken = utils.IfaceAsString(val)
+	if opts.AWSToken != nil {
+		rdr.awsToken = *opts.AWSToken
 	}
 }
 
@@ -194,9 +194,11 @@ func (rdr *S3ER) readLoop(scv s3Client) (err error) {
 
 func (rdr *S3ER) createPoster() {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if len(processedOpt) == 0 &&
-		len(rdr.Config().ProcessedPath) == 0 {
-		return
+	if processedOpt == nil {
+		if len(rdr.Config().ProcessedPath) == 0 {
+			return
+		}
+		processedOpt = new(config.EventExporterOpts)
 	}
 	rdr.poster = ees.NewS3EE(&config.EventExporterCfg{
 		ID:             rdr.Config().ID,

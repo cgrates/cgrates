@@ -21,15 +21,18 @@ package ers
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestGetProcessOptions(t *testing.T) {
-	opts := map[string]interface{}{
-		"testKeyProcessed": "testValue",
+	opts := &config.EventReaderOpts{
+		AMQPQueueIDProcessed: utils.StringPointer("processed"),
 	}
 	result := getProcessOptions(opts)
-	expected := map[string]interface{}{
-		"testKey": "testValue",
+	expected := &config.EventExporterOpts{
+		AMQPQueueID: utils.StringPointer("processed"),
 	}
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

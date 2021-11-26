@@ -21,7 +21,6 @@ package ers
 import (
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -30,12 +29,144 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func getProcessOptions(opts map[string]interface{}) (proc map[string]interface{}) {
-	proc = make(map[string]interface{})
-	for k, v := range opts {
-		if strings.HasSuffix(k, utils.ProcessedOpt) {
-			proc[k[:len(k)-9]] = v
+func getProcessOptions(erOpts *config.EventReaderOpts) (eeOpts *config.EventExporterOpts) {
+	if erOpts.AMQPExchangeProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
 		}
+		eeOpts.AMQPExchange = erOpts.AMQPExchangeProcessed
+	}
+	if erOpts.AMQPExchangeTypeProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AMQPExchangeType = erOpts.AMQPExchangeTypeProcessed
+	}
+	if erOpts.AMQPQueueIDProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AMQPQueueID = erOpts.AMQPQueueIDProcessed
+	}
+	if erOpts.AMQPRoutingKeyProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AMQPRoutingKey = erOpts.AMQPRoutingKeyProcessed
+	}
+	if erOpts.AWSKeyProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AWSKey = erOpts.AWSKeyProcessed
+	}
+	if erOpts.AWSRegionProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AWSRegion = erOpts.AWSRegionProcessed
+	}
+	if erOpts.AWSSecretProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AWSSecret = erOpts.AWSSecretProcessed
+	}
+	if erOpts.AWSTokenProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.AWSToken = erOpts.AWSTokenProcessed
+	}
+	if erOpts.KafkaTopicProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.KafkaTopic = erOpts.KafkaTopicProcessed
+	}
+	if erOpts.NATSCertificateAuthorityProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.NATSCertificateAuthority = erOpts.NATSCertificateAuthorityProcessed
+	}
+	if erOpts.NATSClientCertificateProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.NATSClientCertificate = erOpts.NATSClientCertificateProcessed
+	}
+	if erOpts.NATSClientKeyProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.NATSClientKey = erOpts.NATSClientKeyProcessed
+	}
+	if erOpts.NATSJWTFileProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.NATSJWTFile = erOpts.NATSJWTFileProcessed
+	}
+	if erOpts.NATSJetStreamMaxWaitProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.NATSJetStreamMaxWait = erOpts.NATSJetStreamMaxWaitProcessed
+	}
+	if erOpts.NATSJetStreamProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.NATSJetStream = erOpts.NATSJetStreamProcessed
+	}
+	if erOpts.NATSSeedFileProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.NATSSeedFile = erOpts.NATSSeedFileProcessed
+	}
+	if erOpts.NATSSubjectProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.NATSSubject = erOpts.NATSSubjectProcessed
+	}
+	if erOpts.S3BucketIDProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.S3BucketID = erOpts.S3BucketIDProcessed
+	}
+	if erOpts.S3FolderPathProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.S3FolderPath = erOpts.S3FolderPathProcessed
+	}
+	if erOpts.SQLDBNameProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.SQLDBName = erOpts.SQLDBNameProcessed
+	}
+	if erOpts.SQLTableNameProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.SQLTableName = erOpts.SQLTableNameProcessed
+	}
+	if erOpts.SQSQueueIDProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.SQSQueueID = erOpts.SQSQueueIDProcessed
+	}
+	if erOpts.SSLModeProcessed != nil {
+		if eeOpts == nil {
+			eeOpts = new(config.EventExporterOpts)
+		}
+		eeOpts.SSLMode = erOpts.SSLModeProcessed
 	}
 	return
 }
@@ -45,7 +176,10 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 	cgrEv = cgrEvs[0]     // by default there is at least one event
 	if len(cgrEvs) != 1 { // need to merge the incoming events
 		// prepare the field after which the events are ordered
-		ordFld := utils.IfaceAsString(cfg.Opts[utils.PartialOrderFieldOpt]) // safe as the checkConfigSanity forces this option to be populated
+		var ordFld string
+		if cfg.Opts.PartialOrderField != nil {
+			ordFld = *cfg.Opts.PartialOrderField
+		}
 		var ordPath config.RSRParsers
 		if ordPath, err = config.NewRSRParsers(ordFld, rsrSep); err != nil { // convert the option to rsrParsers
 			return nil, err

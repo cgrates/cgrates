@@ -49,7 +49,7 @@ func TestNewSQSER(t *testing.T) {
 			SourcePath:     "/var/spool/cgrates/ers/in",
 			ProcessedPath:  "/var/spool/cgrates/ers/out",
 			Filters:        []string{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 	}
 	rdr, err := NewSQSER(cfg, 0, nil, nil,
@@ -77,7 +77,7 @@ func TestSQSERServeRunDelay0(t *testing.T) {
 			SourcePath:     "/var/spool/cgrates/ers/in",
 			ProcessedPath:  "/var/spool/cgrates/ers/out",
 			Filters:        []string{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 	}
 	rdr, err := NewSQSER(cfg, 0, nil, nil,
@@ -103,7 +103,7 @@ func TestSQSERServe(t *testing.T) {
 			SourcePath:     "/var/spool/cgrates/ers/in",
 			ProcessedPath:  "/var/spool/cgrates/ers/out",
 			Filters:        []string{},
-			Opts:           make(map[string]interface{}),
+			Opts:           &config.EventReaderOpts{},
 		},
 	}
 	rdr, err := NewSQSER(cfg, 0, nil, nil,
@@ -276,22 +276,19 @@ func TestSQSERParseOpts(t *testing.T) {
 		poster:    nil,
 	}
 
-	opts := map[string]interface{}{
-		utils.SQSQueueID: "QueueID",
-		utils.AWSRegion:  "AWSRegion",
-		utils.AWSKey:     "AWSKey",
-		utils.AWSSecret:  "AWSSecret",
-		utils.AWSToken:   "AWSToken",
+	opts := &config.EventReaderOpts{
+		SQSQueueID: utils.StringPointer("QueueID"),
+		AWSRegion:  utils.StringPointer("AWSRegion"),
+		AWSKey:     utils.StringPointer("AWSKey"),
+		AWSSecret:  utils.StringPointer("AWSSecret"),
+		AWSToken:   utils.StringPointer("AWSToken"),
 	}
 	rdr.parseOpts(opts)
-	if rdr.queueID != opts[utils.SQSQueueID] ||
-		rdr.awsRegion != opts[utils.AWSRegion] ||
-		rdr.awsID != opts[utils.AWSKey] ||
-		rdr.awsKey != opts[utils.AWSSecret] ||
-		rdr.awsToken != opts[utils.AWSToken] {
+	if rdr.queueID != *opts.SQSQueueID || rdr.awsRegion != *opts.AWSRegion || rdr.awsID != *opts.AWSKey || rdr.awsKey != *opts.AWSSecret ||
+		rdr.awsToken != *opts.AWSToken {
 		t.Error("Fields do not corespond")
 	}
-	rdr.Config().Opts = map[string]interface{}{}
+	rdr.Config().Opts = &config.EventReaderOpts{}
 	rdr.Config().ProcessedPath = utils.EmptyString
 	rdr.createPoster()
 }
@@ -532,7 +529,7 @@ func TestSQSERReadMsgError3(t *testing.T) {
 		poster: ees.NewSQSee(&config.EventExporterCfg{
 			ExportPath: "url",
 			Attempts:   1,
-			Opts:       make(map[string]interface{}),
+			Opts:       &config.EventExporterOpts{},
 		}, nil),
 	}
 	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}

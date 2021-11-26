@@ -34,6 +34,7 @@ func TestNewNatsEE(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
+		Opts:               &config.EventExporterOpts{},
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
@@ -72,6 +73,7 @@ func TestParseOpt(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
+		Opts:               &config.EventExporterOpts{},
 	}
 	opts := &config.EventExporterOpts{}
 	nodeID := "node_id1"
@@ -98,6 +100,7 @@ func TestParseOptJetStream(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
+		Opts:               &config.EventExporterOpts{},
 	}
 	opts := &config.EventExporterOpts{
 		NATSJetStream: utils.BoolPointer(true),
@@ -129,6 +132,7 @@ func TestParseOptJetStreamMaxWait(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
+		Opts:               &config.EventExporterOpts{},
 	}
 	opts := &config.EventExporterOpts{
 		NATSJetStream:        utils.BoolPointer(true),
@@ -161,6 +165,7 @@ func TestParseOptSubject(t *testing.T) {
 		Type:               "nats",
 		Attempts:           2,
 		ConcurrentRequests: 2,
+		Opts:               &config.EventExporterOpts{},
 	}
 	opts := &config.EventExporterOpts{
 		NATSSubject: utils.StringPointer("nats_subject"),

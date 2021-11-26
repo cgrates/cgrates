@@ -1968,6 +1968,7 @@ const (
 	OptsCfg                = "opts"
 	Tenants                = "tenants"
 	MysqlLocation          = "mysqlLocation"
+	SSLMode                = "sslMode"
 )
 
 // DataDbCfg

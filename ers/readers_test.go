@@ -102,7 +102,9 @@ func TestNewSQLReader(t *testing.T) {
 	reader.Type = utils.MetaSQL
 	reader.ID = "file_reader"
 	reader.ConcurrentReqs = -1
-	reader.Opts = map[string]interface{}{"db_name": "cgrates2"}
+	reader.Opts = &config.EventReaderOpts{
+		SQLDBName: utils.StringPointer("cgrates2"),
+	}
 	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	reader.ProcessedPath = ""
 	cfg.ERsCfg().Readers = append(cfg.ERsCfg().Readers, reader)
@@ -127,7 +129,9 @@ func TestNewSQLReaderError(t *testing.T) {
 	reader.Type = utils.MetaSQL
 	reader.ID = "file_reader"
 	reader.ConcurrentReqs = -1
-	reader.Opts = map[string]interface{}{"db_name": "cgrates2"}
+	reader.Opts = &config.EventReaderOpts{
+		SQLDBName: utils.StringPointer("cgrates2"),
+	}
 	reader.SourcePath = "#"
 	reader.ProcessedPath = ""
 	expected := "unknown db_type "
@@ -212,7 +216,7 @@ func TestNewAMQPReader(t *testing.T) {
 	}
 	exp.dialURL = exp.Config().SourcePath
 	exp.Config().ProcessedPath = ""
-	exp.setOpts(map[string]interface{}{})
+	exp.setOpts(&config.EventReaderOpts{})
 	exp.createPoster()
 	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
@@ -237,7 +241,7 @@ func TestNewAMQPv1Reader(t *testing.T) {
 		rdrErr:    nil,
 	}
 	exp.Config().ProcessedPath = ""
-	exp.Config().Opts = map[string]interface{}{}
+	exp.Config().Opts = &config.EventReaderOpts{}
 	exp.createPoster()
 	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
@@ -263,7 +267,7 @@ func TestNewS3Reader(t *testing.T) {
 		bucket:    "cgrates_cdrs",
 	}
 	exp.Config().ProcessedPath = ""
-	exp.Config().Opts = map[string]interface{}{}
+	exp.Config().Opts = &config.EventReaderOpts{}
 	exp.createPoster()
 	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
@@ -300,7 +304,7 @@ func TestNewSQSReader(t *testing.T) {
 	// 	t.Error(err)
 	// }
 	exp.Config().ProcessedPath = ""
-	exp.Config().Opts = map[string]interface{}{}
+	exp.Config().Opts = &config.EventReaderOpts{}
 	exp.createPoster()
 	var expected EventReader = exp
 	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)

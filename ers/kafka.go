@@ -184,28 +184,29 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 	return
 }
 
-func (rdr *KafkaER) setOpts(opts map[string]interface{}) (err error) {
+func (rdr *KafkaER) setOpts(opts *config.EventReaderOpts) (err error) {
 	rdr.topic = utils.KafkaDefaultTopic
 	rdr.groupID = utils.KafkaDefaultGroupID
 	rdr.maxWait = utils.KafkaDefaultMaxWait
-
-	if vals, has := opts[utils.KafkaTopic]; has {
-		rdr.topic = utils.IfaceAsString(vals)
+	if opts.KafkaTopic != nil {
+		rdr.topic = *opts.KafkaTopic
 	}
-	if vals, has := opts[utils.KafkaGroupID]; has {
-		rdr.groupID = utils.IfaceAsString(vals)
+	if opts.KafkaGroupID != nil {
+		rdr.groupID = *opts.KafkaGroupID
 	}
-	if vals, has := opts[utils.KafkaMaxWait]; has {
-		rdr.maxWait, err = utils.IfaceAsDuration(vals)
+	if opts.KafkaMaxWait != nil {
+		rdr.maxWait = *opts.KafkaMaxWait
 	}
 	return
 }
 
 func (rdr *KafkaER) createPoster() {
 	processedOpt := getProcessOptions(rdr.Config().Opts)
-	if len(processedOpt) == 0 &&
-		len(rdr.Config().ProcessedPath) == 0 {
-		return
+	if processedOpt == nil {
+		if len(rdr.Config().ProcessedPath) == 0 {
+			return
+		}
+		processedOpt = new(config.EventExporterOpts)
 	}
 	rdr.poster = ees.NewKafkaEE(&config.EventExporterCfg{
 		ID:             rdr.Config().ID,

@@ -177,6 +177,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.coreSCfg = new(CoreSCfg)
+	cfg.dfltEvExp = &EventExporterCfg{Opts: &EventExporterOpts{}}
+	cfg.dfltEvRdr = &EventReaderCfg{Opts: &EventReaderOpts{}}
 
 	cfg.cacheDP = make(map[string]utils.MapStorage)
 

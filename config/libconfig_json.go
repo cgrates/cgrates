@@ -251,7 +251,7 @@ type EventReaderJsonCfg struct {
 	Concurrent_requests   *int
 	Source_path           *string
 	Processed_path        *string
-	Opts                  map[string]interface{}
+	Opts                  *EventReaderOptsJson
 	Tenant                *string
 	Timezone              *string
 	Filters               *[]string

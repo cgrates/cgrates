@@ -226,22 +226,22 @@ func TestS3ERParseOpts(t *testing.T) {
 		poster:    nil,
 	}
 
-	opts := map[string]interface{}{
-		utils.S3Bucket:  "QueueID",
-		utils.AWSRegion: "AWSRegion",
-		utils.AWSKey:    "AWSKey",
-		utils.AWSSecret: "AWSSecret",
-		utils.AWSToken:  "AWSToken",
+	opts := &config.EventReaderOpts{
+		S3BucketID: utils.StringPointer("QueueID"),
+		AWSRegion:  utils.StringPointer("AWSRegion"),
+		AWSKey:     utils.StringPointer("AWSKey"),
+		AWSSecret:  utils.StringPointer("AWSSecret"),
+		AWSToken:   utils.StringPointer("AWSToken"),
 	}
 	rdr.parseOpts(opts)
-	if rdr.bucket != opts[utils.S3Bucket] ||
-		rdr.awsRegion != opts[utils.AWSRegion] ||
-		rdr.awsID != opts[utils.AWSKey] ||
-		rdr.awsKey != opts[utils.AWSSecret] ||
-		rdr.awsToken != opts[utils.AWSToken] {
+	if rdr.bucket != *opts.S3BucketID ||
+		rdr.awsRegion != *opts.AWSRegion ||
+		rdr.awsID != *opts.AWSKey ||
+		rdr.awsKey != *opts.AWSSecret ||
+		rdr.awsToken != *opts.AWSToken {
 		t.Error("Fields do not corespond")
 	}
-	rdr.Config().Opts = map[string]interface{}{}
+	rdr.Config().Opts = &config.EventReaderOpts{}
 	rdr.Config().ProcessedPath = utils.EmptyString
 	rdr.createPoster()
 }
@@ -579,7 +579,7 @@ func TestS3ERReadMsgError5(t *testing.T) {
 		poster: ees.NewS3EE(&config.EventExporterCfg{
 			ExportPath: "url",
 			Attempts:   1,
-			Opts:       map[string]interface{}{},
+			Opts:       &config.EventExporterOpts{},
 		}, nil),
 	}
 	rdr.Config().SourcePath = rdr.awsRegion

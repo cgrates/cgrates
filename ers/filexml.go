@@ -136,7 +136,10 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 	if err != nil {
 		return err
 	}
-	xmlRootPath := utils.ParseHierarchyPath(utils.IfaceAsString(rdr.Config().Opts[utils.XMLRootPathOpt]), utils.EmptyString)
+	var xmlRootPath utils.HierarchyPath
+	if rdr.Config().Opts.XMLRootPath != nil {
+		xmlRootPath = utils.ParseHierarchyPath(*rdr.Config().Opts.XMLRootPath, utils.EmptyString)
+	}
 	xmlElmts := xmlquery.Find(doc, xmlRootPath.AsString("/", true))
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0

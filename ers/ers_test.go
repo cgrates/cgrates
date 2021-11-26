@@ -50,7 +50,7 @@ func TestERsProcessPartialEvent(t *testing.T) {
 		SourcePath:     "/var/spool/cgrates/ers/in",
 		ProcessedPath:  "/var/spool/cgrates/ers/out",
 		Filters:        []string{},
-		Opts:           make(map[string]interface{}),
+		Opts:           &config.EventReaderOpts{},
 	}
 
 	args := &erEvent{
@@ -93,8 +93,8 @@ func TestErsOnEvictedMetaPostCDROK(t *testing.T) {
 			ID:            "ER1",
 			Type:          utils.MetaNone,
 			ProcessedPath: "/tmp",
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaPostCDR,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaPostCDR),
 			},
 		},
 	}
@@ -158,8 +158,8 @@ func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
 			ID:            "ER1",
 			Type:          utils.MetaNone,
 			ProcessedPath: "/tmp",
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaPostCDR,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaPostCDR),
 			},
 		},
 	}
@@ -206,9 +206,9 @@ func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
-				utils.PartialPathOpt:        dirPath,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
+				PartialPath:        utils.StringPointer(dirPath),
 			},
 			CacheDumpFields: []*config.FCTemplate{
 				{
@@ -273,9 +273,9 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
-				utils.PartialPathOpt:        dirPath,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
+				PartialPath:        utils.StringPointer(dirPath),
 			},
 		},
 	}
@@ -315,8 +315,8 @@ func TestErsOnEvictedMetaDumpToFileEmptyPath(t *testing.T) {
 		rdrCfg: &config.EventReaderCfg{
 			ID:   "ER1",
 			Type: utils.MetaNone,
-			Opts: map[string]interface{}{
-				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
+			Opts: &config.EventReaderOpts{
+				PartialCacheAction: utils.StringPointer(utils.MetaDumpToFile),
 			},
 		},
 	}
