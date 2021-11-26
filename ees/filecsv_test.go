@@ -63,7 +63,7 @@ func TestFileCsvComposeHeader(t *testing.T) {
 		cfg:       cfg.EEsCfg().Exporters[0],
 		cgrCfg:    cfg,
 		filterS:   filterS,
-		file:      nopCloser{byteBuff},
+		wrtr:      nopCloser{byteBuff},
 		csvWriter: csvNW,
 		dc:        &utils.SafeMapStorage{},
 	}
@@ -126,7 +126,7 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 		cfg:       cfg.EEsCfg().Exporters[0],
 		cgrCfg:    cfg,
 		filterS:   filterS,
-		file:      nopCloser{byteBuff},
+		wrtr:      nopCloser{byteBuff},
 		csvWriter: csvNW,
 		dc:        &utils.SafeMapStorage{},
 	}
@@ -196,7 +196,7 @@ func TestFileCsvExportEvent(t *testing.T) {
 		cfg:       cfg.EEsCfg().Exporters[0],
 		cgrCfg:    cfg,
 		filterS:   filterS,
-		file:      nopCloser{byteBuff},
+		wrtr:      nopCloser{byteBuff},
 		csvWriter: csvNW,
 		dc:        dc,
 	}
@@ -222,7 +222,7 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 		cfg:       cfg.EEsCfg().Exporters[0],
 		cgrCfg:    cfg,
 		filterS:   filterS,
-		file:      nopCloserWrite{byteBuff},
+		wrtr:      nopCloserWrite{byteBuff},
 		csvWriter: csvNW,
 		dc:        &utils.SafeMapStorage{},
 	}
@@ -256,7 +256,7 @@ func TestFileCsvOnEvictedClose(t *testing.T) {
 		cfg:       cfg.EEsCfg().Exporters[0],
 		cgrCfg:    cfg,
 		filterS:   filterS,
-		file:      nopCloserError{byteBuff},
+		wrtr:      nopCloserError{byteBuff},
 		csvWriter: csvNW,
 		dc:        &utils.SafeMapStorage{},
 	}

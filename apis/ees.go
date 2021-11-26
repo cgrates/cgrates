@@ -36,3 +36,7 @@ type EeSv1 struct {
 func (cS *EeSv1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) error {
 	return cS.ees.V1ProcessEvent(ctx, cgrEv, rply)
 }
+
+func (cS *EeSv1) ArchiveEventsAsReply(ctx *context.Context, args *ees.ArchiveEventsArgs, reply *[]byte) error {
+	return cS.ees.V1ArchiveEventsAsReply(ctx, args, reply)
+}

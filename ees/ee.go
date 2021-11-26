@@ -51,9 +51,9 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
 	}
 	switch cfg.Type {
 	case utils.MetaFileCSV:
-		return NewFileCSVee(cfg, cgrCfg, filterS, dc)
+		return NewFileCSVee(cfg, cgrCfg, filterS, dc, nil)
 	case utils.MetaFileFWV:
-		return NewFileFWVee(cfg, cgrCfg, filterS, dc)
+		return NewFileFWVee(cfg, cgrCfg, filterS, dc, nil)
 	case utils.MetaHTTPPost:
 		return NewHTTPPostEE(cfg, cgrCfg, filterS, dc)
 	case utils.MetaHTTPjsonMap:
@@ -241,6 +241,7 @@ func (slicePreparing) PrepareMap(mp *utils.CGREvent) (interface{}, error) {
 	}
 	return csvRecord, nil
 }
+
 func (slicePreparing) PrepareOrderMap(mp *utils.OrderedNavigableMap) (interface{}, error) {
 	return mp.OrderedFieldsAsStrings(), nil
 }

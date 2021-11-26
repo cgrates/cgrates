@@ -19,6 +19,7 @@ package ees
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 	"testing"
@@ -45,11 +46,11 @@ func TestNewEventExporter(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eeExpect, err := NewFileCSVee(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, dc)
+	eeExpect, err := NewFileCSVee(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, dc, nil)
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
-	err = eeExpect.init()
+	err = eeExpect.init(nil)
 	if err == nil {
 		t.Error("\nExpected an error")
 	}
@@ -82,11 +83,11 @@ func TestNewEventExporterCase2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eeExpect, err := NewFileFWVee(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, dc)
+	eeExpect, err := NewFileFWVee(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, dc, io.Discard)
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
-	err = eeExpect.init()
+	err = eeExpect.init(io.Discard)
 	if err == nil {
 		t.Error("\nExpected an error")
 	}

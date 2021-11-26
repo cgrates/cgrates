@@ -609,6 +609,7 @@ func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
 			mp[k] = []string{MetaAny}
 		}
 	}
+
 	exp := NewAttrReloadCacheWithOpts()
 	rply := NewAttrReloadCacheWithOptsFromMap(mp, "", nil)
 	if !reflect.DeepEqual(exp, rply) {
@@ -618,5 +619,4 @@ func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
 	if !reflect.DeepEqual(mp, rplyM) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(mp), ToJSON(rplyM))
 	}
-
 }

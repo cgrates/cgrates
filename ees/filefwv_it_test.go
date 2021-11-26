@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"io"
 	"net/rpc"
 	"os"
 	"path"
@@ -177,7 +178,7 @@ func TestFileFwvInit(t *testing.T) {
 		cfg:    cgrCfg.EEsCfg().Exporters[0],
 		dc:     dc,
 	}
-	if err := fFwv.init(); err != nil {
+	if err := fFwv.init(io.Discard); err != nil {
 		t.Error(err)
 	}
 	if err := os.RemoveAll("/tmp/TestInitFileCSV"); err != nil {

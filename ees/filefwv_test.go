@@ -54,7 +54,7 @@ func TestFileFwvComposeHeader(t *testing.T) {
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
 		filterS: filterS,
-		file:    nopCloser{byteBuff},
+		writer:  nopCloser{byteBuff},
 		dc:      &utils.SafeMapStorage{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
@@ -116,7 +116,7 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
 		filterS: filterS,
-		file:    nopCloser{byteBuff},
+		writer:  nopCloser{byteBuff},
 		dc:      &utils.SafeMapStorage{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
@@ -182,7 +182,7 @@ func TestFileFwvExportEvent(t *testing.T) {
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
 		filterS: filterS,
-		file:    nopCloser{byteBuff},
+		writer:  nopCloser{byteBuff},
 		dc:      dc,
 	}
 	if err := fFwv.ExportEvent(context.Background(), []string{"value", "3"}, ""); err != nil {
@@ -218,7 +218,7 @@ func TestFileFwvExportEventWriteError(t *testing.T) {
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
 		filterS: filterS,
-		file:    nopCloserWrite{byteBuff},
+		writer:  nopCloserWrite{byteBuff},
 		dc:      dc,
 	}
 	if err := fFwv.ExportEvent(context.Background(), []string{""}, ""); err == nil || err != utils.ErrNotImplemented {
@@ -236,7 +236,7 @@ func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
 		filterS: filterS,
-		file:    nopCloserWrite{byteBuff},
+		writer:  nopCloserWrite{byteBuff},
 		dc:      &utils.SafeMapStorage{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
@@ -268,7 +268,7 @@ func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
 		filterS: filterS,
-		file:    nopCloserWrite{byteBuff},
+		writer:  nopCloserWrite{byteBuff},
 		dc:      &utils.SafeMapStorage{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
@@ -299,7 +299,7 @@ func TestFileFwvOnEvictedTrailer(t *testing.T) {
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
 		filterS: filterS,
-		file:    nopCloserWrite{byteBuff},
+		writer:  nopCloserWrite{byteBuff},
 		dc:      &utils.SafeMapStorage{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{
@@ -337,7 +337,7 @@ func TestFileFwvOnEvictedClose(t *testing.T) {
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
 		filterS: filterS,
-		file:    nopCloserError{byteBuff},
+		writer:  nopCloserError{byteBuff},
 		dc:      &utils.SafeMapStorage{},
 	}
 	fFwv.Cfg().Fields = []*config.FCTemplate{

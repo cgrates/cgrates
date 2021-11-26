@@ -55,6 +55,7 @@ var (
 		testCsvVerifyExports,
 		testCsvExportComposedEvent,
 		testCsvVerifyComposedExports,
+		testCsvExportBufferedEvent,
 		testCsvExportEventWithInflateTemplate,
 		testCsvVerifyExportsWithInflateTemplate,
 		testCsvExportNotFoundExporter,
@@ -311,6 +312,121 @@ func testCsvVerifyComposedExports(t *testing.T) {
 	}
 }
 
+func testCsvExportBufferedEvent(t *testing.T) {
+	eventVoice := &ArchiveEventsArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaExporterID: "CSVExporterBuffered",
+		},
+		Events: []*utils.CGREvent{
+			{
+				Tenant: "cgrates.org",
+				ID:     "voiceEvent",
+				Event: map[string]interface{}{
+					utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:           utils.MetaVoice,
+					"ComposedOriginID1": "dsaf",
+					"ComposedOriginID2": "dsaf",
+					utils.OriginHost:    "192.168.1.1",
+					utils.RequestType:   utils.MetaRated,
+					utils.Tenant:        "cgrates.org",
+					utils.Category:      "call",
+					utils.AccountField:  "1001",
+					utils.Subject:       "1001",
+					utils.Destination:   "1002",
+					utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
+					utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
+					utils.Usage:         10 * time.Second,
+					utils.RunID:         utils.MetaDefault,
+					utils.Cost:          1.016374,
+					"ExtraFields": map[string]string{"extra1": "val_extra1",
+						"extra2": "val_extra2", "extra3": "val_extra3"},
+				},
+			},
+			{
+				Tenant: "cgrates.org",
+				ID:     "dataEvent",
+				Event: map[string]interface{}{
+					utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:          utils.MetaData,
+					utils.OriginID:     "abcdef",
+					utils.OriginHost:   "192.168.1.1",
+					utils.RequestType:  utils.MetaRated,
+					utils.Tenant:       "AnotherTenant",
+					utils.Category:     "call", //for data CDR use different Tenant
+					utils.AccountField: "1001",
+					utils.Subject:      "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+					utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
+					utils.Usage:        10 * time.Nanosecond,
+					utils.RunID:        utils.MetaDefault,
+					utils.Cost:         0.012,
+					"ExtraFields": map[string]string{"extra1": "val_extra1",
+						"extra2": "val_extra2", "extra3": "val_extra3"},
+				},
+			},
+			{
+				Tenant: "cgrates.org",
+				ID:     "smsEvent",
+				Event: map[string]interface{}{
+					utils.CGRID:        utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
+					utils.ToR:          utils.MetaData,
+					utils.OriginID:     "abcdef",
+					utils.RequestType:  utils.MetaNone,
+					utils.Tenant:       "phone.org",
+					utils.Category:     "sms", //for data CDR use different Tenant
+					utils.AccountField: "User2001",
+					utils.Subject:      "User2001",
+					utils.Destination:  "User2002",
+					utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
+					utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
+					utils.Usage:        10 * time.Nanosecond,
+					utils.RunID:        "raw",
+					utils.Cost:         44.5,
+					"ExtraFields": map[string]string{"extra1": "val_extra1",
+						"extra2": "val_extra2", "extra3": "val_extra3"},
+				},
+			},
+			{
+				Tenant: "cgrates.org",
+				ID:     "photoEvent",
+				Event: map[string]interface{}{
+					utils.CGRID:        utils.Sha1("qwert", time.Unix(1383813745, 0).UTC().String()),
+					utils.OriginID:     "abcdef",
+					utils.OriginHost:   "127.0.0.1",
+					utils.RequestType:  utils.MetaPrepaid,
+					utils.Tenant:       "dispatchers.org",
+					utils.Category:     "photo", //for data CDR use different Tenant
+					utils.AccountField: "1005",
+					utils.Subject:      "1005",
+					utils.Destination:  "1000",
+					utils.SetupTime:    time.Unix(22383813745, 0).UTC(),
+					utils.AnswerTime:   time.Unix(22383813760, 0).UTC(),
+					utils.Usage:        10 * time.Nanosecond,
+					utils.RunID:        "Default_charging_id",
+					utils.Cost:         1.442234,
+				},
+			},
+		},
+	}
+
+	expected := `NumberOfEvent,CGRID,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost` + "\n" +
+		`1,dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.0164` + "\n" +
+		`2,ea1f1968cc207859672c332364fc7614c86b04c5,*default,*data,*rated,AnotherTenant,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,0.012` + "\n" +
+		`3,9e0b2a4b23e0843efe522e8a611b092a16ecfba1,raw,*data,*none,phone.org,sms,User2001,User2001,User2002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,44.5` + "\n" +
+		`4,cd8112998c2abb0e4a7cd3a94c74817cd5fe67d3,Default_charging_id,*prepaid,dispatchers.org,photo,1005,1005,1000,2679-04-25T22:02:25Z,2679-04-25T22:02:40Z,10,1.4422` + "\n" +
+		`4,10s,46.9706` + "\n"
+	var reply []byte
+	if err := csvRpc.Call(utils.EeSv1ArchiveEventsAsReply,
+		eventVoice, &reply); err != nil {
+		t.Error(err)
+	} else if string(reply) != expected {
+		t.Errorf("Expected %q \n received %q", expected, string(reply))
+	}
+	time.Sleep(time.Second)
+}
+
 func testCsvExportEventWithInflateTemplate(t *testing.T) {
 	eventVoice := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterWIthTemplate"},
@@ -486,7 +602,7 @@ func TestCsvInitFileCSV(t *testing.T) {
 		cfg:    cgrCfg.EEsCfg().Exporters[0],
 		dc:     dc,
 	}
-	if err := fCsv.init(); err != nil {
+	if err := fCsv.init(nil); err != nil {
 		t.Error(err)
 	}
 	if err := os.RemoveAll("/tmp/TestInitFileCSV"); err != nil {
