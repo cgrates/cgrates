@@ -345,60 +345,67 @@ func TestIfaceAsBool(t *testing.T) {
 	val := interface{}(true)
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != true {
+	} else if !itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}("true")
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != true {
+	} else if !itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}(0)
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != false {
+	} else if itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}(int32(2))
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != true {
+	} else if !itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}(1)
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != true {
+	} else if !itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}(uint32(2))
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != true {
+	} else if !itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}(uint64(2))
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != true {
+	} else if !itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}(0.0)
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != false {
+	} else if itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}(1.0)
 	if itmConvert, err := IfaceAsBool(val); err != nil {
 		t.Error(err)
-	} else if itmConvert != true {
+	} else if !itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}("This is not a bool")
 	if _, err := IfaceAsBool(val); err == nil {
 		t.Error("expecting error")
+	}
+
+	val = interface{}("")
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert {
+		t.Errorf("received: %+v", itmConvert)
 	}
 }
 
@@ -840,6 +847,17 @@ func TestIfaceAsTInt64Default(t *testing.T) {
 	_, err := IfaceAsTInt64(test)
 	if err == nil || err.Error() != "cannot convert field<bool>: true to int" {
 		t.Errorf("Expecting <cannot convert field<bool>: true to int> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsTIntDefault(t *testing.T) {
+	if _, err := IfaceAsTInt(true); err == nil || err.Error() != "cannot convert field<bool>: true to int" {
+		t.Errorf("Expecting <cannot convert field<bool>: true to int> ,received: <%+v>", err)
+	}
+	var test time.Duration = 2147483647
+	response, _ := IfaceAsTInt(test)
+	if !reflect.DeepEqual(response, int(test.Nanoseconds())) {
+		t.Errorf("Expected <%+v> ,received: <%+v>", test.Nanoseconds(), response)
 	}
 }
 
@@ -1716,8 +1734,24 @@ func TestOptAsStringSlice(t *testing.T) {
 
 func TestStringAsBig(t *testing.T) {
 	itm := "2ns"
-	_, err := StringAsBig(itm)
+	v, err := StringAsBig(itm)
 	if err != nil {
 		t.Error(err)
+	}
+	if exp := decimal.New(2, 0); exp.Cmp(v) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", exp, v)
+	}
+	itm = ""
+	if v, err := StringAsBig(itm); err != nil {
+		t.Error(err)
+	} else if exp := decimal.New(0, 0); exp.Cmp(v) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", exp, v)
+	}
+
+	itm = "2"
+	if v, err := StringAsBig(itm); err != nil {
+		t.Error(err)
+	} else if exp := decimal.New(2, 0); exp.Cmp(v) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", exp, v)
 	}
 }

@@ -70,18 +70,14 @@ type APDiktat struct {
 }
 
 // RSRValues returns the Value as RSRParsers
-func (dk *APDiktat) RSRValues(sep string) (v config.RSRParsers, err error) {
+func (dk *APDiktat) RSRValues(sep string) (_ config.RSRParsers, err error) {
 	if dk.valRSR == nil {
 		dk.valRSR, err = config.NewRSRParsers(dk.Value, sep)
-		if err != nil {
-			return
-		}
 	}
-	return dk.valRSR, nil
+	return dk.valRSR, err
 }
 
 // ActionProfileWithAPIOpts is used in API calls
-
 type ActionProfileWithAPIOpts struct {
 	*ActionProfile
 	APIOpts map[string]interface{}
@@ -129,12 +125,12 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 	}
 
 	var acID string
-	if strings.HasPrefix(path[0], utils.Actions) &&
-		path[0][5] == '[' && path[0][len(path[0])-1] == ']' {
-		acID = path[0][6 : len(path[0])-1]
-	} else if path[0] == utils.Actions {
+	if path[0] == utils.Actions {
 		acID = path[1]
 		path = path[1:]
+	} else if strings.HasPrefix(path[0], utils.Actions) &&
+		path[0][7] == '[' && path[0][len(path[0])-1] == ']' {
+		acID = path[0][8 : len(path[0])-1]
 	}
 	if acID == utils.EmptyString {
 		return utils.ErrWrongPath
@@ -170,6 +166,7 @@ func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err err
 			if strings.HasPrefix(path[0], utils.Opts) &&
 				path[0][4] == '[' && path[0][len(path[0])-1] == ']' {
 				aP.Opts[path[0][5:len(path[0])-1]] = val
+				return
 			}
 			return utils.ErrWrongPath
 		case utils.ID:
