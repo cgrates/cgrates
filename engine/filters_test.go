@@ -1313,3 +1313,59 @@ func TestFilterPassCronExpParseDPErr(t *testing.T) {
 		t.Error("should not be passing")
 	}
 }
+func TestFilterSet(t *testing.T) {
+	fltr := Filter{}
+	exp := Filter{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001", "1002"},
+		}},
+	}
+	if err := fltr.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+
+	if err := fltr.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	if err := fltr.Set([]string{utils.Rules, utils.Type}, utils.MetaString, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{utils.Rules, utils.Element}, "~*req.Account", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{utils.Rules, utils.Values}, "1001", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{utils.Rules, utils.Type}, utils.MetaString, true, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{utils.Rules, utils.Element}, "~*req.Account", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{utils.Rules, utils.Values}, "1002", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := fltr.Set([]string{utils.Rules, "Wrong"}, "1002", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+
+	fltr.Compress()
+
+	if !reflect.DeepEqual(exp, fltr) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(fltr))
+	}
+}

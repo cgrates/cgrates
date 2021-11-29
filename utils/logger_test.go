@@ -40,6 +40,9 @@ func TestEmergLogger(t *testing.T) {
 	newLogger := &StdLogger{nodeID: id}
 
 	newLogger.SetLogLevel(-1)
+	if newLogger.GetLogLevel() != -1 {
+		t.Fatal("Unexpected log level")
+	}
 	if err := newLogger.Emerg(EmptyString); err != nil {
 		t.Error(err)
 	} else {

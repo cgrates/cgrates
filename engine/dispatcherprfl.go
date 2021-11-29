@@ -241,9 +241,9 @@ func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool,
 			case utils.Params:
 				dP.Hosts[len(dP.Hosts)-1].Params, err = utils.NewMapFromCSV(utils.IfaceAsString(val))
 			default:
-				if strings.HasPrefix(path[0], utils.Params) &&
-					path[0][6] == '[' && path[0][len(path[0])-1] == ']' {
-					dP.Hosts[len(dP.Hosts)-1].Params[path[0][7:len(path[0])-1]] = val
+				if strings.HasPrefix(path[1], utils.Params) &&
+					path[1][6] == '[' && path[1][len(path[1])-1] == ']' {
+					dP.Hosts[len(dP.Hosts)-1].Params[path[1][7:len(path[1])-1]] = val
 					return
 				}
 				return utils.ErrWrongPath
@@ -255,7 +255,7 @@ func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool,
 			return utils.ErrWrongPath
 		}
 		if len(dP.Hosts) == 0 || newBranch {
-			dP.Hosts = append(dP.Hosts, new(DispatcherHostProfile))
+			dP.Hosts = append(dP.Hosts, &DispatcherHostProfile{Params: make(map[string]interface{})})
 		}
 		dP.Hosts[len(dP.Hosts)-1].Params[path[2]] = val
 	}

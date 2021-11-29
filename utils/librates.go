@@ -452,8 +452,8 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 }
 
 // CompressIntervals will compress intervals which equal
-func CompressIntervals(rtIvls []*RateSInterval) {
-}
+// func CompressIntervals(rtIvls []*RateSInterval) {
+// }
 
 // AsRateProfile converts APIRateProfile to RateProfile
 func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
@@ -482,9 +482,7 @@ func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
 			}
 		}
 	}
-	if err = rp.Compile(); err != nil {
-		return
-	}
+	err = rp.Compile()
 	return
 }
 

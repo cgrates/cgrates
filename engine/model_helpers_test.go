@@ -853,6 +853,7 @@ func TestTPFilterAsTPFilter3(t *testing.T) {
 	}
 
 	rcvTPs := FilterMdls(tps).AsTPFilter()
+	sort.Slice(rcvTPs, func(i, j int) bool { return rcvTPs[i].Tenant > rcvTPs[j].Tenant })
 	sort.Strings(rcvTPs[0].Filters[0].Values)
 	sort.Strings(eTPs[0].Filters[0].Values)
 	if !reflect.DeepEqual(eTPs, rcvTPs) {
