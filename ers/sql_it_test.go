@@ -660,7 +660,7 @@ func TestSQLSetURLError2(t *testing.T) {
 		rdrErr:        nil,
 		cap:           nil,
 	}
-	err := testSQLEventReader.setURL("*mysql://cgrates:CGRateS.org@127.0.0.1:3306", "http://user^:passwo^rd@foo.com/", nil)
+	err := testSQLEventReader.setURL("*mysql://cgrates:CGRateS.org@127.0.0.1:3306", "http://user^:passwo^rd@foo.com/", &config.EventReaderOpts{})
 	expected := `parse "http://user^:passwo^rd@foo.com/": net/url: invalid userinfo`
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)

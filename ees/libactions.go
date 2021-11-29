@@ -97,6 +97,7 @@ func postEvent(_ *engine.Account, a *engine.Action, _ engine.Actions, _ *engine.
 		ExportPath:     a.ExtraParameters,
 		Attempts:       config.CgrConfig().GeneralCfg().PosterAttempts,
 		FailedPostsDir: config.CgrConfig().GeneralCfg().FailedPostsDir,
+		Opts:           &config.EventExporterOpts{},
 	}, config.CgrConfig(), nil, nil)
 	if err != nil {
 		return err

@@ -1415,7 +1415,6 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 	if !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}
-	// fmt.Println(rcvLog)
 	utils.Logger.SetLogLevel(0)
 	if err := os.RemoveAll(dirPath); err != nil {
 		t.Error(err)
