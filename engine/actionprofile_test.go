@@ -244,5 +244,4 @@ func TestActionProfileSet(t *testing.T) {
 	if !reflect.DeepEqual(exp, ap) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(ap))
 	}
-
 }
