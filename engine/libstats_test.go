@@ -1370,3 +1370,79 @@ func TestStatQueueLockUnlockStatQueues(t *testing.T) {
 		t.Fatal("expected struct field \"lkID\" to be empty")
 	}
 }
+
+func TestStatQueueProfileSet(t *testing.T) {
+	sq := StatQueueProfile{}
+	exp := StatQueueProfile{
+		Tenant:       "cgrates.org",
+		ID:           "ID",
+		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:       10,
+		QueueLength:  10,
+		TTL:          10,
+		MinItems:     10,
+		Stored:       true,
+		Blocker:      true,
+		ThresholdIDs: []string{"TH1"},
+		Metrics: []*MetricWithFilters{{
+			MetricID: utils.MetaTCD,
+		}, {
+			MetricID:  utils.MetaACD,
+			FilterIDs: []string{"fltr1"},
+		}},
+	}
+	if err := sq.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+
+	if err := sq.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.Weight}, 10, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.QueueLength}, 10, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.TTL}, 10, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.MinItems}, 10, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.Stored}, true, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.Blocker}, true, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.ThresholdIDs}, "TH1", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	if err := sq.Set([]string{utils.Metrics, utils.MetricID}, "*tcd;*acd", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.Metrics, utils.FilterIDs}, "fltr1", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	if err := sq.Set([]string{utils.Metrics, "wrong"}, "fltr1", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(exp, sq) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(sq))
+	}
+}

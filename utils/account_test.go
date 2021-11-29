@@ -1117,7 +1117,19 @@ func TestAccountSet(t *testing.T) {
 					"bal8":  MapStorage{"bal9": "val3"},
 					"bal10": "val3",
 				},
-				Units: NewDecimal(0, 0),
+				Units:          NewDecimal(10, 0),
+				FilterIDs:      []string{"*string:~*req.Account:1001"},
+				AttributeIDs:   []string{"Attr1", "Attr2"},
+				RateProfileIDs: []string{"Attr1", "Attr2"},
+				Weights:        DynamicWeights{{Weight: 10}},
+				UnitFactors: []*UnitFactor{
+					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(10, 0)},
+					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(101, 0)},
+				},
+				CostIncrements: []*CostIncrement{
+					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(10, 0), FixedFee: NewDecimal(10, 0), RecurrentFee: NewDecimal(10, 0)},
+					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(101, 0), FixedFee: NewDecimal(101, 0), RecurrentFee: NewDecimal(101, 0)},
+				},
 			},
 		},
 	}
@@ -1186,6 +1198,82 @@ func TestAccountSet(t *testing.T) {
 	if err := acc.Set([]string{Balances, "bal1", Opts, "bal10"}, "val3", false, EmptyString); err != nil {
 		t.Error(err)
 	}
+	if err := acc.Set([]string{Balances, "bal1", FilterIDs}, "*string:~*req.Account:1001", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", AttributeIDs}, "Attr1;Attr2", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", RateProfileIDs}, "Attr1;Attr2", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Units}, "10", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", Weights}, ";10", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	expErr = `invalid key: <1> for BalanceUnitFactors`
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "1", false, EmptyString); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+	expErr = `can't convert <a> to decimal`
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "a;a", false, EmptyString); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "fltr1;10", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors, "Wrong"}, "fltr1;10", false, EmptyString); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors, Factor}, "101", true, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors, FilterIDs}, "fltr1", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	expErr = `invalid key: <1> for BalanceCostIncrements`
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "1", false, EmptyString); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+	expErr = `can't convert <a> to decimal`
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;a;10", false, EmptyString); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;a;10;10", false, EmptyString); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;a", false, EmptyString); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;10", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, FixedFee}, "101", true, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, RecurrentFee}, "101", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, Increment}, "101", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, FilterIDs}, "fltr1", false, EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, "Wrong"}, "fltr1", false, EmptyString); err != ErrWrongPath {
+		t.Error(err)
+	}
+
+	if err := acc.Balances["bal1"].Set(nil, "fltr1", false); err != ErrWrongPath {
+		t.Error(err)
+	}
+
 	if !reflect.DeepEqual(exp, acc) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(acc))
 	}

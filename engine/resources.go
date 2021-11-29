@@ -1027,6 +1027,8 @@ func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string)
 		return utils.ErrWrongPath
 	}
 	switch path[0] {
+	default:
+		return utils.ErrWrongPath
 	case utils.Tenant:
 		rp.Tenant = utils.IfaceAsString(val)
 	case utils.ID:
