@@ -21,7 +21,9 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,7 +34,7 @@ func TestDspRateSv1CostForEventCase(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
+	result := dspSrv.GuardianSv1Ping(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -43,7 +45,7 @@ func TestDspGuardianSv1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
-	result := dspSrv.GuardianSv1Ping(nil, reply)
+	result := dspSrv.GuardianSv1Ping(context.Background(), nil, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -58,7 +60,7 @@ func TestDspGuardianSv1PingErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
+	result := dspSrv.GuardianSv1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -68,11 +70,11 @@ func TestDspGuardianSv1PingErrorNil(t *testing.T) {
 func TestDspGuardianSv1RemoteLockCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := AttrRemoteLockWithAPIOpts{
+	CGREvent := &guardian.AttrRemoteLockWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.GuardianSv1RemoteLock(CGREvent, reply)
+	result := dspSrv.GuardianSv1RemoteLock(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -83,11 +85,11 @@ func TestDspGuardianSv1RemoteLockErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := AttrRemoteLockWithAPIOpts{
+	CGREvent := &guardian.AttrRemoteLockWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.GuardianSv1RemoteLock(CGREvent, reply)
+	result := dspSrv.GuardianSv1RemoteLock(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -97,11 +99,11 @@ func TestDspGuardianSv1RemoteLockErrorNil(t *testing.T) {
 func TestDspGuardianSv1RemoteUnlockCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := AttrRemoteUnlockWithAPIOpts{
+	CGREvent := &guardian.AttrRemoteUnlockWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.GuardianSv1RemoteUnlock(CGREvent, reply)
+	result := dspSrv.GuardianSv1RemoteUnlock(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -112,11 +114,11 @@ func TestDspGuardianSv1RemoteUnlockErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := AttrRemoteUnlockWithAPIOpts{
+	CGREvent := &guardian.AttrRemoteUnlockWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *[]string
-	result := dspSrv.GuardianSv1RemoteUnlock(CGREvent, reply)
+	result := dspSrv.GuardianSv1RemoteUnlock(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

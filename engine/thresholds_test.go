@@ -3012,3 +3012,63 @@ func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
 	}
 
 }
+
+func TestThresholdProfileSet(t *testing.T) {
+	th := ThresholdProfile{}
+	exp := ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "ID",
+		FilterIDs:        []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:           10,
+		MaxHits:          10,
+		MinHits:          10,
+		MinSleep:         10,
+		Blocker:          true,
+		Async:            true,
+		ActionProfileIDs: []string{"acc1"},
+	}
+	if err := th.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if err := th.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if err := th.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+
+	if err := th.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.Weight}, 10, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.MaxHits}, 10, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.MinHits}, 10, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.MinSleep}, 10, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	if err := th.Set([]string{utils.Blocker}, true, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.Async}, true, false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.ActionProfileIDs}, "acc1", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(exp, th) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(th))
+	}
+}
