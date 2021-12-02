@@ -714,21 +714,27 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "TEST_ATTRIBUTES_IT_TEST",
-			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+			Tenant: utils.CGRateSorg}, APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaClear,
+		}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "TEST_ATTRIBUTE3",
-			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+			Tenant: utils.CGRateSorg}, APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaClear,
+		}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "TEST_ATTRIBUTES_new_fltr",
-			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+			Tenant: utils.CGRateSorg}, APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaClear,
+		}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
@@ -736,7 +742,9 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
-			ID: "fltr_for_attr"}}, &reply); err != nil {
+			ID: "fltr_for_attr"}, APIOpts: map[string]interface{}{
+			utils.MetaCache: utils.MetaClear,
+		}}, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -746,6 +754,7 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
