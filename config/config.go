@@ -196,7 +196,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Context:      []*utils.DynamicStringOpt{},
 			IgnoreErrors: []*utils.DynamicBoolOpt{},
 			MaxCost:      []*utils.DynamicInterfaceOpt{},
-			ProfileCount: []*utils.DynamicIntOpt{},
+			ProfileCount: []*utils.DynamicIntPointerOpt{},
 			Limit:        []*utils.DynamicIntPointerOpt{},
 			Offset:       []*utils.DynamicIntPointerOpt{},
 			Usage:        []*utils.DynamicDecimalBigOpt{},
