@@ -49,6 +49,17 @@ func (dcs DataConverters) ConvertString(in string) (out string, err error) {
 	return IfaceAsString(outIface), nil
 }
 
+// ConvertString converts from and to string
+func (dcs DataConverters) ConvertInterface(in interface{}) (out interface{}, err error) {
+	out = in
+	for _, cnv := range dcs {
+		if out, err = cnv.Convert(out); err != nil {
+			return
+		}
+	}
+	return
+}
+
 // DataConverter represents functions which should convert input into output
 type DataConverter interface {
 	Convert(interface{}) (interface{}, error)
@@ -474,6 +485,26 @@ type LengthConverter struct{}
 func (LengthConverter) Convert(in interface{}) (out interface{}, err error) {
 	switch val := in.(type) {
 	case string:
+		if len(val) > 2 {
+			var tmp interface{}
+			var l func() (interface{}, error)
+			switch {
+			case val[0] == '[' && val[len(val)-1] == ']':
+				v := []interface{}{}
+				l = func() (interface{}, error) { return len(v), nil }
+				tmp = &v
+
+			case val[0] == '{' && val[len(val)-1] == '}':
+				v := map[string]interface{}{}
+				l = func() (interface{}, error) { return len(v), nil }
+				tmp = &v
+			}
+			if tmp != nil {
+				if err := json.Unmarshal([]byte(val), tmp); err == nil {
+					return l()
+				}
+			}
+		}
 		return len(val), nil
 	case []string:
 		return len(val), nil

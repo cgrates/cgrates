@@ -400,9 +400,10 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 
 func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 	expectedAcc := utils.Account{
-		Tenant:    "cgrates.org",
-		ID:        "ACNT_VOL1",
-		FilterIDs: []string{},
+		Tenant:  "cgrates.org",
+		ID:      "ACNT_VOL1",
+		Opts:    make(map[string]interface{}),
+		Weights: utils.DynamicWeights{{}},
 		Balances: map[string]*utils.Balance{
 			"ABS_VOLUME1": {
 				ID: "ABS_VOLUME1",
@@ -412,6 +413,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 						Weight:    30,
 					},
 				},
+				Opts:  make(map[string]interface{}),
 				Type:  "*abstract",
 				Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // this should be -0
 				CostIncrements: []*utils.CostIncrement{
@@ -429,6 +431,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 						Weight:    20,
 					},
 				},
+				Opts:  make(map[string]interface{}),
 				Type:  "*abstract",
 				Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)),
 				CostIncrements: []*utils.CostIncrement{
@@ -459,7 +462,6 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 				RateProfileIDs: []string{"RP_SUPPLIER1"},
 			},
 		},
-		ThresholdIDs: []string{},
 	}
 	var result utils.Account
 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.AdminSv1GetAccount,

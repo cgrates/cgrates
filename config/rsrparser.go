@@ -167,6 +167,22 @@ func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP utils.DataProvider) (
 	return
 }
 
+// ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
+func (prsrs RSRParsers) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (out interface{}, err error) {
+	for i, prsr := range prsrs {
+		outPrsr, err := prsr.ParseDataProviderWithInterfaces2(dP)
+		if err != nil {
+			return nil, err
+		}
+		if i == 0 {
+			out = outPrsr
+		} else {
+			out = utils.IfaceAsString(out) + utils.IfaceAsString(outPrsr)
+		}
+	}
+	return
+}
+
 // GetIfaceFromValues returns an interface for each RSRParser
 func (prsrs RSRParsers) GetIfaceFromValues(evNm utils.DataProvider) (iFaceVals []interface{}, err error) {
 	iFaceVals = make([]interface{}, len(prsrs))
@@ -311,6 +327,14 @@ func (prsr *RSRParser) parseValue(value string) (out string, err error) {
 	return prsr.converters.ConvertString(value)
 }
 
+// parseValue the field value from a string
+func (prsr *RSRParser) parseValueInterface(value interface{}) (out interface{}, err error) {
+	for _, rsRule := range prsr.rsrRules {
+		value = rsRule.Process(utils.IfaceAsString(value))
+	}
+	return prsr.converters.ConvertInterface(value)
+}
+
 // ParseValue will parse the value out considering converters
 func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
 	out = prsr.path
@@ -359,6 +383,26 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (o
 		return
 	}
 	return prsr.parseValue(utils.IfaceAsString(outIface))
+}
+
+// ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
+func (prsr *RSRParser) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (out interface{}, err error) {
+	if prsr.dynRules != nil {
+		var dynPath string
+		if dynPath, err = prsr.dynRules.ParseDataProvider(dP); err != nil {
+			return
+		}
+		var dynRSR *RSRParser
+		if dynRSR, err = NewRSRParser(prsr.Rules[:prsr.dynIdxStart] + dynPath + prsr.Rules[prsr.dynIdxEnd:]); err != nil {
+			return
+		}
+		return dynRSR.ParseDataProviderWithInterfaces2(dP)
+	}
+	var outIface interface{}
+	if outIface, err = utils.DPDynamicInterface(prsr.path, dP); err != nil {
+		return
+	}
+	return prsr.parseValueInterface(outIface)
 }
 
 // CompileDynRule will return the compiled dynamic rule

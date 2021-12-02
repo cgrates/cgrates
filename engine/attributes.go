@@ -335,6 +335,8 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.R
 		out, err = value.ParseValue(utils.EmptyString)
 	case utils.MetaVariable, utils.MetaComposed:
 		out, err = value.ParseDataProvider(dp)
+	case utils.MetaGeneric:
+		out, err = value.ParseDataProviderWithInterfaces2(dp)
 	case utils.MetaUsageDifference:
 		if len(value) != 2 {
 			return "", fmt.Errorf("invalid arguments <%s> to %s",
