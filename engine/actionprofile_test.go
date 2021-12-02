@@ -244,5 +244,4 @@ func TestActionAPDiktatRSRValuesError(t *testing.T) {
 	if err == nil || err.Error() != expErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expErr, err)
 	}
-
 }
