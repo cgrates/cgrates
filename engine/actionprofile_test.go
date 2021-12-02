@@ -245,3 +245,56 @@ func TestActionProfileSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(ap))
 	}
 }
+func TestActionAPDiktatRSRValues(t *testing.T) {
+	apdDiktat := APDiktat{
+		valRSR: config.RSRParsers{
+			&config.RSRParser{
+				Rules: ">;q=0.7;expires=3600",
+			},
+			&config.RSRParser{
+				Rules: ">;q=0.7;expires=3600",
+			},
+		},
+	}
+	rsrPars, err := apdDiktat.RSRValues(";")
+	if err != nil {
+		t.Error(err)
+	}
+	expected := config.RSRParsers{
+		&config.RSRParser{
+			Rules: ">;q=0.7;expires=3600",
+		},
+		&config.RSRParser{
+			Rules: ">;q=0.7;expires=3600",
+		},
+	}
+	if !reflect.DeepEqual(rsrPars, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rsrPars))
+
+	}
+}
+
+func TestActionAPDiktatRSRValuesNil(t *testing.T) {
+	apdDiktat := APDiktat{}
+	rsrPars, err := apdDiktat.RSRValues(";")
+	if err != nil {
+		t.Error(err)
+	}
+	var expected config.RSRParsers
+	if !reflect.DeepEqual(rsrPars, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rsrPars))
+
+	}
+}
+
+func TestActionAPDiktatRSRValuesError(t *testing.T) {
+	apdDiktat := APDiktat{
+		Value: "val`val2val3",
+	}
+	expErr := "Closed unspilit syntax"
+	_, err := apdDiktat.RSRValues(";")
+	if err == nil || err.Error() != expErr {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expErr, err)
+	}
+
+}
