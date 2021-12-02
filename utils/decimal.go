@@ -20,7 +20,6 @@ package utils
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -201,11 +200,9 @@ func (d *Decimal) Compare(d2 *Decimal) int {
 
 // NewDecimalFromString converts a string to decimal
 func NewDecimalFromString(value string) (*Decimal, error) {
-	z, ok := new(decimal.Big).SetString(value)
-	// verify ok and check if the value was converted successfuly
-	// and the big is a valid number
-	if !ok || z.IsNaN(0) {
-		return nil, fmt.Errorf("can't convert <%+v> to decimal", value)
+	z, err := StringAsBig(value)
+	if err != nil {
+		return nil, err
 	}
 	return &Decimal{z}, nil
 }

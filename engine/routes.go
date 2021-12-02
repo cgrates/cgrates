@@ -474,11 +474,16 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 			valA, err = utils.IfaceAsStringSlice(val)
 			rp.SortingParameters = append(rp.SortingParameters, valA...)
 		case utils.Sorting:
-			rp.Sorting = utils.IfaceAsString(val)
+			if valStr := utils.IfaceAsString(val); len(valStr) != 0 {
+				rp.Sorting = valStr
+			}
 		case utils.Weights:
 			rp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 		}
 	case 2:
+		if val == utils.EmptyString {
+			return
+		}
 		if path[0] != utils.Routes {
 			return utils.ErrWrongPath
 		}
