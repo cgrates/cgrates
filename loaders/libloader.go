@@ -180,6 +180,8 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 				err = ar.Compose(fullPath, nMItm)
 			case utils.MetaGroup: // in case of *group type simply append to valSet
 				err = ar.Append(fullPath, nMItm)
+			case utils.MetaGeneric:
+				err = ar.Set(fullPath, out)
 			default:
 				err = ar.SetAsSlice(fullPath, nMItm)
 			}
@@ -292,4 +294,18 @@ func prepareData(prf profile, lData []*utils.OrderedNavigableMap, rsrSep string)
 		}
 	}
 	return
+}
+
+// Set implements utils.NMInterface
+func (ar *record) Set(fullPath *utils.FullPath, nm interface{}) (err error) {
+	switch fullPath.PathSlice[0] {
+	default:
+		return ar.data.Set(fullPath, nm)
+	case utils.MetaTmp:
+		_, err = ar.tmp.Set(fullPath.PathSlice[1:], nm)
+		return
+	case utils.MetaUCH:
+		ar.cache.Set(fullPath.Path[5:], nm, nil)
+		return
+	}
 }
