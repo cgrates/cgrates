@@ -363,7 +363,7 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		DefaultRatio:        1,
 		Opts: &RoutesOpts{
 			Context:      []*utils.DynamicStringOpt{},
-			ProfileCount: []*utils.DynamicIntOpt{},
+			ProfileCount: []*utils.DynamicIntPointerOpt{},
 			IgnoreErrors: []*utils.DynamicBoolOpt{},
 			MaxCost:      []*utils.DynamicInterfaceOpt{},
 			Limit:        []*utils.DynamicIntPointerOpt{},

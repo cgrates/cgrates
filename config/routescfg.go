@@ -25,11 +25,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var RoutesProfileCountDftOpt = utils.IntPointer(1)
+
 const (
 	RoutesContextDftOpt      = "*routes"
 	RoutesIgnoreErrorsDftOpt = false
 	RoutesMaxCostDftOpt      = utils.EmptyString
-	RoutesProfileCountDftOpt = 1
 	RoutesUsageDftOpt        = time.Minute
 )
 
@@ -39,7 +40,7 @@ type RoutesOpts struct {
 	MaxCost      []*utils.DynamicInterfaceOpt
 	Limit        []*utils.DynamicIntPointerOpt
 	Offset       []*utils.DynamicIntPointerOpt
-	ProfileCount []*utils.DynamicIntOpt
+	ProfileCount []*utils.DynamicIntPointerOpt
 	Usage        []*utils.DynamicDecimalBigOpt
 }
 
@@ -89,7 +90,7 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 		rtsOpts.Offset = append(rtsOpts.Offset, utils.IntToIntPointerDynamicOpts(jsnCfg.Offset)...)
 	}
 	if jsnCfg.ProfileCount != nil {
-		rtsOpts.ProfileCount = append(rtsOpts.ProfileCount, jsnCfg.ProfileCount...)
+		rtsOpts.ProfileCount = append(rtsOpts.ProfileCount, utils.IntToIntPointerDynamicOpts(jsnCfg.ProfileCount)...)
 	}
 	if jsnCfg.Usage != nil {
 		var usage []*utils.DynamicDecimalBigOpt
@@ -159,9 +160,9 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 	if rts.MaxCost != nil {
 		maxCost = utils.CloneDynamicInterfaceOpt(rts.MaxCost)
 	}
-	var profileCount []*utils.DynamicIntOpt
+	var profileCount []*utils.DynamicIntPointerOpt
 	if rts.ProfileCount != nil {
-		profileCount = utils.CloneDynamicIntOpt(rts.ProfileCount)
+		profileCount = utils.CloneDynamicIntPointerOpt(rts.ProfileCount)
 	}
 	var limit []*utils.DynamicIntPointerOpt
 	if rts.Limit != nil {
@@ -318,8 +319,8 @@ func diffRoutesOptsJsonCfg(d *RoutesOptsJson, v1, v2 *RoutesOpts) *RoutesOptsJso
 	if !utils.DynamicBoolOptEqual(v1.IgnoreErrors, v2.IgnoreErrors) {
 		d.IgnoreErrors = v2.IgnoreErrors
 	}
-	if !utils.DynamicIntOptEqual(v1.ProfileCount, v2.ProfileCount) {
-		d.ProfileCount = v2.ProfileCount
+	if !utils.DynamicIntPointerOptEqual(v1.ProfileCount, v2.ProfileCount) {
+		d.ProfileCount = utils.IntPointerToIntDynamicOpts(v2.ProfileCount)
 	}
 	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
 		d.Usage = utils.DecimalBigToStringDynamicOpts(v2.Usage)

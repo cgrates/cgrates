@@ -94,6 +94,9 @@ var (
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfileCount: 1,
+			},
 		},
 		{ //matching RouteProfile2
 			Tenant: "cgrates.org",
@@ -105,12 +108,18 @@ var (
 				"PddInterval":    "1s",
 				utils.Weight:     "20.0",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfileCount: 1,
+			},
 		},
 		{ //matching RouteProfilePrefix
 			Tenant: "cgrates.org",
 			ID:     "utils.CGREvent1",
 			Event: map[string]interface{}{
 				"Route": "RouteProfilePrefix",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfileCount: 1,
 			},
 		},
 		{ //matching
@@ -119,6 +128,9 @@ var (
 			Event: map[string]interface{}{
 				"UsageInterval": "1s",
 				"PddInterval":   "1s",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsRoutesProfileCount: 1,
 			},
 		},
 	}

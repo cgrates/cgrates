@@ -736,7 +736,7 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		DefaultRatio:        1,
 		Opts: &RoutesOpts{
 			Context:      []*utils.DynamicStringOpt{},
-			ProfileCount: []*utils.DynamicIntOpt{},
+			ProfileCount: []*utils.DynamicIntPointerOpt{},
 			IgnoreErrors: []*utils.DynamicBoolOpt{},
 			MaxCost:      []*utils.DynamicInterfaceOpt{},
 			Limit:        []*utils.DynamicIntPointerOpt{},
@@ -1957,7 +1957,7 @@ func TestRouteSConfig(t *testing.T) {
 		NestedFields:        false,
 		Opts: &RoutesOpts{
 			Context:      []*utils.DynamicStringOpt{},
-			ProfileCount: []*utils.DynamicIntOpt{},
+			ProfileCount: []*utils.DynamicIntPointerOpt{},
 			IgnoreErrors: []*utils.DynamicBoolOpt{},
 			MaxCost:      []*utils.DynamicInterfaceOpt{},
 			Limit:        []*utils.DynamicIntPointerOpt{},
@@ -4438,7 +4438,7 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.DefaultRatioCfg:        1,
 			utils.OptsCfg: map[string]interface{}{
 				utils.OptsContext:         []*utils.DynamicStringOpt{},
-				utils.MetaProfileCountCfg: []*utils.DynamicIntOpt{},
+				utils.MetaProfileCountCfg: []*utils.DynamicIntPointerOpt{},
 				utils.MetaIgnoreErrorsCfg: []*utils.DynamicBoolOpt{},
 				utils.MetaMaxCostCfg:      []*utils.DynamicInterfaceOpt{},
 				utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},

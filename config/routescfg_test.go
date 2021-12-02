@@ -56,7 +56,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		NestedFields:        true,
 		Opts: &RoutesOpts{
 			Context:      []*utils.DynamicStringOpt{},
-			ProfileCount: []*utils.DynamicIntOpt{},
+			ProfileCount: []*utils.DynamicIntPointerOpt{},
 			IgnoreErrors: []*utils.DynamicBoolOpt{},
 			MaxCost:      []*utils.DynamicInterfaceOpt{},
 			Limit:        []*utils.DynamicIntPointerOpt{},
@@ -115,7 +115,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 			utils.OptsContext:         []*utils.DynamicStringOpt{},
 			utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},
 			utils.MetaOffsetCfg:       []*utils.DynamicIntPointerOpt{},
-			utils.MetaProfileCountCfg: []*utils.DynamicIntOpt{},
+			utils.MetaProfileCountCfg: []*utils.DynamicIntPointerOpt{},
 			utils.MetaIgnoreErrorsCfg: []*utils.DynamicBoolOpt{},
 			utils.MetaMaxCostCfg:      []*utils.DynamicInterfaceOpt{},
 			utils.MetaUsage:           []*utils.DynamicDecimalBigOpt{},
@@ -163,7 +163,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			utils.OptsContext:         []*utils.DynamicStringOpt{},
 			utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},
 			utils.MetaOffsetCfg:       []*utils.DynamicIntPointerOpt{},
-			utils.MetaProfileCountCfg: []*utils.DynamicIntOpt{},
+			utils.MetaProfileCountCfg: []*utils.DynamicIntPointerOpt{},
 			utils.MetaIgnoreErrorsCfg: []*utils.DynamicBoolOpt{},
 			utils.MetaMaxCostCfg:      []*utils.DynamicInterfaceOpt{},
 			utils.MetaUsage:           []*utils.DynamicDecimalBigOpt{},
@@ -256,9 +256,9 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value: utils.IntPointer(2),
 				},
 			},
-			ProfileCount: []*utils.DynamicIntOpt{
+			ProfileCount: []*utils.DynamicIntPointerOpt{
 				{
-					Value: 1,
+					Value: utils.IntPointer(1),
 				},
 			},
 			Usage: []*utils.DynamicDecimalBigOpt{
@@ -309,9 +309,9 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value: utils.IntPointer(3),
 				},
 			},
-			ProfileCount: []*utils.DynamicIntOpt{
+			ProfileCount: []*utils.DynamicIntPointerOpt{
 				{
-					Value: 2,
+					Value: utils.IntPointer(2),
 				},
 			},
 			Usage: []*utils.DynamicDecimalBigOpt{
@@ -430,9 +430,9 @@ func TestRouteSCloneSection(t *testing.T) {
 					Value: utils.IntPointer(1),
 				},
 			},
-			ProfileCount: []*utils.DynamicIntOpt{
+			ProfileCount: []*utils.DynamicIntPointerOpt{
 				{
-					Value: 1,
+					Value: utils.IntPointer(1),
 				},
 			},
 		},
@@ -475,9 +475,9 @@ func TestRouteSCloneSection(t *testing.T) {
 					Value: utils.IntPointer(1),
 				},
 			},
-			ProfileCount: []*utils.DynamicIntOpt{
+			ProfileCount: []*utils.DynamicIntPointerOpt{
 				{
-					Value: 1,
+					Value: utils.IntPointer(1),
 				},
 			},
 		},
