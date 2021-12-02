@@ -131,7 +131,7 @@ func (iDB *InternalDB) SetVersions(vrs Versions, overwrite bool) (err error) {
 	x, ok := iDB.db.Get(utils.CacheVersions, utils.VersionName)
 	if !ok || x == nil {
 		iDB.db.Set(utils.CacheVersions, utils.VersionName, vrs, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			true, utils.NonTransactional)
 		return
 	}
 	provVrs := x.(Versions)
@@ -139,7 +139,7 @@ func (iDB *InternalDB) SetVersions(vrs Versions, overwrite bool) (err error) {
 		provVrs[key] = val
 	}
 	iDB.db.Set(utils.CacheVersions, utils.VersionName, provVrs, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -155,11 +155,11 @@ func (iDB *InternalDB) RemoveVersions(vrs Versions) (err error) {
 			delete(internalVersions, key)
 		}
 		iDB.db.Set(utils.CacheVersions, utils.VersionName, internalVersions, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			true, utils.NonTransactional)
 		return
 	}
 	iDB.db.Remove(utils.CacheVersions, utils.VersionName,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -199,13 +199,13 @@ func (iDB *InternalDB) GetResourceProfileDrv(_ *context.Context, tenant, id stri
 
 func (iDB *InternalDB) SetResourceProfileDrv(_ *context.Context, rp *ResourceProfile) (err error) {
 	iDB.db.Set(utils.CacheResourceProfiles, rp.TenantID(), rp, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveResourceProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -218,13 +218,13 @@ func (iDB *InternalDB) GetResourceDrv(_ *context.Context, tenant, id string) (r 
 
 func (iDB *InternalDB) SetResourceDrv(_ *context.Context, r *Resource) (err error) {
 	iDB.db.Set(utils.CacheResources, r.TenantID(), r, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveResourceDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheResources, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -246,13 +246,13 @@ func (iDB *InternalDB) GetStatQueueProfileDrv(_ *context.Context, tenant string,
 }
 func (iDB *InternalDB) SetStatQueueProfileDrv(_ *context.Context, sq *StatQueueProfile) (err error) {
 	iDB.db.Set(utils.CacheStatQueueProfiles, sq.TenantID(), sq, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemStatQueueProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -271,12 +271,12 @@ func (iDB *InternalDB) SetStatQueueDrv(_ *context.Context, ssq *StoredStatQueue,
 		}
 	}
 	iDB.db.Set(utils.CacheStatQueues, utils.ConcatenatedKey(sq.Tenant, sq.ID), sq, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 func (iDB *InternalDB) RemStatQueueDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -290,13 +290,13 @@ func (iDB *InternalDB) GetThresholdProfileDrv(_ *context.Context, tenant, id str
 
 func (iDB *InternalDB) SetThresholdProfileDrv(_ *context.Context, tp *ThresholdProfile) (err error) {
 	iDB.db.Set(utils.CacheThresholdProfiles, tp.TenantID(), tp, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemThresholdProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -310,13 +310,13 @@ func (iDB *InternalDB) GetThresholdDrv(_ *context.Context, tenant, id string) (t
 
 func (iDB *InternalDB) SetThresholdDrv(_ *context.Context, th *Threshold) (err error) {
 	iDB.db.Set(utils.CacheThresholds, th.TenantID(), th, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveThresholdDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheThresholds, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -334,13 +334,13 @@ func (iDB *InternalDB) SetFilterDrv(_ *context.Context, fltr *Filter) (err error
 		return
 	}
 	iDB.db.Set(utils.CacheFilters, fltr.TenantID(), fltr, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveFilterDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheFilters, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -357,13 +357,13 @@ func (iDB *InternalDB) SetRouteProfileDrv(_ *context.Context, spp *RouteProfile)
 		return
 	}
 	iDB.db.Set(utils.CacheRouteProfiles, spp.TenantID(), spp, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveRouteProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheRouteProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -380,13 +380,13 @@ func (iDB *InternalDB) SetAttributeProfileDrv(_ *context.Context, attr *Attribut
 		return
 	}
 	iDB.db.Set(utils.CacheAttributeProfiles, attr.TenantID(), attr, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveAttributeProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -400,13 +400,13 @@ func (iDB *InternalDB) GetChargerProfileDrv(_ *context.Context, tenant, id strin
 
 func (iDB *InternalDB) SetChargerProfileDrv(_ *context.Context, chr *ChargerProfile) (err error) {
 	iDB.db.Set(utils.CacheChargerProfiles, chr.TenantID(), chr, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveChargerProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -420,13 +420,13 @@ func (iDB *InternalDB) GetDispatcherProfileDrv(_ *context.Context, tenant, id st
 
 func (iDB *InternalDB) SetDispatcherProfileDrv(_ *context.Context, dpp *DispatcherProfile) (err error) {
 	iDB.db.Set(utils.CacheDispatcherProfiles, dpp.TenantID(), dpp, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveDispatcherProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -444,7 +444,7 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(_ *context.Context, itemIDPrefix string
 
 func (iDB *InternalDB) SetLoadIDsDrv(_ *context.Context, loadIDs map[string]int64) (err error) {
 	iDB.db.Set(utils.CacheLoadIDs, utils.LoadIDs, loadIDs, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -458,13 +458,13 @@ func (iDB *InternalDB) GetDispatcherHostDrv(_ *context.Context, tenant, id strin
 
 func (iDB *InternalDB) SetDispatcherHostDrv(_ *context.Context, dpp *DispatcherHost) (err error) {
 	iDB.db.Set(utils.CacheDispatcherHosts, dpp.TenantID(), dpp, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveDispatcherHostDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -481,13 +481,13 @@ func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProf
 		return
 	}
 	iDB.db.Set(utils.CacheRateProfiles, rpp.TenantID(), rpp, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -501,13 +501,13 @@ func (iDB *InternalDB) GetActionProfileDrv(_ *context.Context, tenant, id string
 
 func (iDB *InternalDB) SetActionProfileDrv(_ *context.Context, ap *ActionProfile) (err error) {
 	iDB.db.Set(utils.CacheActionProfiles, ap.TenantID(), ap, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveActionProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheActionProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
@@ -553,10 +553,10 @@ func (iDB *InternalDB) SetIndexesDrv(_ *context.Context, idxItmType, tntCtx stri
 				continue
 			}
 			iDB.db.Remove(idxItmType, dbKey,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+				true, utils.NonTransactional)
 			key := strings.TrimSuffix(strings.TrimPrefix(dbKey, "tmp_"), utils.ConcatenatedKeySep+transactionID)
 			iDB.db.Set(idxItmType, key, x, []string{tntCtx},
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+				true, utils.NonTransactional)
 		}
 		return
 	}
@@ -567,15 +567,17 @@ func (iDB *InternalDB) SetIndexesDrv(_ *context.Context, idxItmType, tntCtx stri
 		}
 		if len(indx) == 0 {
 			iDB.db.Remove(idxItmType, dbKey,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+				true, utils.NonTransactional)
 			continue
 		}
 		//to be the same as HMSET
-		if x, ok := iDB.db.Get(idxItmType, dbKey); ok && x != nil {
-			indx = utils.JoinStringSet(indx, x.(utils.StringSet))
+		if transactionID != utils.EmptyString {
+			if x, ok := iDB.db.Get(idxItmType, dbKey); ok && x != nil {
+				indx = utils.JoinStringSet(indx, x.(utils.StringSet))
+			}
 		}
 		iDB.db.Set(idxItmType, dbKey, indx, []string{tntCtx},
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			true, utils.NonTransactional)
 	}
 	return
 }
@@ -585,7 +587,7 @@ func (iDB *InternalDB) RemoveIndexesDrv(_ *context.Context, idxItmType, tntCtx, 
 		iDB.db.RemoveGroup(idxItmType, tntCtx, true, utils.EmptyString)
 		return
 	}
-	iDB.db.Remove(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	iDB.db.Remove(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), true, utils.NonTransactional)
 	return
 }
 
@@ -599,12 +601,12 @@ func (iDB *InternalDB) GetAccountDrv(_ *context.Context, tenant, id string) (ap 
 
 func (iDB *InternalDB) SetAccountDrv(_ *context.Context, ap *utils.Account) (err error) {
 	iDB.db.Set(utils.CacheAccounts, ap.TenantID(), ap, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
 
 func (iDB *InternalDB) RemoveAccountDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheAccounts, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		true, utils.NonTransactional)
 	return
 }
