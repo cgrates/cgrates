@@ -4582,3 +4582,98 @@ func TestAttributesProcessEventSetError(t *testing.T) {
 		t.Error(err)
 	}
 }
+func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AttributeSCfg().IndexedSelects = false
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := NewAttributeService(dm, filterS, cfg)
+	pw := config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
+
+	ap1 := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR1",
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaConstant,
+				Value: pw,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AttrProcessEventMultipleRuns",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: "errVal",
+		},
+	}
+
+	reply := &AttrSProcessEventReply{}
+	exrErr := `strconv.ParseInt: parsing "errVal": invalid syntax`
+	if err := alS.V1ProcessEvent(context.Background(), ev, reply); err == nil || err.Error() != exrErr {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exrErr, err)
+	}
+}
+
+func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AttributeSCfg().IndexedSelects = false
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := NewAttributeService(dm, filterS, cfg)
+	pw := config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep)
+
+	ap1 := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR1",
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaConstant,
+				Value: pw,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AttrProcessEventMultipleRuns",
+		Event:  map[string]interface{}{},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProfileRuns: "errVal",
+		},
+	}
+
+	reply := &AttrSProcessEventReply{}
+	exrErr := `strconv.ParseInt: parsing "errVal": invalid syntax`
+	if err := alS.V1ProcessEvent(context.Background(), ev, reply); err == nil || err.Error() != exrErr {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exrErr, err)
+	}
+}
