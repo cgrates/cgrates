@@ -129,12 +129,12 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return NewRandomConverter(params[len(MetaRandom)+1:])
 	case strings.HasPrefix(params, MetaJoin):
 		if len(params) == len(MetaJoin) { // no extra params, defaults implied
-			return joinConverter(FieldsSep), nil
+			return joinConverter(InfieldSep), nil
 		}
 		return joinConverter(params[len(MetaJoin)+1:]), nil
 	case strings.HasPrefix(params, MetaSplit):
 		if len(params) == len(MetaSplit) { // no extra params, defaults implied
-			return splitConverter(FieldsSep), nil
+			return splitConverter(InfieldSep), nil
 		}
 		return splitConverter(params[len(MetaSplit)+1:]), nil
 	default:
