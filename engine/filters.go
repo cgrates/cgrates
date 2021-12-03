@@ -736,3 +736,14 @@ func (fltr *Filter) Compress() {
 	}
 	fltr.Rules = newRules
 }
+
+func (fltr *Filter) Merge(v2 interface{}) {
+	vi := v2.(*Filter)
+	if len(vi.Tenant) != 0 {
+		fltr.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		fltr.ID = vi.ID
+	}
+	fltr.Rules = append(fltr.Rules, vi.Rules...)
+}
