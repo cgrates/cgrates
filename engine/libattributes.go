@@ -234,3 +234,21 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 	}
 	return
 }
+
+func (ap *AttributeProfile) Merge(v2 interface{}) {
+	vi := v2.(*AttributeProfile)
+	if len(vi.Tenant) != 0 {
+		ap.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		ap.ID = vi.ID
+	}
+	ap.FilterIDs = append(ap.FilterIDs, vi.FilterIDs...)
+	ap.Attributes = append(ap.Attributes, vi.Attributes...)
+	if vi.Blocker {
+		ap.Blocker = true
+	}
+	if vi.Weight != 0 {
+		ap.Weight = vi.Weight
+	}
+}

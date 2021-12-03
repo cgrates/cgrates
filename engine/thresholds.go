@@ -625,3 +625,33 @@ func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string
 	}
 	return
 }
+
+func (tp *ThresholdProfile) Merge(v2 interface{}) {
+	vi := v2.(*ThresholdProfile)
+	if len(vi.Tenant) != 0 {
+		tp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		tp.ID = vi.ID
+	}
+	tp.FilterIDs = append(tp.FilterIDs, vi.FilterIDs...)
+	tp.ActionProfileIDs = append(tp.ActionProfileIDs, vi.ActionProfileIDs...)
+	if vi.Blocker {
+		tp.Blocker = vi.Blocker
+	}
+	if vi.Async {
+		tp.Async = vi.Async
+	}
+	if vi.Weight != 0 {
+		tp.Weight = vi.Weight
+	}
+	if vi.MaxHits != 0 {
+		tp.MaxHits = vi.MaxHits
+	}
+	if vi.MinHits != 0 {
+		tp.MinHits = vi.MinHits
+	}
+	if vi.MinSleep != 0 {
+		tp.MinSleep = vi.MinSleep
+	}
+}

@@ -610,3 +610,35 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 	}
 	return
 }
+
+func (sqp *StatQueueProfile) Merge(v2 interface{}) {
+	vi := v2.(*StatQueueProfile)
+	if len(vi.Tenant) != 0 {
+		sqp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		sqp.ID = vi.ID
+	}
+	sqp.FilterIDs = append(sqp.FilterIDs, vi.FilterIDs...)
+	sqp.ThresholdIDs = append(sqp.ThresholdIDs, vi.ThresholdIDs...)
+	sqp.Metrics = append(sqp.Metrics, vi.Metrics...)
+
+	if vi.QueueLength != 0 {
+		sqp.QueueLength = vi.QueueLength
+	}
+	if vi.TTL != 0 {
+		sqp.TTL = vi.TTL
+	}
+	if vi.MinItems != 0 {
+		sqp.MinItems = vi.MinItems
+	}
+	if vi.Blocker {
+		sqp.Blocker = vi.Blocker
+	}
+	if vi.Stored {
+		sqp.Stored = vi.Stored
+	}
+	if vi.Weight != 0 {
+		sqp.Weight = vi.Weight
+	}
+}
