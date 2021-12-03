@@ -526,3 +526,20 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 	}
 	return
 }
+
+func (rp *RouteProfile) Merge(v2 interface{}) {
+	vi := v2.(*RouteProfile)
+	if len(vi.Tenant) != 0 {
+		rp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		rp.ID = vi.ID
+	}
+	rp.FilterIDs = append(rp.FilterIDs, vi.FilterIDs...)
+	rp.SortingParameters = append(rp.SortingParameters, vi.SortingParameters...)
+	rp.Routes = append(rp.Routes, vi.Routes...)
+	rp.Weights = append(rp.Weights, vi.Weights...)
+	if len(vi.Sorting) != 0 {
+		rp.Sorting = vi.Sorting
+	}
+}
