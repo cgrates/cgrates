@@ -872,7 +872,7 @@ func TestRouteProfileSet(t *testing.T) {
 	if err := rp.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := rp.Set([]string{"NotAField", "1"}, ":", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
@@ -913,7 +913,7 @@ func TestRouteProfileSet(t *testing.T) {
 	if err := rp.Set([]string{utils.Routes, utils.StatIDs}, "stat1", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.Weights}, "", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.Routes, utils.Weights}, ";0", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{utils.Routes, utils.Blocker}, "true", false, utils.EmptyString); err != nil {
