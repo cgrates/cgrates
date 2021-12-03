@@ -1056,3 +1056,33 @@ func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string)
 	}
 	return
 }
+
+func (rp *ResourceProfile) Merge(v2 interface{}) {
+	vi := v2.(*ResourceProfile)
+	if len(vi.Tenant) != 0 {
+		rp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		rp.ID = vi.ID
+	}
+	rp.FilterIDs = append(rp.FilterIDs, vi.FilterIDs...)
+	rp.ThresholdIDs = append(rp.ThresholdIDs, vi.ThresholdIDs...)
+	if len(vi.AllocationMessage) != 0 {
+		rp.AllocationMessage = vi.AllocationMessage
+	}
+	if vi.UsageTTL != 0 {
+		rp.UsageTTL = vi.UsageTTL
+	}
+	if vi.Limit != 0 {
+		rp.Limit = vi.Limit
+	}
+	if vi.Blocker {
+		rp.Blocker = vi.Blocker
+	}
+	if vi.Stored {
+		rp.Stored = vi.Stored
+	}
+	if vi.Weight != 0 {
+		rp.Weight = vi.Weight
+	}
+}
