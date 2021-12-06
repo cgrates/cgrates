@@ -418,7 +418,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 		`4,cd8112998c2abb0e4a7cd3a94c74817cd5fe67d3,Default_charging_id,*prepaid,dispatchers.org,photo,1005,1005,1000,2679-04-25T22:02:25Z,2679-04-25T22:02:40Z,10,1.4422` + "\n" +
 		`4,10s,46.9706` + "\n"
 	var reply []byte
-	if err := csvRpc.Call(utils.EeSv1ArchiveEventsAsReply,
+	if err := csvRpc.Call(utils.EeSv1ArchiveEventsInReply,
 		eventVoice, &reply); err != nil {
 		t.Error(err)
 	} else if string(reply) != expected {
