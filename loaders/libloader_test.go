@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -62,21 +63,20 @@ func TestNewRecord(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	expErrMsg := "inline parse error for string: <*string>"
-	if _, err := newRecord(context.Background(), utils.MapStorage{},
-		[]*config.FCTemplate{
+	if err := newRecord(utils.MapStorage{}, nil, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), []*config.FCTemplate{
 			{Filters: []string{"*exists:~*req.NoField:"}},
 			{Filters: []string{"*string"}},
-		},
-		"cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err == nil || err.Error() != expErrMsg {
+		}, fs, 0, "", utils.InfieldSep); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
 	}
-	r, err := newRecord(context.Background(), utils.MapStorage{}, []*config.FCTemplate{}, "cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil))
-	if err != nil {
-		t.Fatal(err)
+	pt := profileTest{}
+	if err := newRecord(utils.MapStorage{}, pt, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), []*config.FCTemplate{}, fs, 0, "", utils.InfieldSep); err != nil {
+		t.Error(err)
 	}
-	exp := utils.NewOrderedNavigableMap()
-	if !reflect.DeepEqual(r, exp) {
-		t.Errorf("Expected %+v, received %+q", exp, r)
+	if len(pt) != 0 {
+		t.Fatal("Expected empty map")
 	}
 }
 
@@ -92,16 +92,17 @@ func TestNewRecordWithCahe(t *testing.T) {
 	for _, f := range fc {
 		f.ComputePath()
 	}
-	exp := utils.NewOrderedNavigableMap()
-	exp.SetAsSlice(utils.NewFullPath(utils.Tenant), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	exp.SetAsSlice(utils.NewFullPath(utils.ID), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "Attr1"}}})
-	exp.SetAsSlice(utils.NewFullPath(utils.Value), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0"}}})
-	if r, err := newRecord(context.Background(), config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil),
-		fc, "cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err != nil {
+	exp := profileTest{
+		utils.Tenant: "cgrates.org",
+		utils.ID:     "Attr1",
+		utils.Value:  "0",
+	}
+	r := profileTest{}
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected %+v, received %+v", exp, r)
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp.GetOrder()), utils.ToJSON(r.GetOrder()))
 	}
 }
 
@@ -117,14 +118,32 @@ func TestNewRecordWithTmp(t *testing.T) {
 	for _, f := range fc {
 		f.ComputePath()
 	}
-	exp := utils.NewOrderedNavigableMap()
-	exp.SetAsSlice(utils.NewFullPath(utils.Tenant), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
-	exp.SetAsSlice(utils.NewFullPath(utils.ID), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "Attr1"}}})
-	exp.SetAsSlice(utils.NewFullPath(utils.Value), []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0"}}})
-	if r, err := newRecord(context.Background(), config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil),
-		fc, "cgrates.org", fs, cfg, ltcache.NewCache(-1, 0, false, nil)); err != nil {
+	exp := profileTest{
+		utils.Tenant: "cgrates.org",
+		utils.ID:     "Attr1",
+		utils.Value:  "0",
+	}
+	r := profileTest{}
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
-		t.Errorf("Expected %+v, received %+q", exp, r)
+		t.Errorf("Expected %+v, received %+v", exp, r)
 	}
+}
+
+type profileTest utils.MapStorage
+
+func (p profileTest) Set(path []string, val interface{}, _ bool, _ string) error {
+	return utils.MapStorage(p).Set(path, val)
+}
+func (p profileTest) Merge(v2 interface{}) {
+	var vi map[string]interface{}
+	json.Unmarshal([]byte(utils.ToJSON(v2)), &vi)
+	for k, v := range vi {
+		(map[string]interface{}(p))[k] = v
+	}
+}
+func (p profileTest) TenantID() string {
+	return utils.ConcatenatedKey(utils.IfaceAsString(map[string]interface{}(p)[utils.Tenant]), utils.IfaceAsString(map[string]interface{}(p)[utils.ID]))
 }
