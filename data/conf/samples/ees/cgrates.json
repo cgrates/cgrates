@@ -458,6 +458,7 @@
 				{"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.CGRID"},
 				{"tag": "AnswerTime", "path": "*exp.answer_time", "type": "*variable", "value": "~*req.AnswerTime"},
 				{"tag": "Cost", "path": "*exp.cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
+				{"tag": "Usage", "path": "*exp.`usage`", "type": "*variable", "value": "~*req.Usage"},
 			]
 		},
 		{
