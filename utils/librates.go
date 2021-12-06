@@ -677,3 +677,28 @@ func (rt *Rate) Set(path []string, val interface{}, newBranch bool) (err error) 
 	}
 	return
 }
+
+func (rp *RateProfile) Merge(v2 interface{}) {
+	vi := v2.(*RateProfile)
+	if len(vi.Tenant) != 0 {
+		rp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		rp.ID = vi.ID
+	}
+	if len(vi.MaxCostStrategy) != 0 {
+		rp.MaxCostStrategy = vi.MaxCostStrategy
+	}
+	rp.FilterIDs = append(rp.FilterIDs, vi.FilterIDs...)
+	rp.Weights = append(rp.Weights, vi.Weights...)
+	for k, v := range vi.Rates {
+		rp.Rates[k] = v
+	}
+	o := decimal.New(0, 0)
+	if vi.MinCost != nil && vi.MinCost.Cmp(o) != 0 {
+		rp.MinCost = vi.MinCost
+	}
+	if vi.MaxCost != nil && vi.MinCost.Cmp(o) != 0 {
+		rp.MaxCost = vi.MaxCost
+	}
+}

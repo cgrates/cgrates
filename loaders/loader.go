@@ -32,11 +32,13 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
-const (
-	gprefix = utils.MetaGoogleAPI + utils.ConcatenatedKeySep
-)
+// const (
+// 	gprefix = utils.MetaGoogleAPI + utils.ConcatenatedKeySep
+// )
 
-func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id string, withIndex, ratesPartial bool, ratesData *utils.OrderedNavigableMap) (_ error) {
+func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, withIndex, ratesPartial bool, obj profile) (_ error) {
+	tntID := utils.NewTenantID(obj.TenantID())
+	tnt, id := tntID.Tenant, tntID.ID
 	switch lType {
 	case utils.MetaAttributes:
 		return dm.RemoveAttributeProfile(ctx, tnt, id, withIndex)
@@ -58,11 +60,12 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id s
 		return dm.RemoveDispatcherHost(ctx, tnt, id)
 	case utils.MetaRateProfiles:
 		if ratesPartial {
-			rateIDs, err := RateIDsFromOrderedNavigableMap(ratesData)
-			if err != nil {
-				return err
+			rt := obj.(*utils.RateProfile)
+			ids := make([]string, 0, len(rt.Rates))
+			for k := range rt.Rates {
+				ids = append(ids, k)
 			}
-			return dm.RemoveRateProfileRates(ctx, tnt, id, rateIDs, withIndex)
+			return dm.RemoveRateProfileRates(ctx, tnt, id, ids, withIndex)
 		}
 		return dm.RemoveRateProfile(ctx, tnt, id, withIndex)
 	case utils.MetaActionProfiles:
@@ -73,108 +76,33 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType, tnt, id s
 	return
 }
 
-func setToDB(ctx *context.Context, dm *engine.DataManager, lType, rsrSep string, tntID *utils.TenantID, lDataSet []*utils.OrderedNavigableMap, withIndex, ratesPartial bool) (err error) {
+func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data profile, withIndex, ratesPartial bool) (err error) {
 	switch lType {
 	case utils.MetaAttributes:
-		apf := &engine.AttributeProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(apf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetAttributeProfile(ctx, apf, withIndex)
+		return dm.SetAttributeProfile(ctx, data.(*engine.AttributeProfile), withIndex)
 	case utils.MetaResources:
-		res := &engine.ResourceProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(res, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetResourceProfile(ctx, res, withIndex)
+		return dm.SetResourceProfile(ctx, data.(*engine.ResourceProfile), withIndex)
 	case utils.MetaFilters:
-		fltr := &engine.Filter{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(fltr, lDataSet, rsrSep); err != nil {
-			return
-		}
+		fltr := data.(*engine.Filter)
 		fltr.Compress()
 		if err = fltr.Compile(); err != nil {
 			return
 		}
 		return dm.SetFilter(ctx, fltr, withIndex)
 	case utils.MetaStats:
-		stsPrf := &engine.StatQueueProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(stsPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetStatQueueProfile(ctx, stsPrf, withIndex)
+		return dm.SetStatQueueProfile(ctx, data.(*engine.StatQueueProfile), withIndex)
 	case utils.MetaThresholds:
-		thPrf := &engine.ThresholdProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(thPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetThresholdProfile(ctx, thPrf, withIndex)
+		return dm.SetThresholdProfile(ctx, data.(*engine.ThresholdProfile), withIndex)
 	case utils.MetaRoutes:
-		spPrf := &engine.RouteProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(spPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetRouteProfile(ctx, spPrf, withIndex)
+		return dm.SetRouteProfile(ctx, data.(*engine.RouteProfile), withIndex)
 	case utils.MetaChargers:
-		cpPrf := &engine.ChargerProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(cpPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetChargerProfile(ctx, cpPrf, withIndex)
+		return dm.SetChargerProfile(ctx, data.(*engine.ChargerProfile), withIndex)
 	case utils.MetaDispatchers:
-		dpPrf := &engine.DispatcherProfile{
-			Tenant:         tntID.Tenant,
-			ID:             tntID.ID,
-			StrategyParams: make(map[string]interface{}),
-		}
-		if err = prepareData(dpPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetDispatcherProfile(ctx, dpPrf, withIndex)
+		return dm.SetDispatcherProfile(ctx, data.(*engine.DispatcherProfile), withIndex)
 	case utils.MetaDispatcherHosts:
-		dpPrf := &engine.DispatcherHost{
-			Tenant: tntID.Tenant,
-			RemoteHost: &config.RemoteHost{
-				ID:        tntID.ID,
-				Transport: utils.MetaJSON,
-			},
-		}
-		if err = prepareData(dpPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetDispatcherHost(ctx, dpPrf)
+		return dm.SetDispatcherHost(ctx, data.(*engine.DispatcherHost))
 	case utils.MetaRateProfiles:
-		rpl := &utils.RateProfile{
-			Tenant:  tntID.Tenant,
-			ID:      tntID.ID,
-			Rates:   make(map[string]*utils.Rate),
-			MinCost: utils.NewDecimal(0, 0),
-			MaxCost: utils.NewDecimal(0, 0),
-		}
-		if err = prepareData(rpl, lDataSet, rsrSep); err != nil {
-			return
-		}
+		rpl := data.(*utils.RateProfile)
 		if ratesPartial {
 			err = dm.SetRateProfileRates(ctx, rpl, true)
 		} else {
@@ -182,180 +110,48 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType, rsrSep string,
 		}
 		return
 	case utils.MetaActionProfiles:
-		acp := &engine.ActionProfile{
-			Tenant:  tntID.Tenant,
-			ID:      tntID.ID,
-			Targets: make(map[string]utils.StringSet),
-		}
-		if err = prepareData(acp, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetActionProfile(ctx, acp, withIndex)
+		return dm.SetActionProfile(ctx, data.(*engine.ActionProfile), withIndex)
 	case utils.MetaAccounts:
-		acp := &utils.Account{
-			Tenant:   tntID.Tenant,
-			ID:       tntID.ID,
-			Opts:     make(map[string]interface{}),
-			Balances: make(map[string]*utils.Balance),
-		}
-		if err = prepareData(acp, lDataSet, rsrSep); err != nil {
-			return
-		}
-		return dm.SetAccount(ctx, acp, withIndex)
+		return dm.SetAccount(ctx, data.(*utils.Account), withIndex)
 	}
 	return
 }
 
-func dryRun(ctx *context.Context, lType, rsrSep, ldrID string, tntID *utils.TenantID, lDataSet []*utils.OrderedNavigableMap) (err error) {
+func dryRun(ctx *context.Context, lType, ldrID string, obj profile) (err error) {
+	var msg string
 	switch lType {
 	case utils.MetaAttributes:
-		apf := &engine.AttributeProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(apf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(apf)))
+		msg = "<%s-%s> DRY_RUN: AttributeProfile: %s"
 	case utils.MetaResources:
-		res := &engine.ResourceProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(res, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: ResourceProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(res)))
+		msg = "<%s-%s> DRY_RUN: ResourceProfile: %s"
 	case utils.MetaFilters:
-		fltr := &engine.Filter{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(fltr, lDataSet, rsrSep); err != nil {
-			return
-		}
+		fltr := obj.(*engine.Filter)
 		fltr.Compress()
 		if err = fltr.Compile(); err != nil {
 			return
 		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: Filter: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(fltr)))
+		msg = "<%s-%s> DRY_RUN: Filter: %s"
 	case utils.MetaStats:
-		stsPrf := &engine.StatQueueProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(stsPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(stsPrf)))
+		msg = "<%s-%s> DRY_RUN: StatsQueueProfile: %s"
 	case utils.MetaThresholds:
-		thPrf := &engine.ThresholdProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(thPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: ThresholdProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(thPrf)))
+		msg = "<%s-%s> DRY_RUN: ThresholdProfile: %s"
 	case utils.MetaRoutes:
-		spPrf := &engine.RouteProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(spPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: RouteProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(spPrf)))
+		msg = "<%s-%s> DRY_RUN: RouteProfile: %s"
 	case utils.MetaChargers:
-		cpPrf := &engine.ChargerProfile{
-			Tenant: tntID.Tenant,
-			ID:     tntID.ID,
-		}
-		if err = prepareData(cpPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: ChargerProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(cpPrf)))
+		msg = "<%s-%s> DRY_RUN: ChargerProfile: %s"
 	case utils.MetaDispatchers:
-		dpPrf := &engine.DispatcherProfile{
-			Tenant:         tntID.Tenant,
-			ID:             tntID.ID,
-			StrategyParams: make(map[string]interface{}),
-		}
-		if err = prepareData(dpPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(dpPrf)))
+		msg = "<%s-%s> DRY_RUN: DispatcherProfile: %s"
 	case utils.MetaDispatcherHosts:
-		dpPrf := &engine.DispatcherHost{
-			Tenant: tntID.Tenant,
-			RemoteHost: &config.RemoteHost{
-				ID:        tntID.ID,
-				Transport: utils.MetaJSON,
-			},
-		}
-		if err = prepareData(dpPrf, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherHost: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(dpPrf)))
+		msg = "<%s-%s> DRY_RUN: DispatcherHost: %s"
 	case utils.MetaRateProfiles:
-		rpl := &utils.RateProfile{
-			Tenant:  tntID.Tenant,
-			ID:      tntID.ID,
-			Rates:   make(map[string]*utils.Rate),
-			MinCost: utils.NewDecimal(0, 0),
-			MaxCost: utils.NewDecimal(0, 0),
-		}
-		if err = prepareData(rpl, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: RateProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(rpl)))
-
+		msg = "<%s-%s> DRY_RUN: RateProfile: %s"
 	case utils.MetaActionProfiles:
-		acp := &engine.ActionProfile{
-			Tenant:  tntID.Tenant,
-			ID:      tntID.ID,
-			Targets: make(map[string]utils.StringSet),
-		}
-		if err = prepareData(acp, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: ActionProfile: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(acp)))
+		msg = "<%s-%s> DRY_RUN: ActionProfile: %s"
 	case utils.MetaAccounts:
-		acp := &utils.Account{
-			Tenant:   tntID.Tenant,
-			ID:       tntID.ID,
-			Opts:     make(map[string]interface{}),
-			Balances: make(map[string]*utils.Balance),
-		}
-		if err = prepareData(acp, lDataSet, rsrSep); err != nil {
-			return
-		}
-		utils.Logger.Info(
-			fmt.Sprintf("<%s-%s> DRY_RUN: Accounts: %s",
-				utils.LoaderS, ldrID, utils.ToJSON(acp)))
+		msg = "<%s-%s> DRY_RUN: Accounts: %s"
 	}
+	utils.Logger.Info(fmt.Sprintf(msg,
+		utils.LoaderS, ldrID, utils.ToJSON(obj)))
 	return
 }
 
@@ -385,16 +181,16 @@ type loader struct {
 	Locker
 }
 
-func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet []*utils.OrderedNavigableMap, lType, action, caching string, withIndex, partialRates bool) (err error) {
+func (l *loader) process(ctx *context.Context, obj profile, lType, action, caching string, withIndex, partialRates bool) (err error) {
 	switch action {
 	case utils.MetaParse:
 		return
 	case utils.MetaDryRun:
-		return dryRun(ctx, lType, l.cfg.GeneralCfg().RSRSep, l.ldrCfg.ID, tntID, lDataSet)
+		return dryRun(ctx, lType, l.ldrCfg.ID, obj)
 	case utils.MetaStore:
-		err = setToDB(ctx, l.dm, lType, l.cfg.GeneralCfg().RSRSep, tntID, lDataSet, withIndex, partialRates)
+		err = setToDB(ctx, l.dm, lType, obj, withIndex, partialRates)
 	case utils.MetaRemove:
-		err = removeFromDB(ctx, l.dm, lType, tntID.Tenant, tntID.ID, withIndex, partialRates, lDataSet[0])
+		err = removeFromDB(ctx, l.dm, lType, withIndex, partialRates, obj)
 	default:
 		return fmt.Errorf("unsupported loader action: <%q>", action)
 	}
@@ -403,7 +199,7 @@ func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet [
 	}
 	cacheArgs := make(map[string][]string)
 	var cacheIDs []string // verify if we need to clear indexe
-	tntId := tntID.TenantID()
+	tntId := obj.TenantID()
 	switch lType {
 	case utils.MetaAttributes:
 		cacheIDs = []string{utils.CacheAttributeFilterIndexes}
@@ -448,8 +244,9 @@ func (l *loader) process(ctx *context.Context, tntID *utils.TenantID, lDataSet [
 }
 
 func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*config.FCTemplate, lType, action, caching string, withIndex, partialRates bool) (err error) {
-	var prevTntID *utils.TenantID
-	var lData []*utils.OrderedNavigableMap
+	newPrf := newProfileFunc(lType)
+	obj := newPrf()
+	var prevTntID string
 	for lineNr := 1; ; lineNr++ {
 		var record []string
 		if record, err = csv.Read(); err != nil {
@@ -462,27 +259,29 @@ func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*confi
 					utils.LoaderS, l.ldrCfg.ID, csv.Path(), lineNr, err))
 			return
 		}
-		var data *utils.OrderedNavigableMap
-		if data, err = newRecord(ctx, config.NewSliceDP(record, nil), tmpls, l.ldrCfg.Tenant, l.filterS, l.cfg, l.dataCache[lType]); err != nil {
+
+		tmp := newPrf()
+		if err = newRecord(config.NewSliceDP(record, nil), tmp, l.ldrCfg.Tenant, l.cfg, l.dataCache[lType]).
+			SetFields(ctx, tmpls, l.filterS, l.cfg.GeneralCfg().RoundingDecimals, l.cfg.GeneralCfg().DefaultTimezone, l.cfg.GeneralCfg().RSRSep); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> <%s> file<%s> line: %d, error: %s",
 					utils.LoaderS, l.ldrCfg.ID, csv.Path(), lineNr, err))
 			return
 		}
-		tntID := TenantIDFromOrderedNavigableMap(data)
-		if !prevTntID.Equal(tntID) {
-			if prevTntID != nil {
-				if err = l.process(ctx, prevTntID, lData, lType, action, caching, withIndex, partialRates); err != nil {
+
+		if tntID := tmp.TenantID(); prevTntID != tntID {
+			if len(prevTntID) != 0 {
+				if err = l.process(ctx, obj, lType, action, caching, withIndex, partialRates); err != nil {
 					return
 				}
 			}
 			prevTntID = tntID
-			lData = make([]*utils.OrderedNavigableMap, 0, 1)
+			obj = newPrf()
 		}
-		lData = append(lData, data)
+		obj.Merge(tmp)
 	}
-	if prevTntID != nil {
-		err = l.process(ctx, prevTntID, lData, lType, action, caching, withIndex, partialRates)
+	if len(prevTntID) != 0 {
+		err = l.process(ctx, obj, lType, action, caching, withIndex, partialRates)
 	}
 	return
 }

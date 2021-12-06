@@ -47,23 +47,23 @@ func TestRemoveFromDB(t *testing.T) {
 	for _, lType := range []string{utils.MetaAttributes, utils.MetaResources, utils.MetaFilters, utils.MetaStats,
 		utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
 		utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccounts} {
-		if err := removeFromDB(context.Background(), dm, lType, "cgrates.org", "ID", true, false, utils.NewOrderedNavigableMap()); err != utils.ErrNotFound {
+		if err := removeFromDB(context.Background(), dm, lType, true, false, profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}); err != utils.ErrNotFound {
 			t.Error(err)
 		}
 	}
 	expErrMsg := "cannot find RateIDs in map"
-	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, "cgrates.org", "ID", true, true, utils.NewOrderedNavigableMap()); err == nil || err.Error() != expErrMsg {
+	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, true, true, profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
-	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, "cgrates.org", "ID", true, true, newOrderNavMap(utils.MapStorage{utils.RateIDs: "RT1"})); err != utils.ErrNotFound {
+	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, true, true, &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{"RT1": {}}}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if err := removeFromDB(context.Background(), dm, utils.EmptyString, "cgrates.org", "ID", true, false, utils.NewOrderedNavigableMap()); err != nil {
+	if err := removeFromDB(context.Background(), dm, utils.EmptyString, true, false, profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}); err != nil {
 		t.Error(err)
 	}
 }
 
-func testDryRunWithData(lType string, data []*utils.OrderedNavigableMap) (string, error) {
+func testDryRunWithData(lType string, data profile) (string, error) {
 	buf := bytes.NewBuffer([]byte{})
 	log.SetOutput(buf)
 	lgr := utils.Logger
@@ -71,15 +71,15 @@ func testDryRunWithData(lType string, data []*utils.OrderedNavigableMap) (string
 	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
 	utils.Logger.SetLogLevel(7)
 
-	err := dryRun(context.Background(), lType, utils.InfieldSep, "test", TenantIDFromOrderedNavigableMap(data[0]), data)
+	err := dryRun(context.Background(), lType, "test", data)
 	return buf.String(), err
 }
 
 func testDryRun(t *testing.T, lType string) string {
-	data := utils.NewOrderedNavigableMap()
-	data.SetAsSlice(utils.NewFullPath(utils.Tenant), []*utils.DataNode{utils.NewLeafNode("cgrates.org")})
-	data.SetAsSlice(utils.NewFullPath(utils.ID), []*utils.DataNode{utils.NewLeafNode("ID")})
-	buf, err := testDryRunWithData(lType, []*utils.OrderedNavigableMap{data})
+	buf, err := testDryRunWithData(lType, profileTest{
+		utils.Tenant: "cgrates.org",
+		utils.ID:     "ID",
+	})
 	if err != nil {
 		t.Fatal(lType, err)
 	}
@@ -94,241 +94,96 @@ func newOrderNavMap(mp utils.MapStorage) (o *utils.OrderedNavigableMap) {
 	return
 }
 func TestDryRun(t *testing.T) {
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Attributes\":null,\"Blocker\":false,\"Weight\":0}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaAttributes); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ResourceProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"UsageTTL\":0,\"Limit\":0,\"AllocationMessage\":\"\",\"Blocker\":false,\"Stored\":false,\"Weight\":0,\"ThresholdIDs\":null}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ResourceProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaResources); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Filter: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"Rules\":[]}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Filter: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaFilters); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: StatsQueueProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"QueueLength\":0,\"TTL\":0,\"MinItems\":0,\"Metrics\":null,\"Stored\":false,\"Blocker\":false,\"Weight\":0,\"ThresholdIDs\":null}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: StatsQueueProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaStats); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ThresholdProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"MaxHits\":0,\"MinHits\":0,\"MinSleep\":0,\"Blocker\":false,\"Weight\":0,\"ActionProfileIDs\":null,\"Async\":false}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ThresholdProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaThresholds); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RouteProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Sorting\":\"\",\"SortingParameters\":null,\"Routes\":null,\"Weights\":null}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RouteProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaRoutes); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ChargerProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"RunID\":\"\",\"AttributeIDs\":null,\"Weight\":0}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ChargerProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaChargers); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Strategy\":\"\",\"StrategyParams\":{},\"Weight\":0,\"Hosts\":null}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaDispatchers); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RateProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Weights\":null,\"MinCost\":0,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"Rates\":{}}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RateProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaRateProfiles); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ActionProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Weight\":0,\"Schedule\":\"\",\"Targets\":{},\"Actions\":null}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ActionProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaActionProfiles); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Accounts: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Weights\":null,\"Opts\":{},\"Balances\":{},\"ThresholdIDs\":null}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Accounts: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		testDryRun(t, utils.MetaAccounts); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-
-	rplyLog, err := testDryRunWithData(utils.MetaDispatcherHosts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", utils.Address: "127.0.0.1"})})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if expLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherHost: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"Address\":\"127.0.0.1\",\"Transport\":\"*json\",\"ConnectAttempts\":0,\"Reconnects\":0,\"ConnectTimeout\":0,\"ReplyTimeout\":0,\"TLS\":false,\"ClientKey\":\"\",\"ClientCertificate\":\"\",\"CaCertificate\":\"\"}"; !strings.Contains(rplyLog, expLog) {
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherHost: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+		testDryRun(t, utils.MetaDispatcherHosts); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
-	}
-}
-
-func TestDryRunWithUpdateStructErrors(t *testing.T) {
-	expErrMsg := `strconv.ParseFloat: parsing "notWeight": invalid syntax`
-	if _, err := testDryRunWithData(utils.MetaAttributes, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if _, err := testDryRunWithData(utils.MetaResources, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaStats, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaThresholds, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if _, err := testDryRunWithData(utils.MetaChargers, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaDispatchers, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if _, err := testDryRunWithData(utils.MetaActionProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-}
-
-func TestDryRunWithModelsErrors(t *testing.T) {
-	expErrMsg := `strconv.ParseFloat: parsing "float": invalid syntax`
-	if _, err := testDryRunWithData(utils.MetaResources, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Limit": "float"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	expErrMsg = `time: invalid duration "float"`
-	if _, err := testDryRunWithData(utils.MetaStats, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "TTL": "float"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaThresholds, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "MinSleep": "float"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	expErrMsg = `invalid Weight <float> in string: <;float>`
-	if _, err := testDryRunWithData(utils.MetaRoutes, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaRateProfiles, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if _, err := testDryRunWithData(utils.MetaAccounts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	expErrMsg = `time: invalid duration "float"`
-	if _, err := testDryRunWithData(utils.MetaDispatcherHosts, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"})}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if _, err := testDryRunWithData(utils.MetaFilters, []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float"})}); err != utils.ErrWrongPath {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	expErrMsg = `emtpy RSRParser in rule: <>`
-	data := newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})
-	data.SetAsSlice(utils.NewFullPath("Rules.Type"), []*utils.DataNode{utils.NewLeafNode("*no")})
-	if _, err := testDryRunWithData(utils.MetaFilters, []*utils.OrderedNavigableMap{data}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-}
-
-func TestSetToDBWithUpdateStructErrors(t *testing.T) {
-	expErrMsg := `strconv.ParseFloat: parsing "notWeight": invalid syntax`
-	if err := setToDB(context.Background(), nil, utils.MetaAttributes, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if err := setToDB(context.Background(), nil, utils.MetaChargers, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID(""), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Weight: "notWeight"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-}
-
-func TestSetToDBWithModelsErrors(t *testing.T) {
-	expErrMsg := `strconv.ParseFloat: parsing "float": invalid syntax`
-	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Limit": "float"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	expErrMsg = `time: invalid duration "float"`
-	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "TTL": "float"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "MinSleep": "float"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	expErrMsg = `invalid Weight <float> in string: <;float>`
-	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Weights": ";float"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	expErrMsg = `time: invalid duration "float"`
-	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float", "Address": "127.0.0.1"})}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	if err := setToDB(context.Background(), nil, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "ReplyTimeout": "float"})}, true, false); err != utils.ErrWrongPath {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	expErrMsg = `emtpy RSRParser in rule: <>`
-	data := newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})
-	data.SetAsSlice(utils.NewFullPath("Rules.Type"), []*utils.DataNode{utils.NewLeafNode("*no")})
-	if err := setToDB(context.Background(), nil, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{data}, true, false); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if err := setToDB(context.Background(), nil, utils.EmptyString, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
-		t.Error(err)
 	}
 }
 
 func TestSetToDBWithDBError(t *testing.T) {
-	if err := setToDB(context.Background(), nil, utils.MetaAttributes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaAttributes, newProfileFunc(utils.MetaAttributes)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaResources, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaResources, newProfileFunc(utils.MetaResources)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaStats, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaStats, newProfileFunc(utils.MetaStats)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
-		t.Fatal(err)
-	}
-
-	if err := setToDB(context.Background(), nil, utils.MetaChargers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
-		t.Fatal(err)
-	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaThresholds, newProfileFunc(utils.MetaThresholds)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaChargers, newProfileFunc(utils.MetaChargers)(), true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, newProfileFunc(utils.MetaDispatchers)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 
-	if err := setToDB(context.Background(), nil, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, newProfileFunc(utils.MetaActionProfiles)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+
+	if err := setToDB(context.Background(), nil, utils.MetaFilters, newProfileFunc(utils.MetaFilters)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaRoutes, newProfileFunc(utils.MetaRoutes)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, newProfileFunc(utils.MetaDispatcherHosts)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != utils.ErrNoDatabaseConn {
+	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, newProfileFunc(utils.MetaRateProfiles)(), true, false); err != utils.ErrNoDatabaseConn {
+		t.Fatal(err)
+	}
+	if err := setToDB(context.Background(), nil, utils.MetaAccounts, newProfileFunc(utils.MetaAccounts)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
 }
@@ -336,131 +191,131 @@ func TestSetToDBWithDBError(t *testing.T) {
 func TestSetToDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
-	if err := setToDB(context.Background(), dm, utils.MetaAttributes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+	if err := setToDB(context.Background(), dm, utils.MetaAttributes, v1, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v1, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaResources, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v2 := &engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"}
+	if err := setToDB(context.Background(), dm, utils.MetaResources, v2, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v2 := &engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v2, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v2), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaStats, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v3 := &engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"}
+	if err := setToDB(context.Background(), dm, utils.MetaStats, v3, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v3 := &engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v3, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v3), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaThresholds, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v4 := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
+	if err := setToDB(context.Background(), dm, utils.MetaThresholds, v4, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v4 := &engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v4, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v4), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaChargers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v5 := &engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"}
+	if err := setToDB(context.Background(), dm, utils.MetaChargers, v5, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v5 := &engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v5, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v5), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaDispatchers, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})}
+	if err := setToDB(context.Background(), dm, utils.MetaDispatchers, v6, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})}
 	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v6, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v6), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaActionProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v7 := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}}
+	if err := setToDB(context.Background(), dm, utils.MetaActionProfiles, v7, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v7 := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}}
 	if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v7, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v7), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaFilters, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
-		t.Fatal(err)
-	}
 	v8 := &engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)}
 	v8.Compile()
+	if err := setToDB(context.Background(), dm, utils.MetaFilters, v8, true, false); err != nil {
+		t.Fatal(err)
+	}
 	if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v8, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v8), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaRoutes, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v9 := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
+	if err := setToDB(context.Background(), dm, utils.MetaRoutes, v9, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v9 := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v9, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v9), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaDispatcherHosts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"})}, true, false); err != nil {
+	v10 := &engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}
+	if err := setToDB(context.Background(), dm, utils.MetaDispatcherHosts, v10, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v10 := &engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}
 	if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v10, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v10), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v11 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
+	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, v11, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v11 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
 	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v11, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v11), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaAccounts, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, false); err != nil {
+	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})}
+	if err := setToDB(context.Background(), dm, utils.MetaAccounts, v12, true, false); err != nil {
 		t.Fatal(err)
 	}
-	v12 := &utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})}
 	if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v12, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v12), utils.ToJSON(prf))
 	}
 
-	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, utils.InfieldSep, utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, true, true); err != nil {
+	v13 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
+	if err := setToDB(context.Background(), dm, utils.MetaRateProfiles, v13, true, true); err != nil {
 		t.Fatal(err)
 	}
-	v13 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
 	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v13, prf) {
@@ -491,11 +346,11 @@ func TestLoaderProcess(t *testing.T) {
 	}
 
 	expErrMsg := `unsupported loader action: <"notSupported">`
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{}, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
+	if err := ld.process(context.Background(), nil, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{}, utils.MetaAttributes, utils.MetaParse, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), nil, utils.MetaAttributes, utils.MetaParse, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
 
@@ -505,27 +360,27 @@ func TestLoaderProcess(t *testing.T) {
 	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
 	utils.Logger.SetLogLevel(7)
 
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAttributes, utils.MetaDryRun, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}, utils.MetaAttributes, utils.MetaDryRun, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
 	utils.Logger = lgr
 	log.SetOutput(os.Stderr)
 
-	if expLog, rplyLog := "[INFO] <LoaderS-*default> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":null,\"Attributes\":null,\"Blocker\":false,\"Weight\":0}",
+	if expLog, rplyLog := "[INFO] <LoaderS-*default> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
 		buf.String(); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err != nil {
+	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaStore, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
-	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v1, prf) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v1), utils.ToJSON(prf))
 	}
-	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAttributes, utils.MetaRemove, utils.MetaNone, true, false); err != nil {
+	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaRemove, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
 	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {

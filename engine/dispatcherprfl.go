@@ -296,3 +296,64 @@ func (dH *DispatcherHost) Set(path []string, val interface{}, newBranch bool, _ 
 	}
 	return
 }
+
+func (dP *DispatcherProfile) Merge(v2 interface{}) {
+	vi := v2.(*DispatcherProfile)
+	if len(vi.Tenant) != 0 {
+		dP.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		dP.ID = vi.ID
+	}
+	dP.FilterIDs = append(dP.FilterIDs, vi.FilterIDs...)
+	dP.Hosts = append(dP.Hosts, vi.Hosts...)
+	if vi.Weight != 0 {
+		dP.Weight = vi.Weight
+	}
+	for k, v := range vi.StrategyParams {
+		dP.StrategyParams[k] = v
+	}
+	if len(vi.Strategy) != 0 {
+		dP.Strategy = vi.Strategy
+	}
+}
+
+func (dH *DispatcherHost) Merge(v2 interface{}) {
+	vi := v2.(*DispatcherHost)
+	if len(vi.Tenant) != 0 {
+		dH.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		dH.ID = vi.ID
+	}
+	if len(vi.Address) != 0 {
+		dH.Address = vi.Address
+	}
+	if len(vi.Transport) != 0 {
+		dH.Transport = vi.Transport
+	}
+	if len(vi.ClientKey) != 0 {
+		dH.ClientKey = vi.ClientKey
+	}
+	if len(vi.ClientCertificate) != 0 {
+		dH.ClientCertificate = vi.ClientCertificate
+	}
+	if len(vi.CaCertificate) != 0 {
+		dH.CaCertificate = vi.CaCertificate
+	}
+	if vi.TLS {
+		dH.TLS = vi.TLS
+	}
+	if vi.ConnectTimeout != 0 {
+		dH.ConnectTimeout = vi.ConnectTimeout
+	}
+	if vi.ReplyTimeout != 0 {
+		dH.ReplyTimeout = vi.ReplyTimeout
+	}
+	if vi.ConnectAttempts != 0 {
+		dH.ConnectAttempts = vi.ConnectAttempts
+	}
+	if vi.Reconnects != 0 {
+		dH.Reconnects = vi.Reconnects
+	}
+}

@@ -204,3 +204,25 @@ func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err err
 	}
 	return
 }
+
+func (ap *ActionProfile) Merge(v2 interface{}) {
+	vi := v2.(*ActionProfile)
+	if len(vi.Tenant) != 0 {
+		ap.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		ap.ID = vi.ID
+	}
+	ap.FilterIDs = append(ap.FilterIDs, vi.FilterIDs...)
+	ap.Actions = append(ap.Actions, vi.Actions...)
+
+	if vi.Weight != 0 {
+		ap.Weight = vi.Weight
+	}
+	if len(vi.Schedule) != 0 {
+		ap.Schedule = vi.Schedule
+	}
+	for k, v := range vi.Targets {
+		ap.Targets[k] = v
+	}
+}

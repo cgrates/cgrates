@@ -78,3 +78,21 @@ func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ 
 	}
 	return
 }
+
+func (cp *ChargerProfile) Merge(v2 interface{}) {
+	vi := v2.(*ChargerProfile)
+	if len(vi.Tenant) != 0 {
+		cp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		cp.ID = vi.ID
+	}
+	if len(vi.RunID) != 0 {
+		cp.RunID = vi.RunID
+	}
+	cp.FilterIDs = append(cp.FilterIDs, vi.FilterIDs...)
+	cp.AttributeIDs = append(cp.AttributeIDs, vi.AttributeIDs...)
+	if vi.Weight != 0 {
+		cp.Weight = vi.Weight
+	}
+}
