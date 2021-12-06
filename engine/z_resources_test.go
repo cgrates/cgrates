@@ -6838,3 +6838,372 @@ func TestResourceProfileSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cp))
 	}
 }
+func TestResourcesV1ResourcesForEventErrRetrieveUsageID(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.UsageID = []*utils.DynamicStringOpt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     "value",
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply Resources
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1ResourcesForEventErrRetrieveUsageTTL(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     time.Minute,
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply Resources
+	if err := rS.V1GetResourcesForEvent(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AuthorizeResourcesErrRetrieveUsageID(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.UsageID = []*utils.DynamicStringOpt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     "value",
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply string
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AuthorizeResourcesErrRetrieveUnits(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.Units = []*utils.DynamicFloat64Opt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     3,
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply string
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AuthorizeResourcesErrRetrieveUsageTTL(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     time.Minute,
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply string
+	if err := rS.V1AuthorizeResources(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AllocateResourcesErrRetrieveUsageID(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.UsageID = []*utils.DynamicStringOpt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     "value",
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply string
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AllocateResourcesErrRetrieveUsageTTL(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     time.Minute,
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply string
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AllocateResourcesErrRetrieveUnits(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.Units = []*utils.DynamicFloat64Opt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     3,
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply string
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1ReleaseResourcesErrRetrieveUsageID(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.UsageID = []*utils.DynamicStringOpt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     "value",
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply string
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1ReleaseResourcesErrRetrieveUsageTTL(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
+		{
+			FilterIDs: []string{"FLTR_Invalid"},
+			Tenant:    "*any",
+			Value:     time.Minute,
+		},
+	}
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.CGREvent{
+		ID: "ResourcesForEventTest",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+
+	experr := `NOT_FOUND:FLTR_Invalid`
+	var reply string
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
