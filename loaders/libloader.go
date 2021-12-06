@@ -31,25 +31,22 @@ import (
 
 // UpdateFromCSV will update LoaderData with data received from fileName,
 // contained in record and processed with cfgTpl
-func newRecord(ctx *context.Context, req utils.DataProvider, tmpls []*config.FCTemplate, tnt string, filterS *engine.FilterS,
-	cfg *config.CGRConfig, cache *ltcache.Cache) (_ *utils.OrderedNavigableMap, err error) {
-	r := &record{
-		data:   utils.NewOrderedNavigableMap(),
+func newRecord(req utils.DataProvider, data profile, tnt string, cfg *config.CGRConfig, cache *ltcache.Cache) *record {
+	return &record{
+		data:   data,
+		dp:     config.NewObjectDP(data),
 		tmp:    &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)},
 		req:    req,
 		cfg:    cfg.GetDataProvider(),
 		cache:  cache,
 		tenant: tnt,
 	}
-	if err = r.SetFields(ctx, tmpls, filterS, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone, cfg.GeneralCfg().RSRSep); err != nil {
-		return
-	}
-	return r.data, nil
 }
 
 type record struct {
 	tenant string
-	data   *utils.OrderedNavigableMap
+	dp     utils.DataProvider
+	data   profile
 	tmp    *utils.DataNode
 	req    utils.DataProvider
 	cfg    utils.DataProvider
@@ -87,7 +84,7 @@ func RateIDsFromOrderedNavigableMap(data *utils.OrderedNavigableMap) ([]string, 
 func (ar *record) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default:
-		val, err = ar.data.FieldAsInterface(fldPath)
+		val, err = ar.dp.FieldAsInterface(fldPath)
 	case utils.MetaReq:
 		if len(fldPath) != 1 {
 			val, err = ar.req.FieldAsInterface(fldPath[1:])
@@ -128,7 +125,6 @@ func (ar *record) FieldAsInterface(fldPath []string) (val interface{}, err error
 }
 
 //SetFields will populate fields of record out of templates
-
 func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, filterS *engine.FilterS, rndDec int, dftTmz, rsrSep string) (err error) {
 	ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	for _, fld := range tmpls {
@@ -177,13 +173,9 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 			nMItm := &utils.DataLeaf{Data: out, NewBranch: fld.NewBranch, AttributeID: fld.AttributeID}
 			switch fld.Type {
 			case utils.MetaComposed:
-				err = ar.Compose(fullPath, nMItm)
-			case utils.MetaGroup: // in case of *group type simply append to valSet
-				err = ar.Append(fullPath, nMItm)
-			case utils.MetaGeneric:
-				err = ar.Set(fullPath, out)
+				err = ar.Compose(fullPath, nMItm, rsrSep)
 			default:
-				err = ar.SetAsSlice(fullPath, nMItm)
+				err = ar.Set(fullPath, nMItm, rsrSep)
 			}
 			if err != nil {
 				return
@@ -196,25 +188,11 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 	return
 }
 
-// Set implements utils.NMInterface
-func (ar *record) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf) (err error) {
-	switch fullPath.PathSlice[0] {
-	default:
-		return ar.data.SetAsSlice(fullPath, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
-	case utils.MetaTmp:
-		_, err = ar.tmp.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
-		return
-	case utils.MetaUCH:
-		ar.cache.Set(fullPath.Path[5:], nm.Data, nil)
-		return
-	}
-}
-
 // RemoveAll deletes all fields at given prefix
 func (ar *record) RemoveAll(prefix string) error {
 	switch prefix {
 	default:
-		ar.data = utils.NewOrderedNavigableMap()
+		// ar.data = utils.NewOrderedNavigableMap()
 	case utils.MetaTmp:
 		ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	case utils.MetaUCH:
@@ -227,10 +205,10 @@ func (ar *record) RemoveAll(prefix string) error {
 func (ar *record) Remove(fullPath *utils.FullPath) error {
 	switch fullPath.PathSlice[0] {
 	default:
-		return ar.data.Remove(&utils.FullPath{
+		return nil /* ar.data.Remove(&utils.FullPath{
 			PathSlice: fullPath.PathSlice,
 			Path:      fullPath.Path,
-		})
+		})*/
 	case utils.MetaTmp:
 		return ar.tmp.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
 	case utils.MetaUCH:
@@ -239,24 +217,9 @@ func (ar *record) Remove(fullPath *utils.FullPath) error {
 	}
 }
 
-// Append sets the value at the given path
-// this used with full path and the processed path to not calculate them for every set
-func (ar *record) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
-	switch fullPath.PathSlice[0] {
-	case utils.MetaTmp:
-		_, err = ar.tmp.Append(fullPath.PathSlice[1:], val)
-		return
-	case utils.MetaUCH:
-		ar.cache.Set(fullPath.Path[5:], val.Data, nil)
-		return
-	default:
-		return ar.data.Append(fullPath, val)
-	}
-}
-
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
-func (ar *record) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+func (ar *record) Compose(fullPath *utils.FullPath, val *utils.DataLeaf, sep string) (err error) {
 	switch fullPath.PathSlice[0] {
 	case utils.MetaTmp:
 		return ar.tmp.Compose(fullPath.PathSlice[1:], val)
@@ -271,41 +234,101 @@ func (ar *record) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err er
 		ar.cache.Set(path, prv, nil)
 		return
 	default:
-		return ar.data.Compose(fullPath, val)
-	}
-}
-
-type profile interface {
-	Set([]string, interface{}, bool, string) error
-}
-
-func prepareData(prf profile, lData []*utils.OrderedNavigableMap, rsrSep string) (err error) {
-	for _, mp := range lData {
-		for el := mp.GetFirstElement(); el != nil; el = el.Next() {
-			path := el.Value
-			nmIt, _ := mp.Field(path)
-			if nmIt == nil {
-				continue
-			}
-			path = path[:len(path)-1] // remove the last index
-			if err = prf.Set(path, nmIt.Data, nmIt.NewBranch, rsrSep); err != nil {
-				return
-			}
+		var valStr string
+		if valStr, err = ar.FieldAsString(fullPath.PathSlice); err != nil && err != utils.ErrNotFound {
+			return
 		}
+		return ar.data.Set(fullPath.PathSlice, valStr+utils.IfaceAsString(val.Data), val.NewBranch, utils.InfieldSep)
 	}
-	return
 }
 
 // Set implements utils.NMInterface
-func (ar *record) Set(fullPath *utils.FullPath, nm interface{}) (err error) {
+func (ar *record) Set(fullPath *utils.FullPath, nm *utils.DataLeaf, sep string) (err error) {
 	switch fullPath.PathSlice[0] {
 	default:
-		return ar.data.Set(fullPath, nm)
+		return ar.data.Set(fullPath.PathSlice, nm.Data, nm.NewBranch, sep)
 	case utils.MetaTmp:
 		_, err = ar.tmp.Set(fullPath.PathSlice[1:], nm)
 		return
 	case utils.MetaUCH:
 		ar.cache.Set(fullPath.Path[5:], nm, nil)
 		return
+	}
+}
+
+type profile interface {
+	// utils.DataProvider
+	Set([]string, interface{}, bool, string) error
+	Merge(interface{})
+	TenantID() string
+}
+
+func newProfileFunc(lType string) func() profile {
+	switch lType {
+	case utils.MetaAttributes:
+		return func() profile {
+			return new(engine.AttributeProfile)
+		}
+	case utils.MetaResources:
+		return func() profile {
+			return new(engine.ResourceProfile)
+		}
+	case utils.MetaFilters:
+		return func() profile {
+			return new(engine.Filter)
+		}
+	case utils.MetaStats:
+		return func() profile {
+			return new(engine.StatQueueProfile)
+		}
+	case utils.MetaThresholds:
+		return func() profile {
+			return new(engine.ThresholdProfile)
+		}
+	case utils.MetaRoutes:
+		return func() profile {
+			return new(engine.RouteProfile)
+		}
+	case utils.MetaChargers:
+		return func() profile {
+			return new(engine.ChargerProfile)
+		}
+	case utils.MetaDispatchers:
+		return func() profile {
+			return &engine.DispatcherProfile{
+				StrategyParams: make(map[string]interface{}),
+			}
+		}
+	case utils.MetaDispatcherHosts:
+		return func() profile {
+			return &engine.DispatcherHost{
+				RemoteHost: &config.RemoteHost{
+					Transport: utils.MetaJSON,
+				},
+			}
+		}
+	case utils.MetaRateProfiles:
+		return func() profile {
+			return &utils.RateProfile{
+				Rates:   make(map[string]*utils.Rate),
+				MinCost: utils.NewDecimal(0, 0),
+				MaxCost: utils.NewDecimal(0, 0),
+			}
+		}
+	case utils.MetaActionProfiles:
+		return func() profile {
+			return &engine.ActionProfile{
+				Targets: make(map[string]utils.StringSet),
+			}
+		}
+	case utils.MetaAccounts:
+		return func() profile {
+			return &utils.Account{
+				Opts:     make(map[string]interface{}),
+				Balances: make(map[string]*utils.Balance),
+			}
+		}
+	default:
+		return func() profile { return nil }
 	}
 }
