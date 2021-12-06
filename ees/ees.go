@@ -329,8 +329,8 @@ type ArchiveEventsArgs struct {
 	Events  []*utils.CGREvent
 }
 
-// V1ArchiveEventsAsReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.
-func (eeS *EeS) V1ArchiveEventsAsReply(ctx *context.Context, args *ArchiveEventsArgs, reply *[]byte) (err error) {
+// V1ArchiveEventsInReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.
+func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEventsArgs, reply *[]byte) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = eeS.cfg.GeneralCfg().DefaultTenant
 	}

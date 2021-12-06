@@ -1503,7 +1503,7 @@ const (
 	EeSv1                     = "EeSv1"
 	EeSv1Ping                 = "EeSv1.Ping"
 	EeSv1ProcessEvent         = "EeSv1.ProcessEvent"
-	EeSv1ArchiveEventsAsReply = "EeSv1.ArchiveEventsAsReply"
+	EeSv1ArchiveEventsInReply = "EeSv1.ArchiveEventsInReply"
 )
 
 // ActionProfile APIs
