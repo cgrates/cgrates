@@ -1354,7 +1354,7 @@ func TestJoinConverter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expVal := "1,2,3,5"
+	expVal := "1;2;3;5"
 	if i, err := d.Convert("1;2;3;5"); err != nil {
 		t.Error(err.Error())
 	} else if expVal != i {
@@ -1383,7 +1383,7 @@ func TestSplitConverter(t *testing.T) {
 		t.Fatal(err)
 	}
 	expVal := []string{"1", "2", "3", "5"}
-	if i, err := d.Convert("1,2,3,5"); err != nil {
+	if i, err := d.Convert("1;2;3;5"); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(expVal, i) {
 		t.Errorf("expecting: %q, received: %q", expVal, i)

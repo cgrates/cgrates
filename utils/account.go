@@ -864,3 +864,22 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 	}
 	return ErrWrongPath
 }
+
+func (ap *Account) Merge(v2 interface{}) {
+	vi := v2.(*Account)
+	if len(vi.Tenant) != 0 {
+		ap.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		ap.ID = vi.ID
+	}
+	ap.FilterIDs = append(ap.FilterIDs, vi.FilterIDs...)
+	ap.Weights = append(ap.Weights, vi.Weights...)
+	ap.ThresholdIDs = append(ap.ThresholdIDs, vi.ThresholdIDs...)
+	for k, v := range vi.Opts {
+		ap.Opts[k] = v
+	}
+	for k, v := range vi.Balances {
+		ap.Balances[k] = v
+	}
+}
