@@ -6743,46 +6743,6 @@ func TestResourcesV1ReleaseResourcesErrRetrieveUsageTTL(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
-
-// func TestResourcesMatchingResourcesForEvent(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
-
-// 	Cache.Clear(nil)
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
-// 		{
-// 			FilterIDs: []string{"FLTR_Invalid"},
-// 			Tenant:    "*any",
-// 			Value:     time.Minute,
-// 		},
-// 	}
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-// 	Cache = NewCacheS(cfg, dm, nil)
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	rS := NewResourceService(dm, cfg, fltrs, nil)
-// 	args := &utils.CGREvent{
-// 		Tenant: cfg.GeneralCfg().DefaultTenant,
-// 		ID:     "ResourcesForEventTest",
-// 		Event: map[string]interface{}{
-// 			utils.AccountField: "1001",
-// 		},
-// 		APIOpts: map[string]interface{}{},
-// 	}
-// 	experr := `NOT_FOUND:FLTR_Invalid`
-// 	expected := []*Resource{}
-// 	response, err := rS.matchingResourcesForEvent(context.Background(), args.Tenant, args, "", utils.DurationPointer(time.Second))
-// 	if err == nil ||
-// 		err.Error() != experr {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-// 	}
-// 	if !reflect.DeepEqual(expected, response) {
-// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, response)
-// 	}
-// }
 func TestResourceProfileSet(t *testing.T) {
 	cp := ResourceProfile{}
 	exp := ResourceProfile{
