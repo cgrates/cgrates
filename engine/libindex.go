@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	FilterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix})
+	FilterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix, utils.MetaExists, utils.MetaNotExists})
 	// Element or values of a filter that starts with one of this should not be indexed
 	ToNotBeIndexed = []string{utils.DynamicDataPrefix + utils.MetaAccounts,
 		utils.DynamicDataPrefix + utils.MetaStats,
@@ -101,6 +101,24 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 					continue
 				}
 				var rcvIndx map[string]utils.StringSet
+				// only read from cache in case if we do not find the index to not cache the negative response
+				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
+					idxKey, transactionID, true, false); err != nil {
+					if err != utils.ErrNotFound {
+						return
+					}
+					err = nil
+					indexes[idxKey] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
+					continue
+				}
+				for idxKey, idx := range rcvIndx { // parse the received indexes
+					indexes[idxKey] = idx
+				}
+			}
+			// this case is only for "*exists" and "*notexists" type. These 2 types does not have values, so the key will be just type and element.
+			if len(flt.Values) == 0 {
+				var rcvIndx map[string]utils.StringSet
+				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
 				// only read from cache in case if we do not find the index to not cache the negative response
 				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
 					idxKey, transactionID, true, false); err != nil {
@@ -406,6 +424,9 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+		if len(flt.Values) == 0 {
+			newRules.Add(utils.ConcatenatedKey(flt.Type, flt.Element[1:])) // asume it is *exists/*notexists type
+		}
 		for _, fldVal := range flt.Values {
 			if IsDynamicDPPath(fldVal) {
 				continue
@@ -431,6 +452,15 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+		// this case is only for "*exists" and "*notexists" type. These 2 types does not have values, so the key will be just type and element.
+		if len(flt.Values) == 0 {
+			idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
+			if !newRules.Has(idxKey) {
+				removeRules.Add(idxKey)
+			} else {
+				oldRules.Add(idxKey)
+			}
+		}
 		for _, fldVal := range flt.Values {
 			if IsDynamicDPPath(fldVal) {
 				continue
