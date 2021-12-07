@@ -36,15 +36,17 @@ type ThresholdsOpts struct {
 
 // ThresholdSCfg the threshold config section
 type ThresholdSCfg struct {
-	Enabled             bool
-	IndexedSelects      bool
-	StoreInterval       time.Duration // Dump regularly from cache into dataDB
-	StringIndexedFields *[]string
-	PrefixIndexedFields *[]string
-	SuffixIndexedFields *[]string
-	NestedFields        bool
-	ActionSConns        []string // connections towards ActionS
-	Opts                *ThresholdsOpts
+	Enabled                bool
+	IndexedSelects         bool
+	StoreInterval          time.Duration // Dump regularly from cache into dataDB
+	StringIndexedFields    *[]string
+	PrefixIndexedFields    *[]string
+	SuffixIndexedFields    *[]string
+	ExistsIndexedFields    *[]string
+	NotExistsIndexedFields *[]string
+	NestedFields           bool
+	ActionSConns           []string // connections towards ActionS
+	Opts                   *ThresholdsOpts
 }
 
 // loadThresholdSCfg loads the ThresholdS section of the configuration
@@ -92,6 +94,12 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg.Suffix_indexed_fields != nil {
 		t.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		t.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.Notexists_indexed_fields != nil {
+		t.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+	}
 	if jsnCfg.Nested_fields != nil {
 		t.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -129,6 +137,12 @@ func (t ThresholdSCfg) AsMapInterface(string) interface{} {
 	}
 	if t.SuffixIndexedFields != nil {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*t.SuffixIndexedFields)
+	}
+	if t.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*t.ExistsIndexedFields)
+	}
+	if t.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*t.NotExistsIndexedFields)
 	}
 	if t.ActionSConns != nil {
 		mp[utils.ActionSConnsCfg] = getInternalJSONConns(t.ActionSConns)
@@ -173,6 +187,12 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	if t.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.SuffixIndexedFields))
 	}
+	if t.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.ExistsIndexedFields))
+	}
+	if t.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.NotExistsIndexedFields))
+	}
 	if t.ActionSConns != nil {
 		cln.ActionSConns = utils.CloneStringSlice(t.ActionSConns)
 	}
@@ -186,15 +206,17 @@ type ThresholdsOptsJson struct {
 
 // Threshold service config section
 type ThresholdSJsonCfg struct {
-	Enabled               *bool
-	Indexed_selects       *bool
-	Store_interval        *string
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-	Actions_conns         *[]string
-	Opts                  *ThresholdsOptsJson
+	Enabled                  *bool
+	Indexed_selects          *bool
+	Store_interval           *string
+	String_indexed_fields    *[]string
+	Prefix_indexed_fields    *[]string
+	Suffix_indexed_fields    *[]string
+	Exists_indexed_fields    *[]string
+	Notexists_indexed_fields *[]string
+	Nested_fields            *bool // applies when indexed fields is not defined
+	Actions_conns            *[]string
+	Opts                     *ThresholdsOptsJson
 }
 
 func diffThresholdsOptsJsonCfg(d *ThresholdsOptsJson, v1, v2 *ThresholdsOpts) *ThresholdsOptsJson {
@@ -226,6 +248,8 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.Notexists_indexed_fields = diffIndexSlice(d.Notexists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}

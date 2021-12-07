@@ -47,19 +47,23 @@ type RatesOpts struct {
 
 // RateSCfg the rates config section
 type RateSCfg struct {
-	Enabled                 bool
-	IndexedSelects          bool
-	StringIndexedFields     *[]string
-	PrefixIndexedFields     *[]string
-	SuffixIndexedFields     *[]string
-	NestedFields            bool
-	RateIndexedSelects      bool
-	RateStringIndexedFields *[]string
-	RatePrefixIndexedFields *[]string
-	RateSuffixIndexedFields *[]string
-	RateNestedFields        bool
-	Verbosity               int
-	Opts                    *RatesOpts
+	Enabled                    bool
+	IndexedSelects             bool
+	StringIndexedFields        *[]string
+	PrefixIndexedFields        *[]string
+	SuffixIndexedFields        *[]string
+	ExistsIndexedFields        *[]string
+	NotExistsIndexedFields     *[]string
+	NestedFields               bool
+	RateIndexedSelects         bool
+	RateStringIndexedFields    *[]string
+	RatePrefixIndexedFields    *[]string
+	RateSuffixIndexedFields    *[]string
+	RateExistsIndexedFields    *[]string
+	RateNotExistsIndexedFields *[]string
+	RateNestedFields           bool
+	Verbosity                  int
+	Opts                       *RatesOpts
 }
 
 // loadRateSCfg loads the rates section of the configuration
@@ -120,6 +124,12 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 	if jsnCfg.Suffix_indexed_fields != nil {
 		rCfg.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		rCfg.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.Notexists_indexed_fields != nil {
+		rCfg.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+	}
 	if jsnCfg.Nested_fields != nil {
 		rCfg.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -135,6 +145,12 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 	}
 	if jsnCfg.Rate_suffix_indexed_fields != nil {
 		rCfg.RateSuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_suffix_indexed_fields))
+	}
+	if jsnCfg.Rate_exists_indexed_fields != nil {
+		rCfg.RateExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_exists_indexed_fields))
+	}
+	if jsnCfg.Rate_notexists_indexed_fields != nil {
+		rCfg.RateNotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_notexists_indexed_fields))
 	}
 	if jsnCfg.Rate_nested_fields != nil {
 		rCfg.RateNestedFields = *jsnCfg.Rate_nested_fields
@@ -175,6 +191,12 @@ func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	if rCfg.SuffixIndexedFields != nil {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.SuffixIndexedFields)
 	}
+	if rCfg.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.ExistsIndexedFields)
+	}
+	if rCfg.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.NotExistsIndexedFields)
+	}
 	if rCfg.RateStringIndexedFields != nil {
 		mp[utils.RateStringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateStringIndexedFields)
 	}
@@ -183,6 +205,12 @@ func (rCfg RateSCfg) AsMapInterface(string) interface{} {
 	}
 	if rCfg.RateSuffixIndexedFields != nil {
 		mp[utils.RateSuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateSuffixIndexedFields)
+	}
+	if rCfg.RateExistsIndexedFields != nil {
+		mp[utils.RateExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateExistsIndexedFields)
+	}
+	if rCfg.RateNotExistsIndexedFields != nil {
+		mp[utils.RateNotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateNotExistsIndexedFields)
 	}
 	return mp
 }
@@ -240,7 +268,12 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 	if rCfg.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.SuffixIndexedFields))
 	}
-
+	if rCfg.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.ExistsIndexedFields))
+	}
+	if rCfg.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.NotExistsIndexedFields))
+	}
 	if rCfg.RateStringIndexedFields != nil {
 		cln.RateStringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateStringIndexedFields))
 	}
@@ -249,6 +282,12 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 	}
 	if rCfg.RateSuffixIndexedFields != nil {
 		cln.RateSuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateSuffixIndexedFields))
+	}
+	if rCfg.RateExistsIndexedFields != nil {
+		cln.RateExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateExistsIndexedFields))
+	}
+	if rCfg.RateNotExistsIndexedFields != nil {
+		cln.RateNotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateNotExistsIndexedFields))
 	}
 	return
 }
@@ -262,19 +301,23 @@ type RatesOptsJson struct {
 }
 
 type RateSJsonCfg struct {
-	Enabled                    *bool
-	Indexed_selects            *bool
-	String_indexed_fields      *[]string
-	Prefix_indexed_fields      *[]string
-	Suffix_indexed_fields      *[]string
-	Nested_fields              *bool // applies when indexed fields is not defined
-	Rate_indexed_selects       *bool
-	Rate_string_indexed_fields *[]string
-	Rate_prefix_indexed_fields *[]string
-	Rate_suffix_indexed_fields *[]string
-	Rate_nested_fields         *bool // applies when indexed fields is not defined
-	Verbosity                  *int
-	Opts                       *RatesOptsJson
+	Enabled                       *bool
+	Indexed_selects               *bool
+	String_indexed_fields         *[]string
+	Prefix_indexed_fields         *[]string
+	Suffix_indexed_fields         *[]string
+	Exists_indexed_fields         *[]string
+	Notexists_indexed_fields      *[]string
+	Nested_fields                 *bool // applies when indexed fields is not defined
+	Rate_indexed_selects          *bool
+	Rate_string_indexed_fields    *[]string
+	Rate_prefix_indexed_fields    *[]string
+	Rate_suffix_indexed_fields    *[]string
+	Rate_exists_indexed_fields    *[]string
+	Rate_notexists_indexed_fields *[]string
+	Rate_nested_fields            *bool // applies when indexed fields is not defined
+	Verbosity                     *int
+	Opts                          *RatesOptsJson
 }
 
 func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
@@ -312,6 +355,8 @@ func diffRateSJsonCfg(d *RateSJsonCfg, v1, v2 *RateSCfg) *RateSJsonCfg {
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.Notexists_indexed_fields = diffIndexSlice(d.Notexists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
@@ -321,6 +366,8 @@ func diffRateSJsonCfg(d *RateSJsonCfg, v1, v2 *RateSCfg) *RateSJsonCfg {
 	d.Rate_string_indexed_fields = diffIndexSlice(d.Rate_string_indexed_fields, v1.RateStringIndexedFields, v2.RateStringIndexedFields)
 	d.Rate_prefix_indexed_fields = diffIndexSlice(d.Rate_prefix_indexed_fields, v1.RatePrefixIndexedFields, v2.RatePrefixIndexedFields)
 	d.Rate_suffix_indexed_fields = diffIndexSlice(d.Rate_suffix_indexed_fields, v1.RateSuffixIndexedFields, v2.RateSuffixIndexedFields)
+	d.Rate_exists_indexed_fields = diffIndexSlice(d.Rate_exists_indexed_fields, v1.RateExistsIndexedFields, v2.RateExistsIndexedFields)
+	d.Rate_notexists_indexed_fields = diffIndexSlice(d.Rate_notexists_indexed_fields, v1.RateNotExistsIndexedFields, v2.RateNotExistsIndexedFields)
 	if v1.RateNestedFields != v2.RateNestedFields {
 		d.Rate_nested_fields = utils.BoolPointer(v2.RateNestedFields)
 	}
