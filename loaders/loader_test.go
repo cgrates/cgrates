@@ -50,10 +50,6 @@ func TestRemoveFromDB(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	expErrMsg := "cannot find RateIDs in map"
-	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, true, true, profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
 	if err := removeFromDB(context.Background(), dm, utils.MetaRateProfiles, true, true, &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{"RT1": {}}}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -93,52 +89,57 @@ func newOrderNavMap(mp utils.MapStorage) (o *utils.OrderedNavigableMap) {
 	return
 }
 func TestDryRun(t *testing.T) {
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: AttributeProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaAttributes); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ResourceProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ResourceProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaResources); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Filter: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
-		testDryRun(t, utils.MetaFilters); !strings.Contains(rplyLog, expLog) {
+
+	if rplyLog, err := testDryRunWithData(utils.MetaFilters, &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+	}); err != nil {
+		t.Fatal(err)
+	} else if expLog := "[INFO] <LoaderS-test> DRY_RUN: Filter: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"Rules\":[]}"; !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: StatsQueueProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: StatsQueueProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaStats); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ThresholdProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ThresholdProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaThresholds); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RouteProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RouteProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaRoutes); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ChargerProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ChargerProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaChargers); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaDispatchers); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RateProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RateProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaRateProfiles); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ActionProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: ActionProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaActionProfiles); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Accounts: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Accounts: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaAccounts); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherHost: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherHost: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaDispatcherHosts); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
@@ -364,7 +365,7 @@ func TestLoaderProcess(t *testing.T) {
 		t.Error(err)
 	}
 
-	if expLog, rplyLog := "[INFO] <LoaderS-*default> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\"}",
+	if expLog, rplyLog := "[INFO] <LoaderS-*default> DRY_RUN: AttributeProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		buf.String(); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
@@ -414,189 +415,222 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
 	}
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, []string{connID})
-
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAttributes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
+	{
+		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		if err := ld.process(context.Background(), v, utils.MetaAttributes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{AttributeProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheAttributeFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
-	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	{
+		v := (&engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"})
+		if err := ld.process(context.Background(), v, utils.MetaResources, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{ResourceProfileIDs: []string{tntID}, ResourceIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheResourceFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{AttributeProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheAttributeFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
-	}
-
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaResources, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetResourceProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.ResourceProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{ResourceProfileIDs: []string{tntID}, ResourceIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheResourceFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
-	}
-
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaStats, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheStatFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
-	}
-
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaThresholds, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheThresholdFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	{
+		v := (&engine.StatQueueProfile{Tenant: "cgrates.org", ID: "ID"})
+		if err := ld.process(context.Background(), v, utils.MetaStats, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetStatQueueProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{StatsQueueProfileIDs: []string{tntID}, StatsQueueIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheStatFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaRoutes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{RouteProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheRouteFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
-	}
-
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaChargers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{ChargerProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheChargerFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	{
+		v := (&engine.ThresholdProfile{Tenant: "cgrates.org", ID: "ID"})
+		if err := ld.process(context.Background(), v, utils.MetaThresholds, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetThresholdProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{ThresholdProfileIDs: []string{tntID}, ThresholdIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheThresholdFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaDispatchers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
-	}
-
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaRateProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{RateProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+	{
+		v := (&engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"})
+		if err := ld.process(context.Background(), v, utils.MetaRoutes, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetRouteProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{RouteProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheRouteFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaActionProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{ActionProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
-	}
-
-	reloadCache, clearCache = nil, nil
-
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaFilters, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
-	}
-	if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{FilterIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if !reflect.DeepEqual(nil, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
+	{
+		v := (&engine.ChargerProfile{Tenant: "cgrates.org", ID: "ID"})
+		if err := ld.process(context.Background(), v, utils.MetaChargers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetChargerProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{ChargerProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheChargerFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID", "Address": "127.0.0.1"})}, utils.MetaDispatcherHosts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
+	{
+		v := (&engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]interface{})})
+		if err := ld.process(context.Background(), v, utils.MetaDispatchers, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
-	if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if v := (&engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+
+	{
+		v := (&utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)})
+		if err := ld.process(context.Background(), v, utils.MetaRateProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetRateProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{RateProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherHostIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if !reflect.DeepEqual(nil, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
+
+	{
+		v := (&engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}})
+		if err := ld.process(context.Background(), v, utils.MetaActionProfiles, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetActionProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{ActionProfileIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheActionProfiles, utils.CacheActionProfilesFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
 
 	reloadCache, clearCache = nil, nil
 
-	if err := ld.process(context.Background(), utils.NewTenantID(tntID), []*utils.OrderedNavigableMap{newOrderNavMap(utils.MapStorage{utils.Tenant: "cgrates.org", utils.ID: "ID"})}, utils.MetaAccounts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
-		t.Error(err)
+	{
+		v := (&engine.Filter{Tenant: "cgrates.org", ID: "ID", Rules: make([]*engine.FilterRule, 0)})
+		if err := ld.process(context.Background(), v, utils.MetaFilters, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetFilter(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{FilterIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if !reflect.DeepEqual(nil, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
+		}
 	}
-	if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
-		t.Fatal(err)
-	} else if v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})}); !reflect.DeepEqual(v, prf) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+
+	{
+		v := (&engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}})
+		if err := ld.process(context.Background(), v, utils.MetaDispatcherHosts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{DispatcherHostIDs: []string{tntID}}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if !reflect.DeepEqual(nil, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
+		}
 	}
-	if exp := (&utils.AttrReloadCacheWithAPIOpts{}); !reflect.DeepEqual(exp, reloadCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-	}
-	if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+
+	reloadCache, clearCache = nil, nil
+
+	{
+		v := (&utils.Account{Tenant: "cgrates.org", ID: "ID", Balances: map[string]*utils.Balance{}, Opts: make(map[string]interface{})})
+		if err := ld.process(context.Background(), v, utils.MetaAccounts, utils.MetaStore, utils.MetaReload, true, false); err != nil {
+			t.Error(err)
+		}
+		if prf, err := dm.GetAccount(context.Background(), "cgrates.org", "ID"); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(v, prf) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+		}
+		if exp := (&utils.AttrReloadCacheWithAPIOpts{}); !reflect.DeepEqual(exp, reloadCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
+		}
+		if exp := (&utils.AttrCacheIDsWithAPIOpts{CacheIDs: []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}}); !reflect.DeepEqual(exp, clearCache) {
+			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(clearCache))
+		}
 	}
 }
 

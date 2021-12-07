@@ -531,6 +531,7 @@ func testLoadersGetDispatcherHost(t *testing.T) {
 		RemoteHost: &config.RemoteHost{
 			ID:              expIDs[0],
 			Address:         utils.MetaInternal,
+			Transport:       utils.MetaJSON,
 			ConnectAttempts: 1,
 			Reconnects:      3,
 			ConnectTimeout:  time.Minute,

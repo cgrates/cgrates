@@ -677,7 +677,9 @@ func (ap *Account) Set(path []string, val interface{}, newBranch bool, _ string)
 			valA, err = IfaceAsStringSlice(val)
 			ap.ThresholdIDs = append(ap.ThresholdIDs, valA...)
 		case Weights:
-			ap.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			if val != EmptyString {
+				ap.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			}
 		case Opts:
 			ap.Opts, err = NewMapFromCSV(IfaceAsString(val))
 		}
@@ -743,7 +745,9 @@ func (bL *Balance) Set(path []string, val interface{}, newBranch bool) (err erro
 			valB, err = IfaceAsBig(val)
 			bL.Units = &Decimal{valB}
 		case Weights:
-			bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			if val != EmptyString {
+				bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			}
 		case UnitFactors:
 			if ufStr := IfaceAsString(val); len(ufStr) != 0 {
 				sls := strings.Split(ufStr, InfieldSep)

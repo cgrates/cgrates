@@ -131,11 +131,14 @@ func testLdro2nRtLoadTP(t *testing.T) {
 		"Rates.csv",
 		"DestinationRates.csv",
 		"RatingPlans.csv",
-		"RatingProfiles.csv",
 	} {
 		if err = copyFile(filepath.Join(*dataDir, "tariffplans", "oldtutorial2", file), filepath.Join("/tmp/In", file)); err != nil {
 			t.Fatal(err)
 		}
+	}
+	time.Sleep(time.Second)
+	if err = copyFile(filepath.Join(*dataDir, "tariffplans", "oldtutorial2", "RatingProfiles.csv"), filepath.Join("/tmp/In", "RatingProfiles.csv")); err != nil {
+		t.Fatal(err)
 	}
 	time.Sleep(time.Second)
 }
@@ -194,12 +197,31 @@ func testLdro2nRtCheckData(t *testing.T) {
 		MinCost:   utils.NewDecimal(0, 0),
 		MaxCost:   utils.NewDecimal(0, 0),
 		Rates: map[string]*utils.Rate{
-			"RP_RETAIL1_DR_1007_MAXCOST_DISC": {
-				ID:              "RP_RETAIL1_DR_1007_MAXCOST_DISC",
+			"RP_RETAIL1_DR_1007_MAXCOST_DISC_*any": {
+				ID:              "RP_RETAIL1_DR_1007_MAXCOST_DISC_*any",
+				FilterIDs:       []string{"*prefix:~*req.Destination:1007"},
+				ActivationTimes: "",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				IntervalRates: []*utils.IntervalRate{{
+					IntervalStart: utils.NewDecimalFromFloat64(0),
+					FixedFee:      utils.NewDecimalFromFloat64(0),
+					RecurrentFee:  utils.NewDecimalFromFloat64(0.01),
+					Unit:          utils.NewDecimalFromFloat64(1000000000),
+					Increment:     utils.NewDecimalFromFloat64(1000000000),
+				}},
+			},
+			"RP_RETAIL1_DR_FS_10CNT_OFFPEAK_EVENING": {
+				ID:              "RP_RETAIL1_DR_FS_10CNT_OFFPEAK_EVENING",
 				FilterIDs:       []string{"*prefix:~*req.Destination:10"},
 				ActivationTimes: "* 00 * * 1,2,3,4,5",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
 				IntervalRates: []*utils.IntervalRate{{
+					IntervalStart: utils.NewDecimalFromFloat64(0),
+					FixedFee:      utils.NewDecimalFromFloat64(0.2),
+					RecurrentFee:  utils.NewDecimalFromFloat64(0.1),
+					Unit:          utils.NewDecimalFromFloat64(60000000000),
+					Increment:     utils.NewDecimalFromFloat64(60000000000),
+				}, {
 					IntervalStart: utils.NewDecimalFromFloat64(60000000000),
 					FixedFee:      utils.NewDecimalFromFloat64(0),
 					RecurrentFee:  utils.NewDecimalFromFloat64(0.05),
@@ -207,12 +229,18 @@ func testLdro2nRtCheckData(t *testing.T) {
 					Increment:     utils.NewDecimalFromFloat64(1000000000),
 				}},
 			},
-			"RP_RETAIL1_DR_FS_10CNT": {
-				ID:              "RP_RETAIL1_DR_FS_10CNT",
+			"RP_RETAIL1_DR_FS_10CNT_OFFPEAK_MORNING": {
+				ID:              "RP_RETAIL1_DR_FS_10CNT_OFFPEAK_MORNING",
 				FilterIDs:       []string{"*prefix:~*req.Destination:10"},
 				ActivationTimes: "* 00 * * 1,2,3,4,5",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
 				IntervalRates: []*utils.IntervalRate{{
+					IntervalStart: utils.NewDecimalFromFloat64(0),
+					FixedFee:      utils.NewDecimalFromFloat64(0.2),
+					RecurrentFee:  utils.NewDecimalFromFloat64(0.1),
+					Unit:          utils.NewDecimalFromFloat64(60000000000),
+					Increment:     utils.NewDecimalFromFloat64(60000000000),
+				}, {
 					IntervalStart: utils.NewDecimalFromFloat64(60000000000),
 					FixedFee:      utils.NewDecimalFromFloat64(0),
 					RecurrentFee:  utils.NewDecimalFromFloat64(0.05),
@@ -220,12 +248,37 @@ func testLdro2nRtCheckData(t *testing.T) {
 					Increment:     utils.NewDecimalFromFloat64(1000000000),
 				}},
 			},
-			"RP_RETAIL1_DR_FS_40CNT": {
-				ID:              "RP_RETAIL1_DR_FS_40CNT",
+			"RP_RETAIL1_DR_FS_10CNT_OFFPEAK_WEEKEND": {
+				ID:              "RP_RETAIL1_DR_FS_10CNT_OFFPEAK_WEEKEND",
+				FilterIDs:       []string{"*prefix:~*req.Destination:10"},
+				ActivationTimes: "* 00 * * 6,0",
+				Weights:         utils.DynamicWeights{{Weight: 10}},
+				IntervalRates: []*utils.IntervalRate{{
+					IntervalStart: utils.NewDecimalFromFloat64(0),
+					FixedFee:      utils.NewDecimalFromFloat64(0.2),
+					RecurrentFee:  utils.NewDecimalFromFloat64(0.1),
+					Unit:          utils.NewDecimalFromFloat64(60000000000),
+					Increment:     utils.NewDecimalFromFloat64(60000000000),
+				}, {
+					IntervalStart: utils.NewDecimalFromFloat64(60000000000),
+					FixedFee:      utils.NewDecimalFromFloat64(0),
+					RecurrentFee:  utils.NewDecimalFromFloat64(0.05),
+					Unit:          utils.NewDecimalFromFloat64(60000000000),
+					Increment:     utils.NewDecimalFromFloat64(1000000000),
+				}},
+			},
+			"RP_RETAIL1_DR_FS_40CNT_PEAK": {
+				ID:              "RP_RETAIL1_DR_FS_40CNT_PEAK",
 				FilterIDs:       []string{"*prefix:~*req.Destination:10"},
 				ActivationTimes: "* 00 * * 1,2,3,4,5",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
 				IntervalRates: []*utils.IntervalRate{{
+					IntervalStart: utils.NewDecimalFromFloat64(0),
+					FixedFee:      utils.NewDecimalFromFloat64(0.8),
+					RecurrentFee:  utils.NewDecimalFromFloat64(0.4),
+					Unit:          utils.NewDecimalFromFloat64(60000000000),
+					Increment:     utils.NewDecimalFromFloat64(30000000000),
+				}, {
 					IntervalStart: utils.NewDecimalFromFloat64(60000000000),
 					FixedFee:      utils.NewDecimalFromFloat64(0),
 					RecurrentFee:  utils.NewDecimalFromFloat64(0.2),
