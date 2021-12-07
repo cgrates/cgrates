@@ -177,7 +177,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 				Weights: ";35",
 			},
 		},
-		Weights: ";0",
+		Weights: "",
 	}
 	var reply *engine.APIRouteProfile
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
@@ -224,7 +224,6 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 				Weights:        ";30",
 			},
 		},
-		Weights: ";0",
 	}
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1002", Tenant: "cgrates.org"},
@@ -265,7 +264,6 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 				Weights:   ";20",
 			},
 		},
-		Weights: ";0",
 	}
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1003", Tenant: "cgrates.org"},
@@ -306,7 +304,6 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 				Weights:     ";10",
 			},
 		},
-		Weights: ";0",
 	}
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1004", Tenant: "cgrates.org"},
@@ -343,7 +340,6 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 				StatIDs: []string{"STATS_VENDOR_2:*distinct#~*req.Usage"},
 			},
 		},
-		Weights: ";0",
 	}
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_ACNT_1005", Tenant: "cgrates.org"},
@@ -388,7 +384,6 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 				Weights:        ";10",
 			},
 		},
-		Weights: ";0",
 	}
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantID{ID: "ROUTE_HC1", Tenant: "cgrates.org"},
