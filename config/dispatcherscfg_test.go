@@ -27,22 +27,26 @@ import (
 
 func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &DispatcherSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Indexed_selects:       utils.BoolPointer(true),
-		String_indexed_fields: &[]string{"*req.prefix", "*req.indexed"},
-		Prefix_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		Suffix_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		Attributes_conns:      &[]string{utils.MetaInternal, "*conn1"},
-		Nested_fields:         utils.BoolPointer(true),
+		Enabled:                  utils.BoolPointer(true),
+		Indexed_selects:          utils.BoolPointer(true),
+		String_indexed_fields:    &[]string{"*req.prefix", "*req.indexed"},
+		Prefix_indexed_fields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		Suffix_indexed_fields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		Exists_indexed_fields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		Notexists_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		Attributes_conns:         &[]string{utils.MetaInternal, "*conn1"},
+		Nested_fields:            utils.BoolPointer(true),
 	}
 	expected := &DispatcherSCfg{
-		Enabled:             true,
-		IndexedSelects:      true,
-		StringIndexedFields: &[]string{"*req.prefix", "*req.indexed"},
-		PrefixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		NestedFields:        true,
+		Enabled:                true,
+		IndexedSelects:         true,
+		StringIndexedFields:    &[]string{"*req.prefix", "*req.indexed"},
+		PrefixIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		SuffixIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		ExistsIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		NotExistsIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		NestedFields:           true,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -63,18 +67,22 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 			"indexed_selects":true,
 			"prefix_indexed_fields": [],
             "suffix_indexed_fields": [],
+			"exists_indexed_fields": [],
+            "notexists_indexed_fields": [],
 			"nested_fields": false,
 			"attributes_conns": [],
 		},
 		
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:             false,
-		utils.IndexedSelectsCfg:      true,
-		utils.PrefixIndexedFieldsCfg: []string{},
-		utils.SuffixIndexedFieldsCfg: []string{},
-		utils.NestedFieldsCfg:        false,
-		utils.AttributeSConnsCfg:     []string{},
+		utils.EnabledCfg:                false,
+		utils.IndexedSelectsCfg:         true,
+		utils.PrefixIndexedFieldsCfg:    []string{},
+		utils.SuffixIndexedFieldsCfg:    []string{},
+		utils.ExistsIndexedFieldsCfg:    []string{},
+		utils.NotExistsIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:           false,
+		utils.AttributeSConnsCfg:        []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -91,19 +99,23 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
             "string_indexed_fields": ["*req.prefix"],
 			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
             "suffix_indexed_fields": ["*req.prefix"],
+			"exists_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
+            "notexists_indexed_fields": ["*req.prefix"],
 			"nested_fields": false,
 			"attributes_conns": ["*internal:*attributes", "*conn1"],
 		},
 		
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:             false,
-		utils.IndexedSelectsCfg:      true,
-		utils.StringIndexedFieldsCfg: []string{"*req.prefix"},
-		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
-		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix"},
-		utils.NestedFieldsCfg:        false,
-		utils.AttributeSConnsCfg:     []string{"*internal", "*conn1"},
+		utils.EnabledCfg:                false,
+		utils.IndexedSelectsCfg:         true,
+		utils.StringIndexedFieldsCfg:    []string{"*req.prefix"},
+		utils.PrefixIndexedFieldsCfg:    []string{"*req.prefix", "*req.indexed", "*req.fields"},
+		utils.SuffixIndexedFieldsCfg:    []string{"*req.prefix"},
+		utils.ExistsIndexedFieldsCfg:    []string{"*req.prefix", "*req.indexed", "*req.fields"},
+		utils.NotExistsIndexedFieldsCfg: []string{"*req.prefix"},
+		utils.NestedFieldsCfg:           false,
+		utils.AttributeSConnsCfg:        []string{"*internal", "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -117,12 +129,14 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 		"dispatchers":{},
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:             false,
-		utils.IndexedSelectsCfg:      true,
-		utils.PrefixIndexedFieldsCfg: []string{},
-		utils.SuffixIndexedFieldsCfg: []string{},
-		utils.NestedFieldsCfg:        false,
-		utils.AttributeSConnsCfg:     []string{},
+		utils.EnabledCfg:                false,
+		utils.IndexedSelectsCfg:         true,
+		utils.PrefixIndexedFieldsCfg:    []string{},
+		utils.SuffixIndexedFieldsCfg:    []string{},
+		utils.ExistsIndexedFieldsCfg:    []string{},
+		utils.NotExistsIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:           false,
+		utils.AttributeSConnsCfg:        []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -132,13 +146,15 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 }
 func TestDispatcherSCfgClone(t *testing.T) {
 	ban := &DispatcherSCfg{
-		Enabled:             true,
-		IndexedSelects:      true,
-		StringIndexedFields: &[]string{"*req.prefix", "*req.indexed"},
-		PrefixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		NestedFields:        true,
+		Enabled:                true,
+		IndexedSelects:         true,
+		StringIndexedFields:    &[]string{"*req.prefix", "*req.indexed"},
+		PrefixIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		SuffixIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		ExistsIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		NotExistsIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
+		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		NestedFields:           true,
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

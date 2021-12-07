@@ -38,6 +38,8 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		String_indexed_fields:     &[]string{"*req.index1"},
 		Prefix_indexed_fields:     &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields:     &[]string{"*req.index1"},
+		Exists_indexed_fields:     &[]string{"*req.index1", "*req.index2"},
+		Notexists_indexed_fields:  &[]string{"*req.index1"},
 		Nested_fields:             utils.BoolPointer(true),
 		Dynaprepaid_actionprofile: &[]string{"val1", "val2"},
 	}
@@ -53,6 +55,8 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		StringIndexedFields:      &[]string{"*req.index1"},
 		PrefixIndexedFields:      &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields:      &[]string{"*req.index1"},
+		NotExistsIndexedFields:   &[]string{"*req.index1"},
+		ExistsIndexedFields:      &[]string{"*req.index1", "*req.index2"},
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1", "val2"},
 		Opts: &ActionsOpts{
@@ -118,6 +122,8 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 	"string_indexed_fields": ["*req.index1"],			
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
     "suffix_indexed_fields": ["*req.index1"],
+	"exists_indexed_fields": ["*req.index1","*req.index2"],		
+    "notexists_indexed_fields": ["*req.index1"],
 	"nested_fields": true,	
     "DynaprepaidActionProfile": [],
 	},		
@@ -135,6 +141,8 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.StringIndexedFieldsCfg:    []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg:    []string{"*req.index1", "*req.index2"},
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.index1"},
+		utils.ExistsIndexedFieldsCfg:    []string{"*req.index1", "*req.index2"},
+		utils.NotExistsIndexedFieldsCfg: []string{"*req.index1"},
 		utils.NestedFieldsCfg:           true,
 		utils.DynaprepaidActionplansCfg: []string{},
 		utils.OptsCfg: map[string]interface{}{
