@@ -26,22 +26,26 @@ import (
 
 func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &ChargerSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Indexed_selects:       utils.BoolPointer(true),
-		Attributes_conns:      &[]string{utils.MetaInternal, "*conn1"},
-		String_indexed_fields: &[]string{"*req.Field1"},
-		Prefix_indexed_fields: &[]string{"*req.Field1", "*req.Field2"},
-		Suffix_indexed_fields: &[]string{"*req.Field1", "*req.Field2"},
-		Nested_fields:         utils.BoolPointer(true),
+		Enabled:                  utils.BoolPointer(true),
+		Indexed_selects:          utils.BoolPointer(true),
+		Attributes_conns:         &[]string{utils.MetaInternal, "*conn1"},
+		String_indexed_fields:    &[]string{"*req.Field1"},
+		Prefix_indexed_fields:    &[]string{"*req.Field1", "*req.Field2"},
+		Suffix_indexed_fields:    &[]string{"*req.Field1", "*req.Field2"},
+		Exists_indexed_fields:    &[]string{"*req.Field1", "*req.Field2"},
+		Notexists_indexed_fields: &[]string{"*req.Field1", "*req.Field2"},
+		Nested_fields:            utils.BoolPointer(true),
 	}
 	expected := &ChargerSCfg{
-		Enabled:             true,
-		IndexedSelects:      true,
-		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
-		StringIndexedFields: &[]string{"*req.Field1"},
-		PrefixIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
-		SuffixIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
-		NestedFields:        true,
+		Enabled:                true,
+		IndexedSelects:         true,
+		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		StringIndexedFields:    &[]string{"*req.Field1"},
+		PrefixIndexedFields:    &[]string{"*req.Field1", "*req.Field2"},
+		SuffixIndexedFields:    &[]string{"*req.Field1", "*req.Field2"},
+		ExistsIndexedFields:    &[]string{"*req.Field1", "*req.Field2"},
+		NotExistsIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
+		NestedFields:           true,
 	}
 	jsncfg := NewDefaultCGRConfig()
 	if err = jsncfg.chargerSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -67,12 +71,14 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 	},	
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:             false,
-		utils.AttributeSConnsCfg:     []string{},
-		utils.IndexedSelectsCfg:      true,
-		utils.PrefixIndexedFieldsCfg: []string{},
-		utils.NestedFieldsCfg:        false,
-		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.EnabledCfg:                false,
+		utils.AttributeSConnsCfg:        []string{},
+		utils.IndexedSelectsCfg:         true,
+		utils.PrefixIndexedFieldsCfg:    []string{},
+		utils.NestedFieldsCfg:           false,
+		utils.SuffixIndexedFieldsCfg:    []string{},
+		utils.ExistsIndexedFieldsCfg:    []string{},
+		utils.NotExistsIndexedFieldsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -88,19 +94,23 @@ func TestChargerSCfgAsMapInterface1(t *testing.T) {
 			"attributes_conns": ["*internal:*attributes", "*conn1"],					
 			"indexed_selects":true,			
             "string_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],
-			 "prefix_indexed_fields": ["*req.DestinationPrefix"],
-             "suffix_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],		
+			"prefix_indexed_fields": ["*req.DestinationPrefix"],
+            "suffix_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],		
+			"exists_indexed_fields": ["*req.DestinationPrefix"],
+            "notexists_indexed_fields": [],	 
 			"nested_fields": false,					
 		},	
 	}`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:             false,
-		utils.AttributeSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.IndexedSelectsCfg:      true,
-		utils.StringIndexedFieldsCfg: []string{"*req.Field1", "*req.Field2", "*req.Field3"},
-		utils.PrefixIndexedFieldsCfg: []string{"*req.DestinationPrefix"},
-		utils.NestedFieldsCfg:        false,
-		utils.SuffixIndexedFieldsCfg: []string{"*req.Field1", "*req.Field2", "*req.Field3"},
+		utils.EnabledCfg:                false,
+		utils.AttributeSConnsCfg:        []string{utils.MetaInternal, "*conn1"},
+		utils.IndexedSelectsCfg:         true,
+		utils.StringIndexedFieldsCfg:    []string{"*req.Field1", "*req.Field2", "*req.Field3"},
+		utils.PrefixIndexedFieldsCfg:    []string{"*req.DestinationPrefix"},
+		utils.NestedFieldsCfg:           false,
+		utils.SuffixIndexedFieldsCfg:    []string{"*req.Field1", "*req.Field2", "*req.Field3"},
+		utils.ExistsIndexedFieldsCfg:    []string{"*req.DestinationPrefix"},
+		utils.NotExistsIndexedFieldsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

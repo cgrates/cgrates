@@ -943,6 +943,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								//
 		"*profileIDs": [					
@@ -984,6 +986,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 },
 
@@ -996,6 +1000,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts":{								//
 		"*usageID": [						
@@ -1032,6 +1038,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {								//
 		"*profileIDs": [						
@@ -1066,6 +1074,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"actions_conns": [],					// connections to ActionS to execute the actions
 	"opts":{								//
@@ -1093,6 +1103,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],					// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
@@ -1479,6 +1491,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
 },
@@ -1524,11 +1538,15 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"rate_indexed_selects": true,			// enable profile matching exclusively on indexes
 	//"rate_string_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
+	"rate_exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"rate_notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "verbosity": 1000,                      // number of increment iterations allowed
 	"opts":{								//
@@ -1698,6 +1716,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"dynaprepaid_actionprofile": [],		//
 	"opts":{								//
@@ -1728,6 +1748,8 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "max_iterations": 1000,                 // maximum number of iterations
     "max_usage": "72h",                     // maximum time of usage
