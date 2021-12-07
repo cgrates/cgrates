@@ -335,9 +335,9 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	}
 	expID, has := args.APIOpts[utils.MetaExporterID]
 	if !has {
-		return fmt.Errorf("ExporterID is missing from argument's options: <%v>", utils.ToJSON(args))
+		return fmt.Errorf("ExporterID is missing from argument's options")
 	}
-	//var validExporter bool
+	// var validExporter bool
 	var eesCfg *config.EventExporterCfg
 	for _, exporter := range eeS.cfg.EEsCfg().Exporters {
 		if exporter.ID == expID {
@@ -364,7 +364,6 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 
 	buff := new(bytes.Buffer)
 	zBuff := zip.NewWriter(buff)
-	//
 	var wrtr io.Writer
 	if wrtr, err = zBuff.Create("events.csv"); err != nil {
 		return err
@@ -380,7 +379,21 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	if err != nil {
 		return err
 	}
+	cgrDp := utils.MapStorage{
+		utils.MetaOpts: args.APIOpts,
+	}
 	for _, event := range args.Events {
+		if len(eesCfg.Filters) != 0 {
+			utils.Logger.Debug(fmt.Sprintf("ev: %v", utils.ToJSON(event)))
+			tnt := utils.FirstNonEmpty(args.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
+			cgrDp[utils.MetaReq] = event
+			if pass, errPass := eeS.fltrS.Pass(ctx, tnt,
+				eesCfg.Filters, cgrDp); errPass != nil {
+				return errPass
+			} else if !pass {
+				continue // does not pass the filters, ignore the exporter
+			}
+		}
 		cgrEv := &utils.CGREvent{
 			ID:      utils.UUIDSha1Prefix(),
 			Tenant:  args.Tenant,
