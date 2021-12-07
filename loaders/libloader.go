@@ -248,10 +248,10 @@ func (ar *record) Set(fullPath *utils.FullPath, nm *utils.DataLeaf, sep string) 
 	default:
 		return ar.data.Set(fullPath.PathSlice, nm.Data, nm.NewBranch, sep)
 	case utils.MetaTmp:
-		_, err = ar.tmp.Set(fullPath.PathSlice[1:], nm)
+		_, err = ar.tmp.Set(fullPath.PathSlice[1:], nm.Data)
 		return
 	case utils.MetaUCH:
-		ar.cache.Set(fullPath.Path[5:], nm, nil)
+		ar.cache.Set(fullPath.Path[5:], nm.Data, nil)
 		return
 	}
 }

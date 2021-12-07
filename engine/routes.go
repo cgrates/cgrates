@@ -196,18 +196,14 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, cfg
 	var limit *int
 	if limit, err = GetIntPointerOpts(ctx, ev.Tenant, ev, fS, cfgOpts.Limit,
 		utils.OptsRoutesLimit); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
+		return
 	} else {
 		opts.paginator.Limit = limit
 	}
 	var offset *int
 	if offset, err = GetIntPointerOpts(ctx, ev.Tenant, ev, fS, cfgOpts.Offset,
 		utils.OptsRoutesOffset); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
+		return
 	} else {
 		opts.paginator.Offset = offset
 	}
@@ -478,7 +474,9 @@ func (rp *RouteProfile) Set(path []string, val interface{}, newBranch bool, _ st
 				rp.Sorting = valStr
 			}
 		case utils.Weights:
-			rp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			if val != utils.EmptyString {
+				rp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+			}
 		}
 	case 2:
 		if val == utils.EmptyString {

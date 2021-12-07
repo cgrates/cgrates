@@ -545,6 +545,9 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 	default:
 		return utils.ErrWrongPath
 	case 1:
+		if val == utils.EmptyString {
+			return
+		}
 		switch path[0] {
 		default:
 			return utils.ErrWrongPath

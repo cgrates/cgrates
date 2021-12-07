@@ -400,10 +400,9 @@ func testSessVolDiscProcessCDRCustomer(t *testing.T) {
 
 func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 	expectedAcc := utils.Account{
-		Tenant:  "cgrates.org",
-		ID:      "ACNT_VOL1",
-		Opts:    make(map[string]interface{}),
-		Weights: utils.DynamicWeights{{}},
+		Tenant: "cgrates.org",
+		ID:     "ACNT_VOL1",
+		Opts:   make(map[string]interface{}),
 		Balances: map[string]*utils.Balance{
 			"ABS_VOLUME1": {
 				ID: "ABS_VOLUME1",
