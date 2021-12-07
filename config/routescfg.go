@@ -46,19 +46,21 @@ type RoutesOpts struct {
 
 // RouteSCfg is the configuration of route service
 type RouteSCfg struct {
-	Enabled             bool
-	IndexedSelects      bool
-	StringIndexedFields *[]string
-	PrefixIndexedFields *[]string
-	SuffixIndexedFields *[]string
-	NestedFields        bool
-	AttributeSConns     []string
-	ResourceSConns      []string
-	StatSConns          []string
-	RateSConns          []string
-	AccountSConns       []string
-	DefaultRatio        int
-	Opts                *RoutesOpts
+	Enabled                bool
+	IndexedSelects         bool
+	StringIndexedFields    *[]string
+	PrefixIndexedFields    *[]string
+	SuffixIndexedFields    *[]string
+	ExistsIndexedFields    *[]string
+	NotExistsIndexedFields *[]string
+	NestedFields           bool
+	AttributeSConns        []string
+	ResourceSConns         []string
+	StatSConns             []string
+	RateSConns             []string
+	AccountSConns          []string
+	DefaultRatio           int
+	Opts                   *RoutesOpts
 }
 
 // loadRouteSCfg loads the RouteS section of the configuration
@@ -120,6 +122,12 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
 		rts.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
+	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		rts.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.Notexists_indexed_fields != nil {
+		rts.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Attributes_conns != nil {
 		rts.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
@@ -216,6 +224,12 @@ func (rts RouteSCfg) AsMapInterface(string) interface{} {
 	if rts.SuffixIndexedFields != nil {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.SuffixIndexedFields)
 	}
+	if rts.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rts.ExistsIndexedFields)
+	}
+	if rts.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*rts.NotExistsIndexedFields)
+	}
 	if rts.AttributeSConns != nil {
 		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(rts.AttributeSConns)
 	}
@@ -270,6 +284,12 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 	if rts.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.SuffixIndexedFields))
 	}
+	if rts.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.ExistsIndexedFields))
+	}
+	if rts.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.NotExistsIndexedFields))
+	}
 	return
 }
 
@@ -285,19 +305,21 @@ type RoutesOptsJson struct {
 
 // Route service config section
 type RouteSJsonCfg struct {
-	Enabled               *bool
-	Indexed_selects       *bool
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-	Attributes_conns      *[]string
-	Resources_conns       *[]string
-	Stats_conns           *[]string
-	Rates_conns           *[]string
-	Accounts_conns        *[]string
-	Default_ratio         *int
-	Opts                  *RoutesOptsJson
+	Enabled                  *bool
+	Indexed_selects          *bool
+	String_indexed_fields    *[]string
+	Prefix_indexed_fields    *[]string
+	Suffix_indexed_fields    *[]string
+	Exists_indexed_fields    *[]string
+	Notexists_indexed_fields *[]string
+	Nested_fields            *bool // applies when indexed fields is not defined
+	Attributes_conns         *[]string
+	Resources_conns          *[]string
+	Stats_conns              *[]string
+	Rates_conns              *[]string
+	Accounts_conns           *[]string
+	Default_ratio            *int
+	Opts                     *RoutesOptsJson
 }
 
 func diffRoutesOptsJsonCfg(d *RoutesOptsJson, v1, v2 *RoutesOpts) *RoutesOptsJson {
@@ -341,6 +363,8 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.Notexists_indexed_fields = diffIndexSlice(d.Notexists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}

@@ -25,13 +25,15 @@ import (
 
 // ChargerSCfg is the configuration of charger service
 type ChargerSCfg struct {
-	Enabled             bool
-	IndexedSelects      bool
-	AttributeSConns     []string
-	StringIndexedFields *[]string
-	PrefixIndexedFields *[]string
-	SuffixIndexedFields *[]string
-	NestedFields        bool
+	Enabled                bool
+	IndexedSelects         bool
+	AttributeSConns        []string
+	StringIndexedFields    *[]string
+	PrefixIndexedFields    *[]string
+	SuffixIndexedFields    *[]string
+	ExistsIndexedFields    *[]string
+	NotExistsIndexedFields *[]string
+	NestedFields           bool
 }
 
 // loadChargerSCfg loads the ChargerS section of the configuration
@@ -65,6 +67,12 @@ func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 	if jsnCfg.Suffix_indexed_fields != nil {
 		cS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		cS.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.NotExists_indexed_fields != nil {
+		cS.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.NotExists_indexed_fields))
+	}
 	if jsnCfg.Nested_fields != nil {
 		cS.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -89,6 +97,12 @@ func (cS ChargerSCfg) AsMapInterface(string) interface{} {
 	}
 	if cS.SuffixIndexedFields != nil {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.SuffixIndexedFields)
+	}
+	if cS.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*cS.ExistsIndexedFields)
+	}
+	if cS.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*cS.NotExistsIndexedFields)
 	}
 	return mp
 }
@@ -116,18 +130,26 @@ func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
 	if cS.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.SuffixIndexedFields))
 	}
+	if cS.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.ExistsIndexedFields))
+	}
+	if cS.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.NotExistsIndexedFields))
+	}
 	return
 }
 
 // ChargerSJsonCfg service config section
 type ChargerSJsonCfg struct {
-	Enabled               *bool
-	Indexed_selects       *bool
-	Attributes_conns      *[]string
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
+	Enabled                  *bool
+	Indexed_selects          *bool
+	Attributes_conns         *[]string
+	String_indexed_fields    *[]string
+	Prefix_indexed_fields    *[]string
+	Suffix_indexed_fields    *[]string
+	Exists_indexed_fields    *[]string
+	NotExists_indexed_fields *[]string
+	Nested_fields            *bool // applies when indexed fields is not defined
 }
 
 func diffChargerSJsonCfg(d *ChargerSJsonCfg, v1, v2 *ChargerSCfg) *ChargerSJsonCfg {
@@ -146,6 +168,8 @@ func diffChargerSJsonCfg(d *ChargerSJsonCfg, v1, v2 *ChargerSCfg) *ChargerSJsonC
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.NotExists_indexed_fields = diffIndexSlice(d.NotExists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}

@@ -41,18 +41,20 @@ type AccountsOpts struct {
 
 // AccountSCfg is the configuration of ActionS
 type AccountSCfg struct {
-	Enabled             bool
-	AttributeSConns     []string
-	RateSConns          []string
-	ThresholdSConns     []string
-	IndexedSelects      bool
-	StringIndexedFields *[]string
-	PrefixIndexedFields *[]string
-	SuffixIndexedFields *[]string
-	NestedFields        bool
-	MaxIterations       int
-	MaxUsage            *utils.Decimal
-	Opts                *AccountsOpts
+	Enabled                bool
+	AttributeSConns        []string
+	RateSConns             []string
+	ThresholdSConns        []string
+	IndexedSelects         bool
+	StringIndexedFields    *[]string
+	PrefixIndexedFields    *[]string
+	SuffixIndexedFields    *[]string
+	ExistsIndexedFields    *[]string
+	NotExistsIndexedFields *[]string
+	NestedFields           bool
+	MaxIterations          int
+	MaxUsage               *utils.Decimal
+	Opts                   *AccountsOpts
 }
 
 // loadAccountSCfg loads the AccountS section of the configuration
@@ -112,6 +114,12 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 	if jsnCfg.Suffix_indexed_fields != nil {
 		acS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		acS.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.Notexists_indexed_fields != nil {
+		acS.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+	}
 	if jsnCfg.Nested_fields != nil {
 		acS.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -160,6 +168,12 @@ func (acS AccountSCfg) AsMapInterface(string) interface{} {
 	}
 	if acS.SuffixIndexedFields != nil {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
+	}
+	if acS.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.ExistsIndexedFields)
+	}
+	if acS.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.NotExistsIndexedFields)
 	}
 	if acS.MaxUsage != nil {
 		mp[utils.MaxUsage] = acS.MaxUsage.String()
@@ -217,6 +231,12 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 	if acS.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.SuffixIndexedFields))
 	}
+	if acS.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.ExistsIndexedFields))
+	}
+	if acS.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.NotExistsIndexedFields))
+	}
 	return
 }
 
@@ -228,18 +248,20 @@ type AccountsOptsJson struct {
 
 // Account service config section
 type AccountSJsonCfg struct {
-	Enabled               *bool
-	Indexed_selects       *bool
-	Attributes_conns      *[]string
-	Rates_conns           *[]string
-	Thresholds_conns      *[]string
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-	Max_iterations        *int
-	Max_usage             *string
-	Opts                  *AccountsOptsJson
+	Enabled                  *bool
+	Indexed_selects          *bool
+	Attributes_conns         *[]string
+	Rates_conns              *[]string
+	Thresholds_conns         *[]string
+	String_indexed_fields    *[]string
+	Prefix_indexed_fields    *[]string
+	Suffix_indexed_fields    *[]string
+	Exists_indexed_fields    *[]string
+	Notexists_indexed_fields *[]string
+	Nested_fields            *bool // applies when indexed fields is not defined
+	Max_iterations           *int
+	Max_usage                *string
+	Opts                     *AccountsOptsJson
 }
 
 func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *AccountsOptsJson {
@@ -280,6 +302,8 @@ func diffAccountSJsonCfg(d *AccountSJsonCfg, v1, v2 *AccountSCfg) *AccountSJsonC
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.Notexists_indexed_fields = diffIndexSlice(d.Notexists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}

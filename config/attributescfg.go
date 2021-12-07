@@ -40,16 +40,18 @@ type AttributesOpts struct {
 
 // AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
-	Enabled             bool
-	ResourceSConns      []string
-	StatSConns          []string
-	AccountSConns       []string
-	IndexedSelects      bool
-	StringIndexedFields *[]string
-	PrefixIndexedFields *[]string
-	SuffixIndexedFields *[]string
-	NestedFields        bool
-	Opts                *AttributesOpts
+	Enabled                bool
+	ResourceSConns         []string
+	StatSConns             []string
+	AccountSConns          []string
+	IndexedSelects         bool
+	StringIndexedFields    *[]string
+	PrefixIndexedFields    *[]string
+	SuffixIndexedFields    *[]string
+	ExistsIndexedFields    *[]string
+	NotExistsIndexedFields *[]string
+	NestedFields           bool
+	Opts                   *AttributesOpts
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
@@ -107,6 +109,12 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Suffix_indexed_fields != nil {
 		alS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		alS.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.Notexists_indexed_fields != nil {
+		alS.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+	}
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -139,10 +147,15 @@ func (alS AttributeSCfg) AsMapInterface(string) interface{} {
 	if alS.SuffixIndexedFields != nil {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*alS.SuffixIndexedFields)
 	}
+	if alS.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*alS.ExistsIndexedFields)
+	}
+	if alS.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*alS.NotExistsIndexedFields)
+	}
 	if alS.StatSConns != nil {
 		mp[utils.StatSConnsCfg] = getInternalJSONConns(alS.StatSConns)
 	}
-
 	if alS.ResourceSConns != nil {
 		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(alS.ResourceSConns)
 	}
@@ -207,6 +220,12 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 	if alS.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*alS.SuffixIndexedFields))
 	}
+	if alS.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*alS.ExistsIndexedFields))
+	}
+	if alS.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*alS.NotExistsIndexedFields))
+	}
 	return
 }
 
@@ -219,16 +238,18 @@ type AttributesOptsJson struct {
 
 // Attribute service config section
 type AttributeSJsonCfg struct {
-	Enabled               *bool
-	Stats_conns           *[]string
-	Resources_conns       *[]string
-	Accounts_conns        *[]string
-	Indexed_selects       *bool
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-	Opts                  *AttributesOptsJson
+	Enabled                  *bool
+	Stats_conns              *[]string
+	Resources_conns          *[]string
+	Accounts_conns           *[]string
+	Indexed_selects          *bool
+	String_indexed_fields    *[]string
+	Prefix_indexed_fields    *[]string
+	Suffix_indexed_fields    *[]string
+	Exists_indexed_fields    *[]string
+	Notexists_indexed_fields *[]string
+	Nested_fields            *bool // applies when indexed fields is not defined
+	Opts                     *AttributesOptsJson
 }
 
 func diffAttributesOptsJsonCfg(d *AttributesOptsJson, v1, v2 *AttributesOpts) *AttributesOptsJson {
@@ -272,6 +293,8 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.Notexists_indexed_fields = diffIndexSlice(d.Notexists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
