@@ -1714,19 +1714,21 @@ const (
 
 // StorDbCfg
 const (
-	TypeCfg                = "type"
-	SQLMaxOpenConnsCfg     = "sqlMaxOpenConns"
-	SQLMaxIdleConnsCfg     = "sqlMaxIdleConns"
-	SQLConnMaxLifetimeCfg  = "sqlConnMaxLifetime"
-	StringIndexedFieldsCfg = "string_indexed_fields"
-	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
-	SuffixIndexedFieldsCfg = "suffix_indexed_fields"
-	MongoQueryTimeoutCfg   = "mongoQueryTimeout"
-	SSLModeCfg             = "sslMode"
-	ItemsCfg               = "items"
-	OptsCfg                = "opts"
-	Tenants                = "tenants"
-	MysqlLocation          = "mysqlLocation"
+	TypeCfg                   = "type"
+	SQLMaxOpenConnsCfg        = "sqlMaxOpenConns"
+	SQLMaxIdleConnsCfg        = "sqlMaxIdleConns"
+	SQLConnMaxLifetimeCfg     = "sqlConnMaxLifetime"
+	StringIndexedFieldsCfg    = "string_indexed_fields"
+	PrefixIndexedFieldsCfg    = "prefix_indexed_fields"
+	SuffixIndexedFieldsCfg    = "suffix_indexed_fields"
+	ExistsIndexedFieldsCfg    = "exists_indexed_fields"
+	NotExistsIndexedFieldsCfg = "notexists_indexed_fields"
+	MongoQueryTimeoutCfg      = "mongoQueryTimeout"
+	SSLModeCfg                = "sslMode"
+	ItemsCfg                  = "items"
+	OptsCfg                   = "opts"
+	Tenants                   = "tenants"
+	MysqlLocation             = "mysqlLocation"
 )
 
 // DataDbCfg
@@ -1987,13 +1989,15 @@ const (
 	MetaOffsetCfg       = "*offset"
 
 	// RateSCfg
-	MetaIntervalStartCfg       = "*intervalStart"
-	RateIndexedSelectsCfg      = "rate_indexed_selects"
-	RateNestedFieldsCfg        = "rate_nested_fields"
-	RateStringIndexedFieldsCfg = "rate_string_indexed_fields"
-	RatePrefixIndexedFieldsCfg = "rate_prefix_indexed_fields"
-	RateSuffixIndexedFieldsCfg = "rate_suffix_indexed_fields"
-	Verbosity                  = "verbosity"
+	MetaIntervalStartCfg          = "*intervalStart"
+	RateIndexedSelectsCfg         = "rate_indexed_selects"
+	RateNestedFieldsCfg           = "rate_nested_fields"
+	RateStringIndexedFieldsCfg    = "rate_string_indexed_fields"
+	RatePrefixIndexedFieldsCfg    = "rate_prefix_indexed_fields"
+	RateSuffixIndexedFieldsCfg    = "rate_suffix_indexed_fields"
+	RateExistsIndexedFieldsCfg    = "rate_exists_indexed_fields"
+	RateNotExistsIndexedFieldsCfg = "rate_notexists_indexed_fields"
+	Verbosity                     = "verbosity"
 
 	// ResourceSCfg
 	MetaUsageIDCfg  = "*usageID"

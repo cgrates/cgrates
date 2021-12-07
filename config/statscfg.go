@@ -45,6 +45,8 @@ type StatSCfg struct {
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string
+	ExistsIndexedFields    *[]string
+	NotExistsIndexedFields *[]string
 	NestedFields           bool
 	Opts                   *StatsOpts
 }
@@ -103,6 +105,12 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 	if jsnCfg.Suffix_indexed_fields != nil {
 		st.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice((*jsnCfg.Suffix_indexed_fields)))
 	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		st.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.Notexists_indexed_fields != nil {
+		st.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+	}
 	if jsnCfg.Nested_fields != nil {
 		st.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -138,7 +146,12 @@ func (st StatSCfg) AsMapInterface(string) interface{} {
 	}
 	if st.SuffixIndexedFields != nil {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*st.SuffixIndexedFields)
-
+	}
+	if st.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*st.ExistsIndexedFields)
+	}
+	if st.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*st.NotExistsIndexedFields)
 	}
 	if st.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(st.ThresholdSConns)
@@ -182,7 +195,6 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 	if st.ThresholdSConns != nil {
 		cln.ThresholdSConns = utils.CloneStringSlice(st.ThresholdSConns)
 	}
-
 	if st.StringIndexedFields != nil {
 		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.StringIndexedFields))
 	}
@@ -191,6 +203,12 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 	}
 	if st.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.SuffixIndexedFields))
+	}
+	if cln.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cln.ExistsIndexedFields))
+	}
+	if cln.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cln.NotExistsIndexedFields))
 	}
 	return
 }
@@ -211,6 +229,8 @@ type StatServJsonCfg struct {
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
+	Exists_indexed_fields    *[]string
+	Notexists_indexed_fields *[]string
 	Nested_fields            *bool // applies when indexed fields is not defined
 	Opts                     *StatsOptsJson
 }
@@ -253,6 +273,8 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.Notexists_indexed_fields = diffIndexSlice(d.Notexists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
