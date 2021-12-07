@@ -145,14 +145,16 @@ func testCfgGetConfig(t *testing.T) {
 	var reply map[string]interface{}
 	expected := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []string{"*localhost"},
-			"enabled":               true,
-			"indexed_selects":       true,
-			"nested_fields":         false,
-			"prefix_indexed_fields": []string{},
-			"resources_conns":       []string{"*localhost"},
-			"stats_conns":           []string{"*localhost"},
-			"suffix_indexed_fields": []string{},
+			"accounts_conns":           []string{"*localhost"},
+			"enabled":                  true,
+			"indexed_selects":          true,
+			"nested_fields":            false,
+			"prefix_indexed_fields":    []string{},
+			"resources_conns":          []string{"*localhost"},
+			"stats_conns":              []string{"*localhost"},
+			"suffix_indexed_fields":    []string{},
+			"exists_indexed_fields":    []string{},
+			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
@@ -211,14 +213,16 @@ func testCfgSetGetConfig(t *testing.T) {
 	}
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []interface{}{"*internal"},
-			"enabled":               true,
-			"indexed_selects":       false,
-			"nested_fields":         false,
-			"prefix_indexed_fields": []interface{}{},
-			"resources_conns":       []interface{}{"*internal"},
-			"stats_conns":           []interface{}{"*internal"},
-			"suffix_indexed_fields": []interface{}{},
+			"accounts_conns":           []interface{}{"*internal"},
+			"enabled":                  true,
+			"indexed_selects":          false,
+			"nested_fields":            false,
+			"prefix_indexed_fields":    []interface{}{},
+			"resources_conns":          []interface{}{"*internal"},
+			"stats_conns":              []interface{}{"*internal"},
+			"suffix_indexed_fields":    []interface{}{},
+			"exists_indexed_fields":    []interface{}{},
+			"notexists_indexed_fields": []interface{}{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaProfileIDs: []interface{}{},
 				utils.MetaProcessRunsCfg: []interface{}{
@@ -283,16 +287,20 @@ func testCfgSetEmptyReload(t *testing.T) {
 	}
 	expectedGet := map[string]interface{}{
 		"rates": map[string]interface{}{
-			"enabled":                    true,
-			"indexed_selects":            false,
-			"nested_fields":              false,
-			"prefix_indexed_fields":      []string{},
-			"rate_indexed_selects":       true,
-			"rate_nested_fields":         false,
-			"rate_prefix_indexed_fields": []string{},
-			"rate_suffix_indexed_fields": []string{},
-			"suffix_indexed_fields":      []string{},
-			"verbosity":                  1000,
+			"enabled":                       true,
+			"indexed_selects":               false,
+			"nested_fields":                 false,
+			"prefix_indexed_fields":         []string{},
+			"exists_indexed_fields":         []string{},
+			"notexists_indexed_fields":      []string{},
+			"rate_indexed_selects":          true,
+			"rate_nested_fields":            false,
+			"rate_prefix_indexed_fields":    []string{},
+			"rate_suffix_indexed_fields":    []string{},
+			"suffix_indexed_fields":         []string{},
+			"rate_exists_indexed_fields":    []string{},
+			"rate_notexists_indexed_fields": []string{},
+			"verbosity":                     1000,
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaStartTime:            []*utils.DynamicStringOpt{},
@@ -351,7 +359,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"indexed_selects":false,"nested_fields":false,"opts":{"*processRuns":[{"Tenant":"","Value":2},{"Tenant":"","Value":2}],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"Tenant":"","Value":2},{"Tenant":"","Value":2}],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -510,14 +518,16 @@ func testCfgSetGetConfigStore(t *testing.T) {
 	}
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []string{"*internal"},
-			"enabled":               true,
-			"indexed_selects":       false,
-			"nested_fields":         false,
-			"prefix_indexed_fields": []string{},
-			"resources_conns":       []string{"*internal"},
-			"stats_conns":           []string{"*internal"},
-			"suffix_indexed_fields": []string{},
+			"accounts_conns":           []string{"*internal"},
+			"enabled":                  true,
+			"indexed_selects":          false,
+			"nested_fields":            false,
+			"prefix_indexed_fields":    []string{},
+			"resources_conns":          []string{"*internal"},
+			"stats_conns":              []string{"*internal"},
+			"suffix_indexed_fields":    []string{},
+			"exists_indexed_fields":    []string{},
+			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
@@ -609,14 +619,16 @@ func testCfgReloadConfigStore(t *testing.T) {
 func testCfgGetAfterReloadStore(t *testing.T) {
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []interface{}{"*internal"},
-			"enabled":               true,
-			"indexed_selects":       true,
-			"nested_fields":         false,
-			"prefix_indexed_fields": []interface{}{},
-			"resources_conns":       []interface{}{"*internal"},
-			"stats_conns":           []interface{}{"*internal"},
-			"suffix_indexed_fields": []interface{}{},
+			"accounts_conns":           []interface{}{"*internal"},
+			"enabled":                  true,
+			"indexed_selects":          true,
+			"nested_fields":            false,
+			"prefix_indexed_fields":    []interface{}{},
+			"resources_conns":          []interface{}{"*internal"},
+			"stats_conns":              []interface{}{"*internal"},
+			"suffix_indexed_fields":    []interface{}{},
+			"exists_indexed_fields":    []interface{}{},
+			"notexists_indexed_fields": []interface{}{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaProfileIDs: []interface{}{},
 				utils.MetaProcessRunsCfg: []interface{}{
