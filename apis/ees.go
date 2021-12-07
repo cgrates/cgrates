@@ -37,6 +37,7 @@ func (cS *EeSv1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeI
 	return cS.ees.V1ProcessEvent(ctx, cgrEv, rply)
 }
 
+// ArchiveEventsInReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.
 func (cS *EeSv1) ArchiveEventsInReply(ctx *context.Context, args *ees.ArchiveEventsArgs, reply *[]byte) error {
 	return cS.ees.V1ArchiveEventsInReply(ctx, args, reply)
 }

@@ -326,7 +326,7 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 type ArchiveEventsArgs struct {
 	Tenant  string
 	APIOpts map[string]interface{}
-	Events  []*utils.CGREvent
+	Events  []map[string]interface{}
 }
 
 // V1ArchiveEventsInReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.
@@ -382,7 +382,13 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 		return err
 	}
 	for _, event := range args.Events {
-		if err := exportEventWithExporter(ctx, ee, event, false, eeS.cfg, eeS.fltrS); err != nil {
+		cgrEv := &utils.CGREvent{
+			ID:      utils.UUIDSha1Prefix(),
+			Tenant:  args.Tenant,
+			Event:   event,
+			APIOpts: args.APIOpts,
+		}
+		if err := exportEventWithExporter(ctx, ee, cgrEv, false, eeS.cfg, eeS.fltrS); err != nil {
 			return err
 		}
 	}
