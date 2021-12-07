@@ -234,7 +234,6 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 				(*rply)[exporterID][key] = val
 			}
 		}
-
 	}
 	metricMapLock.Unlock()
 	if len(*rply) == 0 {

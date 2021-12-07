@@ -25,13 +25,15 @@ import (
 
 // DispatcherSCfg is the configuration of dispatcher service
 type DispatcherSCfg struct {
-	Enabled             bool
-	IndexedSelects      bool
-	StringIndexedFields *[]string
-	PrefixIndexedFields *[]string
-	SuffixIndexedFields *[]string
-	NestedFields        bool
-	AttributeSConns     []string
+	Enabled                bool
+	IndexedSelects         bool
+	StringIndexedFields    *[]string
+	PrefixIndexedFields    *[]string
+	SuffixIndexedFields    *[]string
+	ExistsIndexedFields    *[]string
+	NotExistsIndexedFields *[]string
+	NestedFields           bool
+	AttributeSConns        []string
 }
 
 // loadDispatcherSCfg loads the DispatcherS section of the configuration
@@ -62,6 +64,12 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	if jsnCfg.Suffix_indexed_fields != nil {
 		dps.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		dps.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.Notexists_indexed_fields != nil {
+		dps.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+	}
 	if jsnCfg.Attributes_conns != nil {
 		dps.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
@@ -90,6 +98,12 @@ func (dps DispatcherSCfg) AsMapInterface(string) interface{} {
 	if dps.AttributeSConns != nil {
 		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(dps.AttributeSConns)
 	}
+	if dps.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*dps.ExistsIndexedFields)
+	}
+	if dps.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*dps.NotExistsIndexedFields)
+	}
 	return mp
 }
 
@@ -116,17 +130,25 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 	if dps.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*dps.SuffixIndexedFields))
 	}
+	if dps.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*dps.ExistsIndexedFields))
+	}
+	if dps.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*dps.NotExistsIndexedFields))
+	}
 	return
 }
 
 type DispatcherSJsonCfg struct {
-	Enabled               *bool
-	Indexed_selects       *bool
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-	Attributes_conns      *[]string
+	Enabled                  *bool
+	Indexed_selects          *bool
+	String_indexed_fields    *[]string
+	Prefix_indexed_fields    *[]string
+	Suffix_indexed_fields    *[]string
+	Exists_indexed_fields    *[]string
+	Notexists_indexed_fields *[]string
+	Nested_fields            *bool // applies when indexed fields is not defined
+	Attributes_conns         *[]string
 }
 
 func diffDispatcherSJsonCfg(d *DispatcherSJsonCfg, v1, v2 *DispatcherSCfg) *DispatcherSJsonCfg {
@@ -142,6 +164,8 @@ func diffDispatcherSJsonCfg(d *DispatcherSJsonCfg, v1, v2 *DispatcherSCfg) *Disp
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.Notexists_indexed_fields = diffIndexSlice(d.Notexists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}

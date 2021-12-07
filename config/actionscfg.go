@@ -45,6 +45,8 @@ type ActionSCfg struct {
 	StringIndexedFields      *[]string
 	PrefixIndexedFields      *[]string
 	SuffixIndexedFields      *[]string
+	ExistsIndexedFields      *[]string
+	NotExistsIndexedFields   *[]string
 	NestedFields             bool
 	DynaprepaidActionProfile []string
 	Opts                     *ActionsOpts
@@ -108,6 +110,12 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	if jsnCfg.Suffix_indexed_fields != nil {
 		acS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
+	if jsnCfg.Exists_indexed_fields != nil {
+		acS.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Exists_indexed_fields))
+	}
+	if jsnCfg.Notexists_indexed_fields != nil {
+		acS.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
+	}
 	if jsnCfg.Nested_fields != nil {
 		acS.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -162,6 +170,12 @@ func (acS ActionSCfg) AsMapInterface(string) interface{} {
 	}
 	if acS.SuffixIndexedFields != nil {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
+	}
+	if acS.ExistsIndexedFields != nil {
+		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.ExistsIndexedFields)
+	}
+	if acS.NotExistsIndexedFields != nil {
+		mp[utils.NotExistsIndexedFieldsCfg] = utils.CloneStringSlice(*acS.NotExistsIndexedFields)
 	}
 	return mp
 }
@@ -219,6 +233,12 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 	if acS.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.SuffixIndexedFields))
 	}
+	if acS.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.ExistsIndexedFields))
+	}
+	if acS.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.NotExistsIndexedFields))
+	}
 	if acS.DynaprepaidActionProfile != nil {
 		cln.DynaprepaidActionProfile = make([]string, len(acS.DynaprepaidActionProfile))
 		for i, con := range acS.DynaprepaidActionProfile {
@@ -246,6 +266,8 @@ type ActionSJsonCfg struct {
 	String_indexed_fields     *[]string
 	Prefix_indexed_fields     *[]string
 	Suffix_indexed_fields     *[]string
+	Exists_indexed_fields     *[]string
+	Notexists_indexed_fields  *[]string
 	Nested_fields             *bool // applies when indexed fields is not defined
 	Dynaprepaid_actionprofile *[]string
 	Opts                      *ActionsOptsJson
@@ -293,15 +315,11 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
-	if v1.StringIndexedFields != v2.StringIndexedFields {
-		d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
-	}
-	if v1.PrefixIndexedFields != v2.PrefixIndexedFields {
-		d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
-	}
-	if v1.SuffixIndexedFields != v2.SuffixIndexedFields {
-		d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
-	}
+	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
+	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
+	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	d.Exists_indexed_fields = diffIndexSlice(d.Exists_indexed_fields, v1.ExistsIndexedFields, v2.ExistsIndexedFields)
+	d.Notexists_indexed_fields = diffIndexSlice(d.Notexists_indexed_fields, v1.NotExistsIndexedFields, v2.NotExistsIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
