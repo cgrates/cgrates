@@ -26,26 +26,30 @@ import (
 
 func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &AttributeSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Indexed_selects:       utils.BoolPointer(false),
-		Resources_conns:       &[]string{"*internal", "*conn1"},
-		Stats_conns:           &[]string{"*internal", "*conn1"},
-		Accounts_conns:        &[]string{"*internal", "*conn1"},
-		String_indexed_fields: &[]string{"*req.index1"},
-		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
-		Suffix_indexed_fields: &[]string{"*req.index1"},
-		Nested_fields:         utils.BoolPointer(true),
+		Enabled:                  utils.BoolPointer(true),
+		Indexed_selects:          utils.BoolPointer(false),
+		Resources_conns:          &[]string{"*internal", "*conn1"},
+		Stats_conns:              &[]string{"*internal", "*conn1"},
+		Accounts_conns:           &[]string{"*internal", "*conn1"},
+		String_indexed_fields:    &[]string{"*req.index1"},
+		Prefix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
+		Suffix_indexed_fields:    &[]string{"*req.index1"},
+		Exists_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
+		Notexists_indexed_fields: &[]string{"*req.index1"},
+		Nested_fields:            utils.BoolPointer(true),
 	}
 	expected := &AttributeSCfg{
-		Enabled:             true,
-		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
-		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
-		IndexedSelects:      false,
-		StringIndexedFields: &[]string{"*req.index1"},
-		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
-		SuffixIndexedFields: &[]string{"*req.index1"},
-		NestedFields:        true,
+		Enabled:                true,
+		AccountSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
+		StatSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ResourceSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
+		IndexedSelects:         false,
+		StringIndexedFields:    &[]string{"*req.index1"},
+		PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields:    &[]string{"*req.index1"},
+		ExistsIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+		NotExistsIndexedFields: &[]string{"*req.index1"},
+		NestedFields:           true,
 		Opts: &AttributesOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProcessRuns:          []*utils.DynamicIntOpt{},
@@ -128,6 +132,8 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"accounts_conns": ["*internal"],			
 	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
     "string_indexed_fields": ["*req.index1"],
+	"exists_indexed_fields": ["*req.index1","*req.index2"],		
+    "notexists_indexed_fields": ["*req.index1"],
 	"opts": {
 		"*processRuns": [
 				{
@@ -138,15 +144,17 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	},		
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:             true,
-		utils.StatSConnsCfg:          []string{utils.MetaInternal},
-		utils.ResourceSConnsCfg:      []string{utils.MetaInternal},
-		utils.AccountSConnsCfg:       []string{utils.MetaInternal},
-		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
-		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
-		utils.IndexedSelectsCfg:      true,
-		utils.NestedFieldsCfg:        false,
-		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.EnabledCfg:                true,
+		utils.StatSConnsCfg:             []string{utils.MetaInternal},
+		utils.ResourceSConnsCfg:         []string{utils.MetaInternal},
+		utils.AccountSConnsCfg:          []string{utils.MetaInternal},
+		utils.StringIndexedFieldsCfg:    []string{"*req.index1"},
+		utils.PrefixIndexedFieldsCfg:    []string{"*req.index1", "*req.index2"},
+		utils.ExistsIndexedFieldsCfg:    []string{"*req.index1", "*req.index2"},
+		utils.NotExistsIndexedFieldsCfg: []string{"*req.index1"},
+		utils.IndexedSelectsCfg:         true,
+		utils.NestedFieldsCfg:           false,
+		utils.SuffixIndexedFieldsCfg:    []string{},
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
@@ -169,6 +177,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
      "attributes": {
            "suffix_indexed_fields": ["*req.index1","*req.index2"],
+		   "notexists_indexed_fields": ["*req.index1","*req.index2"],
            "nested_fields": true,
            "enabled": true,
            "opts": {
@@ -181,14 +190,16 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
      },
 }`
 	expectedMap := map[string]interface{}{
-		utils.EnabledCfg:             true,
-		utils.StatSConnsCfg:          []string{},
-		utils.ResourceSConnsCfg:      []string{},
-		utils.AccountSConnsCfg:       []string{},
-		utils.IndexedSelectsCfg:      true,
-		utils.PrefixIndexedFieldsCfg: []string{},
-		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
-		utils.NestedFieldsCfg:        true,
+		utils.EnabledCfg:                true,
+		utils.StatSConnsCfg:             []string{},
+		utils.ResourceSConnsCfg:         []string{},
+		utils.AccountSConnsCfg:          []string{},
+		utils.IndexedSelectsCfg:         true,
+		utils.PrefixIndexedFieldsCfg:    []string{},
+		utils.SuffixIndexedFieldsCfg:    []string{"*req.index1", "*req.index2"},
+		utils.ExistsIndexedFieldsCfg:    []string{},
+		utils.NotExistsIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
+		utils.NestedFieldsCfg:           true,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
@@ -214,14 +225,16 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 }
 `
 	expectedMap := map[string]interface{}{
-		utils.EnabledCfg:             false,
-		utils.StatSConnsCfg:          []string{},
-		utils.ResourceSConnsCfg:      []string{},
-		utils.AccountSConnsCfg:       []string{},
-		utils.IndexedSelectsCfg:      true,
-		utils.PrefixIndexedFieldsCfg: []string{},
-		utils.SuffixIndexedFieldsCfg: []string{},
-		utils.NestedFieldsCfg:        false,
+		utils.EnabledCfg:                false,
+		utils.StatSConnsCfg:             []string{},
+		utils.ResourceSConnsCfg:         []string{},
+		utils.AccountSConnsCfg:          []string{},
+		utils.IndexedSelectsCfg:         true,
+		utils.PrefixIndexedFieldsCfg:    []string{},
+		utils.SuffixIndexedFieldsCfg:    []string{},
+		utils.ExistsIndexedFieldsCfg:    []string{},
+		utils.NotExistsIndexedFieldsCfg: []string{},
+		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]interface{}{
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},

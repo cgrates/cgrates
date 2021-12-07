@@ -204,11 +204,11 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 	if st.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.SuffixIndexedFields))
 	}
-	if cln.ExistsIndexedFields != nil {
-		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cln.ExistsIndexedFields))
+	if st.ExistsIndexedFields != nil {
+		cln.ExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.ExistsIndexedFields))
 	}
-	if cln.NotExistsIndexedFields != nil {
-		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cln.NotExistsIndexedFields))
+	if st.NotExistsIndexedFields != nil {
+		cln.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*st.NotExistsIndexedFields))
 	}
 	return
 }

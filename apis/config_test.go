@@ -65,14 +65,16 @@ func TestConfigSetGetConfig(t *testing.T) {
 	err = rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []string{"*localhost"},
-			"enabled":               true,
-			"indexed_selects":       true,
-			"nested_fields":         false,
-			"prefix_indexed_fields": []string{},
-			"resources_conns":       []string{"*localhost"},
-			"stats_conns":           []string{"*localhost"},
-			"suffix_indexed_fields": []string{},
+			"accounts_conns":           []string{"*localhost"},
+			"enabled":                  true,
+			"indexed_selects":          true,
+			"nested_fields":            false,
+			"prefix_indexed_fields":    []string{},
+			"resources_conns":          []string{"*localhost"},
+			"stats_conns":              []string{"*localhost"},
+			"suffix_indexed_fields":    []string{},
+			"exists_indexed_fields":    []string{},
+			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
@@ -102,14 +104,16 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 		Tenant: utils.CGRateSorg,
 		Config: map[string]interface{}{
 			"attributes": map[string]interface{}{
-				"accounts_conns":        []string{"*internal"},
-				"enabled":               true,
-				"indexed_selects":       false,
-				"nested_fields":         false,
-				"prefix_indexed_fields": []string{},
-				"resources_conns":       []string{"*internal"},
-				"stats_conns":           []string{"*internal"},
-				"suffix_indexed_fields": []string{},
+				"accounts_conns":           []string{"*internal"},
+				"enabled":                  true,
+				"indexed_selects":          false,
+				"nested_fields":            false,
+				"prefix_indexed_fields":    []string{},
+				"resources_conns":          []string{"*internal"},
+				"stats_conns":              []string{"*internal"},
+				"suffix_indexed_fields":    []string{},
+				"exists_indexed_fields":    []string{},
+				"notexists_indexed_fields": []string{},
 				utils.OptsCfg: map[string]interface{}{
 					utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
 						{
@@ -137,14 +141,16 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	errGet := rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
 	expectedGet := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []string{"*localhost"},
-			"enabled":               true,
-			"indexed_selects":       true,
-			"nested_fields":         false,
-			"prefix_indexed_fields": []string{},
-			"resources_conns":       []string{"*localhost"},
-			"stats_conns":           []string{"*localhost"},
-			"suffix_indexed_fields": []string{},
+			"accounts_conns":           []string{"*localhost"},
+			"enabled":                  true,
+			"indexed_selects":          true,
+			"nested_fields":            false,
+			"prefix_indexed_fields":    []string{},
+			"resources_conns":          []string{"*localhost"},
+			"stats_conns":              []string{"*localhost"},
+			"suffix_indexed_fields":    []string{},
+			"exists_indexed_fields":    []string{},
+			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
@@ -181,14 +187,16 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 	errGetRld := rlcCfg.GetConfig(context.Background(), argsGetRld, &replyGetRld)
 	expectedGetRld := map[string]interface{}{
 		"attributes": map[string]interface{}{
-			"accounts_conns":        []string{"*localhost"},
-			"enabled":               true,
-			"indexed_selects":       true,
-			"nested_fields":         false,
-			"prefix_indexed_fields": []string{},
-			"resources_conns":       []string{"*localhost"},
-			"stats_conns":           []string{"*localhost"},
-			"suffix_indexed_fields": []string{},
+			"accounts_conns":           []string{"*localhost"},
+			"enabled":                  true,
+			"indexed_selects":          true,
+			"nested_fields":            false,
+			"prefix_indexed_fields":    []string{},
+			"resources_conns":          []string{"*localhost"},
+			"stats_conns":              []string{"*localhost"},
+			"suffix_indexed_fields":    []string{},
+			"exists_indexed_fields":    []string{},
+			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]interface{}{
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
@@ -240,6 +248,8 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	"resources_conns":["*localhost"],
 	"stats_conns":["*localhost"],
 	"suffix_indexed_fields":[],
+	"exists_indexed_fields":[],
+	"notexists_indexed_fields":[],
 	},
 }`,
 		DryRun: true,
@@ -261,7 +271,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 	}
 	var replyGet string
 	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
-	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"indexed_selects":true,"nested_fields":false,"opts":{"*processRuns":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*localhost"],"enabled":true,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*localhost"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	if err != nil {
 		t.Errorf("Expected <%+v>, \nReceived <%+v>", nil, errGet)
 	}
