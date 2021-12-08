@@ -20,6 +20,7 @@ package engine
 
 import (
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -224,5 +225,187 @@ func (ap *ActionProfile) Merge(v2 interface{}) {
 	}
 	for k, v := range vi.Targets {
 		ap.Targets[k] = v
+	}
+}
+
+func (ap *ActionProfile) String() string { return utils.ToJSON(ap) }
+func (ap *ActionProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = ap.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (ap *ActionProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idxStr := utils.GetPathIndexString(fldPath[0])
+			if idxStr != nil {
+				switch fld {
+				case utils.Actions:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(ap.Actions) {
+						return ap.Actions[idx], nil
+					}
+				case utils.FilterIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(ap.FilterIDs) {
+						return ap.FilterIDs[idx], nil
+					}
+				case utils.Targets:
+					if tr, has := ap.Targets[*idxStr]; has {
+						return tr, nil
+					}
+				}
+			}
+			return nil, utils.ErrNotFound
+		case utils.Tenant:
+			return ap.Tenant, nil
+		case utils.ID:
+			return ap.ID, nil
+		case utils.FilterIDs:
+			return ap.FilterIDs, nil
+		case utils.Weight:
+			return ap.Weight, nil
+		case utils.Actions:
+			return ap.Actions, nil
+		case utils.Schedule:
+			return ap.Schedule, nil
+		case utils.Targets:
+			return ap.Targets, nil
+		}
+	}
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	fld, idxStr := utils.GetPathIndexString(fldPath[0])
+	switch fld {
+	default:
+		return nil, utils.ErrNotFound
+	case utils.Actions:
+		var idx int
+		if idx, err = strconv.Atoi(*idxStr); err != nil {
+			return
+		}
+		if idx >= len(ap.Actions) {
+			return nil, utils.ErrNotFound
+		}
+		return ap.Actions[idx].FieldAsInterface(fldPath[1:])
+	case utils.Targets:
+		tr, has := ap.Targets[*idxStr]
+		if !has {
+			return nil, utils.ErrNotFound
+		}
+		return tr.FieldAsInterface(fldPath[1:])
+	}
+}
+
+func (a *APAction) String() string { return utils.ToJSON(a) }
+func (a *APAction) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = a.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (cp *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	switch len(fldPath) {
+	default:
+		return nil, utils.ErrNotFound
+	case 1:
+		switch fldPath[0] {
+		default:
+			fld, idxStr := utils.GetPathIndexString(fldPath[0])
+			if idxStr != nil {
+				switch fld {
+				case utils.FilterIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(cp.FilterIDs) {
+						return cp.FilterIDs[idx], nil
+					}
+				case utils.Diktats:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(cp.Diktats) {
+						return cp.Diktats[idx], nil
+					}
+				case utils.Opts:
+					return utils.MapStorage(cp.Opts).FieldAsInterface([]string{*idxStr})
+				}
+			}
+			return nil, utils.ErrNotFound
+		case utils.Blocker:
+			return cp.Blocker, nil
+		case utils.ID:
+			return cp.ID, nil
+		case utils.FilterIDs:
+			return cp.FilterIDs, nil
+		case utils.TTL:
+			return cp.TTL, nil
+		case utils.Diktats:
+			return cp.Diktats, nil
+		case utils.Type:
+			return cp.Type, nil
+		case utils.Opts:
+			return cp.Opts, nil
+		}
+	case 2:
+		fld, idxStr := utils.GetPathIndexString(fldPath[0])
+		switch fld {
+		default:
+			return nil, utils.ErrNotFound
+		case utils.Opts:
+			path := fldPath[1:]
+			if idxStr != nil {
+				path = append([]string{*idxStr}, path...)
+			}
+			return utils.MapStorage(cp.Opts).FieldAsInterface(path)
+		case utils.Diktats:
+			if idxStr == nil {
+				return nil, utils.ErrNotFound
+			}
+			var idx int
+			if idx, err = strconv.Atoi(*idxStr); err != nil {
+				return
+			}
+			if idx >= len(cp.Diktats) {
+				return nil, utils.ErrNotFound
+			}
+			return cp.Diktats[idx].FieldAsInterface(fldPath[1:])
+		}
+	}
+}
+
+func (dk *APDiktat) String() string { return utils.ToJSON(dk) }
+func (dk *APDiktat) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = dk.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (dk *APDiktat) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, utils.ErrNotFound
+	case utils.Path:
+		return dk.Path, nil
+	case utils.Value:
+		return dk.Value, nil
 	}
 }

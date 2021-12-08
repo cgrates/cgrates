@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -250,5 +251,81 @@ func (ap *AttributeProfile) Merge(v2 interface{}) {
 	}
 	if vi.Weight != 0 {
 		ap.Weight = vi.Weight
+	}
+}
+
+func (ap *AttributeProfile) String() string { return utils.ToJSON(ap) }
+func (ap *AttributeProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = ap.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idx := utils.GetPathIndex(fldPath[0])
+			if fld == utils.FilterIDs &&
+				idx != nil &&
+				*idx < len(ap.FilterIDs) {
+				return ap.FilterIDs[*idx], nil
+			}
+			return nil, utils.ErrNotFound
+		case utils.Tenant:
+			return ap.Tenant, nil
+		case utils.ID:
+			return ap.ID, nil
+		case utils.FilterIDs:
+			return ap.FilterIDs, nil
+		case utils.Blocker:
+			return ap.Blocker, nil
+		case utils.Weight:
+			return ap.Weight, nil
+		case utils.Attributes:
+			return ap.Attributes, nil
+		}
+	}
+	if len(fldPath) == 0 ||
+		!strings.HasPrefix(fldPath[0], utils.Attributes) ||
+		fldPath[0][10] != '[' ||
+		fldPath[0][len(fldPath[0])-1] != ']' {
+		return nil, utils.ErrNotFound
+	}
+	var idx int
+	if idx, err = strconv.Atoi(fldPath[0][11 : len(fldPath[0])-1]); err != nil {
+		return
+	}
+	if idx >= len(ap.Attributes) {
+		return nil, utils.ErrNotFound
+	}
+	return ap.Attributes[idx].FieldAsInterface(fldPath[1:])
+}
+
+func (at *Attribute) String() string { return utils.ToJSON(at) }
+func (at *Attribute) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = at.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+
+func (at *Attribute) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, utils.ErrNotFound
+	case utils.FilterIDs:
+		return at.FilterIDs, nil
+	case utils.Path:
+		return at.Path, nil
+	case utils.Type:
+		return at.Type, nil
+	case utils.Value:
+		return at.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep), nil
 	}
 }
