@@ -370,7 +370,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	}
 	switch eesCfg.Type {
 	case utils.MetaFileCSV:
-		ee, err = NewFileCSVee(eesCfg, eeS.cfg, eeS.fltrS, dc, &buffer{buff})
+		ee, err = NewFileCSVee(eesCfg, eeS.cfg, eeS.fltrS, dc, &buffer{wrtr})
 	case utils.MetaFileFWV:
 		ee, err = NewFileFWVee(eesCfg, eeS.cfg, eeS.fltrS, dc, wrtr)
 	default:
@@ -384,7 +384,6 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	}
 	for _, event := range args.Events {
 		if len(eesCfg.Filters) != 0 {
-			utils.Logger.Debug(fmt.Sprintf("ev: %v", utils.ToJSON(event)))
 			tnt := utils.FirstNonEmpty(args.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
 			cgrDp[utils.MetaReq] = event
 			if pass, errPass := eeS.fltrS.Pass(ctx, tnt,
@@ -400,19 +399,16 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 			Event:   event,
 			APIOpts: args.APIOpts,
 		}
-		if err := exportEventWithExporter(ctx, ee, cgrEv, false, eeS.cfg, eeS.fltrS); err != nil {
+		if err = exportEventWithExporter(ctx, ee, cgrEv, false, eeS.cfg, eeS.fltrS); err != nil {
 			return err
 		}
 	}
 	if err = ee.Close(); err != nil {
 		return err
 	}
-
-	*reply = buff.Bytes()
 	if err = zBuff.Close(); err != nil {
 		return err
 	}
-
-	buff.Reset()
+	*reply = buff.Bytes()
 	return
 }
