@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -643,5 +644,103 @@ func (sqp *StatQueueProfile) Merge(v2 interface{}) {
 	}
 	if vi.Weight != 0 {
 		sqp.Weight = vi.Weight
+	}
+}
+
+func (sqp *StatQueueProfile) String() string { return utils.ToJSON(sqp) }
+func (sqp *StatQueueProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = sqp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idx := utils.GetPathIndex(fldPath[0])
+			if idx != nil {
+				switch fld {
+				case utils.ThresholdIDs:
+					if *idx < len(sqp.ThresholdIDs) {
+						return sqp.ThresholdIDs[*idx], nil
+					}
+				case utils.FilterIDs:
+					if *idx < len(sqp.FilterIDs) {
+						return sqp.FilterIDs[*idx], nil
+					}
+				case utils.Metrics:
+					if *idx < len(sqp.Metrics) {
+						return sqp.Metrics[*idx], nil
+					}
+				}
+			}
+			return nil, utils.ErrNotFound
+		case utils.Tenant:
+			return sqp.Tenant, nil
+		case utils.ID:
+			return sqp.ID, nil
+		case utils.FilterIDs:
+			return sqp.FilterIDs, nil
+		case utils.Weight:
+			return sqp.Weight, nil
+		case utils.ThresholdIDs:
+			return sqp.ThresholdIDs, nil
+		case utils.QueueLength:
+			return sqp.QueueLength, nil
+		case utils.TTL:
+			return sqp.TTL, nil
+		case utils.MinItems:
+			return sqp.MinItems, nil
+		case utils.Metrics:
+			return sqp.Metrics, nil
+		case utils.Stored:
+			return sqp.Stored, nil
+		case utils.Blocker:
+			return sqp.Blocker, nil
+		}
+	}
+	if len(fldPath) == 0 ||
+		!strings.HasPrefix(fldPath[0], utils.Metrics) ||
+		fldPath[0][7] != '[' ||
+		fldPath[0][len(fldPath[0])-1] != ']' {
+		return nil, utils.ErrNotFound
+	}
+	var idx int
+	if idx, err = strconv.Atoi(fldPath[0][8 : len(fldPath[0])-1]); err != nil {
+		return
+	}
+	if idx >= len(sqp.Metrics) {
+		return nil, utils.ErrNotFound
+	}
+	return sqp.Metrics[idx].FieldAsInterface(fldPath[1:])
+}
+
+func (mf *MetricWithFilters) String() string { return utils.ToJSON(mf) }
+func (mf *MetricWithFilters) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = mf.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (mf *MetricWithFilters) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if fld == utils.FilterIDs &&
+			idx != nil &&
+			*idx < len(mf.FilterIDs) {
+			return mf.FilterIDs[*idx], nil
+		}
+		return nil, utils.ErrNotFound
+	case utils.MetricID:
+		return mf.MetricID, nil
+	case utils.FilterIDs:
+		return mf.FilterIDs, nil
 	}
 }

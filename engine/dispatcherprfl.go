@@ -21,6 +21,7 @@ package engine
 import (
 	"math/rand"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/birpc"
@@ -356,4 +357,176 @@ func (dH *DispatcherHost) Merge(v2 interface{}) {
 	if vi.Reconnects != 0 {
 		dH.Reconnects = vi.Reconnects
 	}
+}
+
+func (dH *DispatcherHost) String() string { return utils.ToJSON(dH) }
+func (dH *DispatcherHost) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = dH.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (dH *DispatcherHost) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, utils.ErrNotFound
+	case utils.Tenant:
+		return dH.Tenant, nil
+	case utils.ID:
+		return dH.ID, nil
+	case utils.Address:
+		return dH.Address, nil
+	case utils.Transport:
+		return dH.Transport, nil
+	case utils.ConnectAttempts:
+		return dH.ConnectAttempts, nil
+	case utils.Reconnects:
+		return dH.Reconnects, nil
+	case utils.ConnectTimeout:
+		return dH.ConnectTimeout, nil
+	case utils.ReplyTimeout:
+		return dH.ReplyTimeout, nil
+	case utils.TLS:
+		return dH.TLS, nil
+	case utils.ClientKey:
+		return dH.ClientKey, nil
+	case utils.ClientCertificate:
+		return dH.ClientCertificate, nil
+	case utils.CaCertificate:
+		return dH.CaCertificate, nil
+	}
+}
+
+func (dP *DispatcherProfile) String() string { return utils.ToJSON(dP) }
+func (dP *DispatcherProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = dP.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (dP *DispatcherProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idxStr := utils.GetPathIndexString(fldPath[0])
+			if idxStr != nil {
+				switch fld {
+				case utils.Hosts:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(dP.Hosts) {
+						return dP.Hosts[idx], nil
+					}
+				case utils.FilterIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(dP.FilterIDs) {
+						return dP.FilterIDs[idx], nil
+					}
+				case utils.StrategyParams:
+					return utils.MapStorage(dP.StrategyParams).FieldAsInterface([]string{*idxStr})
+				}
+			}
+			return nil, utils.ErrNotFound
+		case utils.Tenant:
+			return dP.Tenant, nil
+		case utils.ID:
+			return dP.ID, nil
+		case utils.FilterIDs:
+			return dP.FilterIDs, nil
+		case utils.Weight:
+			return dP.Weight, nil
+		case utils.Hosts:
+			return dP.Hosts, nil
+		case utils.Strategy:
+			return dP.Strategy, nil
+		}
+	}
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	fld, idxStr := utils.GetPathIndexString(fldPath[0])
+	switch fld {
+	default:
+		return nil, utils.ErrNotFound
+	case utils.StrategyParams:
+		path := fldPath[1:]
+		if idxStr != nil {
+			path = append([]string{*idxStr}, path...)
+		}
+		return utils.MapStorage(dP.StrategyParams).FieldAsInterface(path)
+	case utils.Hosts:
+		if idxStr == nil {
+			return nil, utils.ErrNotFound
+		}
+		var idx int
+		if idx, err = strconv.Atoi(*idxStr); err != nil {
+			return
+		}
+		if idx >= len(dP.Hosts) {
+			return nil, utils.ErrNotFound
+		}
+		return dP.Hosts[idx].FieldAsInterface(fldPath[1:])
+	}
+}
+
+func (dC *DispatcherHostProfile) String() string { return utils.ToJSON(dC) }
+func (dC *DispatcherHostProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = dC.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (dC *DispatcherHostProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idxStr := utils.GetPathIndexString(fldPath[0])
+			if idxStr != nil {
+				switch fld {
+				case utils.FilterIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(dC.FilterIDs) {
+						return dC.FilterIDs[idx], nil
+					}
+				case utils.Params:
+					return utils.MapStorage(dC.Params).FieldAsInterface([]string{*idxStr})
+				}
+			}
+			return nil, utils.ErrNotFound
+		case utils.ID:
+			return dC.ID, nil
+		case utils.FilterIDs:
+			return dC.FilterIDs, nil
+		case utils.Weight:
+			return dC.Weight, nil
+		case utils.Blocker:
+			return dC.Blocker, nil
+		}
+	}
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	fld, idxStr := utils.GetPathIndexString(fldPath[0])
+	if fld != utils.Params {
+		return nil, utils.ErrNotFound
+	}
+	path := fldPath[1:]
+	if idxStr != nil {
+		path = append([]string{*idxStr}, path...)
+	}
+	return utils.MapStorage(dC.Params).FieldAsInterface(path)
 }

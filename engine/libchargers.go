@@ -96,3 +96,46 @@ func (cp *ChargerProfile) Merge(v2 interface{}) {
 		cp.Weight = vi.Weight
 	}
 }
+
+func (cp *ChargerProfile) String() string { return utils.ToJSON(cp) }
+func (cp *ChargerProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = cp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (cp *ChargerProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if idx != nil {
+			switch fld {
+			case utils.AttributeIDs:
+				if *idx < len(cp.AttributeIDs) {
+					return cp.AttributeIDs[*idx], nil
+				}
+			case utils.FilterIDs:
+				if *idx < len(cp.FilterIDs) {
+					return cp.FilterIDs[*idx], nil
+				}
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.Tenant:
+		return cp.Tenant, nil
+	case utils.ID:
+		return cp.ID, nil
+	case utils.FilterIDs:
+		return cp.FilterIDs, nil
+	case utils.Weight:
+		return cp.Weight, nil
+	case utils.AttributeIDs:
+		return cp.AttributeIDs, nil
+	case utils.RunID:
+		return cp.RunID, nil
+	}
+}

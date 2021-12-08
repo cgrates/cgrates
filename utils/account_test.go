@@ -1171,7 +1171,7 @@ func TestAccountSet(t *testing.T) {
 	if err := acc.Set([]string{ThresholdIDs}, "TH1", false, EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Weights}, "", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Weights}, ";0", false, EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := acc.Set([]string{Balances + "[bal1]", ID}, "bal1", false, EmptyString); err != nil {

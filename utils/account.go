@@ -21,6 +21,7 @@ package utils
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -885,5 +886,266 @@ func (ap *Account) Merge(v2 interface{}) {
 	}
 	for k, v := range vi.Balances {
 		ap.Balances[k] = v
+	}
+}
+
+func (ap *Account) String() string { return ToJSON(ap) }
+func (ap *Account) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = ap.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
+}
+func (ap *Account) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idxStr := GetPathIndexString(fldPath[0])
+			if idxStr != nil {
+				switch fld {
+				case FilterIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(ap.FilterIDs) {
+						return ap.FilterIDs[idx], nil
+					}
+				case ThresholdIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(ap.ThresholdIDs) {
+						return ap.ThresholdIDs[idx], nil
+					}
+				case Opts:
+					return MapStorage(ap.Opts).FieldAsInterface([]string{*idxStr})
+				case Rates:
+					if rt, has := ap.Balances[*idxStr]; has {
+						return rt, nil
+					}
+				}
+			}
+			return nil, ErrNotFound
+		case Tenant:
+			return ap.Tenant, nil
+		case ID:
+			return ap.ID, nil
+		case FilterIDs:
+			return ap.FilterIDs, nil
+		case Weights:
+			return ap.Weights.String(InfieldSep, ANDSep), nil
+		case ThresholdIDs:
+			return ap.ThresholdIDs, nil
+		case Opts:
+			return ap.Opts, nil
+		case Balances:
+			return ap.Balances, nil
+		}
+	}
+	if len(fldPath) == 0 {
+		return nil, ErrNotFound
+	}
+	fld, idxStr := GetPathIndexString(fldPath[0])
+	switch fld {
+	default:
+		return nil, ErrNotFound
+	case Opts:
+		path := fldPath[1:]
+		if idxStr != nil {
+			path = append([]string{*idxStr}, path...)
+		}
+		return MapStorage(ap.Opts).FieldAsInterface(path)
+	case Balances:
+		if idxStr == nil {
+			idxStr = &fldPath[1]
+			fldPath = fldPath[1:]
+		}
+		bl, has := ap.Balances[*idxStr]
+		if !has {
+			return nil, ErrNotFound
+		}
+		if len(fldPath) == 1 {
+			return bl, nil
+		}
+		return bl.FieldAsInterface(fldPath[1:])
+	}
+}
+
+func (bL *Balance) String() string { return ToJSON(bL) }
+func (bL *Balance) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = bL.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
+}
+func (bL *Balance) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idxStr := GetPathIndexString(fldPath[0])
+			if idxStr != nil {
+				switch fld {
+				case FilterIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(bL.FilterIDs) {
+						return bL.FilterIDs[idx], nil
+					}
+				case AttributeIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(bL.AttributeIDs) {
+						return bL.AttributeIDs[idx], nil
+					}
+				case RateProfileIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(bL.RateProfileIDs) {
+						return bL.RateProfileIDs[idx], nil
+					}
+				case UnitFactors:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(bL.UnitFactors) {
+						return bL.UnitFactors[idx], nil
+					}
+				case CostIncrements:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(bL.CostIncrements) {
+						return bL.CostIncrements[idx], nil
+					}
+				case Opts:
+					return MapStorage(bL.Opts).FieldAsInterface([]string{*idxStr})
+				}
+			}
+			return nil, ErrNotFound
+		case Type:
+			return bL.Type, nil
+		case ID:
+			return bL.ID, nil
+		case FilterIDs:
+			return bL.FilterIDs, nil
+		case Weights:
+			return bL.Weights.String(InfieldSep, ANDSep), nil
+		case AttributeIDs:
+			return bL.AttributeIDs, nil
+		case Units:
+			return bL.Units, nil
+		}
+	}
+	if len(fldPath) == 0 {
+		return nil, ErrNotFound
+	}
+	fld, idxStr := GetPathIndexString(fldPath[0])
+	switch fld {
+	default:
+		return nil, ErrNotFound
+	case Opts:
+		path := fldPath[1:]
+		if idxStr != nil {
+			path = append([]string{*idxStr}, path...)
+		}
+		return MapStorage(bL.Opts).FieldAsInterface(path)
+	case UnitFactors:
+		if idxStr == nil {
+			return nil, ErrNotFound
+		}
+		var idx int
+		if idx, err = strconv.Atoi(*idxStr); err != nil {
+			return
+		}
+		if idx >= len(bL.UnitFactors) {
+			return nil, ErrNotFound
+		}
+		return bL.UnitFactors[idx].FieldAsInterface(fldPath[1:])
+	case CostIncrements:
+		if idxStr == nil {
+			return nil, ErrNotFound
+		}
+		var idx int
+		if idx, err = strconv.Atoi(*idxStr); err != nil {
+			return
+		}
+		if idx >= len(bL.CostIncrements) {
+			return nil, ErrNotFound
+		}
+		return bL.CostIncrements[idx].FieldAsInterface(fldPath[1:])
+	}
+}
+
+func (uF *UnitFactor) String() string { return ToJSON(uF) }
+func (uF *UnitFactor) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = uF.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
+}
+func (uF *UnitFactor) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := GetPathIndex(fldPath[0])
+		if idx != nil &&
+			fld == FilterIDs {
+			if *idx < len(uF.FilterIDs) {
+				return uF.FilterIDs[*idx], nil
+			}
+		}
+		return nil, ErrNotFound
+	case FilterIDs:
+		return uF.FilterIDs, nil
+	case Factor:
+		return uF.Factor, nil
+	}
+}
+
+func (cI *CostIncrement) String() string { return ToJSON(cI) }
+func (cI *CostIncrement) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = cI.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
+}
+func (cI *CostIncrement) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := GetPathIndex(fldPath[0])
+		if idx != nil &&
+			fld == FilterIDs {
+			if *idx < len(cI.FilterIDs) {
+				return cI.FilterIDs[*idx], nil
+			}
+		}
+		return nil, ErrNotFound
+	case FilterIDs:
+		return cI.FilterIDs, nil
+	case Increment:
+		return cI.Increment, nil
+	case FixedFee:
+		return cI.FixedFee, nil
+	case RecurrentFee:
+		return cI.RecurrentFee, nil
 	}
 }

@@ -146,14 +146,16 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &AttributeSCfg{
-		Enabled:             true,
-		AccountSConns:       []string{},
-		ResourceSConns:      []string{},
-		StatSConns:          []string{},
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		IndexedSelects:      true,
+		Enabled:                true,
+		AccountSConns:          []string{},
+		ResourceSConns:         []string{},
+		StatSConns:             []string{},
+		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+		PrefixIndexedFields:    &[]string{},
+		SuffixIndexedFields:    &[]string{},
+		ExistsIndexedFields:    &[]string{},
+		NotExistsIndexedFields: &[]string{},
+		IndexedSelects:         true,
 		Opts: &AttributesOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProcessRuns:          []*utils.DynamicIntOpt{},
@@ -185,14 +187,16 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &AttributeSCfg{
-		Enabled:             true,
-		ResourceSConns:      []string{},
-		AccountSConns:       []string{},
-		StatSConns:          []string{utils.MetaLocalHost},
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		IndexedSelects:      true,
+		Enabled:                true,
+		ResourceSConns:         []string{},
+		AccountSConns:          []string{},
+		StatSConns:             []string{utils.MetaLocalHost},
+		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+		PrefixIndexedFields:    &[]string{},
+		SuffixIndexedFields:    &[]string{},
+		ExistsIndexedFields:    &[]string{},
+		NotExistsIndexedFields: &[]string{},
+		IndexedSelects:         true,
 		Opts: &AttributesOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProcessRuns:          []*utils.DynamicIntOpt{},
@@ -238,12 +242,14 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &ChargerSCfg{
-		Enabled:             true,
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		IndexedSelects:      true,
-		AttributeSConns:     []string{"*localhost"},
+		Enabled:                true,
+		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+		PrefixIndexedFields:    &[]string{},
+		SuffixIndexedFields:    &[]string{},
+		ExistsIndexedFields:    &[]string{},
+		NotExistsIndexedFields: &[]string{},
+		IndexedSelects:         true,
+		AttributeSConns:        []string{"*localhost"},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ChargerSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ChargerSCfg()))
@@ -261,12 +267,14 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &ThresholdSCfg{
-		Enabled:             true,
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		ActionSConns:        []string{},
-		IndexedSelects:      true,
+		Enabled:                true,
+		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+		PrefixIndexedFields:    &[]string{},
+		SuffixIndexedFields:    &[]string{},
+		ActionSConns:           []string{},
+		ExistsIndexedFields:    &[]string{},
+		NotExistsIndexedFields: &[]string{},
+		IndexedSelects:         true,
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -290,12 +298,14 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &StatSCfg{
-		Enabled:             true,
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		IndexedSelects:      true,
-		ThresholdSConns:     []string{utils.MetaLocalHost},
+		Enabled:                true,
+		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+		PrefixIndexedFields:    &[]string{},
+		SuffixIndexedFields:    &[]string{},
+		ExistsIndexedFields:    &[]string{},
+		NotExistsIndexedFields: &[]string{},
+		IndexedSelects:         true,
+		ThresholdSConns:        []string{utils.MetaLocalHost},
 		Opts: &StatsOpts{
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
@@ -320,12 +330,14 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &ResourceSConfig{
-		Enabled:             true,
-		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		IndexedSelects:      true,
-		ThresholdSConns:     []string{utils.MetaLocalHost},
+		Enabled:                true,
+		StringIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
+		PrefixIndexedFields:    &[]string{},
+		SuffixIndexedFields:    &[]string{},
+		ExistsIndexedFields:    &[]string{},
+		NotExistsIndexedFields: &[]string{},
+		IndexedSelects:         true,
+		ThresholdSConns:        []string{utils.MetaLocalHost},
 		Opts: &ResourcesOpts{
 			UsageID:  []*utils.DynamicStringOpt{},
 			UsageTTL: []*utils.DynamicDurationOpt{},
@@ -350,17 +362,19 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &RouteSCfg{
-		Enabled:             true,
-		StringIndexedFields: &[]string{"*req.LCRProfile"},
-		PrefixIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Destination},
-		SuffixIndexedFields: &[]string{},
-		ResourceSConns:      []string{},
-		StatSConns:          []string{},
-		AttributeSConns:     []string{},
-		RateSConns:          []string{},
-		AccountSConns:       []string{},
-		IndexedSelects:      true,
-		DefaultRatio:        1,
+		Enabled:                true,
+		StringIndexedFields:    &[]string{"*req.LCRProfile"},
+		PrefixIndexedFields:    &[]string{utils.MetaReq + utils.NestingSep + utils.Destination},
+		SuffixIndexedFields:    &[]string{},
+		ExistsIndexedFields:    &[]string{},
+		NotExistsIndexedFields: &[]string{},
+		ResourceSConns:         []string{},
+		StatSConns:             []string{},
+		AttributeSConns:        []string{},
+		RateSConns:             []string{},
+		AccountSConns:          []string{},
+		IndexedSelects:         true,
+		DefaultRatio:           1,
 		Opts: &RoutesOpts{
 			Context:      []*utils.DynamicStringOpt{},
 			ProfileCount: []*utils.DynamicIntPointerOpt{},

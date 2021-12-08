@@ -34,7 +34,6 @@ import (
 func newRecord(req utils.DataProvider, data profile, tnt string, cfg *config.CGRConfig, cache *ltcache.Cache) *record {
 	return &record{
 		data:   data,
-		dp:     config.NewObjectDP(data),
 		tmp:    &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)},
 		req:    req,
 		cfg:    cfg.GetDataProvider(),
@@ -45,7 +44,6 @@ func newRecord(req utils.DataProvider, data profile, tnt string, cfg *config.CGR
 
 type record struct {
 	tenant string
-	dp     utils.DataProvider
 	data   profile
 	tmp    *utils.DataNode
 	req    utils.DataProvider
@@ -84,7 +82,7 @@ func RateIDsFromOrderedNavigableMap(data *utils.OrderedNavigableMap) ([]string, 
 func (ar *record) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default:
-		val, err = ar.dp.FieldAsInterface(fldPath)
+		val, err = ar.data.FieldAsInterface(fldPath)
 	case utils.MetaReq:
 		if len(fldPath) != 1 {
 			val, err = ar.req.FieldAsInterface(fldPath[1:])
@@ -257,7 +255,7 @@ func (ar *record) Set(fullPath *utils.FullPath, nm *utils.DataLeaf, sep string) 
 }
 
 type profile interface {
-	// utils.DataProvider
+	utils.DataProvider
 	Set([]string, interface{}, bool, string) error
 	Merge(interface{})
 	TenantID() string

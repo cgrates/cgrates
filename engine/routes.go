@@ -387,7 +387,7 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 		utils.OptsRoutesProfileCount); err != nil {
 		return
 	}
-	if prfCountOpt != nil || prfCount > *prfCountOpt { // it has the option and is smaller that the current number of profiles
+	if prfCountOpt != nil && prfCount > *prfCountOpt { // it has the option and is smaller that the current number of profiles
 		prfCount = *prfCountOpt
 	}
 	var extraOpts *optsGetRoutes
@@ -539,5 +539,128 @@ func (rp *RouteProfile) Merge(v2 interface{}) {
 	rp.Weights = append(rp.Weights, vi.Weights...)
 	if len(vi.Sorting) != 0 {
 		rp.Sorting = vi.Sorting
+	}
+}
+
+func (rp *RouteProfile) String() string { return utils.ToJSON(rp) }
+func (rp *RouteProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = rp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		switch fldPath[0] {
+		default:
+			fld, idx := utils.GetPathIndex(fldPath[0])
+			if idx != nil {
+				switch fld {
+				case utils.SortingParameters:
+					if *idx < len(rp.SortingParameters) {
+						return rp.SortingParameters[*idx], nil
+					}
+				case utils.FilterIDs:
+					if *idx < len(rp.FilterIDs) {
+						return rp.FilterIDs[*idx], nil
+					}
+				case utils.Routes:
+					if *idx < len(rp.Routes) {
+						return rp.Routes[*idx], nil
+					}
+				}
+			}
+			return nil, utils.ErrNotFound
+		case utils.Tenant:
+			return rp.Tenant, nil
+		case utils.ID:
+			return rp.ID, nil
+		case utils.FilterIDs:
+			return rp.FilterIDs, nil
+		case utils.Weights:
+			return rp.Weights.String(utils.InfieldSep, utils.ANDSep), nil
+		case utils.SortingParameters:
+			return rp.SortingParameters, nil
+		case utils.Sorting:
+			return rp.Sorting, nil
+		case utils.Routes:
+			return rp.Routes, nil
+		}
+	}
+	if len(fldPath) == 0 ||
+		!strings.HasPrefix(fldPath[0], utils.Routes) ||
+		fldPath[0][6] != '[' ||
+		fldPath[0][len(fldPath[0])-1] != ']' {
+		return nil, utils.ErrNotFound
+	}
+	var idx int
+	if idx, err = strconv.Atoi(fldPath[0][7 : len(fldPath[0])-1]); err != nil {
+		return
+	}
+	if idx >= len(rp.Routes) {
+		return nil, utils.ErrNotFound
+	}
+	return rp.Routes[idx].FieldAsInterface(fldPath[1:])
+}
+
+func (rt *Route) String() string { return utils.ToJSON(rt) }
+func (rt *Route) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = rt.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (rt *Route) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if idx != nil {
+			switch fld {
+			case utils.AccountIDs:
+				if *idx < len(rt.AccountIDs) {
+					return rt.AccountIDs[*idx], nil
+				}
+			case utils.FilterIDs:
+				if *idx < len(rt.FilterIDs) {
+					return rt.FilterIDs[*idx], nil
+				}
+			case utils.RateProfileIDs:
+				if *idx < len(rt.RateProfileIDs) {
+					return rt.RateProfileIDs[*idx], nil
+				}
+			case utils.ResourceIDs:
+				if *idx < len(rt.ResourceIDs) {
+					return rt.ResourceIDs[*idx], nil
+				}
+			case utils.StatIDs:
+				if *idx < len(rt.StatIDs) {
+					return rt.StatIDs[*idx], nil
+				}
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.ID:
+		return rt.ID, nil
+	case utils.FilterIDs:
+		return rt.FilterIDs, nil
+	case utils.AccountIDs:
+		return rt.AccountIDs, nil
+	case utils.RateProfileIDs:
+		return rt.RateProfileIDs, nil
+	case utils.ResourceIDs:
+		return rt.ResourceIDs, nil
+	case utils.StatIDs:
+		return rt.StatIDs, nil
+	case utils.Weights:
+		return rt.Weights.String(utils.InfieldSep, utils.ANDSep), nil
+	case utils.Blocker:
+		return rt.Blocker, nil
+	case utils.RouteParameters:
+		return rt.RouteParameters, nil
 	}
 }

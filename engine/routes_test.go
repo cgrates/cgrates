@@ -885,7 +885,7 @@ func TestRouteProfileSet(t *testing.T) {
 	if err := rp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Weights}, "", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.Weights}, ";0", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{utils.Sorting}, utils.MetaQOS, false, utils.EmptyString); err != nil {
