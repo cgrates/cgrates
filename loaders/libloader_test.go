@@ -147,3 +147,11 @@ func (p profileTest) Merge(v2 interface{}) {
 func (p profileTest) TenantID() string {
 	return utils.ConcatenatedKey(utils.IfaceAsString(map[string]interface{}(p)[utils.Tenant]), utils.IfaceAsString(map[string]interface{}(p)[utils.ID]))
 }
+
+func (p profileTest) String() string { return utils.MapStorage(p).String() }
+func (p profileTest) FieldAsString(fldPath []string) (string, error) {
+	return utils.MapStorage(p).FieldAsString(fldPath)
+}
+func (p profileTest) FieldAsInterface(fldPath []string) (interface{}, error) {
+	return utils.MapStorage(p).FieldAsInterface(fldPath)
+}

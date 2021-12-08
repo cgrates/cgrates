@@ -1086,3 +1086,54 @@ func (rp *ResourceProfile) Merge(v2 interface{}) {
 		rp.Weight = vi.Weight
 	}
 }
+
+func (rp *ResourceProfile) String() string { return utils.ToJSON(rp) }
+func (rp *ResourceProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = rp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if idx != nil {
+			switch fld {
+			case utils.ThresholdIDs:
+				if *idx < len(rp.ThresholdIDs) {
+					return rp.ThresholdIDs[*idx], nil
+				}
+			case utils.FilterIDs:
+				if *idx < len(rp.FilterIDs) {
+					return rp.FilterIDs[*idx], nil
+				}
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.Tenant:
+		return rp.Tenant, nil
+	case utils.ID:
+		return rp.ID, nil
+	case utils.FilterIDs:
+		return rp.FilterIDs, nil
+	case utils.UsageTTL:
+		return rp.UsageTTL, nil
+	case utils.Limit:
+		return rp.Limit, nil
+	case utils.AllocationMessage:
+		return rp.AllocationMessage, nil
+	case utils.Blocker:
+		return rp.Blocker, nil
+	case utils.Stored:
+		return rp.Stored, nil
+	case utils.Weight:
+		return rp.Weight, nil
+	case utils.ThresholdIDs:
+		return rp.ThresholdIDs, nil
+	}
+}

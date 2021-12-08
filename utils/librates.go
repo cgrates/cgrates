@@ -21,6 +21,7 @@ package utils
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -691,7 +692,12 @@ func (rp *RateProfile) Merge(v2 interface{}) {
 	rp.FilterIDs = append(rp.FilterIDs, vi.FilterIDs...)
 	rp.Weights = append(rp.Weights, vi.Weights...)
 	for k, v := range vi.Rates {
-		rp.Rates[k] = v
+		rt, has := rp.Rates[k]
+		if !has {
+			rp.Rates[k] = v
+			continue
+		}
+		rt.Merge(v)
 	}
 	o := decimal.New(0, 0)
 	if vi.MinCost != nil && vi.MinCost.Cmp(o) != 0 {
@@ -699,5 +705,172 @@ func (rp *RateProfile) Merge(v2 interface{}) {
 	}
 	if vi.MaxCost != nil && vi.MinCost.Cmp(o) != 0 {
 		rp.MaxCost = vi.MaxCost
+	}
+}
+
+func (rt *Rate) Merge(vi *Rate) {
+	if len(vi.ID) != 0 {
+		rt.ID = vi.ID
+	}
+	if len(vi.ActivationTimes) != 0 {
+		rt.ActivationTimes = vi.ActivationTimes
+	}
+	if vi.Blocker {
+		rt.Blocker = vi.Blocker
+	}
+	rt.FilterIDs = append(rt.FilterIDs, vi.FilterIDs...)
+	rt.Weights = append(rt.Weights, vi.Weights...)
+	rt.IntervalRates = append(rt.IntervalRates, vi.IntervalRates...)
+}
+
+func (rp *RateProfile) String() string { return ToJSON(rp) }
+func (rp *RateProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = rp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
+}
+func (rp *RateProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idxStr := GetPathIndexString(fldPath[0])
+			if idxStr != nil {
+				switch fld {
+				case FilterIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(rp.FilterIDs) {
+						return rp.FilterIDs[idx], nil
+					}
+				case Rates:
+					if rt, has := rp.Rates[*idxStr]; has {
+						return rt, nil
+					}
+				}
+			}
+			return nil, ErrNotFound
+		case Tenant:
+			return rp.Tenant, nil
+		case ID:
+			return rp.ID, nil
+		case FilterIDs:
+			return rp.FilterIDs, nil
+		case Weights:
+			return rp.Weights.String(InfieldSep, ANDSep), nil
+		case MinCost:
+			return rp.MinCost, nil
+		case MaxCost:
+			return rp.MaxCost, nil
+		case MaxCostStrategy:
+			return rp.MaxCostStrategy, nil
+		case Rates:
+			return rp.Rates, nil
+		}
+	}
+	if len(fldPath) == 0 {
+		return nil, ErrNotFound
+	}
+	fld, idxStr := GetPathIndexString(fldPath[0])
+	if fld != Rates {
+		return nil, ErrNotFound
+	}
+
+	if idxStr == nil {
+
+		idxStr = &fldPath[1]
+		fldPath = fldPath[1:]
+	}
+	rt, has := rp.Rates[*idxStr]
+	if !has {
+		return nil, ErrNotFound
+	}
+	if len(fldPath) == 1 {
+		return rt, nil
+	}
+	return rt.FieldAsInterface(fldPath[1:])
+}
+
+func (rt *Rate) String() string { return ToJSON(rt) }
+func (rt *Rate) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = rt.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
+}
+func (rt *Rate) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	switch len(fldPath) {
+	default:
+		return nil, ErrNotFound
+	case 1:
+		switch fldPath[0] {
+		default:
+			fld, idx := GetPathIndex(fldPath[0])
+			if idx != nil {
+				switch fld {
+				case IntervalRates:
+					if *idx < len(rt.IntervalRates) {
+						return rt.IntervalRates[*idx], nil
+					}
+				case FilterIDs:
+					if *idx < len(rt.FilterIDs) {
+						return rt.FilterIDs[*idx], nil
+					}
+				}
+			}
+			return nil, ErrNotFound
+		case ID:
+			return rt.ID, nil
+		case FilterIDs:
+			return rt.FilterIDs, nil
+		case Weights:
+			return rt.Weights.String(InfieldSep, ANDSep), nil
+		case IntervalRates:
+			return rt.IntervalRates, nil
+		case Blocker:
+			return rt.Blocker, nil
+		case ActivationTimes:
+			return rt.ActivationTimes, nil
+		}
+	case 2:
+		fld, idx := GetPathIndex(fldPath[0])
+		if fld != IntervalRates ||
+			idx == nil ||
+			*idx >= len(rt.IntervalRates) {
+			return nil, ErrNotFound
+		}
+		return rt.IntervalRates[*idx].FieldAsInterface(fldPath[1:])
+	}
+}
+
+func (iR *IntervalRate) String() string { return ToJSON(iR) }
+func (iR *IntervalRate) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = iR.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return IfaceAsString(val), nil
+}
+func (iR *IntervalRate) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		return nil, ErrNotFound
+	case IntervalStart:
+		return iR.IntervalStart, nil
+	case FixedFee:
+		return iR.FixedFee, nil
+	case RecurrentFee:
+		return iR.RecurrentFee, nil
+	case Unit:
+		return iR.Unit, nil
+	case Increment:
+		return iR.Increment, nil
 	}
 }

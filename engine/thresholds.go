@@ -655,3 +655,54 @@ func (tp *ThresholdProfile) Merge(v2 interface{}) {
 		tp.MinSleep = vi.MinSleep
 	}
 }
+
+func (tp *ThresholdProfile) String() string { return utils.ToJSON(tp) }
+func (tp *ThresholdProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = tp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (tp *ThresholdProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if idx != nil {
+			switch fld {
+			case utils.ActionProfileIDs:
+				if *idx < len(tp.ActionProfileIDs) {
+					return tp.ActionProfileIDs[*idx], nil
+				}
+			case utils.FilterIDs:
+				if *idx < len(tp.FilterIDs) {
+					return tp.FilterIDs[*idx], nil
+				}
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.Tenant:
+		return tp.Tenant, nil
+	case utils.ID:
+		return tp.ID, nil
+	case utils.FilterIDs:
+		return tp.FilterIDs, nil
+	case utils.Weight:
+		return tp.Weight, nil
+	case utils.ActionProfileIDs:
+		return tp.ActionProfileIDs, nil
+	case utils.MaxHits:
+		return tp.MaxHits, nil
+	case utils.MinHits:
+		return tp.MinHits, nil
+	case utils.MinSleep:
+		return tp.MinSleep, nil
+	case utils.Blocker:
+		return tp.Blocker, nil
+	case utils.Async:
+		return tp.Async, nil
+	}
+}
