@@ -23,6 +23,7 @@ import (
 	"net"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -746,4 +747,75 @@ func (fltr *Filter) Merge(v2 interface{}) {
 		fltr.ID = vi.ID
 	}
 	fltr.Rules = append(fltr.Rules, vi.Rules...)
+}
+
+func (fltr *Filter) String() string { return utils.ToJSON(fltr) }
+func (fltr *Filter) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = fltr.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (fltr *Filter) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) == 1 {
+		switch fldPath[0] {
+		default:
+			fld, idx := utils.GetPathIndex(fldPath[0])
+			if fld == utils.Rules &&
+				idx != nil &&
+				*idx < len(fltr.Rules) {
+				return fltr.Rules[*idx], nil
+			}
+			return nil, utils.ErrNotFound
+		case utils.Tenant:
+			return fltr.Tenant, nil
+		case utils.ID:
+			return fltr.ID, nil
+		}
+	}
+	if len(fldPath) == 0 ||
+		!strings.HasPrefix(fldPath[0], utils.Rules) ||
+		fldPath[0][5] != '[' ||
+		fldPath[0][len(fldPath[0])-1] != ']' {
+		return nil, utils.ErrNotFound
+	}
+	var idx int
+	if idx, err = strconv.Atoi(fldPath[0][6 : len(fldPath[0])-1]); err != nil {
+		return
+	}
+	if idx >= len(fltr.Rules) {
+		return nil, utils.ErrNotFound
+	}
+	return fltr.Rules[idx].FieldAsInterface(fldPath[1:])
+}
+
+func (fltr *FilterRule) String() string { return utils.ToJSON(fltr) }
+func (fltr *FilterRule) FieldAsString(fldPath []string) (_ string, err error) {
+	var val interface{}
+	if val, err = fltr.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (fltr *FilterRule) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if fld == utils.Values &&
+			idx != nil &&
+			*idx < len(fltr.Values) {
+			return fltr.Values[*idx], nil
+		}
+		return nil, utils.ErrNotFound
+	case utils.Type:
+		return fltr.Type, nil
+	case utils.Element:
+		return fltr.Element, nil
+	case utils.Values:
+		return fltr.Values, nil
+	}
 }

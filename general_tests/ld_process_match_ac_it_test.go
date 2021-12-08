@@ -215,10 +215,7 @@ func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
 							"Opts":         map[string]interface{}{},
 							"Tenant":       "cgrates.org",
 							"ThresholdIDs": nil,
-							"Weights": []map[string]interface{}{{
-								"FilterIDs": nil,
-								"Weight":    0,
-							}},
+							"Weights":      nil,
 						},
 					},
 					"Charges":     nil,

@@ -1394,10 +1394,10 @@ func TestStatQueueProfileSet(t *testing.T) {
 	if err := sq.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := sq.Set([]string{"NotAField"}, ";", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := sq.Set([]string{"NotAField", "1"}, ";", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
