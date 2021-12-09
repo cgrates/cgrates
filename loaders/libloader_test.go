@@ -78,6 +78,10 @@ func TestNewRecord(t *testing.T) {
 	if len(pt) != 0 {
 		t.Fatal("Expected empty map")
 	}
+	exp := `{}`
+	if rply := newRecord(utils.MapStorage{}, pt, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).String(); exp != rply {
+		t.Errorf("Expeceted: %q, received: %v", exp, rply)
+	}
 }
 
 func TestNewRecordWithCahe(t *testing.T) {
@@ -88,6 +92,10 @@ func TestNewRecordWithCahe(t *testing.T) {
 		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
 		{Type: utils.MetaComposed, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
 		{Type: utils.MetaVariable, Path: "Value", Value: config.NewRSRParsersMustCompile("~*uch.*tntID.Value", ";")},
+		{Type: utils.MetaRemove, Path: "Value", Value: config.NewRSRParsersMustCompile("~*uch.*tntID.Value", ";")}, //ignored
+		{Type: utils.MetaComposed, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaRemove, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaRemoveAll, Path: "*uch", Value: config.NewRSRParsersMustCompile("0", ";")},
 	}
 	for _, f := range fc {
 		f.ComputePath()
@@ -114,6 +122,9 @@ func TestNewRecordWithTmp(t *testing.T) {
 		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
 		{Type: utils.MetaComposed, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
 		{Type: utils.MetaVariable, Path: "Value", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
+		{Type: utils.MetaComposed, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaRemove, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaRemoveAll, Path: "*tmp", Value: config.NewRSRParsersMustCompile("0", ";")},
 	}
 	for _, f := range fc {
 		f.ComputePath()
@@ -154,4 +165,147 @@ func (p profileTest) FieldAsString(fldPath []string) (string, error) {
 }
 func (p profileTest) FieldAsInterface(fldPath []string) (interface{}, error) {
 	return utils.MapStorage(p).FieldAsInterface(fldPath)
+}
+
+func TestNewProfileFunc(t *testing.T) {
+	tf := newProfileFunc(utils.EmptyString)
+	if v := tf(); v != nil {
+		t.Fatal("Expected emoty reply")
+	}
+}
+
+func TestNewRecordWithTmp2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fs := engine.NewFilterS(cfg, nil, nil)
+	fc := []*config.FCTemplate{
+		{Type: utils.MetaVariable, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*req.0", ";")},
+		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
+		{Type: utils.MetaVariable, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaVariable, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaComposed, Path: "Value", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";"), Blocker: true},
+		{Type: utils.MetaComposed, Path: "Value", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	exp := profileTest{
+		utils.Tenant: "cgrates.org",
+		utils.ID:     "Attr1",
+		utils.Value:  "0",
+	}
+	r := profileTest{}
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(r, exp) {
+		t.Errorf("Expected %+v, received %+v", exp, r)
+	}
+}
+
+func TestNewRecordWithComposeError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fs := engine.NewFilterS(cfg, nil, nil)
+	fc := []*config.FCTemplate{
+		{Type: utils.MetaVariable, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*req.0", ";")},
+		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
+		{Type: utils.MetaVariable, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaComposed, Path: "Value.NotVal", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	r := profileTest{
+		"Value": []string{},
+	}
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+}
+
+func TestNewRecordWithRemoveError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fs := engine.NewFilterS(cfg, nil, nil)
+	fc := []*config.FCTemplate{
+		{Type: utils.MetaVariable, Path: "*tmp.Value.0.Field", Value: config.NewRSRParsersMustCompile("tmp", ";")},
+		{Type: utils.MetaRemove, Path: "*tmp.Value.NotVal", Value: config.NewRSRParsersMustCompile("tmp", ";")},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	r := profileTest{
+		"Value": []string{},
+	}
+	expErrMsg := `strconv.Atoi: parsing "NotVal": invalid syntax`
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}
+
+func TestNewRecordSetFieldsError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fs := engine.NewFilterS(cfg, nil, nil)
+	fc := []*config.FCTemplate{
+		{Type: utils.MetaVariable, Path: "*tmp.Value<0.Field", Value: config.NewRSRParsersMustCompile("~*cfg.tmp", ";")},
+		{Type: utils.MetaVariable, Path: "*tmp.Value<0.Field", Value: config.NewRSRParsersMustCompile("tmp", ";")},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	r := profileTest{
+		"Value": []string{},
+	}
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+}
+
+func TestNewRecordSetFieldsMandatoryError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fs := engine.NewFilterS(cfg, nil, nil)
+	fc := []*config.FCTemplate{
+		{Type: utils.MetaVariable, Path: "path", Value: config.NewRSRParsersMustCompile("~*cfg.tmp", ";"), Mandatory: true},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	r := profileTest{
+		"Value": []string{},
+	}
+	expErrMsg := `NOT_FOUND:`
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
+		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}
+
+func TestRecordFieldAsInterface(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dp := config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil)
+	r := newRecord(dp, profileTest{}, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil))
+	if val, err := r.FieldAsInterface([]string{utils.MetaReq}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp; !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected %+v, received %+v", exp, val)
+	}
+	if val, err := r.FieldAsInterface([]string{utils.MetaTmp}); err != nil {
+		t.Fatal(err)
+	} else if exp := (&utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}); !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected %+v, received %+v", exp, val)
+	}
+	if val, err := r.FieldAsInterface([]string{utils.MetaCfg}); err != nil {
+		t.Fatal(err)
+	} else if exp := cfg.GetDataProvider(); !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected %+v, received %+v", exp, val)
+	}
+	if val, err := r.FieldAsInterface([]string{utils.MetaTenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; !reflect.DeepEqual(val, exp) {
+		t.Errorf("Expected %+v, received %+v", exp, val)
+	}
+	if _, err := r.FieldAsInterface([]string{utils.MetaUCH}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
 }

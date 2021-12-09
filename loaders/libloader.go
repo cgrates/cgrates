@@ -142,9 +142,7 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 				return
 			}
 		case utils.MetaRemoveAll:
-			if err = ar.RemoveAll(fld.GetPathSlice()[0]); err != nil {
-				return
-			}
+			ar.RemoveAll(fld.GetPathSlice()[0])
 		default:
 			var out interface{}
 			if out, err = engine.ParseAttribute(ar, fld.Type, fld.Path, fld.Value, rndDec,
@@ -187,7 +185,7 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 }
 
 // RemoveAll deletes all fields at given prefix
-func (ar *record) RemoveAll(prefix string) error {
+func (ar *record) RemoveAll(prefix string) {
 	switch prefix {
 	default:
 		// ar.data = utils.NewOrderedNavigableMap()
@@ -196,14 +194,13 @@ func (ar *record) RemoveAll(prefix string) error {
 	case utils.MetaUCH:
 		ar.cache.Clear()
 	}
-	return nil
 }
 
 // Remove deletes the fields found at path with the given prefix
 func (ar *record) Remove(fullPath *utils.FullPath) error {
 	switch fullPath.PathSlice[0] {
 	default:
-		return nil /* ar.data.Remove(&utils.FullPath{
+		/* ar.data.Remove(&utils.FullPath{
 			PathSlice: fullPath.PathSlice,
 			Path:      fullPath.Path,
 		})*/
@@ -211,8 +208,8 @@ func (ar *record) Remove(fullPath *utils.FullPath) error {
 		return ar.tmp.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
 	case utils.MetaUCH:
 		ar.cache.Remove(fullPath.Path[5:])
-		return nil
 	}
+	return nil
 }
 
 // Set sets the value at the given path
