@@ -1399,3 +1399,22 @@ func TestSplitConverter(t *testing.T) {
 		t.Errorf("expecting: %q, received: %q", expVal, i)
 	}
 }
+
+func TestDataConvertersConvertInterface(t *testing.T) {
+	dcs := &DataConverters{}
+	if rcv, err := dcs.ConvertInterface(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv != EmptyString {
+		t.Errorf("Expecting: <%+q>, received: <%+q>", EmptyString, rcv)
+	}
+	if rcv, err := dcs.ConvertInterface("test"); err != nil {
+		t.Error(err)
+	} else if rcv != "test" {
+		t.Errorf("Expecting: <test>, received: <%+q>", rcv)
+	}
+	dcs = &DataConverters{joinConverter(";")}
+	expErrMsg := `cannot convert field: {} to []string`
+	if _, err := dcs.ConvertInterface(struct{}{}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}

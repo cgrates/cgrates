@@ -108,7 +108,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 		} else {
 			err = dm.SetRateProfile(ctx, rpl, true)
 		}
-		return
 	case utils.MetaActionProfiles:
 		return dm.SetActionProfile(ctx, data.(*engine.ActionProfile), withIndex)
 	case utils.MetaAccounts:
