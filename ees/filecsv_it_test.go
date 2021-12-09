@@ -30,6 +30,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -396,14 +397,6 @@ func testCsvExportBufferedEvent(t *testing.T) {
 			},
 		},
 	}
-	/*
-		expected := []byte(`NumberOfEvent,CGRID,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost` + "\n" +
-			`1,dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.0164` + "\n" +
-			`2,ea1f1968cc207859672c332364fc7614c86b04c5,*default,*data,*rated,AnotherTenant,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,0.012` + "\n" +
-			`3,9e0b2a4b23e0843efe522e8a611b092a16ecfba1,raw,*data,*none,phone.org,sms,User2001,User2001,User2002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,44.5` + "\n" +
-			`4,cd8112998c2abb0e4a7cd3a94c74817cd5fe67d3,Default_charging_id,*prepaid,dispatchers.org,photo,1005,1005,1000,2679-04-25T22:02:25Z,2679-04-25T22:02:40Z,10,1.4422` + "\n" +
-			`4,10s,46.9706` + "\n")
-	*/
 	var reply []byte
 	if err := csvRpc.Call(utils.EeSv1ArchiveEventsInReply,
 		eventVoice, &reply); err != nil {
@@ -414,6 +407,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	csvRply := make([][]string, 6)
 	for _, f := range rdr.File {
 		rc, err := f.Open()
 		if err != nil {
@@ -421,17 +415,33 @@ func testCsvExportBufferedEvent(t *testing.T) {
 		}
 		info := csv.NewReader(rc)
 		info.FieldsPerRecord = -1
+		count := 0
 		for {
-			_, err = info.Read()
+			file, err := info.Read()
 			if err == io.EOF {
 				break
 			}
 			if err != nil {
 				t.Error(err)
 			}
+			csvRply[count] = file
+			count++
 		}
 		rc.Close()
 	}
+
+	expected := [][]string{
+		{"NumberOfEvent", "CGRID", "RunID", "ToR", "OriginID", "RequestType", "Tenant", "Category", "Account", "Subject", "Destination", "SetupTime", "AnswerTime", "Usage", "Cost"},
+		{"1", "dbafe9c8614c785a65aabd116dd3959c3c56f7f6", "*default", "*voice", "dsafdsaf", "*rated", "cgrates.org", "call", "1001", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10000000000", "1.0164"},
+		{"2", "ea1f1968cc207859672c332364fc7614c86b04c5", "*default", "*data", "", "*rated", "AnotherTenant", "call", "1001", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "0.012"},
+		{"3", "9e0b2a4b23e0843efe522e8a611b092a16ecfba1", "raw", "*data", "abcdefghh", "*none", "phone.org", "sms", "User2001", "User2001", "User2002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "44.5"},
+		{"4", "cd8112998c2abb0e4a7cd3a94c74817cd5fe67d3", "Default_charging_id", "", "", "*prepaid", "dispatchers.org", "photo", "1005", "1005", "1000", "2679-04-25T22:02:25Z", "2679-04-25T22:02:40Z", "10", "1.4422"},
+		{"4", "10s", "46.9706"},
+	}
+	if !reflect.DeepEqual(expected, csvRply) {
+		t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
+	}
+
 	time.Sleep(time.Second)
 }
 
