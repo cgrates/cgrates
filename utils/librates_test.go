@@ -1888,7 +1888,7 @@ func TestRateProfile(t *testing.T) {
 	rp := RateProfile{Rates: make(map[string]*Rate)}
 	exp := RateProfile{
 		Tenant:          "cgrates.org",
-		ID:              "ID",
+		ID:              ID,
 		FilterIDs:       []string{"fltr1", "*string:~*req.Account:1001"},
 		Weights:         DynamicWeights{{}},
 		MinCost:         NewDecimal(10, 0),
@@ -1924,7 +1924,7 @@ func TestRateProfile(t *testing.T) {
 	if err := rp.Set([]string{Tenant}, "cgrates.org", false, EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{ID}, "ID", false, EmptyString); err != nil {
+	if err := rp.Set([]string{ID}, ID, false, EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{FilterIDs}, "fltr1;*string:~*req.Account:1001", false, EmptyString); err != nil {
@@ -1991,5 +1991,141 @@ func TestRateProfile(t *testing.T) {
 
 	if !reflect.DeepEqual(exp, rp) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(rp))
+	}
+}
+
+func TestRateProfileFieldAsInterface(t *testing.T) {
+	rp := RateProfile{
+		Tenant:          "cgrates.org",
+		ID:              ID,
+		FilterIDs:       []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:         DynamicWeights{{}},
+		MinCost:         NewDecimal(10, 0),
+		MaxCost:         NewDecimal(10, 0),
+		MaxCostStrategy: "strategy",
+		Rates: map[string]*Rate{
+			"rat1": {
+				ID:              "rat1",
+				FilterIDs:       []string{"fltr1"},
+				Weights:         DynamicWeights{{}},
+				ActivationTimes: "* * * * *",
+				Blocker:         true,
+				IntervalRates: []*IntervalRate{{
+					IntervalStart: NewDecimal(10, 0),
+					FixedFee:      NewDecimal(10, 0),
+					RecurrentFee:  NewDecimal(10, 0),
+					Unit:          NewDecimal(10, 0),
+					Increment:     NewDecimal(10, 0),
+				}},
+			},
+		},
+	}
+	if _, err := rp.FieldAsInterface(nil); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{"field"}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{"field", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{Opts + "[f]"}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{Opts + "[f]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.FieldAsInterface([]string{Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Weights}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";0"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{MaxCostStrategy}); err != nil {
+		t.Fatal(err)
+	} else if exp := "strategy"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	expErrMsg := `strconv.Atoi: parsing "a": invalid syntax`
+	if _, err := rp.FieldAsInterface([]string{FilterIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates, "rat1"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{MinCost}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.MinCost; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{MaxCost}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.MaxCost; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if _, err := rp.FieldAsInterface([]string{Rates, "rat2"}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].ID; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", IntervalRates}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].IntervalRates; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].Blocker; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", ActivationTimes}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].ActivationTimes; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", Weights}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";0"; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
 	}
 }

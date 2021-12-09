@@ -1278,3 +1278,410 @@ func TestAccountSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(acc))
 	}
 }
+func TestAccountFieldAsInterface(t *testing.T) {
+	acc := Account{
+		Tenant:       "cgrates.org",
+		ID:           "ID",
+		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:      DynamicWeights{{}},
+		ThresholdIDs: []string{"TH1"},
+		Opts: map[string]interface{}{
+			"bal":  "val",
+			"bal2": "val2",
+			"bal3": "val2",
+			"bal4": "val2",
+			"bal5": MapStorage{"bal6": "val3"},
+		},
+		Balances: map[string]*Balance{
+			"bal1": {
+				ID:   "bal1",
+				Type: MetaConcrete,
+				Opts: map[string]interface{}{
+					"bal7":  "val3",
+					"bal8":  MapStorage{"bal9": "val3"},
+					"bal10": "val3",
+				},
+				Units:          NewDecimal(10, 0),
+				FilterIDs:      []string{"*string:~*req.Account:1001"},
+				AttributeIDs:   []string{"Attr1", "Attr2"},
+				RateProfileIDs: []string{"Attr1", "Attr2"},
+				Weights:        DynamicWeights{{Weight: 10}},
+				UnitFactors: []*UnitFactor{
+					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(10, 0)},
+					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(101, 0)},
+				},
+				CostIncrements: []*CostIncrement{
+					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(10, 0), FixedFee: NewDecimal(10, 0), RecurrentFee: NewDecimal(10, 0)},
+					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(101, 0), FixedFee: NewDecimal(101, 0), RecurrentFee: NewDecimal(101, 0)},
+				},
+			},
+		},
+	}
+	if _, err := acc.FieldAsInterface(nil); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{"field"}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{"field", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Opts + "[f]"}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Opts + "[f]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := acc.FieldAsInterface([]string{Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Weights}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";0"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Opts}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Opts; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{ThresholdIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.ThresholdIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{ThresholdIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.ThresholdIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances, "bal1"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	expErrMsg := `strconv.Atoi: parsing "a": invalid syntax`
+	if _, err := acc.FieldAsInterface([]string{FilterIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := acc.FieldAsInterface([]string{ThresholdIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if _, err := acc.FieldAsInterface([]string{Balances + "[]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", "", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", Opts}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].Opts; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", Type}); err != nil {
+		t.Fatal(err)
+	} else if exp := MetaConcrete; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", Units}); err != nil {
+		t.Fatal(err)
+	} else if exp := NewDecimal(10, 0); exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", Weights}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";10"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", AttributeIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].AttributeIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", RateProfileIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].RateProfileIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", AttributeIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].AttributeIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances, "bal1", RateProfileIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].RateProfileIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances, "bal1", ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "bal1"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].UnitFactors; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].CostIncrements; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].UnitFactors[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].CostIncrements[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", Opts + "[0]"}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", Opts + "[0]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", FilterIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", AttributeIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", RateProfileIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[a]", ""}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[a]", ""}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors, ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements, ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[4]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[4]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[0]", "", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", "", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[0]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[0]", FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].UnitFactors[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[0]", FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].UnitFactors[0].FilterIDs[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", UnitFactors + "[0]", Factor}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].UnitFactors[0].Factor; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].CostIncrements[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].CostIncrements[0].FilterIDs[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", Increment}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].CostIncrements[0].Increment; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", FixedFee}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].CostIncrements[0].FixedFee; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", RecurrentFee}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].CostIncrements[0].RecurrentFee; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	if _, err := acc.FieldAsString([]string{""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := acc.FieldAsString([]string{Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, exp := acc.String(), ToJSON(acc); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	if _, err := acc.Balances["bal1"].FieldAsString([]string{}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := acc.Balances["bal1"].FieldAsString([]string{ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "bal1"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, exp := acc.Balances["bal1"].String(), ToJSON(acc.Balances["bal1"]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	if _, err := acc.Balances["bal1"].UnitFactors[0].FieldAsString([]string{}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := acc.Balances["bal1"].UnitFactors[0].FieldAsString([]string{FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := "fltr1"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, exp := acc.Balances["bal1"].UnitFactors[0].String(), ToJSON(acc.Balances["bal1"].UnitFactors[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	if _, err := acc.Balances["bal1"].CostIncrements[0].FieldAsString([]string{}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := acc.Balances["bal1"].CostIncrements[0].FieldAsString([]string{FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := "fltr1"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, exp := acc.Balances["bal1"].CostIncrements[0].String(), ToJSON(acc.Balances["bal1"].CostIncrements[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+}
+
+func TestAccountMerge(t *testing.T) {
+	acc := &Account{
+		Opts: make(map[string]interface{}),
+		Balances: map[string]*Balance{
+			"bal1": {
+				Type: MetaConcrete,
+				Opts: make(map[string]interface{}),
+			},
+			"bal3": {},
+		},
+	}
+	exp := &Account{
+		Tenant:       "cgrates.org",
+		ID:           "ID",
+		FilterIDs:    []string{"fltr1"},
+		Weights:      DynamicWeights{{}},
+		Opts:         map[string]interface{}{"opt1": "val"},
+		ThresholdIDs: []string{"TH1"},
+		Balances: map[string]*Balance{
+			"bal1": {
+				ID:             "bal1",
+				Type:           MetaConcrete,
+				FilterIDs:      []string{"fltr1"},
+				Weights:        DynamicWeights{{}},
+				Units:          DecimalNaN,
+				Opts:           map[string]interface{}{"opt1": "val"},
+				AttributeIDs:   []string{"ATTR1"},
+				RateProfileIDs: []string{"RT1"},
+				UnitFactors:    []*UnitFactor{{}},
+				CostIncrements: []*CostIncrement{{}},
+			},
+			"bal2": {},
+			"bal3": {Type: MetaConcrete},
+		},
+	}
+	if acc.Merge(&Account{
+		Tenant:       "cgrates.org",
+		ID:           "ID",
+		FilterIDs:    []string{"fltr1"},
+		Weights:      DynamicWeights{{}},
+		Opts:         map[string]interface{}{"opt1": "val"},
+		ThresholdIDs: []string{"TH1"},
+		Balances: map[string]*Balance{
+			"bal3": {Type: MetaConcrete},
+			"bal2": {},
+			"bal1": {
+				ID:             "bal1",
+				FilterIDs:      []string{"fltr1"},
+				Weights:        DynamicWeights{{}},
+				Units:          DecimalNaN,
+				Opts:           map[string]interface{}{"opt1": "val"},
+				AttributeIDs:   []string{"ATTR1"},
+				RateProfileIDs: []string{"RT1"},
+				UnitFactors:    []*UnitFactor{{}},
+				CostIncrements: []*CostIncrement{{}},
+			},
+		},
+	}); !reflect.DeepEqual(exp, acc) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(acc))
+	}
+
+}

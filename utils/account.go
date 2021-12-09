@@ -885,6 +885,10 @@ func (ap *Account) Merge(v2 interface{}) {
 		ap.Opts[k] = v
 	}
 	for k, v := range vi.Balances {
+		if bl, has := ap.Balances[k]; has {
+			bl.Merge(v)
+			continue
+		}
 		ap.Balances[k] = v
 	}
 }
@@ -922,7 +926,7 @@ func (ap *Account) FieldAsInterface(fldPath []string) (_ interface{}, err error)
 					}
 				case Opts:
 					return MapStorage(ap.Opts).FieldAsInterface([]string{*idxStr})
-				case Rates:
+				case Balances:
 					if rt, has := ap.Balances[*idxStr]; has {
 						return rt, nil
 					}
@@ -1046,6 +1050,14 @@ func (bL *Balance) FieldAsInterface(fldPath []string) (_ interface{}, err error)
 			return bL.AttributeIDs, nil
 		case Units:
 			return bL.Units, nil
+		case RateProfileIDs:
+			return bL.RateProfileIDs, nil
+		case Opts:
+			return bL.Opts, nil
+		case UnitFactors:
+			return bL.UnitFactors, nil
+		case CostIncrements:
+			return bL.CostIncrements, nil
 		}
 	}
 	if len(fldPath) == 0 {
@@ -1147,5 +1159,26 @@ func (cI *CostIncrement) FieldAsInterface(fldPath []string) (_ interface{}, err 
 		return cI.FixedFee, nil
 	case RecurrentFee:
 		return cI.RecurrentFee, nil
+	}
+}
+
+func (bL *Balance) Merge(vi *Balance) {
+	if len(vi.ID) != 0 {
+		bL.ID = vi.ID
+	}
+	if len(vi.Type) != 0 {
+		bL.Type = vi.Type
+	}
+	if vi.Units != nil {
+		bL.Units = vi.Units
+	}
+	bL.FilterIDs = append(bL.FilterIDs, vi.FilterIDs...)
+	bL.Weights = append(bL.Weights, vi.Weights...)
+	bL.UnitFactors = append(bL.UnitFactors, vi.UnitFactors...)
+	bL.CostIncrements = append(bL.CostIncrements, vi.CostIncrements...)
+	bL.AttributeIDs = append(bL.AttributeIDs, vi.AttributeIDs...)
+	bL.RateProfileIDs = append(bL.RateProfileIDs, vi.RateProfileIDs...)
+	for k, v := range vi.Opts {
+		bL.Opts[k] = v
 	}
 }

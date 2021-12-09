@@ -107,6 +107,7 @@ func TestDryRun(t *testing.T) {
 	} else if expLog := "[INFO] <LoaderS-test> DRY_RUN: Filter: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"Rules\":[]}"; !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
+
 	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: StatsQueueProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaStats); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
@@ -143,6 +144,15 @@ func TestDryRun(t *testing.T) {
 	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherHost: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaDispatcherHosts); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+
+	expErrMsg := `emtpy RSRParser in rule: <>`
+	if _, err := testDryRunWithData(utils.MetaFilters, &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+		Rules:  []*engine.FilterRule{{}},
+	}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
 
@@ -186,6 +196,11 @@ func TestSetToDBWithDBError(t *testing.T) {
 	}
 	if err := setToDB(context.Background(), nil, utils.MetaAccounts, newProfileFunc(utils.MetaAccounts)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
+	}
+
+	expErrMsg := `emtpy RSRParser in rule: <>`
+	if err := setToDB(context.Background(), nil, utils.MetaFilters, &engine.Filter{Rules: []*engine.FilterRule{{Type: "*"}}}, true, false); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
 
