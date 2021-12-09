@@ -20,7 +20,7 @@ CREATE TABLE cdrs (
   destination varchar(128) NOT NULL,
   setup_time datetime NOT NULL,
   pdd DECIMAL(12,9) NOT NULL,
-  answer_time datetime NOT NULL,
+  answer_time datetime NULL,
   `usage` DECIMAL(30,9) NOT NULL,
   supplier varchar(128) NOT NULL,
   disconnect_cause varchar(64) NOT NULL,
