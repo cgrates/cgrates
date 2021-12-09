@@ -37,9 +37,9 @@ func NewFileCSVee(cfg *config.EventExporterCfg,
 	cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	dc *utils.SafeMapStorage, wrtr io.WriteCloser) (fCsv *FileCSVee, err error) {
 	fCsv = &FileCSVee{
-		cfg: cfg,
-		dc:  dc,
-		//wrtr:    wrtr,
+		cfg:     cfg,
+		dc:      dc,
+		wrtr:    wrtr,
 		cgrCfg:  cgrCfg,
 		filterS: filterS,
 	}

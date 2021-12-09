@@ -382,8 +382,15 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	cgrDp := utils.MapStorage{
 		utils.MetaOpts: args.APIOpts,
 	}
+	var ignoreFltr bool
+	if val, has := args.APIOpts[utils.MetaProfileIgnoreFilters]; has {
+		ignoreFltr, err = utils.IfaceAsBool(val)
+		if err != nil {
+			return err
+		}
+	}
 	for _, event := range args.Events {
-		if len(eesCfg.Filters) != 0 {
+		if len(eesCfg.Filters) != 0 && !ignoreFltr {
 			tnt := utils.FirstNonEmpty(args.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
 			cgrDp[utils.MetaReq] = event
 			if pass, errPass := eeS.fltrS.Pass(ctx, tnt,

@@ -22,6 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"archive/zip"
+	"bytes"
+	"encoding/csv"
+	"io"
 	"net/rpc"
 	"os"
 	"path"
@@ -342,7 +346,6 @@ func testCsvExportBufferedEvent(t *testing.T) {
 			{
 				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
-				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
 				utils.RequestType:  utils.MetaRated,
 				utils.Tenant:       "AnotherTenant",
@@ -359,26 +362,25 @@ func testCsvExportBufferedEvent(t *testing.T) {
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			{
-				utils.CGRID:        utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
-				utils.ToR:          utils.MetaData,
-				utils.OriginID:     "abcdef",
-				utils.RequestType:  utils.MetaNone,
-				utils.Tenant:       "phone.org",
-				utils.Category:     "sms", //for data CDR use different Tenant
-				utils.AccountField: "User2001",
-				utils.Subject:      "User2001",
-				utils.Destination:  "User2002",
-				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
-				utils.AnswerTime:   time.Unix(1383813746, 0).UTC(),
-				utils.Usage:        10 * time.Nanosecond,
-				utils.RunID:        "raw",
-				utils.Cost:         44.5,
+				utils.CGRID:         utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:           utils.MetaData,
+				"ComposedOriginID1": "abcdefghh",
+				utils.RequestType:   utils.MetaNone,
+				utils.Tenant:        "phone.org",
+				utils.Category:      "sms", //for data CDR use different Tenant
+				utils.AccountField:  "User2001",
+				utils.Subject:       "User2001",
+				utils.Destination:   "User2002",
+				utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
+				utils.AnswerTime:    time.Unix(1383813746, 0).UTC(),
+				utils.Usage:         10 * time.Nanosecond,
+				utils.RunID:         "raw",
+				utils.Cost:          44.5,
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
 			{
 				utils.CGRID:        utils.Sha1("qwert", time.Unix(1383813745, 0).UTC().String()),
-				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "127.0.0.1",
 				utils.RequestType:  utils.MetaPrepaid,
 				utils.Tenant:       "dispatchers.org",
@@ -394,18 +396,41 @@ func testCsvExportBufferedEvent(t *testing.T) {
 			},
 		},
 	}
-	expected := []byte(`NumberOfEvent,CGRID,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost` + "\n" +
-		`1,dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.0164` + "\n" +
-		`2,ea1f1968cc207859672c332364fc7614c86b04c5,*default,*data,*rated,AnotherTenant,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,0.012` + "\n" +
-		`3,9e0b2a4b23e0843efe522e8a611b092a16ecfba1,raw,*data,*none,phone.org,sms,User2001,User2001,User2002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,44.5` + "\n" +
-		`4,cd8112998c2abb0e4a7cd3a94c74817cd5fe67d3,Default_charging_id,*prepaid,dispatchers.org,photo,1005,1005,1000,2679-04-25T22:02:25Z,2679-04-25T22:02:40Z,10,1.4422` + "\n" +
-		`4,10s,46.9706` + "\n")
+	/*
+		expected := []byte(`NumberOfEvent,CGRID,RunID,ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage,Cost` + "\n" +
+			`1,dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10000000000,1.0164` + "\n" +
+			`2,ea1f1968cc207859672c332364fc7614c86b04c5,*default,*data,*rated,AnotherTenant,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,0.012` + "\n" +
+			`3,9e0b2a4b23e0843efe522e8a611b092a16ecfba1,raw,*data,*none,phone.org,sms,User2001,User2001,User2002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,44.5` + "\n" +
+			`4,cd8112998c2abb0e4a7cd3a94c74817cd5fe67d3,Default_charging_id,*prepaid,dispatchers.org,photo,1005,1005,1000,2679-04-25T22:02:25Z,2679-04-25T22:02:40Z,10,1.4422` + "\n" +
+			`4,10s,46.9706` + "\n")
+	*/
 	var reply []byte
 	if err := csvRpc.Call(utils.EeSv1ArchiveEventsInReply,
 		eventVoice, &reply); err != nil {
 		t.Error(err)
-	} else if len(reply) != 563 {
-		t.Errorf("Expected %v \n received %v", len(expected), len(reply))
+	}
+
+	rdr, err := zip.NewReader(bytes.NewReader(reply), int64(len(reply)))
+	if err != nil {
+		t.Error(err)
+	}
+	for _, f := range rdr.File {
+		rc, err := f.Open()
+		if err != nil {
+			t.Fatal(err)
+		}
+		info := csv.NewReader(rc)
+		info.FieldsPerRecord = -1
+		for {
+			_, err = info.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				t.Error(err)
+			}
+		}
+		rc.Close()
 	}
 	time.Sleep(time.Second)
 }
