@@ -389,7 +389,10 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 	var prfCountOpt *int
 	if prfCountOpt, err = GetIntPointerOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.ProfileCount,
 		utils.OptsRoutesProfileCount); err != nil {
-		return
+		if err != utils.ErrNotFound { // if the error is NOT_FOUND, it means that in opts or config, countProfiles field is not defined, so we will get just 1 profile
+			return
+		}
+		prfCountOpt = utils.IntPointer(1)
 	}
 	if prfCountOpt != nil || prfCount > *prfCountOpt { // it has the option and is smaller that the current number of profiles
 		prfCount = *prfCountOpt
@@ -398,7 +401,6 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 	if extraOpts, err = newOptsGetRoutes(ctx, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
 		return
 	}
-
 	var startIdx, noSrtRoutes int
 	if extraOpts.paginator.Offset != nil { // save the offset in a varible to not duble check if we have offset and is still not 0
 		startIdx = *extraOpts.paginator.Offset
