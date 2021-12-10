@@ -437,3 +437,344 @@ func TestDispatcherHostSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }
+
+func TestDispatcherProfileAsInterface(t *testing.T) {
+	dp := DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:    10,
+		Strategy:  utils.MetaRandom,
+		StrategyParams: map[string]interface{}{
+			"opt1": "val1",
+			"opt2": "val1",
+			"opt3": "val1",
+		},
+		Hosts: DispatcherHostProfiles{
+			{
+				ID:        "host1",
+				FilterIDs: []string{"fltr1"},
+				Weight:    10,
+				Blocker:   true,
+				Params: map[string]interface{}{
+					"param1": "val1",
+					"param2": "val1",
+				},
+			},
+			{
+				Params: map[string]interface{}{
+					"param3": "val1",
+				},
+			},
+		},
+	}
+	if _, err := dp.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dp.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dp.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Weight}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Weight; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Hosts}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Hosts; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Strategy}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Strategy; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Hosts}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Hosts; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Hosts[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	expErrMsg := `strconv.Atoi: parsing "a": invalid syntax`
+	if _, err := dp.FieldAsInterface([]string{utils.FilterIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[a]", ""}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[4]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[a]", ""}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts, ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.StrategyParams + "[a]"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.StrategyParams + "[a]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Hosts[0].ID; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Hosts[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.Weight}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Hosts[0].Weight; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Hosts[0].Blocker; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := dp.Hosts[0].FilterIDs[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.FilterIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.Params + "[a]"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.Params + "[a]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dp.FieldAsInterface([]string{utils.Hosts + "[0]", utils.Params + "a]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if _, err := dp.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := dp.FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := dp.String(), utils.ToJSON(dp); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := dp.Hosts[0].FieldAsString([]string{}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := dp.Hosts[0].FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "host1"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := dp.Hosts[0].String(), utils.ToJSON(dp.Hosts[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}
+
+func TestDispatcherProfileMerge(t *testing.T) {
+	dp := &DispatcherProfile{
+		StrategyParams: make(map[string]interface{}),
+	}
+	exp := &DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts:          DispatcherHostProfiles{{}},
+	}
+	if dp.Merge(&DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "ID",
+		FilterIDs:      []string{"fltr1"},
+		Weight:         65,
+		Strategy:       utils.MetaLoad,
+		StrategyParams: map[string]interface{}{"k": "v"},
+		Hosts:          DispatcherHostProfiles{{}},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}
+
+func TestDispatcherHostAsInterface(t *testing.T) {
+	dh := DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                "ID",
+			Address:           "127.0.0.1",
+			Transport:         utils.MetaJSON,
+			ConnectAttempts:   1,
+			Reconnects:        1,
+			ConnectTimeout:    time.Nanosecond,
+			ReplyTimeout:      time.Nanosecond,
+			TLS:               true,
+			ClientKey:         "key",
+			ClientCertificate: "ce",
+			CaCertificate:     "ca",
+		},
+	}
+	if _, err := dh.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dh.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := dh.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := dh.FieldAsInterface([]string{utils.Address}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.Address; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.Transport}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.Transport; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.ConnectAttempts}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.ConnectAttempts; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.Reconnects}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.Reconnects; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.ConnectTimeout}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.ConnectTimeout; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.ReplyTimeout}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.ReplyTimeout; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.TLS}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.TLS; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.ClientKey}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.ClientKey; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.ClientCertificate}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.ClientCertificate; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := dh.FieldAsInterface([]string{utils.CaCertificate}); err != nil {
+		t.Fatal(err)
+	} else if exp := dh.CaCertificate; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if _, err := dh.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := dh.FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := dh.String(), utils.ToJSON(dh); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}
+
+func TestDispatcherHostMerge(t *testing.T) {
+	dp := &DispatcherHost{
+		RemoteHost: &config.RemoteHost{},
+	}
+	exp := &DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                "ID",
+			Address:           "127.0.0.1",
+			Transport:         utils.MetaJSON,
+			ConnectAttempts:   1,
+			Reconnects:        1,
+			ConnectTimeout:    time.Nanosecond,
+			ReplyTimeout:      time.Nanosecond,
+			TLS:               true,
+			ClientKey:         "key",
+			ClientCertificate: "ce",
+			CaCertificate:     "ca",
+		},
+	}
+	if dp.Merge(&DispatcherHost{
+		Tenant: "cgrates.org",
+		RemoteHost: &config.RemoteHost{
+			ID:                "ID",
+			Address:           "127.0.0.1",
+			Transport:         utils.MetaJSON,
+			ConnectAttempts:   1,
+			Reconnects:        1,
+			ConnectTimeout:    time.Nanosecond,
+			ReplyTimeout:      time.Nanosecond,
+			TLS:               true,
+			ClientKey:         "key",
+			ClientCertificate: "ce",
+			CaCertificate:     "ca",
+		},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}

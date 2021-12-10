@@ -290,6 +290,9 @@ func (ap *ActionProfile) FieldAsInterface(fldPath []string) (_ interface{}, err 
 	default:
 		return nil, utils.ErrNotFound
 	case utils.Actions:
+		if idxStr == nil {
+			return nil, utils.ErrNotFound
+		}
 		var idx int
 		if idx, err = strconv.Atoi(*idxStr); err != nil {
 			return
@@ -318,6 +321,15 @@ func (a *APAction) FieldAsString(fldPath []string) (_ string, err error) {
 func (cp *APAction) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
 	switch len(fldPath) {
 	default:
+		if fld, idxStr := utils.GetPathIndexString(fldPath[0]); fld == utils.Opts {
+			path := fldPath[1:]
+			if idxStr != nil {
+				path = append([]string{*idxStr}, path...)
+			}
+			return utils.MapStorage(cp.Opts).FieldAsInterface(path)
+		}
+		fallthrough
+	case 0:
 		return nil, utils.ErrNotFound
 	case 1:
 		switch fldPath[0] {
