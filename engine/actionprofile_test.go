@@ -245,3 +245,275 @@ func TestActionProfileSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(ap))
 	}
 }
+
+func TestActionProfileFieldAsInterface(t *testing.T) {
+	ap := ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Schedule:  utils.MetaNow,
+		Weight:    10,
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts:   utils.NewStringSet([]string{"1001", "1002"}),
+			utils.MetaThresholds: utils.NewStringSet([]string{"TH1", "TH2"}),
+		},
+		Actions: []*APAction{{
+			ID:        "acc1",
+			Type:      "val1",
+			FilterIDs: []string{"fltr1"},
+			Blocker:   true,
+			TTL:       10,
+			Opts: map[string]interface{}{
+				"opt0": "val1",
+				"opt1": "val1",
+				"opt2": "val1",
+				"opt3": utils.MapStorage{"opt4": "val1"},
+			},
+			Diktats: []*APDiktat{{
+				Path:  "path",
+				Value: "val1",
+			}},
+		}},
+	}
+	if _, err := ap.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Weight}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Weight; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Schedule}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Schedule; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Targets}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Targets; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Targets + "[*accounts]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Targets[utils.MetaAccounts]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	expErrMsg := `strconv.Atoi: parsing "a": invalid syntax`
+	if _, err := ap.FieldAsInterface([]string{utils.FilterIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[a]", "a"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions, ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[4]", "a"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Targets + "[4]", "a"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Targets + "[*accounts]", "1001"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Targets[utils.MetaAccounts]["1001"]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", "a"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].Blocker; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].ID; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.TTL}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].TTL; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].Diktats; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Type}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].Type; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Opts}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].Opts; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Opts + "[0]"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].FilterIDs[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].Diktats[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.FilterIDs + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats + "[a]"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Opts + "0"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Opts + "0", "0"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Opts + "[0]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Opts + "[0]", "", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", "" + "[0]", "", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats, "0"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats + "[4]", "0"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats + "[0]", "0"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats + "[a]", "0"}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats + "[0]", utils.Path}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].Diktats[0].Path; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Actions + "[0]", utils.Diktats + "[0]", utils.Value}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Actions[0].Diktats[0].Value; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := ap.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsString([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := ap.String(), utils.ToJSON(ap); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := ap.Actions[0].FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.Actions[0].FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "acc1"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := ap.Actions[0].String(), utils.ToJSON(ap.Actions[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := ap.Actions[0].Diktats[0].FieldAsString([]string{"", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.Actions[0].Diktats[0].FieldAsString([]string{utils.Path}); err != nil {
+		t.Fatal(err)
+	} else if exp := "path"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := ap.Actions[0].Diktats[0].String(), utils.ToJSON(ap.Actions[0].Diktats[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}
+
+func TestActionProfileMerge(t *testing.T) {
+	acc := &ActionProfile{
+		Targets: make(map[string]utils.StringSet),
+	}
+	exp := &ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1"},
+		Weight:    65,
+		Schedule:  "* * * * *",
+		Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:   []*APAction{{}},
+	}
+	if acc.Merge(&ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1"},
+		Weight:    65,
+		Schedule:  "* * * * *",
+		Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+		Actions:   []*APAction{{}},
+	}); !reflect.DeepEqual(exp, acc) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(acc))
+	}
+}

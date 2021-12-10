@@ -2097,6 +2097,15 @@ func TestRateProfileFieldAsInterface(t *testing.T) {
 	if _, err := rp.FieldAsInterface([]string{Rates, "rat2"}); err != ErrNotFound {
 		t.Fatal(err)
 	}
+	if _, err := rp.FieldAsInterface([]string{Rates, "rat1", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{Rates, "rat1", "", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{Rates, "rat1", "", "", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
 
 	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", ID}); err != nil {
 		t.Fatal(err)
@@ -2128,4 +2137,140 @@ func TestRateProfileFieldAsInterface(t *testing.T) {
 	} else if exp := ";0"; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
 	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].FilterIDs[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", IntervalRates + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].IntervalRates[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if _, err := rp.FieldAsInterface([]string{Rates + "[rat1]", IntervalRates + "[0]", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.Rates["rat1"].IntervalRates[0].FieldAsInterface([]string{"", ""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", IntervalRates + "[0]", IntervalStart}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].IntervalRates[0].IntervalStart; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", IntervalRates + "[0]", FixedFee}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].IntervalRates[0].FixedFee; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", IntervalRates + "[0]", RecurrentFee}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].IntervalRates[0].RecurrentFee; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", IntervalRates + "[0]", Unit}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].IntervalRates[0].Unit; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{Rates + "[rat1]", IntervalRates + "[0]", Increment}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Rates["rat1"].IntervalRates[0].Increment; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	if _, err := rp.FieldAsString([]string{""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.FieldAsString([]string{Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, exp := rp.String(), ToJSON(rp); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	if _, err := rp.Rates["rat1"].FieldAsString([]string{""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.Rates["rat1"].FieldAsString([]string{ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "rat1"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, exp := rp.Rates["rat1"].String(), ToJSON(rp.Rates["rat1"]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+
+	if _, err := rp.Rates["rat1"].IntervalRates[0].FieldAsString([]string{""}); err != ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.Rates["rat1"].IntervalRates[0].FieldAsString([]string{IntervalStart}); err != nil {
+		t.Fatal(err)
+	} else if exp := "10"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, exp := rp.Rates["rat1"].IntervalRates[0].String(), ToJSON(rp.Rates["rat1"].IntervalRates[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+}
+
+func TestRateProfileMerge(t *testing.T) {
+	acc := &RateProfile{
+		Rates: map[string]*Rate{
+			"rat1": {},
+			"rat2": {Blocker: true},
+		},
+	}
+	exp := &RateProfile{
+		Tenant:          "cgrates.org",
+		ID:              "ID",
+		FilterIDs:       []string{"fltr1"},
+		Weights:         DynamicWeights{{}},
+		MinCost:         NewDecimal(10, 0),
+		MaxCost:         NewDecimal(10, 0),
+		MaxCostStrategy: "strategy",
+		Rates: map[string]*Rate{
+			"rat1": {
+				ID:              "rat1",
+				FilterIDs:       []string{"fltr1"},
+				ActivationTimes: "* * * * *",
+				Weights:         DynamicWeights{{}},
+				Blocker:         true,
+				IntervalRates:   []*IntervalRate{{}},
+			},
+			"rat2": {
+				ID:      "rat2",
+				Blocker: true,
+			},
+			"rat3": {},
+		},
+	}
+	if acc.Merge(&RateProfile{
+		Tenant:          "cgrates.org",
+		ID:              "ID",
+		FilterIDs:       []string{"fltr1"},
+		Weights:         DynamicWeights{{}},
+		MinCost:         NewDecimal(10, 0),
+		MaxCost:         NewDecimal(10, 0),
+		MaxCostStrategy: "strategy",
+		Rates: map[string]*Rate{
+			"rat1": {
+				ID:              "rat1",
+				FilterIDs:       []string{"fltr1"},
+				ActivationTimes: "* * * * *",
+				Weights:         DynamicWeights{{}},
+				Blocker:         true,
+				IntervalRates:   []*IntervalRate{{}},
+			},
+			"rat2": {
+				ID: "rat2",
+			},
+			"rat3": {},
+		},
+	}); !reflect.DeepEqual(exp, acc) {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(acc))
+	}
+
 }
