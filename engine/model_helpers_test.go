@@ -853,8 +853,9 @@ func TestTPFilterAsTPFilter3(t *testing.T) {
 	}
 
 	rcvTPs := FilterMdls(tps).AsTPFilter()
-	sort.Strings(rcvTPs[0].Filters[0].Values)
-	sort.Strings(eTPs[0].Filters[0].Values)
+	sort.Slice(rcvTPs, func(i, j int) bool {
+		return rcvTPs[i].Tenant > rcvTPs[j].Tenant
+	})
 	if !reflect.DeepEqual(eTPs, rcvTPs) {
 		t.Errorf("Expecting: %+v \n ,Received: %+v", utils.ToJSON(eTPs), utils.ToJSON(rcvTPs))
 	}
