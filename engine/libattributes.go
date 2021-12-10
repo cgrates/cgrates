@@ -21,7 +21,6 @@ package engine
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -267,10 +266,17 @@ func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 		switch fldPath[0] {
 		default:
 			fld, idx := utils.GetPathIndex(fldPath[0])
-			if fld == utils.FilterIDs &&
-				idx != nil &&
-				*idx < len(ap.FilterIDs) {
-				return ap.FilterIDs[*idx], nil
+			if idx != nil {
+				switch fld {
+				case utils.Attributes:
+					if *idx < len(ap.Attributes) {
+						return ap.Attributes[*idx], nil
+					}
+				case utils.FilterIDs:
+					if *idx < len(ap.FilterIDs) {
+						return ap.FilterIDs[*idx], nil
+					}
+				}
 			}
 			return nil, utils.ErrNotFound
 		case utils.Tenant:
@@ -287,20 +293,17 @@ func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 			return ap.Attributes, nil
 		}
 	}
-	if len(fldPath) == 0 ||
-		!strings.HasPrefix(fldPath[0], utils.Attributes) ||
-		fldPath[0][10] != '[' ||
-		fldPath[0][len(fldPath[0])-1] != ']' {
+	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	var idx int
-	if idx, err = strconv.Atoi(fldPath[0][11 : len(fldPath[0])-1]); err != nil {
-		return
-	}
-	if idx >= len(ap.Attributes) {
+	fld, idx := utils.GetPathIndex(fldPath[0])
+	if fld != utils.Attributes || idx == nil {
 		return nil, utils.ErrNotFound
 	}
-	return ap.Attributes[idx].FieldAsInterface(fldPath[1:])
+	if *idx >= len(ap.Attributes) {
+		return nil, utils.ErrNotFound
+	}
+	return ap.Attributes[*idx].FieldAsInterface(fldPath[1:])
 }
 
 func (at *Attribute) String() string { return utils.ToJSON(at) }
@@ -318,6 +321,12 @@ func (at *Attribute) FieldAsInterface(fldPath []string) (_ interface{}, err erro
 	}
 	switch fldPath[0] {
 	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if idx != nil &&
+			fld == utils.FilterIDs &&
+			*idx < len(at.FilterIDs) {
+			return at.FilterIDs[*idx], nil
+		}
 		return nil, utils.ErrNotFound
 	case utils.FilterIDs:
 		return at.FilterIDs, nil

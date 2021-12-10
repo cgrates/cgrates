@@ -1037,7 +1037,7 @@ func TestLenTimeConverter3(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
-	if rcv, err := cnv.Convert("[]"); err != nil {
+	if rcv, err := cnv.Convert("[}"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
@@ -1226,6 +1226,17 @@ func TestLenTimeConverter3(t *testing.T) {
 	}
 
 	if rcv, err := cnv.Convert(map[string]Account{}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+
+	if rcv, err := cnv.Convert("[]"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+	if rcv, err := cnv.Convert("{}"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
