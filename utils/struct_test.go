@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"math/cmplx"
 	"reflect"
 	"testing"
@@ -221,26 +222,20 @@ func TestUpdateStructWithIfaceMapErrorDefault(t *testing.T) {
 	}
 }
 
-// func TestContentStructFieldByIndexIsEmpty(t *testing.T) {
-
-// 	type InsideStruct struct {
-// 		Field1 int
-// 	}
-// 	type contentStruct struct {
-// 		content1 string
-// 		content2 InsideStruct
-// 	}
-
-// 	myStruct := contentStruct{
-// 		content1: "string1",
-// 		content2: InsideStruct{
-// 			Field1: 1,
-// 		},
-// 	}
-// 	value := reflect.ValueOf(myStruct)
-// 	ptr := value.FieldByName("content2")
-// 	value = reflect.Indirect(ptr).FieldByName("Field1")
-// 	if fieldByIndexIsEmpty(value, []int{0, 1}) {
-// 		fmt.Printf("%v", value)
-// 	}
-// }
+func TestContentStructFieldByIndexIsEmpty(t *testing.T) {
+	type testStr struct {
+		fld int
+	}
+	myStruct := struct {
+		content1 string
+		content2 *testStr
+	}{
+		content1: "string1",
+		content2: &testStr{
+			fld: 1,
+		},
+	}
+	if fieldByIndexIsEmpty(reflect.ValueOf(myStruct), []int{1, 0}) {
+		fmt.Printf("%v", myStruct)
+	}
+}

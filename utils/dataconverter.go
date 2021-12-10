@@ -485,7 +485,7 @@ type LengthConverter struct{}
 func (LengthConverter) Convert(in interface{}) (out interface{}, err error) {
 	switch val := in.(type) {
 	case string:
-		if len(val) > 2 {
+		if len(val) >= 2 {
 			var tmp interface{}
 			var l func() (interface{}, error)
 			switch {

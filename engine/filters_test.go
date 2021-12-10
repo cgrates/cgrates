@@ -1369,3 +1369,121 @@ func TestFilterSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(fltr))
 	}
 }
+
+func TestFilterAsInterface(t *testing.T) {
+	fltr := Filter{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001", "1002"},
+		}},
+	}
+	if _, err := fltr.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := fltr.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := fltr.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := fltr.FieldAsInterface([]string{utils.Rules + "[4]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	expErrMsg := `strconv.Atoi: parsing "a": invalid syntax`
+	if _, err := fltr.FieldAsInterface([]string{utils.Rules + "[a]", ""}); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if _, err := fltr.FieldAsInterface([]string{utils.Rules + "[0]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := fltr.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := fltr.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := fltr.FieldAsInterface([]string{utils.Rules + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := fltr.Rules[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := fltr.FieldAsInterface([]string{utils.Rules + "[0]", utils.Values}); err != nil {
+		t.Fatal(err)
+	} else if exp := fltr.Rules[0].Values; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := fltr.FieldAsInterface([]string{utils.Rules + "[0]", utils.Values + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := fltr.Rules[0].Values[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := fltr.FieldAsInterface([]string{utils.Rules + "[0]", utils.Element}); err != nil {
+		t.Fatal(err)
+	} else if exp := fltr.Rules[0].Element; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := fltr.FieldAsInterface([]string{utils.Rules + "[0]", utils.Type}); err != nil {
+		t.Fatal(err)
+	} else if exp := fltr.Rules[0].Type; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := fltr.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := fltr.FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := fltr.String(), utils.ToJSON(fltr); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := fltr.Rules[0].FieldAsString([]string{}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := fltr.Rules[0].FieldAsString([]string{utils.Type}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.MetaString; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := fltr.Rules[0].String(), utils.ToJSON(fltr.Rules[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+}
+
+func TestFilterMerge(t *testing.T) {
+	dp := &Filter{}
+	exp := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001", "1002"},
+		}},
+	}
+	if dp.Merge(&Filter{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+		Rules: []*FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001", "1002"},
+		}},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}

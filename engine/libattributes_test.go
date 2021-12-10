@@ -280,3 +280,163 @@ func TestAttributeProfileSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }
+
+func TestAttributeProfileAsInterface(t *testing.T) {
+	ap := AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:    10,
+		Blocker:   true,
+		Attributes: []*Attribute{{
+			Path:      "*req.Account",
+			Type:      utils.MetaConstant,
+			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+			FilterIDs: []string{"fltr1"},
+		}},
+	}
+	if _, err := ap.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Weight}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Weight; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Blocker; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Attributes}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Attributes; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Attributes + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Attributes[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Attributes + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Attributes[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Attributes + "[4]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Attributes + "[0]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Attributes + "0]"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Attributes + "[0]", utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Attributes[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Attributes + "[0]", utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Attributes[0].FilterIDs[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Attributes + "[0]", utils.Path}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Attributes[0].Path; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Attributes + "[0]", utils.Type}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Attributes[0].Type; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Attributes + "[0]", utils.Value}); err != nil {
+		t.Fatal(err)
+	} else if exp := "10"; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := ap.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := ap.String(), utils.ToJSON(ap); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := ap.Attributes[0].FieldAsString([]string{}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.Attributes[0].FieldAsString([]string{utils.Value}); err != nil {
+		t.Fatal(err)
+	} else if exp := "10"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := ap.Attributes[0].String(), utils.ToJSON(ap.Attributes[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}
+
+func TestAttributeProfileMerge(t *testing.T) {
+	dp := &AttributeProfile{}
+	exp := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:    10,
+		Blocker:   true,
+		Attributes: []*Attribute{{
+			Path:      "*req.Account",
+			Type:      utils.MetaConstant,
+			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+			FilterIDs: []string{"fltr1"},
+		}},
+	}
+	if dp.Merge(&AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ID",
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:    10,
+		Blocker:   true,
+		Attributes: []*Attribute{{
+			Path:      "*req.Account",
+			Type:      utils.MetaConstant,
+			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+			FilterIDs: []string{"fltr1"},
+		}},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}

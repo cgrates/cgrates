@@ -1445,3 +1445,161 @@ func TestStatQueueProfileSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(sq))
 	}
 }
+
+func TestStatQueueProfileAsInterface(t *testing.T) {
+	ap := StatQueueProfile{
+		Tenant:       "cgrates.org",
+		ID:           "ID",
+		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:       10,
+		QueueLength:  10,
+		TTL:          10,
+		MinItems:     10,
+		Stored:       true,
+		Blocker:      true,
+		ThresholdIDs: []string{"TH1"},
+		Metrics: []*MetricWithFilters{{
+			MetricID: utils.MetaTCD,
+		}, {
+			MetricID:  utils.MetaACD,
+			FilterIDs: []string{"fltr1"},
+		}},
+	}
+	if _, err := ap.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Weight}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Weight; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.ThresholdIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.ThresholdIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.ThresholdIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.ThresholdIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Metrics}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Metrics; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Metrics[0]; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := ap.FieldAsInterface([]string{utils.QueueLength}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.QueueLength; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.TTL}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.TTL; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.MinItems}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.MinItems; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Stored}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Stored; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Blocker; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "[4]"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "4]"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "[4]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]", "", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if val, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]", utils.MetricID}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Metrics[0].MetricID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]", utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Metrics[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := ap.FieldAsInterface([]string{utils.Metrics + "[1]", utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := ap.Metrics[1].FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := ap.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := ap.String(), utils.ToJSON(ap); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := ap.Metrics[0].FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := ap.Metrics[0].FieldAsString([]string{utils.MetricID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.MetaTCD; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := ap.Metrics[0].String(), utils.ToJSON(ap.Metrics[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+}

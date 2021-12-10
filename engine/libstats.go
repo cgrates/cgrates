@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -701,20 +700,18 @@ func (sqp *StatQueueProfile) FieldAsInterface(fldPath []string) (_ interface{}, 
 			return sqp.Blocker, nil
 		}
 	}
-	if len(fldPath) == 0 ||
-		!strings.HasPrefix(fldPath[0], utils.Metrics) ||
-		fldPath[0][7] != '[' ||
-		fldPath[0][len(fldPath[0])-1] != ']' {
+	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	var idx int
-	if idx, err = strconv.Atoi(fldPath[0][8 : len(fldPath[0])-1]); err != nil {
-		return
-	}
-	if idx >= len(sqp.Metrics) {
+	fld, idx := utils.GetPathIndex(fldPath[0])
+	if fld != utils.Metrics ||
+		idx == nil {
 		return nil, utils.ErrNotFound
 	}
-	return sqp.Metrics[idx].FieldAsInterface(fldPath[1:])
+	if *idx >= len(sqp.Metrics) {
+		return nil, utils.ErrNotFound
+	}
+	return sqp.Metrics[*idx].FieldAsInterface(fldPath[1:])
 }
 
 func (mf *MetricWithFilters) String() string { return utils.ToJSON(mf) }
