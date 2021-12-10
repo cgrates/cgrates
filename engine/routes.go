@@ -388,13 +388,11 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
 	var prfCountOpt *int
 	if prfCountOpt, err = GetIntPointerOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.ProfileCount,
-		utils.OptsRoutesProfileCount); err != nil {
-		if err != utils.ErrNotFound { // if the error is NOT_FOUND, it means that in opts or config, countProfiles field is not defined, so we will get just 1 profile
-			return
-		}
-		prfCountOpt = utils.IntPointer(1)
+		utils.OptsRoutesProfileCount); err != nil && err != utils.ErrNotFound {
+		// if the error is NOT_FOUND, it means that in opts or config, countProfiles field is not defined
+		return
 	}
-	if prfCountOpt != nil || prfCount > *prfCountOpt { // it has the option and is smaller that the current number of profiles
+	if prfCountOpt != nil && prfCount > *prfCountOpt { // it has the option and is smaller that the current number of profiles
 		prfCount = *prfCountOpt
 	}
 	var extraOpts *optsGetRoutes
