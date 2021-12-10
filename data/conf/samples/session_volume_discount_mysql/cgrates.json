@@ -26,7 +26,7 @@
         
     "attributes": {
         "enabled": true,
-        "opts":{								// 			
+        "opts":{								// 		
             "*processRuns": [
                 {
                     "Tenant": "*any",
@@ -136,12 +136,14 @@
         "enabled": true,
         "accounts_conns": ["*localhost"],
         "rates_conns": ["*localhost"],
-        "*ignoreErrors": [						
-            {
-                "Tenant": "*any",
-                "Value": true,
-            },
-        ],
+        "opts":{				
+            "*ignoreErrors": [
+                {
+                    "Tenant": "*any",
+                    "Value": true,
+                },
+            ],
+        },
     },
         
     "admins": {
