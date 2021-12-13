@@ -1393,6 +1393,9 @@ func TestStatQueueProfileSet(t *testing.T) {
 	if err := sq.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
+	if err := sq.Set([]string{""}, "", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 	if err := sq.Set([]string{"NotAField"}, ";", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
@@ -1447,7 +1450,7 @@ func TestStatQueueProfileSet(t *testing.T) {
 }
 
 func TestStatQueueProfileAsInterface(t *testing.T) {
-	ap := StatQueueProfile{
+	sqp := StatQueueProfile{
 		Tenant:       "cgrates.org",
 		ID:           "ID",
 		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
@@ -1465,141 +1468,182 @@ func TestStatQueueProfileAsInterface(t *testing.T) {
 			FilterIDs: []string{"fltr1"},
 		}},
 	}
-	if _, err := ap.FieldAsInterface(nil); err != utils.ErrNotFound {
+	if _, err := sqp.FieldAsInterface(nil); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if _, err := ap.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+	if _, err := sqp.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if _, err := ap.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+	if _, err := sqp.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Tenant}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.Tenant}); err != nil {
 		t.Fatal(err)
 	} else if exp := "cgrates.org"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.ID}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.ID}); err != nil {
 		t.Fatal(err)
 	} else if exp := utils.ID; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.FilterIDs; !reflect.DeepEqual(exp, val) {
+	} else if exp := sqp.FilterIDs; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.FilterIDs[0]; exp != val {
+	} else if exp := sqp.FilterIDs[0]; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Weight}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.Weight}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Weight; !reflect.DeepEqual(exp, val) {
+	} else if exp := sqp.Weight; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.ThresholdIDs}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.ThresholdIDs}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.ThresholdIDs; !reflect.DeepEqual(exp, val) {
+	} else if exp := sqp.ThresholdIDs; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.ThresholdIDs + "[0]"}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.ThresholdIDs + "[0]"}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.ThresholdIDs[0]; exp != val {
+	} else if exp := sqp.ThresholdIDs[0]; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Metrics}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.Metrics}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Metrics; !reflect.DeepEqual(exp, val) {
+	} else if exp := sqp.Metrics; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]"}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.Metrics + "[0]"}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Metrics[0]; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-
-	if val, err := ap.FieldAsInterface([]string{utils.QueueLength}); err != nil {
-		t.Fatal(err)
-	} else if exp := ap.QueueLength; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := ap.FieldAsInterface([]string{utils.TTL}); err != nil {
-		t.Fatal(err)
-	} else if exp := ap.TTL; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := ap.FieldAsInterface([]string{utils.MinItems}); err != nil {
-		t.Fatal(err)
-	} else if exp := ap.MinItems; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := ap.FieldAsInterface([]string{utils.Stored}); err != nil {
-		t.Fatal(err)
-	} else if exp := ap.Stored; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := ap.FieldAsInterface([]string{utils.Blocker}); err != nil {
-		t.Fatal(err)
-	} else if exp := ap.Blocker; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "[4]"}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "4]"}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "[4]", ""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]", ""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if _, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]", "", ""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-
-	if val, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]", utils.MetricID}); err != nil {
-		t.Fatal(err)
-	} else if exp := ap.Metrics[0].MetricID; exp != val {
+	} else if exp := sqp.Metrics[0]; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 
-	if val, err := ap.FieldAsInterface([]string{utils.Metrics + "[0]", utils.FilterIDs}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.QueueLength}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Metrics[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+	} else if exp := sqp.QueueLength; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Metrics + "[1]", utils.FilterIDs + "[0]"}); err != nil {
+	if val, err := sqp.FieldAsInterface([]string{utils.TTL}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Metrics[1].FilterIDs[0]; exp != val {
+	} else if exp := sqp.TTL; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := sqp.FieldAsInterface([]string{utils.MinItems}); err != nil {
+		t.Fatal(err)
+	} else if exp := sqp.MinItems; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := sqp.FieldAsInterface([]string{utils.Stored}); err != nil {
+		t.Fatal(err)
+	} else if exp := sqp.Stored; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := sqp.FieldAsInterface([]string{utils.Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := sqp.Blocker; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if _, err := sqp.FieldAsInterface([]string{utils.Metrics + "[4]"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := sqp.FieldAsInterface([]string{utils.Metrics + "4]"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := sqp.FieldAsInterface([]string{utils.Metrics + "[4]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := sqp.FieldAsInterface([]string{utils.Metrics + "[0]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := sqp.FieldAsInterface([]string{utils.Metrics + "[0]", "", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if val, err := sqp.FieldAsInterface([]string{utils.Metrics + "[0]", utils.MetricID}); err != nil {
+		t.Fatal(err)
+	} else if exp := sqp.Metrics[0].MetricID; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 
-	if _, err := ap.FieldAsString([]string{""}); err != utils.ErrNotFound {
+	if val, err := sqp.FieldAsInterface([]string{utils.Metrics + "[0]", utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := sqp.Metrics[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := sqp.FieldAsInterface([]string{utils.Metrics + "[1]", utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := sqp.Metrics[1].FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := sqp.FieldAsString([]string{""}); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if val, err := ap.FieldAsString([]string{utils.ID}); err != nil {
+	if val, err := sqp.FieldAsString([]string{utils.ID}); err != nil {
 		t.Fatal(err)
 	} else if exp := "ID"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, exp := ap.String(), utils.ToJSON(ap); exp != val {
+	if val, exp := sqp.String(), utils.ToJSON(sqp); exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 
-	if _, err := ap.Metrics[0].FieldAsString([]string{""}); err != utils.ErrNotFound {
+	if _, err := sqp.Metrics[0].FieldAsString([]string{""}); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if val, err := ap.Metrics[0].FieldAsString([]string{utils.MetricID}); err != nil {
+	if val, err := sqp.Metrics[0].FieldAsString([]string{utils.MetricID}); err != nil {
 		t.Fatal(err)
 	} else if exp := utils.MetaTCD; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, exp := ap.Metrics[0].String(), utils.ToJSON(ap.Metrics[0]); exp != val {
+	if val, exp := sqp.Metrics[0].String(), utils.ToJSON(sqp.Metrics[0]); exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
+}
 
+func TestStatQueueProfileMerge(t *testing.T) {
+	sqp := &StatQueueProfile{}
+	exp := &StatQueueProfile{
+		Tenant:       "cgrates.org",
+		ID:           "ID",
+		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:       10,
+		QueueLength:  10,
+		TTL:          10,
+		MinItems:     10,
+		Stored:       true,
+		Blocker:      true,
+		ThresholdIDs: []string{"TH1"},
+		Metrics: []*MetricWithFilters{{
+			MetricID: utils.MetaTCD,
+		}, {
+			MetricID:  utils.MetaACD,
+			FilterIDs: []string{"fltr1"},
+		}},
+	}
+	if sqp.Merge(&StatQueueProfile{
+		Tenant:       "cgrates.org",
+		ID:           "ID",
+		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:       10,
+		QueueLength:  10,
+		TTL:          10,
+		MinItems:     10,
+		Stored:       true,
+		Blocker:      true,
+		ThresholdIDs: []string{"TH1"},
+		Metrics: []*MetricWithFilters{{
+			MetricID: utils.MetaTCD,
+		}, {
+			MetricID:  utils.MetaACD,
+			FilterIDs: []string{"fltr1"},
+		}},
+	}); !reflect.DeepEqual(exp, sqp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(sqp))
+	}
 }
