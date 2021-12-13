@@ -79,7 +79,7 @@ func TestChargerProfilesSort(t *testing.T) {
 }
 
 func TestChargerProfileAsInterface(t *testing.T) {
-	ap := ChargerProfile{
+	cp := ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "ID",
 		FilterIDs:    []string{"fltr1", "*string:~*req.Account:1001"},
@@ -87,65 +87,65 @@ func TestChargerProfileAsInterface(t *testing.T) {
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"attr1"},
 	}
-	if _, err := ap.FieldAsInterface(nil); err != utils.ErrNotFound {
+	if _, err := cp.FieldAsInterface(nil); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if _, err := ap.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+	if _, err := cp.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if _, err := ap.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+	if _, err := cp.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Tenant}); err != nil {
+	if val, err := cp.FieldAsInterface([]string{utils.Tenant}); err != nil {
 		t.Fatal(err)
 	} else if exp := "cgrates.org"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.ID}); err != nil {
+	if val, err := cp.FieldAsInterface([]string{utils.ID}); err != nil {
 		t.Fatal(err)
 	} else if exp := utils.ID; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+	if val, err := cp.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.FilterIDs; !reflect.DeepEqual(exp, val) {
+	} else if exp := cp.FilterIDs; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+	if val, err := cp.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.FilterIDs[0]; exp != val {
+	} else if exp := cp.FilterIDs[0]; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Weight}); err != nil {
+	if val, err := cp.FieldAsInterface([]string{utils.Weight}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Weight; !reflect.DeepEqual(exp, val) {
+	} else if exp := cp.Weight; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.RunID}); err != nil {
+	if val, err := cp.FieldAsInterface([]string{utils.RunID}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.RunID; !reflect.DeepEqual(exp, val) {
+	} else if exp := cp.RunID; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.AttributeIDs}); err != nil {
+	if val, err := cp.FieldAsInterface([]string{utils.AttributeIDs}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.AttributeIDs; !reflect.DeepEqual(exp, val) {
+	} else if exp := cp.AttributeIDs; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.AttributeIDs + "[0]"}); err != nil {
+	if val, err := cp.FieldAsInterface([]string{utils.AttributeIDs + "[0]"}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.AttributeIDs[0]; exp != val {
+	} else if exp := cp.AttributeIDs[0]; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 
-	if _, err := ap.FieldAsString([]string{""}); err != utils.ErrNotFound {
+	if _, err := cp.FieldAsString([]string{""}); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
-	if val, err := ap.FieldAsString([]string{utils.ID}); err != nil {
+	if val, err := cp.FieldAsString([]string{utils.ID}); err != nil {
 		t.Fatal(err)
 	} else if exp := "ID"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, exp := ap.String(), utils.ToJSON(ap); exp != val {
+	if val, exp := cp.String(), utils.ToJSON(cp); exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 
