@@ -30,7 +30,7 @@ import (
 
 var (
 	testRoutesPrfs = []*RouteProfile{
-		&RouteProfile{
+		{
 			Tenant:    "cgrates.org",
 			ID:        "RouteProfile1",
 			FilterIDs: []string{"FLTR_RPP_1"},
@@ -44,7 +44,7 @@ var (
 			},
 			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
-		&RouteProfile{
+		{
 			Tenant:    "cgrates.org",
 			ID:        "RouteProfile2",
 			FilterIDs: []string{"FLTR_SUPP_2"},
@@ -68,7 +68,7 @@ var (
 			},
 			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
-		&RouteProfile{
+		{
 			Tenant:    "cgrates.org",
 			ID:        "RouteProfilePrefix",
 			FilterIDs: []string{"FLTR_SUPP_3"},
@@ -559,7 +559,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	Cache.Clear(nil)
 	sppTest := []*RouteProfile{
-		&RouteProfile{
+		{
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfile1",
 			Sorting: utils.MetaWeight,
@@ -572,7 +572,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			},
 			Weights: utils.DynamicWeights{{Weight: 10}},
 		},
-		&RouteProfile{
+		{
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfile2",
 			Sorting: utils.MetaWeight,
@@ -595,7 +595,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			},
 			Weights: utils.DynamicWeights{{Weight: 5}},
 		},
-		&RouteProfile{
+		{
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfilePrefix",
 			Sorting: utils.MetaWeight,
@@ -608,7 +608,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			},
 			Weights: utils.DynamicWeights{{Weight: 20}},
 		},
-		&RouteProfile{
+		{
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfilePrefix4",
 			Sorting: utils.MetaWeight,
@@ -869,6 +869,9 @@ func TestRouteProfileSet(t *testing.T) {
 	if err := rp.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
+	if err := rp.Set([]string{"", ""}, "", false, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 	if err := rp.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
@@ -932,5 +935,233 @@ func TestRouteProfileSet(t *testing.T) {
 
 	if !reflect.DeepEqual(exp, rp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rp))
+	}
+}
+
+func TestRouteProfileAsInterface(t *testing.T) {
+	rp := RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:              "RT1",
+			FilterIDs:       []string{"fltr1"},
+			AccountIDs:      []string{"acc1"},
+			RateProfileIDs:  []string{"rp1"},
+			ResourceIDs:     []string{"res1"},
+			StatIDs:         []string{"stat1"},
+			Weights:         utils.DynamicWeights{{}},
+			Blocker:         true,
+			RouteParameters: "params",
+		}},
+	}
+	if _, err := rp.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Weights}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";0"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.SortingParameters}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.SortingParameters; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.SortingParameters + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.SortingParameters[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Sorting}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Sorting; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if _, err := rp.FieldAsInterface([]string{utils.Routes + "[4]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", "", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.Weights}); err != nil {
+		t.Fatal(err)
+	} else if exp := ";0"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].Blocker; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.RouteParameters}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].RouteParameters; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.AccountIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].AccountIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.AccountIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].AccountIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.RateProfileIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].RateProfileIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.RateProfileIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].RateProfileIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.ResourceIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].ResourceIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.ResourceIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].ResourceIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.StatIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].StatIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.StatIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Routes[0].StatIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := rp.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := rp.String(), utils.ToJSON(rp); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := rp.Routes[0].FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.Routes[0].FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "RT1"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := rp.Routes[0].String(), utils.ToJSON(rp.Routes[0]); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}
+
+func TestRouteProfileMerge(t *testing.T) {
+	dp := &RouteProfile{}
+	exp := &RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:              "RT1",
+			FilterIDs:       []string{"fltr1"},
+			AccountIDs:      []string{"acc1"},
+			RateProfileIDs:  []string{"rp1"},
+			ResourceIDs:     []string{"res1"},
+			StatIDs:         []string{"stat1"},
+			Weights:         utils.DynamicWeights{{}},
+			Blocker:         true,
+			RouteParameters: "params",
+		}},
+	}
+	if dp.Merge(&RouteProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights:           utils.DynamicWeights{{}},
+		Sorting:           utils.MetaQOS,
+		SortingParameters: []string{"param"},
+		Routes: []*Route{{
+			ID:              "RT1",
+			FilterIDs:       []string{"fltr1"},
+			AccountIDs:      []string{"acc1"},
+			RateProfileIDs:  []string{"rp1"},
+			ResourceIDs:     []string{"res1"},
+			StatIDs:         []string{"stat1"},
+			Weights:         utils.DynamicWeights{{}},
+			Blocker:         true,
+			RouteParameters: "params",
+		}},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }

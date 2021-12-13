@@ -551,7 +551,7 @@ func (rp *RouteProfile) FieldAsString(fldPath []string) (_ string, err error) {
 	return utils.IfaceAsString(val), nil
 }
 func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ interface{}, err error) {
-	if len(fldPath) != 1 {
+	if len(fldPath) == 1 {
 		switch fldPath[0] {
 		default:
 			fld, idx := utils.GetPathIndex(fldPath[0])
@@ -588,20 +588,18 @@ func (rp *RouteProfile) FieldAsInterface(fldPath []string) (_ interface{}, err e
 			return rp.Routes, nil
 		}
 	}
-	if len(fldPath) == 0 ||
-		!strings.HasPrefix(fldPath[0], utils.Routes) ||
-		fldPath[0][6] != '[' ||
-		fldPath[0][len(fldPath[0])-1] != ']' {
+	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	var idx int
-	if idx, err = strconv.Atoi(fldPath[0][7 : len(fldPath[0])-1]); err != nil {
-		return
-	}
-	if idx >= len(rp.Routes) {
+	fld, idx := utils.GetPathIndex(fldPath[0])
+	if fld != utils.Routes ||
+		idx == nil {
 		return nil, utils.ErrNotFound
 	}
-	return rp.Routes[idx].FieldAsInterface(fldPath[1:])
+	if *idx >= len(rp.Routes) {
+		return nil, utils.ErrNotFound
+	}
+	return rp.Routes[*idx].FieldAsInterface(fldPath[1:])
 }
 
 func (rt *Route) String() string { return utils.ToJSON(rt) }

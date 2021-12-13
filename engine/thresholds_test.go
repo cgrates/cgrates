@@ -3072,3 +3072,130 @@ func TestThresholdProfileSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(th))
 	}
 }
+
+func TestThresholdProfileAsInterface(t *testing.T) {
+	tp := ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "ID",
+		FilterIDs:        []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:           10,
+		MaxHits:          10,
+		MinHits:          10,
+		MinSleep:         10,
+		Blocker:          true,
+		Async:            true,
+		ActionProfileIDs: []string{"acc1"},
+	}
+	if _, err := tp.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := tp.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := tp.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.Weight}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.Weight; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.ActionProfileIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.ActionProfileIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.ActionProfileIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.ActionProfileIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := tp.FieldAsInterface([]string{utils.MaxHits}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.MaxHits; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.MinHits}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.MinHits; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.MinSleep}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.MinSleep; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.Blocker; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := tp.FieldAsInterface([]string{utils.Async}); err != nil {
+		t.Fatal(err)
+	} else if exp := tp.Async; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := tp.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := tp.FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := tp.String(), utils.ToJSON(tp); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+}
+
+func TestThresholdProfileMerge(t *testing.T) {
+	dp := &ThresholdProfile{}
+	exp := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "ID",
+		FilterIDs:        []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:           10,
+		MaxHits:          10,
+		MinHits:          10,
+		MinSleep:         10,
+		Blocker:          true,
+		Async:            true,
+		ActionProfileIDs: []string{"acc1"},
+	}
+	if dp.Merge(&ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "ID",
+		FilterIDs:        []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:           10,
+		MaxHits:          10,
+		MinHits:          10,
+		MinSleep:         10,
+		Blocker:          true,
+		Async:            true,
+		ActionProfileIDs: []string{"acc1"},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}

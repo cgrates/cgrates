@@ -6802,3 +6802,131 @@ func TestResourceProfileSet(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(cp))
 	}
 }
+
+func TestResourceProfileAsInterface(t *testing.T) {
+	rp := ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:            10,
+		UsageTTL:          10,
+		Limit:             10,
+		AllocationMessage: "new",
+		Blocker:           true,
+		Stored:            true,
+		ThresholdIDs:      []string{"TH1"},
+	}
+	if _, err := rp.FieldAsInterface(nil); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if _, err := rp.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Tenant}); err != nil {
+		t.Fatal(err)
+	} else if exp := "cgrates.org"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := utils.ID; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.FilterIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.FilterIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Weight}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Weight; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.ThresholdIDs}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.ThresholdIDs; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.ThresholdIDs + "[0]"}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.ThresholdIDs[0]; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if val, err := rp.FieldAsInterface([]string{utils.UsageTTL}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.UsageTTL; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Limit}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Limit; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.AllocationMessage}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.AllocationMessage; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Blocker}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Blocker; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, err := rp.FieldAsInterface([]string{utils.Stored}); err != nil {
+		t.Fatal(err)
+	} else if exp := rp.Stored; !reflect.DeepEqual(exp, val) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+	if _, err := rp.FieldAsString([]string{""}); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+	if val, err := rp.FieldAsString([]string{utils.ID}); err != nil {
+		t.Fatal(err)
+	} else if exp := "ID"; exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+	if val, exp := rp.String(), utils.ToJSON(rp); exp != val {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
+	}
+
+}
+
+func TestResourceProfileMerge(t *testing.T) {
+	dp := &ResourceProfile{}
+	exp := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:            10,
+		UsageTTL:          10,
+		Limit:             10,
+		AllocationMessage: "new",
+		Blocker:           true,
+		Stored:            true,
+		ThresholdIDs:      []string{"TH1"},
+	}
+	if dp.Merge(&ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID",
+		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
+		Weight:            10,
+		UsageTTL:          10,
+		Limit:             10,
+		AllocationMessage: "new",
+		Blocker:           true,
+		Stored:            true,
+		ThresholdIDs:      []string{"TH1"},
+	}); !reflect.DeepEqual(exp, dp) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
+	}
+}
