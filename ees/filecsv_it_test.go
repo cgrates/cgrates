@@ -25,7 +25,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/csv"
-	"io"
 	"net/rpc"
 	"os"
 	"path"
@@ -415,17 +414,9 @@ func testCsvExportBufferedEvent(t *testing.T) {
 		}
 		info := csv.NewReader(rc)
 		info.FieldsPerRecord = -1
-		count := 0
-		for {
-			file, err := info.Read()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				t.Error(err)
-			}
-			csvRply[count] = file
-			count++
+		csvRply, err = info.ReadAll()
+		if err != nil {
+			t.Error(err)
 		}
 		rc.Close()
 	}

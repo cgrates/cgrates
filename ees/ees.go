@@ -346,13 +346,13 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 		}
 	}
 	if eesCfg == nil {
-		return fmt.Errorf("exporter config with ID: <%v> is missing", expID)
+		return fmt.Errorf("exporter config with ID: %q is missing", expID)
 	}
 	if !eesCfg.Synchronous {
-		return fmt.Errorf("exporter with ID: <%v> is not synchronous", expID)
+		return fmt.Errorf("exporter with ID: %q is not synchronous", expID)
 	}
 	if eesCfg.ExportPath != utils.MetaBuffer {
-		return fmt.Errorf("exporter with ID: <%v> has an invalid ExportPath for archiving", expID)
+		return fmt.Errorf("exporter with ID: %q has an invalid ExportPath for archiving", expID)
 	}
 	var dc *utils.SafeMapStorage
 	if dc, err = newEEMetrics(utils.FirstNonEmpty(
@@ -389,9 +389,10 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 			return err
 		}
 	}
+	tnt := utils.FirstNonEmpty(args.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
+	var exported bool
 	for _, event := range args.Events {
 		if len(eesCfg.Filters) != 0 && !ignoreFltr {
-			tnt := utils.FirstNonEmpty(args.Tenant, eeS.cfg.GeneralCfg().DefaultTenant)
 			cgrDp[utils.MetaReq] = event
 			if pass, errPass := eeS.fltrS.Pass(ctx, tnt,
 				eesCfg.Filters, cgrDp); errPass != nil {
@@ -402,13 +403,18 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 		}
 		cgrEv := &utils.CGREvent{
 			ID:      utils.UUIDSha1Prefix(),
-			Tenant:  args.Tenant,
+			Tenant:  tnt,
 			Event:   event,
 			APIOpts: args.APIOpts,
 		}
+		exported = true
 		if err = exportEventWithExporter(ctx, ee, cgrEv, false, eeS.cfg, eeS.fltrS); err != nil {
 			return err
 		}
+	}
+	// most probably beacause of not matching filters
+	if !exported {
+		return fmt.Errorf("exporter did not write data in zip format")
 	}
 	if err = ee.Close(); err != nil {
 		return err
