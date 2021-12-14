@@ -93,7 +93,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		hasUF = true
 	}
 	if blncLmt != nil {
-		maxBlcDbt := new(decimal.Big).Copy(aB.blnCfg.Units.Big)
+		maxBlcDbt := utils.CloneDecimalBig(aB.blnCfg.Units.Big)
 		if hasUF {
 			maxBlcDbt = utils.DivideBig(maxBlcDbt, uF.Factor.Big) // common units with debit and increments
 		}
@@ -124,7 +124,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		usage = ecCost.Abstracts.Big
 		dbtUnits = ecCost.Abstracts.Big
 	} else {
-		dbtUnits = new(decimal.Big).Copy(usage)
+		dbtUnits = utils.CloneDecimalBig(usage)
 	}
 	if hasUF {
 		dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)

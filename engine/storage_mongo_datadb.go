@@ -153,7 +153,7 @@ func DecimalDecoder(ec bsoncodec.DecodeContext, vw bsonrw.ValueReader, val refle
 	if err != nil {
 		return err
 	}
-	dBig := new(decimal.Big)
+	dBig := decimal.WithContext(utils.DecimalContext)
 	if err := dBig.UnmarshalText(data); err != nil {
 		return err
 	}

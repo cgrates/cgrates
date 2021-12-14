@@ -149,11 +149,11 @@ func TestCloneDynamicDurationOpt(t *testing.T) {
 func TestCloneDynamicDecimalBigOpt(t *testing.T) {
 	in := []*DynamicDecimalBigOpt{
 		{
-			Value:     new(decimal.Big).SetUint64(10),
+			Value:     decimal.WithContext(DecimalContext).SetUint64(10),
 			FilterIDs: []string{"fltr1"},
 		},
 		{
-			Value:     new(decimal.Big).SetUint64(2),
+			Value:     decimal.WithContext(DecimalContext).SetUint64(2),
 			FilterIDs: []string{"fltr2"},
 		},
 	}
@@ -524,12 +524,12 @@ func TestDynamicDecimalBigOptEquals(t *testing.T) {
 	v1 := []*DynamicDecimalBigOpt{
 		{
 			Tenant:    "cgrates.org",
-			Value:     new(decimal.Big).SetUint64(10),
+			Value:     decimal.WithContext(DecimalContext).SetUint64(10),
 			FilterIDs: []string{"fltr1"},
 		},
 		{
 			Tenant:    "cgrates.org",
-			Value:     new(decimal.Big).SetUint64(2),
+			Value:     decimal.WithContext(DecimalContext).SetUint64(2),
 			FilterIDs: []string{"fltr2"},
 		},
 	}
@@ -537,12 +537,12 @@ func TestDynamicDecimalBigOptEquals(t *testing.T) {
 	v2 := []*DynamicDecimalBigOpt{
 		{
 			Tenant:    "cgrates.org",
-			Value:     new(decimal.Big).SetUint64(10),
+			Value:     decimal.WithContext(DecimalContext).SetUint64(10),
 			FilterIDs: []string{"fltr1"},
 		},
 		{
 			Tenant:    "cgrates.org",
-			Value:     new(decimal.Big).SetUint64(2),
+			Value:     decimal.WithContext(DecimalContext).SetUint64(2),
 			FilterIDs: []string{"fltr2"},
 		},
 	}
@@ -551,7 +551,7 @@ func TestDynamicDecimalBigOptEquals(t *testing.T) {
 		t.Error("Expected both slices to be the same")
 	}
 
-	v1[0].Value = new(decimal.Big).SetUint64(16)
+	v1[0].Value = decimal.WithContext(DecimalContext).SetUint64(16)
 	if DynamicDecimalBigOptEqual(v1, v2) {
 		t.Error("Expected slices to differ")
 	}
@@ -571,7 +571,7 @@ func TestDynamicDecimalBigOptEquals(t *testing.T) {
 
 	//Test if different lengths
 	v1 = append(v1, &DynamicDecimalBigOpt{
-		Value:     new(decimal.Big).SetUint64(10),
+		Value:     decimal.WithContext(DecimalContext).SetUint64(10),
 		FilterIDs: []string{"fltr1"},
 	})
 	if DynamicDecimalBigOptEqual(v1, v2) {
@@ -651,7 +651,7 @@ func TestStringToDecimalBigDynamicOpts(t *testing.T) {
 		{
 			FilterIDs: []string{"fld1", "fld2"},
 			Tenant:    "cgrates.org",
-			Value:     new(decimal.Big).SetUint64(200),
+			Value:     decimal.WithContext(DecimalContext).SetUint64(200),
 		},
 	}
 
@@ -777,7 +777,7 @@ func TestDecimalBigToStringDynamicOpts(t *testing.T) {
 		{
 			FilterIDs: []string{"test_filter", "test_filter2"},
 			Tenant:    "cgrates.org",
-			Value:     new(decimal.Big).SetUint64(300),
+			Value:     decimal.WithContext(DecimalContext).SetUint64(300),
 		},
 	}
 

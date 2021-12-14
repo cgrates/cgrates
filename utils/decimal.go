@@ -29,42 +29,55 @@ import (
 )
 
 var (
-	DecimalNaN = &Decimal{}
+	DecimalNaN     = &Decimal{}
+	DecimalContext decimal.Context
 )
 
 func init() {
-	d, _ := new(decimal.Big).SetString("NaN")
+	d, _ := decimal.WithContext(DecimalContext).SetString("NaN")
 	DecimalNaN = &Decimal{d}
 }
 
+func NewRoundingMode(rnd string) (decimal.RoundingMode, error) {
+	switch rnd {
+	case decimal.ToNearestEven.String():
+		return decimal.ToNearestEven, nil
+	case decimal.ToNearestAway.String():
+		return decimal.ToNearestAway, nil
+	case decimal.ToZero.String():
+		return decimal.ToZero, nil
+	case decimal.AwayFromZero.String():
+		return decimal.AwayFromZero, nil
+	case decimal.ToNegativeInf.String():
+		return decimal.ToNegativeInf, nil
+	case decimal.ToPositiveInf.String():
+		return decimal.ToPositiveInf, nil
+	case decimal.ToNearestTowardZero.String():
+		return decimal.ToNearestTowardZero, nil
+	default:
+		return 7, fmt.Errorf("usupoorted rounding: <%q>", rnd)
+	}
+}
+
 func DivideBig(x, y *decimal.Big) *decimal.Big {
-	if x == nil {
+	if x == nil || y == nil {
 		return nil
 	}
-	if y == nil {
-		return nil
-	}
-	return new(decimal.Big).Quo(x, y)
+	return decimal.WithContext(DecimalContext).Quo(x, y)
 }
 
 func DivideBigWithReminder(x, y *decimal.Big) (q *decimal.Big, r *decimal.Big) {
-	if x == nil {
+	if x == nil || y == nil {
 		return
 	}
-	if y == nil {
-		return
-	}
-	return new(decimal.Big).QuoRem(x, y, new(decimal.Big))
+	return decimal.WithContext(DecimalContext).QuoRem(x, y, decimal.WithContext(DecimalContext))
 }
 
 func MultiplyBig(x, y *decimal.Big) *decimal.Big {
-	if x == nil {
+	if x == nil || y == nil {
 		return nil
 	}
-	if y == nil {
-		return nil
-	}
-	return new(decimal.Big).Mul(x, y)
+	return decimal.WithContext(DecimalContext).Mul(x, y)
 }
 
 func SumBig(x, y *decimal.Big) *decimal.Big {
@@ -74,51 +87,45 @@ func SumBig(x, y *decimal.Big) *decimal.Big {
 	if y == nil {
 		return x
 	}
-	return new(decimal.Big).Add(x, y)
+	return decimal.WithContext(DecimalContext).Add(x, y)
 }
 
 func SubstractBig(x, y *decimal.Big) *decimal.Big {
 	if x == nil || y == nil {
 		return x
 	}
-	return new(decimal.Big).Sub(x, y)
+	return decimal.WithContext(DecimalContext).Sub(x, y)
 }
 
 // MultiplyDecimal multiples two Decimals and returns the result
 func MultiplyDecimal(x, y *Decimal) *Decimal {
-	return &Decimal{new(decimal.Big).Mul(x.Big, y.Big)}
+	return &Decimal{MultiplyBig(x.Big, y.Big)}
 }
 
 // DivideDecimal divides two Decimals and returns the result
 func DivideDecimal(x, y *Decimal) *Decimal {
-	return &Decimal{new(decimal.Big).Quo(x.Big, y.Big)}
+	return &Decimal{DivideBig(x.Big, y.Big)}
 }
 
 // sumDecimal adds two Decimals and returns the result
 func SumDecimal(x, y *Decimal) *Decimal {
-	return &Decimal{new(decimal.Big).Add(x.Big, y.Big)}
+	if x == nil {
+		return y
+	}
+	if y == nil {
+		return x
+	}
+	return &Decimal{SumBig(x.Big, y.Big)}
 }
 
 func SubstractDecimal(x, y *Decimal) *Decimal {
-	return &Decimal{new(decimal.Big).Sub(x.Big, y.Big)}
-}
-
-// SumDecimalAsBig returns tbe Big sum, protecting against nil Decimals
-func SumDecimalAsBig(x, y *Decimal) *decimal.Big {
-	var xBig, yBig *decimal.Big
-	if x != nil {
-		xBig = x.Big
-	}
-	if y != nil {
-		yBig = y.Big
-	}
-	return SumBig(xBig, yBig)
+	return &Decimal{SubstractBig(x.Big, y.Big)}
 }
 
 // NewDecimalFromFloat64 is a constructor for Decimal out of float64
 // passing through string is necessary due to differences between decimal and binary representation of float64
 func NewDecimalFromFloat64(f float64) *Decimal {
-	d, _ := new(decimal.Big).SetString(strconv.FormatFloat(f, 'f', -1, 64))
+	d, _ := decimal.WithContext(DecimalContext).SetString(strconv.FormatFloat(f, 'f', -1, 64))
 	return &Decimal{d}
 }
 
@@ -129,7 +136,9 @@ func NewDecimalFromUsage(u string) (d *Decimal, err error) {
 	case u == EmptyString:
 		d = NewDecimal(0, 0)
 	//"ns", "us" (or "µs"), "ms", "s", "m", "h"
-	case strings.HasSuffix(u, SSuffix), strings.HasSuffix(u, MSuffix), strings.HasSuffix(u, HSuffix):
+	case strings.HasSuffix(u, SSuffix),
+		strings.HasSuffix(u, MSuffix),
+		strings.HasSuffix(u, HSuffix):
 		var tm time.Duration
 		if tm, err = time.ParseDuration(u); err != nil {
 			return
@@ -143,7 +152,7 @@ func NewDecimalFromUsage(u string) (d *Decimal, err error) {
 
 // NewDecimal is a constructor for Decimal, following the one of decimal.Big
 func NewDecimal(value int64, scale int) *Decimal {
-	return &Decimal{decimal.New(value, scale)}
+	return &Decimal{decimal.WithContext(DecimalContext).SetMantScale(value, scale)}
 }
 
 type Decimal struct {
@@ -153,10 +162,10 @@ type Decimal struct {
 // UnmarshalBinary implements the method for binaryUnmarshal interface for Msgpack encoding
 func (d *Decimal) UnmarshalBinary(data []byte) (err error) {
 	if d == nil {
-		d = &Decimal{new(decimal.Big)}
+		d = &Decimal{decimal.WithContext(DecimalContext)}
 	}
 	if d.Big == nil {
-		d.Big = new(decimal.Big)
+		d.Big = decimal.WithContext(DecimalContext)
 	}
 	return d.Big.UnmarshalText(data)
 }
@@ -164,7 +173,7 @@ func (d *Decimal) UnmarshalBinary(data []byte) (err error) {
 // MarshalBinary implements the method for binaryMarshal interface for Msgpack encoding
 func (d *Decimal) MarshalBinary() ([]byte, error) {
 	if d.Big == nil {
-		d.Big = new(decimal.Big)
+		d.Big = decimal.WithContext(DecimalContext)
 	}
 	return d.Big.MarshalText()
 }
@@ -172,10 +181,10 @@ func (d *Decimal) MarshalBinary() ([]byte, error) {
 // UnmarshalJSON implements the method for jsonUnmarshal for JSON encoding
 func (d *Decimal) UnmarshalJSON(data []byte) (err error) {
 	if d == nil {
-		d = &Decimal{new(decimal.Big)}
+		d = &Decimal{decimal.WithContext(DecimalContext)}
 	}
 	if d.Big == nil {
-		d.Big = new(decimal.Big)
+		d.Big = decimal.WithContext(DecimalContext)
 	}
 	return d.Big.UnmarshalText(data)
 }
@@ -191,7 +200,7 @@ func (d *Decimal) MarshalJSON() ([]byte, error) {
 
 // Clone returns a copy of the Decimal
 func (d *Decimal) Clone() *Decimal {
-	return &Decimal{new(decimal.Big).Copy(d.Big)}
+	return &Decimal{decimal.WithContext(DecimalContext).Copy(d.Big)}
 }
 
 // Compare wraps the decimal.Big.Cmp function. It does not handle nil d2
@@ -201,7 +210,7 @@ func (d *Decimal) Compare(d2 *Decimal) int {
 
 // NewDecimalFromString converts a string to decimal
 func NewDecimalFromString(value string) (*Decimal, error) {
-	z, ok := new(decimal.Big).SetString(value)
+	z, ok := decimal.WithContext(DecimalContext).SetString(value)
 	// verify ok and check if the value was converted successfuly
 	// and the big is a valid number
 	if !ok || z.IsNaN(0) {
@@ -233,4 +242,8 @@ func (d *Decimal) Duration() (dur time.Duration, ok bool) {
 	}
 	dur = time.Duration(i64)
 	return
+}
+
+func CloneDecimalBig(in *decimal.Big) *decimal.Big {
+	return decimal.WithContext(DecimalContext).Copy(in)
 }

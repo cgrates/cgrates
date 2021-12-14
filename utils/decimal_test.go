@@ -44,9 +44,9 @@ func TestConvertDecimalToFloat(t *testing.T) {
 }
 
 func TestNewDecimalDivide(t *testing.T) {
-	x := new(decimal.Big).SetUint64(10)
-	y := new(decimal.Big).SetUint64(5)
-	expected, _ := new(decimal.Big).SetUint64(2).Float64()
+	x := decimal.WithContext(DecimalContext).SetUint64(10)
+	y := decimal.WithContext(DecimalContext).SetUint64(5)
+	expected, _ := decimal.WithContext(DecimalContext).SetUint64(2).Float64()
 	received, _ := DivideBig(x, y).Float64()
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
@@ -63,7 +63,7 @@ func TestDivideBigNil(t *testing.T) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}
 
-	x = new(decimal.Big).SetUint64(2)
+	x = decimal.WithContext(DecimalContext).SetUint64(2)
 	y = nil
 	expected = nil
 	received = DivideBig(x, y)
@@ -73,9 +73,9 @@ func TestDivideBigNil(t *testing.T) {
 }
 
 func TestNewDecimalMultiply(t *testing.T) {
-	x := new(decimal.Big).SetUint64(10)
-	y := new(decimal.Big).SetUint64(5)
-	expected, _ := new(decimal.Big).SetUint64(50).Float64()
+	x := decimal.WithContext(DecimalContext).SetUint64(10)
+	y := decimal.WithContext(DecimalContext).SetUint64(5)
+	expected, _ := decimal.WithContext(DecimalContext).SetUint64(50).Float64()
 	received, _ := MultiplyBig(x, y).Float64()
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
@@ -92,7 +92,7 @@ func TestMultiplyBigNil(t *testing.T) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}
 
-	x = new(decimal.Big).SetUint64(2)
+	x = decimal.WithContext(DecimalContext).SetUint64(2)
 	y = nil
 	expected = nil
 	received = MultiplyBig(x, y)
@@ -102,9 +102,9 @@ func TestMultiplyBigNil(t *testing.T) {
 }
 
 func TestNewDecimalAdd(t *testing.T) {
-	x := new(decimal.Big).SetUint64(10)
-	y := new(decimal.Big).SetUint64(5)
-	expected, _ := new(decimal.Big).SetUint64(15).Float64()
+	x := decimal.WithContext(DecimalContext).SetUint64(10)
+	y := decimal.WithContext(DecimalContext).SetUint64(5)
+	expected, _ := decimal.WithContext(DecimalContext).SetUint64(15).Float64()
 	received, _ := SumBig(x, y).Float64()
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
@@ -114,16 +114,16 @@ func TestNewDecimalAdd(t *testing.T) {
 func TestSumBigNil(t *testing.T) {
 	var x, y, expected *decimal.Big
 	x = nil
-	y = new(decimal.Big).SetUint64(2)
-	expected = new(decimal.Big).SetUint64(2)
+	y = decimal.WithContext(DecimalContext).SetUint64(2)
+	expected = decimal.WithContext(DecimalContext).SetUint64(2)
 	received := SumBig(x, y)
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}
 
-	x = new(decimal.Big).SetUint64(3)
+	x = decimal.WithContext(DecimalContext).SetUint64(3)
 	y = nil
-	expected = new(decimal.Big).SetUint64(3)
+	expected = decimal.WithContext(DecimalContext).SetUint64(3)
 	received = SumBig(x, y)
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
@@ -132,9 +132,9 @@ func TestSumBigNil(t *testing.T) {
 
 func TestSubstractBigNil(t *testing.T) {
 	var x, y, expected *decimal.Big
-	x = new(decimal.Big).SetUint64(10)
+	x = decimal.WithContext(DecimalContext).SetUint64(10)
 	y = nil
-	expected = new(decimal.Big).SetUint64(10)
+	expected = decimal.WithContext(DecimalContext).SetUint64(10)
 	received := SubstractBig(x, y)
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
@@ -290,10 +290,10 @@ func TestDecimalNewDecimalFromStringErr(t *testing.T) {
 }
 
 func TestDivideBigWithReminder(t *testing.T) {
-	x := new(decimal.Big).SetUint64(10)
-	y := new(decimal.Big).SetUint64(5)
-	qExpected := new(decimal.Big).SetUint64(2)
-	rExpected := new(decimal.Big).SetUint64(0)
+	x := decimal.WithContext(DecimalContext).SetUint64(10)
+	y := decimal.WithContext(DecimalContext).SetUint64(5)
+	qExpected := decimal.WithContext(DecimalContext).SetUint64(2)
+	rExpected := decimal.WithContext(DecimalContext).SetUint64(0)
 	qReceived, rReceived := DivideBigWithReminder(x, y)
 	if !reflect.DeepEqual(qExpected, qReceived) {
 		t.Errorf("Expected divident <+%v> but received <+%v>", qExpected, qReceived)
@@ -311,7 +311,7 @@ func TestDivideBigWithReminder(t *testing.T) {
 		t.Errorf("Expected divident <+%v> but received <+%v>", rExpected, rReceived)
 	}
 
-	x = new(decimal.Big).SetUint64(10)
+	x = decimal.WithContext(DecimalContext).SetUint64(10)
 	y = nil
 	qReceived, rReceived = DivideBigWithReminder(x, y)
 	qExpected = nil

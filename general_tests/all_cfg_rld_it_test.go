@@ -111,7 +111,7 @@ func testConfigSReload(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 
-	cfgStr := "{\"cores\":{\"caps\":0,\"caps_stats_interval\":\"0\",\"caps_strategy\":\"*busy\",\"shutdown_timeout\":\"1s\"}}"
+	cfgStr := "{\"cores\":{\"caps\":0,\"caps_stats_interval\":\"0\",\"caps_strategy\":\"*busy\",\"ees_conns\":[],\"shutdown_timeout\":\"1s\"}}"
 	var rpl2 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

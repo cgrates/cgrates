@@ -148,7 +148,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		acntBkps[i] = acnt.Account.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
 		if ecDbt, err = aS.accountDebit(ctx, acnt.Account,
-			new(decimal.Big).Copy(usage), cgrEv, concretes, dbted); err != nil {
+			utils.CloneDecimalBig(usage), cgrEv, concretes, dbted); err != nil {
 			if store {
 				restoreAccounts(ctx, aS.dm, acnts, acntBkps)
 			}
@@ -207,7 +207,7 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 			return // no more debit
 		}
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = debFunc(ctx, new(decimal.Big).Copy(usage), cgrEv, dbted); err != nil {
+		if ecDbt, err = debFunc(ctx, utils.CloneDecimalBig(usage), cgrEv, dbted); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps ||
 				err == utils.ErrNotImplemented {
 				err = nil

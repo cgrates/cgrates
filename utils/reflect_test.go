@@ -1231,80 +1231,80 @@ func TestMultiplyInt64Error(t *testing.T) {
 func TestIfaceAsBig(t *testing.T) {
 	timeDur := time.Duration(1)
 	rcv, _ := IfaceAsBig(timeDur)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(1)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(1)) {
 		t.Errorf("Expected %v but received %v", 1, rcv)
 	}
 
 	testInt := 2
 	rcv, _ = IfaceAsBig(testInt)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(2)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(2)) {
 		t.Errorf("Expected %v but received %v", 2, rcv)
 	}
 
 	testInt8 := int8(3)
 	rcv, _ = IfaceAsBig(testInt8)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(3)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(3)) {
 		t.Errorf("Expected %v but received %v", 3, rcv)
 	}
 
 	testInt16 := int16(4)
 	rcv, _ = IfaceAsBig(testInt16)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(4)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(4)) {
 		t.Errorf("Expected %v but received %v", 4, rcv)
 	}
 
 	testInt32 := int32(5)
 	rcv, _ = IfaceAsBig(testInt32)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(5)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(5)) {
 		t.Errorf("Expected %v but received %v", 5, rcv)
 	}
 
 	testInt64 := int64(6)
 	rcv, _ = IfaceAsBig(testInt64)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(6)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(6)) {
 		t.Errorf("Expected %v but received %v", 6, rcv)
 	}
 
 	uTestInt := uint(2)
 	rcv, _ = IfaceAsBig(uTestInt)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(2)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(2)) {
 		t.Errorf("Expected %v but received %v", 2, rcv)
 	}
 
 	uTestInt8 := uint8(3)
 	rcv, _ = IfaceAsBig(uTestInt8)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(3)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(3)) {
 		t.Errorf("Expected %v but received %v", 3, rcv)
 	}
 
 	uTestInt16 := uint16(4)
 	rcv, _ = IfaceAsBig(uTestInt16)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(4)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(4)) {
 		t.Errorf("Expected %v but received %v", 4, rcv)
 	}
 
 	uTestInt32 := uint32(5)
 	rcv, _ = IfaceAsBig(uTestInt32)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(5)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(5)) {
 		t.Errorf("Expected %v but received %v", 5, rcv)
 	}
 
 	uTestInt64 := uint64(6)
 	rcv, _ = IfaceAsBig(uTestInt64)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(6)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(6)) {
 		t.Errorf("Expected %v but received %v", 6, rcv)
 	}
 
 	testFloat64 := float64(12.2)
 	rcv, _ = IfaceAsBig(testFloat64)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetFloat64(12.2)) {
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetFloat64(12.2)) {
 		t.Errorf("Expected %v but received %v", 12.2, rcv)
 	}
 
 	testFloat32 := float32(12)
 	rcv, _ = IfaceAsBig(testFloat32)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetFloat64(float64(12))) {
-		t.Errorf("Expected %v but received %v", new(decimal.Big).SetFloat64(float64(12)), rcv)
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetFloat64(float64(12))) {
+		t.Errorf("Expected %v but received %v", decimal.WithContext(DecimalContext).SetFloat64(float64(12)), rcv)
 	}
 
 	timeSuffix := "not_valid_timems"
@@ -1319,20 +1319,20 @@ func TestIfaceAsBig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(123)) {
-		t.Errorf("Expected %v but received %v", new(decimal.Big).SetUint64(123), rcv)
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(123)) {
+		t.Errorf("Expected %v but received %v", decimal.WithContext(DecimalContext).SetUint64(123), rcv)
 	}
 
-	decBig := new(decimal.Big).SetUint64(21)
+	decBig := decimal.WithContext(DecimalContext).SetUint64(21)
 	rcv, _ = IfaceAsBig(decBig)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(21)) {
-		t.Errorf("Expected %v but received %v", new(decimal.Big).SetUint64(21), rcv)
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(21)) {
+		t.Errorf("Expected %v but received %v", decimal.WithContext(DecimalContext).SetUint64(21), rcv)
 	}
 
 	dec := NewDecimal(10, 0)
 	rcv, _ = IfaceAsBig(dec)
-	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(10)) {
-		t.Errorf("Expected %v but received %v", new(decimal.Big).SetUint64(10), rcv)
+	if !reflect.DeepEqual(rcv, decimal.WithContext(DecimalContext).SetUint64(10)) {
+		t.Errorf("Expected %v but received %v", decimal.WithContext(DecimalContext).SetUint64(10), rcv)
 	}
 
 	def := []string{"test"}

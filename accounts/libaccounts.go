@@ -185,7 +185,7 @@ func debitConcreteUnits(ctx *context.Context, cUnits *decimal.Big,
 	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
 	for _, cB := range cncrtBlncs {
 		var ecCncrt *utils.EventCharges
-		if ecCncrt, err = cB.debitConcretes(ctx, new(decimal.Big).Copy(cUnits), cgrEv, nil); err != nil {
+		if ecCncrt, err = cB.debitConcretes(ctx, utils.CloneDecimalBig(cUnits), cgrEv, nil); err != nil {
 			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
 			return nil, err
 		}
@@ -280,7 +280,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			}
 			err = nil
 			// ErrInsufficientCredit
-			aDenied = new(decimal.Big).Copy(aUnits)
+			aDenied = utils.CloneDecimalBig(aUnits)
 			if aPaid == nil { // going backwards
 				aUnits = utils.DivideBig( // divide by 2
 					aUnits, decimal.New(2, 0))
@@ -293,7 +293,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 				continue
 			}
 		} else { // debit for the usage succeeded
-			aPaid = new(decimal.Big).Copy(aUnits)
+			aPaid = utils.CloneDecimalBig(aUnits)
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
 			if ec == nil {
 				ec = utils.NewEventCharges()

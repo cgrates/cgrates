@@ -1891,7 +1891,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	/*
 		acnt1.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
 		acnt1.Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
-		acnt1.Balances[ab2ID].Units = &utils.Decimal{new(decimal.Big).CopySign(decimal.New(0, 0), decimal.New(-1, 0))} // negative 0
+		acnt1.Balances[ab2ID].Units = &utils.Decimal{decimal.WithContext(DecimalContext).CopySign(decimal.New(0, 0), decimal.New(-1, 0))} // negative 0
 		acnt1.Balances[cb2ID].Units = utils.NewDecimal(0, 0)
 		if rcv, err := dm.GetAccount(acnt1.Tenant, acnt1.ID); err != nil {
 			t.Error(err)
@@ -2411,7 +2411,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaAbstract,
-				Units: &utils.Decimal{utils.SumDecimalAsBig(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0))}, // this should be -0
+				Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // this should be -0
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment: utils.NewDecimal(int64(time.Second), 0),

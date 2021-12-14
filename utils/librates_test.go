@@ -1599,7 +1599,7 @@ func TestRateSIncrementCost(t *testing.T) {
 	}
 
 	cost := rIc.Cost(rts)
-	exp := new(decimal.Big).SetUint64(15)
+	exp := decimal.WithContext(DecimalContext).SetUint64(15)
 	if !reflect.DeepEqual(cost, exp) {
 		t.Errorf("Expected %T \n but received \n %T", exp, cost)
 	}
@@ -1612,7 +1612,7 @@ func TestRateSIncrementCostNotNil(t *testing.T) {
 		RateID:            "RI1",
 		CompressFactor:    int64(3),
 		Usage:             NewDecimal(int64(30), 0),
-		cost:              new(decimal.Big).SetUint64(15),
+		cost:              decimal.WithContext(DecimalContext).SetUint64(15),
 	}
 
 	rts := map[string]*IntervalRate{
@@ -1624,7 +1624,7 @@ func TestRateSIncrementCostNotNil(t *testing.T) {
 	}
 
 	cost := rIc.Cost(rts)
-	exp := new(decimal.Big).SetUint64(15)
+	exp := decimal.WithContext(DecimalContext).SetUint64(15)
 	if !reflect.DeepEqual(cost, exp) {
 		t.Errorf("Expected %T \n but received \n %T", exp, cost)
 	}
@@ -1672,7 +1672,7 @@ func TestRateSIncrementCostFixedFee(t *testing.T) {
 	}
 
 	cost := rIc.Cost(rts)
-	exp := new(decimal.Big).SetUint64(10)
+	exp := decimal.WithContext(DecimalContext).SetUint64(10)
 	if !reflect.DeepEqual(cost, exp) {
 		t.Errorf("Expected %v \n but received \n %v", exp, cost)
 	}
@@ -1698,7 +1698,7 @@ func TestRateSIncrementCostDiffUnitIncrement(t *testing.T) {
 	}
 
 	cost := rIc.Cost(rts)
-	exp := new(decimal.Big).SetUint64(3)
+	exp := decimal.WithContext(DecimalContext).SetUint64(3)
 	if !reflect.DeepEqual(cost, exp) {
 		t.Errorf("Expected %v \n but received \n %v", exp, cost)
 	}
@@ -1878,7 +1878,7 @@ func TestRateSIntervalCost(t *testing.T) {
 	}
 
 	rcv := rIv.Cost(rts)
-	exp := new(decimal.Big).SetUint64(2)
+	exp := decimal.WithContext(DecimalContext).SetUint64(2)
 	if !reflect.DeepEqual(rcv, exp) {
 		fmt.Printf("Expected %v \n but received \n %v", exp, rcv)
 	}

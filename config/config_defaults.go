@@ -53,6 +53,10 @@ const CGRATES_CFG_JSON = `
 	"digest_equal": ":",									// equal symbol used in case of digests
 	"rsr_separator": ";",									// separator used within RSR fields
 	"max_parallel_conns": 100,								// the maximum number of connection used by the *parallel strategy
+	"decimal_max_scale": 0,									// the maximum scale for decimal numbers
+	"decimal_min_scale": 0,									// the minimum scale for decimal numbers
+	"decimal_precision": 0,									// the precision of the decimal operations
+	"decimal_rounding_mode": "ToNearestEven",				// the rounding mode <ToNearestEvend|ToNearestAwayd|ToZerod|AwayFromZerod|ToNegativeInfd|ToPositiveInfd|ToNearestTowardZero>
 },
 
 

@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // GeneralCfg is the general config section
@@ -51,6 +52,11 @@ type GeneralCfg struct {
 	DigestEqual      string        //
 	RSRSep           string        // separator used to split RSRParser (by default is used ";")
 	MaxParallelConns int           // the maximum number of connections used by the *parallel strategy
+
+	DecimalMaxScale     int
+	DecimalMinScale     int
+	DecimalPrecision    int
+	DecimalRoundingMode decimal.RoundingMode
 }
 
 // loadGeneralCfg loads the General section of the configuration
@@ -146,35 +152,51 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 		gencfg.MaxParallelConns = *jsnGeneralCfg.Max_parallel_conns
 	}
 
-	return nil
+	if jsnGeneralCfg.Decimal_max_scale != nil {
+		gencfg.DecimalMaxScale = *jsnGeneralCfg.Decimal_max_scale
+	}
+	if jsnGeneralCfg.Decimal_min_scale != nil {
+		gencfg.DecimalMinScale = *jsnGeneralCfg.Decimal_min_scale
+	}
+	if jsnGeneralCfg.Decimal_precision != nil {
+		gencfg.DecimalPrecision = *jsnGeneralCfg.Decimal_precision
+	}
+	if jsnGeneralCfg.Decimal_rounding_mode != nil {
+		gencfg.DecimalRoundingMode, err = utils.NewRoundingMode(*jsnGeneralCfg.Decimal_rounding_mode)
+	}
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
 	mp := map[string]interface{}{
-		utils.NodeIDCfg:           gencfg.NodeID,
-		utils.LoggerCfg:           gencfg.Logger,
-		utils.LogLevelCfg:         gencfg.LogLevel,
-		utils.RoundingDecimalsCfg: gencfg.RoundingDecimals,
-		utils.DBDataEncodingCfg:   utils.Meta + gencfg.DBDataEncoding,
-		utils.TpExportPathCfg:     gencfg.TpExportPath,
-		utils.PosterAttemptsCfg:   gencfg.PosterAttempts,
-		utils.FailedPostsDirCfg:   gencfg.FailedPostsDir,
-		utils.DefaultReqTypeCfg:   gencfg.DefaultReqType,
-		utils.DefaultCategoryCfg:  gencfg.DefaultCategory,
-		utils.DefaultTenantCfg:    gencfg.DefaultTenant,
-		utils.DefaultTimezoneCfg:  gencfg.DefaultTimezone,
-		utils.DefaultCachingCfg:   gencfg.DefaultCaching,
-		utils.ConnectAttemptsCfg:  gencfg.ConnectAttempts,
-		utils.ReconnectsCfg:       gencfg.Reconnects,
-		utils.DigestSeparatorCfg:  gencfg.DigestSeparator,
-		utils.DigestEqualCfg:      gencfg.DigestEqual,
-		utils.RSRSepCfg:           gencfg.RSRSep,
-		utils.MaxParallelConnsCfg: gencfg.MaxParallelConns,
-		utils.LockingTimeoutCfg:   "0",
-		utils.FailedPostsTTLCfg:   "0",
-		utils.ConnectTimeoutCfg:   "0",
-		utils.ReplyTimeoutCfg:     "0",
+		utils.NodeIDCfg:              gencfg.NodeID,
+		utils.LoggerCfg:              gencfg.Logger,
+		utils.LogLevelCfg:            gencfg.LogLevel,
+		utils.RoundingDecimalsCfg:    gencfg.RoundingDecimals,
+		utils.DBDataEncodingCfg:      utils.Meta + gencfg.DBDataEncoding,
+		utils.TpExportPathCfg:        gencfg.TpExportPath,
+		utils.PosterAttemptsCfg:      gencfg.PosterAttempts,
+		utils.FailedPostsDirCfg:      gencfg.FailedPostsDir,
+		utils.DefaultReqTypeCfg:      gencfg.DefaultReqType,
+		utils.DefaultCategoryCfg:     gencfg.DefaultCategory,
+		utils.DefaultTenantCfg:       gencfg.DefaultTenant,
+		utils.DefaultTimezoneCfg:     gencfg.DefaultTimezone,
+		utils.DefaultCachingCfg:      gencfg.DefaultCaching,
+		utils.ConnectAttemptsCfg:     gencfg.ConnectAttempts,
+		utils.ReconnectsCfg:          gencfg.Reconnects,
+		utils.DigestSeparatorCfg:     gencfg.DigestSeparator,
+		utils.DigestEqualCfg:         gencfg.DigestEqual,
+		utils.RSRSepCfg:              gencfg.RSRSep,
+		utils.MaxParallelConnsCfg:    gencfg.MaxParallelConns,
+		utils.LockingTimeoutCfg:      "0",
+		utils.FailedPostsTTLCfg:      "0",
+		utils.ConnectTimeoutCfg:      "0",
+		utils.ReplyTimeoutCfg:        "0",
+		utils.DecimalMaxScaleCfg:     gencfg.DecimalMaxScale,
+		utils.DecimalMinScaleCfg:     gencfg.DecimalMinScale,
+		utils.DecimalPrecisionCfg:    gencfg.DecimalPrecision,
+		utils.DecimalRoundingModeCfg: gencfg.DecimalRoundingMode.String(),
 	}
 
 	if gencfg.LockingTimeout != 0 {
@@ -202,29 +224,33 @@ func (gencfg GeneralCfg) CloneSection() Section { return gencfg.Clone() }
 // Clone returns a deep copy of GeneralCfg
 func (gencfg GeneralCfg) Clone() *GeneralCfg {
 	return &GeneralCfg{
-		NodeID:           gencfg.NodeID,
-		Logger:           gencfg.Logger,
-		LogLevel:         gencfg.LogLevel,
-		RoundingDecimals: gencfg.RoundingDecimals,
-		DBDataEncoding:   gencfg.DBDataEncoding,
-		TpExportPath:     gencfg.TpExportPath,
-		PosterAttempts:   gencfg.PosterAttempts,
-		FailedPostsDir:   gencfg.FailedPostsDir,
-		FailedPostsTTL:   gencfg.FailedPostsTTL,
-		DefaultReqType:   gencfg.DefaultReqType,
-		DefaultCategory:  gencfg.DefaultCategory,
-		DefaultTenant:    gencfg.DefaultTenant,
-		DefaultTimezone:  gencfg.DefaultTimezone,
-		DefaultCaching:   gencfg.DefaultCaching,
-		ConnectAttempts:  gencfg.ConnectAttempts,
-		Reconnects:       gencfg.Reconnects,
-		ConnectTimeout:   gencfg.ConnectTimeout,
-		ReplyTimeout:     gencfg.ReplyTimeout,
-		LockingTimeout:   gencfg.LockingTimeout,
-		DigestSeparator:  gencfg.DigestSeparator,
-		DigestEqual:      gencfg.DigestEqual,
-		RSRSep:           gencfg.RSRSep,
-		MaxParallelConns: gencfg.MaxParallelConns,
+		NodeID:              gencfg.NodeID,
+		Logger:              gencfg.Logger,
+		LogLevel:            gencfg.LogLevel,
+		RoundingDecimals:    gencfg.RoundingDecimals,
+		DBDataEncoding:      gencfg.DBDataEncoding,
+		TpExportPath:        gencfg.TpExportPath,
+		PosterAttempts:      gencfg.PosterAttempts,
+		FailedPostsDir:      gencfg.FailedPostsDir,
+		FailedPostsTTL:      gencfg.FailedPostsTTL,
+		DefaultReqType:      gencfg.DefaultReqType,
+		DefaultCategory:     gencfg.DefaultCategory,
+		DefaultTenant:       gencfg.DefaultTenant,
+		DefaultTimezone:     gencfg.DefaultTimezone,
+		DefaultCaching:      gencfg.DefaultCaching,
+		ConnectAttempts:     gencfg.ConnectAttempts,
+		Reconnects:          gencfg.Reconnects,
+		ConnectTimeout:      gencfg.ConnectTimeout,
+		ReplyTimeout:        gencfg.ReplyTimeout,
+		LockingTimeout:      gencfg.LockingTimeout,
+		DigestSeparator:     gencfg.DigestSeparator,
+		DigestEqual:         gencfg.DigestEqual,
+		RSRSep:              gencfg.RSRSep,
+		MaxParallelConns:    gencfg.MaxParallelConns,
+		DecimalMaxScale:     gencfg.DecimalMaxScale,
+		DecimalMinScale:     gencfg.DecimalMinScale,
+		DecimalPrecision:    gencfg.DecimalPrecision,
+		DecimalRoundingMode: gencfg.DecimalRoundingMode,
 	}
 }
 
@@ -253,6 +279,11 @@ type GeneralJsonCfg struct {
 	Digest_equal         *string
 	Rsr_separator        *string
 	Max_parallel_conns   *int
+
+	Decimal_max_scale     *int
+	Decimal_min_scale     *int
+	Decimal_precision     *int
+	Decimal_rounding_mode *string
 }
 
 func diffGeneralJsonCfg(d *GeneralJsonCfg, v1, v2 *GeneralCfg) *GeneralJsonCfg {
@@ -328,6 +359,18 @@ func diffGeneralJsonCfg(d *GeneralJsonCfg, v1, v2 *GeneralCfg) *GeneralJsonCfg {
 	}
 	if v1.MaxParallelConns != v2.MaxParallelConns {
 		d.Max_parallel_conns = utils.IntPointer(v2.MaxParallelConns)
+	}
+	if v1.DecimalMaxScale != v2.DecimalMaxScale {
+		d.Decimal_max_scale = utils.IntPointer(v2.DecimalMaxScale)
+	}
+	if v1.DecimalMinScale != v2.DecimalMinScale {
+		d.Decimal_min_scale = utils.IntPointer(v2.DecimalMinScale)
+	}
+	if v1.DecimalPrecision != v2.DecimalPrecision {
+		d.Decimal_precision = utils.IntPointer(v2.DecimalPrecision)
+	}
+	if v1.DecimalRoundingMode != v2.DecimalRoundingMode {
+		d.Decimal_rounding_mode = utils.StringPointer(v2.DecimalRoundingMode.String())
 	}
 	return d
 }
