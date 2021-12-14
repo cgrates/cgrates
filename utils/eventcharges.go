@@ -54,12 +54,8 @@ type ChargeEntry struct {
 func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 	//ec.SyncIDs(eCs...) // so we can compare properly
 	for _, nEc := range eCs {
-		if sumAbst := SumDecimalAsBig(ec.Abstracts, nEc.Abstracts); sumAbst != nil {
-			ec.Abstracts = &Decimal{sumAbst}
-		}
-		if sumCrct := SumDecimalAsBig(ec.Concretes, nEc.Concretes); sumCrct != nil {
-			ec.Concretes = &Decimal{sumCrct}
-		}
+		ec.Abstracts = SumDecimal(ec.Abstracts, nEc.Abstracts)
+		ec.Concretes = SumDecimal(ec.Concretes, nEc.Concretes)
 		ec.appendChargeEntry(nEc.Charges...)
 		for acntID, acntChrg := range nEc.Accounting {
 			ec.Accounting[acntID] = acntChrg

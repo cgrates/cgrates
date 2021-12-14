@@ -73,6 +73,7 @@ const (
 
 var (
 	SectionToService = map[string]string{
+		GeneralJSON:         utils.GlobalVarS,
 		AttributeSJSON:      utils.AttributeS,
 		ChargerSJSON:        utils.ChargerS,
 		ThresholdSJSON:      utils.ThresholdS,

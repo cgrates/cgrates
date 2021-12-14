@@ -1188,7 +1188,7 @@ func testOnStorITAccount(t *testing.T) {
 				},
 				Type: utils.MetaVoice,
 				Units: &utils.Decimal{
-					Big: new(decimal.Big).SetUint64(10),
+					Big: decimal.WithContext(utils.DecimalContext).SetUint64(10),
 				},
 				Opts: map[string]interface{}{
 					"key1": "val1",

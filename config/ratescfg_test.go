@@ -247,13 +247,13 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			Usage: []*utils.DynamicDecimalBigOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  new(decimal.Big).SetUint64(2),
+					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(2),
 				},
 			},
 			IntervalStart: []*utils.DynamicDecimalBigOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  new(decimal.Big).SetUint64(2),
+					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(2),
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -294,13 +294,13 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			Usage: []*utils.DynamicDecimalBigOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  new(decimal.Big).SetUint64(3),
+					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(3),
 				},
 			},
 			IntervalStart: []*utils.DynamicDecimalBigOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  new(decimal.Big).SetUint64(3),
+					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(3),
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{

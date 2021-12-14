@@ -49,12 +49,20 @@ type GlobalVarS struct {
 func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
 	ees.SetFailedPostCacheTTL(gv.cfg.GeneralCfg().FailedPostsTTL)
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
+	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
+	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
+	utils.DecimalContext.Precision = gv.cfg.GeneralCfg().DecimalPrecision
+	utils.DecimalContext.RoundingMode = gv.cfg.GeneralCfg().DecimalRoundingMode
 	return nil
 }
 
 // Reload handles the change of config
 func (gv *GlobalVarS) Reload(*context.Context, context.CancelFunc) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
+	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
+	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
+	utils.DecimalContext.Precision = gv.cfg.GeneralCfg().DecimalPrecision
+	utils.DecimalContext.RoundingMode = gv.cfg.GeneralCfg().DecimalRoundingMode
 	return nil
 }
 

@@ -61,7 +61,7 @@ func (ap *Account) AccountBalancesBackup() (abb AccountBalancesBackup) {
 	if ap.Balances != nil {
 		abb = make(AccountBalancesBackup)
 		for blncID, blnc := range ap.Balances {
-			abb[blncID] = new(decimal.Big).Copy(blnc.Units.Big)
+			abb[blncID] = CloneDecimalBig(blnc.Units.Big)
 		}
 	}
 	return

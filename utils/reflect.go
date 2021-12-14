@@ -86,7 +86,7 @@ func StringAsBig(itm string) (b *decimal.Big, err error) {
 		}
 		return decimal.New(int64(tm), 0), nil
 	}
-	z, ok := new(decimal.Big).SetString(itm)
+	z, ok := decimal.WithContext(DecimalContext).SetString(itm)
 	// verify ok and check if the value was converted successfuly
 	// and the big is a valid number
 	if !ok || z.IsNaN(0) {
@@ -110,19 +110,19 @@ func IfaceAsBig(itm interface{}) (b *decimal.Big, err error) {
 	case int64:
 		return decimal.New(it, 0), nil
 	case uint:
-		return new(decimal.Big).SetUint64(uint64(it)), nil
+		return decimal.WithContext(DecimalContext).SetUint64(uint64(it)), nil
 	case uint8:
-		return new(decimal.Big).SetUint64(uint64(it)), nil
+		return decimal.WithContext(DecimalContext).SetUint64(uint64(it)), nil
 	case uint16:
-		return new(decimal.Big).SetUint64(uint64(it)), nil
+		return decimal.WithContext(DecimalContext).SetUint64(uint64(it)), nil
 	case uint32:
-		return new(decimal.Big).SetUint64(uint64(it)), nil
+		return decimal.WithContext(DecimalContext).SetUint64(uint64(it)), nil
 	case uint64:
-		return new(decimal.Big).SetUint64(it), nil
+		return decimal.WithContext(DecimalContext).SetUint64(it), nil
 	case float32: // automatically hitting here also ints
-		return new(decimal.Big).SetFloat64(float64(it)), nil
+		return decimal.WithContext(DecimalContext).SetFloat64(float64(it)), nil
 	case float64: // automatically hitting here also ints
-		return new(decimal.Big).SetFloat64(it), nil
+		return decimal.WithContext(DecimalContext).SetFloat64(it), nil
 	case string:
 		return StringAsBig(it)
 	case *Decimal:

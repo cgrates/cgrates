@@ -408,7 +408,6 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 
 func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
 	if rIv.cost == nil {
-		rIv.cost = new(decimal.Big)
 		for _, incrm := range rIv.Increments {
 			rIv.cost = SumBig(rIv.cost, incrm.Cost(rts))
 		}
@@ -443,7 +442,7 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 			if rIcr.CompressFactor != 1 {
 				rIcr.cost = MultiplyBig(
 					rIcr.cost,
-					new(decimal.Big).SetUint64(uint64(rIcr.CompressFactor)))
+					decimal.WithContext(DecimalContext).SetUint64(uint64(rIcr.CompressFactor)))
 			}
 		}
 	}

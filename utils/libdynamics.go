@@ -381,10 +381,6 @@ func DynamicDurationPointerOptEqual(v1, v2 []*DynamicDurationPointerOpt) bool {
 	return true
 }
 
-func CloneDecimalBig(in *decimal.Big) *decimal.Big {
-	return new(decimal.Big).Copy(in)
-}
-
 func StringToDecimalBigDynamicOpts(strOpts []*DynamicStringOpt) (decOpts []*DynamicDecimalBigOpt, err error) {
 	decOpts = make([]*DynamicDecimalBigOpt, len(strOpts))
 	for index, opt := range strOpts {
