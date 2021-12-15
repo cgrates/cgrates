@@ -365,7 +365,10 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	buff := new(bytes.Buffer)
 	zBuff := zip.NewWriter(buff)
 	var wrtr io.Writer
-	if wrtr, err = zBuff.Create("events.csv"); err != nil {
+	if wrtr, err = zBuff.CreateHeader(&zip.FileHeader{
+		Name:     "events.csv",
+		Modified: time.Now(),
+	}); err != nil {
 		return err
 	}
 	switch eesCfg.Type {
@@ -414,7 +417,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	}
 	// most probably beacause of not matching filters
 	if !exported {
-		return fmt.Errorf("exporter did not write data in zip format")
+		return utils.NewErrServerError(fmt.Errorf("NO EXPORTS"))
 	}
 	if err = ee.Close(); err != nil {
 		return err
