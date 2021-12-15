@@ -362,7 +362,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 		Tenant:     "cgrates.org",
 		EventStart: engine.NewMapEvent(startEv),
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event:      engine.NewMapEvent(ev),
 				TotalUsage: time.Duration(2 * time.Second),
 			},
@@ -421,7 +421,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event:         engine.NewMapEvent(ev),
 				TotalUsage:    time.Duration(2 * time.Second),
 				NextAutoDebit: &tTime,
@@ -429,7 +429,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		},
 	}
 	exp := []*ExternalSession{
-		&ExternalSession{
+		{
 			CGRID:    "RandomCGRID",
 			RunID:    utils.MetaDefault,
 			ToR:      utils.VOICE,
@@ -504,7 +504,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event:      engine.NewMapEvent(ev),
 				TotalUsage: time.Duration(2 * time.Second),
 				CD: &engine.CallDescriptor{
@@ -518,7 +518,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		},
 	}
 	exp := []*ExternalSession{
-		&ExternalSession{
+		{
 			CGRID:    "RandomCGRID",
 			RunID:    utils.MetaDefault,
 			ToR:      utils.VOICE,
@@ -594,7 +594,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event:      engine.NewMapEvent(ev),
 				TotalUsage: time.Duration(2 * time.Second),
 				CD: &engine.CallDescriptor{

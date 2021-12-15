@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"fmt"
 	"runtime"
 	"sync"
 	"time"
@@ -290,6 +291,7 @@ func (sr *SRun) debitReserve(dur time.Duration, lastUsage *time.Duration) (rDur 
 	if lastUsage != nil &&
 		sr.LastUsage != *lastUsage {
 		diffUsage := sr.LastUsage - *lastUsage
+		fmt.Println("diffUsage ", diffUsage)
 		sr.ExtraDuration += diffUsage
 		sr.TotalUsage -= sr.LastUsage
 		sr.TotalUsage += *lastUsage
@@ -302,6 +304,7 @@ func (sr *SRun) debitReserve(dur time.Duration, lastUsage *time.Duration) (rDur 
 		sr.TotalUsage += dur
 	} else {
 		rDur = dur - sr.ExtraDuration
+		fmt.Println("sr.ExtraDuration ", sr.ExtraDuration)
 		sr.ExtraDuration = 0
 	}
 	return

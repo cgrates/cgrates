@@ -92,41 +92,39 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	session := &Session{
 		CGRID:      GetSetCGRID(sEv),
 		EventStart: sEv,
-		SRuns: []*SRun{
-			&SRun{
-				Event: sEv,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
+		SRuns: []*SRun{{
+			Event: sEv,
+			CD: &engine.CallDescriptor{
+				RunID: utils.MetaDefault,
 			},
-		},
+		}},
 	}
 	cgrID := GetSetCGRID(sEv)
 	sS.indexSession(session, false)
 	eIndexes := map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"12345": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"12345": {
+				cgrID: {utils.MetaDefault: true},
 			},
 		},
-		"Tenant": map[string]map[string]utils.StringMap{
-			"cgrates.org": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.MetaDefault: true},
+		"Tenant": {
+			"cgrates.org": {
+				cgrID: {utils.MetaDefault: true},
 			},
 		},
-		"Account": map[string]map[string]utils.StringMap{
-			"account1": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.MetaDefault: true},
+		"Account": {
+			"account1": {
+				cgrID: {utils.MetaDefault: true},
 			},
 		},
-		"Extra3": map[string]map[string]utils.StringMap{
-			utils.MetaEmpty: map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.MetaDefault: true},
+		"Extra3": {
+			utils.MetaEmpty: {
+				cgrID: {utils.MetaDefault: true},
 			},
 		},
-		"Extra4": map[string]map[string]utils.StringMap{
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.MetaDefault: true},
+		"Extra4": {
+			utils.NOT_AVAILABLE: {
+				cgrID: {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -135,12 +133,12 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
 	}
 	eRIdxes := map[string][]*riFieldNameVal{
-		cgrID: []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
-			&riFieldNameVal{fieldName: "Account", fieldValue: "account1"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12345"},
+		cgrID: {
+			{fieldName: "Tenant", fieldValue: "cgrates.org"},
+			{fieldName: "Account", fieldValue: "account1"},
+			{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			{fieldName: "OriginID", fieldValue: "12345"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) ||
@@ -162,7 +160,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		CGRID:      cgrID2,
 		EventStart: sSEv2,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sSEv2,
 				CD: &engine.CallDescriptor{
 					RunID: utils.MetaDefault,
@@ -183,7 +181,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		CGRID:      cgrID3,
 		EventStart: sSEv3,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sSEv3,
 				CD: &engine.CallDescriptor{
 					RunID: utils.MetaDefault,
@@ -193,51 +191,51 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	}
 	sS.indexSession(session3, false)
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"12345": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"12345": {
+				cgrID: {utils.MetaDefault: true},
 			},
-			"12346": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+			"12346": {
+				cgrID2: {utils.MetaDefault: true},
 			},
-			"12347": map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
-			},
-		},
-		"Tenant": map[string]map[string]utils.StringMap{
-			"cgrates.org": map[string]utils.StringMap{
-				cgrID:  utils.StringMap{utils.MetaDefault: true},
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
-			},
-			"itsyscom.com": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+			"12347": {
+				cgrID3: {utils.MetaDefault: true},
 			},
 		},
-		"Account": map[string]map[string]utils.StringMap{
-			"account1": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.MetaDefault: true},
+		"Tenant": {
+			"cgrates.org": {
+				cgrID:  {utils.MetaDefault: true},
+				cgrID3: {utils.MetaDefault: true},
 			},
-			"account2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
-			},
-		},
-		"Extra3": map[string]map[string]utils.StringMap{
-			utils.MetaEmpty: map[string]utils.StringMap{
-				cgrID:  utils.StringMap{utils.MetaDefault: true},
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
-			},
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
+			"itsyscom.com": {
+				cgrID2: {utils.MetaDefault: true},
 			},
 		},
-		"Extra4": map[string]map[string]utils.StringMap{
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID:  utils.StringMap{utils.MetaDefault: true},
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
+		"Account": {
+			"account1": {
+				cgrID: {utils.MetaDefault: true},
 			},
-			"info2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+			"account2": {
+				cgrID2: {utils.MetaDefault: true},
+				cgrID3: {utils.MetaDefault: true},
+			},
+		},
+		"Extra3": {
+			utils.MetaEmpty: {
+				cgrID:  {utils.MetaDefault: true},
+				cgrID2: {utils.MetaDefault: true},
+			},
+			utils.NOT_AVAILABLE: {
+				cgrID3: {utils.MetaDefault: true},
+			},
+		},
+		"Extra4": {
+			utils.NOT_AVAILABLE: {
+				cgrID:  {utils.MetaDefault: true},
+				cgrID3: {utils.MetaDefault: true},
+			},
+			"info2": {
+				cgrID2: {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -245,26 +243,26 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
-		cgrID: []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
-			&riFieldNameVal{fieldName: "Account", fieldValue: "account1"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12345"},
+		cgrID: {
+			{fieldName: "Tenant", fieldValue: "cgrates.org"},
+			{fieldName: "Account", fieldValue: "account1"},
+			{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			{fieldName: "OriginID", fieldValue: "12345"},
 		},
-		cgrID2: []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
-			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
+		cgrID2: {
+			{fieldName: "Tenant", fieldValue: "itsyscom.com"},
+			{fieldName: "Account", fieldValue: "account2"},
+			{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			{fieldName: "Extra4", fieldValue: "info2"},
+			{fieldName: "OriginID", fieldValue: "12346"},
 		},
-		cgrID3: []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
-			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12347"},
+		cgrID3: {
+			{fieldName: "Tenant", fieldValue: "cgrates.org"},
+			{fieldName: "Account", fieldValue: "account2"},
+			{fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
+			{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			{fieldName: "OriginID", fieldValue: "12347"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) ||
@@ -275,42 +273,42 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	// Unidex first session
 	sS.unindexSession(cgrID, false)
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"12346": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"12346": {
+				cgrID2: {utils.MetaDefault: true},
 			},
-			"12347": map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
-			},
-		},
-		"Tenant": map[string]map[string]utils.StringMap{
-			"cgrates.org": map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
-			},
-			"itsyscom.com": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+			"12347": {
+				cgrID3: {utils.MetaDefault: true},
 			},
 		},
-		"Account": map[string]map[string]utils.StringMap{
-			"account2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
+		"Tenant": {
+			"cgrates.org": {
+				cgrID3: {utils.MetaDefault: true},
+			},
+			"itsyscom.com": {
+				cgrID2: {utils.MetaDefault: true},
 			},
 		},
-		"Extra3": map[string]map[string]utils.StringMap{
-			utils.MetaEmpty: map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
-			},
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
+		"Account": {
+			"account2": {
+				cgrID2: {utils.MetaDefault: true},
+				cgrID3: {utils.MetaDefault: true},
 			},
 		},
-		"Extra4": map[string]map[string]utils.StringMap{
-			"info2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+		"Extra3": {
+			utils.MetaEmpty: {
+				cgrID2: {utils.MetaDefault: true},
 			},
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.MetaDefault: true},
+			utils.NOT_AVAILABLE: {
+				cgrID3: {utils.MetaDefault: true},
+			},
+		},
+		"Extra4": {
+			"info2": {
+				cgrID2: {utils.MetaDefault: true},
+			},
+			utils.NOT_AVAILABLE: {
+				cgrID3: {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -318,19 +316,19 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
-		cgrID2: []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
-			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
+		cgrID2: {
+			{fieldName: "Tenant", fieldValue: "itsyscom.com"},
+			{fieldName: "Account", fieldValue: "account2"},
+			{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			{fieldName: "Extra4", fieldValue: "info2"},
+			{fieldName: "OriginID", fieldValue: "12346"},
 		},
-		cgrID3: []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
-			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12347"},
+		cgrID3: {
+			{fieldName: "Tenant", fieldValue: "cgrates.org"},
+			{fieldName: "Account", fieldValue: "account2"},
+			{fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
+			{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			{fieldName: "OriginID", fieldValue: "12347"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) ||
@@ -339,29 +337,29 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	}
 	sS.unindexSession(cgrID3, false)
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"12346": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"12346": {
+				cgrID2: {utils.MetaDefault: true},
 			},
 		},
-		"Tenant": map[string]map[string]utils.StringMap{
-			"itsyscom.com": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+		"Tenant": {
+			"itsyscom.com": {
+				cgrID2: {utils.MetaDefault: true},
 			},
 		},
-		"Account": map[string]map[string]utils.StringMap{
-			"account2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+		"Account": {
+			"account2": {
+				cgrID2: {utils.MetaDefault: true},
 			},
 		},
-		"Extra3": map[string]map[string]utils.StringMap{
-			utils.MetaEmpty: map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+		"Extra3": {
+			utils.MetaEmpty: {
+				cgrID2: {utils.MetaDefault: true},
 			},
 		},
-		"Extra4": map[string]map[string]utils.StringMap{
-			"info2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.MetaDefault: true},
+		"Extra4": {
+			"info2": {
+				cgrID2: {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -369,12 +367,12 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
-		cgrID2: []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
-			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
+		cgrID2: {
+			{fieldName: "Tenant", fieldValue: "itsyscom.com"},
+			{fieldName: "Account", fieldValue: "account2"},
+			{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			{fieldName: "Extra4", fieldValue: "info2"},
+			{fieldName: "OriginID", fieldValue: "12346"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) ||
@@ -407,14 +405,12 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	s := &Session{
 		CGRID:      "session1",
 		EventStart: sSEv,
-		SRuns: []*SRun{
-			&SRun{
-				Event: sSEv,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
+		SRuns: []*SRun{{
+			Event: sSEv,
+			CD: &engine.CallDescriptor{
+				RunID: utils.MetaDefault,
 			},
-		},
+		}},
 	}
 	//register the session
 	sS.registerSession(s, false)
@@ -426,9 +422,9 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 
 	//verify if the index was created according to session
 	eIndexes := map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"111": map[string]utils.StringMap{
-				"session1": utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"111": {
+				"session1": {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -438,8 +434,8 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	}
 	//verify if the revIdx was created according to session
 	eRIdxes := map[string][]*riFieldNameVal{
-		"session1": []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "111"},
+		"session1": {
+			{fieldName: "OriginID", fieldValue: "111"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) && len(eRIdxes["session1"]) != len(sS.aSessionsRIdx["session1"]) {
@@ -466,7 +462,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		CGRID:      "session2",
 		EventStart: sSEv2,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sSEv2,
 				CD: &engine.CallDescriptor{
 					RunID: utils.MetaDefault,
@@ -483,12 +479,12 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 
 	// verify if the index was created according to session
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"111": map[string]utils.StringMap{
-				"session1": utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"111": {
+				"session1": {utils.MetaDefault: true},
 			},
-			"222": map[string]utils.StringMap{
-				"session2": utils.StringMap{utils.MetaDefault: true},
+			"222": {
+				"session2": {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -498,11 +494,11 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	}
 	//verify if the revIdx was created according to session
 	eRIdxes = map[string][]*riFieldNameVal{
-		"session1": []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "111"},
+		"session1": {
+			{fieldName: "OriginID", fieldValue: "111"},
 		},
-		"session2": []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "222"},
+		"session2": {
+			{fieldName: "OriginID", fieldValue: "222"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) &&
@@ -533,7 +529,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		CGRID:      "session1",
 		EventStart: sSEv3,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sSEv3,
 				CD: &engine.CallDescriptor{
 					RunID: utils.MetaDefault,
@@ -559,9 +555,9 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	}
 
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"222": map[string]utils.StringMap{
-				"session2": utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"222": {
+				"session2": {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -570,8 +566,8 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 			utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
-		"session2": []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "222"},
+		"session2": {
+			{fieldName: "OriginID", fieldValue: "222"},
 		},
 	}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) {
@@ -626,7 +622,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		CGRID:      "session1",
 		EventStart: sSEv,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sSEv,
 				CD: &engine.CallDescriptor{
 					RunID: utils.MetaDefault,
@@ -644,9 +640,9 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 
 	//verify if the index was created according to session
 	eIndexes := map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"111": map[string]utils.StringMap{
-				"session1": utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"111": {
+				"session1": {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -656,8 +652,8 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	}
 	//verify if the revIdx was created according to session
 	eRIdxes := map[string][]*riFieldNameVal{
-		"session1": []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "111"},
+		"session1": {
+			{fieldName: "OriginID", fieldValue: "111"},
 		},
 	}
 	if len(eRIdxes) != len(sS.pSessionsRIdx) &&
@@ -687,7 +683,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		CGRID:      "session2",
 		EventStart: sSEv2,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sSEv2,
 				CD: &engine.CallDescriptor{
 					RunID: utils.MetaDefault,
@@ -704,12 +700,12 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 
 	//verify if the index was created according to session
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"111": map[string]utils.StringMap{
-				"session1": utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"111": {
+				"session1": {utils.MetaDefault: true},
 			},
-			"222": map[string]utils.StringMap{
-				"session2": utils.StringMap{utils.MetaDefault: true},
+			"222": {
+				"session2": {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -719,11 +715,11 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	}
 	//verify if the revIdx was created according to session
 	eRIdxes = map[string][]*riFieldNameVal{
-		"session1": []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "111"},
+		"session1": {
+			{fieldName: "OriginID", fieldValue: "111"},
 		},
-		"session2": []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "222"},
+		"session2": {
+			{fieldName: "OriginID", fieldValue: "222"},
 		},
 	}
 	if len(eRIdxes) != len(sS.pSessionsRIdx) &&
@@ -754,7 +750,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		CGRID:      "session1",
 		EventStart: sSEv3,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sSEv3,
 				CD:    &engine.CallDescriptor{},
 			},
@@ -773,9 +769,9 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	sS.unregisterSession("session1", true)
 
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"222": map[string]utils.StringMap{
-				"session2": utils.StringMap{utils.MetaDefault: true},
+		"OriginID": {
+			"222": {
+				"session2": {utils.MetaDefault: true},
 			},
 		},
 	}
@@ -784,8 +780,8 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 			utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
-		"session2": []*riFieldNameVal{
-			&riFieldNameVal{fieldName: "OriginID", fieldValue: "222"},
+		"session2": {
+			{fieldName: "OriginID", fieldValue: "222"},
 		},
 	}
 	if len(eRIdxes) != len(sS.pSessionsRIdx) {
@@ -1631,13 +1627,11 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	mpStr := engine.NewInternalDB(nil, nil, true, sSCfg.DataDbCfg().Items)
 	sS := NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx := map[string][]string{}
-	expUindx := []*engine.FilterRule{
-		&engine.FilterRule{
-			Type:    utils.MetaString,
-			Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
-			Values:  []string{utils.VOICE},
-		},
-	}
+	expUindx := []*engine.FilterRule{{
+		Type:    utils.MetaString,
+		Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
+		Values:  []string{utils.VOICE},
+	}}
 	fltrs := []string{"*string:~*req.ToR:*voice"}
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
@@ -1648,7 +1642,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		"ToR": true,
 	}
 	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
-	expIndx = map[string][]string{(utils.ToR): []string{utils.VOICE}}
+	expIndx = map[string][]string{utils.ToR: {utils.VOICE}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
@@ -1709,7 +1703,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		CGRID:      GetSetCGRID(sEv),
 		EventStart: sEv,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sEv,
 				CD: &engine.CallDescriptor{
 					RunID: "RunID",
@@ -1719,9 +1713,9 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	}
 	cgrID := GetSetCGRID(sEv)
 	sS.indexSession(session, false)
-	indx := map[string][]string{"ToR": []string{utils.VOICE, utils.DATA}}
+	indx := map[string][]string{"ToR": {utils.VOICE, utils.DATA}}
 	expCGRIDs := []string{cgrID}
-	expmatchingSRuns := map[string]utils.StringMap{cgrID: utils.StringMap{
+	expmatchingSRuns := map[string]utils.StringMap{cgrID: {
 		"RunID": true,
 	}}
 	if cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, false); !reflect.DeepEqual(expCGRIDs, cgrIDs) {
@@ -1736,8 +1730,8 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.indexSession(session, false)
 	indx = map[string][]string{
-		"ToR":    []string{utils.VOICE, utils.DATA},
-		"Extra2": []string{"55"},
+		"ToR":    {utils.VOICE, utils.DATA},
+		"Extra2": {"55"},
 	}
 	expCGRIDs = []string{}
 	expmatchingSRuns = map[string]utils.StringMap{}
@@ -1748,13 +1742,13 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	}
 	//t3
 	session.SRuns = []*SRun{
-		&SRun{
+		{
 			Event: sEv,
 			CD: &engine.CallDescriptor{
 				RunID: "RunID",
 			},
 		},
-		&SRun{
+		{
 			Event: engine.NewMapEvent(map[string]interface{}{
 				utils.EVENT_NAME: "TEST_EVENT",
 				utils.ToR:        "*voice"}),
@@ -1770,12 +1764,12 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.indexSession(session, true)
 	indx = map[string][]string{
-		"ToR":    []string{utils.VOICE, utils.DATA},
-		"Extra2": []string{"5"},
+		"ToR":    {utils.VOICE, utils.DATA},
+		"Extra2": {"5"},
 	}
 
 	expCGRIDs = []string{cgrID}
-	expmatchingSRuns = map[string]utils.StringMap{cgrID: utils.StringMap{
+	expmatchingSRuns = map[string]utils.StringMap{cgrID: {
 		"RunID": true,
 	}}
 	if cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, true); !reflect.DeepEqual(expCGRIDs, cgrIDs) {
@@ -1785,15 +1779,11 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	}
 }
 
-type testRPCClientConnection struct{}
-
-func (*testRPCClientConnection) Call(string, interface{}, interface{}) error { return nil }
-
 func TestNewSessionS(t *testing.T) {
 	cgrCGF, _ := config.NewDefaultCGRConfig()
 
 	eOut := &SessionS{
-		cgrCfg:        cgrCGF,
+		cfg:           cgrCGF,
 		dm:            nil,
 		biJClnts:      make(map[rpcclient.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
@@ -2010,7 +2000,7 @@ func TestSessionSgetSession(t *testing.T) {
 		CGRID:      "session1",
 		EventStart: sSEv,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sSEv,
 				CD: &engine.CallDescriptor{
 					RunID: utils.MetaDefault,
@@ -2063,13 +2053,13 @@ func TestSessionSfilterSessions(t *testing.T) {
 		CGRID:      GetSetCGRID(sEv),
 		EventStart: sEv,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sEv,
 				CD: &engine.CallDescriptor{
 					RunID: "RunID",
 				},
 			},
-			&SRun{
+			{
 				Event: sr2,
 				CD: &engine.CallDescriptor{
 					RunID: "RunID2",
@@ -2239,13 +2229,13 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		CGRID:      GetSetCGRID(sEv),
 		EventStart: sEv,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event: sEv,
 				CD: &engine.CallDescriptor{
 					RunID: "RunID",
 				},
 			},
-			&SRun{
+			{
 				Event: sr2,
 				CD: &engine.CallDescriptor{
 					RunID: "RunID2",
@@ -2992,7 +2982,7 @@ func TestSyncSessionsSync(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 	sessions.aSessions = map[string]*Session{}
-	sessions.cgrCfg.GeneralCfg().ReplyTimeout = 1
+	sessions.cfg.GeneralCfg().ReplyTimeout = 1
 	engine.SetConnManager(connMgr)
 	sessions.aSessions = map[string]*Session{}
 
