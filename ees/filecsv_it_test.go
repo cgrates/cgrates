@@ -60,6 +60,7 @@ var (
 		testCsvExportComposedEvent,
 		testCsvVerifyComposedExports,
 		testCsvExportBufferedEvent,
+		testCsvExportBufferedEventNoExports,
 		testCsvExportEventWithInflateTemplate,
 		testCsvVerifyExportsWithInflateTemplate,
 		testCsvExportNotFoundExporter,
@@ -332,7 +333,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 				utils.RequestType:   utils.MetaRated,
 				utils.Tenant:        "cgrates.org",
 				utils.Category:      "call",
-				utils.AccountField:  "1001",
+				utils.AccountField:  "1005",
 				utils.Subject:       "1001",
 				utils.Destination:   "1002",
 				utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
@@ -350,7 +351,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 				utils.RequestType:  utils.MetaRated,
 				utils.Tenant:       "AnotherTenant",
 				utils.Category:     "call", //for data CDR use different Tenant
-				utils.AccountField: "1001",
+				utils.AccountField: "1005",
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
 				utils.SetupTime:    time.Unix(1383813745, 0).UTC(),
@@ -368,7 +369,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 				utils.RequestType:   utils.MetaNone,
 				utils.Tenant:        "phone.org",
 				utils.Category:      "sms", //for data CDR use different Tenant
-				utils.AccountField:  "User2001",
+				utils.AccountField:  "1005",
 				utils.Subject:       "User2001",
 				utils.Destination:   "User2002",
 				utils.SetupTime:     time.Unix(1383813745, 0).UTC(),
@@ -423,9 +424,9 @@ func testCsvExportBufferedEvent(t *testing.T) {
 
 	expected := [][]string{
 		{"NumberOfEvent", "CGRID", "RunID", "ToR", "OriginID", "RequestType", "Tenant", "Category", "Account", "Subject", "Destination", "SetupTime", "AnswerTime", "Usage", "Cost"},
-		{"1", "dbafe9c8614c785a65aabd116dd3959c3c56f7f6", "*default", "*voice", "dsafdsaf", "*rated", "cgrates.org", "call", "1001", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10000000000", "1.0164"},
-		{"2", "ea1f1968cc207859672c332364fc7614c86b04c5", "*default", "*data", "", "*rated", "AnotherTenant", "call", "1001", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "0.012"},
-		{"3", "9e0b2a4b23e0843efe522e8a611b092a16ecfba1", "raw", "*data", "abcdefghh", "*none", "phone.org", "sms", "User2001", "User2001", "User2002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "44.5"},
+		{"1", "dbafe9c8614c785a65aabd116dd3959c3c56f7f6", "*default", "*voice", "dsafdsaf", "*rated", "cgrates.org", "call", "1005", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10000000000", "1.0164"},
+		{"2", "ea1f1968cc207859672c332364fc7614c86b04c5", "*default", "*data", "", "*rated", "AnotherTenant", "call", "1005", "1001", "1002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "0.012"},
+		{"3", "9e0b2a4b23e0843efe522e8a611b092a16ecfba1", "raw", "*data", "abcdefghh", "*none", "phone.org", "sms", "1005", "User2001", "User2002", "2013-11-07T08:42:25Z", "2013-11-07T08:42:26Z", "10", "44.5"},
 		{"4", "cd8112998c2abb0e4a7cd3a94c74817cd5fe67d3", "Default_charging_id", "", "", "*prepaid", "dispatchers.org", "photo", "1005", "1005", "1000", "2679-04-25T22:02:25Z", "2679-04-25T22:02:40Z", "10", "1.4422"},
 		{"4", "10s", "46.9706"},
 	}
@@ -434,6 +435,62 @@ func testCsvExportBufferedEvent(t *testing.T) {
 	}
 
 	time.Sleep(time.Second)
+}
+
+func testCsvExportBufferedEventNoExports(t *testing.T) {
+	// in this case, exported does not exist in config
+	eventVoice := &ArchiveEventsArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaExporterID: "InexistentExport",
+		},
+		Events: []map[string]interface{}{
+			{
+				utils.AccountField: "not_exported_Acc",
+			},
+		},
+	}
+	var reply []byte
+	expectedErr := "exporter config with ID: InexistentExport is missing"
+	if err := csvRpc.Call(utils.EeSv1ArchiveEventsInReply,
+		eventVoice, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %q \n received %q", utils.ToJSON(expectedErr), utils.ToJSON(err))
+	}
+
+	// in this case, exporter exists but the events will not match our filters (filter for Account)
+	eventVoice = &ArchiveEventsArgs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.MetaExporterID: "CSVExporterBuffered",
+		},
+		Events: []map[string]interface{}{
+			{
+				utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:           utils.MetaVoice,
+				"ComposedOriginID1": "dsaf",
+				"ComposedOriginID2": "dsaf",
+				utils.OriginHost:    "192.168.1.1",
+				utils.RequestType:   utils.MetaRated,
+				utils.Tenant:        "cgrates.org",
+				utils.Category:      "call",
+				utils.AccountField:  "DifferentAccount12",
+			},
+			{
+				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.ToR:          utils.MetaData,
+				utils.OriginHost:   "192.168.1.1",
+				utils.RequestType:  utils.MetaRated,
+				utils.Tenant:       "AnotherTenant",
+				utils.Category:     "call", //for data CDR use different Tenant
+				utils.AccountField: "DifferentAccount10",
+			},
+		},
+	}
+	expectedErr = "SERVER_ERROR: NO EXPORTS"
+	if err := csvRpc.Call(utils.EeSv1ArchiveEventsInReply,
+		eventVoice, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %q \n received %q", utils.ToJSON(expectedErr), utils.ToJSON(err))
+	}
 }
 
 func testCsvExportEventWithInflateTemplate(t *testing.T) {
@@ -467,7 +524,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 	eventData := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterWIthTemplate"},
 		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
+			Tenant: "cgrates.exporter config with ID: InexistentExport is missingorg",
 			ID:     "dataEvent",
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),

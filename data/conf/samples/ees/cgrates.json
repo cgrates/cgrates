@@ -123,6 +123,7 @@
 			"id": "CSVExporterBuffered",
 			"type": "*fileCSV",
 			"export_path": "*buffer",
+			"filters": ["*string:~*req.Account:1005"],
 			"attempts": 1,
 			"field_separator": ",",
 			"synchronous": true,
