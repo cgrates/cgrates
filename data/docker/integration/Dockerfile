@@ -50,7 +50,7 @@ RUN set -ex; \
 	echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/conf.d/docker.cnf
 
 
-RUN wget -O go.tgz "https://storage.googleapis.com/golang/go1.15.7.linux-amd64.tar.gz" --progress=dot:giga
+RUN wget -O go.tgz "https://storage.googleapis.com/golang/go1.17.5.linux-amd64.tar.gz" --progress=dot:giga
 RUN tar -C /usr/local -xzf go.tgz
 RUN rm go.tgz
 
