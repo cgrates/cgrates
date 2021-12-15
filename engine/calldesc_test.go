@@ -2452,3 +2452,29 @@ func BenchmarkStorageMultipleGetSessionTime(b *testing.B) {
 		cd.GetMaxSessionDuration(nil)
 	}
 }
+
+func TestCDRefundIncrementspanic(t *testing.T) {
+	ub := &Account{
+		ID: "test:refpanic",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{Uuid: "moneya", Value: 100},
+			},
+		},
+	}
+	dm.SetAccount(ub)
+	increments := Increments{
+		&Increment{Cost: 2, BalanceInfo: &DebitInfo{
+			Monetary: &MonetaryInfo{UUID: "moneya2"}, AccountID: ub.ID}},
+	}
+	cd := &CallDescriptor{ToR: utils.MetaVoice, Increments: increments}
+	if _, err := cd.refundIncrements(nil); err != nil {
+		t.Fatal(err)
+	}
+	ub, _ = dm.GetAccount(ub.ID)
+	if ub.BalanceMap[utils.MetaMonetary][0].GetValue() != 100 || // no refund because of missing balance with ID
+		len(ub.BalanceMap) != 1 ||
+		len(ub.BalanceMap[utils.MetaMonetary]) != 1 {
+		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
+	}
+}
