@@ -349,10 +349,10 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 		return fmt.Errorf("exporter config with ID: %s is missing", expID)
 	}
 	if !eesCfg.Synchronous {
-		return fmt.Errorf("exporter with ID: %q is not synchronous", expID)
+		return fmt.Errorf("exporter with ID: %s is not synchronous", expID)
 	}
 	if eesCfg.ExportPath != utils.MetaBuffer {
-		return fmt.Errorf("exporter with ID: %q has an invalid ExportPath for archiving", expID)
+		return fmt.Errorf("exporter with ID: %s has an invalid ExportPath for archiving", expID)
 	}
 	var dc *utils.SafeMapStorage
 	if dc, err = newEEMetrics(utils.FirstNonEmpty(
