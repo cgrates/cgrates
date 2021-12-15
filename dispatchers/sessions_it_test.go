@@ -796,7 +796,7 @@ func testDspSessionPassive(t *testing.T) {
 			utils.Usage:       5 * time.Minute,
 		}),
 		SRuns: []*sessions.SRun{
-			&sessions.SRun{
+			{
 				Event: engine.NewMapEvent(map[string]interface{}{
 					"RunID":           "CustomerCharges",
 					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",

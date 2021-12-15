@@ -299,7 +299,7 @@ func testSessionsItTerminatePassive(t *testing.T) {
 		CGRID:      cgrID,
 		EventStart: sEv,
 		SRuns: []*SRun{
-			&SRun{
+			{
 				Event:      sEv,
 				TotalUsage: time.Minute,
 				CD:         &engine.CallDescriptor{},

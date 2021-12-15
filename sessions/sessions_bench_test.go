@@ -241,7 +241,7 @@ func benchmarkSendInitSessionx10(b *testing.B) {
 		sendInitx10(i * 10)
 		tStart := time.Now()
 		_ = getCount()
-		if tDur := time.Now().Sub(tStart); tDur > 100*time.Millisecond && tDur < time.Second {
+		if tDur := time.Since(tStart); tDur > 100*time.Millisecond && tDur < time.Second {
 			fmt.Printf("Expected answer in less than %v receved answer after %v for %v sessions\n", 100*time.Millisecond, tDur, i*10+10)
 		} else if tDur >= time.Second {
 			b.Fatalf("Fatal:Expected answer in less than %v receved answer after %v for %v sessions", time.Second, tDur, i*10+10)
