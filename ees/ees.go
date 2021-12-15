@@ -346,7 +346,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 		}
 	}
 	if eesCfg == nil {
-		return fmt.Errorf("exporter config with ID: %q is missing", expID)
+		return fmt.Errorf("exporter config with ID: %s is missing", expID)
 	}
 	if !eesCfg.Synchronous {
 		return fmt.Errorf("exporter with ID: %q is not synchronous", expID)
