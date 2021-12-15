@@ -24,15 +24,12 @@ import (
 	"log"
 	"log/syslog"
 	"os"
-	"reflect"
 )
 
 var Logger LoggerInterface
 
 func init() {
-	if Logger == nil || reflect.ValueOf(Logger).IsNil() {
-		Logger, _ = NewLogger(MetaStdLog, EmptyString, 0)
-	}
+	Logger, _ = NewLogger(MetaStdLog, EmptyString, 0)
 }
 
 // log severities following rfc3164
@@ -66,7 +63,7 @@ type LoggerInterface interface {
 func NewLogger(loggerType, nodeID string, level int) (l LoggerInterface, err error) {
 	switch loggerType {
 	case MetaStdLog:
-		return NewWriterLogger(nodeID, level)
+		return NewStdLogger(nodeID, level), nil
 	case MetaSysLog:
 		return NewSysLogger(nodeID, level)
 	default:
@@ -185,7 +182,7 @@ type NopCloser struct {
 	io.Writer
 }
 
-func (*NopCloser) Close() error { return nil }
+func (NopCloser) Close() error { return nil }
 
 type logWriter struct {
 	*log.Logger
@@ -198,14 +195,22 @@ func (l *logWriter) Write(p []byte) (n int, err error) {
 }
 func (*logWriter) Close() error { return nil }
 
-func NewWriterLogger(nodeID string, level int) (w *StdLogger, err error) {
+func NewStdLogger(nodeID string, level int) *StdLogger {
 	return &StdLogger{
 		nodeID:   nodeID,
 		logLevel: level,
 		w: &logWriter{
 			log.New(os.Stderr, EmptyString, log.LstdFlags),
 		},
-	}, nil
+	}
+}
+
+func NewStdLoggerWithWriter(w io.Writer, nodeID string, level int) *StdLogger {
+	return &StdLogger{
+		nodeID:   nodeID,
+		logLevel: level,
+		w:        NopCloser{w},
+	}
 }
 
 func (sl *StdLogger) GetSyslog() *syslog.Writer {
@@ -234,7 +239,7 @@ func (sl *StdLogger) Alert(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_ALERT {
 		return
 	}
-	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [ALERT] %s", sl.nodeID, m)
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [ALERT] %s\n", sl.nodeID, m)
 	return
 }
 
@@ -243,7 +248,7 @@ func (sl *StdLogger) Crit(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_CRITICAL {
 		return
 	}
-	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [CRITICAL] %s", sl.nodeID, m)
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [CRITICAL] %s\n", sl.nodeID, m)
 	return
 }
 
@@ -252,7 +257,7 @@ func (sl *StdLogger) Debug(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_DEBUG {
 		return
 	}
-	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [DEBUG] %s", sl.nodeID, m)
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [DEBUG] %s\n", sl.nodeID, m)
 	return
 }
 
@@ -261,7 +266,7 @@ func (sl *StdLogger) Emerg(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_EMERGENCY {
 		return
 	}
-	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [EMERGENCY] %s", sl.nodeID, m)
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [EMERGENCY] %s\n", sl.nodeID, m)
 	return
 }
 
@@ -270,7 +275,7 @@ func (sl *StdLogger) Err(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_ERROR {
 		return
 	}
-	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [ERROR] %s", sl.nodeID, m)
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [ERROR] %s\n", sl.nodeID, m)
 	return
 }
 
@@ -279,7 +284,7 @@ func (sl *StdLogger) Info(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_INFO {
 		return
 	}
-	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [INFO] %s", sl.nodeID, m)
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [INFO] %s\n", sl.nodeID, m)
 	return
 }
 
@@ -288,7 +293,7 @@ func (sl *StdLogger) Notice(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_NOTICE {
 		return
 	}
-	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [NOTICE] %s", sl.nodeID, m)
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [NOTICE] %s\n", sl.nodeID, m)
 	return
 }
 
@@ -297,6 +302,6 @@ func (sl *StdLogger) Warning(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_WARNING {
 		return
 	}
-	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [WARNING] %s", sl.nodeID, m)
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [WARNING] %s\n", sl.nodeID, m)
 	return
 }
