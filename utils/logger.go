@@ -20,52 +20,19 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"log/syslog"
+	"os"
 	"reflect"
-	"runtime"
 )
 
 var Logger LoggerInterface
 
 func init() {
 	if Logger == nil || reflect.ValueOf(Logger).IsNil() {
-		//used for testing only, so we will ignore the error for now
-		Logger, _ = Newlogger(MetaSysLog, EmptyString)
+		Logger, _ = NewLogger(MetaStdLog, EmptyString, 0)
 	}
-}
-
-// Newlogger  creates the Logger object
-func Newlogger(loggertype, id string) (lgr LoggerInterface, err error) {
-	lgr = &StdLogger{nodeID: id}
-	switch loggertype {
-	case MetaStdLog:
-		return
-	case MetaSysLog:
-		var l *syslog.Writer
-		l, err = syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, fmt.Sprintf("CGRateS <%s> ", id))
-		lgr.SetSyslog(l) // if we received an error, l is nil
-		return
-	default:
-		return nil, fmt.Errorf("unsupported logger: <%s>", loggertype)
-	}
-}
-
-type LoggerInterface interface {
-	SetSyslog(log *syslog.Writer)
-	SetLogLevel(level int)
-	GetLogLevel() int
-	GetSyslog() *syslog.Writer
-	Close() error
-	Emerg(m string) error
-	Alert(m string) error
-	Crit(m string) error
-	Err(m string) error
-	Warning(m string) error
-	Notice(m string) error
-	Info(m string) error
-	Debug(m string) error
-	Write(p []byte) (n int, err error)
 }
 
 // log severities following rfc3164
@@ -80,33 +47,176 @@ const (
 	LOGLEVEL_DEBUG
 )
 
-// Logs to standard output
-type StdLogger struct {
+type LoggerInterface interface {
+	GetSyslog() *syslog.Writer
+	SetLogLevel(level int)
+	GetLogLevel() int
+	Close() error
+	Emerg(m string) error
+	Alert(m string) error
+	Crit(m string) error
+	Err(m string) error
+	Warning(m string) error
+	Notice(m string) error
+	Info(m string) error
+	Debug(m string) error
+	Write(p []byte) (n int, err error)
+}
+
+func NewLogger(loggerType, nodeID string, level int) (l LoggerInterface, err error) {
+	switch loggerType {
+	case MetaStdLog:
+		return NewWriterLogger(nodeID, level)
+	case MetaSysLog:
+		return NewSysLogger(nodeID, level)
+	default:
+		return nil, fmt.Errorf("unsupported logger: <%+s>", loggerType)
+	}
+}
+
+type SysLogger struct {
 	logLevel int
-	nodeID   string
 	syslog   *syslog.Writer
 }
 
-func (sl *StdLogger) Close() (err error) {
-	if sl.syslog != nil {
-		err = sl.syslog.Close()
+func NewSysLogger(nodeID string, level int) (logger *SysLogger, err error) {
+	var l *syslog.Writer
+	l, err = syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, fmt.Sprintf("CGRateS <%s>", nodeID))
+	logger = &SysLogger{
+		logLevel: level,
+		syslog:   l,
 	}
 	return
 }
-func (sl *StdLogger) Write(p []byte) (n int, err error) {
-	s := string(p[:])
-	fmt.Print(s)
-	return 1, nil
-}
 
-//SetSyslog sets the logger for the server
-func (sl *StdLogger) SetSyslog(l *syslog.Writer) {
-	sl.syslog = l
-}
-
-// GetSyslog returns the logger for the server
-func (sl *StdLogger) GetSyslog() *syslog.Writer {
+func (sl *SysLogger) GetSyslog() *syslog.Writer {
 	return sl.syslog
+}
+
+func (sl *SysLogger) Close() (err error) {
+	return sl.syslog.Close()
+}
+
+func (sl *SysLogger) Write(p []byte) (n int, err error) {
+	return sl.syslog.Write(p)
+}
+
+// GetLogLevel() returns the level logger number for the server
+func (sl *SysLogger) GetLogLevel() int {
+	return sl.logLevel
+}
+
+// SetLogLevel changes the log level
+func (sl *SysLogger) SetLogLevel(level int) {
+	sl.logLevel = level
+}
+
+// Alert logs to syslog with alert level
+func (sl *SysLogger) Alert(m string) (_ error) {
+	if sl.logLevel < LOGLEVEL_ALERT {
+		return
+	}
+	return sl.syslog.Alert(m)
+}
+
+// Crit logs to syslog with critical level
+func (sl *SysLogger) Crit(m string) (_ error) {
+	if sl.logLevel < LOGLEVEL_CRITICAL {
+		return
+	}
+	return sl.syslog.Crit(m)
+}
+
+// Debug logs to syslog with debug level
+func (sl *SysLogger) Debug(m string) (_ error) {
+	if sl.logLevel < LOGLEVEL_DEBUG {
+		return
+	}
+	return sl.syslog.Debug(m)
+}
+
+// Emerg logs to syslog with emergency level
+func (sl *SysLogger) Emerg(m string) (_ error) {
+	if sl.logLevel < LOGLEVEL_EMERGENCY {
+		return
+	}
+	return sl.syslog.Emerg(m)
+}
+
+// Err logs to syslog with error level
+func (sl *SysLogger) Err(m string) (_ error) {
+	if sl.logLevel < LOGLEVEL_ERROR {
+		return
+	}
+	return sl.syslog.Err(m)
+}
+
+// Info logs to syslog with info level
+func (sl *SysLogger) Info(m string) (_ error) {
+	if sl.logLevel < LOGLEVEL_INFO {
+		return
+	}
+	return sl.syslog.Info(m)
+}
+
+// Notice logs to syslog with notice level
+func (sl *SysLogger) Notice(m string) (_ error) {
+	if sl.logLevel < LOGLEVEL_NOTICE {
+		return
+	}
+	return sl.syslog.Notice(m)
+}
+
+// Warning logs to syslog with warning level
+func (sl *SysLogger) Warning(m string) (_ error) {
+	if sl.logLevel < LOGLEVEL_WARNING {
+		return
+	}
+	return sl.syslog.Warning(m)
+}
+
+type StdLogger struct {
+	w        io.WriteCloser
+	logLevel int
+	nodeID   string
+}
+
+type NopCloser struct {
+	io.Writer
+}
+
+func (*NopCloser) Close() error { return nil }
+
+type logWriter struct {
+	*log.Logger
+}
+
+func (l *logWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	err = l.Output(2, string(p))
+	return
+}
+func (*logWriter) Close() error { return nil }
+
+func NewWriterLogger(nodeID string, level int) (w *StdLogger, err error) {
+	return &StdLogger{
+		nodeID:   nodeID,
+		logLevel: level,
+		w: &logWriter{
+			log.New(os.Stderr, EmptyString, log.LstdFlags),
+		},
+	}, nil
+}
+
+func (sl *StdLogger) GetSyslog() *syslog.Writer {
+	return nil
+}
+
+func (sl *StdLogger) Close() (err error) {
+	return sl.w.Close()
+}
+func (sl *StdLogger) Write(p []byte) (n int, err error) {
+	return sl.w.Write(p)
 }
 
 // GetLogLevel() returns the level logger number for the server
@@ -119,114 +229,74 @@ func (sl *StdLogger) SetLogLevel(level int) {
 	sl.logLevel = level
 }
 
-// Alert logs to syslog with alert level
+// Alert logs to stderr with alert level
 func (sl *StdLogger) Alert(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_ALERT {
 		return
 	}
-	if sl.syslog != nil {
-		sl.syslog.Alert(m)
-	} else {
-		log.Print("CGRateS <" + sl.nodeID + "> [ALERT] " + m)
-	}
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [ALERT] %s", sl.nodeID, m)
 	return
 }
 
-// Crit logs to syslog with critical level
+// Crit logs to stderr with critical level
 func (sl *StdLogger) Crit(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_CRITICAL {
 		return
 	}
-	if sl.syslog != nil {
-		sl.syslog.Crit(m)
-	} else {
-		log.Print("CGRateS <" + sl.nodeID + "> [CRITICAL] " + m)
-	}
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [CRITICAL] %s", sl.nodeID, m)
 	return
 }
 
-// Debug logs to syslog with debug level
+// Debug logs to stderr with debug level
 func (sl *StdLogger) Debug(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_DEBUG {
 		return
 	}
-	if sl.syslog != nil {
-		sl.syslog.Debug(m)
-	} else {
-		log.Print("CGRateS <" + sl.nodeID + "> [DEBUG] " + m)
-	}
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [DEBUG] %s", sl.nodeID, m)
 	return
 }
 
-// Emerg logs to syslog with emergency level
+// Emerg logs to stderr with emergency level
 func (sl *StdLogger) Emerg(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_EMERGENCY {
 		return
 	}
-	if sl.syslog != nil {
-		sl.syslog.Emerg(m)
-	} else {
-		log.Print("CGRateS <" + sl.nodeID + "> [EMERGENCY] " + m)
-	}
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [EMERGENCY] %s", sl.nodeID, m)
 	return
 }
 
-// Err logs to syslog with error level
+// Err logs to stderr with error level
 func (sl *StdLogger) Err(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_ERROR {
 		return
 	}
-	if sl.syslog != nil {
-		sl.syslog.Err(m)
-	} else {
-		log.Print("CGRateS <" + sl.nodeID + "> [ERROR] " + m)
-	}
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [ERROR] %s", sl.nodeID, m)
 	return
 }
 
-// Info logs to syslog with info level
+// Info logs to stderr with info level
 func (sl *StdLogger) Info(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_INFO {
 		return
 	}
-	if sl.syslog != nil {
-		sl.syslog.Info(m)
-	} else {
-		log.Print("CGRateS <" + sl.nodeID + "> [INFO] " + m)
-	}
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [INFO] %s", sl.nodeID, m)
 	return
 }
 
-// Notice logs to syslog with notice level
+// Notice logs to stderr with notice level
 func (sl *StdLogger) Notice(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_NOTICE {
 		return
 	}
-	if sl.syslog != nil {
-		sl.syslog.Notice(m)
-	} else {
-		log.Print("CGRateS <" + sl.nodeID + "> [NOTICE] " + m)
-	}
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [NOTICE] %s", sl.nodeID, m)
 	return
 }
 
-// Warning logs to syslog with warning level
+// Warning logs to stderr with warning level
 func (sl *StdLogger) Warning(m string) (err error) {
 	if sl.logLevel < LOGLEVEL_WARNING {
 		return
 	}
-
-	if sl.syslog != nil {
-		sl.syslog.Warning(m)
-	} else {
-		log.Print("CGRateS <" + sl.nodeID + "> [WARNING] " + m)
-	}
+	_, err = fmt.Fprintf(sl.w, "CGRateS <%s> [WARNING] %s", sl.nodeID, m)
 	return
-}
-
-// LogStack logs to syslog the stack trace using debug level
-func LogStack() {
-	buf := make([]byte, 300)
-	runtime.Stack(buf, false)
-	Logger.Debug(string(buf))
 }
