@@ -111,7 +111,6 @@ func (asr *StatASR) AddEvent(evID string, ev utils.DataProvider) error {
 }
 
 func (asr *StatASR) RemEvent(evID string) (err error) {
-
 	val, has := asr.Events[evID]
 	if !has {
 		return utils.ErrNotFound

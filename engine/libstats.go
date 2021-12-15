@@ -127,8 +127,8 @@ type StoredStatQueue struct {
 }
 
 type StatQueueWithAPIOpts struct {
-	*StatQueue
-	APIOpts map[string]interface{}
+	StatQueue *StatQueue
+	APIOpts   map[string]interface{}
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
@@ -395,9 +395,6 @@ func (sis StatQueues) Sort() {
 }
 
 func (sq *StatQueue) MarshalJSON() (rply []byte, err error) {
-	if sq == nil {
-		return []byte("null"), nil
-	}
 	type tmp StatQueue
 	sq.lock(utils.EmptyString)
 	rply, err = json.Marshal(tmp(*sq))
@@ -473,15 +470,23 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
-func (sq *StatQueue) GobEncode() (rply []byte, err error) {
+type sqEncode StatQueue
+
+func (sq StatQueue) GobEncode() (rply []byte, err error) {
 	buf := bytes.NewBuffer(rply)
-	type tmp StatQueue
 	sq.lock(utils.EmptyString)
-	err = gob.NewEncoder(buf).Encode(tmp(*sq))
+	err = gob.NewEncoder(buf).Encode(sqEncode(sq))
 	sq.unlock()
 	return buf.Bytes(), err
 }
 
+func (sq *StatQueue) GobDecode(rply []byte) (err error) {
+	buf := bytes.NewBuffer(rply)
+	var eSq sqEncode
+	err = gob.NewDecoder(buf).Decode(&eSq)
+	*sq = StatQueue(eSq)
+	return err
+}
 func (sq *StatQueue) Clone() (cln *StatQueue) {
 	cln = &StatQueue{
 		Tenant:    sq.Tenant,
@@ -511,28 +516,11 @@ func (ssq *StatQueueWithAPIOpts) MarshalJSON() (rply []byte, err error) {
 		StatQueue
 		APIOpts map[string]interface{}
 	}
-	ssq.lock(utils.EmptyString)
 	rply, err = json.Marshal(tmp{
 		StatQueue: *ssq.StatQueue,
 		APIOpts:   ssq.APIOpts,
 	})
-	ssq.unlock()
 	return
-}
-
-func (ssq *StatQueueWithAPIOpts) GobEncode() (rply []byte, err error) {
-	buf := bytes.NewBuffer(rply)
-	type tmp struct {
-		StatQueue
-		APIOpts map[string]interface{}
-	}
-	ssq.lock(utils.EmptyString)
-	err = gob.NewEncoder(buf).Encode(tmp{
-		StatQueue: *ssq.StatQueue,
-		APIOpts:   ssq.APIOpts,
-	})
-	ssq.unlock()
-	return buf.Bytes(), err
 }
 
 // UnmarshalJSON here only to fully support json for StatQueue

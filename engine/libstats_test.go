@@ -1295,6 +1295,7 @@ func TestStatQueueWithAPIOptsJSONMarshall(t *testing.T) {
 	if err = json.Unmarshal([]byte(utils.ToJSON(exp2)), rply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(rply, exp2) {
+		t.Errorf("Expected: %+v , received: %+v", exp2, rply)
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp2), utils.ToJSON(rply))
 	}
 

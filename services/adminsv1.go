@@ -103,6 +103,10 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		for _, s := range srv {
 			apiService.server.RpcRegister(s)
 		}
+		rpl, _ := engine.NewService(apis.NewReplicatorSv1(datadb, apiService.api))
+		for _, s := range rpl {
+			apiService.server.RpcRegister(s)
+		}
 	}
 
 	//backwards compatible
