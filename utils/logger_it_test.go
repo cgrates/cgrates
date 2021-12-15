@@ -116,8 +116,10 @@ func testEmergencyLogger(t *testing.T) {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
-	newLogger.SetSyslog(writer)
+	newLogger := &SysLogger{
+		logLevel: 7,
+		syslog:   writer,
+	}
 
 	if err := newLogger.Emerg("emergency_panic"); err != nil {
 		t.Error(err)
@@ -150,10 +152,10 @@ func testAlertLogger(t *testing.T) {
 		t.Error(err)
 	}
 
-	newLogger := new(StdLogger)
-	newLogger.SetSyslog(writer)
-
-	newLogger.SetLogLevel(7)
+	newLogger := &SysLogger{
+		logLevel: 7,
+		syslog:   writer,
+	}
 
 	if err := newLogger.Alert("emergency_alert"); err != nil {
 		t.Error(err)
@@ -185,9 +187,10 @@ func testCriticalLogger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newLogger := new(StdLogger)
-	newLogger.SetSyslog(writer)
-	newLogger.SetLogLevel(7)
+	newLogger := &SysLogger{
+		logLevel: 7,
+		syslog:   writer,
+	}
 
 	if err := newLogger.Crit("critical_panic"); err != nil {
 		t.Error(err)
@@ -219,9 +222,10 @@ func testErrorLogger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newLogger := new(StdLogger)
-	newLogger.SetSyslog(writer)
-	newLogger.SetLogLevel(7)
+	newLogger := &SysLogger{
+		logLevel: 7,
+		syslog:   writer,
+	}
 
 	if err := newLogger.Err("error_panic"); err != nil {
 		t.Error(err)
@@ -253,9 +257,10 @@ func testWarningLogger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newLogger := new(StdLogger)
-	newLogger.SetSyslog(writer)
-	newLogger.SetLogLevel(7)
+	newLogger := &SysLogger{
+		logLevel: 7,
+		syslog:   writer,
+	}
 
 	if err := newLogger.Warning("warning_panic"); err != nil {
 		t.Error(err)
@@ -287,9 +292,10 @@ func testNoticeLogger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newLogger := new(StdLogger)
-	newLogger.SetSyslog(writer)
-	newLogger.SetLogLevel(7)
+	newLogger := &SysLogger{
+		logLevel: 7,
+		syslog:   writer,
+	}
 
 	if err := newLogger.Notice("notice_panic"); err != nil {
 		t.Error(err)
@@ -322,9 +328,10 @@ func testInfoLogger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newLogger := new(StdLogger)
-	newLogger.SetSyslog(writer)
-	newLogger.SetLogLevel(7)
+	newLogger := &SysLogger{
+		logLevel: 7,
+		syslog:   writer,
+	}
 
 	if err := newLogger.Info("info_panic"); err != nil {
 		t.Error(err)
@@ -356,9 +363,10 @@ func testDebugLogger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newLogger := new(StdLogger)
-	newLogger.SetSyslog(writer)
-	newLogger.SetLogLevel(7)
+	newLogger := &SysLogger{
+		logLevel: 7,
+		syslog:   writer,
+	}
 
 	if err := newLogger.Debug("debug_panic"); err != nil {
 		t.Error(err)
