@@ -193,15 +193,14 @@ func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt,
 		method, args, &reply)
 }
 
-/*
 // callCacheRevDestinations used for reverse destination, loadIDs and indexes replication
-func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {
+func (admS *AdminSv1) callCacheMultiple(ctx *context.Context, cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {
 	if len(itemIDs) == 0 {
 		return
 	}
 	var reply, method string
 	var args interface{}
-	switch utils.FirstNonEmpty(cacheopt, apierSv1.cfg.GeneralCfg().DefaultCaching) {
+	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
 	case utils.MetaReload:
@@ -221,10 +220,9 @@ func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs
 			APIOpts:  opts,
 		}
 	}
-	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.cfg.ApierCfg().CachesConns,
+	return admS.connMgr.Call(ctx, admS.cfg.AdminSCfg().CachesConns,
 		method, args, &reply)
 }
-*/
 
 func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, fltr *engine.Filter, tnt, tntID string, args map[string][]string) (_ map[string][]string, err error) {
 	indxIDs := make([]string, 0, len(fltr.Rules))
