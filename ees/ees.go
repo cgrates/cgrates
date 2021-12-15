@@ -377,7 +377,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	case utils.MetaFileFWV:
 		ee, err = NewFileFWVee(eesCfg, eeS.cfg, eeS.fltrS, dc, wrtr)
 	default:
-		err = fmt.Errorf("unsupported exporter type: <%s>", eesCfg.Type)
+		err = fmt.Errorf("unsupported exporter type: %s>", eesCfg.Type)
 	}
 	if err != nil {
 		return err
