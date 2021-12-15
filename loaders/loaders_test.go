@@ -20,7 +20,6 @@ package loaders
 
 import (
 	"bytes"
-	"log"
 	"os"
 	"path"
 	"reflect"
@@ -75,12 +74,12 @@ func TestNewLoaderService(t *testing.T) {
 	stop := make(chan struct{})
 	close(stop)
 
-	buf := bytes.NewBuffer([]byte{})
-	log.SetOutput(buf)
-	lgr := utils.Logger
-	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
-	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	utils.Logger.SetLogLevel(7)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	ld.ListenAndServe(stop)
 	runtime.Gosched()

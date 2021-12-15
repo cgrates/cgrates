@@ -21,8 +21,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -2398,14 +2396,12 @@ func TestResourceCaching(t *testing.T) {
 }
 
 func TestResourcesRemoveExpiredUnitsResetTotalUsage(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	r := &Resource{
 		TTLIdx: []string{"ResGroup1", "ResGroup2", "ResGroup3"},
@@ -2441,12 +2437,10 @@ func TestResourcesRemoveExpiredUnitsResetTotalUsage(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, r)
 	}
 
-	rcvlog := buf.String()[20:]
+	rcvlog := buf.String()
 	if rcvlog != explog {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", explog, rcvlog)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestResourcesAvailable(t *testing.T) {
@@ -2549,10 +2543,12 @@ func (mW *mockWriter) Write(p []byte) (n int, err error) {
 }
 
 func TestResourcesRecordUsageClearErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
 	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	rs := Resources{
 		{
@@ -2627,13 +2623,12 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 	}
 	experr := fmt.Sprintf("duplicate resource usage with id: %s", "cgrates.org:"+ru.ID)
 
-	defer log.SetOutput(os.Stderr)
-	log.SetOutput(&mockWriter{
+	utils.Logger = utils.NewStdLoggerWithWriter(&mockWriter{
 		WriteF: func(p []byte) (n int, err error) {
 			delete(rs[0].Usages, "RU_4")
 			return buf.Write(p)
 		},
-	})
+	}, "", 4)
 
 	err := rs.recordUsage(ru)
 
@@ -2647,13 +2642,10 @@ func TestResourcesRecordUsageClearErr(t *testing.T) {
 
 	rcv := strings.Split(buf.String(), "\n")
 	for idx, exp := range explog {
-		rcv[idx] = rcv[idx][20:]
 		if rcv[idx] != exp {
 			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv[idx])
 		}
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestResourceAllocateResourceOtherDB(t *testing.T) {
@@ -2710,15 +2702,12 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 }
 
 func TestResourceClearUsageErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
-
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 	rs := Resources{
 		{
 			Usages: map[string]*ResourceUsage{
@@ -2746,12 +2735,10 @@ func TestResourceClearUsageErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	rcvlog := buf.String()[20:]
+	rcvlog := buf.String()
 	if rcvlog != explog {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", explog, rcvlog)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestResourcesAllocateResourceErrRsUnavailable(t *testing.T) {
@@ -2849,14 +2836,12 @@ func TestResourcesAllocateResourceDryRun(t *testing.T) {
 }
 
 func TestResourcesShutdown(t *testing.T) {
-	utils.Logger.SetLogLevel(6)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 
 	rS := &ResourceS{
 		storedResources: utils.StringSet{
@@ -2885,34 +2870,23 @@ func TestResourcesShutdown(t *testing.T) {
 	rcvLogs = rcvLogs[:len(rcvLogs)-1]
 
 	for idx, rcvLog := range rcvLogs {
-		rcvLog := rcvLog[20:]
 		if rcvLog != expLogs[idx] {
 			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
 				expLogs[idx], rcvLog)
 		}
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestResourcesStoreResources(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
 	defer func() {
+		utils.Logger = tmpLogger
 		Cache = tmp
 	}()
 
-	utils.Logger.SetLogLevel(6)
-	utils.Logger.SetSyslog(nil)
-	defer func() {
-		utils.Logger.SetLogLevel(0)
-	}()
-
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
-
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 	rS := &ResourceS{
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
@@ -2941,7 +2915,7 @@ func TestResourcesStoreResources(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rS)
 	}
 
-	rcvlog := buf.String()[20:]
+	rcvlog := buf.String()
 
 	if rcvlog != explog {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", explog, rcvlog)
@@ -2983,16 +2957,13 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 
 func TestResourcesStoreResourceErrCache(t *testing.T) {
 	tmp := Cache
-
-	utils.Logger.SetLogLevel(6)
-	utils.Logger.SetSyslog(nil)
+	tmpLogger := utils.Logger
 
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 	defer func() {
 		Cache = tmp
-		utils.Logger.SetLogLevel(0)
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
 
 	dft := config.CgrConfig()
@@ -3024,7 +2995,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 		t.Errorf("\nexpected true, received %+v", *r.dirty)
 	}
 
-	rcvlog := buf.String()[20:]
+	rcvlog := buf.String()
 
 	if rcvlog != explog {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", explog, rcvlog)
@@ -3136,21 +3107,14 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 
 func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
 	defer func() {
 		Cache = tmp
-	}()
-
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-	defer func() {
-		utils.Logger.SetLogLevel(0)
+		utils.Logger = tmpLogger
 	}()
 
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}

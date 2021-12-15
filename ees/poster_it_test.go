@@ -140,11 +140,6 @@ func TestSQSPoster(t *testing.T) {
 	if !*itTestSQS {
 		return
 	}
-	cfg1 := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg1.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-
 	//#####################################
 	// update this variables
 	endpoint := "https://sqs.us-east-2.amazonaws.com"
@@ -223,10 +218,6 @@ func TestS3Poster(t *testing.T) {
 	if !*itTestS3 {
 		return
 	}
-	cfg1 := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg1.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 
 	//#####################################
 	// update this variables
@@ -289,10 +280,6 @@ func TestAMQPv1Poster(t *testing.T) {
 	if !*itTestAMQPv1 {
 		return
 	}
-	cfg1 := config.NewDefaultCGRConfig()
-
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg1.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 
 	//#####################################
 	// update this variables

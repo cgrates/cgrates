@@ -20,7 +20,6 @@ package actions
 
 import (
 	"bytes"
-	"log"
 	"strings"
 	"testing"
 	"time"
@@ -55,24 +54,19 @@ func TestACHTTPPostExecute(t *testing.T) {
 		},
 	}
 
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-
-	buff := new(bytes.Buffer)
-	log.SetOutput(buff)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	expected := `<EEs> Exporter <TEST_ACTION_HTTPPOST> could not export because err: <Post "~*balance.TestBalance.Value": unsupported protocol scheme "">`
 	if err := http.execute(context.Background(), dataStorage, utils.EmptyString); err != nil {
 		t.Error(err)
-	} else if rcv := buff.String(); !strings.Contains(rcv, expected) {
+	} else if rcv := buf.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
-
-	buff.Reset()
 
 	// channels cannot be marshaled
 	dataStorage[utils.MetaReq] = make(chan struct{}, 1)

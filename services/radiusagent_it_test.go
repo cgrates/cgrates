@@ -42,8 +42,6 @@ func TestRadiusAgentReload(t *testing.T) {
 
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	ctx, cancel := context.WithCancel(context.TODO())
@@ -104,8 +102,6 @@ func TestRadiusAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.SessionSCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	ctx, cancel := context.WithCancel(context.TODO())
@@ -185,8 +181,6 @@ func TestRadiusAgentReload3(t *testing.T) {
 	}
 	cfg.SessionSCfg().Enabled = true
 	cfg.RadiusAgentCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	ctx, cancel := context.WithCancel(context.TODO())
@@ -207,8 +201,6 @@ func TestRadiusAgentReload4(t *testing.T) {
 	cfg.SessionSCfg().Enabled = true
 	cfg.RadiusAgentCfg().Enabled = true
 	cfg.RadiusAgentCfg().ListenNet = "test"
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}

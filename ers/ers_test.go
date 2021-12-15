@@ -20,8 +20,6 @@ package ers
 
 import (
 	"bytes"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -124,14 +122,12 @@ func TestErsOnEvictedMetaPostCDROK(t *testing.T) {
 }
 
 func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	value := &erEvents{
 		events: []*utils.CGREvent{
@@ -174,23 +170,19 @@ func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
 	}
 	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","AnswerTime":"2021-06-01T13:00:00Z","Destination":"1003"},"APIOpts":null},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","AnswerTime":"2021-06-01T12:00:00Z","Destination":"1002"},"APIOpts":null}]> due error <unsupported comparison type: string, kind: string>`
 	erS.onEvicted("id", value)
-	rcvLog := buf.String()[20:]
+	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected: <%+v> to be included in <%+v>", expLog, rcvLog)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
 	value := &erEvents{
@@ -230,23 +222,19 @@ func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
 `
 	erS.onEvicted("ID", value)
 
-	rcvLog := buf.String()[20:]
+	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
 	value := &erEvents{
@@ -292,12 +280,10 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 	expLog := `[WARNING] <ERs> failed posting expired parial events <[{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","AnswerTime":"2021-06-01T13:00:00Z","Destination":"1003"},"APIOpts":null},{"Tenant":"cgrates.org","ID":"EventErsOnEvicted","Event":{"Account":"1001","AnswerTime":"2021-06-01T12:00:00Z","Destination":"1002"},"APIOpts":null}]> due error <unsupported comparison type: string, kind: string>`
 	erS.onEvicted("ID", value)
 
-	rcvLog := buf.String()[20:]
+	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestErsOnEvictedMetaDumpToFileEmptyPath(t *testing.T) {

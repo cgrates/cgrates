@@ -42,8 +42,6 @@ func TestAnalyzerSReload(t *testing.T) {
 	if err := os.MkdirAll("/tmp/analyzers", 0700); err != nil {
 		t.Fatal(err)
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 
 	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -109,8 +107,6 @@ func TestAnalyzerSReload2(t *testing.T) {
 	if err := os.MkdirAll("/tmp/analyzers", 0700); err != nil {
 		t.Fatal(err)
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
@@ -138,8 +134,6 @@ func TestAnalyzerSReload3(t *testing.T) {
 		log.Fatal(err)
 	}
 	cfg.AnalyzerSCfg().IndexType = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)

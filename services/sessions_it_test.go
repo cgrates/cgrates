@@ -61,8 +61,6 @@ func TestSessionSReload1(t *testing.T) {
 		engine.Cache = temporaryCache
 	}()
 	engine.Cache = engine.NewCacheS(cfg, nil, nil)
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := cores.NewServer(nil)
@@ -138,8 +136,6 @@ func TestSessionSReload2(t *testing.T) {
 
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	chS := engine.NewCacheS(cfg, nil, nil)
@@ -187,8 +183,6 @@ func TestSessionSReload3(t *testing.T) {
 
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	chS := engine.NewCacheS(cfg, nil, nil)

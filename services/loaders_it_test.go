@@ -62,8 +62,6 @@ func TestLoaderSReload(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 		},
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 
 	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)

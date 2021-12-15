@@ -118,8 +118,6 @@ func testSQLInitConfig(t *testing.T) {
 	if err := sqlCfg.CheckConfigSanity(); err != nil {
 		t.Fatal(err)
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, sqlCfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 }
 
 func testSQLInitCdrDb(t *testing.T) {
@@ -393,8 +391,6 @@ func testSQLInitConfig2(t *testing.T) {
 		}`); err != nil {
 		t.Fatal(err)
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, sqlCfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 }
 
 func testSQLInitCdrDb2(t *testing.T) {

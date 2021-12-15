@@ -39,8 +39,6 @@ import (
 func TestDispatcherSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	cfg.AttributeSCfg().Enabled = true
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)

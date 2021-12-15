@@ -21,7 +21,6 @@ package loaders
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -64,12 +63,12 @@ func TestRemoveFromDB(t *testing.T) {
 }
 
 func testDryRunWithData(lType string, data []utils.MapStorage) (string, error) {
-	buf := bytes.NewBuffer([]byte{})
-	log.SetOutput(buf)
-	lgr := utils.Logger
-	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
-	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	utils.Logger.SetLogLevel(7)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	err := dryRun(context.Background(), lType, "", "test", data)
 	return buf.String(), err
@@ -526,17 +525,16 @@ func TestLoaderProcess(t *testing.T) {
 		t.Error(err)
 	}
 
-	buf := bytes.NewBuffer([]byte{})
-	log.SetOutput(buf)
-	lgr := utils.Logger
-	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	utils.Logger.SetLogLevel(7)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	if err := ld.process(context.Background(), utils.NewTenantID("cgrates.org:ID"), []utils.MapStorage{{utils.Tenant: "cgrates.org", utils.ID: "ID"}}, utils.MetaAttributes, utils.MetaDryRun, utils.MetaNone, true, false); err != nil {
 		t.Error(err)
 	}
-	utils.Logger = lgr
-	log.SetOutput(os.Stderr)
 
 	if expLog, rplyLog := "[INFO] <LoaderS-*default> DRY_RUN: AttributeProfile: {\"Tenant\":\"cgrates.org\",\"ID\":\"ID\",\"FilterIDs\":[],\"Attributes\":[],\"Blocker\":false,\"Weight\":0}",
 		buf.String(); !strings.Contains(rplyLog, expLog) {
@@ -1177,12 +1175,13 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 		t.Errorf("Expected file to not be moved because of template error: %v", err)
 	}
 
-	buf := bytes.NewBuffer([]byte{})
-	log.SetOutput(buf)
-	lgr := utils.Logger
-	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
-	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	utils.Logger.SetLogLevel(7)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
+
 	if err := ld.processFolder(context.Background(), utils.MetaNone, true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -1244,12 +1243,12 @@ func TestLoaderHandleFolder(t *testing.T) {
 	stop := make(chan struct{})
 	close(stop)
 
-	buf := bytes.NewBuffer([]byte{})
-	log.SetOutput(buf)
-	lgr := utils.Logger
-	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
-	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	utils.Logger.SetLogLevel(7)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	ld.handleFolder(stop)
 
@@ -1272,12 +1271,12 @@ func TestLoaderListenAndServe(t *testing.T) {
 	stop := make(chan struct{})
 	close(stop)
 
-	buf := bytes.NewBuffer([]byte{})
-	log.SetOutput(buf)
-	lgr := utils.Logger
-	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
-	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	utils.Logger.SetLogLevel(7)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	ld.ListenAndServe(stop)
 	runtime.Gosched()
@@ -1301,12 +1300,12 @@ func TestLoaderListenAndServeI(t *testing.T) {
 	stop := make(chan struct{})
 	close(stop)
 
-	buf := bytes.NewBuffer([]byte{})
-	log.SetOutput(buf)
-	lgr := utils.Logger
-	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
-	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	utils.Logger.SetLogLevel(7)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	ld.ListenAndServe(stop)
 	runtime.Gosched()

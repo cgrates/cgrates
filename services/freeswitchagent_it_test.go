@@ -41,8 +41,6 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	ctx, cancel := context.WithCancel(context.TODO())
@@ -87,8 +85,6 @@ func TestFreeSwitchAgentReload2(t *testing.T) {
 
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -116,8 +112,6 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -144,8 +138,6 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 func TestFreeSwitchAgentReload4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -182,8 +174,6 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 func TestFreeSwitchAgentReload5(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -203,8 +193,6 @@ func TestFreeSwitchAgentReload5(t *testing.T) {
 func TestFreeSwitchAgentReload6(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}

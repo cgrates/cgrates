@@ -4506,25 +4506,20 @@ func TestBiRPCv1DisconnectPeer(t *testing.T) {
 		t.Errorf("Unexpected reply result")
 	}
 
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-
-	buff := new(bytes.Buffer)
-	log.SetOutput(buff)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	args.OriginHost = "changed_host"
 	expLogg := "[WARNING] <SessionS> failed sending DPR for connection with id: <client1>, err: <NO_ACTIVE_SESSION>"
 	if err := sessions.BiRPCv1DisconnectPeer(nil, args, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
-	} else if rcv := buff.String(); !strings.Contains(rcv, expLogg) {
+	} else if rcv := buf.String(); !strings.Contains(rcv, expLogg) {
 		t.Errorf("Expected %+v, received %+v", expLogg, rcv)
 	}
-
-	buff.Reset()
 }
 
 type mkCallForces struct{}

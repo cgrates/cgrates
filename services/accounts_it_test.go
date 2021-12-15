@@ -38,9 +38,6 @@ import (
 func TestAccountSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)

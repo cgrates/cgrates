@@ -69,8 +69,6 @@ func TestAMQPER(t *testing.T) {
 	if err := cfg.CheckConfigSanity(); err != nil {
 		t.Fatal(err)
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)

@@ -20,8 +20,6 @@ package accounts
 
 import (
 	"bytes"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -569,14 +567,13 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 			},
 		},
 	}
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-	buff := new(bytes.Buffer)
-	log.SetOutput(buff)
+
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	restoreAccounts(context.Background(), dm, []*utils.AccountWithWeight{
 		{acntPrf, 0, utils.EmptyString},
@@ -585,12 +582,9 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 	})
 
 	subString := "<AccountS> error <NOT_IMPLEMENTED> restoring account <cgrates.org:1001>"
-	if rcv := buff.String(); !strings.Contains(rcv, subString) {
+	if rcv := buf.String(); !strings.Contains(rcv, subString) {
 		t.Errorf("Expected %+q, received %+q", subString, rcv)
 	}
-
-	log.SetOutput(os.Stderr)
-	utils.Logger.SetLogLevel(6)
 }
 
 func TestRestoreAccount3(t *testing.T) { //coverage purpose

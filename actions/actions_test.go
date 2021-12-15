@@ -21,8 +21,6 @@ package actions
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -332,20 +330,17 @@ func TestActionSListenAndServe(t *testing.T) {
 		time.Sleep(10)
 		stopChan <- struct{}{}
 	}()
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-	buff := new(bytes.Buffer)
-	log.SetOutput(buff)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 	acts.ListenAndServe(stopChan, cfgRld)
 	expString := "CGRateS <> [INFO] <CoreS> starting <ActionS>"
-	if rcv := buff.String(); !strings.Contains(rcv, expString) {
+	if rcv := buf.String(); !strings.Contains(rcv, expString) {
 		t.Errorf("Expected %+v, received %+v", expString, rcv)
 	}
-	buff.Reset()
 }
 
 func TestV1ScheduleActions(t *testing.T) {
@@ -476,22 +471,18 @@ func TestActionShutDown(t *testing.T) {
 	acts := NewActionS(cfg, filters, dm, nil)
 	acts.crn = &cron.Cron{}
 
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-	buff := new(bytes.Buffer)
-	log.SetOutput(buff)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	acts.Shutdown()
 	expBuff := "CGRateS <> [INFO] <CoreS> shutdown <ActionS>"
-	if rcv := buff.String(); !strings.Contains(rcv, expBuff) {
+	if rcv := buf.String(); !strings.Contains(rcv, expBuff) {
 		t.Errorf("Expected %+v, received %+v", expBuff, rcv)
 	}
-
-	buff.Reset()
 }
 
 type dataDBMockError struct {
@@ -533,15 +524,12 @@ func TestLogActionExecute(t *testing.T) {
 		utils.MetaOpts: map[string]interface{}{},
 	}
 
-	if newLogger, err := utils.Newlogger(utils.MetaStdLog, "Engine1"); err != nil {
-		t.Error(err)
-	} else {
-		newLogger.SetLogLevel(7)
-		utils.Logger = newLogger
-	}
-
-	output := new(bytes.Buffer)
-	log.SetOutput(output)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "Engine1", 7)
 
 	logAction := actLog{}
 	if err := logAction.execute(context.Background(), evNM, utils.MetaNone); err != nil {
@@ -549,12 +537,9 @@ func TestLogActionExecute(t *testing.T) {
 	}
 
 	expected := "CGRateS <Engine1> [INFO] LOG Event: {\"*opts\":{},\"*req\":{\"Account\":\"10\"}}"
-	if rcv := output.String(); !strings.Contains(rcv, expected) {
+	if rcv := buf.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
-	output.Reset()
-
-	log.SetOutput(os.Stderr)
 }
 
 type testMockCDRsConn struct {
@@ -1075,24 +1060,20 @@ func TestACScheduledActions(t *testing.T) {
 		},
 	}
 
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-
-	buff := new(bytes.Buffer)
-	log.SetOutput(buff)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	acts := NewActionS(cfg, fltrs, dm, nil)
 	expected := "WARNING] <ActionS> ignoring ActionProfile with id: <cgrates.org:TestACScheduledActions> creating action: <TOPUP>, error: <unsupported action type: <inexistent_type>>"
 	if _, err := acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, false, true); err != nil {
 		t.Error(err)
-	} else if rcv := buff.String(); !strings.Contains(rcv, expected) {
+	} else if rcv := buf.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
-	buff.Reset()
 
 	actPrf.Actions[0].Type = utils.MetaResetStatQueue
 	actPrf.Targets = map[string]utils.StringSet{
@@ -1119,6 +1100,7 @@ func TestACScheduledActions(t *testing.T) {
 			data:     mapStorage,
 		},
 	}
+	var err error
 	var schedActs []*scheduledActs
 	if schedActs, err = acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, false, true); err != nil {
 		t.Error(err)
