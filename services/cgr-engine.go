@@ -355,11 +355,10 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 	}
 
 	// init syslog
-	if utils.Logger, err = utils.Newlogger(utils.FirstNonEmpty(*flags.SysLogger,
-		cgr.cfg.GeneralCfg().Logger), cgr.cfg.GeneralCfg().NodeID); err != nil {
+	if utils.Logger, err = utils.NewLogger(utils.FirstNonEmpty(*flags.SysLogger, cgr.cfg.GeneralCfg().Logger),
+		cgr.cfg.GeneralCfg().NodeID, cgr.cfg.GeneralCfg().LogLevel); err != nil {
 		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
 	}
-	utils.Logger.SetLogLevel(cgr.cfg.GeneralCfg().LogLevel)
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 	cgr.cfg.LazySanityCheck()
 
