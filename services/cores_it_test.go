@@ -38,9 +38,6 @@ import (
 func TestCoreSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-
 	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil

@@ -20,8 +20,6 @@ package engine
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -1128,73 +1126,17 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 	}
 }
 
-// func TestThresholdsProcessEventAccountUpdateErrPartExec(t *testing.T) {
-// 	utils.Logger.SetLogLevel(4)
-// 	utils.Logger.SetSyslog(nil)
-
-// 	var buf bytes.Buffer
-// 	log.SetOutput(&buf)
-// 	defer func() {
-// 		log.SetOutput(os.Stderr)
-// 	}()
-
-// 	thPrf := &ThresholdProfile{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "TH1",
-// 		FilterIDs: []string{"*string:~*req.Account:1001"},
-// 		MinHits:   2,
-// 		MaxHits:   5,
-// 		Weight:    10,
-// 		ActionIDs: []string{"actPrf"},
-// 	}
-// 	th := &Threshold{
-// 		Tenant: "cgrates.org",
-// 		ID:     "TH1",
-// 		Hits:   2,
-// 		tPrfl:  thPrf,
-// 	}
-
-// 	args := &ThresholdsArgsProcessEvent{
-// 		ThresholdIDs: []string{"TH1"},
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "ThresholdProcessEvent",
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 			APIOpts: map[string]interface{}{
-// 				utils.MetaEventType: utils.AccountUpdate,
-// 			},
-// 		},
-// 	}
-// 	expLog := `[WARNING] <ThresholdS> failed executing actions: actPrf, error: NOT_FOUND`
-// 	if err := processEventWithThreshold(context.Background(), args, dm); err == nil ||
-// 		err != utils.ErrPartiallyExecuted {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
-// 	}
-
-// 	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
-// 		t.Errorf("expected log <%+v> \nto be included in: <%+v>", expLog, rcvLog)
-// 	}
-// 	utils.Logger.SetLogLevel(0)
-// }
-
 func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 	tmpC := config.CgrConfig()
 	tmpCM := connMgr
+	tmpLogger := utils.Logger
 	defer func() {
 		config.SetCgrConfig(tmpC)
 		connMgr = tmpCM
+		utils.Logger = tmpLogger
 	}()
-
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().ActionSConns = []string{"actPrfID"}
@@ -1236,7 +1178,6 @@ func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 		t.Errorf("expected log <%+v> \nto be included in: <%+v>", expLog, rcvLog)
 	}
 
-	utils.Logger.SetLogLevel(0)
 }
 
 // func TestThresholdsProcessEvent3(t *testing.T) {
@@ -1275,14 +1216,12 @@ func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 // }
 
 func TestThresholdsShutdown(t *testing.T) {
-	utils.Logger.SetLogLevel(6)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1298,7 +1237,6 @@ func TestThresholdsShutdown(t *testing.T) {
 		t.Errorf("expected logs <%+v> and <%+v> \n to be included in <%+v>",
 			expLog1, expLog2, rcvLog)
 	}
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestThresholdsStoreThresholdsOK(t *testing.T) {
@@ -1336,18 +1274,14 @@ func TestThresholdsStoreThresholdsOK(t *testing.T) {
 
 func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
 	defer func() {
 		Cache = tmp
+		utils.Logger = tmpLogger
 	}()
-
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
 
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	tS := NewThresholdService(nil, cfg, nil, nil)
@@ -1375,24 +1309,19 @@ func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 		t.Errorf("expected log <%+v>\n to be in included in: <%+v>", expLog, rcvLog)
 	}
 
-	utils.Logger.SetLogLevel(0)
 	Cache.Remove(context.Background(), utils.CacheThresholds, "TH1", true, utils.NonTransactional)
 }
 
 func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
 	defer func() {
+		utils.Logger = tmpLogger
 		Cache = tmp
 	}()
 
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1416,7 +1345,6 @@ func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 		t.Errorf("expected <%+v> \nto be included in: <%+v>", expLog, rcvLog)
 	}
 
-	utils.Logger.SetLogLevel(0)
 	Cache.Remove(context.Background(), utils.CacheThresholds, "TH2", true, utils.NonTransactional)
 }
 
@@ -1522,11 +1450,9 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 }
 
 func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
+	tmpLogger := utils.Logger
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 	tmp := config.CgrConfig()
 	tmpC := Cache
 	tmpCMgr := connMgr
@@ -1547,7 +1473,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 		connMgr = tmpCMgr
 		Cache = tmpC
 		config.SetCgrConfig(tmp)
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
 	thPrf := &ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -1600,8 +1526,6 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 		t.Errorf("expected logs <%+v> and <%+v> to be included in: <%+v>",
 			expLog1, expLog2, rcvLog)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestThresholdsProcessEventNotFound(t *testing.T) {
@@ -1713,18 +1637,14 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 
 func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
 	defer func() {
+		utils.Logger = tmpLogger
 		Cache = tmp
 	}()
 
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1776,8 +1696,6 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 				expLog, rcvLog)
 		}
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
@@ -2897,14 +2815,9 @@ func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
 }
 
 func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
+	tmpLogger := utils.Logger
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	tmp := Cache
 	tmpC := config.CgrConfig()
@@ -2913,6 +2826,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 		connMgr = tmpCM
+		utils.Logger = tmpLogger
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2940,8 +2854,6 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
 		t.Errorf("expected log <%+v> to be included in <%+v>", expLog, rcv)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {

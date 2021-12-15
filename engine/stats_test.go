@@ -20,8 +20,6 @@ package engine
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -405,7 +403,6 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 
 func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	Cache.Clear(nil)
-	utils.Logger.SetLogLevel(7)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dmSTS := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -969,14 +966,12 @@ func TestStatQueueStartLoop(t *testing.T) {
 }
 
 func TestStatQueueShutdown(t *testing.T) {
-	utils.Logger.SetLogLevel(6)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -992,7 +987,6 @@ func TestStatQueueShutdown(t *testing.T) {
 		t.Errorf("expected logs <%+v> and <%+v> \n to be included in <%+v>",
 			expLog1, expLog2, rcvLog)
 	}
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestStatQueueStoreStatsOK(t *testing.T) {
@@ -1030,18 +1024,14 @@ func TestStatQueueStoreStatsOK(t *testing.T) {
 
 func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
 	defer func() {
 		Cache = tmp
+		utils.Logger = tmpLogger
 	}()
-
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
 
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	sS := NewStatService(nil, cfg, nil, nil)
@@ -1069,24 +1059,18 @@ func TestStatQueueStoreStatsStoreSQErr(t *testing.T) {
 		t.Errorf("expected log <%+v>\n to be in included in: <%+v>", expLog, rcvLog)
 	}
 
-	utils.Logger.SetLogLevel(0)
 	Cache.Remove(context.Background(), utils.CacheStatQueues, "SQ1", true, utils.NonTransactional)
 }
 
 func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
 	defer func() {
+		utils.Logger = tmpLogger
 		Cache = tmp
 	}()
-
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1110,19 +1094,16 @@ func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 		t.Errorf("expected <%+v> \nto be included in: <%+v>", expLog, rcvLog)
 	}
 
-	utils.Logger.SetLogLevel(0)
 	Cache.Remove(context.Background(), utils.CacheStatQueues, "SQ2", true, utils.NonTransactional)
 }
 
 func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	tmp := Cache
 	tmpC := config.CgrConfig()
@@ -1159,8 +1140,6 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	} else if rcv := buf.String(); !strings.Contains(rcv, expLog) {
 		t.Errorf("expected log <%+v> to be included in <%+v>", expLog, rcv)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestStatQueueStoreThresholdNilDirtyField(t *testing.T) {
@@ -1291,14 +1270,12 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 }
 
 func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1364,8 +1341,6 @@ func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
 		t.Errorf("expected log <%+v> to be included in: <%+v>",
 			expLog, rcvLog)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
@@ -2428,23 +2403,15 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
 	tmpCM := connMgr
+	tmpLogger := utils.Logger
 	defer func() {
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 		connMgr = tmpCM
+		utils.Logger = tmpLogger
 	}()
-
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-	defer func() {
-		utils.Logger.SetLogLevel(0)
-	}()
-
 	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}

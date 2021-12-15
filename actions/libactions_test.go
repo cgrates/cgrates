@@ -20,7 +20,6 @@ package actions
 
 import (
 	"bytes"
-	"log"
 	"reflect"
 	"strings"
 	"testing"
@@ -96,23 +95,19 @@ func TestACExecuteScheduledAction(t *testing.T) {
 		utils.EmptyString, utils.MetaTopUp, utils.MetaNow,
 		dataStorage, acts)
 
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-
-	buff := new(bytes.Buffer)
-	log.SetOutput(buff)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	schedActs.ScheduledExecute()
 
 	expected := "CGRateS <> [WARNING] executing action: <TEST_ACTION>, error: <no connection with CDR Server>"
-	if rcv := buff.String(); !strings.Contains(rcv, expected) {
+	if rcv := buf.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
-	buff.Reset()
 
 	//not a data to save
 	if err := schedActs.postExec(); err != nil {

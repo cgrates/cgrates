@@ -37,8 +37,6 @@ import (
 
 func TestStorDBReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
@@ -182,8 +180,6 @@ func TestStorDBReloadVersion1(t *testing.T) {
 		utils.TpActionProfiles: 1,
 	}, true)
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	cfg.ChargerSCfg().Enabled = true
@@ -249,8 +245,6 @@ func TestStorDBReloadVersion2(t *testing.T) {
 		utils.TpActionProfiles: 1,
 	}, true)
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	cfg.ChargerSCfg().Enabled = true
@@ -311,8 +305,6 @@ func TestStorDBReloadVersion3(t *testing.T) {
 		utils.TpActionProfiles: 1,
 	}, true)
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	cfg.ChargerSCfg().Enabled = true
@@ -342,8 +334,6 @@ func TestStorDBReloadVersion3(t *testing.T) {
 
 func TestStorDBReloadNewStorDBConnError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	cfg.ChargerSCfg().Enabled = true
@@ -369,8 +359,6 @@ func TestStorDBReloadNewStorDBConnError(t *testing.T) {
 
 func TestStorDBReloadStartDBError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	cfg.ChargerSCfg().Enabled = true

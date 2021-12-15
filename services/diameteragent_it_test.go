@@ -39,8 +39,6 @@ func TestDiameterAgentReload1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
@@ -101,8 +99,6 @@ func TestDiameterAgentReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -120,8 +116,6 @@ func TestDiameterAgentReload2(t *testing.T) {
 
 func TestDiameterAgentReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}

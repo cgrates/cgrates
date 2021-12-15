@@ -49,8 +49,6 @@ func TestEventReaderSReload(t *testing.T) {
 	}
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -119,8 +117,6 @@ func TestEventReaderSReload2(t *testing.T) {
 		}
 	}
 	cfg := config.NewDefaultCGRConfig()
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	cfg.SessionSCfg().Enabled = true
 	cfg.ERsCfg().Enabled = true
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{

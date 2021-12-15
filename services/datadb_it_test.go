@@ -39,9 +39,6 @@ import (
 func TestDataDBReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
-
 	shdWg := new(sync.WaitGroup)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -182,8 +179,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -237,8 +232,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 func TestDataDBReloadErrorMarsheler(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DBDataEncoding = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -328,8 +321,6 @@ func TestDataDBStartVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -382,8 +373,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}

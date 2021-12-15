@@ -20,7 +20,6 @@ package ees
 
 import (
 	"bytes"
-	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -59,20 +58,17 @@ func TestListenAndServe(t *testing.T) {
 		time.Sleep(10 * time.Nanosecond)
 		stopChan <- struct{}{}
 	}()
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(6)
-	logBuf := new(bytes.Buffer)
-	log.SetOutput(logBuf)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 	eeS.ListenAndServe(stopChan, cfgRld)
 	logExpect := "[INFO] <EEs> reloading configuration internals."
-	if rcv := logBuf.String(); !strings.Contains(rcv, logExpect) {
+	if rcv := buf.String(); !strings.Contains(rcv, logExpect) {
 		t.Errorf("Expected %q but received %q", logExpect, rcv)
 	}
-	logBuf.Reset()
 }
 
 type testMockEvent struct {
@@ -418,21 +414,18 @@ func TestV1ProcessEvent6(t *testing.T) {
 }
 
 func TestOnCacheEvicted(t *testing.T) {
-	var err error
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-	bufLog := new(bytes.Buffer)
-	log.SetOutput(bufLog)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 	ee := newMockEventExporter()
 	onCacheEvicted(utils.EmptyString, ee)
 	rcvExpect := "CGRateS <> [WARNING] NOT IMPLEMENTED"
-	if rcv := bufLog.String(); !strings.Contains(rcv, rcvExpect) {
+	if rcv := buf.String(); !strings.Contains(rcv, rcvExpect) {
 		t.Errorf("Expected %v but received %v", rcvExpect, rcv)
 	}
-	bufLog.Reset()
 }
 func TestShutdown(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -440,14 +433,17 @@ func TestShutdown(t *testing.T) {
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS := NewEventExporterS(cfg, filterS, nil)
-	logBuf := new(bytes.Buffer)
-	log.SetOutput(logBuf)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 	eeS.Shutdown()
 	logExpect := "[INFO] <CoreS> shutdown <EEs>"
-	if rcv := logBuf.String(); !strings.Contains(rcv, logExpect) {
+	if rcv := buf.String(); !strings.Contains(rcv, logExpect) {
 		t.Errorf("Expected %q but received %q", logExpect, rcv)
 	}
-	logBuf.Reset()
 }
 
 func TestUpdateEEMetrics(t *testing.T) {

@@ -39,8 +39,6 @@ import (
 func TestRateSReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)

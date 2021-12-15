@@ -41,8 +41,6 @@ func TestDNSAgentReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	ctx, cancel := context.WithCancel(context.TODO())
@@ -111,8 +109,6 @@ func TestDNSAgentReload2(t *testing.T) {
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().ListenNet = "test"
 	cfg.DNSAgentCfg().Listen = "test"
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -136,8 +132,6 @@ func TestDNSAgentReload3(t *testing.T) {
 	cfg.DNSAgentCfg().Enabled = true
 	cfg.DNSAgentCfg().ListenNet = "test"
 	cfg.DNSAgentCfg().Listen = "test"
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -163,8 +157,6 @@ func TestDNSAgentReload4(t *testing.T) {
 	cfg.DNSAgentCfg().ListenNet = "tls"
 	cfg.TLSCfg().ServerCerificate = "bad_certificate"
 	cfg.TLSCfg().ServerKey = "bad_key"
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -186,8 +178,6 @@ func TestDNSAgentReload5(t *testing.T) {
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -212,8 +202,6 @@ func TestDNSAgentReload6(t *testing.T) {
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
 
-	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
-	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}

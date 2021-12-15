@@ -25,7 +25,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -806,14 +805,12 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 }
 
 func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
-	utils.Logger.SetLogLevel(3)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 3)
 
 	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
 	err := os.Mkdir(dirPath, 0755)
@@ -854,23 +851,20 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 
 	erS.onEvicted("ID", value)
 
-	rcvLog := buf.String()[20:]
+	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, "error: csv: invalid field or comment delimiter") {
 		t.Errorf("expected: <%s> to be included in log message: <%s>",
 			"error: csv: invalid field or comment delimiter", rcvLog)
 	}
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
-	utils.Logger.SetLogLevel(3)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 3)
 
 	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
 	err := os.Mkdir(dirPath, 0755)
@@ -910,7 +904,7 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 
 	erS.onEvicted("ID", value)
 
-	rcvLog := buf.String()[20:]
+	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, "CGRateS <> [ERROR] <ERs> Failed creating /tmp/TestErsOnEvictedMetaDumpToFile/non-existent/ID.") &&
 		!strings.Contains(rcvLog, "error: open /tmp/TestErsOnEvictedMetaDumpToFile/non-existent/ID.") {
 		t.Errorf("expected: <%s> and <%s> to be included in log message: <%s>",
@@ -918,8 +912,6 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 			"error: open /tmp/TestErsOnEvictedMetaDumpToFile/non-existent/ID.",
 			rcvLog)
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
 
 func TestErsOnEvictedNoCacheDumpFields(t *testing.T) {
@@ -1164,14 +1156,12 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 }
 
 func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	dirPath := "/tmp/TestErsOnEvictedCacheDumpfields"
 	err := os.MkdirAll(dirPath, 0755)
@@ -1241,7 +1231,6 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}
 
-	utils.Logger.SetLogLevel(0)
 	if err := os.RemoveAll(dirPath); err != nil {
 		t.Error(err)
 	}
@@ -1254,14 +1243,12 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 		t.Error(err)
 	}
 
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	value := &erEvents{
 		events: []*utils.CGREvent{
@@ -1317,12 +1304,11 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 
 	expLog := `Converting CDR with CGRID: <ID_JSON> to record , ignoring due to error: <unsupported field prefix: <~*req> when set field>`
 	erS.onEvicted("ID_JSON", value)
-	rcvLog := buf.String()[20:]
+	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}
 
-	utils.Logger.SetLogLevel(0)
 	if err := os.RemoveAll(dirPath); err != nil {
 		t.Error(err)
 	}
@@ -1421,14 +1407,12 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 }
 
 func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	dirPath := "/tmp/TestErsOnEvictedDumpToJSON"
 	err := os.MkdirAll(dirPath, 0755)
@@ -1481,22 +1465,18 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 	if !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}
-	// fmt.Println(rcvLog)
-	utils.Logger.SetLogLevel(0)
 	if err := os.RemoveAll(dirPath); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	dirPath := "/tmp/TestErsOnEvictedDumpToJSON"
 	err := os.MkdirAll(dirPath, 0755)
@@ -1548,11 +1528,10 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 
 	expLog := "error: json: unsupported type: func()"
 	erS.onEvicted("ID_JSON", value)
-	rcvLog := buf.String()[20:]
+	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, expLog) {
 		t.Errorf("expected <%+v> to be included in: <%+v>", expLog, rcvLog)
 	}
-	utils.Logger.SetLogLevel(0)
 	if err := os.RemoveAll(dirPath); err != nil {
 		t.Error(err)
 	}

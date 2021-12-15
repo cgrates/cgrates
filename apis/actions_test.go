@@ -21,8 +21,6 @@ package apis
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -732,14 +730,12 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 
 func TestActionsExecuteActionsLog(t *testing.T) {
 	engine.Cache.Clear(nil)
-	utils.Logger.SetLogLevel(6)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -802,7 +798,6 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 		t.Errorf("Expected log: %s to be included in %s", expected, rcv)
 	}
 
-	utils.Logger.SetLogLevel(0)
 	dm.DataDB().Flush(utils.EmptyString)
 }
 

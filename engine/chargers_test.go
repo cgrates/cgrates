@@ -19,8 +19,6 @@ package engine
 
 import (
 	"bytes"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -650,15 +648,12 @@ func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
 
 func TestChargersShutdown(t *testing.T) {
 	cS := &ChargerS{}
-
-	utils.Logger.SetLogLevel(6)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
+	tmpLogger := utils.Logger
 	defer func() {
-		log.SetOutput(os.Stderr)
+		utils.Logger = tmpLogger
 	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 
 	exp := []string{
 		"CGRateS <> [INFO] <ChargerS> shutdown initialized",
@@ -668,11 +663,8 @@ func TestChargersShutdown(t *testing.T) {
 	rcv := strings.Split(buf.String(), "\n")
 
 	for i := 0; i < 2; i++ {
-		rcv[i] = rcv[i][20:]
 		if rcv[i] != exp[i] {
 			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp[i], rcv[i])
 		}
 	}
-
-	utils.Logger.SetLogLevel(0)
 }
