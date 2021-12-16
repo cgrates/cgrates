@@ -25,14 +25,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-const WRITE = 8
-
 func NewLogger(loggerType, tenant, nodeID string, level int, connMgr *ConnManager,
 	eesConns []string) (utils.LoggerInterface, error) {
 	switch loggerType {
-	case "*exporter":
+	case utils.MetaExportLog:
 		return NewExportLogger(nodeID, tenant, level, connMgr, eesConns), nil
-
 	default:
 		return utils.NewLogger(loggerType, nodeID, level)
 	}
@@ -76,7 +73,7 @@ func (el *ExportLogger) call(m string, level int) error {
 
 func (el *ExportLogger) Write(p []byte) (n int, err error) {
 	n = len(p)
-	err = el.call(string(p), WRITE)
+	err = el.call(string(p), 8)
 	return
 }
 
