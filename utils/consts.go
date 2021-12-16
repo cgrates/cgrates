@@ -2618,6 +2618,17 @@ const (
 	HSuffix  = "h"
 )
 
+// rounding strings
+const (
+	ToNearestEven       = "*toNearestEven"
+	ToNearestAway       = "*toNearestAway"
+	ToZero              = "*toZero"
+	AwayFromZero        = "*awayFromZero"
+	ToNegativeInf       = "*toNegativeInf"
+	ToPositiveInf       = "*toPositiveInf"
+	ToNearestTowardZero = "*toNearestTowardZero"
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {
