@@ -524,7 +524,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 	eventData := &utils.CGREventWithEeIDs{
 		EeIDs: []string{"CSVExporterWIthTemplate"},
 		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.exporter config with ID: InexistentExport is missingorg",
+			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
