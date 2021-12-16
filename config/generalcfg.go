@@ -196,7 +196,7 @@ func (gencfg GeneralCfg) AsMapInterface(string) interface{} {
 		utils.DecimalMaxScaleCfg:     gencfg.DecimalMaxScale,
 		utils.DecimalMinScaleCfg:     gencfg.DecimalMinScale,
 		utils.DecimalPrecisionCfg:    gencfg.DecimalPrecision,
-		utils.DecimalRoundingModeCfg: gencfg.DecimalRoundingMode.String(),
+		utils.DecimalRoundingModeCfg: utils.RoundingModeToString(gencfg.DecimalRoundingMode),
 	}
 
 	if gencfg.LockingTimeout != 0 {

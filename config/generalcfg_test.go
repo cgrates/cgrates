@@ -173,7 +173,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.DecimalMaxScaleCfg:     0,
 		utils.DecimalMinScaleCfg:     0,
 		utils.DecimalPrecisionCfg:    0,
-		utils.DecimalRoundingModeCfg: "ToNearestEven",
+		utils.DecimalRoundingModeCfg: "*toNearestEven",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -220,7 +220,7 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.DecimalMaxScaleCfg:     0,
 		utils.DecimalMinScaleCfg:     0,
 		utils.DecimalPrecisionCfg:    0,
-		utils.DecimalRoundingModeCfg: "ToNearestEven",
+		utils.DecimalRoundingModeCfg: "*toNearestEven",
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

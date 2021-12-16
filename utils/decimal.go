@@ -40,25 +40,44 @@ func init() {
 
 func NewRoundingMode(rnd string) (decimal.RoundingMode, error) {
 	switch rnd {
-	case decimal.ToNearestEven.String():
+	case ToNearestEven:
 		return decimal.ToNearestEven, nil
-	case decimal.ToNearestAway.String():
+	case ToNearestAway:
 		return decimal.ToNearestAway, nil
-	case decimal.ToZero.String():
+	case ToZero:
 		return decimal.ToZero, nil
-	case decimal.AwayFromZero.String():
+	case AwayFromZero:
 		return decimal.AwayFromZero, nil
-	case decimal.ToNegativeInf.String():
+	case ToNegativeInf:
 		return decimal.ToNegativeInf, nil
-	case decimal.ToPositiveInf.String():
+	case ToPositiveInf:
 		return decimal.ToPositiveInf, nil
-	case decimal.ToNearestTowardZero.String():
+	case ToNearestTowardZero:
 		return decimal.ToNearestTowardZero, nil
 	default:
 		return 7, fmt.Errorf("usupoorted rounding: <%q>", rnd)
 	}
 }
-
+func RoundingModeToString(rnd decimal.RoundingMode) string {
+	switch rnd {
+	case decimal.ToNearestEven:
+		return ToNearestEven
+	case decimal.ToNearestAway:
+		return ToNearestAway
+	case decimal.ToZero:
+		return ToZero
+	case decimal.AwayFromZero:
+		return AwayFromZero
+	case decimal.ToNegativeInf:
+		return ToNegativeInf
+	case decimal.ToPositiveInf:
+		return ToPositiveInf
+	case decimal.ToNearestTowardZero:
+		return ToNearestTowardZero
+	default:
+		return EmptyString
+	}
+}
 func DivideBig(x, y *decimal.Big) *decimal.Big {
 	if x == nil || y == nil {
 		return nil
