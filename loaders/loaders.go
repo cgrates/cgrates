@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"archive/zip"
+	"bytes"
 	"errors"
 	"fmt"
 	"sync"
@@ -113,6 +115,66 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 	}
 	if err := ldr.processFolder(context.Background(), utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), ldr.ldrCfg.Opts.Cache, ldrS.cfg.GeneralCfg().DefaultCaching),
 		wI, soE); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*rply = utils.OK
+	return
+}
+
+type ArgsProcessZip struct {
+	LoaderID string
+	Data     []byte
+	APIOpts  map[string]interface{}
+}
+
+func (ldrS *LoaderS) V1ImportZip(ctx *context.Context, args *ArgsProcessZip,
+	rply *string) (err error) {
+	var zipR *zip.Reader
+	if zipR, err = zip.NewReader(bytes.NewReader(args.Data), int64(len(args.Data))); err != nil {
+		return
+	}
+	ldrS.RLock()
+	defer ldrS.RUnlock()
+
+	if args.LoaderID == utils.EmptyString {
+		args.LoaderID = utils.MetaDefault
+	}
+	ldr, has := ldrS.ldrs[args.LoaderID]
+	if !has {
+		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
+	}
+	var locked bool
+	if locked, err = ldr.Locked(); err != nil {
+		return utils.NewErrServerError(err)
+	} else if locked {
+		fl := ldr.ldrCfg.Opts.ForceLock
+		if val, has := args.APIOpts[utils.MetaForceLock]; has {
+			if fl, err = utils.IfaceAsBool(val); err != nil {
+				return
+			}
+		}
+		if !fl {
+			return errors.New("ANOTHER_LOADER_RUNNING")
+		}
+		if err := ldr.Unlock(); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	wI := ldr.ldrCfg.Opts.WithIndex
+	if val, has := args.APIOpts[utils.MetaWithIndex]; has {
+		if wI, err = utils.IfaceAsBool(val); err != nil {
+			return
+		}
+	}
+
+	soE := ldr.ldrCfg.Opts.StopOnError
+	if val, has := args.APIOpts[utils.MetaStopOnError]; has {
+		if soE, err = utils.IfaceAsBool(val); err != nil {
+			return
+		}
+	}
+	if err := ldr.processZip(context.Background(), utils.FirstNonEmpty(utils.IfaceAsString(args.APIOpts[utils.MetaCache]), ldr.ldrCfg.Opts.Cache, ldrS.cfg.GeneralCfg().DefaultCaching),
+		wI, soE, zipR); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*rply = utils.OK

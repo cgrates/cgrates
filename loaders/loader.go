@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"archive/zip"
 	"fmt"
 	"io"
 	"os"
@@ -164,7 +165,7 @@ func newLoader(cfg *config.CGRConfig, ldrCfg *config.LoaderSCfg, dm *engine.Data
 		connMgr:    connMgr,
 		cacheConns: cacheConns,
 		dataCache:  dataCache,
-		Locker:     newLocker(ldrCfg.GetLockFilePath()),
+		Locker:     newLocker(ldrCfg.GetLockFilePath(), ldrCfg.ID),
 	}
 }
 
@@ -242,7 +243,7 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action, cachi
 	return engine.CallCache(l.connMgr, ctx, l.cacheConns, caching, cacheArgs, cacheIDs, nil, false, l.ldrCfg.Tenant)
 }
 
-func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*config.FCTemplate, lType, action, caching string, withIndex, partialRates bool) (err error) {
+func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action, caching string, withIndex, partialRates bool) (err error) {
 	newPrf := newProfileFunc(lType)
 	obj := newPrf()
 	var prevTntID string
@@ -285,24 +286,16 @@ func (l *loader) processData(ctx *context.Context, csv CSVReader, tmpls []*confi
 	return
 }
 
-func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action, caching string, withIndex bool) (err error) {
-	csvType := utils.MetaFileCSV
-	switch {
-	// case strings.HasPrefix(inPath, gprefix): // uncomment this after *gapi is implemented
-	// 	csvType = utils.MetaGoogleAPI
-	// 	inPath = strings.TrimPrefix(inPath, gprefix)
-	case utils.IsURL(inPath):
-		csvType = utils.MetaUrl
-	}
-	var csv CSVReader
-	if csv, err = NewCSVReader(csvType, inPath, cfg.Filename, rune(l.ldrCfg.FieldSeparator[0]), 0); err != nil {
+func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action, caching string, withIndex bool, prv CSVProvider) (err error) {
+	var csv *CSVFile
+	if csv, err = NewCSVReader(prv, inPath, cfg.Filename, rune(l.ldrCfg.FieldSeparator[0]), 0); err != nil {
 		return
 	}
 	defer csv.Close()
 	if err = l.processData(ctx, csv, cfg.Fields, cfg.Type, action, caching,
 		withIndex, cfg.Flags.GetBool(utils.PartialRatesOpt)); err != nil || // encounterd error
 		outPath == utils.EmptyString || // or no moving
-		csvType != utils.MetaFileCSV { // or the type can not be moved(e.g. url)
+		prv.Type() != utils.MetaFileCSV { // or the type can not be moved(e.g. url)
 		return
 	}
 	return os.Rename(path.Join(inPath, cfg.Filename), path.Join(outPath, cfg.Filename))
@@ -330,7 +323,7 @@ func (l *loader) processIFile(_, fileName string) (err error) {
 		return
 	}
 	defer l.Unlock()
-	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, utils.FirstNonEmpty(l.ldrCfg.Opts.Cache, l.cfg.GeneralCfg().DefaultCaching), l.ldrCfg.Opts.WithIndex)
+	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, utils.FirstNonEmpty(l.ldrCfg.Opts.Cache, l.cfg.GeneralCfg().DefaultCaching), l.ldrCfg.Opts.WithIndex, fileProvider{})
 }
 
 func (l *loader) processFolder(ctx *context.Context, caching string, withIndex, stopOnError bool) (err error) {
@@ -338,8 +331,16 @@ func (l *loader) processFolder(ctx *context.Context, caching string, withIndex, 
 		return
 	}
 	defer l.Unlock()
+	var csvType CSVProvider = fileProvider{}
+	switch {
+	// case strings.HasPrefix(inPath, gprefix): // uncomment this after *gapi is implemented
+	// 	csvType = utils.MetaGoogleAPI
+	// 	inPath = strings.TrimPrefix(inPath, gprefix)
+	case utils.IsURL(l.ldrCfg.TpInDir):
+		csvType = urlProvider{}
+	}
 	for _, cfg := range l.ldrCfg.Data {
-		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, caching, withIndex); err != nil {
+		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, caching, withIndex, csvType); err != nil {
 			if !stopOnError {
 				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))
@@ -396,6 +397,26 @@ func (l *loader) ListenAndServe(stopChan chan struct{}) (err error) {
 			utils.LoaderS+"-"+l.ldrCfg.ID, stopChan)
 	default:
 		go l.handleFolder(stopChan)
+	}
+	return
+}
+
+func (l *loader) processZip(ctx *context.Context, caching string, withIndex, stopOnError bool, zipR *zip.Reader) (err error) {
+	if err = l.Lock(); err != nil {
+		return
+	}
+	defer l.Unlock()
+	ziP := zipProvider{zipR}
+	for _, cfg := range l.ldrCfg.Data {
+		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, caching, withIndex, ziP); err != nil {
+			if !stopOnError {
+				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
+					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))
+				err = nil
+				continue
+			}
+			return
+		}
 	}
 	return
 }

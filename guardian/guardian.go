@@ -170,7 +170,7 @@ func (gl *GuardianLocker) Guard(ctx *context.Context, handler func(*context.Cont
 
 // GuardIDs aquires a lock for duration
 // returns the reference ID for the lock group aquired
-func (gl *GuardianLocker) GuardIDs(refID string, timeout time.Duration, lkIDs ...string) (retRefID string) {
+func (gl *GuardianLocker) GuardIDs(refID string, timeout time.Duration, lkIDs ...string) string {
 	return gl.lockWithReference(refID, timeout, lkIDs...)
 }
 

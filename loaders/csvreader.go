@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"archive/zip"
 	"encoding/csv"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -33,28 +33,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type CSVReader interface {
-	Path() string
-	Read() ([]string, error)
-	Close() error
-}
-
-func NewCSVReader(csvType, dPath, fn string, sep rune, nrFlds int) (CSVReader, error) {
-	switch csvType {
-	case utils.MetaFileCSV:
-		return NewFileCSV(path.Join(dPath, fn), sep, nrFlds)
-	case utils.MetaUrl:
-		return NewURLCSV(strings.TrimSuffix(dPath, utils.Slash)+utils.Slash+fn, sep, nrFlds)
-	case utils.MetaGoogleAPI: // TODO: Implement *gapi
-		return nil, nil
-	case utils.MetaString:
-		return NewStringCSV(fn, sep, nrFlds), nil
-	default:
-		return nil, fmt.Errorf("unsupported CSVReader type: <%q>", csvType)
+func NewCSVReader(prv CSVProvider, dPath, fn string, sep rune, nrFlds int) (_ *CSVFile, err error) {
+	var file io.ReadCloser
+	if file, err = prv.Open(dPath, fn); err != nil {
+		return
 	}
+	return NewCSVFile(file, path.Join(dPath, fn), sep, nrFlds), nil
 }
 
-func NewCSVFile(rdr io.ReadCloser, path string, sep rune, nrFlds int) CSVReader {
+func NewCSVFile(rdr io.ReadCloser, path string, sep rune, nrFlds int) *CSVFile {
 	csvRrdr := csv.NewReader(rdr)
 	csvRrdr.Comma = sep
 	csvRrdr.Comment = utils.CommentChar
@@ -67,19 +54,37 @@ func NewCSVFile(rdr io.ReadCloser, path string, sep rune, nrFlds int) CSVReader 
 	}
 }
 
-func NewFileCSV(path string, sep rune, nrFlds int) (_ CSVReader, err error) {
-	var file io.ReadCloser
-	if file, err = os.Open(path); err != nil {
-		return
-	}
-	return NewCSVFile(file, path, sep, nrFlds), nil
-}
-
-func NewStringCSV(data string, sep rune, nrFlds int) (_ CSVReader) {
+func NewStringCSV(data string, sep rune, nrFlds int) *CSVFile {
 	return NewCSVFile(io.NopCloser(strings.NewReader(data)), data, sep, nrFlds)
 }
 
-func NewURLCSV(path string, sep rune, nrFlds int) (_ CSVReader, err error) {
+type CSVFile struct {
+	path   string    // only for logging purposes
+	cls    io.Closer // keep reference so we can close it when done
+	csvRdr *csv.Reader
+}
+
+func (c *CSVFile) Path() string            { return c.path }
+func (c *CSVFile) Read() ([]string, error) { return c.csvRdr.Read() }
+func (c *CSVFile) Close() error            { return c.cls.Close() }
+
+type CSVProvider interface {
+	Open(dPath, fn string) (io.ReadCloser, error)
+	Type() string
+}
+
+type fileProvider struct{}
+
+func (fileProvider) Open(dPath, fn string) (io.ReadCloser, error) {
+	return os.Open(path.Join(dPath, fn))
+}
+
+func (fileProvider) Type() string { return utils.MetaFileCSV }
+
+type urlProvider struct{}
+
+func (urlProvider) Open(dPath, fn string) (_ io.ReadCloser, err error) {
+	path := strings.TrimSuffix(dPath, utils.Slash) + utils.Slash + fn
 	if _, err = url.ParseRequestURI(path); err != nil {
 		return
 	}
@@ -95,15 +100,18 @@ func NewURLCSV(path string, sep rune, nrFlds int) (_ CSVReader, err error) {
 		err = utils.ErrNotFound
 		return
 	}
-	return NewCSVFile(req.Body, path, sep, nrFlds), nil
+	return req.Body, nil
 }
+func (urlProvider) Type() string { return utils.MetaUrl }
 
-type CSVFile struct {
-	path   string    // only for logging purposes
-	cls    io.Closer // keep reference so we can close it when done
-	csvRdr *csv.Reader
+type zipProvider struct{ *zip.Reader }
+
+func (z zipProvider) Open(_, fn string) (io.ReadCloser, error) { return z.Reader.Open(fn) }
+func (zipProvider) Type() string                               { return utils.MetaZip }
+
+type stringProvider struct{}
+
+func (stringProvider) Open(_, fn string) (io.ReadCloser, error) {
+	return io.NopCloser(strings.NewReader(fn)), nil
 }
-
-func (c *CSVFile) Path() string            { return c.path }
-func (c *CSVFile) Read() ([]string, error) { return c.csvRdr.Read() }
-func (c *CSVFile) Close() error            { return c.cls.Close() }
+func (stringProvider) Type() string { return utils.MetaString }

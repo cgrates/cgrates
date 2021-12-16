@@ -37,3 +37,8 @@ func (ldrSv1 *LoaderSv1) Run(ctx *context.Context, args *loaders.ArgsProcessFold
 	rply *string) error {
 	return ldrSv1.ldrS.V1Run(ctx, args, rply)
 }
+
+func (ldrSv1 *LoaderSv1) ImportZip(ctx *context.Context, args *loaders.ArgsProcessZip,
+	rply *string) error {
+	return ldrSv1.ldrS.V1ImportZip(ctx, args, rply)
+}
