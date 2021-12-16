@@ -591,6 +591,7 @@ const (
 	MetaMultiply             = "*multiply"
 	MetaDivide               = "*divide"
 	MetaUrl                  = "*url"
+	MetaZip                  = "*zip"
 	MetaXml                  = "*xml"
 	MetaReq                  = "*req"
 	MetaVars                 = "*vars"
@@ -634,6 +635,7 @@ const (
 	IdxEnd                   = "]"
 	IdxCombination           = "]["
 
+	MetaMemory              = "*memory"
 	RemoteHost              = "RemoteHost"
 	Local                   = "local"
 	TCP                     = "tcp"

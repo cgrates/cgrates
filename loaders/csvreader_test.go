@@ -39,14 +39,7 @@ import (
 func TestNewCSVStringReader(t *testing.T) {
 	data := `cgrates.org,ATTR_VARIABLE,,20,,*req.Category,*variable,~*req.ToR,`
 
-	expErrMsg := `unsupported CSVReader type: <"nonValidType">`
-	if _, err := NewCSVReader("nonValidType", utils.EmptyString, data, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-	if np, err := NewCSVReader(utils.MetaGoogleAPI, utils.EmptyString, data, utils.CSVSep, -1); err != nil || np != nil { // for coverage (remove when implemented)
-		t.Error("This tipe should not be implemented yet")
-	}
-	csvR, err := NewCSVReader(utils.MetaString, utils.EmptyString, data, utils.CSVSep, -1)
+	csvR, err := NewCSVReader(stringProvider{}, utils.EmptyString, data, utils.CSVSep, -1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,23 +70,29 @@ func TestNewCSVStringReader(t *testing.T) {
 	if err := csvR.Close(); err != nil {
 		t.Error(err)
 	}
+	if tp := (stringProvider{}).Type(); tp != utils.MetaString {
+		t.Errorf("Expeceted: %q, received: %q", utils.MetaString, tp)
+	}
+	if tp := (zipProvider{}).Type(); tp != utils.MetaZip {
+		t.Errorf("Expeceted: %q, received: %q", utils.MetaZip, tp)
+	}
 }
 
 func TestNewCSVReaderErrors(t *testing.T) {
 	path := "TestNewCSVReaderErrors" + strconv.Itoa(rand.Int()) + utils.CSVSuffix
 	expErrMsg := fmt.Sprintf("open %s: no such file or directory", path)
-	if _, err := NewCSVReader(utils.MetaFileCSV, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
+	if _, err := NewCSVReader(fileProvider{}, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	expErrMsg = fmt.Sprintf("parse %q: invalid URI for request", "./"+path)
-	if _, err := NewCSVReader(utils.MetaUrl, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
+	if _, err := NewCSVReader(urlProvider{}, ".", path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
 	prePath := "http:/localhost:" + strconv.Itoa(rand.Int())
 	expErrMsg = fmt.Sprintf(`path:"%s/%s" is not reachable`, prePath, path)
-	if _, err := NewCSVReader(utils.MetaUrl, prePath, path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
+	if _, err := NewCSVReader(urlProvider{}, prePath, path, utils.CSVSep, -1); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %q, received: %q", expErrMsg, err.Error())
 	}
 }
@@ -106,17 +105,17 @@ func TestNewCSVURLReader(t *testing.T) {
 	defer s.Close()
 	runtime.Gosched()
 
-	if _, err := NewCSVReader(utils.MetaUrl, s.URL+"/notFound", utils.AttributesCsv, utils.CSVSep, -1); err != utils.ErrNotFound {
+	if _, err := NewCSVReader(urlProvider{}, s.URL+"/notFound", utils.AttributesCsv, utils.CSVSep, -1); err != utils.ErrNotFound {
 		t.Errorf("Expeceted: %v, received: %v", utils.ErrNotFound, err)
 	}
 
-	csvR, err := NewCSVReader(utils.MetaUrl, s.URL+"/ok", utils.AttributesCsv, utils.CSVSep, -1)
+	csvR, err := NewCSVReader(urlProvider{}, s.URL+"/ok", utils.AttributesCsv, utils.CSVSep, -1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	expPath := s.URL + "/ok/" + utils.AttributesCsv
+	expPath := path.Join(s.URL + "/ok/" + utils.AttributesCsv)
 	if p := csvR.Path(); p != expPath {
-		t.Errorf("Expeceted: %+v, received: %+v", data, expPath)
+		t.Errorf("Expeceted: %+v, received: %+v", p, expPath)
 	}
 
 	if p, err := csvR.Read(); err != nil {
@@ -127,6 +126,9 @@ func TestNewCSVURLReader(t *testing.T) {
 
 	if err := csvR.Close(); err != nil {
 		t.Error(err)
+	}
+	if tp := (urlProvider{}).Type(); tp != utils.MetaUrl {
+		t.Errorf("Expeceted: %q, received: %q", utils.MetaUrl, tp)
 	}
 }
 
@@ -152,7 +154,7 @@ func TestNewCSVFileReader(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	csvR, err := NewCSVReader(utils.MetaFileCSV, dir, utils.AttributesCsv, utils.CSVSep, -1)
+	csvR, err := NewCSVReader(fileProvider{}, dir, utils.AttributesCsv, utils.CSVSep, -1)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"archive/zip"
 	"bytes"
 	"os"
 	"path"
@@ -60,7 +61,7 @@ func TestNewLoaderService(t *testing.T) {
 				connMgr:    cM,
 				dataCache:  cache,
 				cacheConns: cfg.LoaderCfg()[0].CacheSConns,
-				Locker:     newLocker(cfg.LoaderCfg()[0].GetLockFilePath()),
+				Locker:     newLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID),
 			},
 		},
 	}); !reflect.DeepEqual(exp, ld) {
@@ -299,6 +300,202 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	ld.Reload(dm, fS, cM)
 	expErrMsg = `UNKNOWN_LOADER: *default`
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+}
+
+func TestLoaderServiceV1ImportZip(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fc := []*config.FCTemplate{
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	cfg.LoaderCfg()[0].Enabled = true
+	cfg.LoaderCfg()[0].Data = []*config.LoaderDataType{{
+		Type:     utils.MetaAttributes,
+		Filename: utils.AttributesCsv,
+		Fields:   fc,
+	}}
+	cfg.LoaderCfg()[0].LockFilePath = utils.MetaMemory
+	cfg.LoaderCfg()[0].TpInDir = utils.EmptyString
+	cfg.LoaderCfg()[0].TpOutDir = utils.EmptyString
+
+	buf := new(bytes.Buffer)
+	wr := zip.NewWriter(buf)
+	f, err := wr.Create(utils.AttributesCsv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.Write([]byte(`cgrates.org,ID`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := wr.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+
+	ld := NewLoaderService(cfg, dm, fS, cM)
+	var rply string
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache:       utils.MetaNone,
+			utils.MetaWithIndex:   true,
+			utils.MetaStopOnError: true,
+			utils.MetaForceLock:   true,
+		},
+	}, &rply); err != nil {
+		t.Fatal(err)
+	} else if rply != utils.OK {
+		t.Errorf("Expected: %q,received: %q", utils.OK, rply)
+	}
+	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if v := (&engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}); !reflect.DeepEqual(v, prf) {
+		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+	}
+}
+
+func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fc := []*config.FCTemplate{
+		{Filters: []string{"*string"}},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+	cfg.LoaderCfg()[0].Enabled = true
+	cfg.LoaderCfg()[0].Data = []*config.LoaderDataType{{
+		Type:     utils.MetaAttributes,
+		Filename: utils.AttributesCsv,
+		Fields:   fc,
+	}}
+	cfg.LoaderCfg()[0].TpInDir = utils.EmptyString
+	cfg.LoaderCfg()[0].TpOutDir = utils.EmptyString
+	defer os.Remove(cfg.LoaderCfg()[0].LockFilePath)
+	buf := new(bytes.Buffer)
+	wr := zip.NewWriter(buf)
+	f, err := wr.Create(utils.AttributesCsv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.Write([]byte(`cgrates.org,ID`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := wr.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+
+	ld := NewLoaderService(cfg, dm, fS, cM)
+	var rply string
+
+	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache:       utils.MetaNone,
+			utils.MetaWithIndex:   true,
+			utils.MetaStopOnError: true,
+			utils.MetaForceLock:   true,
+		},
+	}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = "zip: not a valid zip file"
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		APIOpts: map[string]interface{}{
+			utils.MetaCache:       utils.MetaNone,
+			utils.MetaWithIndex:   true,
+			utils.MetaStopOnError: true,
+			utils.MetaForceLock:   true,
+		},
+	}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `strconv.ParseBool: parsing "notfloat": invalid syntax`
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache:       utils.MetaNone,
+			utils.MetaWithIndex:   true,
+			utils.MetaStopOnError: "notfloat",
+			utils.MetaForceLock:   true,
+		},
+	}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache:       utils.MetaNone,
+			utils.MetaWithIndex:   "notfloat",
+			utils.MetaStopOnError: "notfloat",
+			utils.MetaForceLock:   true,
+		},
+	}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	ld.ldrs[utils.MetaDefault].Locker.Lock()
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache:       utils.MetaNone,
+			utils.MetaWithIndex:   "notfloat",
+			utils.MetaStopOnError: "notfloat",
+			utils.MetaForceLock:   "notfloat",
+		},
+	}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	expErrMsg = `ANOTHER_LOADER_RUNNING`
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(),
+		APIOpts: map[string]interface{}{
+			utils.MetaCache:       utils.MetaNone,
+			utils.MetaWithIndex:   "notfloat",
+			utils.MetaStopOnError: "notfloat",
+			utils.MetaForceLock:   false,
+		},
+	}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	ld.ldrs[utils.MetaDefault].Locker = mockLock{}
+
+	expErrMsg = `SERVER_ERROR: EXISTS`
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(),
+	}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	ld.ldrs[utils.MetaDefault].Locker = mockLock2{}
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(), APIOpts: map[string]interface{}{
+			utils.MetaForceLock: true}}, &rply); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	cfg.LoaderCfg()[0].Enabled = false
+	ld.Reload(dm, fS, cM)
+	expErrMsg = `UNKNOWN_LOADER: *default`
+	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
+		Data: buf.Bytes(),
+	}, &rply); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }

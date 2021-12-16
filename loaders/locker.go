@@ -21,6 +21,9 @@ package loaders
 import (
 	"io"
 	"os"
+
+	"github.com/cgrates/cgrates/guardian"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type Locker interface {
@@ -30,11 +33,15 @@ type Locker interface {
 	IsLockFile(string) bool
 }
 
-func newLocker(path string) Locker {
-	if len(path) != 0 {
+func newLocker(path, loaderID string) Locker {
+	switch path {
+	case utils.EmptyString:
+		return new(nopLock)
+	case utils.MetaMemory:
+		return &memoryLock{loaderID: loaderID}
+	default:
 		return folderLock(path)
 	}
-	return new(nopLock)
 }
 
 type folderLock string
@@ -66,8 +73,24 @@ func (fl folderLock) IsLockFile(path string) bool { return path == string(fl) }
 
 type nopLock struct{}
 
-// lockFolder will attempt to lock the folder by creating the lock file
 func (nopLock) Lock() (_ error)            { return }
 func (nopLock) Unlock() (_ error)          { return }
 func (nopLock) Locked() (_ bool, _ error)  { return }
 func (nopLock) IsLockFile(string) (_ bool) { return }
+
+type memoryLock struct {
+	loaderID string
+	refID    string
+}
+
+func (m *memoryLock) Lock() (_ error) {
+	m.refID = guardian.Guardian.GuardIDs(m.refID, 0, utils.ConcatenatedKey(utils.LoaderS, m.loaderID))
+	return
+}
+func (m *memoryLock) Unlock() (_ error) {
+	guardian.Guardian.UnguardIDs(m.refID)
+	m.refID = utils.EmptyString
+	return
+}
+func (m memoryLock) Locked() (bool, error)      { return len(m.refID) != 0, nil }
+func (m memoryLock) IsLockFile(string) (_ bool) { return }

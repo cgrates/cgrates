@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"archive/zip"
 	"bytes"
+	"encoding/csv"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -355,7 +357,7 @@ func TestLoaderProcess(t *testing.T) {
 		filterS:   fS,
 		connMgr:   cM,
 		dataCache: cache,
-		Locker:    newLocker(cfg.LoaderCfg()[0].GetLockFilePath()),
+		Locker:    newLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID),
 	}); !reflect.DeepEqual(expLd, ld) {
 		t.Errorf("Expeceted: %+v, received: %+v", expLd, ld)
 	}
@@ -683,11 +685,9 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore, 
 	}
 }
 
-type mockCSV struct{}
+type mockReader struct{}
 
-func (mockCSV) Path() (_ string)        { return }
-func (mockCSV) Read() ([]string, error) { return nil, utils.ErrNotFound }
-func (mockCSV) Close() (_ error)        { return }
+func (mockReader) Read([]byte) (int, error) { return 0, utils.ErrNotFound }
 
 func TestLoaderProcessDataErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -725,7 +725,7 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported", u
 		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
 	}
 
-	if err := ld.processData(context.Background(), mockCSV{}, fc, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err != utils.ErrNotFound {
+	if err := ld.processData(context.Background(), &CSVFile{csvRdr: csv.NewReader(mockReader{})}, fc, utils.MetaAttributes, "notSupported", utils.MetaNone, true, false); err != utils.ErrNotFound {
 		t.Errorf("Expeceted: %q, received: %v", utils.ErrNotFound, err)
 	}
 }
@@ -759,7 +759,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		Type:     utils.MetaAttributes,
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
-	}, s.URL+"/ok", utils.EmptyString, utils.MetaStore, utils.MetaNone, true); err != nil {
+	}, s.URL+"/ok", utils.EmptyString, utils.MetaStore, utils.MetaNone, true, urlProvider{}); err != nil {
 		t.Fatal(err)
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
@@ -772,7 +772,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		Type:     utils.MetaAttributes,
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
-	}, s.URL+"/notFound", utils.EmptyString, utils.MetaStore, utils.MetaNone, true); err != utils.ErrNotFound {
+	}, s.URL+"/notFound", utils.EmptyString, utils.MetaStore, utils.MetaNone, true, urlProvider{}); err != utils.ErrNotFound {
 		t.Errorf("Expeceted: %v, received: %v", utils.ErrNotFound, err)
 	}
 
@@ -978,6 +978,13 @@ func TestLoaderProcessFolder(t *testing.T) {
 	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err != utils.ErrExists {
 		t.Fatal(err)
 	}
+
+	ld.Locker = nopLock{}
+	ld.ldrCfg.TpInDir = "http://localhost:0"
+	expErrMsg := `path:"http://localhost:0/Attributes.csv" is not reachable`
+	if err := ld.processFolder(context.Background(), utils.MetaNone, true, true); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
 }
 
 func TestLoaderProcessFolderErrors(t *testing.T) {
@@ -1071,7 +1078,6 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 		buf.String(); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-
 }
 
 func TestLoaderMoveUnprocessedFilesErrors(t *testing.T) {
@@ -1191,4 +1197,91 @@ func TestLoaderListenAndServeI(t *testing.T) {
 		buf.String(); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
+}
+
+func TestLoaderProcessZipErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
+	cache := map[string]*ltcache.Cache{}
+	for k, cfg := range cfg.LoaderCfg()[0].Cache {
+		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil)
+	}
+	fc := []*config.FCTemplate{
+		{Filters: []string{"*string"}},
+	}
+	for _, f := range fc {
+		f.ComputePath()
+	}
+
+	ld := newLoader(cfg, &config.LoaderSCfg{
+		ID:       "test",
+		Enabled:  true,
+		TpInDir:  utils.EmptyString,
+		TpOutDir: utils.EmptyString,
+		Data: []*config.LoaderDataType{
+			{
+				Type:     utils.MetaAttributes,
+				Filename: utils.AttributesCsv,
+				Fields:   fc,
+			},
+		},
+		FieldSeparator: utils.FieldsSep,
+		Action:         utils.MetaStore,
+		Opts: &config.LoaderSOptsCfg{
+			WithIndex: true,
+			Cache:     utils.MetaNone,
+		},
+	}, dm, cache, fS, cM, nil)
+	bufz := new(bytes.Buffer)
+	w := zip.NewWriter(bufz)
+	f, err := w.Create(utils.AttributesCsv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.Write([]byte(`cgrates.org,ID`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	r, err := zip.NewReader(bytes.NewReader(bufz.Bytes()), int64(bufz.Len()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expErrMsg := "inline parse error for string: <*string>"
+	if err := ld.processZip(context.Background(), utils.MetaNone, true, true, r); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
+	}
+
+	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	buf := bytes.NewBuffer([]byte{})
+	log.SetOutput(buf)
+	lgr := utils.Logger
+	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
+	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	utils.Logger.SetLogLevel(7)
+	if err := ld.processZip(context.Background(), utils.MetaNone, true, false, r); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	if expLog, rplyLog := "<LoaderS-test> loaderType: <*attributes> cannot open files, err: inline parse error for string: <*string>",
+		buf.String(); !strings.Contains(rplyLog, expLog) {
+		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
+	}
+
+	ld.Locker = mockLock{}
+	if err := ld.processZip(context.Background(), utils.MetaNone, true, true, r); err != utils.ErrExists {
+		t.Fatal(err)
+	}
+
 }
