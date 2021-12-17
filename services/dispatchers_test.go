@@ -43,7 +43,7 @@ func TestDispatcherSCoverage(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	chS := NewCacheService(cfg, db, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	srv := NewDispatcherService(cfg, db, chS, filterSChan, server,
-		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+		make(chan birpc.ClientConnector, 1), engine.NewConnManager(cfg), anz, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -54,7 +54,7 @@ func TestDispatcherSCoverage(t *testing.T) {
 		cacheS:      chS,
 		filterSChan: filterSChan,
 		server:      server,
-		connMgr:     nil,
+		connMgr:     srv.connMgr,
 		connChan:    make(chan birpc.ClientConnector, 1),
 		anz:         anz,
 		srvDep:      srvDep,

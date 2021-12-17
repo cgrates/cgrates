@@ -203,9 +203,9 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 		case strings.HasPrefix(m, utils.RateS):
 			m = strings.TrimPrefix(m, utils.RateS)
 			key = utils.RateS
-		// case strings.HasPrefix(m, utils.ReplicatorS):
-		// 	m = strings.TrimPrefix(m, utils.ReplicatorS)
-		// 	key = utils.ReplicatorS
+		case strings.HasPrefix(m, utils.ReplicatorS):
+			m = strings.TrimPrefix(m, utils.ReplicatorS)
+			key = utils.ReplicatorS
 		case strings.HasPrefix(m, utils.ResourceS):
 			m = strings.TrimPrefix(m, utils.ResourceS)
 			key = utils.ResourceS
@@ -224,6 +224,24 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 		case strings.HasPrefix(m, utils.CDRs):
 			m = strings.TrimPrefix(m, utils.CDRs)
 			key = utils.CDRs
+		case strings.HasPrefix(m, utils.EeS):
+			m = strings.TrimPrefix(m, utils.EeS)
+			key = utils.EeS
+		case strings.HasPrefix(m, utils.CoreS):
+			m = strings.TrimPrefix(m, utils.CoreS)
+			key = utils.CoreS
+		case strings.HasPrefix(m, utils.AnalyzerS):
+			m = strings.TrimPrefix(m, utils.AnalyzerS)
+			key = utils.AnalyzerS
+		case strings.HasPrefix(m, utils.AdminS):
+			m = strings.TrimPrefix(m, utils.AdminS)
+			key = utils.AdminS
+		case strings.HasPrefix(m, utils.LoaderS):
+			m = strings.TrimPrefix(m, utils.LoaderS)
+			key = utils.LoaderS
+		case strings.HasPrefix(m, utils.ServiceManager):
+			m = strings.TrimPrefix(m, utils.ServiceManager)
+			key = utils.ServiceManager
 		}
 		if len(m) < 2 || unicode.ToLower(rune(m[0])) != 'v' {
 			continue
@@ -243,7 +261,6 @@ func NewDispatcherService(val interface{}) (_ IntService, err error) {
 			s[key] = srv2
 		}
 		srv2.Methods[m[2:]] = v
-
 	}
 	return s, nil
 }

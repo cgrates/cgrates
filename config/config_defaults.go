@@ -1,3 +1,4 @@
+//go:generate go run ../data/scripts/generate_config/generate.go
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
