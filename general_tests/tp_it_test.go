@@ -21,111 +21,123 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-// import (
-// 	"net/rpc"
-// 	"path"
-// 	"testing"
-// 	"time"
+import (
+	"path"
+	"testing"
 
-// 	"github.com/cgrates/cgrates/config"
-// 	"github.com/cgrates/cgrates/engine"
-// 	"github.com/cgrates/cgrates/utils"
-// )
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/utils"
+)
 
-// var (
-// 	tpCfgPath  string
-// 	tpCfgDIR   string
-// 	tpCfg      *config.CGRConfig
-// 	tpRPC      *rpc.Client
-// 	tpLoadInst utils.LoadInstance // Share load information between tests
+var (
+	tpCfgPath  string
+	tpCfgDIR   string
+	tpCfg      *config.CGRConfig
+	tpRPC      *birpc.Client
+	tpLoadInst utils.LoadInstance // Share load information between tests
 
-// 	sTestTp = []func(t *testing.T){
-// 		testTpInitCfg,
-// 		testTpResetDataDb,
-// 		testTpResetStorDb,
-// 		testTpStartEngine,
-// 		testTpRpcConn,
-// 		testTpLoadTariffPlanFromFolder,
-// 		testTpBalanceCounter,
-// 		testTpActionTriggers,
-// 		testTpZeroCost,
-// 		testTpZeroNegativeCost,
-// 		testTpExecuteActionCgrRpc,
-// 		testTpExecuteActionCgrRpcAcc,
-// 		//testTpExecuteActionCgrRpcCdrStats,
-// 		testTpCreateExecuteActionMatch,
-// 		testTpSetRemoveActions,
-// 		testTpRemoveActionsRefenced,
-// 		testTpApierResetAccountActionTriggers,
-// 		testTpStopCgrEngine,
-// 	}
-// )
+	sTestTp = []func(t *testing.T){
+		testTpInitCfg,
+		testTpResetDataDb,
+		testTpResetStorDb,
+		testTpStartEngine,
+		testTpRpcConn,
+		testTpLoadTariffPlanFromFolder,
+		// testTpBalanceCounter,
+		// testTpActionTriggers,
+		// testTpZeroCost,
+		// testTpZeroNegativeCost,
+		// testTpExecuteActionCgrRpc,
+		// testTpExecuteActionCgrRpcAcc,
+		//testTpExecuteActionCgrRpcCdrStats,
+		// testTpCreateExecuteActionMatch,
+		// testTpSetRemoveActions,
+		// testTpRemoveActionsRefenced,
+		// testTpApierResetAccountActionTriggers,
+		testTpStopCgrEngine,
+	}
+)
 
-// func TestTp(t *testing.T) {
-// 	switch *dbType {
-// 	case utils.MetaInternal:
-// 		tpCfgDIR = "tutinternal"
-// 	case utils.MetaMySQL:
-// 		tpCfgDIR = "tutmysql"
-// 	case utils.MetaMongo:
-// 		tpCfgDIR = "tutmongo"
-// 	case utils.MetaPostgres:
-// 		t.SkipNow()
-// 	default:
-// 		t.Fatal("Unknown Database type")
-// 	}
-// 	for _, stest := range sTestTp {
-// 		t.Run(tpCfgDIR, stest)
-// 	}
-// }
-// func testTpInitCfg(t *testing.T) {
-// 	tpCfgPath = path.Join(*dataDir, "conf", "samples", tpCfgDIR)
-// 	// Init config first
-// 	var err error
-// 	tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
+func TestTp(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpCfgDIR = "tp_internal"
+	case utils.MetaMySQL:
+		tpCfgDIR = "tp_mysql"
+	case utils.MetaMongo:
+		tpCfgDIR = "tp_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	for _, stest := range sTestTp {
+		t.Run(tpCfgDIR, stest)
+	}
+}
+func testTpInitCfg(t *testing.T) {
+	tpCfgPath = path.Join(*dataDir, "conf", "samples", tpCfgDIR)
+	// Init config first
+	var err error
+	tpCfg, err = config.NewCGRConfigFromPath(context.Background(), tpCfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+}
 
-// // Remove data in both rating and accounting db
-// func testTpResetDataDb(t *testing.T) {
-// 	if err := engine.InitDataDB(tpCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+// Remove data in both rating and accounting db
+func testTpResetDataDb(t *testing.T) {
+	if err := engine.InitDataDB(tpCfg); err != nil {
+		t.Fatal(err)
+	}
+}
 
-// // Wipe out the cdr database
-// func testTpResetStorDb(t *testing.T) {
-// 	if err := engine.InitStorDB(tpCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+// Wipe out the cdr database
+func testTpResetStorDb(t *testing.T) {
+	if err := engine.InitStorDB(tpCfg); err != nil {
+		t.Fatal(err)
+	}
+}
 
-// // Start CGR Engine
-// func testTpStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(tpCfgPath, 1000); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+// Start CGR Engine
+func testTpStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(tpCfgPath, 1000); err != nil {
+		t.Fatal(err)
+	}
+}
 
-// // Connect rpc client to rater
-// func testTpRpcConn(t *testing.T) {
-// 	var err error
-// 	tpRPC, err = newRPCClient(tpCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+// Connect rpc client to rater
+func testTpRpcConn(t *testing.T) {
+	var err error
+	tpRPC, err = newRPCClient(tpCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal(err)
+	}
+}
 
-// // Load the tariff plan, creating accounts and their balances
-// func testTpLoadTariffPlanFromFolder(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-// 	if err := tpRPC.Call(utils.APIerSv2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
-// 		t.Error(err)
-// 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
-// }
+// Load the tariff plan, creating accounts and their balances
+func testTpLoadTariffPlanFromFolder(t *testing.T) {
+	caching := utils.MetaReload
+	if tpCfg.DataDbCfg().Type == utils.Internal {
+		caching = utils.MetaNone
+	}
+	var reply string
+	if err := tpRPC.Call(context.Background(), utils.LoaderSv1Run,
+		&loaders.ArgsProcessFolder{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache:       caching,
+				utils.MetaStopOnError: true,
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+}
 
 // func testTpBalanceCounter(t *testing.T) {
 // 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
@@ -439,8 +451,8 @@ package general_tests
 // 	}
 // }
 
-// func testTpStopCgrEngine(t *testing.T) {
-// 	if err := engine.KillEngine(100); err != nil {
-// 		t.Error(err)
-// 	}
-// }
+func testTpStopCgrEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+}
