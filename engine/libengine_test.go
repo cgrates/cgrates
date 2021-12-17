@@ -235,6 +235,7 @@ func TestIntServiceNewDispatcherService(t *testing.T) {
 		"StatSv1":        {"Do", "Ping"},
 		"TestRPCDspMock": {"AccountSv1Do", "ActionSv1Do", "AttributeSv1Do", "CDRsv1Do", "CacheSv1Do", "ChargerSv1Do", "ConfigSv1Do", "DispatcherSv1Do", "GuardianSv1Do", "Ping", "RateSv1Do", "ReplicatorSv1Do", "ResourceSv1Do", "RouteSv1Do", "SessionSv1Do", "StatSv1Do", "ThresholdSv1Do"},
 		"ThresholdSv1":   {"Do", "Ping"},
+		"ReplicatorSv1":  {"Do", "Ping"},
 	}
 	if !reflect.DeepEqual(exp, methods) {
 		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(methods))

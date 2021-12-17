@@ -46,6 +46,8 @@ func NewConnManager(cfg *config.CGRConfig) (cM *ConnManager) {
 type ConnManager struct {
 	cfg         *config.CGRConfig
 	rpcInternal map[string]chan birpc.ClientConnector
+	disp        map[string]chan birpc.ClientConnector
+	dispIntCh   RPCClientSet
 	dynIntCh    RPCClientSet
 	connCache   *ltcache.Cache
 }
@@ -64,7 +66,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 	var intChan chan birpc.ClientConnector
 	var isInternalRPC bool
 	var connCfg *config.RPCConn
-	if intChan, isInternalRPC = cM.rpcInternal[connID]; isInternalRPC {
+	if intChan, isInternalRPC = cM.getInternalConnChan(connID); isInternalRPC {
 		connCfg = cM.cfg.RPCConns()[rpcclient.InternalRPC]
 		if strings.HasPrefix(connID, rpcclient.BiRPCInternal) {
 			connCfg = cM.cfg.RPCConns()[rpcclient.BiRPCInternal]
@@ -73,7 +75,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 		connCfg = cM.cfg.RPCConns()[connID]
 		for _, rpcConn := range connCfg.Conns {
 			if rpcConn.Address == utils.MetaInternal {
-				intChan = cM.dynIntCh.GetInternalChanel()
+				intChan = cM.GetInternalChan()
 				break
 			}
 		}
@@ -207,6 +209,9 @@ func (cM *ConnManager) Reload() {
 }
 
 func (cM *ConnManager) GetInternalChan() chan birpc.ClientConnector {
+	if cM.dispIntCh != nil {
+		return cM.dispIntCh.GetInternalChanel()
+	}
 	return cM.dynIntCh.GetInternalChanel()
 }
 
@@ -214,4 +219,81 @@ func (cM *ConnManager) AddInternalConn(connName, apiPrefix string,
 	iConnCh chan birpc.ClientConnector) {
 	cM.rpcInternal[connName] = iConnCh
 	cM.dynIntCh[apiPrefix] = iConnCh
+}
+
+func (cM *ConnManager) EnableDispatcher(dsp IntService) {
+	cM.disp = map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaDispatchers, utils.MetaAttributes): cM.rpcInternal[utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)],
+	}
+	cM.dispIntCh = make(RPCClientSet)
+	for m, srv := range dsp {
+		var key string
+		switch {
+		case strings.HasPrefix(m, utils.AccountS):
+			key = utils.MetaAccounts
+		case strings.HasPrefix(m, utils.ActionS):
+			key = utils.MetaActions
+		case strings.HasPrefix(m, utils.AttributeS):
+			key = utils.MetaAttributes
+		case strings.HasPrefix(m, utils.CacheS):
+			key = utils.MetaCaches
+		case strings.HasPrefix(m, utils.ChargerS):
+			key = utils.MetaChargers
+		case strings.HasPrefix(m, utils.ConfigS):
+			key = utils.MetaConfig
+		case strings.HasPrefix(m, utils.DispatcherS):
+			key = utils.MetaDispatchers
+		case strings.HasPrefix(m, utils.GuardianS):
+			key = utils.MetaGuardian
+		case strings.HasPrefix(m, utils.RateS):
+			key = utils.MetaRateS
+		case strings.HasPrefix(m, utils.ResourceS):
+			key = utils.MetaResources
+		case strings.HasPrefix(m, utils.RouteS):
+			key = utils.MetaRoutes
+		case strings.HasPrefix(m, utils.SessionS):
+			key = utils.MetaSessionS
+		case strings.HasPrefix(m, utils.StatS):
+			key = utils.MetaStats
+		case strings.HasPrefix(m, utils.ThresholdS):
+			key = utils.MetaThresholds
+		case strings.HasPrefix(m, utils.CDRs):
+			key = utils.MetaCDRs
+		case strings.HasPrefix(m, utils.ReplicatorS):
+			key = utils.MetaReplicator
+		case strings.HasPrefix(m, utils.EeS):
+			key = utils.MetaEEs
+		case strings.HasPrefix(m, utils.CoreS):
+			key = utils.MetaCore
+		case strings.HasPrefix(m, utils.AnalyzerS):
+			key = utils.MetaAnalyzer
+		case strings.HasPrefix(m, utils.AdminS):
+			key = utils.MetaAdminS
+		case strings.HasPrefix(m, utils.LoaderS):
+			key = utils.MetaLoaders
+		case strings.HasPrefix(m, utils.ServiceManager):
+			key = utils.MetaServiceManager
+		}
+		key = utils.ConcatenatedKey(utils.MetaInternal, key)
+		ch := make(chan birpc.ClientConnector, 1)
+		ch <- srv
+		cM.disp[key] = ch
+		cM.dispIntCh[m] = ch
+	}
+	cM.Reload()
+}
+
+func (cM *ConnManager) DisableDispatcher() {
+	cM.disp = nil
+	cM.dispIntCh = nil
+	cM.Reload()
+}
+
+func (cM *ConnManager) getInternalConnChan(key string) (c chan birpc.ClientConnector, has bool) {
+	if cM.disp != nil {
+		c, has = cM.disp[key]
+	} else {
+		c, has = cM.rpcInternal[key]
+	}
+	return
 }

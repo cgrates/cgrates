@@ -103,6 +103,7 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	for _, s := range srv {
 		dspS.server.RpcRegister(s)
 	}
+	dspS.connMgr.EnableDispatcher(srv)
 	// for the moment we dispable Apier through dispatcher
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
@@ -127,6 +128,7 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 	dspS.server.RpcUnregisterName(utils.AttributeSv1)
 
 	dspS.unregisterAllDispatchedSubsystems()
+	dspS.connMgr.DisableDispatcher()
 	dspS.sync()
 	return
 }

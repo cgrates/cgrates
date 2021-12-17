@@ -32,6 +32,10 @@
 // 	"digest_equal": ":",									// equal symbol used in case of digests
 // 	"rsr_separator": ";",									// separator used within RSR fields
 // 	"max_parallel_conns": 100,								// the maximum number of connection used by the *parallel strategy
+// 	"decimal_max_scale": 0,									// the maximum scale for decimal numbers
+// 	"decimal_min_scale": 0,									// the minimum scale for decimal numbers
+// 	"decimal_precision": 0,									// the precision of the decimal operations
+// 	"decimal_rounding_mode": "*toNearestEven",				// the rounding mode <*toNearestEven|*toNearestAway|*toZero|*awayFromZero|*toNegativeInf|*toPositiveInf|*toNearestTowardZero>
 // },
 
 
@@ -39,6 +43,7 @@
 // 	"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
 // 	"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
 // 	"caps_stats_interval": "0",			// the interval we sample for caps stats ( 0 to disabled )
+// 	"ees_conns": [],					// connections to EventExporter
 // 	"shutdown_timeout": "1s"			// the duration to wait until all services are stopped
 // },
 
@@ -149,7 +154,6 @@
 // 		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 // 		"*tp_attributes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 // 		"*tp_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 // 		"*tp_dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 // 		"*tp_dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 // 		"*tp_rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
@@ -544,6 +548,7 @@
 // 				// "certPath": "", // path to client certificate
 // 				// "caPath": "",  // path to CA certificate
 // 				// "tls": false, //
+// 				// "connIDs": [],  // connections for connManager to this exporter
 // 				// "rpcConnTimeout" : "1s", // connection unsuccesfull on timeout
 // 				// "rpcReplyTimeout":"2s", // connection down at replies if taking longer that this value
 // 			},												// extra options for exporter
@@ -922,6 +927,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"opts":{								//
 // 		"*profileIDs": [					
@@ -963,6 +970,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // },
 
@@ -975,6 +984,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"opts":{								//
 // 		"*usageID": [						
@@ -1011,6 +1022,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"opts": {								//
 // 		"*profileIDs": [						
@@ -1026,6 +1039,13 @@
 // 			// 	"FilterIDs": [],
 // 			// 	"Value": false,
 // 			// },
+// 		],	
+// 		"*roundingDecimals": [			// ignore the filters for statIDs
+// 			// {
+// 			// 	"Tenant": "*any",
+// 			// 	"FilterIDs": [],
+// 			// 	"Value": 5,
+// 			// },
 // 		],									
 // 	},								
 // },
@@ -1038,6 +1058,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"actions_conns": [],					// connections to ActionS to execute the actions
 // 	"opts":{								//
@@ -1065,6 +1087,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"attributes_conns": [],					// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
@@ -1131,13 +1155,33 @@
 // 		"id": "*default",									// identifier of the Loader
 // 		"enabled": false,									// starts as service: <true|false>.
 // 		"tenant": "",										// tenant used in filterS.Pass
-// 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 // 		"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 // 		"lockfile_path": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
 // 		"caches_conns": ["*internal"],
 // 		"field_separator": ",",								// separator used in case of csv files
 // 		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the TPs are stored
 // 		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed TPs will be moved
+// 		"action": "*store", 								// what should the loader do<*store|*parse|*remove|*dryrun>
+// 		"opts": {
+// 			// "*cache": "*reload",
+// 			"*withIndex": true,
+// 			// "*forceLock": false,
+// 			// "*stopOnError": false,
+// 		},
+// 		"cache":{
+// 			"*filters":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*attributes":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*resources":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*stats":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*thresholds":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*routes":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*chargers":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*dispatchers":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*dispatcher_hosts":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*rate_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*action_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false},
+// 		},
 // 		"data":[											// data profiles to load
 // 			{
 // 				"type": "*filters",						// data source type
@@ -1431,6 +1475,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
 // },
@@ -1476,11 +1522,15 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"rate_indexed_selects": true,			// enable profile matching exclusively on indexes
 // 	//"rate_string_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 // 	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
+// 	"rate_exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"rate_notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 //     "verbosity": 1000,                      // number of increment iterations allowed
 // 	"opts":{								//
@@ -1650,6 +1700,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 // 	"dynaprepaid_actionprofile": [],		//
 // 	"opts":{								//
@@ -1680,6 +1732,8 @@
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"exists_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"notexists_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 //     "max_iterations": 1000,                 // maximum number of iterations
 //     "max_usage": "72h",                     // maximum time of usage

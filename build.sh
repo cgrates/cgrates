@@ -10,6 +10,9 @@ then
     GIT_LAST_LOG=""
 fi
 
+go generate ./...
+go fmt ./...
+
 go install -ldflags "-X 'github.com/cgrates/cgrates/utils.GitLastLog=$GIT_LAST_LOG'" github.com/cgrates/cgrates/cmd/cgr-engine
 cr=$?
 go install -ldflags "-X 'github.com/cgrates/cgrates/utils.GitLastLog=$GIT_LAST_LOG'" github.com/cgrates/cgrates/cmd/cgr-loader

@@ -1056,6 +1056,7 @@ const (
 
 // ReplicatorSv1 APIs
 const (
+	ReplicatorS                       = "ReplicatorS"
 	ReplicatorSv1                     = "ReplicatorSv1"
 	ReplicatorSv1Ping                 = "ReplicatorSv1.Ping"
 	ReplicatorSv1GetStatQueue         = "ReplicatorSv1.GetStatQueue"
@@ -1498,6 +1499,7 @@ const (
 
 // EEs
 const (
+	EeS                       = "EeS"
 	EeSv1                     = "EeSv1"
 	EeSv1Ping                 = "EeSv1.Ping"
 	EeSv1ProcessEvent         = "EeSv1.ProcessEvent"
