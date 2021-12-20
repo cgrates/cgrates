@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -247,6 +246,7 @@ func (admS *AdminSv1) RemoveDispatcherHost(ctx *context.Context, arg *utils.Tena
 	return nil
 }
 
+/*
 func NewDispatcherSv1(dS *dispatchers.DispatcherService) *DispatcherSv1 {
 	return &DispatcherSv1{dS: dS}
 }
@@ -256,20 +256,21 @@ type DispatcherSv1 struct {
 	ping
 }
 
-// GetProfileForEvent returns the matching dispatcher profile for the provided event
-func (dSv1 DispatcherSv1) GetProfilesForEvent(ctx *context.Context, ev *utils.CGREvent,
-	dPrfl *engine.DispatcherProfiles) error {
-	return dSv1.dS.V1GetProfilesForEvent(ctx, ev, dPrfl)
-}
+// // GetProfileForEvent returns the matching dispatcher profile for the provided event
+// func (dSv1 DispatcherSv1) GetProfilesForEvent(ctx *context.Context, ev *utils.CGREvent,
+// 	dPrfl *engine.DispatcherProfiles) error {
+// 	return dSv1.dS.V1GetProfilesForEvent(ctx, ev, dPrfl)
+// }
 
-func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
-	return dS.dS.DispatcherSv1RemoteStatus(args, reply)
-}
+// func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+// 	return dS.dS.DispatcherSv1RemoteStatus(args, reply)
+// }
 
-func (dS *DispatcherSv1) RemotePing(args *utils.CGREvent, reply *string) (err error) {
-	return dS.dS.DispatcherSv1RemotePing(args, reply)
-}
+// func (dS *DispatcherSv1) RemotePing(args *utils.CGREvent, reply *string) (err error) {
+// 	return dS.dS.DispatcherSv1RemotePing(args, reply)
+// }
 
-func (dS *DispatcherSv1) RemoteSleep(args *utils.DurationArgs, reply *string) (err error) {
-	return dS.dS.DispatcherSv1RemoteSleep(args, reply)
-}
+// func (dS *DispatcherSv1) RemoteSleep(args *utils.DurationArgs, reply *string) (err error) {
+// 	return dS.dS.DispatcherSv1RemoteSleep(args, reply)
+// }
+*/

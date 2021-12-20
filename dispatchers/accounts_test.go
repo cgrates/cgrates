@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -32,7 +33,7 @@ func TestDspAccountSv1PingNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.AccountSv1Ping(CGREvent, reply)
+	result := dspSrv.AccountSv1Ping(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -43,7 +44,7 @@ func TestDspAccountSv1PingNilArgs(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
-	result := dspSrv.AccountSv1Ping(nil, reply)
+	result := dspSrv.AccountSv1Ping(context.Background(), nil, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -58,7 +59,7 @@ func TestDspAccountSv1PingErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.AccountSv1Ping(CGREvent, reply)
+	result := dspSrv.AccountSv1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -72,7 +73,7 @@ func TestDspAAccountsForEventNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*utils.Account
-	result := dspSrv.AccountSv1AccountsForEvent(CGREvent, reply)
+	result := dspSrv.AccountSv1AccountsForEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -87,7 +88,7 @@ func TestDspAccountsForEventErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *[]*utils.Account
-	result := dspSrv.AccountSv1AccountsForEvent(CGREvent, reply)
+	result := dspSrv.AccountSv1AccountsForEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -101,7 +102,7 @@ func TestDspMaxAbstractsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.AccountSv1MaxAbstracts(CGREvent, reply)
+	result := dspSrv.AccountSv1MaxAbstracts(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -116,7 +117,7 @@ func TestDspMaxAbstractsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.AccountSv1MaxAbstracts(CGREvent, reply)
+	result := dspSrv.AccountSv1MaxAbstracts(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -130,7 +131,7 @@ func TestDspDebitAbstractsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.AccountSv1DebitAbstracts(CGREvent, reply)
+	result := dspSrv.AccountSv1DebitAbstracts(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -145,7 +146,7 @@ func TestDspDebitAbstractsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.AccountSv1DebitAbstracts(CGREvent, reply)
+	result := dspSrv.AccountSv1DebitAbstracts(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -159,7 +160,7 @@ func TestDspMaxConcretesNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.AccountSv1MaxConcretes(CGREvent, reply)
+	result := dspSrv.AccountSv1MaxConcretes(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -174,7 +175,7 @@ func TestDspMaxConcretesErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.AccountSv1MaxConcretes(CGREvent, reply)
+	result := dspSrv.AccountSv1MaxConcretes(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -188,7 +189,7 @@ func TestDspDebitConcretesNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.AccountSv1DebitConcretes(CGREvent, reply)
+	result := dspSrv.AccountSv1DebitConcretes(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -203,7 +204,7 @@ func TestDspDebitConcretesErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.EventCharges
-	result := dspSrv.AccountSv1DebitConcretes(CGREvent, reply)
+	result := dspSrv.AccountSv1DebitConcretes(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -217,7 +218,7 @@ func TestDspAccountSv1ActionSetBalanceNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.AccountSv1ActionSetBalance(CGREvent, reply)
+	result := dspSrv.AccountSv1ActionSetBalance(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -232,7 +233,7 @@ func TestDspAccountSv1ActionSetBalanceErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.AccountSv1ActionSetBalance(CGREvent, reply)
+	result := dspSrv.AccountSv1ActionSetBalance(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -246,7 +247,7 @@ func TestDspAAccountSv1ActionRemoveBalanceNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.AccountSv1ActionRemoveBalance(CGREvent, reply)
+	result := dspSrv.AccountSv1ActionRemoveBalance(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -261,7 +262,7 @@ func TestDspAccountSv1ActionRemoveBalanceErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.AccountSv1ActionRemoveBalance(CGREvent, reply)
+	result := dspSrv.AccountSv1ActionRemoveBalance(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

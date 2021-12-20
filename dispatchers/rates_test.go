@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -32,7 +33,7 @@ func TestDspRateSv1PingErrorCase2(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.RateSv1Ping(CGREvent, reply)
+	result := dspSrv.RateSv1Ping(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -47,7 +48,7 @@ func TestDspRateSv1PingErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.RateSv1Ping(CGREvent, reply)
+	result := dspSrv.RateSv1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -58,7 +59,7 @@ func TestDspRateSv1CostForEventCaseNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
-	result := dspSrv.RateSv1Ping(nil, reply)
+	result := dspSrv.RateSv1Ping(context.Background(), nil, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -72,7 +73,7 @@ func TestDspRateSv1CostForEventCase2(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.RateProfileCost
-	result := dspSrv.RateSv1CostForEvent(CGREvent, reply)
+	result := dspSrv.RateSv1CostForEvent(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -83,7 +84,7 @@ func TestDspRateSv1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *utils.RateProfileCost
-	result := dspSrv.RateSv1CostForEvent(nil, reply)
+	result := dspSrv.RateSv1CostForEvent(context.Background(), nil, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -98,7 +99,7 @@ func TestDspRateSv1CostForEventErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *utils.RateProfileCost
-	result := dspSrv.RateSv1CostForEvent(CGREvent, reply)
+	result := dspSrv.RateSv1CostForEvent(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

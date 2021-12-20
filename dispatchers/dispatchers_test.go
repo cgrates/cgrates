@@ -126,7 +126,7 @@ func TestDispatcherauthorizeEvent(t *testing.T) {
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	ev := &utils.CGREvent{}
 	reply := &engine.AttrSProcessEventReply{}
-	err := dsp.authorizeEvent(ev, reply)
+	err := dsp.authorizeEvent(context.Background(), ev, reply)
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -141,7 +141,7 @@ func TestDispatcherAuthorizeEventErr(t *testing.T) {
 	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	ev := &utils.CGREvent{}
 	reply := &engine.AttrSProcessEventReply{}
-	err := dsp.authorizeEvent(ev, reply)
+	err := dsp.authorizeEvent(context.Background(), ev, reply)
 	expected := "MANDATORY_IE_MISSING: [connIDs]"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -203,7 +203,7 @@ func TestDispatcherAuthorizeError(t *testing.T) {
 	}
 	connMng := engine.NewConnManager(cfg)
 	dsp := NewDispatcherService(nil, cfg, nil, connMng)
-	err := dsp.authorize("", "cgrates.org", utils.APIMethods)
+	err := dsp.authorize2("", "cgrates.org", utils.APIMethods)
 	expected := "dial tcp: address error: missing port in address"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -227,7 +227,7 @@ func TestDispatcherAuthorizeError2(t *testing.T) {
 	}
 	connMng := engine.NewConnManager(cfg)
 	dsp := NewDispatcherService(nil, cfg, nil, connMng)
-	err := dsp.authorize("", "cgrates.org", utils.APIMethods)
+	err := dsp.authorize2("", "cgrates.org", utils.APIMethods)
 	expected := "dial tcp: address error: missing port in address"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -248,7 +248,7 @@ func TestDispatcherServiceAuthorizeEvenError1(t *testing.T) {
 	reply := &engine.AttrSProcessEventReply{}
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
 		nil, nil, true, utils.NonTransactional)
-	err := dsp.authorizeEvent(ev, reply)
+	err := dsp.authorizeEvent(context.Background(), ev, reply)
 	expected := "UNKNOWN_API_KEY"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -282,7 +282,7 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 		value, nil, true, utils.NonTransactional)
 
 	expected := "dial tcp: missing address"
-	if err := dsp.authorizeEvent(ev, reply); err == nil || err.Error() != expected {
+	if err := dsp.authorizeEvent(context.Background(), ev, reply); err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
@@ -327,7 +327,7 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
 	rply := &engine.AttrSProcessEventReply{}
-	if err := dsp.authorizeEvent(ev, rply); err != nil {
+	if err := dsp.authorizeEvent(context.Background(), ev, rply); err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	engine.Cache = cacheInit
@@ -376,7 +376,7 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
 	expected := "UNAUTHORIZED_API"
-	if err := dsp.authorize(utils.APIMethods, "testTenant", "apikey"); err == nil || err.Error() != expected {
+	if err := dsp.authorize2(utils.APIMethods, "testTenant", "apikey"); err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
@@ -424,7 +424,7 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
 	expected := "NOT_FOUND"
-	if err := dsp.authorize(utils.APIMethods, "testTenant", "apikey"); err == nil || err.Error() != expected {
+	if err := dsp.authorize2(utils.APIMethods, "testTenant", "apikey"); err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
@@ -473,7 +473,7 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
-	if err := dsp.authorize("testMethod", "testTenant", "apikey"); err != nil {
+	if err := dsp.authorize2("testMethod", "testTenant", "apikey"); err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	engine.Cache = cacheInit

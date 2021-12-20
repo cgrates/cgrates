@@ -30,7 +30,7 @@ import (
 
 var (
 	expTimeAttributes = time.Now().Add(20 * time.Minute)
-	attrS             *AttributeService
+	attrS             *AttributeS
 	dmAtr             *DataManager
 	attrEvs           = []*utils.CGREvent{
 		{ //matching AttributeProfile1
@@ -3454,7 +3454,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
-	alS := &AttributeService{
+	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
 		fltrS: NewFilterS(cfg, nil, dm),
@@ -3527,7 +3527,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
-	alS := &AttributeService{
+	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
 		fltrS: NewFilterS(cfg, nil, dm),
@@ -3565,7 +3565,7 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
-	alS := &AttributeService{
+	alS := &AttributeS{
 		cfg:   cfg,
 		dm:    dm,
 		fltrS: NewFilterS(cfg, nil, dm),

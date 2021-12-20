@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+// do not modify this code because it's generated
 package dispatchers
 
 import (
@@ -23,52 +24,63 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// CDRsV1Ping interogates CDRsV1 server responsible to process the event
-func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREvent,
-	reply *string) (err error) {
-	if args == nil {
-		args = new(utils.CGREvent)
-	}
+func (dS *DispatcherService) CDRsV1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.Tenant != utils.EmptyString {
+	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.CDRsV1Ping, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.CDRsV1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaCDRs,
-		utils.CDRsV1Ping, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCDRs, utils.CDRsV1Ping, args, reply)
 }
-
-func (dS *DispatcherService) CDRsV1ProcessEvent(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.Tenant != utils.EmptyString {
+	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.CDRsV1ProcessEvent, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.CDRsV1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaCDRs,
-		utils.CDRsV1ProcessEvent, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCDRs, utils.CDRsV1ProcessEvent, args, reply)
 }
-
-func (dS *DispatcherService) CDRsV2ProcessEvent(args *utils.CGREvent, reply *[]*utils.EventWithFlags) (err error) {
-	tnt := args.Tenant
-	if tnt == utils.EmptyString {
-		tnt = dS.cfg.GeneralCfg().DefaultTenant
+func (dS *DispatcherService) CDRsV1ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.EventWithFlags) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.CDRsV2ProcessEvent, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.CDRsV1ProcessEventWithGet, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaCDRs,
-		utils.CDRsV2ProcessEvent, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCDRs, utils.CDRsV1ProcessEventWithGet, args, reply)
 }

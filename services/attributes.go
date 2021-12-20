@@ -60,7 +60,7 @@ type AttributeService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	attrS    *engine.AttributeService
+	attrS    *engine.AttributeS
 	rpc      *apis.AttributeSv1         // useful on restart
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService

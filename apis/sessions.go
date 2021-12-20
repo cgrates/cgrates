@@ -20,7 +20,6 @@ package apis
 
 import (
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -111,9 +110,9 @@ func (ssv1 *SessionSv1) GetPassiveSessionsCount(ctx *context.Context, args *util
 	return ssv1.sS.BiRPCv1GetPassiveSessionsCount(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) ReplicateSessions(ctx *context.Context, args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error {
-	return ssv1.sS.BiRPCv1ReplicateSessions(ctx, args.ArgsReplicateSessions, rply)
-}
+// func (ssv1 *SessionSv1) ReplicateSessions(ctx *context.Context, args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error {
+// 	return ssv1.sS.BiRPCv1ReplicateSessions(ctx, args.ArgsReplicateSessions, rply)
+// }
 
 func (ssv1 *SessionSv1) SetPassiveSession(ctx *context.Context, args *sessions.Session,
 	reply *string) error {

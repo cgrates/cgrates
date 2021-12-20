@@ -119,7 +119,6 @@ func (TestRPCSrvMock) V2Do(*context.Context, interface{}, *string) error { retur
 
 type TestRPCSrvMockS struct{} // exported for service
 
-func (TestRPCSrvMockS) Do(*context.Context, interface{}, *string) error   { return nil }
 func (TestRPCSrvMockS) V1Do(*context.Context, interface{}, *string) error { return nil }
 func (TestRPCSrvMockS) V2Do(*context.Context, interface{}, *string) error { return nil }
 
@@ -167,7 +166,7 @@ func TestIntServiceNewService(t *testing.T) {
 	}
 	methods = getMethods(s)
 	exp = map[string][]string{
-		"TestRPCSrvMockS":   {"Do", "Ping", "V1Do", "V2Do"},
+		"TestRPCSrvMockS":   {"Ping", "V1Do", "V2Do"},
 		"TestRPCSrvMockSv1": {"Do", "Ping"},
 		"TestRPCSrvMockSv2": {"Do", "Ping"},
 	}

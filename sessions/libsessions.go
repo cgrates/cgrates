@@ -609,6 +609,8 @@ type ArgsReplicateSessions struct {
 	CGRID   string
 	Passive bool
 	ConnIDs []string
+	APIOpts map[string]interface{}
+	Tenant  string
 }
 
 // getMaxUsageFromRuns will return maxUsage with the lowest one from maxAbstractsRuns

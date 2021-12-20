@@ -33,29 +33,29 @@ import (
 
 // NewAttributeService returns a new AttributeService
 func NewAttributeService(dm *DataManager, filterS *FilterS,
-	cgrcfg *config.CGRConfig) *AttributeService {
-	return &AttributeService{
+	cgrcfg *config.CGRConfig) *AttributeS {
+	return &AttributeS{
 		dm:    dm,
 		fltrS: filterS,
 		cfg:   cgrcfg,
 	}
 }
 
-// AttributeService the service for the API
-type AttributeService struct {
+// AttributeS the service for the API
+type AttributeS struct {
 	dm    *DataManager
 	fltrS *FilterS
 	cfg   *config.CGRConfig
 }
 
 // Shutdown is called to shutdown the service
-func (alS *AttributeService) Shutdown() {
+func (alS *AttributeS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.AttributeS))
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.AttributeS))
 }
 
 // attributeProfileForEvent returns the matching attribute
-func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt string, attrIDs []string,
+func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string, attrIDs []string,
 	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchAttrPrfl *AttributeProfile, err error) {
 	if len(attrIDs) == 0 {
 		ignoreFilters = false
@@ -130,7 +130,7 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
+func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *AttrSProcessEventReply, err error) {
 	var attrIDs []string
 	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
@@ -203,7 +203,7 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 }
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
-func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
+func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
 	attrPrfl *APIAttributeProfile) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -240,7 +240,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
+func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *AttrSProcessEventReply) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {

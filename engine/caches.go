@@ -253,7 +253,7 @@ func (chS *CacheS) V1HasItem(_ *context.Context, args *utils.ArgsGetCacheItemWit
 	return
 }
 
-func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (chS *CacheS) V1GetItemExpiryTime(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *time.Time) (err error) {
 	expTime, has := chS.tCache.GetItemExpiryTime(args.CacheID, args.ItemID)
 	if !has {
@@ -295,7 +295,7 @@ func (chS *CacheS) V1GetCacheStats(ctx *context.Context, args *utils.AttrCacheID
 	return
 }
 
-func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) (err error) {
+func (chS *CacheS) V1PrecacheStatus(_ *context.Context, args *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) (err error) {
 	if len(args.CacheIDs) == 0 {
 		args.CacheIDs = utils.CachePartitions.AsSlice()
 	}
@@ -315,13 +315,13 @@ func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, rply *m
 	return
 }
 
-func (chS *CacheS) V1HasGroup(args *utils.ArgsGetGroupWithAPIOpts,
+func (chS *CacheS) V1HasGroup(_ *context.Context, args *utils.ArgsGetGroupWithAPIOpts,
 	rply *bool) (err error) {
 	*rply = chS.tCache.HasGroup(args.CacheID, args.GroupID)
 	return
 }
 
-func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts,
+func (chS *CacheS) V1GetGroupItemIDs(_ *context.Context, args *utils.ArgsGetGroupWithAPIOpts,
 	rply *[]string) (err error) {
 	if has := chS.tCache.HasGroup(args.CacheID, args.GroupID); !has {
 		return utils.ErrNotFound
@@ -330,7 +330,7 @@ func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts,
 	return
 }
 
-func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
+func (chS *CacheS) V1RemoveGroup(_ *context.Context, args *utils.ArgsGetGroupWithAPIOpts,
 	rply *string) (err error) {
 	chS.tCache.RemoveGroup(args.CacheID, args.GroupID, true, utils.NonTransactional)
 	*rply = utils.OK
@@ -399,7 +399,7 @@ func (chS *CacheS) ReplicateSet(ctx *context.Context, chID, itmID string, value 
 }
 
 // V1ReplicateSet replicate an item
-func (chS *CacheS) V1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+func (chS *CacheS) V1ReplicateSet(_ *context.Context, args *utils.ArgCacheReplicateSet, reply *string) (err error) {
 	if cmp, canCast := args.Value.(utils.Compiler); canCast {
 		if err = cmp.Compile(); err != nil {
 			return
@@ -425,7 +425,7 @@ func (chS *CacheS) ReplicateRemove(ctx *context.Context, chID, itmID string) (er
 }
 
 // V1ReplicateRemove replicate an item
-func (chS *CacheS) V1ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
+func (chS *CacheS) V1ReplicateRemove(_ *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
 	chS.tCache.Remove(args.CacheID, args.ItemID, true, utils.EmptyString)
 	*reply = utils.OK
 	return
