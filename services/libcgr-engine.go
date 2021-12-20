@@ -34,6 +34,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -180,22 +181,27 @@ func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS
 	}
 }
 
-func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector,
+func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGRConfig,
 	server *cores.Server, anz *AnalyzerService) {
-	// grdSv1 := v1.NewGuardianSv1()
-	// if !cfg.DispatcherSCfg().Enabled {
-	// server.RpcRegister(grdSv1)
-	// }
-	// iGuardianSCh <- anz.GetInternalCodec(grdSv1,  utils.GuardianS)
+	srv, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
+	if !cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			server.RpcRegister(s)
+		}
+	}
+	iGuardianSCh <- anz.GetInternalCodec(srv, utils.GuardianS)
 }
 
 func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
-	srvMngr *servmanager.ServiceManager, server *cores.Server,
-	anz *AnalyzerService) {
-	// if !cfg.DispatcherSCfg().Enabled {
-	// server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
-	// }
-	// iServMngrCh <- anz.GetInternalCodec(srvMngr,  utils.ServiceManager)
+	srvMngr *servmanager.ServiceManager, cfg *config.CGRConfig,
+	server *cores.Server, anz *AnalyzerService) {
+	srv, _ := engine.NewServiceWithName(srvMngr, utils.ServiceManager, true)
+	if !cfg.DispatcherSCfg().Enabled {
+		for _, s := range srv {
+			server.RpcRegister(s)
+		}
+	}
+	iServMngrCh <- anz.GetInternalCodec(srv, utils.ServiceManager)
 }
 
 func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,

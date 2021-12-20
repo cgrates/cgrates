@@ -24,18 +24,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AttrRemoteLockWithAPIOpts struct {
-	APIOpts map[string]interface{}
-	Tenant  string
-	utils.AttrRemoteLock
-}
-
-type AttrRemoteUnlockWithAPIOpts struct {
-	APIOpts map[string]interface{}
-	Tenant  string
-	RefID   string
-}
-
 func ParseStringSet(s string) utils.StringSet {
 	if s == utils.MetaZero {
 		return make(utils.StringSet)

@@ -25,6 +25,23 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func (dS *DispatcherService) EeSv1ArchiveEventsInReply(ctx *context.Context, args *ees.ArchiveEventsArgs, reply *[]uint8) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.EeSv1ArchiveEventsInReply, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1ArchiveEventsInReply, args, reply)
+}
 func (dS *DispatcherService) EeSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -44,23 +61,6 @@ func (dS *DispatcherService) EeSv1Ping(ctx *context.Context, args *utils.CGREven
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1Ping, args, reply)
-}
-func (dS *DispatcherService) EeSv1ArchiveEventsInReply(ctx *context.Context, args *ees.ArchiveEventsArgs, reply *[]uint8) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.EeSv1ArchiveEventsInReply, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1ArchiveEventsInReply, args, reply)
 }
 func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *utils.CGREventWithEeIDs, reply *map[string]map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

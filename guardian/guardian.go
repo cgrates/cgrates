@@ -181,3 +181,27 @@ func (gl *GuardianLocker) UnguardIDs(refID string) []string {
 	}
 	return nil
 }
+
+type AttrRemoteLockWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
+	utils.AttrRemoteLock
+}
+
+type AttrRemoteUnlockWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
+	RefID   string
+}
+
+// RemoteLock will lock a key from remote
+func (gl *GuardianLocker) V1RemoteLock(_ *context.Context, attr *AttrRemoteLockWithAPIOpts, reply *string) (err error) {
+	*reply = gl.GuardIDs(attr.ReferenceID, attr.Timeout, attr.LockIDs...)
+	return
+}
+
+// RemoteUnlock will unlock a key from remote based on reference ID
+func (gl *GuardianLocker) V1RemoteUnlock(_ *context.Context, refID *AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error) {
+	*reply = gl.UnguardIDs(refID.RefID)
+	return
+}
