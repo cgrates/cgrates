@@ -16,63 +16,66 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+// do not modify this code because it's generated
 package dispatchers
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// GuardianSv1Ping interogates GuardianSv1 server responsible to process the event
-func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREvent,
-	reply *string) (err error) {
-	if args == nil {
-		args = new(utils.CGREvent)
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize2(utils.GuardianSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaGuardian, utils.GuardianSv1Ping, args, reply)
-}
-
-// GuardianSv1RemoteLock will lock a key from remote
-func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithAPIOpts,
-	reply *string) (err error) {
+func (dS *DispatcherService) GuardianSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.Tenant != utils.EmptyString {
+	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize2(utils.GuardianSv1RemoteLock, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.GuardianSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), &utils.CGREvent{
-		Tenant:  tnt,
-		APIOpts: args.APIOpts,
-	}, utils.MetaGuardian, utils.GuardianSv1RemoteLock, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaGuardian, utils.GuardianSv1Ping, args, reply)
 }
-
-// GuardianSv1RemoteUnlock will unlock a key from remote based on reference ID
-func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithAPIOpts,
-	reply *[]string) (err error) {
+func (dS *DispatcherService) GuardianSv1RemoteLock(ctx *context.Context, args *guardian.AttrRemoteLockWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.Tenant != utils.EmptyString {
+	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize2(utils.GuardianSv1RemoteUnlock, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.GuardianSv1RemoteLock, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), &utils.CGREvent{
-		Tenant:  tnt,
-		APIOpts: args.APIOpts,
-	}, utils.MetaGuardian, utils.GuardianSv1RemoteUnlock, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaGuardian, utils.GuardianSv1RemoteLock, args, reply)
+}
+func (dS *DispatcherService) GuardianSv1RemoteUnlock(ctx *context.Context, args *guardian.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.GuardianSv1RemoteUnlock, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaGuardian, utils.GuardianSv1RemoteUnlock, args, reply)
 }

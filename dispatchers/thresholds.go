@@ -25,6 +25,23 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func (dS *DispatcherService) ThresholdSv1GetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Threshold) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.ThresholdSv1GetThreshold, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1GetThreshold, args, reply)
+}
 func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -62,6 +79,26 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(ctx *context.Cont
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1GetThresholdsForEvent, args, reply)
 }
+func (dS *DispatcherService) ThresholdSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.ThresholdSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1Ping, args, reply)
+}
 func (dS *DispatcherService) ThresholdSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -98,41 +135,4 @@ func (dS *DispatcherService) ThresholdSv1ResetThreshold(ctx *context.Context, ar
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1ResetThreshold, args, reply)
-}
-func (dS *DispatcherService) ThresholdSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	if args != nil {
-		ev = args.Event
-	}
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ThresholdSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1Ping, args, reply)
-}
-func (dS *DispatcherService) ThresholdSv1GetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Threshold) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
-		tnt = args.TenantID.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ThresholdSv1GetThreshold, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaThresholds, utils.ThresholdSv1GetThreshold, args, reply)
 }

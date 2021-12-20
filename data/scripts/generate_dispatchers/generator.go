@@ -29,6 +29,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"sort"
 	"strconv"
 	"unicode"
 
@@ -40,6 +41,7 @@ import (
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/sessions"
@@ -74,6 +76,8 @@ func main() {
 		{"analyzers.go", "MetaAnalyzer", new(analyzers.AnalyzerS), utils.EmptyString},
 		{"admins.go", "MetaAdminS", new(apis.AdminSv1), utils.EmptyString},
 		{"cores.go", "MetaCore", new(cores.CoreS), utils.EmptyString},
+		{"guardian.go", "MetaGuardian", guardian.Guardian, utils.GuardianS},
+		// {"servicemanager.go", "MetaServiceManager", new(servmanager.ServiceManager), utils.EmptyString},
 	} {
 		if err := createFile(file.path, file.subsystem, file.customName, file.obj); err != nil {
 			log.Fatal(err)
@@ -131,7 +135,13 @@ func generateService(subsystem string, srvs engine.IntService) *ast.File {
 		if unicode.IsLetter(rune(k[len(k)-1])) {
 			continue
 		}
-		for n, m := range srv.Methods {
+		methods := make([]string, 0, len(srv.Methods))
+		for n := range srv.Methods {
+			methods = append(methods, n)
+		}
+		sort.Strings(methods)
+		for _, n := range methods {
+			m := srv.Methods[n]
 			decl = append(decl, generateFunc(srv.Name+n, subsystem, m.ArgType, m.ReplyType))
 			imports.AddSlice(getImports(m.ArgType))
 			imports.AddSlice(getImports(m.ReplyType))

@@ -25,26 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ChargerSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	if args != nil {
-		ev = args.Event
-	}
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ChargerSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaChargers, utils.ChargerSv1Ping, args, reply)
-}
 func (dS *DispatcherService) ChargerSv1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.ChargerProfiles) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -64,6 +44,26 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(ctx *context.Context,
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaChargers, utils.ChargerSv1GetChargersForEvent, args, reply)
+}
+func (dS *DispatcherService) ChargerSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.ChargerSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaChargers, utils.ChargerSv1Ping, args, reply)
 }
 func (dS *DispatcherService) ChargerSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

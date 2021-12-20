@@ -25,23 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ConfigSv1StoreCfgInDB(ctx *context.Context, args *config.SectionWithAPIOpts, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ConfigSv1StoreCfgInDB, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaConfig, utils.ConfigSv1StoreCfgInDB, args, reply)
-}
 func (dS *DispatcherService) ConfigSv1GetConfig(ctx *context.Context, args *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -75,6 +58,26 @@ func (dS *DispatcherService) ConfigSv1GetConfigAsJSON(ctx *context.Context, args
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaConfig, utils.ConfigSv1GetConfigAsJSON, args, reply)
+}
+func (dS *DispatcherService) ConfigSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.ConfigSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaConfig, utils.ConfigSv1Ping, args, reply)
 }
 func (dS *DispatcherService) ConfigSv1ReloadConfig(ctx *context.Context, args *config.ReloadArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
@@ -127,23 +130,20 @@ func (dS *DispatcherService) ConfigSv1SetConfigFromJSON(ctx *context.Context, ar
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaConfig, utils.ConfigSv1SetConfigFromJSON, args, reply)
 }
-func (dS *DispatcherService) ConfigSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) ConfigSv1StoreCfgInDB(ctx *context.Context, args *config.SectionWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
 	ev := make(map[string]interface{})
-	if args != nil {
-		ev = args.Event
-	}
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ConfigSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.ConfigSv1StoreCfgInDB, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaConfig, utils.ConfigSv1Ping, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaConfig, utils.ConfigSv1StoreCfgInDB, args, reply)
 }

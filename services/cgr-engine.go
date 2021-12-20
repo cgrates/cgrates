@@ -301,8 +301,8 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 	go cgrStartFilterService(ctx, cgr.iFilterSCh, cgr.cacheS.GetCacheSChan(), cgr.cM,
 		cgr.cfg, cgr.dmS)
 
-	cgrInitServiceManagerV1(cgr.iServeManagerCh, cgr.srvManager, cgr.server, cgr.anzS)
-	cgrInitGuardianSv1(cgr.iGuardianSCh, cgr.server, cgr.anzS) // init GuardianSv1
+	cgrInitServiceManagerV1(cgr.iServeManagerCh, cgr.srvManager, cgr.cfg, cgr.server, cgr.anzS)
+	cgrInitGuardianSv1(cgr.iGuardianSCh, cgr.cfg, cgr.server, cgr.anzS) // init GuardianSv1
 	cgrInitConfigSv1(cgr.iConfigCh, cgr.cfg, cgr.server, cgr.anzS)
 
 	if preload != utils.EmptyString {

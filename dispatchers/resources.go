@@ -25,26 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ResourceSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
-	}
-	ev := make(map[string]interface{})
-	if args != nil {
-		ev = args.Event
-	}
-	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
-	}
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ResourceSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1Ping, args, reply)
-}
 func (dS *DispatcherService) ResourceSv1AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
@@ -138,6 +118,26 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(ctx *context.Contex
 		}
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
+}
+func (dS *DispatcherService) ResourceSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.ResourceSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaResources, utils.ResourceSv1Ping, args, reply)
 }
 func (dS *DispatcherService) ResourceSv1ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
