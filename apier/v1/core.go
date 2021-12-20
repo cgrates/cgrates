@@ -96,6 +96,12 @@ func (cS *CoreSv1) StopMemoryProfiling(_ *utils.TenantWithAPIOpts, reply *string
 	return nil
 }
 
-func (cS *CoreSv1) Panic(args *string, _ *string) error {
-	panic(*args)
+type PanicMsgWithTenantAPIOpts struct {
+	Tenant  string
+	APIOpts map[string]interface{}
+	Msg     string
+}
+
+func (cS *CoreSv1) Panic(args *PanicMsgWithTenantAPIOpts, _ *string) error {
+	panic(utils.ToJSON(args))
 }
