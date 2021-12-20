@@ -95,3 +95,7 @@ func (cS *CoreSv1) StopMemoryProfiling(_ *utils.TenantWithAPIOpts, reply *string
 	*reply = utils.OK
 	return nil
 }
+
+func (cS *CoreSv1) Panic(_ *utils.TenantWithAPIOpts, _ *string) error {
+	panic("This is a panic test!")
+}
