@@ -67,3 +67,13 @@ func (cS *CoreSv1) StartMemoryProfiling(ctx *context.Context, args *utils.Memory
 func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
 	return cS.cS.V1StopMemoryProfiling(ctx, args, reply)
 }
+
+type PanicMessageArgs struct {
+	Tenant  string
+	APIOpts map[string]interface{}
+	Message string
+}
+
+func (cS *CoreSv1) Panic(args *PanicMessageArgs, _ *string) error {
+	panic(args.Message)
+}
