@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"path"
 	"time"
 
@@ -103,5 +104,5 @@ type PanicMsgWithTenantAPIOpts struct {
 }
 
 func (cS *CoreSv1) Panic(args *PanicMsgWithTenantAPIOpts, _ *string) error {
-	panic(utils.ToJSON(args))
+	panic(fmt.Sprintf("Panic Message:<%s>,Tenant:<%s>,APIOpts:<%s>", args.Msg, args.Tenant, args.APIOpts))
 }
