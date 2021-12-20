@@ -701,6 +701,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			RoundingDecimals:     []*utils.DynamicIntOpt{},
+			PrometheusMetrics:    []*utils.DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
@@ -1924,6 +1925,7 @@ func TestStatSConfig(t *testing.T) {
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			RoundingDecimals:     []*utils.DynamicIntOpt{},
+			PrometheusMetrics:    []*utils.DynamicStringSliceOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -4414,6 +4416,7 @@ func TestV1GetConfigStats(t *testing.T) {
 				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 				utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
+				utils.OptsPrometheusMetrics:    []*utils.DynamicStringSliceOpt{},
 			},
 		},
 	}
@@ -5288,7 +5291,7 @@ func TestV1GetConfigAsJSONResourceS(t *testing.T) {
 
 func TestV1GetConfigAsJSONStatS(t *testing.T) {
 	var reply string
-	expected := `{"stats":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]}}`
+	expected := `{"stats":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*prometheusMetrics":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{StatSJSON}}, &reply); err != nil {
 		t.Error(err)

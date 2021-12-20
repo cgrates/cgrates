@@ -1060,6 +1060,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			RoundingDecimals:     []*utils.DynamicIntOpt{},
+			PrometheusMetrics:    []*utils.DynamicStringSliceOpt{},
 		},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))

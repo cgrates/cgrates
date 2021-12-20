@@ -2331,8 +2331,9 @@ const (
 	OptsRoutesUsage        = "*rouUsage"
 
 	// Stats
-	OptsStatsProfileIDs  = "*statsProfileIDs"
-	OptsRoundingDecimals = "*roundingDecimals"
+	OptsStatsProfileIDs   = "*statsProfileIDs"
+	OptsRoundingDecimals  = "*roundingDecimals"
+	OptsPrometheusMetrics = "*prometheusMetrics"
 
 	// Thresholds
 	OptsThresholdsProfileIDs = "*thdProfileIDs"

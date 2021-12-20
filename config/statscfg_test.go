@@ -55,6 +55,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			RoundingDecimals:     []*utils.DynamicIntOpt{},
+			PrometheusMetrics:    []*utils.DynamicStringSliceOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -132,6 +133,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
+			utils.OptsPrometheusMetrics:    []*utils.DynamicStringSliceOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -173,6 +175,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
+			utils.OptsPrometheusMetrics:    []*utils.DynamicStringSliceOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
