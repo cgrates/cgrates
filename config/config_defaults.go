@@ -1068,7 +1068,14 @@ const CGRATES_CFG_JSON = `
 			// 	"FilterIDs": [],
 			// 	"Value": 5,
 			// },
-		],									
+		],	
+		"*prometheusMetrics": [
+			// {
+			// 	"Tenant": "*any",
+			// 	"FilterIDs": [],
+			// 	"Value": [],
+			// },
+		],								
 	},								
 },
 
