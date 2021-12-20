@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -32,7 +33,7 @@ func TestDspActionSv1PingNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ActionSv1Ping(CGREvent, reply)
+	result := dspSrv.ActionSv1Ping(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -43,7 +44,7 @@ func TestDspActionSv1PingNilArgs(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
-	result := dspSrv.ActionSv1Ping(nil, reply)
+	result := dspSrv.ActionSv1Ping(context.Background(), nil, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -58,7 +59,7 @@ func TestDspActionSv1PingErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ActionSv1Ping(CGREvent, reply)
+	result := dspSrv.ActionSv1Ping(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -72,7 +73,7 @@ func TestDspActionSv1ScheduleActionsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ActionSv1ScheduleActions(CGREvent, reply)
+	result := dspSrv.ActionSv1ScheduleActions(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -87,7 +88,7 @@ func TestDspActionSv1ScheduleActionsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ActionSv1ScheduleActions(CGREvent, reply)
+	result := dspSrv.ActionSv1ScheduleActions(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -99,7 +100,7 @@ func TestDspActionSv1ScheduleActionsNilArgs(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	var reply *string
-	result := dspSrv.ActionSv1ScheduleActions(nil, reply)
+	result := dspSrv.ActionSv1ScheduleActions(context.Background(), nil, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -113,7 +114,7 @@ func TestDspActionSv1ExecuteActionsNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ActionSv1ExecuteActions(CGREvent, reply)
+	result := dspSrv.ActionSv1ExecuteActions(context.Background(), CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -128,7 +129,7 @@ func TestDspActionSv1ExecuteActionsErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.ActionSv1ExecuteActions(CGREvent, reply)
+	result := dspSrv.ActionSv1ExecuteActions(context.Background(), CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
@@ -140,7 +141,7 @@ func TestDspActionSv1ExecuteActionsNilArgs(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	var reply *string
-	result := dspSrv.ActionSv1ExecuteActions(nil, reply)
+	result := dspSrv.ActionSv1ExecuteActions(context.Background(), nil, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

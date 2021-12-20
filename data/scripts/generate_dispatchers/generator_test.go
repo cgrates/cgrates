@@ -16,29 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package dispatchers
+package main
 
-import (
-	"strings"
-
-	"github.com/cgrates/cgrates/utils"
-)
-
-type AttrRemoteLockWithAPIOpts struct {
-	APIOpts map[string]interface{}
-	Tenant  string
-	utils.AttrRemoteLock
+/*
+func TestGenerate(t *testing.T) {
+	t.Errorf("%#v", writeFile(os.Stdout, "MetaAttributes", utils.EmptyString, new(engine.AttributeS)))
 }
-
-type AttrRemoteUnlockWithAPIOpts struct {
-	APIOpts map[string]interface{}
-	Tenant  string
-	RefID   string
+func TestGeneratePath(t *testing.T) {
+	path := generatePath(reflect.TypeOf(new(utils.TenantIDWithAPIOpts)), "Tenant", reflect.String)
+	t.Error(path)
 }
-
-func ParseStringSet(s string) utils.StringSet {
-	if s == utils.MetaZero {
-		return make(utils.StringSet)
-	}
-	return utils.NewStringSet(strings.Split(s, utils.ANDSep))
-}
+*/

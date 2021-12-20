@@ -21,11 +21,11 @@ package dispatchers
 
 import (
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ChargerSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) EeSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
@@ -39,49 +39,46 @@ func (dS *DispatcherService) ChargerSv1Ping(ctx *context.Context, args *utils.CG
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ChargerSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.EeSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaChargers, utils.ChargerSv1Ping, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1Ping, args, reply)
 }
-func (dS *DispatcherService) ChargerSv1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.ChargerProfiles) (err error) {
+func (dS *DispatcherService) EeSv1ArchiveEventsInReply(ctx *context.Context, args *ees.ArchiveEventsArgs, reply *[]uint8) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
 	ev := make(map[string]interface{})
-	if args != nil {
-		ev = args.Event
-	}
 	opts := make(map[string]interface{})
 	if args != nil {
 		opts = args.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ChargerSv1GetChargersForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.EeSv1ArchiveEventsInReply, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaChargers, utils.ChargerSv1GetChargersForEvent, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1ArchiveEventsInReply, args, reply)
 }
-func (dS *DispatcherService) ChargerSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.ChrgSProcessEventReply) (err error) {
+func (dS *DispatcherService) EeSv1ProcessEvent(ctx *context.Context, args *utils.CGREventWithEeIDs, reply *map[string]map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
+	if args != nil && (args.CGREvent != nil && len(args.CGREvent.Tenant) != 0) {
+		tnt = args.CGREvent.Tenant
 	}
 	ev := make(map[string]interface{})
-	if args != nil {
-		ev = args.Event
+	if args != nil && args.CGREvent != nil {
+		ev = args.CGREvent.Event
 	}
 	opts := make(map[string]interface{})
-	if args != nil {
-		opts = args.APIOpts
+	if args != nil && args.CGREvent != nil {
+		opts = args.CGREvent.APIOpts
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(ctx, utils.ChargerSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.EeSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaChargers, utils.ChargerSv1ProcessEvent, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEEs, utils.EeSv1ProcessEvent, args, reply)
 }

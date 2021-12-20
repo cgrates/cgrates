@@ -59,7 +59,7 @@ func TestAttributeSCoverage(t *testing.T) {
 	if attrS2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	attrS2.attrS = &engine.AttributeService{}
+	attrS2.attrS = &engine.AttributeS{}
 	if !attrS2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}

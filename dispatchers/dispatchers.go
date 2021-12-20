@@ -1,3 +1,4 @@
+//go:generate go run ../data/scripts/generate_dispatchers/generator.go
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -55,9 +56,9 @@ func (dS *DispatcherService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.DispatcherS))
 }
 
-func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
+func (dS *DispatcherService) authorizeEvent(ctx *context.Context, ev *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
-	if err = dS.connMgr.Call(context.TODO(), dS.cfg.DispatcherSCfg().AttributeSConns,
+	if err = dS.connMgr.Call(ctx, dS.cfg.DispatcherSCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
@@ -67,7 +68,10 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	return
 }
 
-func (dS *DispatcherService) authorize(method, tenant string, apiKey string) (err error) {
+func (dS *DispatcherService) authorize2(method, tenant string, apiKey string) (err error) {
+	return dS.authorize(context.Background(), method, tenant, apiKey)
+}
+func (dS *DispatcherService) authorize(ctx *context.Context, method, tenant string, apiKey string) (err error) {
 	if apiKey == "" {
 		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
@@ -83,7 +87,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string) (er
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeEvent(ctx, ev, &rplyEv); err != nil {
 		return
 	}
 	var apiMethods string
@@ -218,7 +222,7 @@ func (dS *DispatcherService) ping(ctx *context.Context, subsys, method string, a
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(method, tnt,
+		if err = dS.authorize(ctx, method, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
@@ -226,51 +230,51 @@ func (dS *DispatcherService) ping(ctx *context.Context, subsys, method string, a
 	return dS.Dispatch(ctx, args, subsys, method, args, reply)
 }
 
-func (dS *DispatcherService) DispatcherSv1RemoteStatus(args *utils.TenantWithAPIOpts,
+func (dS *DispatcherService) DispatcherSv1RemoteStatus(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	reply *map[string]interface{}) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.CoreSv1Status, tnt,
+		if err = dS.authorize(ctx, utils.CoreSv1Status, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.Background(), &utils.CGREvent{
+	return dS.Dispatch(ctx, &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
 }
 
-func (dS *DispatcherService) DispatcherSv1RemoteSleep(args *utils.DurationArgs, reply *string) (err error) {
+func (dS *DispatcherService) DispatcherSv1RemoteSleep(ctx *context.Context, args *utils.DurationArgs, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.CoreSv1Sleep, tnt,
+		if err = dS.authorize(ctx, utils.CoreSv1Sleep, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.Background(), &utils.CGREvent{
+	return dS.Dispatch(ctx, &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
 }
 
-func (dS *DispatcherService) DispatcherSv1RemotePing(args *utils.CGREvent, reply *string) (err error) {
+func (dS *DispatcherService) DispatcherSv1RemotePing(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.CoreSv1Ping, tnt,
+		if err = dS.authorize(ctx, utils.CoreSv1Ping, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.Background(), args, utils.MetaCore, utils.CoreSv1Ping, args, reply)
+	return dS.Dispatch(ctx, args, utils.MetaCore, utils.CoreSv1Ping, args, reply)
 }

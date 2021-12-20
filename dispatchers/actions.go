@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+// do not modify this code because it's generated
 package dispatchers
 
 import (
@@ -23,50 +24,63 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ActionSv1Ping(args *utils.CGREvent, rpl *string) (err error) {
-	if args == nil {
-		args = new(utils.CGREvent)
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ActionSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
-}
-
-func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.CGREvent, rpl *string) (err error) {
-	if args == nil {
-		args = &utils.CGREvent{}
-	}
+func (dS *DispatcherService) ActionSv1ExecuteActions(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && args.Tenant != utils.EmptyString {
+	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ActionSv1ScheduleActions, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.ActionSv1ExecuteActions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaActions, utils.ActionSv1ScheduleActions, args, rpl)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaActions, utils.ActionSv1ExecuteActions, args, reply)
 }
-
-func (dS *DispatcherService) ActionSv1ExecuteActions(args *utils.CGREvent, rpl *string) (err error) {
-	if args == nil {
-		args = &utils.CGREvent{}
-	}
+func (dS *DispatcherService) ActionSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && args.Tenant != utils.EmptyString {
+	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ActionSv1Ping, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.ActionSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaActions, utils.ActionSv1Ping, args, reply)
+}
+func (dS *DispatcherService) ActionSv1ScheduleActions(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.ActionSv1ScheduleActions, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaActions, utils.ActionSv1ScheduleActions, args, reply)
 }

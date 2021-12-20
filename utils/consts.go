@@ -1114,6 +1114,14 @@ const (
 
 // APIerSv1 APIs
 const (
+	AdminSv1GetRateRatesIndexesHealth         = "AdminSv1.GetRateRatesIndexesHealth"
+	AdminSv1GetChargerProfileCount            = "AdminSv1.GetChargerProfileCount"
+	AdminSv1GetAccountsIndexesHealth          = "AdminSv1.GetAccountsIndexesHealth"
+	AdminSv1GetDispatcherProfileCount         = "AdminSv1.GetDispatcherProfileCount"
+	AdminSv1GetRouteProfileCount              = "AdminSv1.GetRouteProfileCount"
+	AdminSv1GetActionsIndexesHealth           = "AdminSv1.GetActionsIndexesHealth"
+	AdminSv1GetDispatcherHostCount            = "AdminSv1.GetDispatcherHostCount"
+	AdminSv1GetRateProfilesIndexesHealth      = "AdminSv1.GetRateProfilesIndexesHealth"
 	AdminSv1ComputeFilterIndexes              = "AdminSv1.ComputeFilterIndexes"
 	AdminSv1ComputeFilterIndexIDs             = "AdminSv1.ComputeFilterIndexIDs"
 	AdminSv1GetAccountActionPlansIndexHealth  = "AdminSv1.GetAccountActionPlansIndexHealth"
@@ -1256,6 +1264,7 @@ const (
 	ConfigSv1GetConfigAsJSON   = "ConfigSv1.GetConfigAsJSON"
 	ConfigSv1SetConfigFromJSON = "ConfigSv1.SetConfigFromJSON"
 	ConfigSv1StoreCfgInDB      = "ConfigSv1.StoreCfgInDB"
+	ConfigSv1Ping              = "ConfigSv1.Ping"
 )
 
 const (
@@ -1483,18 +1492,19 @@ const (
 
 // Cdrs APIs
 const (
-	CDRsV1                   = "CDRsV1"
-	CDRsV1GetCDRsCount       = "CDRsV1.GetCDRsCount"
-	CDRsV1RateCDRs           = "CDRsV1.RateCDRs"
-	CDRsV1GetCDRs            = "CDRsV1.GetCDRs"
-	CDRsV1ProcessCDR         = "CDRsV1.ProcessCDR"
-	CDRsV1ProcessExternalCDR = "CDRsV1.ProcessExternalCDR"
-	CDRsV1StoreSessionCost   = "CDRsV1.StoreSessionCost"
-	CDRsV1ProcessEvent       = "CDRsV1.ProcessEvent"
-	CDRsV1Ping               = "CDRsV1.Ping"
-	CDRsV2                   = "CDRsV2"
-	CDRsV2StoreSessionCost   = "CDRsV2.StoreSessionCost"
-	CDRsV2ProcessEvent       = "CDRsV2.ProcessEvent"
+	CDRsV1                    = "CDRsV1"
+	CDRsV1GetCDRsCount        = "CDRsV1.GetCDRsCount"
+	CDRsV1RateCDRs            = "CDRsV1.RateCDRs"
+	CDRsV1GetCDRs             = "CDRsV1.GetCDRs"
+	CDRsV1ProcessCDR          = "CDRsV1.ProcessCDR"
+	CDRsV1ProcessExternalCDR  = "CDRsV1.ProcessExternalCDR"
+	CDRsV1StoreSessionCost    = "CDRsV1.StoreSessionCost"
+	CDRsV1ProcessEvent        = "CDRsV1.ProcessEvent"
+	CDRsV1ProcessEventWithGet = "CDRsV1.ProcessEventWithGet"
+	CDRsV1Ping                = "CDRsV1.Ping"
+	CDRsV2                    = "CDRsV2"
+	CDRsV2StoreSessionCost    = "CDRsV2.StoreSessionCost"
+	CDRsV2ProcessEvent        = "CDRsV2.ProcessEvent"
 )
 
 // EEs

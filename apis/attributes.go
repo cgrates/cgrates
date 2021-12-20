@@ -142,14 +142,14 @@ func (admS *AdminSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.Te
 }
 
 // NewAttributeSv1 returns the RPC Object for AttributeS
-func NewAttributeSv1(attrS *engine.AttributeService) *AttributeSv1 {
+func NewAttributeSv1(attrS *engine.AttributeS) *AttributeSv1 {
 	return &AttributeSv1{attrS: attrS}
 }
 
 // AttributeSv1 exports RPC from Attributes service
 type AttributeSv1 struct {
 	ping
-	attrS *engine.AttributeService
+	attrS *engine.AttributeS
 }
 
 // GetAttributeForEvent returns matching AttributeProfile for Event

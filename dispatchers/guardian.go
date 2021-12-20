@@ -31,7 +31,7 @@ func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREvent,
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.GuardianSv1Ping, args.Tenant,
+		if err = dS.authorize2(utils.GuardianSv1Ping, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
@@ -47,7 +47,7 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithAPIOpt
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.GuardianSv1RemoteLock, tnt,
+		if err = dS.authorize2(utils.GuardianSv1RemoteLock, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
@@ -66,7 +66,7 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithAP
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.GuardianSv1RemoteUnlock, tnt,
+		if err = dS.authorize2(utils.GuardianSv1RemoteUnlock, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}

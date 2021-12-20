@@ -106,7 +106,9 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
 		smg.bircpEnabled = true
-		smg.server.BiRPCRegisterName(utils.SessionSv1, srv)
+		for n, s := range srv {
+			smg.server.BiRPCRegisterName(n, s)
+		}
 		// run this in it's own goroutine
 		go smg.start(shtDw)
 	}

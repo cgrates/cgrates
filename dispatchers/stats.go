@@ -16,117 +16,174 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+// do not modify this code because it's generated
 package dispatchers
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) StatSv1Ping(args *utils.CGREvent, reply *string) (err error) {
-	if args == nil {
-		args = new(utils.CGREvent)
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.StatSv1Ping,
-			args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaStats, utils.StatSv1Ping, args, reply)
-}
-
-func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *utils.CGREvent,
-	reply *[]string) (err error) {
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.StatSv1GetStatQueuesForEvent,
-			args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
-}
-
-func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts,
-	reply *map[string]string) (err error) {
-
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.StatSv1GetQueueStringMetrics,
-			args.TenantID.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(context.TODO(), &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      args.ID,
-		APIOpts: args.APIOpts,
-	}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics, args, reply)
-}
-
-func (dS *DispatcherService) StatSv1ProcessEvent(args *utils.CGREvent,
-	reply *[]string) (err error) {
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.StatSv1ProcessEvent,
-			args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
-}
-
-func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts,
-	reply *map[string]float64) (err error) {
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.StatSv1GetQueueFloatMetrics,
-			args.TenantID.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(context.TODO(), &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      args.ID,
-		APIOpts: args.APIOpts,
-	}, utils.MetaStats, utils.StatSv1GetQueueFloatMetrics, args, reply)
-}
-
-func (dS *DispatcherService) StatSv1GetQueueDecimalMetrics(args *utils.TenantIDWithAPIOpts,
-	reply *map[string]float64) (err error) {
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.StatSv1GetQueueDecimalMetrics,
-			args.TenantID.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(context.TODO(), &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      args.ID,
-		APIOpts: args.APIOpts,
-	}, utils.MetaStats, utils.StatSv1GetQueueDecimalMetrics, args, reply)
-}
-
-func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithAPIOpts,
-	reply *[]string) (err error) {
+func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.Tenant != utils.EmptyString {
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetQueueFloatMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetQueueFloatMetrics, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.StatSv1GetQueueIDs, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.StatSv1GetQueueIDs, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), &utils.CGREvent{
-		Tenant:  tnt,
-		APIOpts: args.APIOpts,
-	}, utils.MetaStats, utils.StatSv1GetQueueIDs, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetQueueIDs, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetStatQueuesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
+}
+func (dS *DispatcherService) StatSv1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1ProcessEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
+}
+func (dS *DispatcherService) StatSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1Ping, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetQueueStringMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics, args, reply)
+}
+func (dS *DispatcherService) StatSv1ResetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1ResetStatQueue, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1ResetStatQueue, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetQueueDecimalMetrics, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetQueueDecimalMetrics, args, reply)
+}
+func (dS *DispatcherService) StatSv1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && (args.TenantID != nil && len(args.TenantID.Tenant) != 0) {
+		tnt = args.TenantID.Tenant
+	}
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.StatSv1GetStatQueue, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaStats, utils.StatSv1GetStatQueue, args, reply)
 }

@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+// do not modify this code because it's generated
 package dispatchers
 
 import (
@@ -24,53 +25,83 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREvent, reply *string) (err error) {
-	if args == nil {
-		args = new(utils.CGREvent)
+func (dS *DispatcherService) RouteSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
 	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.RouteSv1Ping,
-			args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.RouteSv1Ping, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1Ping, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1Ping, args, reply)
 }
-
-func (dS *DispatcherService) RouteSv1GetRoutes(args *utils.CGREvent, reply *engine.SortedRoutesList) (err error) {
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+func (dS *DispatcherService) RouteSv1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.RouteSv1GetRoutes,
-			args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.RouteSv1GetRoutes, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
 }
-
-func (dS *DispatcherService) RouteSv1GetRoutesList(args *utils.CGREvent, reply *[]string) (err error) {
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+func (dS *DispatcherService) RouteSv1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.RouteSv1GetRoutesList,
-			args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.RouteSv1GetRoutesList, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1GetRoutesList, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1GetRoutesList, args, reply)
 }
-
-func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) (err error) {
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && len(args.Tenant) != 0 {
+		tnt = args.Tenant
+	}
+	ev := make(map[string]interface{})
+	if args != nil {
+		ev = args.Event
+	}
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.RouteSv1GetRouteProfilesForEvent,
-			args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+		if err = dS.authorize(ctx, utils.RouteSv1GetRouteProfilesForEvent, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1GetRouteProfilesForEvent, args, reply)
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaRoutes, utils.RouteSv1GetRouteProfilesForEvent, args, reply)
 }
