@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"path"
 	"time"
 
@@ -97,12 +96,12 @@ func (cS *CoreSv1) StopMemoryProfiling(_ *utils.TenantWithAPIOpts, reply *string
 	return nil
 }
 
-type PanicMsgWithTenantAPIOpts struct {
+type PanicMessageArgs struct {
 	Tenant  string
 	APIOpts map[string]interface{}
-	Msg     string
+	Message string
 }
 
-func (cS *CoreSv1) Panic(args *PanicMsgWithTenantAPIOpts, _ *string) error {
-	panic(fmt.Sprintf("Panic Message:<%s>,Tenant:<%s>,APIOpts:<%s>", args.Msg, args.Tenant, args.APIOpts))
+func (cS *CoreSv1) Panic(args *PanicMessageArgs, _ *string) error {
+	panic(args.Message)
 }
