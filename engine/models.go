@@ -119,7 +119,7 @@ type CDRsql struct {
 	Subject     string
 	Destination string
 	SetupTime   time.Time
-	AnswerTime  time.Time
+	AnswerTime  *time.Time
 	Usage       int64
 	ExtraFields string
 	CostSource  string
