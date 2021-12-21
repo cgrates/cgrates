@@ -1220,6 +1220,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 }
 
 func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
+	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1269,80 +1270,7 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 	}
 }
 
-func TestStatQueueProcessEventProcessEventErr(t *testing.T) {
-	tmpLogger := utils.Logger
-	defer func() {
-		utils.Logger = tmpLogger
-	}()
-	var buf bytes.Buffer
-	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
-
-	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, nil)
-
-	sqPrf := &StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "SQ1",
-		FilterIDs:    []string{"*string:~*req.Account:1001"},
-		Weight:       10,
-		Blocker:      true,
-		QueueLength:  10,
-		ThresholdIDs: []string{"*none"},
-		MinItems:     5,
-		Metrics: []*MetricWithFilters{
-			{
-				MetricID: utils.MetaTCD,
-			},
-		},
-	}
-	sq := &StatQueue{
-		sqPrfl: sqPrf,
-		Tenant: "cgrates.org",
-		ID:     "SQ1",
-		SQItems: []SQItem{
-			{
-				EventID: "SqProcessEvent",
-			},
-		},
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &StatTCD{},
-		},
-	}
-
-	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
-		t.Error(err)
-	}
-	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
-		t.Error(err)
-	}
-
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "SqProcessEvent",
-		Event: map[string]interface{}{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]interface{}{
-			utils.OptsStatsProfileIDs: []string{"SQ1"},
-		},
-	}
-
-	expLog := `[WARNING] <StatS> Queue: cgrates.org:SQ1, ignoring event: cgrates.org:SqProcessEvent, error: NOT_FOUND:Usage`
-	expIDs := []string{"SQ1"}
-	if rcvIDs, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil ||
-		err.Error() != utils.ErrPartiallyExecuted.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
-	} else if !reflect.DeepEqual(rcvIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rcvIDs)
-	} else if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
-		t.Errorf("expected log <%+v> to be included in: <%+v>",
-			expLog, rcvLog)
-	}
-}
-
+/*
 func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
@@ -1410,6 +1338,7 @@ func TestStatQueueV1ProcessEventProcessEventErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
 	}
 }
+*/
 
 func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	tmp := Cache
