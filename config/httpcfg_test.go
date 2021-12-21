@@ -32,6 +32,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := &HTTPJsonCfg{
 		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
 		Ws_url:              utils.StringPointer("/ws"),
+		Prometheus_url:      utils.StringPointer("/metrics"),
 		Registrars_url:      utils.StringPointer("/randomUrl"),
 		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
 		Http_Cdrs:           utils.StringPointer("/cdr_http"),
@@ -41,6 +42,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	expected := &HTTPCfg{
 		JsonRPCURL:        "/jsonrpc",
 		WSURL:             "/ws",
+		PrometheusURL:     "/metrics",
 		RegistrarSURL:     "/randomUrl",
 		FreeswitchCDRsURL: "/freeswitch_json",
 		CDRsURL:           "/cdr_http",
@@ -93,6 +95,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        "/jsonrpc",
 		utils.RegistrarSURLCfg:         "/registrar",
+		utils.PrometheusURLCfg:         "/prometheus",
 		utils.HTTPWSURLCfg:             "/ws",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
@@ -134,6 +137,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        "/rpc",
 		utils.RegistrarSURLCfg:         "/registrar",
+		utils.PrometheusURLCfg:         "/prometheus",
 		utils.HTTPWSURLCfg:             "",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
