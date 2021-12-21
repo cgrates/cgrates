@@ -272,8 +272,8 @@ func (cdr *CDR) AsCDRsql() (cdrSQL *CDRsql) {
 	cdrSQL.Subject = cdr.Subject
 	cdrSQL.Destination = cdr.Destination
 	cdrSQL.SetupTime = cdr.SetupTime
-	if cdrSQL.AnswerTime != nil {
-		cdr.AnswerTime = *cdrSQL.AnswerTime
+	if !cdr.AnswerTime.IsZero() {
+		cdrSQL.AnswerTime = utils.TimePointer(cdr.AnswerTime)
 	}
 	cdrSQL.Usage = cdr.Usage.Nanoseconds()
 	cdrSQL.ExtraFields = utils.ToJSON(cdr.ExtraFields)
