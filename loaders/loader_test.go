@@ -1260,12 +1260,12 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	buf := bytes.NewBuffer([]byte{})
-	log.SetOutput(buf)
-	lgr := utils.Logger
-	defer func() { utils.Logger = lgr; log.SetOutput(os.Stderr) }()
-	utils.Logger, _ = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	utils.Logger.SetLogLevel(7)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 	if err := ld.processZip(context.Background(), utils.MetaNone, true, false, r); err != nil {
 		t.Fatal(err)
 	}
