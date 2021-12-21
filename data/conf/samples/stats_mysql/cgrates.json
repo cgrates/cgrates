@@ -10,6 +10,12 @@
       "db_port": 6379, 						// data_db port to reach the database
       "db_name": "10", 						// data_db database name to connect to
     },
+
+    "listen": {
+      "rpc_json": ":2012",			// RPC JSON listening address
+      "rpc_gob": ":2013",			// RPC GOB listening address
+      "http": ":2080",				// HTTP listening address
+    },
   
     "stor_db": {
       "db_password": "CGRateS.org",
@@ -24,6 +30,15 @@
         "enabled": true,
         "store_interval": "-1",
         "thresholds_conns": ["*internal"],
+        "opts": {								//
+          "*prometheusMetrics": [
+            {
+             	"Tenant": "*any",
+             	"FilterIDs": [],
+             	"Value": ["SQ_1", "SQ_2"],
+            },
+          ],								
+        },	   
     },
 
     "thresholds": {	

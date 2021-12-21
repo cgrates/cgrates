@@ -34,6 +34,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/net/websocket"
 )
 
@@ -172,7 +173,7 @@ func (s *Server) ServeGOB(ctx *context.Context, shtdwnEngine context.CancelFunc,
 	})
 }
 
-func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc, addr, jsonRPCURL, wsRPCURL string,
+func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc, addr, jsonRPCURL, wsRPCURL, promURL string,
 	useBasicAuth bool, userList map[string]string) {
 	s.Lock()
 	s.httpEnabled = s.httpEnabled || jsonRPCURL != "" || wsRPCURL != ""
@@ -196,6 +197,15 @@ func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc, addr, jsonRPCURL, ws
 			s.httpMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpMux.Handle(wsRPCURL, wsHandler)
+		}
+	}
+	if promURL != "" {
+		utils.Logger.Info("<HTTP> enabling handler for Prometheus connections")
+		wsHandler := promhttp.Handler()
+		if useBasicAuth {
+			s.httpMux.HandleFunc(promURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
+		} else {
+			s.httpMux.Handle(promURL, wsHandler)
 		}
 	}
 	if useBasicAuth {
@@ -358,6 +368,7 @@ func (s *Server) StartServer(ctx *context.Context, shtdwnEngine context.CancelFu
 			cfg.ListenCfg().HTTPListen,
 			cfg.HTTPCfg().JsonRPCURL,
 			cfg.HTTPCfg().WSURL,
+			cfg.HTTPCfg().PrometheusURL,
 			cfg.HTTPCfg().UseBasicAuth,
 			cfg.HTTPCfg().AuthUsers,
 		)

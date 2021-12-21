@@ -306,8 +306,8 @@ func (sS *StatS) processThresholds(ctx *context.Context, sQs StatQueues, opts ma
 	return
 }
 
-// processEvent processes a new event, dispatching to matching queues
-// queues matching are also cached to speed up
+// processEvent processes a new event, dispatching to matching queues.
+// Queues matching are also cached to speed up
 func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
 	evNm := args.AsDataProvider()
 	var sqIDs []string
@@ -335,11 +335,21 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 			withErrors = true
 		}
 		sS.storeStatQueue(ctx, sq)
-
 	}
 	if sS.processThresholds(ctx, matchSQs, args.APIOpts) != nil ||
 		withErrors {
 		err = utils.ErrPartiallyExecuted
+	}
+
+	var promIDs []string
+	if promIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.PrometheusMetrics,
+		[]string{}, utils.OptsPrometheusMetrics); err != nil {
+		return
+	}
+	if len(promIDs) != 0 {
+		if err = exportToPrometheus(matchSQs, utils.NewStringSet(promIDs)); err != nil {
+			return
+		}
 	}
 	matchSQs.unlock()
 	return

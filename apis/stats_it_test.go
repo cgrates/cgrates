@@ -60,7 +60,6 @@ var (
 		testStatsGetStatQueueProfileCount,
 		testStatsRemoveStatQueueProfiles,
 		testStatsGetStatQueuesAfterRemove,
-
 		// check if stats, thresholds and actions subsystems function properly together
 		testStatsStartServer,
 		testStatsSetActionProfileBeforeProcessEv,

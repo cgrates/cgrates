@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // NewStatMetric instantiates the StatMetric
@@ -846,4 +847,33 @@ func (dst *StatDistinct) Clone() StatMetric {
 		cln.FieldValues[k] = v.Clone()
 	}
 	return cln
+}
+
+func exportToPrometheus(matchSQs StatQueues, promIDs utils.StringSet) (err error) {
+	for _, qos := range matchSQs {
+		if _, has := promIDs[qos.ID]; !has {
+			continue
+		}
+		tntID := strings.Replace(qos.TenantID(), ".", "_", -1)
+		gaugeVal := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Subsystem: "stats",
+			Name:      tntID,
+			Help:      "Metrics exported as gauge, depending on metricID's ID.",
+		}, []string{"metricID"})
+		if err = prometheus.Register(gaugeVal); err != nil {
+			if are, ok := err.(prometheus.AlreadyRegisteredError); ok {
+				// A gauge for that metric has been registered before.
+				gaugeVal = are.ExistingCollector.(*prometheus.GaugeVec)
+				err = nil
+			} else {
+				return err
+			}
+		}
+		for metricID, metricVal := range qos.SQMetrics {
+			// bool indicating whether x can fit into a float64 without truncation, overflow, or underflow will be masked for now
+			valToBeSet, _ := metricVal.GetValue().Float64()
+			gaugeVal.WithLabelValues(metricID).Set(valToBeSet)
+		}
+	}
+	return
 }

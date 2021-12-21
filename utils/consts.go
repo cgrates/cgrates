@@ -1824,6 +1824,7 @@ const (
 const (
 	HTTPJsonRPCURLCfg        = "json_rpc_url"
 	RegistrarSURLCfg         = "registrars_url"
+	PrometheusURLCfg         = "prometheus_url"
 	HTTPWSURLCfg             = "ws_url"
 	HTTPFreeswitchCDRsURLCfg = "freeswitch_cdrs_url"
 	HTTPCDRsURLCfg           = "http_cdrs"
