@@ -18,7 +18,7 @@ CREATE TABLE cdrs (
  subject VARCHAR(128) NOT NULL,
  destination VARCHAR(128) NOT NULL,
  setup_time TIMESTAMP WITH TIME ZONE NOT NULL,
- answer_time TIMESTAMP WITH TIME ZONE NOT NULL,
+ answer_time TIMESTAMP WITH TIME ZONE NULL,
  usage BIGINT NOT NULL,
  extra_fields jsonb NOT NULL,
  cost_source VARCHAR(64) NOT NULL,

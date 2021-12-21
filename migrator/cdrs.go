@@ -195,7 +195,9 @@ func NewV1CDRFromCDRSql(cdrSql *engine.CDRsql) (cdr *v1Cdrs, err error) {
 	cdr.Subject = cdrSql.Subject
 	cdr.Destination = cdrSql.Destination
 	cdr.SetupTime = cdrSql.SetupTime
-	cdr.AnswerTime = cdrSql.AnswerTime
+	if !cdr.AnswerTime.IsZero() {
+		cdrSql.AnswerTime = utils.TimePointer(cdr.AnswerTime)
+	}
 	cdr.Usage = time.Duration(cdrSql.Usage)
 	cdr.CostSource = cdrSql.CostSource
 	cdr.Cost = cdrSql.Cost
@@ -223,7 +225,9 @@ func (cdr *v1Cdrs) AsCDRsql() (cdrSql *engine.CDRsql) {
 	cdrSql.Subject = cdr.Subject
 	cdrSql.Destination = cdr.Destination
 	cdrSql.SetupTime = cdr.SetupTime
-	cdrSql.AnswerTime = cdr.AnswerTime
+	if cdrSql.AnswerTime != nil {
+		cdr.AnswerTime = *cdrSql.AnswerTime
+	}
 	cdrSql.Usage = cdr.Usage.Nanoseconds()
 	cdrSql.ExtraFields = utils.ToJSON(cdr.ExtraFields)
 	cdrSql.CostSource = cdr.CostSource
