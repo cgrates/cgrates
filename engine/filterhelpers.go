@@ -87,11 +87,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 					dbItemIDs = dbIndexes[key]
 					break // we got at least one answer back, longest prefix wins
 				}
-				for itemID := range dbItemIDs {
-					if _, hasIt := itemIDs[itemID]; !hasIt { // Add it to list if not already there
-						itemIDs[itemID] = dbItemIDs[itemID]
-					}
-				}
+				itemIDs = utils.JoinStringSet(itemIDs, dbItemIDs)
 			}
 		}
 		return

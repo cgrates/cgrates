@@ -68,9 +68,6 @@ func (dS *DispatcherService) authorizeEvent(ctx *context.Context, ev *utils.CGRE
 	return
 }
 
-func (dS *DispatcherService) authorize2(method, tenant string, apiKey string) (err error) {
-	return dS.authorize(context.Background(), method, tenant, apiKey)
-}
 func (dS *DispatcherService) authorize(ctx *context.Context, method, tenant string, apiKey string) (err error) {
 	if apiKey == "" {
 		return utils.NewErrMandatoryIeMissing(utils.APIKey)
@@ -183,7 +180,7 @@ func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, 
 			return utils.NewErrDispatcherS(err)
 		}
 		if err = d.Dispatch(dS.dm, dS.fltrS, dS.cfg,
-			ctx, dS.connMgr.GetInternalChan(), evNm, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]),
+			ctx, dS.connMgr.GetDispInternalChan(), evNm, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]),
 			subsys, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
 			return
 		}

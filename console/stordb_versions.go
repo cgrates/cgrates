@@ -20,13 +20,12 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetStorDBVersions{
-		name:      "stordb_versions",
-		rpcMethod: utils.APIerSv1GetStorDBVersions,
+		name: "stordb_versions",
+		// rpcMethod: utils.APIerSv1GetStorDBVersions,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

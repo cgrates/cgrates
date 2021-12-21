@@ -141,6 +141,7 @@ func testExpLoadTPFromFolder(t *testing.T) {
 	}
 }
 
+/*
 func testExpExportToFolder(t *testing.T) {
 	var reply string
 	arg := &utils.ArgExportToFolder{
@@ -162,6 +163,7 @@ func testExpLoadTPFromExported(t *testing.T) {
 		t.Error(reply)
 	}
 }
+*/
 
 func testExpVerifyAttributes(t *testing.T) {
 	exp := &engine.AttributeProfile{

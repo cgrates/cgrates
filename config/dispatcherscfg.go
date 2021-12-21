@@ -71,7 +71,7 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 		dps.NotExistsIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Attributes_conns != nil {
-		dps.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
+		dps.AttributeSConns = updateInternalConnsWithPrfx(*jsnCfg.Attributes_conns, utils.MetaAttributes, utils.MetaDispatchers)
 	}
 	if jsnCfg.Nested_fields != nil {
 		dps.NestedFields = *jsnCfg.Nested_fields
@@ -96,7 +96,7 @@ func (dps DispatcherSCfg) AsMapInterface(string) interface{} {
 		mp[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*dps.SuffixIndexedFields)
 	}
 	if dps.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(dps.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = getInternalJSONConnsWithPrfx(dps.AttributeSConns, utils.MetaDispatchers)
 	}
 	if dps.ExistsIndexedFields != nil {
 		mp[utils.ExistsIndexedFieldsCfg] = utils.CloneStringSlice(*dps.ExistsIndexedFields)

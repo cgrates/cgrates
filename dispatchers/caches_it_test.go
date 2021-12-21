@@ -98,8 +98,6 @@ func testDspChcPing(t *testing.T) {
 func testDspChcLoadAfterFolder(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	expStats[utils.CacheLoadIDs].Items = 12
-	expStats[utils.CacheRPCConnections].Items = 1
 	args := utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
@@ -133,7 +131,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 3
 	expStats[utils.CacheThresholdProfiles].Items = 2
 	expStats[utils.CacheThresholds].Items = 2
-	expStats[utils.CacheLoadIDs].Items = 26
+	expStats[utils.CacheLoadIDs].Items = 27
 	expStats[utils.CacheThresholdFilterIndexes].Items = 2
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
 	expStats[utils.CacheStatFilterIndexes].Items = 7
@@ -144,8 +142,8 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheResourceFilterIndexes].Groups = 1
 	expStats[utils.CacheChargerFilterIndexes].Items = 1
 	expStats[utils.CacheChargerFilterIndexes].Groups = 1
-	expStats[utils.CacheAttributeFilterIndexes].Items = 11
-	expStats[utils.CacheAttributeFilterIndexes].Groups = 4
+	expStats[utils.CacheAttributeFilterIndexes].Items = 10
+	expStats[utils.CacheAttributeFilterIndexes].Groups = 2
 	expStats[utils.CacheReverseFilterIndexes].Items = 8
 	expStats[utils.CacheReverseFilterIndexes].Groups = 6
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
@@ -199,24 +197,6 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheActionProfilesFilterIndexes: utils.MetaReady,
 		utils.CacheAccountsFilterIndexes:       utils.MetaReady,
 		utils.CacheAccounts:                    utils.MetaReady,
-
-		utils.CacheVersions:             utils.MetaReady,
-		utils.CacheTBLTPResources:       utils.MetaReady,
-		utils.CacheTBLTPStats:           utils.MetaReady,
-		utils.CacheTBLTPThresholds:      utils.MetaReady,
-		utils.CacheTBLTPFilters:         utils.MetaReady,
-		utils.CacheSessionCostsTBL:      utils.MetaReady,
-		utils.CacheCDRsTBL:              utils.MetaReady,
-		utils.CacheTBLTPRoutes:          utils.MetaReady,
-		utils.CacheTBLTPAttributes:      utils.MetaReady,
-		utils.CacheTBLTPChargers:        utils.MetaReady,
-		utils.CacheTBLTPDispatchers:     utils.MetaReady,
-		utils.CacheTBLTPDispatcherHosts: utils.MetaReady,
-		utils.CacheTBLTPRateProfiles:    utils.MetaReady,
-		utils.MetaAPIBan:                utils.MetaReady,
-		utils.CacheTBLTPActionProfiles:  utils.MetaReady,
-		utils.CacheTBLTPAccounts:        utils.MetaReady,
-		utils.CacheReplicationHosts:     utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithAPIOpts{

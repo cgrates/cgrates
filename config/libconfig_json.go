@@ -27,7 +27,12 @@ import (
 
 // updateInternalConns updates the connection list by specifying the subsystem for internal connections
 func updateInternalConns(conns []string, subsystem string) (c []string) {
-	subsystem = utils.MetaInternal + utils.ConcatenatedKeySep + subsystem
+	return updateInternalConnsWithPrfx(conns, subsystem, utils.MetaInternal)
+}
+
+// updateInternalConns updates the connection list by specifying the subsystem for internal connections
+func updateInternalConnsWithPrfx(conns []string, subsystem, prfx string) (c []string) {
+	subsystem = prfx + utils.ConcatenatedKeySep + subsystem
 	c = make([]string, len(conns))
 	for i, conn := range conns {
 		c[i] = conn
@@ -55,10 +60,14 @@ func updateBiRPCInternalConns(conns []string, subsystem string) (c []string) {
 }
 
 func getInternalJSONConns(conns []string) (c []string) {
+	return getInternalJSONConnsWithPrfx(conns, utils.MetaInternal)
+}
+
+func getInternalJSONConnsWithPrfx(conns []string, prfx string) (c []string) {
 	c = make([]string, len(conns))
 	for i, conn := range conns {
 		c[i] = conn
-		if strings.HasPrefix(conn, utils.MetaInternal) {
+		if strings.HasPrefix(conn, prfx) {
 			c[i] = utils.MetaInternal
 		}
 	}

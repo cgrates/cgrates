@@ -1719,7 +1719,7 @@ func TestConfigSanityDispatcher(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 	cfg.dispatcherSCfg = &DispatcherSCfg{
 		Enabled:         true,
-		AttributeSConns: []string{utils.MetaInternal},
+		AttributeSConns: []string{utils.MetaDispatchers},
 	}
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <DispatcherS> component" {
 		t.Error(err)

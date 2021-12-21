@@ -215,6 +215,9 @@ func (cM *ConnManager) GetInternalChan() chan birpc.ClientConnector {
 	return cM.dynIntCh.GetInternalChanel()
 }
 
+func (cM *ConnManager) GetDispInternalChan() chan birpc.ClientConnector {
+	return cM.dynIntCh.GetInternalChanel()
+}
 func (cM *ConnManager) AddInternalConn(connName, apiPrefix string,
 	iConnCh chan birpc.ClientConnector) {
 	cM.rpcInternal[connName] = iConnCh

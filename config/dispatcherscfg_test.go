@@ -45,7 +45,7 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		ExistsIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		NotExistsIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaDispatchers, utils.MetaAttributes), "*conn1"},
 		NestedFields:           true,
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -102,7 +102,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 			"exists_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],
             "notexists_indexed_fields": ["*req.prefix"],
 			"nested_fields": false,
-			"attributes_conns": ["*internal:*attributes", "*conn1"],
+			"attributes_conns": ["*internal", "*conn1"],
 		},
 		
 }`
@@ -153,7 +153,7 @@ func TestDispatcherSCfgClone(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		ExistsIndexedFields:    &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		NotExistsIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
-		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
+		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaDispatchers, utils.MetaAttributes), "*conn1"},
 		NestedFields:           true,
 	}
 	rcv := ban.Clone()

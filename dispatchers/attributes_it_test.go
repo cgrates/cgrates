@@ -23,9 +23,9 @@ package dispatchers
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -223,21 +223,18 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	eAttrPrf := &engine.AttributeProfile{
+	eAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1002_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*opts.*context:simpleauth"},
-		Attributes: []*engine.Attribute{
-			{
-				FilterIDs: []string{},
-				Path:      utils.MetaReq + utils.NestingSep + "Password",
-				Type:      utils.MetaConstant,
-				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
-			},
-		},
+		Attributes: []*engine.ExternalAttribute{{
+			FilterIDs: []string{},
+			Path:      utils.MetaReq + utils.NestingSep + "Password",
+			Type:      utils.MetaConstant,
+			Value:     "CGRateS.org",
+		}},
 		Weight: 20.0,
 	}
-	eAttrPrf.Compile()
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
@@ -254,12 +251,13 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				"Password":         "CGRateS.org",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
 
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -280,9 +278,8 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
-	if attrReply != nil {
-		attrReply.Compile()
-	}
+	sort.Strings(eAttrPrf.FilterIDs)
+	sort.Strings(attrReply.FilterIDs)
 	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
@@ -331,7 +328,7 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
@@ -349,7 +346,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
@@ -367,7 +364,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 			utils.OptsAPIKey: "1234",
 		},
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
 		t.Error(err)
@@ -386,7 +383,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
@@ -405,32 +402,28 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	eAttrPrf := &engine.AttributeProfile{
+	eAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1001_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:simpleauth"},
-		Attributes: []*engine.Attribute{
-			{
-				FilterIDs: []string{},
-				Path:      utils.MetaReq + utils.NestingSep + "Password",
-				Type:      utils.MetaConstant,
-				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
-			},
-		},
+		Attributes: []*engine.ExternalAttribute{{
+			FilterIDs: []string{},
+			Path:      utils.MetaReq + utils.NestingSep + "Password",
+			Type:      utils.MetaConstant,
+			Value:     "CGRateS.org",
+		}},
 		Weight: 20.0,
 	}
-	eAttrPrf.Compile()
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
-	if attrReply != nil {
-		attrReply.Compile()
-	}
+	sort.Strings(eAttrPrf.FilterIDs)
+	sort.Strings(attrReply.FilterIDs)
 	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
@@ -447,7 +440,8 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 				"Password":         "CGRateS.org",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
@@ -475,7 +469,7 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -495,21 +489,18 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			utils.OptsContext: "simpleauth",
 		},
 	}
-	eAttrPrf := &engine.AttributeProfile{
+	eAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1002_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*opts.*context:simpleauth"},
-		Attributes: []*engine.Attribute{
-			{
-				FilterIDs: []string{},
-				Path:      utils.MetaReq + utils.NestingSep + "Password",
-				Type:      utils.MetaConstant,
-				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
-			},
-		},
+		Attributes: []*engine.ExternalAttribute{{
+			FilterIDs: []string{},
+			Path:      utils.MetaReq + utils.NestingSep + "Password",
+			Type:      utils.MetaConstant,
+			Value:     "CGRateS.org",
+		}},
 		Weight: 20.0,
 	}
-	eAttrPrf.Compile()
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
 	}
@@ -526,12 +517,13 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 				"Password":         "CGRateS.org",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}
 
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	// To ALL2
 	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
@@ -544,9 +536,9 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
-	if attrReply != nil {
-		attrReply.Compile()
-	}
+
+	sort.Strings(eAttrPrf.FilterIDs)
+	sort.Strings(attrReply.FilterIDs)
 	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
@@ -596,7 +588,8 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				"Password":         "CGRateS.com",
 			},
 			APIOpts: map[string]interface{}{
-				utils.OptsAPIKey: "attr12345",
+				utils.OptsAPIKey:  "attr12345",
+				utils.OptsContext: "simpleauth",
 			},
 		},
 	}

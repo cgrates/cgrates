@@ -74,7 +74,8 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 	}
 	var reply map[string]interface{}
 	if err := dispEngine.RPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
-		Tenant: "cgrates.org",
+		Tenant:   "cgrates.org",
+		Sections: []string{"listen"},
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cfg12345",
 		},
