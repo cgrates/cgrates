@@ -20,13 +20,12 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetDataDBVersions{
-		name:      "datadb_versions",
-		rpcMethod: utils.APIerSv1GetDataDBVersions,
+		name: "datadb_versions",
+		// rpcMethod: utils.APIerSv1GetDataDBVersions,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

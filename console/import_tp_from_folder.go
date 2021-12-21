@@ -22,8 +22,8 @@ import "github.com/cgrates/cgrates/utils"
 
 func init() {
 	c := &ImportTpFromFolder{
-		name:      "import_tp_from_folder",
-		rpcMethod: utils.APIerSv1ImportTariffPlanFromFolder,
+		name: "import_tp_from_folder",
+		// rpcMethod: utils.APIerSv1ImportTariffPlanFromFolder,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

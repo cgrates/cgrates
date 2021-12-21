@@ -88,10 +88,11 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 
 func (d *testDispatcher) startEngine(t *testing.T) {
 	var err error
+	// if !strings.Contains(d.CfgPath, "dispatchers_mysql") {
 	if d.cmd, err = engine.StartEngine(d.CfgPath, *waitRater); err != nil {
 		t.Fatalf("Error at engine start:%v\n", err)
 	}
-
+	// }
 	if d.RPC, err = newRPCClient(d.Cfg.ListenCfg()); err != nil {
 		t.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
@@ -119,13 +120,14 @@ func (d *testDispatcher) resetStorDb(t *testing.T) {
 		t.Fatalf("Error at DataDB init:%v\n", err)
 	}
 }
-func (d *testDispatcher) loadData(t *testing.T, path string) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
-	if err := d.RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Errorf("<%s>Error at loading data from folder :%v", d.CfgPath, err)
-	}
-}
+
+// func (d *testDispatcher) loadData(t *testing.T, path string) {
+// 	var reply string
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
+// 	if err := d.RPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+// 		t.Errorf("<%s>Error at loading data from folder :%v", d.CfgPath, err)
+// 	}
+// }
 
 func (d *testDispatcher) loadData2(t *testing.T, path string) {
 	wchan := make(chan struct{}, 1)
@@ -150,13 +152,13 @@ func (d *testDispatcher) loadData2(t *testing.T, path string) {
 }
 
 func testDsp(t *testing.T, tests []func(t *testing.T), testName, all, all2, disp, allTF, all2TF, attrTF string) {
-	engine.KillEngine(0)
+	// engine.KillEngine(0)
 	allEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all), true, true)
 	allEngine2 = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", all2), true, true)
 	dispEngine = newTestEngine(t, path.Join(*dataDir, "conf", "samples", "dispatchers", disp), true, true)
 	dispEngine.loadData2(t, path.Join(*dataDir, "tariffplans", attrTF))
-	allEngine.loadData(t, path.Join(*dataDir, "tariffplans", allTF))
-	allEngine2.loadData(t, path.Join(*dataDir, "tariffplans", all2TF))
+	allEngine.loadData2(t, path.Join(*dataDir, "tariffplans", allTF))
+	allEngine2.loadData2(t, path.Join(*dataDir, "tariffplans", all2TF))
 	time.Sleep(200 * time.Millisecond)
 	for _, stest := range tests {
 		t.Run(testName, stest)

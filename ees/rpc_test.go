@@ -74,7 +74,7 @@ func TestRPCCfg(t *testing.T) {
 			ConcurrentRequests: 0,
 		},
 		codec:         utils.MetaJSON,
-		serviceMethod: utils.APIerSv1ExportToFolder,
+		serviceMethod: utils.AdminSv1ComputeFilterIndexIDs,
 	}
 	exp := &config.EventExporterCfg{
 		ID:                 utils.MetaDefault,

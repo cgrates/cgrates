@@ -22,8 +22,8 @@ import "github.com/cgrates/cgrates/utils"
 
 func init() {
 	c := &CmdGetLoadHistory{
-		name:      "load_history",
-		rpcMethod: utils.APIerSv1GetLoadHistory,
+		name: "load_history",
+		// rpcMethod: utils.APIerSv1GetLoadHistory,
 		rpcParams: new(utils.Paginator),
 	}
 	commands[c.Name()] = c

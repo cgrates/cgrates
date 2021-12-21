@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -89,7 +90,7 @@ func testDspGrdLock(t *testing.T) {
 		Timeout:     500 * time.Millisecond,
 	}
 	var reply string
-	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &AttrRemoteLockWithAPIOpts{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &guardian.AttrRemoteLockWithAPIOpts{
 		AttrRemoteLock: args,
 		Tenant:         "cgrates.org",
 		APIOpts: map[string]interface{}{
@@ -100,7 +101,7 @@ func testDspGrdLock(t *testing.T) {
 	}
 
 	var unlockReply []string
-	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &AttrRemoteUnlockWithAPIOpts{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &guardian.AttrRemoteUnlockWithAPIOpts{
 		RefID:  reply,
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{

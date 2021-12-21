@@ -26,7 +26,6 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -142,16 +141,6 @@ func testGetAttributeProfileBeforeSet(t *testing.T) {
 		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-}
-
-func testAttributeSLoadFromFolder(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := attrSRPC.Call(context.Background(),
-		utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testAttributeSetAttributeProfile(t *testing.T) {
