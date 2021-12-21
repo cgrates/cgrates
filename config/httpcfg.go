@@ -29,8 +29,9 @@ import (
 
 // HTTPCfg is the HTTP config section
 type HTTPCfg struct {
-	JsonRPCURL        string            // JSON RPC relative URL ("" to disable)
-	RegistrarSURL     string            // registrar service relative URL
+	JsonRPCURL        string // JSON RPC relative URL ("" to disable)
+	RegistrarSURL     string // registrar service relative URL
+	PrometheusURL     string
 	WSURL             string            // WebSocket relative URL ("" to disable)
 	FreeswitchCDRsURL string            // Freeswitch CDRS relative URL ("" to disable)
 	CDRsURL           string            // CDRS relative URL ("" to disable)
@@ -133,6 +134,9 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 	if jsnHTTPCfg.Registrars_url != nil {
 		httpcfg.RegistrarSURL = *jsnHTTPCfg.Registrars_url
 	}
+	if jsnHTTPCfg.Prometheus_url != nil {
+		httpcfg.PrometheusURL = *jsnHTTPCfg.Prometheus_url
+	}
 	if jsnHTTPCfg.Ws_url != nil {
 		httpcfg.WSURL = *jsnHTTPCfg.Ws_url
 	}
@@ -181,6 +185,7 @@ func (httpcfg HTTPCfg) AsMapInterface(string) interface{} {
 	return map[string]interface{}{
 		utils.HTTPJsonRPCURLCfg:        httpcfg.JsonRPCURL,
 		utils.RegistrarSURLCfg:         httpcfg.RegistrarSURL,
+		utils.PrometheusURLCfg:         httpcfg.PrometheusURL,
 		utils.HTTPWSURLCfg:             httpcfg.WSURL,
 		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.FreeswitchCDRsURL,
 		utils.HTTPCDRsURLCfg:           httpcfg.CDRsURL,
@@ -204,6 +209,7 @@ func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
 	cln = &HTTPCfg{
 		JsonRPCURL:        httpcfg.JsonRPCURL,
 		RegistrarSURL:     httpcfg.RegistrarSURL,
+		PrometheusURL:     httpcfg.PrometheusURL,
 		WSURL:             httpcfg.WSURL,
 		FreeswitchCDRsURL: httpcfg.FreeswitchCDRsURL,
 		CDRsURL:           httpcfg.CDRsURL,
@@ -239,6 +245,7 @@ type HTTPClientOptsJson struct {
 type HTTPJsonCfg struct {
 	Json_rpc_url        *string
 	Registrars_url      *string
+	Prometheus_url      *string
 	Ws_url              *string
 	Freeswitch_cdrs_url *string
 	Http_Cdrs           *string
@@ -314,6 +321,9 @@ func diffHTTPJsonCfg(d *HTTPJsonCfg, v1, v2 *HTTPCfg) *HTTPJsonCfg {
 	}
 	if v1.RegistrarSURL != v2.RegistrarSURL {
 		d.Registrars_url = utils.StringPointer(v2.RegistrarSURL)
+	}
+	if v1.PrometheusURL != v2.PrometheusURL {
+		d.Prometheus_url = utils.StringPointer(v2.PrometheusURL)
 	}
 	if v1.WSURL != v2.WSURL {
 		d.Ws_url = utils.StringPointer(v2.WSURL)
