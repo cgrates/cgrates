@@ -15,6 +15,7 @@ Group=cgrates
 StandardOutput=journal
 StandardError=journal
 Restart=on-failure
+SyslogIdentifier=cgr-engine
 
 [Install]
 WantedBy=multi-user.target
