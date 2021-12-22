@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
@@ -123,9 +122,16 @@ func testDspRPrfCostForEvent(t *testing.T) {
 		CostIntervals: []*utils.RateSIntervalCost{{
 			Increments: []*utils.RateSIncrementCost{{
 				Usage:          utils.NewDecimal(int64(time.Minute), 0),
+				RateID:         "ec268a8",
 				CompressFactor: 1,
 			}},
 			CompressFactor: 1,
+		}},
+		Rates: map[string]*utils.IntervalRate{"ec268a8": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimalFromFloat64(0.12),
+			Unit:          utils.NewDecimal(60000000000, 0),
+			Increment:     utils.NewDecimal(60000000000, 0),
 		}},
 	}
 
@@ -141,7 +147,7 @@ func testDspRPrfCostForEvent(t *testing.T) {
 			utils.OptsAPIKey: "rPrf12345",
 		}}, &rpCost); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rpCost, exp) {
+	} else if !rpCost.Equals(exp) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exp), utils.ToJSON(rpCost))
 	}
 }
@@ -187,9 +193,16 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 		CostIntervals: []*utils.RateSIntervalCost{{
 			Increments: []*utils.RateSIncrementCost{{
 				Usage:          utils.NewDecimal(int64(time.Minute), 0),
+				RateID:         "ec268a8",
 				CompressFactor: 60,
 			}},
 			CompressFactor: 1,
+		}},
+		Rates: map[string]*utils.IntervalRate{"ec268a8": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimalFromFloat64(0.25),
+			Unit:          utils.NewDecimal(60000000000, 0),
+			Increment:     utils.NewDecimal(1000000000, 0),
 		}},
 	}
 
@@ -204,7 +217,7 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 			utils.OptsAPIKey: "rPrf12345",
 		}}, &rpCost); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rpCost, exp) {
+	} else if !rpCost.Equals(exp) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rpCost))
 	}
 }

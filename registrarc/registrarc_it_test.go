@@ -23,12 +23,12 @@ package registrarc
 
 import (
 	"bytes"
-	"net/rpc"
 	"os/exec"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -40,7 +40,7 @@ var (
 	dspCfgPath string
 	dspCfg     *config.CGRConfig
 	dspCmd     *exec.Cmd
-	dspRPC     *rpc.Client
+	dspRPC     *birpc.Client
 
 	allDir     string
 	allCfgPath string
@@ -129,7 +129,7 @@ func testDsphLoadData(t *testing.T) {
 
 func testDsphGetNodeID() (id string, err error) {
 	var status map[string]interface{}
-	if err = dspRPC.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{
+	if err = dspRPC.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]interface{}{},
 	}, &status); err != nil {

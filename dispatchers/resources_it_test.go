@@ -228,7 +228,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 			"Destination": "1002"},
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey:           "res12345",
-			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55",
+			utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1ReleaseResources,
@@ -274,16 +274,12 @@ func testDspResTestAuthKey3(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	if rs == nil {
-		t.Errorf("Expecting rs to not be nil")
-		// rs shoud not be nil so exit function
-		// to avoid nil segmentation fault;
-		// if this happens try to run this test manualy
-		return
+		t.Fatal("Expecting rs to not be nil")
 	}
 	// make sure Resource1 have no more active resources
 	for _, r := range *rs {
 		if r.ID == "ResGroup1" &&
-			(len(r.Usages) != 1 || len(r.TTLIdx) != 0) {
+			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
@@ -299,7 +295,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 	}
 	// make sure Resource1 have no more active resources
 	if r.ID == "ResGroup1" &&
-		(len(r.Usages) != 1 || len(r.TTLIdx) != 0) {
+		(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
 		t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 	}
 

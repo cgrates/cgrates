@@ -1322,7 +1322,6 @@ func testApisLoadFromPath(t *testing.T) {
 			"prefix_indexed_fields":["*req.Destination"],
 			"stats_conns": ["*internal"],
 			"resources_conns": ["*internal"],
-			"rals_conns": ["*internal"]
 		},
 		
 		
@@ -1331,7 +1330,6 @@ func testApisLoadFromPath(t *testing.T) {
 			"routes_conns": ["*internal"],
 			"resources_conns": ["*internal"],
 			"attributes_conns": ["*internal"],
-			"rals_conns": ["*internal"],
 			"cdrs_conns": ["*internal"],
 			"chargers_conns": ["*internal"]
 		},

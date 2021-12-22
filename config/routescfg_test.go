@@ -148,7 +148,6 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			"attributes_conns": ["*internal:*attributes", "conn1"],
 			"resources_conns": ["*internal:*resources", "conn1"],
 			"stats_conns": ["*internal:*stats", "conn1"],
-			"rals_conns": ["*internal:*responder", "conn1"],
 			"rates_conns": ["*internal:*rates", "conn1"],
 			"accounts_conns": ["*internal:*accounts", "conn1"],
 			"default_ratio":2,

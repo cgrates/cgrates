@@ -61,7 +61,8 @@
 
 "routes": {
 	"enabled": true,
-	"rals_conns": ["*internal"],
+	"rates_conns": ["*internal"],	
+	"accounts_conns": ["*internal"],
 },
 
 "stats": {

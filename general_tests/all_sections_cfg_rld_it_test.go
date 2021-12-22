@@ -43,11 +43,10 @@ var (
 		testSectResetStorDb,
 		testSectStartEngine,
 		testSectRPCConn,
-		//testSectConfigSReloadGeneral,
+		testSectConfigSReloadGeneral,
 		testSectConfigSReloadCores,
 		testSectConfigSReloadRPCConns,
-		//testSectConfigSReloadDataDB,
-		//testSectConfigSReloadStorDB,
+		testSectConfigSReloadStorDB,
 		testSectConfigSReloadListen,
 		testSectConfigSReloadTLS,
 		testSectConfigSReloadHTTP,
@@ -80,6 +79,7 @@ var (
 		testSectConfigSReloadTemplates,
 		testSectConfigSReloadConfigs,
 		testSectConfigSReloadAPIBan,
+		testSectConfigSReloadDataDB,
 		testSectStopCgrEngine,
 	}
 )
@@ -136,7 +136,6 @@ func testSectRPCConn(t *testing.T) {
 }
 
 func testSectConfigSReloadGeneral(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -146,7 +145,7 @@ func testSectConfigSReloadGeneral(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"general\":{\"connect_attempts\":5,\"connect_timeout\":\"1s\",\"dbdata_encoding\":\"*msgpack\",\"default_caching\":\"*reload\",\"default_category\":\"call\",\"default_request_type\":\"*rated\",\"default_tenant\":\"cgrates.org\",\"default_timezone\":\"Local\",\"digest_equal\":\":\",\"digest_separator\":\",\",\"failed_posts_dir\":\"/var/spool/cgrates/failed_posts\",\"failed_posts_ttl\":\"5s\",\"locking_timeout\":\"0\",\"log_level\":7,\"logger\":\"*syslog\",\"max_parallel_conns\":100,\"node_id\":\"98ead14\",\"poster_attempts\":3,\"reconnects\":-1,\"reply_timeout\":\"50s\",\"rounding_decimals\":5,\"rsr_separator\":\";\",\"tpexport_dir\":\"/var/spool/cgrates/tpe\"}}"
+	cfgStr := "{\"general\":{\"connect_attempts\":5,\"connect_timeout\":\"1s\",\"dbdata_encoding\":\"*msgpack\",\"decimal_max_scale\":0,\"decimal_min_scale\":0,\"decimal_precision\":0,\"decimal_rounding_mode\":\"*toNearestEven\",\"default_caching\":\"*reload\",\"default_category\":\"call\",\"default_request_type\":\"*rated\",\"default_tenant\":\"cgrates.org\",\"default_timezone\":\"Local\",\"digest_equal\":\":\",\"digest_separator\":\",\",\"failed_posts_dir\":\"/var/spool/cgrates/failed_posts\",\"failed_posts_ttl\":\"5s\",\"locking_timeout\":\"0\",\"log_level\":7,\"logger\":\"*syslog\",\"max_parallel_conns\":100,\"node_id\":\"98ead14\",\"poster_attempts\":3,\"reconnects\":-1,\"reply_timeout\":\"50s\",\"rounding_decimals\":5,\"rsr_separator\":\";\",\"tpexport_dir\":\"/var/spool/cgrates/tpe\"}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -159,7 +158,6 @@ func testSectConfigSReloadGeneral(t *testing.T) {
 }
 
 func testSectConfigSReloadCores(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.CoreSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -196,7 +194,6 @@ func testSectConfigSReloadCores(t *testing.T) {
 }
 
 func testSectConfigSReloadRPCConns(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -219,17 +216,16 @@ func testSectConfigSReloadRPCConns(t *testing.T) {
 }
 
 func testSectConfigSReloadDataDB(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"data_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"10\",\"db_password\":\"\",\"db_port\":6379,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*account_action_plans\":{\"remote\":false,\"replicate\":false},\"*accounts\":{\"remote\":false,\"replicate\":false},\"*action_plans\":{\"remote\":false,\"replicate\":false},\"*action_triggers\":{\"remote\":false,\"replicate\":false},\"*actions\":{\"remote\":false,\"replicate\":false},\"*attribute_profiles\":{\"remote\":false,\"replicate\":false},\"*charger_profiles\":{\"remote\":false,\"replicate\":false},\"*destinations\":{\"remote\":false,\"replicate\":false},\"*dispatcher_hosts\":{\"remote\":false,\"replicate\":false},\"*dispatcher_profiles\":{\"remote\":false,\"replicate\":false},\"*filters\":{\"remote\":false,\"replicate\":false},\"*indexes\":{\"remote\":false,\"replicate\":false},\"*load_ids\":{\"remote\":false,\"replicate\":false},\"*rating_plans\":{\"remote\":false,\"replicate\":false},\"*rating_profiles\":{\"remote\":false,\"replicate\":false},\"*resource_profiles\":{\"remote\":false,\"replicate\":false},\"*resources\":{\"remote\":false,\"replicate\":false},\"*reverse_destinations\":{\"remote\":false,\"replicate\":false},\"*route_profiles\":{\"remote\":false,\"replicate\":false},\"*statqueues\":{\"remote\":false,\"replicate\":false},\"*threshold_profiles\":{\"remote\":false,\"replicate\":false},\"*thresholds\":{\"remote\":false,\"replicate\":false},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"redisCACertificate\":\"\",\"redisClientCertificate\":\"\",\"redisClientKey\":\"\",\"redisCluster\":false,\"redisClusterOndownDelay\":\"0\",\"redisClusterSync\":\"5s\",\"redisSentinel\":\"\",\"redisTLS\":false},\"remote_conn_id\":\"\",\"remote_conns\":[],\"replication_cache\":\"\",\"replication_conns\":[],\"replication_filtered\":false}}",
+		Config: "{\"data_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"10\",\"db_password\":\"\",\"db_port\":6379,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*account_action_plans\":{\"remote\":false,\"replicate\":false},\"*accounts\":{\"remote\":false,\"replicate\":false},\"*action_plans\":{\"remote\":false,\"replicate\":false},\"*action_triggers\":{\"remote\":false,\"replicate\":false},\"*actions\":{\"remote\":false,\"replicate\":false},\"*attribute_profiles\":{\"remote\":false,\"replicate\":false},\"*charger_profiles\":{\"remote\":false,\"replicate\":false},\"*destinations\":{\"remote\":false,\"replicate\":false},\"*dispatcher_hosts\":{\"remote\":false,\"replicate\":false},\"*dispatcher_profiles\":{\"remote\":false,\"replicate\":false},\"*filters\":{\"remote\":false,\"replicate\":false},\"*indexes\":{\"remote\":false,\"replicate\":false},\"*load_ids\":{\"remote\":false,\"replicate\":false},\"*rating_plans\":{\"remote\":false,\"replicate\":false},\"*rating_profiles\":{\"remote\":false,\"replicate\":false},\"*resource_profiles\":{\"remote\":false,\"replicate\":false},\"*resources\":{\"remote\":false,\"replicate\":false},\"*reverse_destinations\":{\"remote\":false,\"replicate\":false},\"*route_profiles\":{\"remote\":false,\"replicate\":false},\"*statqueues\":{\"remote\":false,\"replicate\":false},\"*threshold_profiles\":{\"remote\":false,\"replicate\":false},\"*thresholds\":{\"remote\":false,\"replicate\":false}},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"redisCACertificate\":\"\",\"redisClientCertificate\":\"\",\"redisClientKey\":\"\",\"redisCluster\":false,\"redisClusterOndownDelay\":\"0\",\"redisClusterSync\":\"5s\",\"redisSentinel\":\"\",\"redisTLS\":false},\"remote_conn_id\":\"\",\"remote_conns\":[],\"replication_cache\":\"\",\"replication_conns\":[],\"replication_filtered\":false}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"data_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"10\",\"db_password\":\"\",\"db_port\":6379,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*account_action_plans\":{\"remote\":false,\"replicate\":false},\"*accounts\":{\"remote\":false,\"replicate\":false},\"*action_plans\":{\"remote\":false,\"replicate\":false},\"*action_triggers\":{\"remote\":false,\"replicate\":false},\"*actions\":{\"remote\":false,\"replicate\":false},\"*attribute_profiles\":{\"remote\":false,\"replicate\":false},\"*charger_profiles\":{\"remote\":false,\"replicate\":false},\"*destinations\":{\"remote\":false,\"replicate\":false},\"*dispatcher_hosts\":{\"remote\":false,\"replicate\":false},\"*dispatcher_profiles\":{\"remote\":false,\"replicate\":false},\"*filters\":{\"remote\":false,\"replicate\":false},\"*indexes\":{\"remote\":false,\"replicate\":false},\"*load_ids\":{\"remote\":false,\"replicate\":false},\"*rating_plans\":{\"remote\":false,\"replicate\":false},\"*rating_profiles\":{\"remote\":false,\"replicate\":false},\"*resource_profiles\":{\"remote\":false,\"replicate\":false},\"*resources\":{\"remote\":false,\"replicate\":false},\"*reverse_destinations\":{\"remote\":false,\"replicate\":false},\"*route_profiles\":{\"remote\":false,\"replicate\":false},\"*statqueue_profiles\":{\"remote\":false,\"replicate\":false},\"*statqueues\":{\"remote\":false,\"replicate\":false},\"*threshold_profiles\":{\"remote\":false,\"replicate\":false},\"*thresholds\":{\"remote\":false,\"replicate\":false},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"redisCACertificate\":\"\",\"redisClientCertificate\":\"\",\"redisClientKey\":\"\",\"redisCluster\":false,\"redisClusterOndownDelay\":\"0\",\"redisClusterSync\":\"5s\",\"redisSentinel\":\"\",\"redisTLS\":false},\"remote_conn_id\":\"\",\"remote_conns\":[],\"replication_cache\":\"\",\"replication_conns\":[],\"replication_filtered\":false}}"
+	cfgStr := "{\"data_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"10\",\"db_password\":\"\",\"db_port\":6379,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*account_action_plans\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*account_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*action_plans\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*action_triggers\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*actions\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*destinations\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*rating_plans\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*rating_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_destinations\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*stat_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_filter_indexes\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*versions\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false}},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"redisCACertificate\":\"\",\"redisClientCertificate\":\"\",\"redisClientKey\":\"\",\"redisCluster\":false,\"redisClusterOndownDelay\":\"0s\",\"redisClusterSync\":\"5s\",\"redisSentinel\":\"\",\"redisTLS\":false},\"remote_conn_id\":\"\",\"remote_conns\":[],\"replication_cache\":\"\",\"replication_conns\":[],\"replication_filtered\":false}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -242,17 +238,16 @@ func testSectConfigSReloadDataDB(t *testing.T) {
 }
 
 func testSectConfigSReloadStorDB(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: "{\"stor_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"cgrates\",\"db_password\":\"CGRateS.org\",\"db_port\":3306,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*cdrs\":{\"remote\":false,\"replicate\":false},\"*session_costs\":{\"remote\":false,\"replicate\":false},\"*tp_account_actions\":{\"remote\":false,\"replicate\":false},\"*tp_action_plans\":{\"remote\":false,\"replicate\":false},\"*tp_action_triggers\":{\"remote\":false,\"replicate\":false},\"*tp_actions\":{\"remote\":false,\"replicate\":false},\"*tp_attributes\":{\"remote\":false,\"replicate\":false},\"*tp_chargers\":{\"remote\":false,\"replicate\":false},\"*tp_destination_rates\":{\"remote\":false,\"replicate\":false},\"*tp_destinations\":{\"remote\":false,\"replicate\":false},\"*tp_dispatcher_hosts\":{\"remote\":false,\"replicate\":false},\"*tp_dispatcher_profiles\":{\"remote\":false,\"replicate\":false},\"*tp_filters\":{\"remote\":false,\"replicate\":false},\"*tp_rates\":{\"remote\":false,\"replicate\":false},\"*tp_rating_plans\":{\"remote\":false,\"replicate\":false},\"*tp_resources\":{\"remote\":false,\"replicate\":false},\"*tp_routes\":{\"remote\":false,\"replicate\":false},\"*tp_stats\":{\"remote\":false,\"replicate\":false},\"*tp_thresholds\":{\"remote\":false,\"replicate\":false},\"*tp_timings\":{\"remote\":false,\"replicate\":false},\"*versions\":{\"remote\":false,\"replicate\":false}},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"mysqlLocation\":\"Local\",\"postgresSSLMode\":\"disable\",\"sqlConnMaxLifetime\":0,\"sqlMaxIdleConns\":10,\"sqlMaxOpenConns\":100},\"prefix_indexed_fields\":[],\"remote_conns\":null,\"replication_conns\":null,\"string_indexed_fields\":[]}}",
+		Config: "{\"stor_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"cgrates\",\"db_password\":\"CGRateS.org\",\"db_port\":3306,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*cdrs\":{\"remote\":false,\"replicate\":false},\"*session_costs\":{\"remote\":false,\"replicate\":false},\"*tp_account_actions\":{\"remote\":false,\"replicate\":false},\"*tp_action_plans\":{\"remote\":false,\"replicate\":false},\"*tp_action_triggers\":{\"remote\":false,\"replicate\":false},\"*tp_actions\":{\"remote\":false,\"replicate\":false},\"*tp_attributes\":{\"remote\":false,\"replicate\":false},\"*tp_chargers\":{\"remote\":false,\"replicate\":false},\"*tp_destination_rates\":{\"remote\":false,\"replicate\":false},\"*tp_destinations\":{\"remote\":false,\"replicate\":false},\"*tp_dispatcher_hosts\":{\"remote\":false,\"replicate\":false},\"*tp_dispatcher_profiles\":{\"remote\":false,\"replicate\":false},\"*tp_filters\":{\"remote\":false,\"replicate\":false},\"*tp_rates\":{\"remote\":false,\"replicate\":false},\"*tp_rating_plans\":{\"remote\":false,\"replicate\":false},\"*tp_resources\":{\"remote\":false,\"replicate\":false},\"*tp_routes\":{\"remote\":false,\"replicate\":false},\"*tp_stats\":{\"remote\":false,\"replicate\":false},\"*tp_thresholds\":{\"remote\":false,\"replicate\":false},\"*tp_timings\":{\"remote\":false,\"replicate\":false},\"*versions\":{\"remote\":false,\"replicate\":false}},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"mysqlLocation\":\"Local\",\"postgresSSLMode\":\"disable\",\"sqlConnMaxLifetime\":\"0\",\"sqlMaxIdleConns\":10,\"sqlMaxOpenConns\":100},\"prefix_indexed_fields\":[],\"remote_conns\":null,\"replication_conns\":null,\"string_indexed_fields\":[]}}",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"stor_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"cgrates\",\"db_password\":\"CGRateS.org\",\"db_port\":3306,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*cdrs\":{\"remote\":false,\"replicate\":false},\"*session_costs\":{\"remote\":false,\"replicate\":false},\"*tp_account_actions\":{\"remote\":false,\"replicate\":false},\"*tp_action_plans\":{\"remote\":false,\"replicate\":false},\"*tp_action_triggers\":{\"remote\":false,\"replicate\":false},\"*tp_actions\":{\"remote\":false,\"replicate\":false},\"*tp_attributes\":{\"remote\":false,\"replicate\":false},\"*tp_chargers\":{\"remote\":false,\"replicate\":false},\"*tp_destination_rates\":{\"remote\":false,\"replicate\":false},\"*tp_destinations\":{\"remote\":false,\"replicate\":false},\"*tp_dispatcher_hosts\":{\"remote\":false,\"replicate\":false},\"*tp_dispatcher_profiles\":{\"remote\":false,\"replicate\":false},\"*tp_filters\":{\"remote\":false,\"replicate\":false},\"*tp_rates\":{\"remote\":false,\"replicate\":false},\"*tp_rating_plans\":{\"remote\":false,\"replicate\":false},\"*tp_resources\":{\"remote\":false,\"replicate\":false},\"*tp_routes\":{\"remote\":false,\"replicate\":false},\"*tp_stats\":{\"remote\":false,\"replicate\":false},\"*tp_thresholds\":{\"remote\":false,\"replicate\":false},\"*tp_timings\":{\"remote\":false,\"replicate\":false},\"*versions\":{\"remote\":false,\"replicate\":false}},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"mysqlLocation\":\"Local\",\"postgresSSLMode\":\"disable\",\"sqlConnMaxLifetime\":0,\"sqlMaxIdleConns\":10,\"sqlMaxOpenConns\":100},\"prefix_indexed_fields\":[],\"remote_conns\":null,\"replication_conns\":null,\"string_indexed_fields\":[]}}"
+	cfgStr := "{\"stor_db\":{\"db_host\":\"127.0.0.1\",\"db_name\":\"cgrates\",\"db_password\":\"CGRateS.org\",\"db_port\":3306,\"db_type\":\"*internal\",\"db_user\":\"cgrates\",\"items\":{\"*cdrs\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*session_costs\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_account_actions\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_accounts\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_action_plans\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_action_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_action_triggers\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_actions\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_attributes\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_chargers\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_destination_rates\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_destinations\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_hosts\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_profiles\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_filters\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_rate_profiles\":{\"limit\":-1,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_rates\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_rating_plans\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_resources\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_routes\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_stats\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_thresholds\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_timings\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false},\"*versions\":{\"limit\":0,\"remote\":false,\"replicate\":false,\"static_ttl\":false}},\"opts\":{\"mongoQueryTimeout\":\"10s\",\"mysqlLocation\":\"Local\",\"sqlConnMaxLifetime\":\"0s\",\"sqlMaxIdleConns\":10,\"sqlMaxOpenConns\":100,\"sslMode\":\"disable\"},\"prefix_indexed_fields\":[],\"remote_conns\":null,\"replication_conns\":null,\"string_indexed_fields\":[]}}"
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
@@ -265,7 +260,6 @@ func testSectConfigSReloadStorDB(t *testing.T) {
 }
 
 func testSectConfigSReloadListen(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -288,7 +282,6 @@ func testSectConfigSReloadListen(t *testing.T) {
 }
 
 func testSectConfigSReloadTLS(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -311,7 +304,6 @@ func testSectConfigSReloadTLS(t *testing.T) {
 }
 
 func testSectConfigSReloadHTTP(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -341,69 +333,25 @@ func testSectConfigSReloadCaches(t *testing.T) {
 		t.Errorf("Expected OK received: %s", replyPingBf)
 	}
 
-	if testSectCfgDir == "tutmysql" {
-		var reply string
-		if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
-			Tenant: "cgrates.org",
-			Config: "{\"caches\":{\"partitions\":{\"*account_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*apiban\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2m0s\"},\"*attribute_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*caps_events\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*cdr_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10m0s\"},\"*cdrs\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*closed_sessions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*diameter_messages\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*dispatcher_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_loads\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatchers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*event_charges\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*event_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*replication_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_connections\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_responses\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2s\"},\"*session_costs\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stat_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stir\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*threshold_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_attributes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_chargers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_stats\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*uch\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*versions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false}},\"replication_conns\":[]}}",
-		}, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.OK {
-			t.Errorf("Expected OK received: %+v", reply)
-		}
-		cfgStr := "{\"caches\":{\"partitions\":{\"*account_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*apiban\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2m0s\"},\"*attribute_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*caps_events\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*cdr_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10m0s\"},\"*cdrs\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*closed_sessions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*diameter_messages\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*dispatcher_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_loads\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatchers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*event_charges\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*event_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*replication_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_connections\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_responses\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2s\"},\"*session_costs\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stat_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stir\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*threshold_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_attributes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_chargers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_stats\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*uch\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*versions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false}},\"replication_conns\":[]}}"
-		var rpl string
-		if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
-			Tenant:   "cgrates.org",
-			Sections: []string{config.CacheJSON},
-		}, &rpl); err != nil {
-			t.Error(err)
-		} else if cfgStr != rpl {
-			t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
-		}
-	} else if testSectCfgDir == "tutmongo" {
-		var reply string
-		if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
-			Tenant: "cgrates.org",
-			Config: "{\"caches\":{\"partitions\":{\"*account_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*apiban\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2m0s\"},\"*attribute_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*caps_events\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*cdr_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10m0s\"},\"*cdrs\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*closed_sessions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*diameter_messages\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*dispatcher_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_loads\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatchers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*event_charges\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*event_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*replication_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_connections\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_responses\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2s\"},\"*session_costs\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stat_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stir\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*threshold_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_attributes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_chargers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_stats\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*uch\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*versions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false}},\"replication_conns\":[]}}",
-		}, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.OK {
-			t.Errorf("Expected OK received: %+v", reply)
-		}
-		cfgStr := "{\"caches\":{\"partitions\":{\"*account_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*apiban\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2m0s\"},\"*attribute_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*caps_events\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*cdr_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10m0s\"},\"*cdrs\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*closed_sessions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*diameter_messages\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*dispatcher_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_loads\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatchers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*event_charges\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*event_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*replication_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_connections\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_responses\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2s\"},\"*session_costs\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stat_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stir\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*threshold_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_attributes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_chargers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_stats\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*uch\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*versions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false}},\"replication_conns\":[]}}"
-		var rpl string
-		if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
-			Tenant:   "cgrates.org",
-			Sections: []string{config.CacheJSON},
-		}, &rpl); err != nil {
-			t.Error(err)
-		} else if cfgStr != rpl {
-			t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
-		}
-	} else if testSectCfgDir == "tutinternal" {
-
-		var reply string
-		if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
-			Tenant: "cgrates.org",
-			Config: "{\"caches\":{\"partitions\":{\"*account_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*apiban\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2m0s\"},\"*attribute_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*caps_events\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*cdr_ids\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10m0s\"},\"*cdrs\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*closed_sessions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*diameter_messages\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*dispatcher_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_loads\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_routes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatchers\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*event_charges\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*event_resources\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*replication_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_connections\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_responses\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2s\"},\"*session_costs\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stat_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stir\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*threshold_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_attributes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_chargers\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_filters\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_resources\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_routes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_stats\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_thresholds\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*uch\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*versions\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false}},\"replication_conns\":[]}}",
-		}, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.OK {
-			t.Errorf("Expected OK received: %+v", reply)
-		}
-		cfgStr := "{\"caches\":{\"partitions\":{\"*account_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*apiban\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2m0s\"},\"*attribute_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*caps_events\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*cdr_ids\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10m0s\"},\"*cdrs\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*closed_sessions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*diameter_messages\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*dispatcher_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_loads\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_routes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatchers\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*event_charges\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*event_resources\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*replication_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_connections\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_responses\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2s\"},\"*session_costs\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stat_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stir\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*threshold_filter_indexes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_attributes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_chargers\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_dispatcher_profiles\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_filters\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_resources\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_routes\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_stats\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*tp_thresholds\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*uch\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*versions\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false}},\"replication_conns\":[]}}"
-		var rpl string
-		if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
-			Tenant:   "cgrates.org",
-			Sections: []string{config.CacheJSON},
-		}, &rpl); err != nil {
-			t.Error(err)
-		} else if cfgStr != rpl {
-			t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
-		}
+	var reply string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
+		Tenant: "cgrates.org",
+		Config: "{\"caches\":{\"partitions\":{\"*account_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*apiban\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2m0s\"},\"*attribute_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*caps_events\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*cdr_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10m0s\"},\"*charger_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*closed_sessions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*diameter_messages\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*dispatcher_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_loads\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatchers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*event_charges\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*event_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*replication_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_connections\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_responses\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2s\"},\"*stat_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stir\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*threshold_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*uch\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"}},\"replication_conns\":[]}}",
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %+v", reply)
 	}
-
+	cfgStr := "{\"caches\":{\"partitions\":{\"*account_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*accounts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*action_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*apiban\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2m0s\"},\"*attribute_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*attribute_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*caps_events\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*cdr_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10m0s\"},\"*charger_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*charger_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*closed_sessions\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*diameter_messages\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*dispatcher_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_hosts\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_loads\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatcher_routes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*dispatchers\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*event_charges\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"10s\"},\"*event_resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*filters\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*load_ids\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profile_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rate_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*replication_hosts\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resource_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*resources\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*reverse_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*route_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_connections\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*rpc_responses\":{\"limit\":0,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"2s\"},\"*stat_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueue_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*statqueues\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*stir\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"},\"*threshold_filter_indexes\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*threshold_profiles\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*thresholds\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false},\"*uch\":{\"limit\":-1,\"precache\":false,\"replicate\":false,\"static_ttl\":false,\"ttl\":\"3h0m0s\"}},\"replication_conns\":[]}}"
+	var rpl string
+	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
+		Tenant:   "cgrates.org",
+		Sections: []string{config.CacheJSON},
+	}, &rpl); err != nil {
+		t.Error(err)
+	} else if cfgStr != rpl {
+		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
+	}
 	var replyPingAf string
 	if err := testSectRPC.Call(context.Background(), utils.CacheSv1Ping, &utils.CGREvent{}, &replyPingAf); err != nil {
 		t.Error(err)
@@ -413,7 +361,6 @@ func testSectConfigSReloadCaches(t *testing.T) {
 }
 
 func testSectConfigSReloadFilters(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -436,7 +383,6 @@ func testSectConfigSReloadFilters(t *testing.T) {
 }
 
 func testSectConfigSReloadCDRS(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.CDRsV1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -473,7 +419,6 @@ func testSectConfigSReloadCDRS(t *testing.T) {
 }
 
 func testSectConfigSReloadERS(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -496,7 +441,6 @@ func testSectConfigSReloadERS(t *testing.T) {
 }
 
 func testSectConfigSReloadEES(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -542,7 +486,6 @@ func testSectConfigSReloadSessions(t *testing.T) {
 }
 
 func testSectConfigSReloadAsteriskAgent(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -565,7 +508,6 @@ func testSectConfigSReloadAsteriskAgent(t *testing.T) {
 }
 
 func testSectConfigSReloadFreeswitchAgent(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -588,7 +530,6 @@ func testSectConfigSReloadFreeswitchAgent(t *testing.T) {
 }
 
 func testSectConfigSReloadKamailioAgent(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -611,7 +552,6 @@ func testSectConfigSReloadKamailioAgent(t *testing.T) {
 }
 
 func testSectConfigSReloadDiameterAgent(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -634,7 +574,6 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 }
 
 func testSectConfigSReloadHTTPAgent(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -657,7 +596,6 @@ func testSectConfigSReloadHTTPAgent(t *testing.T) {
 }
 
 func testSectConfigSReloadDNSAgent(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -680,7 +618,6 @@ func testSectConfigSReloadDNSAgent(t *testing.T) {
 }
 
 func testSectConfigSReloadAttributes(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -718,7 +655,6 @@ func testSectConfigSReloadAttributes(t *testing.T) {
 }
 
 func testSectConfigSReloadChargers(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.ChargerSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -755,7 +691,6 @@ func testSectConfigSReloadChargers(t *testing.T) {
 }
 
 func testSectConfigSReloadResources(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.ResourceSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -792,7 +727,6 @@ func testSectConfigSReloadResources(t *testing.T) {
 }
 
 func testSectConfigSReloadStats(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.StatSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -829,7 +763,6 @@ func testSectConfigSReloadStats(t *testing.T) {
 }
 
 func testSectConfigSReloadThresholds(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.ThresholdSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -866,7 +799,6 @@ func testSectConfigSReloadThresholds(t *testing.T) {
 }
 
 func testSectConfigSReloadRoutes(t *testing.T) {
-
 	var replyPingBf string
 	if err := testSectRPC.Call(context.Background(), utils.RouteSv1Ping, &utils.CGREvent{}, &replyPingBf); err != nil {
 		t.Error(err)
@@ -903,7 +835,6 @@ func testSectConfigSReloadRoutes(t *testing.T) {
 }
 
 func testSectConfigSReloadLoaders(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Tenant:  "cgrates.org",
@@ -926,7 +857,6 @@ func testSectConfigSReloadLoaders(t *testing.T) {
 }
 
 func testSectConfigSReloadSuretax(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -949,7 +879,6 @@ func testSectConfigSReloadSuretax(t *testing.T) {
 }
 
 func testSectConfigSReloadLoader(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -972,7 +901,6 @@ func testSectConfigSReloadLoader(t *testing.T) {
 }
 
 func testSectConfigSReloadMigrator(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -995,7 +923,6 @@ func testSectConfigSReloadMigrator(t *testing.T) {
 }
 
 func testSectConfigSReloadDispatchers(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -1018,7 +945,6 @@ func testSectConfigSReloadDispatchers(t *testing.T) {
 }
 
 func testSectConfigSReloadRegistrarC(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -1063,7 +989,6 @@ func testSectConfigSReloadAnalyzer(t *testing.T) {
 }
 
 func testSectConfigSReloadSIPAgent(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -1086,7 +1011,6 @@ func testSectConfigSReloadSIPAgent(t *testing.T) {
 }
 
 func testSectConfigSReloadTemplates(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
@@ -1109,7 +1033,6 @@ func testSectConfigSReloadTemplates(t *testing.T) {
 }
 
 func testSectConfigSReloadConfigs(t *testing.T) {
-
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",

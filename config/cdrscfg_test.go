@@ -178,7 +178,6 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		"store_cdrs": true,						
 		"session_cost_retries": 5,				
 		"chargers_conns":["*internal:*chargers","*conn1"],			
-		"rals_conns": ["*internal:*responder","*conn1"],
 		"attributes_conns": ["*internal:*attributes","*conn1"],					
 		"thresholds_conns": ["*internal:*thresholds","*conn1"],					
 		"stats_conns": ["*internal:*stats","*conn1"],						
