@@ -146,7 +146,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 				RouteID:         "route1",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.3166,
+					utils.Cost:         0.1,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
 				},
@@ -155,7 +155,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 				RouteID:         "route2",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.6334,
+					utils.Cost:         0.12,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
 				},
@@ -226,7 +226,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				RouteID:         "route1",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.3166,
+					utils.Cost:         0.1,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
 				},
@@ -235,7 +235,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				RouteID:         "route2",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.6334,
+					utils.Cost:         0.12,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
 				},
@@ -288,7 +288,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				RouteID:         "route1",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.3166,
+					utils.Cost:         0.1,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
 				},
@@ -297,7 +297,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				RouteID:         "route2",
 				RouteParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.6334,
+					utils.Cost:         0.12,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
 				},
@@ -353,7 +353,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 	expected := engine.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ROUTE_ACNT_1002",
-		FilterIDs:         []string{"FLTR_ACNT_1002", "*ai:~*req.AnswerTime:2017-11-27T00:00:00Z"},
+		FilterIDs:         []string{"FLTR_ACNT_1002"},
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{

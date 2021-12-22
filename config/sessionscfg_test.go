@@ -563,7 +563,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			"enabled": true,
 			"listen_bijson": "127.0.0.1:2018",
 			"chargers_conns": ["*internal:*chargers", "*conn1"],
-			"rals_conns": ["*internal:*responder", "*conn1"],
 			"cdrs_conns": ["*internal:*cdrs", "*conn1"],
 			"resources_conns": ["*internal:*resources", "*conn1"],
 			"thresholds_conns": ["*internal:*thresholds", "*conn1"],

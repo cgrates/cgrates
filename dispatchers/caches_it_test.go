@@ -146,6 +146,11 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheAttributeFilterIndexes].Groups = 2
 	expStats[utils.CacheReverseFilterIndexes].Items = 8
 	expStats[utils.CacheReverseFilterIndexes].Groups = 6
+	expStats[utils.CacheRateProfiles].Items = 2
+	expStats[utils.CacheRateProfilesFilterIndexes].Items = 1
+	expStats[utils.CacheRateProfilesFilterIndexes].Groups = 1
+	expStats[utils.CacheRateFilterIndexes].Items = 2
+	expStats[utils.CacheRateFilterIndexes].Groups = 2
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
@@ -197,6 +202,8 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheActionProfilesFilterIndexes: utils.MetaReady,
 		utils.CacheAccountsFilterIndexes:       utils.MetaReady,
 		utils.CacheAccounts:                    utils.MetaReady,
+		utils.MetaAPIBan:                       utils.MetaReady,
+		utils.CacheReplicationHosts:            utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithAPIOpts{

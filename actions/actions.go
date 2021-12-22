@@ -116,7 +116,7 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 		}
 		for _, sActs := range schedActSet {
 			if sActs.schedule == utils.MetaASAP {
-				go aS.asapExecuteActions(ctx, sActs)
+				go aS.asapExecuteActions(context.Background(), sActs)
 				continue
 			}
 			if _, err = crn.AddFunc(sActs.schedule, sActs.ScheduledExecute); err != nil {

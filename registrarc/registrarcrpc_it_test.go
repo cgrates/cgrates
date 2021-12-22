@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package registrarc
 
 import (
-	"net/rpc"
 	"os/exec"
 	"path"
 	"reflect"
@@ -31,9 +30,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -46,7 +47,7 @@ var (
 	rpcsDir     string
 	rpcsCfgPath string
 	rpcsCfg     *config.CGRConfig
-	rpcsRPC     *rpc.Client
+	rpcsRPC     *birpc.Client
 
 	rpchTest = []func(t *testing.T){
 		testRPCInitCfg,
@@ -111,9 +112,12 @@ func testRPCStartEngine(t *testing.T) {
 
 func testRPCLoadData(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := rpcsRPC.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := rpcsRPC.Call(context.Background(), utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
+		APIOpts: map[string]interface{}{utils.MetaCache: utils.MetaReload},
+	}, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
 	}
 	time.Sleep(100 * time.Millisecond)
 }
@@ -128,7 +132,7 @@ func testRPCChargerSNoAttr(t *testing.T) {
 	}
 	expErr := utils.NewErrServerError(rpcclient.ErrDisconnected).Error()
 	var rply []*engine.ChrgSProcessEventReply
-	if err := rpcsRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &rply); err == nil || err.Error() != expErr {
+	if err := rpcsRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %s,received: %v", expErr, err)
 	}
 }
@@ -153,54 +157,58 @@ func testRPCChargerSWithAttr(t *testing.T) {
 	processedEv := []*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CustomerCharges",
-			AlteredFields:   []string{"*req.RunID"},
+			AlteredFields:   []string{"*opts.*runID"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
 					"Account": "1010",
-					"RunID":   "CustomerCharges",
 				},
 				APIOpts: map[string]interface{}{
-					"*processRuns": 1.,
-					"*subsys":      "*chargers",
+					"*attrProcessRuns": 1.,
+					"*subsys":          "*chargers",
+					"*runID":           "CustomerCharges",
 				},
 			},
 		}, {
 			ChargerSProfile:    "Raw",
 			AttributeSProfiles: []string{"*constant:*req.RequestType:*none"},
-			AlteredFields:      []string{"*req.RunID", "*req.RequestType"},
+			AlteredFields:      []string{"*opts.*runID", "*req.RequestType"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
 					"Account":     "1010",
 					"RequestType": "*none",
-					"RunID":       "raw",
 				},
 				APIOpts: map[string]interface{}{
-					"*processRuns": 1.,
-					"*subsys":      "*chargers",
+					"*attrProcessRuns": 1.,
+					"*subsys":          "*chargers",
+					"*runID":           "raw",
+					"*attrProfileIDs":  []interface{}{"*constant:*req.RequestType:*none"},
+					"*context":         "*chargers",
 				},
 			},
 		}, {
 			ChargerSProfile:    "SupplierCharges",
 			AttributeSProfiles: []string{"cgrates.org:ATTR_SUPPLIER1"},
-			AlteredFields:      []string{"*req.RunID", "*req.Subject"},
+			AlteredFields:      []string{"*opts.*runID", "*req.Subject"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				Event: map[string]interface{}{
 					"Account": "1010",
-					"RunID":   "SupplierCharges",
 					"Subject": "SUPPLIER1",
 				},
 				APIOpts: map[string]interface{}{
-					"*processRuns": 1.,
-					"*subsys":      "*chargers",
+					"*attrProcessRuns": 1.,
+					"*subsys":          "*chargers",
+					"*runID":           "SupplierCharges",
+					"*attrProfileIDs":  []interface{}{"ATTR_SUPPLIER1"},
+					"*context":         "*chargers",
 				},
 			},
 		},
 	}
 	var rply []*engine.ChrgSProcessEventReply
-	if err := rpcsRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &rply); err != nil {
+	if err := rpcsRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &rply); err != nil {
 		t.Fatal(err)
 	}
 	sort.Slice(rply, func(i, j int) bool {
