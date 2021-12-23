@@ -173,6 +173,7 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 								utils.ERs, msg.MessageId, err.Error()))
 					}
 				}
+				msg.Ack(true)
 				if rdr.Config().ConcurrentReqs != -1 {
 					rdr.cap <- struct{}{}
 				}
