@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -452,6 +453,7 @@ func testThresholdsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 			MaxHits:          5,
 			MinHits:          3,
 			Weight:           10,
+			Async:            true,
 		},
 	}
 
@@ -469,9 +471,10 @@ func testThresholdsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 			ID:               "THD_2",
 			FilterIDs:        []string{"*string:~*req.Account:1001"},
 			ActionProfileIDs: []string{"actPrfID"},
-			MaxHits:          2,
-			MinHits:          0,
+			MaxHits:          3,
+			MinHits:          2,
 			Weight:           20,
+			Async:            true,
 		},
 	}
 
@@ -505,6 +508,7 @@ func testThresholdsProcessEvent(t *testing.T) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, tIDs)
 		}
 	}
+	time.Sleep(time.Second)
 }
 
 func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
@@ -522,12 +526,12 @@ func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
 		&engine.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
-			Hits:   0,
+			Hits:   1,
 		},
 		&engine.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_1",
-			Hits:   0,
+			Hits:   1,
 		},
 	}
 
@@ -561,12 +565,12 @@ func testThresholdsGetThresholdsAfterSecondEvent(t *testing.T) {
 		&engine.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
-			Hits:   1,
+			Hits:   0,
 		},
 		&engine.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "THD_1",
-			Hits:   1,
+			Hits:   0,
 		},
 	}
 
