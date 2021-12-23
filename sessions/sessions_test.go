@@ -1633,7 +1633,9 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		Values:  []string{utils.VOICE},
 	}}
 	fltrs := []string{"*string:~*req.ToR:*voice"}
-	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+	if rplyindx, rplyUnindx, err := sS.getIndexedFilters("", fltrs); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
@@ -1644,7 +1646,9 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx = map[string][]string{utils.ToR: {utils.VOICE}}
 	expUindx = nil
-	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+	if rplyindx, rplyUnindx, err := sS.getIndexedFilters("", fltrs); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
@@ -1662,7 +1666,9 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
-	if rplyindx, rplyUnindx := sS.getIndexedFilters("cgrates.org", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+	if rplyindx, rplyUnindx, err := sS.getIndexedFilters("cgrates.org", fltrs); err == nil || err.Error() != utils.ErrPrefixNotFound("FLTR2").Error() {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
@@ -2133,22 +2139,32 @@ func TestSessionSfilterSessions(t *testing.T) {
 		eses1,
 	}
 	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
-	if sess := sS.filterSessions(fltrs, true); len(sess) != 0 {
+	if sess, err := sS.filterSessions(fltrs, true); err != nil {
+		t.Error(err)
+	} else if len(sess) != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
 	}
-	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expSess, sess) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:NoToR", "*string:~*req.Subject:subject1"}}
-	if sess := sS.filterSessions(fltrs, false); len(sess) != 0 {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if len(sess) != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:NoToR"}}
-	if sess := sS.filterSessions(fltrs, false); len(sess) != 0 {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if len(sess) != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
-	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expSess, sess) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
 	}
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
@@ -2158,15 +2174,21 @@ func TestSessionSfilterSessions(t *testing.T) {
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.registerSession(session, false)
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
-	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expSess, sess) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.Subject:subject1"}}
-	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expSess, sess) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.Subject:subject3"}}
-	if sess := sS.filterSessions(fltrs, false); len(sess) != 0 {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if len(sess) != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
 	}
 	expSess = append(expSess, eses2)
@@ -2174,7 +2196,10 @@ func TestSessionSfilterSessions(t *testing.T) {
 		return strings.Compare(expSess[i].ToR, expSess[j].ToR) == -1
 	})
 	fltrs = &utils.SessionFilter{Filters: []string{}}
-	sess := sS.filterSessions(fltrs, false)
+	sess, err := sS.filterSessions(fltrs, false)
+	if err != nil {
+		t.Error(err)
+	}
 	sort.Slice(sess, func(i, j int) bool {
 		return strings.Compare(sess[i].ToR, sess[j].ToR) == -1
 	})
@@ -2182,13 +2207,17 @@ func TestSessionSfilterSessions(t *testing.T) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{}, Limit: utils.IntPointer(1)}
-	if sess := sS.filterSessions(fltrs, false); len(sess) != 1 {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if len(sess) != 1 {
 		t.Errorf("Expected one session, received: %s", utils.ToJSON(sess))
 	} else if !reflect.DeepEqual(expSess[0], eses1) && !reflect.DeepEqual(expSess[0], eses2) {
 		t.Errorf("Expected %s or %s, received: %s", utils.ToJSON(eses1), utils.ToJSON(eses2), utils.ToJSON(sess[0]))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.SMS)}, Limit: utils.IntPointer(1)}
-	if sess := sS.filterSessions(fltrs, false); len(sess) != 1 {
+	if sess, err := sS.filterSessions(fltrs, false); err != nil {
+		t.Error(err)
+	} else if len(sess) != 1 {
 		t.Errorf("Expected one session, received: %s", utils.ToJSON(sess))
 	} else if !reflect.DeepEqual(expSess[0], eses1) && !reflect.DeepEqual(expSess[0], eses2) {
 		t.Errorf("Expected %s or %s, received: %s", utils.ToJSON(eses1), utils.ToJSON(eses2), utils.ToJSON(sess[0]))
@@ -2248,19 +2277,27 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	sS.registerSession(session, false)
 	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
 
-	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
+	if noSess, err := sS.filterSessionsCount(fltrs, false); err != nil {
+		t.Error(err)
+	} else if noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:NoToR", "*string:~*req.Subject:subject1"}}
-	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 0 {
+	if noSess, err := sS.filterSessionsCount(fltrs, false); err != nil {
+		t.Error(err)
+	} else if noSess != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(noSess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:NoToR"}}
-	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 0 {
+	if noSess, err := sS.filterSessionsCount(fltrs, false); err != nil {
+		t.Error(err)
+	} else if noSess != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(noSess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
-	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 1 {
+	if noSess, err := sS.filterSessionsCount(fltrs, false); err != nil {
+		t.Error(err)
+	} else if noSess != 1 {
 		t.Errorf("Expected %v , received: %s", 1, utils.ToJSON(noSess))
 	}
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
@@ -2270,25 +2307,35 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.registerSession(session, false)
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
-	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 1 {
+	if noSess, err := sS.filterSessionsCount(fltrs, false); err != nil {
+		t.Error(err)
+	} else if noSess != 1 {
 		t.Errorf("Expected %v , received: %s", 1, utils.ToJSON(noSess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.Subject:subject1"}}
-	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
+	if noSess, err := sS.filterSessionsCount(fltrs, false); err != nil {
+		t.Error(err)
+	} else if noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.Subject:subject2"}}
-	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 0 {
+	if noSess, err := sS.filterSessionsCount(fltrs, false); err != nil {
+		t.Error(err)
+	} else if noSess != 0 {
 		t.Errorf("Expected no session, received: %s", utils.ToJSON(noSess))
 	}
 	fltrs = &utils.SessionFilter{Filters: []string{}}
-	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
+	if noSess, err := sS.filterSessionsCount(fltrs, false); err != nil {
+		t.Error(err)
+	} else if noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.registerSession(session, true)
 	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
-	if noSess := sS.filterSessionsCount(fltrs, true); noSess != 2 {
+	if noSess, err := sS.filterSessionsCount(fltrs, true); err != nil {
+		t.Error(err)
+	} else if noSess != 2 {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}
 }
