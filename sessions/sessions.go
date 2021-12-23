@@ -422,12 +422,10 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	}
 	sr := s.SRuns[sRunIdx]
 	rDur := sr.debitReserve(dur, lastUsed) // debit out of reserve, rDur is still to be debited
-	fmt.Println("rDur ", rDur)
 	if rDur == time.Duration(0) {
 		return dur, nil // complete debit out of reserve
 	}
 	dbtRsrv := dur - rDur // the amount debited from reserve
-	fmt.Println("dbtRsrv ", dbtRsrv)
 	if sr.CD.LoopIndex > 0 {
 		sr.CD.TimeStart = sr.CD.TimeEnd
 	}
@@ -445,7 +443,6 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	}
 	sr.CD.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	ccDuration := cc.GetDuration()
-	fmt.Println("ccDuration ", ccDuration)
 	if ccDuration > rDur {
 		sr.ExtraDuration = ccDuration - rDur
 	}
@@ -454,7 +451,6 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	} else {
 		sr.LastUsage = ccDuration + dbtRsrv
 	}
-	fmt.Println("sr.LastUsage ", sr.LastUsage)
 	sr.CD.DurationIndex -= rDur
 	sr.CD.DurationIndex += ccDuration
 	sr.CD.MaxCostSoFar += cc.Cost
@@ -857,16 +853,16 @@ func (sS *SessionS) unindexSession(cgrID string, pSessions bool) bool {
 }
 
 func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
-	indexedFltr map[string][]string, unindexedFltr []*engine.FilterRule) {
+	indexedFltr map[string][]string, unindexedFltr []*engine.FilterRule, err error) {
 	indexedFltr = make(map[string][]string)
 	for _, fltrID := range fltrs {
-		f, err := engine.GetFilter(sS.dm, tenant, fltrID,
-			true, true, utils.NonTransactional)
-		if err != nil {
-			// if err == utils.ErrNotFound {
-			// 	err = utils.ErrPrefixNotFound(fltrID)
-			// }
-			continue
+		var f *engine.Filter
+		if f, err = engine.GetFilter(sS.dm, tenant, fltrID,
+			true, true, utils.NonTransactional); err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefixNotFound(fltrID)
+			}
+			return
 		}
 		if f.ActivationInterval != nil &&
 			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
@@ -953,7 +949,7 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 
 // filterSessions will return a list of sessions in external format based on filters passed
 // is thread safe for the Sessions
-func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*ExternalSession) {
+func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*ExternalSession, err error) {
 	if len(sf.Filters) == 0 {
 		ss := sS.getSessions(utils.EmptyString, psv)
 		for _, s := range ss {
@@ -961,13 +957,18 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 				s.AsExternalSessions(sS.cfg.GeneralCfg().DefaultTimezone,
 					sS.cfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
 			if sf.Limit != nil && *sf.Limit > 0 && *sf.Limit < len(aSs) {
-				return aSs[:*sf.Limit]
+				return aSs[:*sf.Limit], nil
 			}
 		}
 		return
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cfg.GeneralCfg().DefaultTenant)
-	indx, unindx := sS.getIndexedFilters(tenant, sf.Filters)
+	indx, unindx, err := sS.getIndexedFilters(tenant, sf.Filters)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error <%s> quering filters", utils.SessionS, err.Error()))
+		return nil, err
+	}
 	cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
 	if len(indx) != 0 && len(cgrIDs) == 0 { // no sessions matched the indexed filters
 		return
@@ -988,7 +989,6 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 				fieldValuesDP[i] = ev
 			}
 			if pass, err = fltr.Pass(ev, fieldValuesDP); err != nil || !pass {
-				pass = false
 				return
 			}
 		}
@@ -1007,7 +1007,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 						sS.cfg.GeneralCfg().NodeID)) // Expensive for large number of sessions
 				if sf.Limit != nil && *sf.Limit > 0 && *sf.Limit < len(aSs) {
 					s.RUnlock()
-					return aSs[:*sf.Limit]
+					return aSs[:*sf.Limit], nil
 				}
 			}
 		}
@@ -1017,7 +1017,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 }
 
 // filterSessionsCount re
-func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (count int) {
+func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (count int, err error) {
 	count = 0
 	if len(sf.Filters) == 0 {
 		ss := sS.getSessions(utils.EmptyString, psv)
@@ -1027,7 +1027,12 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 		return
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cfg.GeneralCfg().DefaultTenant)
-	indx, unindx := sS.getIndexedFilters(tenant, sf.Filters)
+	indx, unindx, err := sS.getIndexedFilters(tenant, sf.Filters)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error <%s> quering filters", utils.SessionS, err.Error()))
+		return 0, err
+	}
 	cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
 	if len(indx) != 0 && len(cgrIDs) == 0 { // no sessions matched the indexed filters
 		return
@@ -1644,46 +1649,44 @@ func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.ClientConnector,
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}
-	aSs := sS.filterSessions(args, false)
-	if len(aSs) == 0 {
-		return utils.ErrNotFound
+	*reply, err = sS.filterSessions(args, false)
+	if err == nil && len(*reply) == 0 {
+		err = utils.ErrNotFound
 	}
-	*reply = aSs
-	return nil
+	return
 }
 
 // BiRPCv1GetActiveSessionsCount counts the active sessions
 func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.ClientConnector,
-	args *utils.SessionFilter, reply *int) error {
+	args *utils.SessionFilter, reply *int) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}
-	*reply = sS.filterSessionsCount(args, false)
-	return nil
+	*reply, err = sS.filterSessionsCount(args, false)
+	return
 }
 
 // BiRPCv1GetPassiveSessions returns the passive sessions handled by SessionS
 func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.ClientConnector,
-	args *utils.SessionFilter, reply *[]*ExternalSession) error {
+	args *utils.SessionFilter, reply *[]*ExternalSession) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}
-	pSs := sS.filterSessions(args, true)
-	if len(pSs) == 0 {
-		return utils.ErrNotFound
+	*reply, err = sS.filterSessions(args, true)
+	if err == nil && len(*reply) == 0 {
+		err = utils.ErrNotFound
 	}
-	*reply = pSs
-	return nil
+	return
 }
 
 // BiRPCv1GetPassiveSessionsCount counts the passive sessions handled by the system
 func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(clnt rpcclient.ClientConnector,
-	args *utils.SessionFilter, reply *int) error {
+	args *utils.SessionFilter, reply *int) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}
-	*reply = sS.filterSessionsCount(args, true)
-	return nil
+	*reply, err = sS.filterSessionsCount(args, true)
+	return
 }
 
 // BiRPCv1SetPassiveSession used for replicating Sessions
@@ -3418,8 +3421,10 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.ClientConnector,
 	if len(args.Filters) != 0 && sS.dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	aSs := sS.filterSessions(args, false)
-	if len(aSs) == 0 {
+	var aSs []*ExternalSession
+	if aSs, err = sS.filterSessions(args, false); err != nil {
+		return
+	} else if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
 	for _, as := range aSs {
