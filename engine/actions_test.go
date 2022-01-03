@@ -87,9 +87,9 @@ func TestActionPlanOnlyHour(t *testing.T) {
 }
 
 func TestActionPlanHourYear(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2022}, StartTime: "10:01:00"}}}
+	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2035}, StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
-	expected := time.Date(2022, 1, 1, 10, 1, 0, 0, time.Local)
+	expected := time.Date(2035, 1, 1, 10, 1, 0, 0, time.Local)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
