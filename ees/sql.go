@@ -146,7 +146,9 @@ func (sqlEe *SQLEe) ExportEvent(req interface{}, _ string) error {
 
 func (sqlEe *SQLEe) Close() (err error) {
 	sqlEe.Lock()
-	err = sqlEe.sqldb.Close()
+	if sqlEe.sqldb != nil {
+		err = sqlEe.sqldb.Close()
+	}
 	sqlEe.db = nil
 	sqlEe.sqldb = nil
 	sqlEe.Unlock()
