@@ -107,12 +107,12 @@ func TestLoggerExportEmerg(t *testing.T) {
 	rpcInternal <- ccM
 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 1, cM, []string{eesConn})
+	el := NewExportLogger("123", "cgrates.org", -1, cM, []string{eesConn})
 
 	if err := el.Emerg("Emergency message"); err != nil {
 		t.Error(err)
 	}
-	el.logLevel = 0
+	el.SetLogLevel(0)
 	if err := el.Emerg("Emergency message"); err != nil {
 		t.Error(err)
 	}
@@ -151,12 +151,12 @@ func TestLoggerExportAlert(t *testing.T) {
 	rpcInternal <- ccM
 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 2, cM, []string{eesConn})
+	el := NewExportLogger("123", "cgrates.org", 0, cM, []string{eesConn})
 
 	if err := el.Alert("Alert message"); err != nil {
 		t.Error(err)
 	}
-	el.logLevel = 1
+	el.SetLogLevel(1)
 	if err := el.Alert("Alert message"); err != nil {
 		t.Error(err)
 	}
@@ -195,12 +195,12 @@ func TestLoggerExportCrit(t *testing.T) {
 	rpcInternal <- ccM
 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 2, cM, []string{eesConn})
+	el := NewExportLogger("123", "cgrates.org", 1, cM, []string{eesConn})
 
 	if err := el.Crit("Critical message"); err != nil {
 		t.Error(err)
 	}
-	el.logLevel = 1
+	el.SetLogLevel(2)
 	if err := el.Crit("Critical message"); err != nil {
 		t.Error(err)
 	}
@@ -239,12 +239,12 @@ func TestLoggerExportErr(t *testing.T) {
 	rpcInternal <- ccM
 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 3, cM, []string{eesConn})
+	el := NewExportLogger("123", "cgrates.org", 2, cM, []string{eesConn})
 
 	if err := el.Err("Error message"); err != nil {
 		t.Error(err)
 	}
-	el.logLevel = 2
+	el.SetLogLevel(3)
 	if err := el.Err("Error message"); err != nil {
 		t.Error(err)
 	}
@@ -283,12 +283,12 @@ func TestLoggerExportWarning(t *testing.T) {
 	rpcInternal <- ccM
 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 4, cM, []string{eesConn})
+	el := NewExportLogger("123", "cgrates.org", 3, cM, []string{eesConn})
 
 	if err := el.Warning("Warning message"); err != nil {
 		t.Error(err)
 	}
-	el.logLevel = 3
+	el.SetLogLevel(4)
 	if err := el.Warning("Warning message"); err != nil {
 		t.Error(err)
 	}
@@ -327,12 +327,12 @@ func TestLoggerExportNotice(t *testing.T) {
 	rpcInternal <- ccM
 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 5, cM, []string{eesConn})
+	el := NewExportLogger("123", "cgrates.org", 4, cM, []string{eesConn})
 
 	if err := el.Notice("Notice message"); err != nil {
 		t.Error(err)
 	}
-	el.logLevel = 4
+	el.SetLogLevel(5)
 	if err := el.Notice("Notice message"); err != nil {
 		t.Error(err)
 	}
@@ -371,12 +371,12 @@ func TestLoggerExportInfo(t *testing.T) {
 	rpcInternal <- ccM
 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 6, cM, []string{eesConn})
+	el := NewExportLogger("123", "cgrates.org", 5, cM, []string{eesConn})
 
 	if err := el.Info("Info message"); err != nil {
 		t.Error(err)
 	}
-	el.logLevel = 5
+	el.SetLogLevel(6)
 	if err := el.Info("Info message"); err != nil {
 		t.Error(err)
 	}
@@ -415,13 +415,72 @@ func TestLoggerExportDebug(t *testing.T) {
 	rpcInternal <- ccM
 	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
 
-	el := NewExportLogger("123", "cgrates.org", 7, cM, []string{eesConn})
+	el := NewExportLogger("123", "cgrates.org", 6, cM, []string{eesConn})
 
 	if err := el.Debug("Debug message"); err != nil {
 		t.Error(err)
 	}
-	el.logLevel = 6
+	el.SetLogLevel(7)
 	if err := el.Debug("Debug message"); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestLoggerSetGetLogLevel(t *testing.T) {
+	el := NewExportLogger("123", "cgrates.org", 6, nil, nil)
+	if rcv := el.GetLogLevel(); rcv != 6 {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", 6, rcv)
+	}
+	el.SetLogLevel(3)
+	if rcv := el.GetLogLevel(); rcv != 3 {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", 3, rcv)
+	}
+}
+
+func TestLoggerGetSyslog(t *testing.T) {
+	el := NewExportLogger("123", "cgrates.org", 6, nil, nil)
+	if el.GetSyslog() != nil {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, el.GetSyslog())
+	}
+}
+
+func TestLoggerExportWrite(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+	eesConn := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CoreSCfg().EEsConns = []string{eesConn}
+	Cache = NewCacheS(cfg, nil, nil)
+	cM := NewConnManager(cfg)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				exp := &utils.CGREvent{
+					Tenant: "cgrates.org",
+					Event: map[string]interface{}{
+						utils.NodeID: "123",
+						"Message":    "message",
+						"Severity":   8,
+					},
+				}
+				if !reflect.DeepEqual(exp, args) {
+					return fmt.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+						utils.ToJSON(exp), utils.ToJSON(args))
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	cM.AddInternalConn(eesConn, utils.EeSv1, rpcInternal)
+
+	el := NewExportLogger("123", "cgrates.org", 8, cM, []string{eesConn})
+
+	if _, err := el.Write([]byte("message")); err != nil {
+		t.Error(err)
+	}
+	el.Close()
 }
