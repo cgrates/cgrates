@@ -325,7 +325,12 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 type ArchiveEventsArgs struct {
 	Tenant  string
 	APIOpts map[string]interface{}
-	Events  []map[string]interface{}
+	Events  []*EventsWithOpts
+}
+
+type EventsWithOpts struct {
+	Event map[string]interface{}
+	Opts  map[string]interface{}
 }
 
 // V1ArchiveEventsInReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.
@@ -337,7 +342,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	if !has {
 		return fmt.Errorf("ExporterID is missing from argument's options")
 	}
-	// var validExporter bool
+	// check if there are any exporters that match our expID
 	var eesCfg *config.EventExporterCfg
 	for _, exporter := range eeS.cfg.EEsCfg().Exporters {
 		if exporter.ID == expID {
@@ -348,9 +353,11 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	if eesCfg == nil {
 		return fmt.Errorf("exporter config with ID: %s is missing", expID)
 	}
+	// also mandatory to be synchronous
 	if !eesCfg.Synchronous {
 		return fmt.Errorf("exporter with ID: %s is not synchronous", expID)
 	}
+	// also mandatory to be type of *buffer
 	if eesCfg.ExportPath != utils.MetaBuffer {
 		return fmt.Errorf("exporter with ID: %s has an invalid ExportPath for archiving", expID)
 	}
@@ -365,6 +372,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	buff := new(bytes.Buffer)
 	zBuff := zip.NewWriter(buff)
 	var wrtr io.Writer
+	// crate the file where eill be stored in zip
 	if wrtr, err = zBuff.CreateHeader(&zip.FileHeader{
 		Name:     "events.csv",
 		Modified: time.Now(),
@@ -375,16 +383,18 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	case utils.MetaFileCSV:
 		ee, err = NewFileCSVee(eesCfg, eeS.cfg, eeS.fltrS, dc, &buffer{wrtr})
 	case utils.MetaFileFWV:
-		ee, err = NewFileFWVee(eesCfg, eeS.cfg, eeS.fltrS, dc, wrtr)
+		ee, err = NewFileFWVee(eesCfg, eeS.cfg, eeS.fltrS, dc, &buffer{wrtr})
 	default:
 		err = fmt.Errorf("unsupported exporter type: %s>", eesCfg.Type)
 	}
 	if err != nil {
 		return err
 	}
+	// we will build the dataPrvider in order to match the filters
 	cgrDp := utils.MapStorage{
 		utils.MetaOpts: args.APIOpts,
 	}
+	// check if APIOpts have to ignore the filters
 	var ignoreFltr bool
 	if val, has := args.APIOpts[utils.MetaProfileIgnoreFilters]; has {
 		ignoreFltr, err = utils.IfaceAsBool(val)
@@ -396,7 +406,7 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	var exported bool
 	for _, event := range args.Events {
 		if len(eesCfg.Filters) != 0 && !ignoreFltr {
-			cgrDp[utils.MetaReq] = event
+			cgrDp[utils.MetaReq] = event.Event
 			if pass, errPass := eeS.fltrS.Pass(ctx, tnt,
 				eesCfg.Filters, cgrDp); errPass != nil {
 				return errPass
@@ -404,12 +414,26 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 				continue // does not pass the filters, ignore the exporter
 			}
 		}
+		// in case of event's Opts got another *exporterID that is different from the initial Opts, will skip that Event and will continue the iterations
+		if newExpID, ok := event.Opts[utils.MetaExporterID]; ok && newExpID != expID {
+			continue
+		}
 		cgrEv := &utils.CGREvent{
 			ID:      utils.UUIDSha1Prefix(),
 			Tenant:  tnt,
-			Event:   event,
-			APIOpts: args.APIOpts,
+			Event:   event.Event,
+			APIOpts: make(map[string]interface{}),
 		}
+		// here we will join the APIOpts from the initial args and Opts from every CDR(EventsWithOPts)
+		for key, val := range args.APIOpts {
+			if _, ok := event.Opts[key]; ok {
+				val = event.Opts[key]
+			}
+			event.Opts[key] = val
+		}
+		cgrEv.APIOpts = event.Opts
+
+		// exported will be true if there will be at least one exporter archived
 		exported = true
 		if err = exportEventWithExporter(ctx, ee, cgrEv, false, eeS.cfg, eeS.fltrS); err != nil {
 			return err
