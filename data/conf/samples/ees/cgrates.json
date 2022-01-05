@@ -127,7 +127,7 @@
 			"attempts": 1,
 			"field_separator": ",",
 			"synchronous": true,
-			"fields":[
+			"fields":[		
 				{"tag": "Number", "path": "*hdr.Number", "type": "*constant", "value": "NumberOfEvent"},
 				{"tag": "CGRID", "path": "*hdr.CGRID", "type": "*constant", "value": "CGRID"},
 				{"tag": "RunID", "path": "*hdr.RunID", "type": "*constant", "value": "RunID"},

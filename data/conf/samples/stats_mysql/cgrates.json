@@ -30,12 +30,12 @@
         "enabled": true,
         "store_interval": "-1",
         "thresholds_conns": ["*internal"],
-        "opts": {								//
-          "*prometheusMetrics": [
+        "opts": {								
+          "*prometheusStatIDs": [
             {
              	"Tenant": "*any",
              	"FilterIDs": [],
-             	"Value": ["SQ_1", "SQ_2"],
+             	"Value": ["SQ_1"],
             },
           ],								
         },	   

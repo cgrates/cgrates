@@ -151,6 +151,7 @@ func testServeHHTPFail(t *testing.T) {
 		"invalid_port_format",
 		cfgDflt.HTTPCfg().JsonRPCURL,
 		cfgDflt.HTTPCfg().WSURL,
+		cfgDflt.HTTPCfg().PrometheusURL,
 		cfgDflt.HTTPCfg().UseBasicAuth,
 		cfgDflt.HTTPCfg().AuthUsers,
 	)

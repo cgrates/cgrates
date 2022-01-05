@@ -342,8 +342,8 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	}
 
 	var promIDs []string
-	if promIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.PrometheusMetrics,
-		[]string{}, utils.OptsPrometheusMetrics); err != nil {
+	if promIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.PrometheusStatIDs,
+		[]string{}, utils.OptsPrometheusStatIDs); err != nil {
 		return
 	}
 	if len(promIDs) != 0 {
