@@ -33,7 +33,7 @@ type StatsOpts struct {
 	ProfileIDs           []*utils.DynamicStringSliceOpt
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt
 	RoundingDecimals     []*utils.DynamicIntOpt
-	PrometheusMetrics    []*utils.DynamicStringSliceOpt
+	PrometheusStatIDs    []*utils.DynamicStringSliceOpt
 }
 
 // StatSCfg the stats config section
@@ -74,8 +74,8 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
 	if jsnCfg.RoundingDecimals != nil {
 		sqOpts.RoundingDecimals = append(sqOpts.RoundingDecimals, jsnCfg.RoundingDecimals...)
 	}
-	if jsnCfg.PrometheusMetrics != nil {
-		sqOpts.PrometheusMetrics = append(sqOpts.PrometheusMetrics, jsnCfg.PrometheusMetrics...)
+	if jsnCfg.PrometheusStatIDs != nil {
+		sqOpts.PrometheusStatIDs = append(sqOpts.PrometheusStatIDs, jsnCfg.PrometheusStatIDs...)
 	}
 }
 
@@ -130,7 +130,7 @@ func (st StatSCfg) AsMapInterface(string) interface{} {
 		utils.MetaProfileIDs:           st.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFilters: st.Opts.ProfileIgnoreFilters,
 		utils.OptsRoundingDecimals:     st.Opts.RoundingDecimals,
-		utils.OptsPrometheusMetrics:    st.Opts.PrometheusMetrics,
+		utils.OptsPrometheusStatIDs:    st.Opts.PrometheusStatIDs,
 	}
 	mp := map[string]interface{}{
 		utils.EnabledCfg:                st.Enabled,
@@ -181,14 +181,14 @@ func (sqOpts *StatsOpts) Clone() *StatsOpts {
 		rounding = utils.CloneDynamicIntOpt(sqOpts.RoundingDecimals)
 	}
 	var promMtrcs []*utils.DynamicStringSliceOpt
-	if sqOpts.PrometheusMetrics != nil {
-		promMtrcs = utils.CloneDynamicStringSliceOpt(sqOpts.PrometheusMetrics)
+	if sqOpts.PrometheusStatIDs != nil {
+		promMtrcs = utils.CloneDynamicStringSliceOpt(sqOpts.PrometheusStatIDs)
 	}
 	return &StatsOpts{
 		ProfileIDs:           sqIDs,
 		ProfileIgnoreFilters: profileIgnoreFilters,
 		RoundingDecimals:     rounding,
-		PrometheusMetrics:    promMtrcs,
+		PrometheusStatIDs:    promMtrcs,
 	}
 }
 
@@ -227,7 +227,7 @@ type StatsOptsJson struct {
 	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
 	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 	RoundingDecimals     []*utils.DynamicIntOpt         `json:"*roundingDecimals"`
-	PrometheusMetrics    []*utils.DynamicStringSliceOpt `json:"*prometheusMetrics"`
+	PrometheusStatIDs    []*utils.DynamicStringSliceOpt `json:"*prometheusStatIDs"`
 }
 
 // Stat service config section
@@ -259,8 +259,8 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 	if !utils.DynamicIntOptEqual(v1.RoundingDecimals, v2.RoundingDecimals) {
 		d.RoundingDecimals = v2.RoundingDecimals
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.PrometheusMetrics, v2.PrometheusMetrics) {
-		d.PrometheusMetrics = v2.PrometheusMetrics
+	if !utils.DynamicStringSliceOptEqual(v1.PrometheusStatIDs, v2.PrometheusStatIDs) {
+		d.PrometheusStatIDs = v2.PrometheusStatIDs
 	}
 	return d
 }
