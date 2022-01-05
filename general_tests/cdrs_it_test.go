@@ -21,170 +21,182 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-// import (
-// 	"net/rpc"
-// 	"path"
-// 	"reflect"
-// 	"testing"
-// 	"time"
+import (
+	"path"
+	"testing"
+	"time"
 
-// 	"github.com/cgrates/cgrates/config"
-// 	"github.com/cgrates/cgrates/engine"
-// 	"github.com/cgrates/cgrates/utils"
-// )
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/utils"
+)
 
-// var (
-// 	cdrsCfgPath string
-// 	cdrsCfg     *config.CGRConfig
-// 	cdrsRpc     *rpc.Client
-// 	cdrsConfDIR string // run the tests for specific configuration
+var (
+	cdrsCfgPath string
+	cdrsCfg     *config.CGRConfig
+	cdrsRpc     *birpc.Client
+	cdrsConfDIR string // run the tests for specific configuration
 
-// 	// subtests to be executed for each confDIR
-// 	sTestsCDRsIT = []func(t *testing.T){
-// 		testV2CDRsInitConfig,
-// 		testV2CDRsInitDataDb,
-// 		testV2CDRsInitCdrDb,
-// 		testV2CDRsStartEngine,
-// 		testV2CDRsRpcConn,
-// 		testV2CDRsLoadTariffPlanFromFolder,
-// 		//default process
-// 		testV2CDRsProcessCDR,
-// 		testV2CDRsGetCdrs,
-// 		//custom process
-// 		testV2CDRsProcessCDR2,
-// 		testV2CDRsGetCdrs2,
-// 		testV2CDRsProcessCDR3,
-// 		testV2CDRsGetCdrs3,
+	// subtests to be executed for each confDIR
+	sTestsCDRsIT = []func(t *testing.T){
+		testV2CDRsInitConfig,
+		testV2CDRsInitDataDb,
+		testV2CDRsInitCdrDb,
+		testV2CDRsStartEngine,
+		testV2CDRsRpcConn,
+		testV2CDRsLoadTariffPlanFromFolder,
+		//default process
+		testV2CDRsProcessCDR,
+		// testV2CDRsGetCdrs,
+		// //custom process
+		// testV2CDRsProcessCDR2,
+		// testV2CDRsGetCdrs2,
+		// testV2CDRsProcessCDR3,
+		// testV2CDRsGetCdrs3,
 
-// 		testV2CDRsProcessCDR4,
-// 		testV2CDRsGetCdrs4,
+		// testV2CDRsProcessCDR4,
+		// testV2CDRsGetCdrs4,
 
-// 		testV2CDRsSetStats,
-// 		testV2CDRsSetThresholdProfile,
+		// testV2CDRsSetStats,
+		// testV2CDRsSetThresholdProfile,
 
-// 		testV2CDRsProcessCDR5,
-// 		testV2CDRsGetCdrs5,
-// 		testV2CDRsGetStats1,
-// 		testV2CDRsGetThreshold1,
-// 		testV2CDRsProcessCDR6,
-// 		testV2CDRsGetCdrs5,
-// 		testV2CDRsGetStats2,
-// 		testV2CDRsGetThreshold2,
-// 		testV2CDRsProcessCDR7,
-// 		testV2CDRsGetCdrs7,
+		// testV2CDRsProcessCDR5,
+		// testV2CDRsGetCdrs5,
+		// testV2CDRsGetStats1,
+		// testV2CDRsGetThreshold1,
+		// testV2CDRsProcessCDR6,
+		// testV2CDRsGetCdrs5,
+		// testV2CDRsGetStats2,
+		// testV2CDRsGetThreshold2,
+		// testV2CDRsProcessCDR7,
+		// testV2CDRsGetCdrs7,
 
-// 		testV2CDRsKillEngine,
-// 	}
-// )
+		testV2CDRsKillEngine,
+	}
+)
 
-// // Tests starting here
-// func TestCDRsIT(t *testing.T) {
-// 	switch *dbType {
-// 	case utils.MetaInternal:
-// 		cdrsConfDIR = "cdrsv2internal"
-// 	case utils.MetaMySQL:
-// 		cdrsConfDIR = "cdrsv2mysql"
-// 	case utils.MetaMongo:
-// 		cdrsConfDIR = "cdrsv2mongo"
-// 	case utils.MetaPostgres:
-// 		t.SkipNow()
-// 	default:
-// 		t.Fatal("Unknown Database type")
-// 	}
+// Tests starting here
+func TestCDRsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cdrsConfDIR = "cdrsv2internal"
+	case utils.MetaMySQL:
+		cdrsConfDIR = "cdrsv2mysql"
+	case utils.MetaMongo:
+		cdrsConfDIR = "cdrsv2mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 
-// 	for _, stest := range sTestsCDRsIT {
-// 		t.Run(cdrsConfDIR, stest)
-// 	}
-// }
+	for _, stest := range sTestsCDRsIT {
+		t.Run(cdrsConfDIR, stest)
+	}
+}
 
-// func testV2CDRsInitConfig(t *testing.T) {
-// 	var err error
-// 	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
-// 	if *encoding == utils.MetaGOB {
-// 		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR+"_gob")
-// 	}
-// 	if cdrsCfg, err = config.NewCGRConfigFromPath(cdrsCfgPath); err != nil {
-// 		t.Fatal("Got config error: ", err.Error())
-// 	}
-// }
+func testV2CDRsInitConfig(t *testing.T) {
+	var err error
+	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
+	if *encoding == utils.MetaGOB {
+		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR+"_gob")
+	}
+	if cdrsCfg, err = config.NewCGRConfigFromPath(context.Background(), cdrsCfgPath); err != nil {
+		t.Fatal("Got config error: ", err.Error())
+	}
+}
 
-// func testV2CDRsInitDataDb(t *testing.T) {
-// 	if err := engine.InitDataDB(cdrsCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+func testV2CDRsInitDataDb(t *testing.T) {
+	if err := engine.InitDataDB(cdrsCfg); err != nil {
+		t.Fatal(err)
+	}
+}
 
-// // InitDb so we can rely on count
-// func testV2CDRsInitCdrDb(t *testing.T) {
-// 	if err := engine.InitStorDB(cdrsCfg); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+// InitDb so we can rely on count
+func testV2CDRsInitCdrDb(t *testing.T) {
+	if err := engine.InitStorDB(cdrsCfg); err != nil {
+		t.Fatal(err)
+	}
+}
 
-// func testV2CDRsStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+func testV2CDRsStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
 
-// // Connect rpc client to rater
-// func testV2CDRsRpcConn(t *testing.T) {
-// 	cdrsRpc, err = newRPCClient(cdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-// 	if err != nil {
-// 		t.Fatal("Could not connect to rater: ", err.Error())
-// 	}
-// }
+// Connect rpc client to rater
+func testV2CDRsRpcConn(t *testing.T) {
+	cdrsRpc, err = newRPCClient(cdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
 
-// func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
-// 	var loadInst utils.LoadInstance
-// 	if err := cdrsRpc.Call(utils.APIerSv2LoadTariffPlanFromFolder,
-// 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-// 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
-// 		t.Error(err)
-// 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
-// 	var resp string
-// 	if err := cdrsRpc.Call(utils.APIerSv1RemoveChargerProfile,
-// 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {
-// 		t.Error(err)
-// 	} else if resp != utils.OK {
-// 		t.Error("Unexpected reply returned", resp)
-// 	}
-// 	var reply *engine.ChargerProfile
-// 	if err := cdrsRpc.Call(utils.APIerSv1GetChargerProfile,
-// 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"},
-// 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-// 		t.Error(err)
-// 	}
-// }
+func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
+	caching := utils.MetaReload
+	var rpl string
+	if err := cdrsRpc.Call(context.Background(), utils.LoaderSv1Run,
+		&loaders.ArgsProcessFolder{
+			APIOpts: map[string]interface{}{
+				utils.MetaCache:       caching,
+				utils.MetaStopOnError: true,
+			},
+		}, &rpl); err != nil {
+		t.Error(err)
+	} else if rpl != utils.OK {
+		t.Error("Unexpected reply returned:", rpl)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	var resp string
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	var reply *engine.ChargerProfile
+	if err := cdrsRpc.Call(context.Background(), utils.AdminSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
 
-// func testV2CDRsProcessCDR(t *testing.T) {
-// 	args := &utils.CGREvent{
-// 		Flags:  []string{utils.MetaRALs},
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]interface{}{
-// 			utils.OriginID:     "testV2CDRsProcessCDR1",
-// 			utils.OriginHost:   "192.168.1.1",
-// 			utils.Source:       "testV2CDRsProcessCDR",
-// 			utils.RequestType:  utils.MetaRated,
-// 			utils.Category:     "call",
-// 			utils.AccountField: "testV2CDRsProcessCDR",
-// 			utils.Subject:      "ANY2CNT",
-// 			utils.Destination:  "+4986517174963",
-// 			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-// 			utils.Usage:        time.Minute,
-// 			"field_extr1":      "val_extr1",
-// 			"fieldextr2":       "valextr2",
-// 		},
-// 	}
+func testV2CDRsProcessCDR(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:     "testV2CDRsProcessCDR1",
+			utils.OriginHost:   "192.168.1.1",
+			utils.Source:       "testV2CDRsProcessCDR",
+			utils.RequestType:  utils.MetaRated,
+			utils.Category:     "call",
+			utils.AccountField: "testV2CDRsProcessCDR",
+			utils.Subject:      "ANY2CNT",
+			utils.Destination:  "+4986517174963",
+			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:        time.Minute,
+			"field_extr1":      "val_extr1",
+			"fieldextr2":       "valextr2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRateS:      false,
+			utils.OptsCDRsExport: false,
+			utils.OptsAccountS:   false,
+		},
+	}
 
-// 	var reply string
-// 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply received: ", reply)
-// 	}
-// }
+	var reply string
+	if err := cdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+}
 
 // func testV2CDRsGetCdrs(t *testing.T) {
 // 	var cdrCnt int64
@@ -735,8 +747,8 @@ package general_tests
 // 	}
 // }
 
-// func testV2CDRsKillEngine(t *testing.T) {
-// 	if err := engine.KillEngine(*waitRater); err != nil {
-// 		t.Error(err)
-// 	}
-// }
+func testV2CDRsKillEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
