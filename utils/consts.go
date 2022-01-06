@@ -2538,6 +2538,13 @@ const (
 	NATSJetStreamMaxWaitProcessedCfg     = "natsJetStreamMaxWaitProcessed"
 )
 
+// Paginator options
+const (
+	PageLimitOpt    = "*pageLimit"
+	PageOffsetOpt   = "*pageOffset"
+	PageMaxItemsOpt = "*pageMaxItems"
+)
+
 // Analyzers constants
 const (
 	MetaScorch  = "*scorch"

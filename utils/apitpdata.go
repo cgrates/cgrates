@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -60,6 +61,50 @@ func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
 		limit = len(in)
 	}
 	return CloneStringSlice(in[offset:limit])
+}
+
+func (args *ArgsItemIDs) PaginateStringSlice(in []string) (out []string, err error) {
+	if len(in) == 0 {
+		return
+	}
+	var limit, offset, maxItems int
+	if limitIface, has := args.APIOpts[PageLimitOpt]; has {
+		var value int64
+		if value, err = IfaceAsTInt64(limitIface); err != nil {
+			return
+		}
+		limit = int(value)
+	}
+	if offsetIface, has := args.APIOpts[PageOffsetOpt]; has {
+		var value int64
+		if value, err = IfaceAsTInt64(offsetIface); err != nil {
+			return
+		}
+		offset = int(value)
+	}
+	if maxItemsIface, has := args.APIOpts[PageMaxItemsOpt]; has {
+		var value int64
+		if value, err = IfaceAsTInt64(maxItemsIface); err != nil {
+			return
+		}
+		maxItems = int(value)
+	}
+	if maxItems != 0 && maxItems < limit+offset {
+		return nil, fmt.Errorf("SERVER_ERROR: maximum number of items exceeded")
+	}
+	if limit == 0 && offset == 0 {
+		return in, nil
+	}
+	if offset > len(in) {
+		return
+	}
+	if offset != 0 && limit != 0 {
+		limit = limit + offset
+	}
+	if limit == 0 || limit > len(in) {
+		limit = len(in)
+	}
+	return in[offset:limit], nil
 }
 
 // Clone creates a clone of the object
