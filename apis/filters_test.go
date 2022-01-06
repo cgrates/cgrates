@@ -104,11 +104,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(2), utils.ToJSON(&replyCnt2))
 	}
 
-	args5 := &utils.PaginatorWithTenant{
-		Tenant:    "",
-		Paginator: utils.Paginator{},
-		APIOpts:   nil,
-	}
+	args5 := &utils.ArgsItemIDs{}
 	var reply5 []string
 	err = admS.GetFilterIDs(context.Background(), args5, &reply5)
 	if err != nil {
@@ -146,11 +142,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(1), utils.ToJSON(&replyCnt3))
 	}
 
-	args6 := &utils.PaginatorWithTenant{
-		Tenant:    "",
-		Paginator: utils.Paginator{},
-		APIOpts:   nil,
-	}
+	args6 := &utils.ArgsItemIDs{}
 	var reply6 []string
 	err = admS.GetFilterIDs(context.Background(), args6, &reply6)
 	if err != nil {
@@ -183,11 +175,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
 
-	args7 := &utils.PaginatorWithTenant{
-		Tenant:    "",
-		Paginator: utils.Paginator{},
-		APIOpts:   nil,
-	}
+	args7 := &utils.ArgsItemIDs{}
 	var reply7 []string
 	err = admS.GetFilterIDs(context.Background(), args7, &reply7)
 	if err == nil || err != utils.ErrNotFound {
@@ -1175,11 +1163,7 @@ func TestFiltersGetFilterIDs(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 
-	args6 := &utils.PaginatorWithTenant{
-		Tenant:    "",
-		Paginator: utils.Paginator{},
-		APIOpts:   nil,
-	}
+	args6 := &utils.ArgsItemIDs{}
 	var reply6 []string
 	err := admS.GetFilterIDs(context.Background(), args6, &reply6)
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
