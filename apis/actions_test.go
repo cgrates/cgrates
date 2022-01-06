@@ -76,7 +76,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 	var actPrfIDs []string
 	expactPrfIDs := []string{"actID"}
 
-	if err := adms.GetActionProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
+	if err := adms.GetActionProfileIDs(context.Background(), &utils.ArgsItemIDs{},
 		&actPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actPrfIDs, expactPrfIDs) {
@@ -352,7 +352,7 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 	experr := "NOT_IMPLEMENTED"
 
 	if err := adms.GetActionProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, received: <%+v>", experr, err)
@@ -379,7 +379,7 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 	var reply []string
 
 	if err := adms.GetActionProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)

@@ -74,7 +74,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 	var sqPrfIDs []string
 	expsqPrfIDs := []string{"sqID"}
 
-	if err := adms.GetStatQueueProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
+	if err := adms.GetStatQueueProfileIDs(context.Background(), &utils.ArgsItemIDs{},
 		&sqPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sqPrfIDs, expsqPrfIDs) {
@@ -351,7 +351,7 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 	experr := "NOT_IMPLEMENTED"
 
 	if err := adms.GetStatQueueProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -378,7 +378,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 	var reply []string
 
 	if err := adms.GetStatQueueProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)

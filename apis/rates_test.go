@@ -158,9 +158,7 @@ func TestRatesGetRateProfileIDs(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	args := &utils.PaginatorWithTenant{
-		Tenant: utils.EmptyString,
-	}
+	args := &utils.ArgsItemIDs{}
 	result := &[]string{}
 	expected := &[]string{"RP1"}
 	err = admS.GetRateProfileIDs(context.Background(), args, result)
@@ -197,7 +195,7 @@ func TestRatesGetRateProfile2(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "tenant",
 	}
 	result := &[]string{}
@@ -219,7 +217,7 @@ func TestRatesGetRateProfileErr(t *testing.T) {
 	dataDBMock := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "tenant",
 	}
 	result := &[]string{}
@@ -241,7 +239,7 @@ func TestRatesGetRateProfileErr2(t *testing.T) {
 	}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "tenant",
 	}
 	result := &[]string{}

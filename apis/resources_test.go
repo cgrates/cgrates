@@ -72,7 +72,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 	var rsPrfIDs []string
 	expRsPrfIDs := []string{"RES_1"}
 
-	if err := adms.GetResourceProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
+	if err := adms.GetResourceProfileIDs(context.Background(), &utils.ArgsItemIDs{},
 		&rsPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsPrfIDs, expRsPrfIDs) {
@@ -356,7 +356,7 @@ func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
 	experr := "NOT_IMPLEMENTED"
 
 	if err := adms.GetResourceProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -383,7 +383,7 @@ func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
 	var reply []string
 
 	if err := adms.GetResourceProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)

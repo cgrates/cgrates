@@ -45,15 +45,15 @@ func (adms *AdminSv1) GetChargerProfile(ctx *context.Context, arg *utils.TenantI
 }
 
 // GetChargerProfileIDs returns list of chargerProfile IDs registered for a tenant
-func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, chPrfIDs *[]string) error {
+func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, chPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := adms.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
-		return err
+	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	var keys []string
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
@@ -62,8 +62,8 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Pag
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*chPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
+	*chPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	return
 }
 
 // GetChargerProfileCount returns the total number of ChargerProfiles registered for a tenant

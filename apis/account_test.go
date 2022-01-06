@@ -566,10 +566,8 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	}
 	var getRply []string
 	err = admS.GetAccountIDs(context.Background(),
-		&utils.PaginatorWithTenant{
-			Tenant:    "testTenant",
-			Paginator: utils.Paginator{},
-			APIOpts:   nil,
+		&utils.ArgsItemIDs{
+			Tenant: "testTenant",
 		}, &getRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -624,10 +622,8 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	}
 	var getRply3 []string
 	err = admS.GetAccountIDs(context.Background(),
-		&utils.PaginatorWithTenant{
-			Tenant:    "testTenant",
-			Paginator: utils.Paginator{},
-			APIOpts:   nil,
+		&utils.ArgsItemIDs{
+			Tenant: "testTenant",
 		}, &getRply3)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -681,10 +677,8 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 
 	var getRplyID []string
 	err = admS.GetAccountIDs(context.Background(),
-		&utils.PaginatorWithTenant{
-			Tenant:    "testTenant",
-			Paginator: utils.Paginator{},
-			APIOpts:   nil,
+		&utils.ArgsItemIDs{
+			Tenant: "testTenant",
 		}, &getRplyID)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -734,10 +728,8 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 
 	var getRplyID2 []string
 	err = admS.GetAccountIDs(context.Background(),
-		&utils.PaginatorWithTenant{
-			Tenant:    "testTenant",
-			Paginator: utils.Paginator{},
-			APIOpts:   nil,
+		&utils.ArgsItemIDs{
+			Tenant: "testTenant",
 		}, &getRplyID2)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
@@ -770,9 +762,7 @@ func TestAccountGetAccountIDSError(t *testing.T) {
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	var getRplyCount3 []string
 	err := admS.GetAccountIDs(context.Background(),
-		&utils.PaginatorWithTenant{
-			APIOpts: nil,
-		}, &getRplyCount3)
+		&utils.ArgsItemIDs{}, &getRplyCount3)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
 	}

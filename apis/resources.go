@@ -44,15 +44,15 @@ func (adms *AdminSv1) GetResourceProfile(ctx *context.Context, arg *utils.Tenant
 }
 
 // GetResourceProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
+func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := adms.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
-		return err
+	prfx := utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	var keys []string
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
@@ -61,8 +61,8 @@ func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.Pa
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*rsPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
+	*rsPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	return
 }
 
 // GetResourceProfileCount returns the total number of ResourceProfileIDs registered for a tenant

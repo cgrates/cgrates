@@ -44,15 +44,15 @@ func (adms *AdminSv1) GetStatQueueProfile(ctx *context.Context, arg *utils.Tenan
 }
 
 // GetStatQueueProfileIDs returns list of statQueueProfile IDs registered for a tenant
-func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, stsPrfIDs *[]string) error {
+func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, stsPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := adms.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
-		return err
+	prfx := utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	var keys []string
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
@@ -61,8 +61,8 @@ func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.P
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*stsPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
+	*stsPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	return
 }
 
 // GetStatQueueProfileCount returns the total number of StatQueueProfileIDs registered for a tenant
