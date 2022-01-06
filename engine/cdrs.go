@@ -185,9 +185,8 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 
 // processEvent processes a CGREvent based on arguments
 // in case of partially executed, both error and evs will be returned
-func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (evs []*utils.EventWithFlags, err error) {
+func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (evs []*utils.EventsWithOpts, err error) {
 	// making the options
-
 	var attrS bool
 	if attrS, err = GetBoolOpts(ctx, ev.Tenant, ev, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
 		config.CDRsAttributesDftOpt, utils.OptsAttributeS); err != nil {
@@ -306,6 +305,15 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 		}
 	}
 
+	// now that we did all the requested processed events, we have to build our EventsWithOpts
+	evs = make([]*utils.EventsWithOpts, len(cgrEvs))
+	for i, cgrEv := range cgrEvs {
+		evs[i] = &utils.EventsWithOpts{
+			Event: cgrEv.Event,
+			Opts:  cgrEv.APIOpts,
+		}
+	}
+
 	if partiallyExecuted {
 		err = utils.ErrPartiallyExecuted
 	}
@@ -348,7 +356,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *utils.CGREvent,
 }
 
 // V1ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
-func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CGREvent, evs *[]*utils.EventWithFlags) (err error) {
+func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CGREvent, evs *[]*utils.EventsWithOpts) (err error) {
 	if arg.ID == utils.EmptyString {
 		arg.ID = utils.GenUUID()
 	}
@@ -365,7 +373,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*evs = *cachedResp.Result.(*[]*utils.EventWithFlags)
+				*evs = *cachedResp.Result.(*[]*utils.EventsWithOpts)
 			}
 			return cachedResp.Error
 		}
@@ -375,7 +383,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 	}
 	// end of RPC caching
 
-	var procEvs []*utils.EventWithFlags
+	var procEvs []*utils.EventsWithOpts
 	if procEvs, err = cdrS.processEvent(ctx, arg); err != nil {
 		return
 	}

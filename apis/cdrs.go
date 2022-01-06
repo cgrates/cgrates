@@ -36,8 +36,14 @@ type CDRsV1 struct {
 	cdrS *engine.CDRServer
 }
 
-// ProcessEvent
+// ProcessEvent will process the CGREvent
 func (cdrSv1 *CDRsV1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *string) error {
 	return cdrSv1.cdrS.V1ProcessEvent(ctx, args, reply)
+}
+
+// ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
+func (cdrSv1 *CDRsV1) ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent,
+	reply *[]*utils.EventsWithOpts) error {
+	return cdrSv1.cdrS.V1ProcessEventWithGet(ctx, args, reply)
 }
