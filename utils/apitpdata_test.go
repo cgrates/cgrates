@@ -620,3 +620,66 @@ func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(mp), ToJSON(rplyM))
 	}
 }
+
+func TestAPITPDataPaginate(t *testing.T) {
+	in := []string{"FLTR_1", "FLTR_2", "FLTR_3", "FLTR_4", "FLTR_5", "FLTR_6", "FLTR_7",
+		"FLTR_8", "FLTR_9", "FLTR_10", "FLTR_11", "FLTR_12", "FLTR_13", "FLTR_14",
+		"FLTR_15", "FLTR_16", "FLTR_17", "FLTR_18", "FLTR_19", "FLTR_20"}
+	args := &ArgsItemIDs{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			PageLimitOpt:    2,
+			PageOffsetOpt:   6,
+			PageMaxItemsOpt: 9,
+		},
+	}
+
+	exp := []string{"FLTR_7", "FLTR_8"}
+	if rcv, err := Paginate(in, args.APIOpts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	args.APIOpts[PageLimitOpt] = 0
+	args.APIOpts[PageOffsetOpt] = 18
+	args.APIOpts[PageMaxItemsOpt] = 50
+	exp = []string{"FLTR_19", "FLTR_20"}
+	if rcv, err := Paginate(in, args.APIOpts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	args.APIOpts[PageOffsetOpt] = 0
+	if rcv, err := Paginate(in, args.APIOpts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, in) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", in, rcv)
+	}
+
+	args.APIOpts[PageLimitOpt] = 25
+	args.APIOpts[PageOffsetOpt] = 18
+	if rcv, err := Paginate(in, args.APIOpts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	args.APIOpts[PageLimitOpt] = 2
+	args.APIOpts[PageOffsetOpt] = 22
+	var expOut []string
+	if rcv, err := Paginate(in, args.APIOpts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expOut) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expOut, rcv)
+	}
+
+	args.APIOpts[PageLimitOpt] = 2
+	args.APIOpts[PageOffsetOpt] = 4
+	args.APIOpts[PageMaxItemsOpt] = 5
+	experr := `SERVER_ERROR: maximum number of items exceeded`
+	if _, err := Paginate(in, args.APIOpts); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
