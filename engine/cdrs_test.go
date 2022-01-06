@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -2489,11 +2490,12 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	defer func() {
 		config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
 	}()
-	var rply []*utils.EventWithFlags
+	var rply []*utils.EventsWithOpts
 	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &rply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
+	fmt.Println(utils.ToJSON(rply))
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -2574,7 +2576,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	defer func() {
 		config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses] = defaultConf
 	}()
-	var rply []*utils.EventWithFlags
+	var rply []*utils.EventsWithOpts
 	err := newCDRSrv.V1ProcessEventWithGet(context.Background(), cgrEv, &rply)
 	if err == nil || err.Error() != "cannot convert field: 1s to bool" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "cannot convert field: 1s to bool", err)
@@ -2712,7 +2714,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 		},
 	}
 
-	rply := []*utils.EventWithFlags{}
+	rply := []*utils.EventsWithOpts{}
 	Cache.Set(context.Background(), utils.CacheRPCResponses, "CDRsV1.ProcessEvent:testID",
 		&utils.CachedRPCResponse{Result: &rply, Error: nil},
 		nil, true, utils.NonTransactional)

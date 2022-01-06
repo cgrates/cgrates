@@ -324,7 +324,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 			utils.MetaExporterID: "CSVExporterBuffered",
 			utils.MetaUsage:      123 * time.Nanosecond,
 		},
-		Events: []*EventsWithOpts{
+		Events: []*utils.EventsWithOpts{
 			{
 				Event: map[string]interface{}{
 					utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
@@ -481,7 +481,7 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.MetaExporterID: "InexistentExport",
 		},
-		Events: []*EventsWithOpts{
+		Events: []*utils.EventsWithOpts{
 			{
 				Event: map[string]interface{}{
 					utils.AccountField: "not_exported_Acc",
@@ -502,7 +502,7 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.MetaExporterID: "CSVExporterBuffered",
 		},
-		Events: []*EventsWithOpts{
+		Events: []*utils.EventsWithOpts{
 			{
 				Event: map[string]interface{}{
 					utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),

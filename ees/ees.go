@@ -325,12 +325,7 @@ func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv interface{}
 type ArchiveEventsArgs struct {
 	Tenant  string
 	APIOpts map[string]interface{}
-	Events  []*EventsWithOpts
-}
-
-type EventsWithOpts struct {
-	Event map[string]interface{}
-	Opts  map[string]interface{}
+	Events  []*utils.EventsWithOpts
 }
 
 // V1ArchiveEventsInReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.

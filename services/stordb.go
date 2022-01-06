@@ -49,7 +49,7 @@ type StorDBService struct {
 	srvDep map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
