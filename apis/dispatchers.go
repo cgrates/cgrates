@@ -44,25 +44,27 @@ func (admS *AdminSv1) GetDispatcherProfile(ctx *context.Context, arg *utils.Tena
 }
 
 // GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
-func (admS *AdminSv1) GetDispatcherProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
+func (admS *AdminSv1) GetDispatcherProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, dPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := admS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
-		return err
+	prfx := utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	var keys []string
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
 	}
-	keys = args.PaginateStringSlice(keys)
+	if keys, err = utils.Paginate(keys, args.APIOpts); err != nil {
+		return
+	}
 	*dPrfIDs = make([]string, len(keys))
 	for i, key := range keys {
 		(*dPrfIDs)[i] = key[len(prfx):]
 	}
-	return nil
+	return
 }
 
 // GetDispatcherProfileCount returns the total number of DispatcherProfiles registered for a tenant
@@ -157,25 +159,27 @@ func (admS *AdminSv1) GetDispatcherHost(ctx *context.Context, arg *utils.TenantI
 }
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
-func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, tenantArg *utils.PaginatorWithTenant, dPrfIDs *[]string) error {
+func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, tenantArg *utils.ArgsItemIDs, dPrfIDs *[]string) (err error) {
 	tenant := tenantArg.Tenant
 	if tenant == utils.EmptyString {
 		tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.DispatcherHostPrefix + tenant + utils.ConcatenatedKeySep
-	keys, err := admS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
+	prfx := utils.DispatcherHostPrefix + tenant + utils.ConcatenatedKeySep + tenantArg.Prefix
+	var keys []string
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
 	}
-	keys = tenantArg.PaginateStringSlice(keys)
+	if keys, err = utils.Paginate(keys, tenantArg.APIOpts); err != nil {
+		return
+	}
 	*dPrfIDs = make([]string, len(keys))
 	for i, key := range keys {
 		(*dPrfIDs)[i] = key[len(prfx):]
 	}
-	return nil
+	return
 }
 
 // GetDispatcherHostCount returns the total number of DispatcherHosts registered for a tenant

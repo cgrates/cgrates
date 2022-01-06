@@ -44,15 +44,15 @@ func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDW
 }
 
 // GetRouteProfileIDs returns list of routeProfile IDs registered for a tenant
-func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, sppPrfIDs *[]string) error {
+func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, sppPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := adms.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
-		return err
+	prfx := utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	var keys []string
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
@@ -61,8 +61,8 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.Pagin
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*sppPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
+	*sppPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	return
 }
 
 // GetRouteProfileCount sets in reply var the total number of RouteProfileIDs registered for the received tenant

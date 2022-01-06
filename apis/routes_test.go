@@ -73,7 +73,7 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 	var rtPrfIDs []string
 	exprtPrfIDs := []string{"routeID"}
 
-	if err := adms.GetRouteProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
+	if err := adms.GetRouteProfileIDs(context.Background(), &utils.ArgsItemIDs{},
 		&rtPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtPrfIDs, exprtPrfIDs) {
@@ -351,7 +351,7 @@ func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
 	experr := "NOT_IMPLEMENTED"
 
 	if err := adms.GetRouteProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -378,7 +378,7 @@ func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
 	var reply []string
 
 	if err := adms.GetRouteProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)

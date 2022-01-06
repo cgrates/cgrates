@@ -75,7 +75,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 	var thPrfIDs []string
 	expThPrfIDs := []string{"thdID"}
 
-	if err := adms.GetThresholdProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
+	if err := adms.GetThresholdProfileIDs(context.Background(), &utils.ArgsItemIDs{},
 		&thPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thPrfIDs, expThPrfIDs) {
@@ -353,7 +353,7 @@ func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
 	experr := "NOT_IMPLEMENTED"
 
 	if err := adms.GetThresholdProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -380,7 +380,7 @@ func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 	var reply []string
 
 	if err := adms.GetThresholdProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)

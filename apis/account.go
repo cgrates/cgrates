@@ -47,15 +47,15 @@ func (admS *AdminSv1) GetAccount(ctx *context.Context, arg *utils.TenantIDWithAP
 }
 
 // GetAccountIDs returns list of action profile IDs registered for a tenant
-func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.PaginatorWithTenant, actPrfIDs *[]string) error {
+func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := admS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
-		return err
+	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	var keys []string
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
@@ -64,8 +64,8 @@ func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.PaginatorW
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*actPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
+	*actPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	return
 }
 
 // GetAccountCount sets in reply var the total number of AccountIDs registered for a tenant

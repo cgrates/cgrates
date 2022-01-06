@@ -354,7 +354,7 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 	}
 	var getRply []string
 	err = admS.GetChargerProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{}, &getRply)
+		&utils.ArgsItemIDs{}, &getRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -385,7 +385,7 @@ func TestChargerSSetGetChargerProfileIDs(t *testing.T) {
 
 	var getRply2 []string
 	err = admS.GetChargerProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{}, &getRply2)
+		&utils.ArgsItemIDs{}, &getRply2)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -413,7 +413,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 	engine.Cache = newCache
 	var getRply []string
 	err := admS.GetChargerProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{}, &getRply)
+		&utils.ArgsItemIDs{}, &getRply)
 	if err == nil || err.Error() != "NOT_FOUND" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND", err)
 	}
@@ -434,7 +434,7 @@ func TestChargerSSetGetChargerProfileIDsErr2(t *testing.T) {
 	engine.Cache = newCache
 	var getRply []string
 	err := admS.GetChargerProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{}, &getRply)
+		&utils.ArgsItemIDs{}, &getRply)
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_IMPLEMENTED", err)
 	}

@@ -48,15 +48,15 @@ func (admS *AdminSv1) GetAttributeProfile(ctx *context.Context, arg *utils.Tenan
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
+func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := admS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
-		return err
+	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	var keys []string
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
@@ -65,8 +65,8 @@ func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.P
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*attrPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
+	*attrPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	return
 }
 
 // GetAttributeProfileCount returns the total number of AttributeProfileIDs registered for a tenant

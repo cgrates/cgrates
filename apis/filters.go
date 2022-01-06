@@ -100,7 +100,7 @@ func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*fltrIDs, err = args.PaginateStringSlice(retIDs)
+	*fltrIDs, err = utils.Paginate(retIDs, args.APIOpts)
 	return
 }
 

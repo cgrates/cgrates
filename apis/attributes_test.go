@@ -84,7 +84,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	var ids []string
 	expected := []string{"TestGetAttributeProfile"}
 	if err := admS.GetAttributeProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{}, &ids); err != nil {
+		&utils.ArgsItemIDs{}, &ids); err != nil {
 		t.Error(err)
 	} else if len(ids) != len(expected) {
 		t.Errorf("Expected %+v, received %+v", ids, expected)
@@ -372,7 +372,7 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 	var reply []string
 	expected := "NOT_IMPLEMENTED"
 	if err := admS.GetAttributeProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -398,7 +398,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	var reply []string
 	expected := "NOT_FOUND"
 	if err := admS.GetAttributeProfileIDs(context.Background(),
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)

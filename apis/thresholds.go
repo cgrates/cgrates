@@ -44,15 +44,15 @@ func (adms *AdminSv1) GetThresholdProfile(ctx *context.Context, arg *utils.Tenan
 }
 
 // GetThresholdProfileIDs returns list of thresholdProfile IDs registered for a tenant
-func (adms *AdminSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, thPrfIDs *[]string) error {
+func (adms *AdminSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, thPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := adms.dm.DataDB().GetKeysForPrefix(ctx, prfx)
-	if err != nil {
-		return err
+	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	var keys []string
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
@@ -61,8 +61,8 @@ func (adms *AdminSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.P
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*thPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
+	*thPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	return
 }
 
 // GetThresholdProfileCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
