@@ -63,31 +63,38 @@ func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
 	return CloneStringSlice(in[offset:limit])
 }
 
-func (args *ArgsItemIDs) PaginateStringSlice(in []string) (out []string, err error) {
-	if len(in) == 0 {
-		return
-	}
-	var limit, offset, maxItems int
-	if limitIface, has := args.APIOpts[PageLimitOpt]; has {
+func getPaginateOpts(opts map[string]interface{}) (limit int, offset int, maxItems int, err error) {
+	if limitIface, has := opts[PageLimitOpt]; has {
 		var value int64
 		if value, err = IfaceAsTInt64(limitIface); err != nil {
 			return
 		}
 		limit = int(value)
 	}
-	if offsetIface, has := args.APIOpts[PageOffsetOpt]; has {
+	if offsetIface, has := opts[PageOffsetOpt]; has {
 		var value int64
 		if value, err = IfaceAsTInt64(offsetIface); err != nil {
 			return
 		}
 		offset = int(value)
 	}
-	if maxItemsIface, has := args.APIOpts[PageMaxItemsOpt]; has {
+	if maxItemsIface, has := opts[PageMaxItemsOpt]; has {
 		var value int64
 		if value, err = IfaceAsTInt64(maxItemsIface); err != nil {
 			return
 		}
 		maxItems = int(value)
+	}
+	return
+}
+
+func Paginate(in []string, opts map[string]interface{}) (out []string, err error) {
+	if len(in) == 0 {
+		return
+	}
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = getPaginateOpts(opts); err != nil {
+		return
 	}
 	if maxItems != 0 && maxItems < limit+offset {
 		return nil, fmt.Errorf("SERVER_ERROR: maximum number of items exceeded")
