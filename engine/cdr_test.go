@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"strconv"
 	"testing"
@@ -519,5 +520,109 @@ func TestAsExternalCDR(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(extCdr, eCDR) {
 		t.Errorf("\nExpected: %+v, \nreceived: %+v", utils.ToJSON(extCdr), utils.ToJSON(eCDR))
+	}
+}
+
+func TestAsExternalCDRDefaultTOR(t *testing.T) {
+	extCdr := &ExternalCDR{
+		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.MetaDefault,
+		Usage: "10", Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
+		Tenant: "cgrates.org", Category: "call", Account: "1001",
+		Subject: "1001", Destination: "1002",
+		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage:      10, Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	if eCDR := eStorCdr.AsExternalCDR(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(extCdr, eCDR) {
+		t.Errorf("\nExpected: %+v, \nreceived: %+v", utils.ToJSON(extCdr), utils.ToJSON(eCDR))
+	}
+}
+
+func TestCDRString(t *testing.T) {
+	testCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
+		Tenant: "cgrates.org", Category: "call", Account: "1001",
+		Subject: "1001", Destination: "1002",
+		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage:      10, Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	mrsh, _ := json.Marshal(testCdr)
+	expected := string(mrsh)
+	result := testCdr.String()
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nreceived <%+v>", expected, result)
+	}
+}
+func TestCDRAsCDRsql(t *testing.T) {
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
+		Tenant: "cgrates.org", Category: "call", Account: "1001",
+		Subject: "1001", Destination: "1002",
+		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage:      10, Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+
+	cdrSQL := new(CDRsql)
+	cdrSQL.Cgrid = cdr.CGRID
+	cdrSQL.RunID = cdr.RunID
+	cdrSQL.OriginHost = cdr.OriginHost
+	cdrSQL.Source = cdr.Source
+	cdrSQL.OriginID = cdr.OriginID
+	cdrSQL.TOR = cdr.ToR
+	cdrSQL.RequestType = cdr.RequestType
+	cdrSQL.Tenant = cdr.Tenant
+	cdrSQL.Category = cdr.Category
+	cdrSQL.Account = cdr.Account
+	cdrSQL.Subject = cdr.Subject
+	cdrSQL.Destination = cdr.Destination
+	cdrSQL.SetupTime = cdr.SetupTime
+	if !cdr.AnswerTime.IsZero() {
+		cdrSQL.AnswerTime = utils.TimePointer(cdr.AnswerTime)
+	}
+	cdrSQL.Usage = cdr.Usage.Nanoseconds()
+	cdrSQL.ExtraFields = utils.ToJSON(cdr.ExtraFields)
+	cdrSQL.CostSource = cdr.CostSource
+	cdrSQL.Cost = cdr.Cost
+	cdrSQL.ExtraInfo = cdr.ExtraInfo
+
+	result := cdr.AsCDRsql()
+	cdrSQL.CreatedAt = result.CreatedAt
+	if !reflect.DeepEqual(result, cdrSQL) {
+		t.Errorf("\nExpected <%+v>, \nreceived <%+v>", utils.ToJSON(cdrSQL), utils.ToJSON(result))
+	}
+}
+
+func TestCDRGetID(t *testing.T) {
+	uR := &UsageRecord{
+		RequestType: utils.MetaRated,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		Usage:       "10",
+	}
+	result := uR.GetID()
+	expected := utils.Sha1(uR.ToR, uR.RequestType, uR.Tenant, uR.Category, uR.Account, uR.Subject, uR.Destination, uR.SetupTime, uR.AnswerTime, uR.Usage)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nreceived <%+v>", utils.ToJSON(expected), utils.ToJSON(result))
 	}
 }
