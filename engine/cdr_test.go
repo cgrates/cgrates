@@ -443,3 +443,81 @@ func TestCDRAddDefaults(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eCDR, cdr)
 	}
 }
+
+func TestNewCDRFromExternalCDRSetupTimeError(t *testing.T) {
+	extCdr := &ExternalCDR{
+		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: "*testTime", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.MetaDefault,
+		Usage: "10", Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	_, err := NewCDRFromExternalCDR(extCdr, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Error(err)
+	}
+}
+
+func TestNewCDRFromExternalCDRAnswerTimeError(t *testing.T) {
+	extCdr := &ExternalCDR{
+		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: "*testTime", RunID: utils.MetaDefault,
+		Usage: "10", Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	_, err := NewCDRFromExternalCDR(extCdr, "")
+	if err == nil || err.Error() != "Unsupported time format" {
+		t.Error(err)
+	}
+}
+
+func TestNewCDRFromExternalCDRUsageError(t *testing.T) {
+	extCdr := &ExternalCDR{
+		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", RunID: utils.MetaDefault,
+		Usage: "testUsage", Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	_, err := NewCDRFromExternalCDR(extCdr, "")
+	if err == nil || err.Error() != `time: invalid duration "testUsage"` {
+		t.Error(err)
+	}
+}
+
+func TestCDRCloneNilCDR(t *testing.T) {
+	var storCdr *CDR
+	if clnStorCdr := storCdr.Clone(); !reflect.DeepEqual(storCdr, clnStorCdr) {
+		t.Errorf("\nExpecting: %+v, \nreceived: %+v", storCdr, clnStorCdr)
+	}
+}
+
+func TestAsExternalCDR(t *testing.T) {
+	extCdr := &ExternalCDR{
+		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.MetaDefault,
+		Usage: "10ns", Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
+		Tenant: "cgrates.org", Category: "call", Account: "1001",
+		Subject: "1001", Destination: "1002",
+		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage:      10, Cost: 1.01, PreRated: true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	if eCDR := eStorCdr.AsExternalCDR(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(extCdr, eCDR) {
+		t.Errorf("\nExpected: %+v, \nreceived: %+v", utils.ToJSON(extCdr), utils.ToJSON(eCDR))
+	}
+}
