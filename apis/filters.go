@@ -88,7 +88,7 @@ func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
 	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return

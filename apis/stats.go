@@ -49,7 +49,7 @@ func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.A
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	prfx := utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
 	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return

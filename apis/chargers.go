@@ -50,7 +50,7 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
 	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return

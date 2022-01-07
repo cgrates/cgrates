@@ -693,10 +693,10 @@ func (tID *TenantID) Equal(tID2 *TenantID) bool {
 }
 
 type ArgsItemIDs struct {
-	Tenant  string
-	ID      string
-	APIOpts map[string]interface{}
-	Prefix  string
+	Tenant      string
+	ID          string
+	APIOpts     map[string]interface{}
+	ItemsPrefix string
 }
 
 type PaginatorWithTenant struct {
