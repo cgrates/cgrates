@@ -53,7 +53,7 @@ func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.A
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
 	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return

@@ -52,7 +52,7 @@ func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.ArgsItemID
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
 	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return

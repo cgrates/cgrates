@@ -49,7 +49,7 @@ func (admS *AdminSv1) GetDispatcherProfileIDs(ctx *context.Context, args *utils.
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	prfx := utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
 	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return
@@ -164,7 +164,7 @@ func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, tenantArg *util
 	if tenant == utils.EmptyString {
 		tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.DispatcherHostPrefix + tenant + utils.ConcatenatedKeySep + tenantArg.Prefix
+	prfx := utils.DispatcherHostPrefix + tenant + utils.ConcatenatedKeySep + tenantArg.ItemsPrefix
 	var keys []string
 	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err

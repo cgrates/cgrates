@@ -49,7 +49,7 @@ func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.Ar
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep + args.Prefix
+	prfx := utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
 	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return
