@@ -160,7 +160,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 		if len(indexedSlice) == 0 {
 			indexesFilter = make(map[string]utils.StringSet)
 			for val, strmap := range indexes {
-				if strings.Index(val, arg.FilterField) != -1 {
+				if strings.Contains(val, arg.FilterField) {
 					indexesFilter[val] = strmap
 					for _, value := range strmap.AsSlice() {
 						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
@@ -173,7 +173,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 		} else {
 			var cloneIndexSlice []string
 			for val, strmap := range indexesFilter {
-				if strings.Index(val, arg.FilterField) != -1 {
+				if strings.Contains(val, arg.FilterField) {
 					for _, value := range strmap.AsSlice() {
 						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
 					}
@@ -188,7 +188,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 	if arg.FilterValue != utils.EmptyString {
 		if len(indexedSlice) == 0 {
 			for val, strmap := range indexes {
-				if strings.Index(val, arg.FilterValue) != -1 {
+				if strings.Contains(val, arg.FilterValue) {
 					for _, value := range strmap.AsSlice() {
 						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 					}
@@ -200,7 +200,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 		} else {
 			var cloneIndexSlice []string
 			for val, strmap := range indexesFilter {
-				if strings.Index(val, arg.FilterValue) != -1 {
+				if strings.Contains(val, arg.FilterValue) {
 					for _, value := range strmap.AsSlice() {
 						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
 					}
