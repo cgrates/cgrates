@@ -71,7 +71,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	}
 
 	var replyCnt int
-	argsCnt := &utils.TenantWithAPIOpts{
+	argsCnt := &utils.ArgsItemIDs{
 		Tenant: utils.CGRateSorg,
 	}
 	err = admS.GetFilterCount(context.Background(), argsCnt, &replyCnt)
@@ -93,7 +93,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	var replyCnt2 int
-	argsCnt2 := &utils.TenantWithAPIOpts{
+	argsCnt2 := &utils.ArgsItemIDs{
 		Tenant: utils.CGRateSorg,
 	}
 	err = admS.GetFilterCount(context.Background(), argsCnt2, &replyCnt2)
@@ -131,7 +131,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `"OK"`, utils.ToJSON(&replyRmv))
 	}
 	var replyCnt3 int
-	argsCnt3 := &utils.TenantWithAPIOpts{
+	argsCnt3 := &utils.ArgsItemIDs{
 		Tenant: utils.CGRateSorg,
 	}
 	err = admS.GetFilterCount(context.Background(), argsCnt3, &replyCnt3)
@@ -169,7 +169,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	}
 
 	var replyCnt4 int
-	argsCnt4 := &utils.TenantWithAPIOpts{}
+	argsCnt4 := &utils.ArgsItemIDs{}
 	err = admS.GetFilterCount(context.Background(), argsCnt4, &replyCnt4)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
@@ -684,7 +684,7 @@ func TestFiltersGetFilterCountError(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	var reply int
-	args := &utils.TenantWithAPIOpts{}
+	args := &utils.ArgsItemIDs{}
 
 	err := admS.GetFilterCount(context.Background(), args, &reply)
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {

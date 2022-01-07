@@ -82,7 +82,7 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetRouteProfileCount(context.Background(), &utils.TenantWithAPIOpts{},
+	if err := adms.GetRouteProfileCount(context.Background(), &utils.ArgsItemIDs{},
 		&rplyCount); err != nil {
 		t.Error(err)
 	} else if rplyCount != len(rtPrfIDs) {
@@ -415,7 +415,7 @@ func TestRoutesGetRouteProfileCountErrMock(t *testing.T) {
 	var reply int
 
 	if err := adms.GetRouteProfileCount(context.Background(),
-		&utils.TenantWithAPIOpts{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
@@ -440,7 +440,7 @@ func TestRoutesGetRouteProfileCountErrKeys(t *testing.T) {
 	var reply int
 
 	if err := adms.GetRouteProfileCount(context.Background(),
-		&utils.TenantWithAPIOpts{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)

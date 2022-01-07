@@ -274,7 +274,7 @@ func TestRatesGetRateProfileCount(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	args := &utils.TenantWithAPIOpts{
+	args := &utils.ArgsItemIDs{
 		Tenant: "tenant",
 	}
 	result := utils.IntPointer(0)
@@ -313,9 +313,7 @@ func TestRatesGetRateProfileCountEmptyTenant(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	args := &utils.TenantWithAPIOpts{
-		Tenant: "",
-	}
+	args := &utils.ArgsItemIDs{}
 	result := utils.IntPointer(0)
 	expected := utils.IntPointer(1)
 	err = admS.GetRateProfileCount(context.Background(), args, result)
@@ -335,9 +333,7 @@ func TestRatesGetRateProfileCountGetKeysError(t *testing.T) {
 	dataDBMock := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
-	args := &utils.TenantWithAPIOpts{
-		Tenant: "",
-	}
+	args := &utils.ArgsItemIDs{}
 	result := utils.IntPointer(0)
 	err := admS.GetRateProfileCount(context.Background(), args, result)
 	if err == nil || err != utils.ErrNotImplemented {
@@ -357,9 +353,7 @@ func TestRatesGetRateProfileCountKeysLenError(t *testing.T) {
 	}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
-	args := &utils.TenantWithAPIOpts{
-		Tenant: "",
-	}
+	args := &utils.ArgsItemIDs{}
 	result := utils.IntPointer(0)
 	err := admS.GetRateProfileCount(context.Background(), args, result)
 	if err == nil || err != utils.ErrNotFound {

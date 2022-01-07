@@ -61,27 +61,31 @@ func (adms *AdminSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.A
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*thPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
+		return
+	}
+	*thPrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
 	return
 }
 
 // GetThresholdProfileCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 ThresholdProfileIDs
-func (adms *AdminSv1) GetThresholdProfileCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (adms *AdminSv1) GetThresholdProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
+	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
-	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx,
-		utils.ThresholdProfilePrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
 		return utils.ErrNotFound
 	}
 	*reply = len(keys)
-	return nil
+	return
 }
 
 // SetThresholdProfile alters/creates a ThresholdProfile

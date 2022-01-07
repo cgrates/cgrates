@@ -85,9 +85,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetActionProfileCount(context.Background(), &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{},
-	},
+	if err := adms.GetActionProfileCount(context.Background(), &utils.ArgsItemIDs{},
 		&rplyCount); err != nil {
 		t.Error(err)
 	} else if rplyCount != len(actPrfIDs) {
@@ -416,10 +414,8 @@ func TestActionsGetActionProfileCountErrMock(t *testing.T) {
 	var reply int
 
 	if err := adms.GetActionProfileCount(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-			},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotImplemented, err)
 	}
@@ -443,10 +439,8 @@ func TestActionsGetActionProfileCountErrKeys(t *testing.T) {
 	var reply int
 
 	if err := adms.GetActionProfileCount(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-			},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
 	}
