@@ -74,7 +74,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 
 	//count the IDs
 	var nmbr int
-	if err := admS.GetAttributeProfileCount(context.Background(), &utils.TenantWithAPIOpts{}, &nmbr); err != nil {
+	if err := admS.GetAttributeProfileCount(context.Background(), &utils.ArgsItemIDs{}, &nmbr); err != nil {
 		t.Error(err)
 	} else if nmbr != 1 {
 		t.Errorf("Expected just one ID")
@@ -437,7 +437,7 @@ func TestAttributesGetAttributeProfileCountMockErr(t *testing.T) {
 	var reply int
 	expected := "NOT_IMPLEMENTED"
 	if err := admS.GetAttributeProfileCount(context.Background(),
-		&utils.TenantWithAPIOpts{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -451,7 +451,7 @@ func TestAttributesGetAttributeProfileCountMockErr(t *testing.T) {
 	expected = "NOT_FOUND"
 	admS.dm = engine.NewDataManager(dbMockNew, cfg.CacheCfg(), nil)
 	if err := admS.GetAttributeProfileCount(context.Background(),
-		&utils.TenantWithAPIOpts{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)

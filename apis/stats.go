@@ -61,20 +61,24 @@ func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.A
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*stsPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
+		return
+	}
+	*stsPrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
 	return
 }
 
 // GetStatQueueProfileCount returns the total number of StatQueueProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 StatQueueProfileIDs
-func (admS *AdminSv1) GetStatQueueProfileCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetStatQueueProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
+	prfx := utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx,
-		utils.StatQueueProfilePrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

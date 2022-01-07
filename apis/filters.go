@@ -100,7 +100,11 @@ func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*fltrIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
+		return
+	}
+	*fltrIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
 	return
 }
 
@@ -133,14 +137,14 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 
 // GetFilterCount returns the total number of FilterIDs registered for a tenant
 // returns ErrNotFound in case of 0 FilterIDs
-func (admS *AdminSv1) GetFilterCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetFilterCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
+	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx,
-		utils.FilterPrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

@@ -65,19 +65,23 @@ func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsIt
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*attrPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
+		return
+	}
+	*attrPrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
 	return
 }
 
 // GetRateProfileCount returns the total number of RateProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RateProfileIDs
-func (admS *AdminSv1) GetRateProfileCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetRateProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
+	prfx := utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
-	prfx := utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep
 	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}

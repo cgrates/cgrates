@@ -62,20 +62,24 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*chPrfIDs, err = utils.Paginate(retIDs, args.APIOpts)
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
+		return
+	}
+	*chPrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
 	return
 }
 
 // GetChargerProfileCount returns the total number of ChargerProfiles registered for a tenant
 // returns ErrNotFound in case of 0 ChargerProfiles
-func (admS *AdminSv1) GetChargerProfileCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetChargerProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
+	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
 	var keys []string
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx,
-		utils.ChargerProfilePrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

@@ -579,9 +579,8 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 
 	var getRplyCount int
 	err = admS.GetAccountCount(context.Background(),
-		&utils.TenantWithAPIOpts{
-			Tenant:  "testTenant",
-			APIOpts: nil,
+		&utils.ArgsItemIDs{
+			Tenant: "testTenant",
 		}, &getRplyCount)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -635,9 +634,8 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	}
 	var getRply4 int
 	err = admS.GetAccountCount(context.Background(),
-		&utils.TenantWithAPIOpts{
-			Tenant:  "testTenant",
-			APIOpts: nil,
+		&utils.ArgsItemIDs{
+			Tenant: "testTenant",
 		}, &getRply4)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -664,9 +662,8 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 
 	var getRplyCount2 int
 	err = admS.GetAccountCount(context.Background(),
-		&utils.TenantWithAPIOpts{
-			Tenant:  "testTenant",
-			APIOpts: nil,
+		&utils.ArgsItemIDs{
+			Tenant: "testTenant",
 		}, &getRplyCount2)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -718,9 +715,8 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 
 	var getRplyCount3 int
 	err = admS.GetAccountCount(context.Background(),
-		&utils.TenantWithAPIOpts{
-			Tenant:  "testTenant",
-			APIOpts: nil,
+		&utils.ArgsItemIDs{
+			Tenant: "testTenant",
 		}, &getRplyCount3)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
@@ -745,9 +741,7 @@ func TestAccountGetAccountCountError(t *testing.T) {
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	var getRplyCount3 int
 	err := admS.GetAccountCount(context.Background(),
-		&utils.TenantWithAPIOpts{
-			APIOpts: nil,
-		}, &getRplyCount3)
+		&utils.ArgsItemIDs{}, &getRplyCount3)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
 	}
