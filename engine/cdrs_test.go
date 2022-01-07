@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -2495,7 +2494,6 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, err)
 	}
-	fmt.Println(utils.ToJSON(rply))
 	expected := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
