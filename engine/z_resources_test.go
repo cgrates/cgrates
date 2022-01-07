@@ -6262,7 +6262,6 @@ func TestResourcesStartLoop(t *testing.T) {
 // 		"RES1": struct{}{},
 // 	}, nil, true, utils.NonTransactional)
 // 	_, err = rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID, utils.DurationPointer(10*time.Second))
-// 	fmt.Println(err)
 // }
 
 func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
