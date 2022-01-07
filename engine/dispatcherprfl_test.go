@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -777,4 +779,16 @@ func TestDispatcherHostMerge(t *testing.T) {
 	}); !reflect.DeepEqual(exp, dp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
+}
+
+func TestDispatcherHostGetConnErr(t *testing.T) {
+	dH := &DispatcherHost{
+		RemoteHost: &config.RemoteHost{},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	_, err := dH.GetConn(context.Background(), cfg, make(chan birpc.ClientConnector, 1))
+	if err == nil || err.Error() != "dial tcp: missing address" {
+		t.Errorf("Expected %v \n but received \n %v", "dial tcp: missing address", err)
+	}
+
 }
