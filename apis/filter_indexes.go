@@ -36,7 +36,6 @@ type AttrGetFilterIndexes struct {
 	FilterField string
 	FilterValue string
 	APIOpts     map[string]interface{}
-	utils.Paginator
 }
 
 type AttrRemFilterIndexes struct {
@@ -219,12 +218,12 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 			}
 		}
 	}
-	if arg.Paginator.Limit != nil || arg.Paginator.Offset != nil {
-		*reply = arg.Paginator.PaginateStringSlice(indexedSlice)
-	} else {
-		*reply = indexedSlice
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(arg.APIOpts); err != nil {
+		return
 	}
-	return nil
+	*reply, err = utils.Paginate(indexedSlice, limit, offset, maxItems)
+	return
 }
 
 // ComputeFilterIndexes selects which index filters to recompute
