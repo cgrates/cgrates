@@ -791,6 +791,7 @@ const (
 	MetaCDR                 = "*cdr"
 	MetaExporterIDs         = "*exporterIDs"
 	MetaExporterID          = "*exporterID"
+	MetaChargeID            = "*chargeID"
 	MetaAsync               = "*async"
 	MetaUsage               = "*usage"
 	MetaStartTime           = "*startTime"

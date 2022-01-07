@@ -110,6 +110,15 @@ func (cgrEv *CGREvent) AsDataProvider() (ev MapStorage) {
 	}
 }
 
+func (cgrEv *CGREvent) GetCDRUniqueID() string {
+	if chargeId, ok := cgrEv.APIOpts[MetaChargeID]; ok {
+		return IfaceAsString(chargeId)
+	} else if cgrId, ok := cgrEv.Event[CGRID]; ok {
+		return IfaceAsString(cgrId)
+	}
+	return UUIDSha1Prefix()
+}
+
 // EventWithFlags is used where flags are needed to mark processing
 type EventWithFlags struct {
 	Flags []string
