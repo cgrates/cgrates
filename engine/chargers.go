@@ -113,10 +113,11 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 		clonedEv.Tenant = tnt
 		clonedEv.APIOpts[utils.MetaRunID] = cP.RunID
 		clonedEv.APIOpts[utils.Subsys] = utils.MetaChargers
+		clonedEv.APIOpts[utils.MetaChargeID] = utils.Sha1(utils.IfaceAsString(clonedEv.Event[utils.CGRID]), cP.RunID)
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,
-			AlteredFields:   []string{utils.MetaOptsRunID},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaChargeID},
 		}
 		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.MetaNone {
 			continue // AttributeS disabled
