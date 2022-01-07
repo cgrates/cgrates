@@ -4677,3 +4677,34 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exrErr, err)
 	}
 }
+
+func TestAttributesParseAttributeMetaGeneric(t *testing.T) {
+	exp := "1234510011002"
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":  "12345",
+			"to":   "1001",
+			"from": "1002",
+		},
+	}
+	if out, err := ParseAttribute(dp, utils.MetaGeneric, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Fatal(err)
+	} else if exp != out {
+		t.Errorf("Expected %q, Received %q", exp, out)
+	}
+}
+
+func TestAttributesParseAttributeError(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":  "12345",
+			"to":   "1001",
+			"from": "1002",
+		},
+	}
+	if _, err := ParseAttribute(dp, "badType", utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil || err.Error() != "unsupported type: <badType>" {
+		t.Errorf("Expected %q, Received %q", "unsupported type: <badType>", err)
+	}
+}
