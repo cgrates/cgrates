@@ -602,7 +602,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 // 	expected := []string{"THD_ACNT_1001", "THD_PoccessCDR"}
 // 	var result []string
 // 	if err := cdrsRpc.Call(utils.APIerSv1GetThresholdProfileIDs,
-// 		&utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
+// 		&utils.ArgsItemIDs{Tenant: "cgrates.org"}, &result); err != nil {
 // 		t.Error(err)
 // 	} else if len(expected) != len(result) {
 // 		t.Errorf("Expecting : %+v, received: %+v", expected, result)

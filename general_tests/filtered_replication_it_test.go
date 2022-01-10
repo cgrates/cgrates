@@ -176,11 +176,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	var replyPrfl *engine.APIAttributeProfile
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -200,11 +200,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -244,7 +244,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(attrPrf.APIAttributeProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -255,11 +255,11 @@ func testFltrRplAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -283,11 +283,11 @@ func testFltrRplFilters(t *testing.T) {
 	var replyPrfl *engine.Filter
 	var rplyIDs []string
 	// empty
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -307,11 +307,11 @@ func testFltrRplFilters(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -351,7 +351,7 @@ func testFltrRplFilters(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(fltr.Filter), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -362,11 +362,11 @@ func testFltrRplFilters(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetFilterIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -399,11 +399,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		},
 	}
 	// empty
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -431,11 +431,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -488,7 +488,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(thPrfl.ThresholdProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -523,11 +523,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -581,11 +581,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		},
 // 	}
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -613,11 +613,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -675,7 +675,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(stPrf.StatQueueProfile), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -716,11 +716,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -767,11 +767,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		},
 // 	}
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -798,11 +798,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -855,7 +855,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(resPrf.ResourceProfile), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -901,11 +901,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -947,11 +947,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *engine.RouteProfile
 // 	var rplyIDs []string
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -971,11 +971,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1015,7 +1015,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(rpPrf.RouteProfile), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1026,11 +1026,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1052,11 +1052,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *engine.ChargerProfile
 // 	var rplyIDs []string
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1075,11 +1075,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1116,7 +1116,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(chPrf.ChargerProfile), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1127,11 +1127,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1152,11 +1152,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *engine.DispatcherProfile
 // 	var rplyIDs []string
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1175,11 +1175,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1216,7 +1216,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(dspPrf.DispatcherProfile), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1227,11 +1227,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1252,11 +1252,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *engine.DispatcherHost
 // 	var rplyIDs []string
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1275,11 +1275,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1316,7 +1316,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(dspPrf.DispatcherHost), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1327,11 +1327,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1391,11 +1391,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *utils.RateProfile
 // 	var rplyIDs []string
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1414,11 +1414,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1456,7 +1456,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expPrf), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1467,11 +1467,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1496,11 +1496,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *engine.ActionProfile
 // 	var rplyIDs []string
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1519,11 +1519,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1560,7 +1560,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(acPrf.ActionProfile), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1571,11 +1571,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1614,11 +1614,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *utils.Account
 // 	var rplyIDs []string
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1637,11 +1637,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1681,7 +1681,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expPrf), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1692,11 +1692,11 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatalf("Unexpected error: %v", err)
 // 	}
@@ -1714,12 +1714,12 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	var replyPrfl *engine.Account
 // 	var rplyCount int
 // 	// empty
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
@@ -1743,12 +1743,12 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 	}
 // 	replyPrfl = nil
 
-// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
 // 	}
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
@@ -1801,7 +1801,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(expPrf), utils.ToJSON(replyPrfl))
 // 	}
 
-// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.PaginatorWithTenant{}, &rplyCount); err != nil {
+// 	if err := fltrRplEngine2RPC.Call(context.Background(), utils.AdminSv1GetAccountCount, &utils.ArgsItemIDs{}, &rplyCount); err != nil {
 // 		t.Fatal(err)
 // 	} else if rplyCount != 0 {
 // 		t.Fatal("Expected no accounts")
