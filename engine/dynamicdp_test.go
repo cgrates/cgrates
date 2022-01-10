@@ -47,20 +47,89 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 	}
 }
 
-// func TestDynamicDPString(t *testing.T) {
-// 	dDP := &dynamicDP{
-// 		tenant: "cgrates.org",
-// 		initialDP: utils.StringSet{
-// 			"test1": struct{}{},
-// 			"test2": struct{}{},
-// 		},
-// 		cache: utils.MapStorage{},
-// 		ctx:   context.Background(),
-// 	}
+func TestDynamicDPString(t *testing.T) {
 
-// 	exp := `["test1","test2"]`
-// 	rcv := dDP.String()
-// 	if rcv != exp {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
-// 	}
-// }
+	rcv := &dynamicDP{
+		resConns:  []string{"conn1"},
+		stsConns:  []string{"conn2"},
+		actsConns: []string{"conn3"},
+		tenant:    "cgrates.org",
+		initialDP: utils.StringSet{
+			"test": struct{}{},
+		},
+		cache: utils.MapStorage{},
+		ctx:   context.Background(),
+	}
+	exp2 := "[\"test\"]"
+	rcv2 := rcv.String()
+	if !reflect.DeepEqual(rcv2, exp2) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp2), utils.ToJSON(rcv2))
+	}
+}
+
+func TestDynamicDPFieldAsInterfaceErrFilename(t *testing.T) {
+
+	rcv := &dynamicDP{
+		resConns:  []string{"conn1"},
+		stsConns:  []string{"conn2"},
+		actsConns: []string{"conn3"},
+		tenant:    "cgrates.org",
+		initialDP: utils.StringSet{
+			"test": struct{}{},
+		},
+		cache: utils.MapStorage{},
+		ctx:   context.Background(),
+	}
+	_, err := rcv.FieldAsInterface([]string{""})
+	if err == nil || err.Error() != "invalid fieldname <[]>" {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			"invalid fieldname <[]>", err)
+	}
+}
+
+func TestDynamicDPFieldAsInterfaceErrLenFldPath(t *testing.T) {
+
+	rcv := &dynamicDP{
+		resConns:  []string{"conn1"},
+		stsConns:  []string{"conn2"},
+		actsConns: []string{"conn3"},
+		tenant:    "cgrates.org",
+		initialDP: utils.StringSet{
+			"test": struct{}{},
+		},
+		cache: utils.MapStorage{},
+		ctx:   context.Background(),
+	}
+	_, err := rcv.FieldAsInterface([]string{})
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ErrNotFound, err)
+	}
+}
+
+func TestDynamicDPFieldAsInterface(t *testing.T) {
+
+	DDP := &dynamicDP{
+		resConns:  []string{"conn1"},
+		stsConns:  []string{"conn2"},
+		actsConns: []string{"conn3"},
+		tenant:    "cgrates.org",
+		initialDP: utils.StringSet{
+			"test": struct{}{},
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+		ctx: context.Background(),
+	}
+	result, err := DDP.FieldAsInterface([]string{"testField"})
+	if err != nil {
+		t.Error(err)
+	}
+	exp := "testValue"
+	if !reflect.DeepEqual(result, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
