@@ -119,12 +119,6 @@ func (cgrEv *CGREvent) GetCDRUniqueID() string {
 	return UUIDSha1Prefix()
 }
 
-// EventWithFlags is used where flags are needed to mark processing
-type EventWithFlags struct {
-	Flags []string
-	Event map[string]interface{}
-}
-
 // GetRoutePaginatorFromOpts will consume supplierPaginator if present
 func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err error) {
 	if ev == nil {
