@@ -23,59 +23,6 @@ import (
 	"time"
 )
 
-func TestPaginatorPaginateStringSlice(t *testing.T) {
-	//len(in)=0
-	eOut := []string{}
-	pgnt := new(Paginator)
-	rcv := pgnt.PaginateStringSlice(eOut)
-	if len(rcv) != 0 {
-		t.Errorf("Expecting an empty slice, received: %+v", rcv)
-	}
-	//offset > len(in)
-	eOut = []string{"1"}
-	pgnt = &Paginator{Offset: IntPointer(2), Limit: IntPointer(0)}
-	rcv = pgnt.PaginateStringSlice(eOut)
-
-	if len(rcv) != 0 {
-		t.Errorf("Expecting an empty slice, received: %+v", rcv)
-	}
-	//offset != 0 && limit != 0
-	eOut = []string{"3", "4"}
-	pgnt = &Paginator{Offset: IntPointer(2), Limit: IntPointer(0)}
-	rcv = pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"})
-
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting an empty slice, received: %+v", rcv)
-	}
-
-	eOut = []string{"1", "2", "3", "4"}
-	pgnt = new(Paginator)
-	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-	eOut = []string{"1", "2", "3"}
-	pgnt.Limit = IntPointer(3)
-	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-	eOut = []string{"2", "3", "4"}
-	pgnt.Offset = IntPointer(1)
-	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-	eOut = []string{}
-	pgnt.Offset = IntPointer(4)
-	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-	eOut = []string{"3"}
-	pgnt.Offset = IntPointer(2)
-	pgnt.Limit = IntPointer(1)
-	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-}
-
 func TestClonePaginator(t *testing.T) {
 	expectedPaginator := Paginator{
 		Limit:  IntPointer(2),
