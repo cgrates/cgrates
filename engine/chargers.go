@@ -117,7 +117,7 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,
-			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaChargeID},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID},
 		}
 		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.MetaNone {
 			continue // AttributeS disabled
