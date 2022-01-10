@@ -103,8 +103,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			} else {
 				log.Printf("The DataDB type has to be %s .\n ", utils.Mongo)
 			}
-		case utils.MetaCDRs:
-			err = m.migrateCDRs()
+
 		case utils.MetaStats:
 			err = m.migrateStats()
 		case utils.MetaThresholds:
@@ -203,9 +202,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateTPDispatchers(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpDispatchers, " ", err)
-			}
-			if err := m.migrateCDRs(); err != nil {
-				log.Print("ERROR: ", utils.MetaCDRs, " ", err)
 			}
 			err = nil
 		}

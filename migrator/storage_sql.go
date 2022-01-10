@@ -21,7 +21,6 @@ package migrator
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -47,53 +46,6 @@ func (sqlMig *migratorSQL) close() {
 
 func (sqlMig *migratorSQL) StorDB() engine.StorDB {
 	return *sqlMig.storDB
-}
-
-func (mgSQL *migratorSQL) getV1CDR() (v1Cdr *v1Cdrs, err error) {
-	if mgSQL.rowIter == nil {
-		mgSQL.rowIter, err = mgSQL.sqlStorage.DB.Query("SELECT * FROM cdrs")
-		if err != nil {
-			return nil, err
-		}
-	}
-	cdrSql := new(engine.CDRsql)
-	mgSQL.rowIter.Scan(&cdrSql)
-	v1Cdr, err = NewV1CDRFromCDRSql(cdrSql)
-
-	if mgSQL.rowIter.Next() {
-		v1Cdr = nil
-		mgSQL.rowIter = nil
-		return nil, utils.ErrNoMoreData
-	}
-	return v1Cdr, nil
-}
-
-func (mgSQL *migratorSQL) setV1CDR(v1Cdr *v1Cdrs) (err error) {
-	tx := mgSQL.sqlStorage.ExportGormDB().Begin()
-	cdrSql := v1Cdr.AsCDRsql()
-	cdrSql.CreatedAt = time.Now()
-	saved := tx.Save(cdrSql)
-	if saved.Error != nil {
-		return saved.Error
-	}
-	tx.Commit()
-	return nil
-}
-
-//rem
-func (mgSQL *migratorSQL) remV1CDRs(v1Cdr *v1Cdrs) (err error) {
-	tx := mgSQL.sqlStorage.ExportGormDB().Begin()
-	var rmParam *v1Cdrs
-	if v1Cdr != nil {
-		rmParam = &v1Cdrs{CGRID: v1Cdr.CGRID,
-			RunID: v1Cdr.RunID}
-	}
-	if err := tx.Where(rmParam).Delete(v1Cdrs{}).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
 }
 
 func (mgSQL *migratorSQL) renameV1SMCosts() (err error) {

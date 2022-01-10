@@ -47,39 +47,6 @@ func (mgoMig *mongoStorDBMigrator) StorDB() engine.StorDB {
 	return *mgoMig.storDB
 }
 
-//CDR methods
-//get
-func (v1ms *mongoStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
-	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).Find(v1ms.mgoDB.GetContext(), bson.D{})
-		if err != nil {
-			return nil, err
-		}
-	}
-	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
-		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
-		v1ms.cursor = nil
-		return nil, utils.ErrNoMoreData
-	}
-	v1Cdr = new(v1Cdrs)
-	if err := (*v1ms.cursor).Decode(v1Cdr); err != nil {
-		return nil, err
-	}
-	return v1Cdr, nil
-}
-
-//set
-func (v1ms *mongoStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).InsertOne(v1ms.mgoDB.GetContext(), v1Cdr)
-	return
-}
-
-//rem
-func (v1ms *mongoStorDBMigrator) remV1CDRs(v1Cdr *v1Cdrs) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).DeleteOne(v1ms.mgoDB.GetContext(), v1Cdr)
-	return
-}
-
 //SMCost methods
 //rename
 func (v1ms *mongoStorDBMigrator) renameV1SMCosts() (err error) {
