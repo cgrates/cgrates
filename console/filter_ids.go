@@ -26,7 +26,7 @@ func init() {
 	c := &CmdGetFilterIDs{
 		name:      "filter_ids",
 		rpcMethod: utils.AdminSv1GetFilterIDs,
-		rpcParams: &utils.PaginatorWithTenant{},
+		rpcParams: &utils.ArgsItemIDs{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetFilterIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.PaginatorWithTenant
+	rpcParams *utils.ArgsItemIDs
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdGetFilterIDs) RpcMethod() string {
 
 func (self *CmdGetFilterIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.PaginatorWithTenant{}
+		self.rpcParams = &utils.ArgsItemIDs{}
 	}
 	return self.rpcParams
 }
