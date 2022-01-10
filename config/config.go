@@ -200,6 +200,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ProfileCount: []*utils.DynamicIntPointerOpt{},
 			Limit:        []*utils.DynamicIntPointerOpt{},
 			Offset:       []*utils.DynamicIntPointerOpt{},
+			MaxItems:     []*utils.DynamicIntPointerOpt{},
 			Usage:        []*utils.DynamicDecimalBigOpt{},
 		}},
 		sureTaxCfg:     new(SureTaxCfg),

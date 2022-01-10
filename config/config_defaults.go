@@ -1169,6 +1169,13 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": 1,
 		// 	},
 		// ],
+		// "*maxItems": [						
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": 1,
+		// 	},
+		// ],
 		"*usage": [							
 			// {
 			// 	"Tenant": "*any",
