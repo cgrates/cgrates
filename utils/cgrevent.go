@@ -119,43 +119,6 @@ func (cgrEv *CGREvent) GetCDRUniqueID() string {
 	return UUIDSha1Prefix()
 }
 
-// GetRoutePaginatorFromOpts will consume supplierPaginator if present
-func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err error) {
-	if ev == nil {
-		return
-	}
-	//check if we have suppliersLimit in event and in case it has add it in args
-	limitIface, hasRoutesLimit := ev[OptsRoutesLimit]
-	if hasRoutesLimit {
-		delete(ev, OptsRoutesLimit)
-		var limit int64
-		if limit, err = IfaceAsInt64(limitIface); err != nil {
-			return
-		}
-		args = Paginator{
-			Limit: IntPointer(int(limit)),
-		}
-	}
-	//check if we have offset in event and in case it has add it in args
-	offsetIface, hasRoutesOffset := ev[OptsRoutesOffset]
-	if !hasRoutesOffset {
-		return
-	}
-	delete(ev, OptsRoutesOffset)
-	var offset int64
-	if offset, err = IfaceAsInt64(offsetIface); err != nil {
-		return
-	}
-	if !hasRoutesLimit { //in case we don't have limit, but we have offset we need to initialize the struct
-		args = Paginator{
-			Offset: IntPointer(int(offset)),
-		}
-		return
-	}
-	args.Offset = IntPointer(int(offset))
-	return
-}
-
 type EventsWithOpts struct {
 	Event map[string]interface{}
 	Opts  map[string]interface{}
