@@ -279,9 +279,8 @@ func testLoadersGetAccount(t *testing.T) {
 	expIDs := []string{"ACC_PRF"}
 	var accIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAccountIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &accIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accIDs, expIDs) {
@@ -349,9 +348,8 @@ func testLoadersGetActionProfile(t *testing.T) {
 	expIDs := []string{"ACT_PRF"}
 	var actIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &actIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actIDs, expIDs) {
@@ -400,9 +398,8 @@ func testLoadersGetAttributeProfile(t *testing.T) {
 	expIDs := []string{"ATTR_ACNT_1001"}
 	var attrIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &attrIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(attrIDs, expIDs) {
@@ -440,9 +437,8 @@ func testLoadersGetChargerProfile(t *testing.T) {
 	expIDs := []string{"Raw"}
 	var chgIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &chgIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chgIDs, expIDs) {
@@ -475,9 +471,8 @@ func testLoadersGetDispatcherProfile(t *testing.T) {
 	expIDs := []string{"DSP1"}
 	var dspPrfIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &dspPrfIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dspPrfIDs, expIDs) {
@@ -517,9 +512,8 @@ func testLoadersGetDispatcherHost(t *testing.T) {
 	expIDs := []string{"DSPHOST1"}
 	var dspHostIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &dspHostIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dspHostIDs, expIDs) {
@@ -556,9 +550,8 @@ func testLoadersGetFilter(t *testing.T) {
 	expIDs := []string{"FLTR_ACCOUNT_1001"}
 	var fltrIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &fltrIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(fltrIDs, expIDs) {
@@ -594,9 +587,8 @@ func testLoadersGetRateProfile(t *testing.T) {
 	expIDs := []string{"RP1"}
 	var rateIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rateIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rateIDs, expIDs) {
@@ -655,9 +647,8 @@ func testLoadersGetResourceProfile(t *testing.T) {
 	expIDs := []string{"RES_ACNT_1001"}
 	var rsIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rsIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsIDs, expIDs) {
@@ -690,9 +681,8 @@ func testLoadersGetRouteProfile(t *testing.T) {
 	expIDs := []string{"ROUTE_ACNT_1001"}
 	var rtIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rtIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtIDs, expIDs) {
@@ -730,9 +720,8 @@ func testLoadersGetStatQueueProfile(t *testing.T) {
 	expIDs := []string{"Stat_1"}
 	var sqIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &sqIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sqIDs, expIDs) {
@@ -781,9 +770,8 @@ func testLoadersGetThresholdProfile(t *testing.T) {
 	expIDs := []string{"THD_ACNT_1001"}
 	var thIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &thIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thIDs, expIDs) {
@@ -831,9 +819,8 @@ func testLoadersRemove(t *testing.T) {
 func testLoadersGetAccountAfterRemove(t *testing.T) {
 	var accIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAccountIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &accIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -851,9 +838,8 @@ func testLoadersGetAccountAfterRemove(t *testing.T) {
 func testLoadersGetActionProfileAfterRemove(t *testing.T) {
 	var actIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &actIDs); err == nil || utils.ErrNotFound.Error() != err.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -871,9 +857,8 @@ func testLoadersGetActionProfileAfterRemove(t *testing.T) {
 func testLoadersGetAttributeProfileAfterRemove(t *testing.T) {
 	var attrIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &attrIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -891,9 +876,8 @@ func testLoadersGetAttributeProfileAfterRemove(t *testing.T) {
 func testLoadersGetChargerProfileAfterRemove(t *testing.T) {
 	var chgIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &chgIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -911,9 +895,8 @@ func testLoadersGetChargerProfileAfterRemove(t *testing.T) {
 func testLoadersGetDispatcherProfileAfterRemove(t *testing.T) {
 	var dspPrfIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &dspPrfIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -931,9 +914,8 @@ func testLoadersGetDispatcherProfileAfterRemove(t *testing.T) {
 func testLoadersGetDispatcherHostAfterRemove(t *testing.T) {
 	var dspHostIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &dspHostIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -951,9 +933,8 @@ func testLoadersGetDispatcherHostAfterRemove(t *testing.T) {
 func testLoadersGetFilterAfterRemove(t *testing.T) {
 	var fltrIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &fltrIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -971,9 +952,8 @@ func testLoadersGetFilterAfterRemove(t *testing.T) {
 func testLoadersGetRateProfileAfterRemove(t *testing.T) {
 	var rateIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rateIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -991,9 +971,8 @@ func testLoadersGetRateProfileAfterRemove(t *testing.T) {
 func testLoadersGetResourceProfileAfterRemove(t *testing.T) {
 	var rsIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rsIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -1011,9 +990,8 @@ func testLoadersGetResourceProfileAfterRemove(t *testing.T) {
 func testLoadersGetRouteProfileAfterRemove(t *testing.T) {
 	var rtIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rtIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -1031,9 +1009,8 @@ func testLoadersGetRouteProfileAfterRemove(t *testing.T) {
 func testLoadersGetStatQueueProfileAfterRemove(t *testing.T) {
 	var sqIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &sqIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -1051,9 +1028,8 @@ func testLoadersGetStatQueueProfileAfterRemove(t *testing.T) {
 func testLoadersGetThresholdProfileAfterRemove(t *testing.T) {
 	var thIDs []string
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &thIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}

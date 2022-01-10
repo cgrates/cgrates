@@ -170,7 +170,7 @@ func testChgrsSetGetChargerProfile(t *testing.T) {
 
 func testChgrsGetChargerProfileIDs(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_CHARGERS_IT_TEST"}
@@ -233,7 +233,7 @@ func testChgrsSetGetChargerProfile2(t *testing.T) {
 
 func testChgrsGetChargerProfileIDs2(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2"}
@@ -296,7 +296,7 @@ func testChgrsSetGetChargerProfile3(t *testing.T) {
 
 func testChgrsGetChargerProfileIDs3(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2", "TEST_CHARGERS_IT_TEST3"}
@@ -333,7 +333,7 @@ func testChgrsRmvChargerProfile(t *testing.T) {
 		t.Error(err)
 	}
 	var reply3 []string
-	args2 := &utils.PaginatorWithTenant{
+	args2 := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected2 := []string{"TEST_CHARGERS_IT_TEST", "TEST_CHARGERS_IT_TEST2"}
@@ -370,7 +370,7 @@ func testChgrsRmvChargerProfile2(t *testing.T) {
 		t.Error(err)
 	}
 	var reply3 []string
-	args2 := &utils.PaginatorWithTenant{
+	args2 := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected2 := []string{"TEST_CHARGERS_IT_TEST"}
@@ -407,7 +407,7 @@ func testChgrsRmvChargerProfile3(t *testing.T) {
 		t.Error(err)
 	}
 	var reply3 []string
-	args2 := &utils.PaginatorWithTenant{
+	args2 := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,

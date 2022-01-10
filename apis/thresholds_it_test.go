@@ -312,9 +312,8 @@ func testThresholdsGetThresholdProfileIDs(t *testing.T) {
 	expIDs := []string{"THD_1", "THD_2"}
 	var tIDs []string
 	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &tIDs); err != nil {
 		t.Error(err)
 	} else {

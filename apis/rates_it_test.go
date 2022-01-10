@@ -210,7 +210,7 @@ func testRateSetRateProfile(t *testing.T) {
 
 func testRateGetRateProfileIDs(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_RATE_IT_TEST"}
@@ -327,7 +327,7 @@ func testRateSetRateProfile2(t *testing.T) {
 
 func testRateGetRateIDs2(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_RATE_IT_TEST", "TEST_RATE_IT_TEST_SECOND"}

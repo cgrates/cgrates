@@ -172,9 +172,8 @@ func testActionsGetActionProfileBeforeSet(t *testing.T) {
 func testActionsGetActionProfileIDsBeforeSet(t *testing.T) {
 	var rplyActIDs []string
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rplyActIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -258,9 +257,8 @@ func testActionsGetActionProfileIDsAfterSet(t *testing.T) {
 
 	var rplyActIDs []string
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rplyActIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyActIDs, expActIDs) {
