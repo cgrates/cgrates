@@ -207,6 +207,13 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, cfg
 	} else {
 		opts.paginator.Offset = offset
 	}
+	var maxItems *int
+	if maxItems, err = GetIntPointerOpts(ctx, ev.Tenant, ev, fS, cfgOpts.MaxItems,
+		utils.OptsRoutesMaxItems); err != nil {
+		return
+	} else {
+		opts.paginator.MaxItems = maxItems
+	}
 
 	var maxCost interface{}
 	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, ev, fS, cfgOpts.MaxCost, config.RoutesMaxCostDftOpt,
@@ -246,7 +253,7 @@ type optsGetRoutes struct {
 	maxCost           float64
 	paginator         *utils.Paginator
 	sortingParameters []string //used for QOS strategy
-	sortingStragety   string
+	sortingStrategy   string
 }
 
 // V1GetRoutes returns the list of valid routes
@@ -326,7 +333,7 @@ var lazyRouteFltrPrfxs = []string{utils.DynamicDataPrefix + utils.MetaReq,
 func (rpS *RouteS) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrfl *RouteProfile, ev *utils.CGREvent,
 	pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
-	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
+	extraOpts.sortingStrategy = rPrfl.Sorting             // populate sortingStrategy in extraOpts
 	//construct the DP and pass it to filterS
 	nM := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -395,9 +402,16 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 	if extraOpts, err = newOptsGetRoutes(ctx, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts); err != nil { // convert routes arguments into internal options used to limit data
 		return
 	}
-	var startIdx, noSrtRoutes int
-	if extraOpts.paginator.Offset != nil { // save the offset in a varible to not duble check if we have offset and is still not 0
-		startIdx = *extraOpts.paginator.Offset
+	var startIdx, noSrtRoutes, initialOffset, maxItems int
+	if extraOpts.paginator.Offset != nil { // save the offset in a varible to not double check if we have offset and is still not 0
+		initialOffset = *extraOpts.paginator.Offset
+		startIdx = initialOffset
+	}
+	if extraOpts.paginator.MaxItems != nil && extraOpts.paginator.Limit != nil {
+		maxItems = *extraOpts.paginator.MaxItems
+		if maxItems < *extraOpts.paginator.Limit+startIdx {
+			return nil, fmt.Errorf("SERVER_ERROR: maximum number of items exceeded")
+		}
 	}
 	sortedRoutes = make(SortedRoutesList, 0, prfCount)
 	for _, rPrfl := range rPrfs {
@@ -411,13 +425,13 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 				prfPag.Limit = &limit                             // add the limit to the paginator
 			}
 		}
-		if startIdx > 0 { // we have offest
+		if startIdx > 0 { // we have offset
 			if idx := startIdx - len(rPrfl.Routes); idx >= 0 { // we still have offset so try the next profile
 				startIdx = idx
 				continue
 			}
-			// we have offset but is in the range of this profile
-			offset := startIdx // store in a seoarate var so when startIdx is updated the prfPag.Offset remains the same
+			// we have offset but it's in the range of this profile
+			offset := startIdx // store in a separate var so when startIdx is updated the prfPag.Offset remains the same
 			startIdx = 0       // set it to 0 for the following loop
 			prfPag.Offset = &offset
 		}
@@ -432,6 +446,9 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 				break
 			}
 		}
+	}
+	if maxItems != 0 && maxItems < len(sortedRoutes)+initialOffset {
+		return nil, fmt.Errorf("SERVER_ERROR: maximum number of items exceeded")
 	}
 	if len(sortedRoutes) == 0 {
 		err = utils.ErrNotFound

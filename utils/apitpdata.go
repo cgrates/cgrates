@@ -33,8 +33,9 @@ type PaginatorWithSearch struct {
 
 // Paginate stuff around items returned
 type Paginator struct {
-	Limit  *int // Limit the number of items returned
-	Offset *int // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
+	Limit    *int // Limit the number of items returned
+	Offset   *int // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
+	MaxItems *int
 }
 
 func GetPaginateOpts(opts map[string]interface{}) (limit, offset, maxItems int, err error) {
