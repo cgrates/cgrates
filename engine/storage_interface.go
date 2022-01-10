@@ -118,8 +118,6 @@ type StorDB interface {
 
 type CdrStorage interface {
 	Storage
-	SetCDR(*CDR, bool) error
-	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 
 type LoadStorage interface {
