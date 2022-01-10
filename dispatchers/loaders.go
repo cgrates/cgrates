@@ -25,6 +25,20 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func (dS *DispatcherService) LoaderSv1ImportZip(ctx *context.Context, args *loaders.ArgsProcessZip, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	ev := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	if args != nil {
+		opts = args.APIOpts
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(ctx, utils.LoaderSv1ImportZip, tnt, utils.IfaceAsString(opts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaLoaders, utils.LoaderSv1ImportZip, args, reply)
+}
 func (dS *DispatcherService) LoaderSv1Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
