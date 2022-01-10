@@ -88,7 +88,9 @@ func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
+	lenPrfx := len(prfx)
+	prfx += args.ItemsPrefix
 	var keys []string
 	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return
@@ -98,7 +100,7 @@ func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs
 	}
 	retIDs := make([]string, len(keys))
 	for i, key := range keys {
-		retIDs[i] = key[len(prfx):]
+		retIDs[i] = key[lenPrfx:]
 	}
 	var limit, offset, maxItems int
 	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
