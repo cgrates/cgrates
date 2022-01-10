@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 )
 
-func writeDefaultCofig(fileName string) error {
+func writeDefaultConfig(fileName string) error {
 	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func main() {
 	if err := os.Remove(*cfgPath); err != nil && !os.IsNotExist(err) {
 		log.Fatal(err)
 	}
-	if err := writeDefaultCofig(*cfgPath); err != nil {
+	if err := writeDefaultConfig(*cfgPath); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("Done writing file at path: %s\n", *cfgPath)
