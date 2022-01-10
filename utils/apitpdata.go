@@ -37,32 +37,6 @@ type Paginator struct {
 	Offset *int // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
 }
 
-func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
-	if len(in) == 0 {
-		return
-	}
-	var limit, offset int
-	if pgnt.Limit != nil && *pgnt.Limit > 0 {
-		limit = *pgnt.Limit
-	}
-	if pgnt.Offset != nil && *pgnt.Offset > 0 {
-		offset = *pgnt.Offset
-	}
-	if limit == 0 && offset == 0 {
-		return in
-	}
-	if offset > len(in) {
-		return
-	}
-	if offset != 0 && limit != 0 {
-		limit = limit + offset
-	}
-	if limit == 0 || limit > len(in) {
-		limit = len(in)
-	}
-	return CloneStringSlice(in[offset:limit])
-}
-
 func GetPaginateOpts(opts map[string]interface{}) (limit, offset, maxItems int, err error) {
 	if limitIface, has := opts[PageLimitOpt]; has {
 		if limit, err = IfaceAsTInt(limitIface); err != nil {

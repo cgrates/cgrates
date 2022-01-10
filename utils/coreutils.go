@@ -699,12 +699,6 @@ type ArgsItemIDs struct {
 	ItemsPrefix string
 }
 
-type PaginatorWithTenant struct {
-	Tenant string
-	Paginator
-	APIOpts map[string]interface{}
-}
-
 type TenantWithAPIOpts struct {
 	Tenant  string
 	APIOpts map[string]interface{}
