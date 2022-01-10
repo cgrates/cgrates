@@ -1479,9 +1479,10 @@ const (
 
 // LoaderS APIs
 const (
-	LoaderSv1     = "LoaderSv1"
-	LoaderSv1Run  = "LoaderSv1.Run"
-	LoaderSv1Ping = "LoaderSv1.Ping"
+	LoaderSv1          = "LoaderSv1"
+	LoaderSv1Run       = "LoaderSv1.Run"
+	LoaderSv1Ping      = "LoaderSv1.Ping"
+	LoaderSv1ImportZip = "LoaderSv1.ImportZip"
 )
 
 // CacheS APIs

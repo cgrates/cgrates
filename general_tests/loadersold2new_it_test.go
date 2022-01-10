@@ -181,9 +181,8 @@ func testLdro2nRtCheckData(t *testing.T) {
 	sort.Strings(expIDs)
 	var rateIDs []string
 	if err := testLdro2nRtRPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &rateIDs); err != nil {
 		t.Error(err)
 	} else if sort.Strings(rateIDs); !reflect.DeepEqual(rateIDs, expIDs) {
