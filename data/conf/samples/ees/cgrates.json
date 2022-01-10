@@ -437,6 +437,10 @@
 				"sqlMaxIdleConns": 10,
 				"sqlMaxOpenConns": 100,
 				"sqlConnMaxLifetime": "0",
+				"sqlDSNParams": {
+                    "allowOldPasswords": "true",
+					"allowNativePasswords": "true",
+				},
 			},
 			"fields":[ // in case that the path is *exp.*row user must complete all the fields one to one with his sql schema in the correct order
 				{"tag": "CGRID", "path": "*exp.*row", "type": "*group", "value": "~*req.CGRID"},
@@ -457,6 +461,7 @@
 				"sqlMaxIdleConns": 10,
 				"sqlMaxOpenConns": 100,
 				"sqlConnMaxLifetime": "0",
+
 			},
 			"fields":[ // the path constains *exp.columnName
 				{"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.CGRID"},

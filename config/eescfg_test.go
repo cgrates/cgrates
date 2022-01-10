@@ -608,6 +608,10 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
                   "export_path": "/tmp/testCSV",			
 			      "opts": {
 					"awsSecret": "test",
+					"sqlDSNParams": {
+						"allowOldPasswords": "true",
+						"allowNativePasswords": "true",
+					},
 				  },											
 			      "timezone": "UTC",										
 			      "filters": [],										
@@ -642,6 +646,10 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.ExportPathCfg: "/tmp/testCSV",
 				utils.OptsCfg: map[string]interface{}{
 					utils.AWSSecret: "test",
+					utils.SQLDSNParams: map[string]string{
+						"allowOldPasswords":    "true",
+						"allowNativePasswords": "true",
+					},
 				},
 				utils.TimezoneCfg:           "UTC",
 				utils.FiltersCfg:            []string{},
@@ -679,7 +687,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		if !reflect.DeepEqual(rcv[utils.ExportersCfg].([]map[string]interface{})[1],
 			eMap[utils.ExportersCfg].([]map[string]interface{})[0]) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]interface{})[0]),
-				utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[0]))
+				utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[1]))
 		}
 		rcv[utils.ExportersCfg] = nil
 		eMap[utils.ExportersCfg] = nil
