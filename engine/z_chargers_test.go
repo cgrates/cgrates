@@ -148,7 +148,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	exp := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields:   []string{utils.MetaOptsRunID, utils.AccountField},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.AccountField},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
@@ -224,7 +224,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	exp := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields:   []string{utils.MetaOptsRunID},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",
@@ -245,7 +245,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
-
+	exp[0].CGREvent.APIOpts[utils.MetaChargeID] = rcv[0].CGREvent.APIOpts[utils.MetaChargeID]
 	if !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(exp), utils.ToJSON(rcv))
@@ -463,7 +463,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	exp := &[]*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "1001",
-			AlteredFields:   []string{utils.MetaOptsRunID, utils.AccountField},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.AccountField},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "cgrEvID",

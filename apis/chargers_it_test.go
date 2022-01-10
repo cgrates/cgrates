@@ -486,7 +486,7 @@ func testChgrsProcessEvent(t *testing.T) {
 	expected := &[]*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "TEST_CHARGERS_IT_TEST",
-			AlteredFields:   []string{"*opts.*runID"},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "eventCharger",
@@ -495,8 +495,9 @@ func testChgrsProcessEvent(t *testing.T) {
 					utils.Destination:  "1002",
 				},
 				APIOpts: map[string]interface{}{
-					"*subsys":       "*chargers",
-					utils.MetaRunID: utils.MetaDefault,
+					utils.MetaChargeID: utils.UUIDSha1Prefix(),
+					"*subsys":          "*chargers",
+					utils.MetaRunID:    utils.MetaDefault,
 				},
 			},
 		},
@@ -514,8 +515,11 @@ func testChgrsProcessEvent(t *testing.T) {
 	if err := chgrsSRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("\nExpected %+v, \nreceived %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	} else {
+		(*reply)[0].CGREvent.APIOpts[utils.MetaChargeID] = (*expected)[0].CGREvent.APIOpts[utils.MetaChargeID]
+		if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("\nExpected %+v, \nreceived %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+		}
 	}
 }
 

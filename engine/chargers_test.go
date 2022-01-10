@@ -452,7 +452,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	rpl := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CPP_1",
-			AlteredFields:   []string{utils.MetaOptsRunID},
+			AlteredFields:   []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID},
 			CGREvent:        chargerEvents[0],
 		},
 	}
@@ -461,6 +461,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %+v", err)
 	}
+	rpl[0].CGREvent.APIOpts[utils.MetaChargeID] = rcv[0].CGREvent.APIOpts[utils.MetaChargeID]
 	if !reflect.DeepEqual(rpl[0], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(rpl[0]), utils.ToJSON(rcv[0]))
 	}
