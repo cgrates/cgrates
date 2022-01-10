@@ -64,7 +64,7 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(ctx *context.Context, args *util
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCDRs, utils.CDRsV1ProcessEvent, args, reply)
 }
-func (dS *DispatcherService) CDRsV1ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.EventWithFlags) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.EventsWithOpts) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant
