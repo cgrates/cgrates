@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/nyaruka/phonenumbers"
 )
 
 func TestDynamicDPnewDynamicDP(t *testing.T) {
@@ -131,5 +132,91 @@ func TestDynamicDPFieldAsInterface(t *testing.T) {
 	if !reflect.DeepEqual(result, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(exp), utils.ToJSON(result))
+	}
+}
+
+func TestLibphonenumberDPString(t *testing.T) {
+	var pInt int32
+	pInt = 2
+	LDP := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+	}
+	exp2 := "country_code:2 "
+	rcv2 := LDP.String()
+	if !reflect.DeepEqual(rcv2, exp2) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp2), utils.ToJSON(rcv2))
+	}
+}
+
+func TestLibphonenumberDPFieldAsString(t *testing.T) {
+	var pInt int32
+	pInt = 2
+	LDP := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+	}
+	exp2 := "testValue"
+	rcv2, err := LDP.FieldAsString([]string{"testField"})
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rcv2, exp2) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp2), utils.ToJSON(rcv2))
+	}
+}
+
+func TestLibphonenumberDPFieldAsStringError(t *testing.T) {
+	var pInt int32
+	pInt = 2
+	LDP := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+	}
+	_, err := LDP.FieldAsString([]string{"testField", "testField2"})
+	if err == nil || err.Error() != "WRONG_PATH" {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			"WRONG_PATH", err)
+	}
+}
+
+func TestLibphonenumberDPFieldAsInterfaceLen0(t *testing.T) {
+	var pInt int32
+	pInt = 2
+	LDP := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		},
+	}
+	exp2 := &libphonenumberDP{
+		pNumber: &phonenumbers.PhoneNumber{
+			CountryCode: &pInt,
+		},
+		cache: utils.MapStorage{
+			"testField": "testValue",
+		}}
+	exp2.setDefaultFields()
+
+	rcv2, err := LDP.FieldAsInterface([]string{})
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rcv2, exp2.cache) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			exp2.cache, rcv2)
 	}
 }
