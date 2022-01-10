@@ -40,6 +40,7 @@ type RoutesOpts struct {
 	MaxCost      []*utils.DynamicInterfaceOpt
 	Limit        []*utils.DynamicIntPointerOpt
 	Offset       []*utils.DynamicIntPointerOpt
+	MaxItems     []*utils.DynamicIntPointerOpt
 	ProfileCount []*utils.DynamicIntPointerOpt
 	Usage        []*utils.DynamicDecimalBigOpt
 }
@@ -90,6 +91,9 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 	}
 	if jsnCfg.Offset != nil {
 		rtsOpts.Offset = append(rtsOpts.Offset, utils.IntToIntPointerDynamicOpts(jsnCfg.Offset)...)
+	}
+	if jsnCfg.MaxItems != nil {
+		rtsOpts.MaxItems = append(rtsOpts.MaxItems, utils.IntToIntPointerDynamicOpts(jsnCfg.MaxItems)...)
 	}
 	if jsnCfg.ProfileCount != nil {
 		rtsOpts.ProfileCount = append(rtsOpts.ProfileCount, utils.IntToIntPointerDynamicOpts(jsnCfg.ProfileCount)...)
@@ -180,6 +184,10 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 	if rts.Offset != nil {
 		offset = utils.CloneDynamicIntPointerOpt(rts.Offset)
 	}
+	var maxItems []*utils.DynamicIntPointerOpt
+	if rts.MaxItems != nil {
+		maxItems = utils.CloneDynamicIntPointerOpt(rts.MaxItems)
+	}
 	var usage []*utils.DynamicDecimalBigOpt
 	if rts.Usage != nil {
 		usage = utils.CloneDynamicDecimalBigOpt(rts.Usage)
@@ -190,6 +198,7 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 		MaxCost:      maxCost,
 		Limit:        limit,
 		Offset:       offset,
+		MaxItems:     maxItems,
 		ProfileCount: profileCount,
 		Usage:        usage,
 	}
@@ -205,6 +214,7 @@ func (rts RouteSCfg) AsMapInterface(string) interface{} {
 		utils.MetaMaxCostCfg:      rts.Opts.MaxCost,
 		utils.MetaLimitCfg:        rts.Opts.Limit,
 		utils.MetaOffsetCfg:       rts.Opts.Offset,
+		utils.MetaMaxItemsCfg:     rts.Opts.MaxItems,
 		utils.MetaUsage:           rts.Opts.Usage,
 	}
 
@@ -299,6 +309,7 @@ type RoutesOptsJson struct {
 	MaxCost      []*utils.DynamicInterfaceOpt `json:"*maxCost"`
 	Limit        []*utils.DynamicIntOpt       `json:"*limit"`
 	Offset       []*utils.DynamicIntOpt       `json:"*offset"`
+	MaxItems     []*utils.DynamicIntOpt       `json:"*maxItems"`
 	ProfileCount []*utils.DynamicIntOpt       `json:"*profileCount"`
 	Usage        []*utils.DynamicStringOpt    `json:"*usage"`
 }
@@ -334,6 +345,9 @@ func diffRoutesOptsJsonCfg(d *RoutesOptsJson, v1, v2 *RoutesOpts) *RoutesOptsJso
 	}
 	if !utils.DynamicIntPointerOptEqual(v1.Offset, v2.Offset) {
 		d.Offset = utils.IntPointerToIntDynamicOpts(v2.Offset)
+	}
+	if !utils.DynamicIntPointerOptEqual(v1.MaxItems, v2.MaxItems) {
+		d.MaxItems = utils.IntPointerToIntDynamicOpts(v2.MaxItems)
 	}
 	if !utils.DynamicInterfaceOptEqual(v1.MaxCost, v2.MaxCost) {
 		d.MaxCost = v2.MaxCost

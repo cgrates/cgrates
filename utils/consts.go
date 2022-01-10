@@ -2026,6 +2026,7 @@ const (
 	MetaMaxCostCfg      = "*maxCost"
 	MetaLimitCfg        = "*limit"
 	MetaOffsetCfg       = "*offset"
+	MetaMaxItemsCfg     = "*maxItems"
 
 	// RateSCfg
 	MetaIntervalStartCfg          = "*intervalStart"
@@ -2232,9 +2233,9 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesDebitInterval, OptsStirATest, OptsStirPayloadMaxDuration, OptsStirIdentity,
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProfileIDs,
-	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsSesChargeable,
-	RemoteHostOpt, MetaCache, OptsThresholdsProfileIDs, OptsRoutesProfileCount, OptsDispatchersProfilesCount,
-	OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
+	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsRoutesMaxItems,
+	OptsSesChargeable, RemoteHostOpt, MetaCache, OptsThresholdsProfileIDs, OptsRoutesProfileCount,
+	OptsDispatchersProfilesCount, OptsAttributeS, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
 	OptsCDRs, OptsSesCDRsDerivedReply, OptsChargerS, OptsResourceS, OptsSesResourceSAuthorize,
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, OptsRouteS,
 	OptsSesRouteSDerivedReply, OptsStatS, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
@@ -2329,6 +2330,7 @@ const (
 	OptsRoutesProfileCount = "*rouProfileCount"
 	OptsRoutesLimit        = "*rouLimit"
 	OptsRoutesOffset       = "*rouOffset"
+	OptsRoutesMaxItems     = "*rouMaxItems"
 	OptsRoutesIgnoreErrors = "*rouIgnoreErrors"
 	OptsRoutesMaxCost      = "*rouMaxCost"
 	OptsRoutesUsage        = "*rouUsage"
