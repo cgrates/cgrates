@@ -313,9 +313,9 @@ func testResourceSGetResourceProfileIDs(t *testing.T) {
 	var reply []string
 	exp := []string{"ResGroup1", "ResGroup2"}
 	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{}}, &reply); err != nil {
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &reply); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(reply)

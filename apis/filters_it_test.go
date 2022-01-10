@@ -299,7 +299,7 @@ func testFilterSSetFilter2(t *testing.T) {
 
 func testFilterSGetFilterSIDs2(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"fltr_for_attr", "fltr_for_attr2"}

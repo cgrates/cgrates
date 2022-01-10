@@ -414,9 +414,8 @@ func testStatsGetStatQueueProfileIDs(t *testing.T) {
 	expIDs := []string{"SQ_1", "SQ_2"}
 	var sqIDs []string
 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
-		&utils.PaginatorWithTenant{
-			Tenant:    "cgrates.org",
-			Paginator: utils.Paginator{},
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
 		}, &sqIDs); err != nil {
 		t.Error(err)
 	} else {

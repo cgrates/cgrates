@@ -204,7 +204,7 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 
 func testAttributeGetAttributeIDs(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_ATTRIBUTES_IT_TEST"}
@@ -295,7 +295,7 @@ func testAttributeSetAttributeProfile2(t *testing.T) {
 
 func testAttributeGetAttributeIDs2(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_ATTRIBUTES_IT_TEST", "TEST_ATTRIBUTES_IT_TEST_SECOND"}
@@ -901,7 +901,7 @@ func testAttributeGetAttributeProfileAllIDs(t *testing.T) {
 	expectedIds := []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_Search_and_replace",
 		"TEST_ATTRIBUTES_IT_TEST"} //"TEST_ATTRIBUTES_IT_TEST_SECOND"}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
-		&utils.PaginatorWithTenant{
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &rply); err != nil {
 		t.Error(err)

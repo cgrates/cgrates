@@ -206,7 +206,7 @@ func testAccSetAccProfile(t *testing.T) {
 
 func testAccGetAccIDs(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_ACC_IT_TEST"}
@@ -320,7 +320,7 @@ func testAccSetAcc2(t *testing.T) {
 
 func testAccGetAccIDs2(t *testing.T) {
 	var reply []string
-	args := &utils.PaginatorWithTenant{
+	args := &utils.ArgsItemIDs{
 		Tenant: "cgrates.org",
 	}
 	expected := []string{"TEST_ACC_IT_TEST", "TEST_ACC_IT_TEST2"}
