@@ -523,6 +523,7 @@ const CGRATES_CFG_JSON = `
 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
 				// "sqlConnMaxLifetime": "0",						// SQLConnMaxLifetime 
+				// "sqlDSNParams": {},                           // DSN params
 
 
 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
