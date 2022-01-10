@@ -23,9 +23,6 @@ import (
 )
 
 type MigratorStorDB interface {
-	getV1CDR() (v1Cdr *v1Cdrs, err error)
-	setV1CDR(v1Cdr *v1Cdrs) (err error)
-	remV1CDRs(v1Cdr *v1Cdrs) (err error)
 	createV1SMCosts() (err error)
 	renameV1SMCosts() (err error)
 	StorDB() engine.StorDB
