@@ -82,7 +82,7 @@ func (adms *AdminSv1) GetFilter(ctx *context.Context, arg *utils.TenantIDWithAPI
 	return nil
 }
 
-func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]engine.Filter) (err error) {
+func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]*engine.Filter) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -115,7 +115,7 @@ func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, 
 		if fltr, err = adms.dm.GetFilter(ctx, tnt, fltrID, true, true, utils.NonTransactional); err != nil {
 			return utils.APIErrorHandler(err)
 		} else {
-			fltrs := append(*reply, *fltr)
+			fltrs := append(*reply, fltr)
 			*reply = fltrs
 		}
 	}
