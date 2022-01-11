@@ -87,12 +87,14 @@ func TestLoggerExportEmerg(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "Emergency message",
-						"Severity":   utils.LOGLEVEL_EMERGENCY,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "Emergency message",
+							"Severity":   utils.LOGLEVEL_EMERGENCY,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -131,12 +133,14 @@ func TestLoggerExportAlert(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "Alert message",
-						"Severity":   utils.LOGLEVEL_ALERT,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "Alert message",
+							"Severity":   utils.LOGLEVEL_ALERT,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -175,12 +179,14 @@ func TestLoggerExportCrit(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "Critical message",
-						"Severity":   utils.LOGLEVEL_CRITICAL,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "Critical message",
+							"Severity":   utils.LOGLEVEL_CRITICAL,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -219,12 +225,14 @@ func TestLoggerExportErr(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "Error message",
-						"Severity":   utils.LOGLEVEL_ERROR,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "Error message",
+							"Severity":   utils.LOGLEVEL_ERROR,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -263,12 +271,14 @@ func TestLoggerExportWarning(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "Warning message",
-						"Severity":   utils.LOGLEVEL_WARNING,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "Warning message",
+							"Severity":   utils.LOGLEVEL_WARNING,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -307,12 +317,14 @@ func TestLoggerExportNotice(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "Notice message",
-						"Severity":   utils.LOGLEVEL_NOTICE,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "Notice message",
+							"Severity":   utils.LOGLEVEL_NOTICE,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -351,12 +363,14 @@ func TestLoggerExportInfo(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "Info message",
-						"Severity":   utils.LOGLEVEL_INFO,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "Info message",
+							"Severity":   utils.LOGLEVEL_INFO,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -395,12 +409,14 @@ func TestLoggerExportDebug(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "Debug message",
-						"Severity":   utils.LOGLEVEL_DEBUG,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "Debug message",
+							"Severity":   utils.LOGLEVEL_DEBUG,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -457,12 +473,14 @@ func TestLoggerExportWrite(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-				exp := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					Event: map[string]interface{}{
-						utils.NodeID: "123",
-						"Message":    "message",
-						"Severity":   8,
+				exp := &utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						Event: map[string]interface{}{
+							utils.NodeID: "123",
+							"Message":    "message",
+							"Severity":   8,
+						},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
