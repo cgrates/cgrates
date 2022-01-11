@@ -525,6 +525,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			SQLMaxOpenConns:    utils.IntPointer(100),
 			SQLMaxIdleConns:    utils.IntPointer(10),
 			SQLConnMaxLifetime: utils.StringPointer("0"),
+			SQLDSNParams:       make(map[string]string),
 			SSLMode:            utils.StringPointer(utils.PostgressSSLModeDisable),
 			MySQLLocation:      utils.StringPointer("Local"),
 		},

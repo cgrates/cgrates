@@ -162,6 +162,7 @@ const CGRATES_CFG_JSON = `
 		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
 		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
+		"sqlDSNParams":{},                  // DSN params for opening db  
 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
 		"sslMode":"disable",				// sslMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrived

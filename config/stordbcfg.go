@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -32,6 +33,7 @@ type StorDBOpts struct {
 	SQLMaxOpenConns    int
 	SQLMaxIdleConns    int
 	SQLConnMaxLifetime time.Duration
+	SQLDSNParams       map[string]string
 	MongoQueryTimeout  time.Duration
 	SSLMode            string
 	MySQLLocation      string
@@ -76,6 +78,10 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 		if dbOpts.SQLConnMaxLifetime, err = utils.ParseDurationWithNanosecs(*jsnCfg.SQLConnMaxLifetime); err != nil {
 			return
 		}
+	}
+	if jsnCfg.SQLDSNParams != nil {
+		dbOpts.SQLDSNParams = make(map[string]string)
+		dbOpts.SQLDSNParams = jsnCfg.SQLDSNParams
 	}
 	if jsnCfg.MongoQueryTimeout != nil {
 		if dbOpts.MongoQueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.MongoQueryTimeout); err != nil {
@@ -165,6 +171,7 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 		SQLMaxOpenConns:    dbOpts.SQLMaxOpenConns,
 		SQLMaxIdleConns:    dbOpts.SQLMaxIdleConns,
 		SQLConnMaxLifetime: dbOpts.SQLConnMaxLifetime,
+		SQLDSNParams:       dbOpts.SQLDSNParams,
 		MongoQueryTimeout:  dbOpts.MongoQueryTimeout,
 		SSLMode:            dbOpts.SSLMode,
 		MySQLLocation:      dbOpts.MySQLLocation,
@@ -208,6 +215,7 @@ func (dbcfg StorDbCfg) AsMapInterface(string) interface{} {
 		utils.SQLMaxOpenConnsCfg:   dbcfg.Opts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:   dbcfg.Opts.SQLMaxIdleConns,
 		utils.SQLConnMaxLifetime:   dbcfg.Opts.SQLConnMaxLifetime.String(),
+		utils.SQLDSNParams:         dbcfg.Opts.SQLDSNParams,
 		utils.MongoQueryTimeoutCfg: dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.SSLModeCfg:           dbcfg.Opts.SSLMode,
 		utils.MysqlLocation:        dbcfg.Opts.MySQLLocation,
@@ -250,6 +258,9 @@ func diffStorDBOptsJsonCfg(d *DBOptsJson, v1, v2 *StorDBOpts) *DBOptsJson {
 	}
 	if v1.SQLConnMaxLifetime != v2.SQLConnMaxLifetime {
 		d.SQLConnMaxLifetime = utils.StringPointer(v2.SQLConnMaxLifetime.String())
+	}
+	if !reflect.DeepEqual(v1.SQLDSNParams, v2.SQLDSNParams) {
+		d.SQLDSNParams = v2.SQLDSNParams
 	}
 	if v1.MongoQueryTimeout != v2.MongoQueryTimeout {
 		d.MongoQueryTimeout = utils.StringPointer(v2.MongoQueryTimeout.String())

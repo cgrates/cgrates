@@ -461,7 +461,6 @@
 				"sqlMaxIdleConns": 10,
 				"sqlMaxOpenConns": 100,
 				"sqlConnMaxLifetime": "0",
-
 			},
 			"fields":[ // the path constains *exp.columnName
 				{"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.CGRID"},
