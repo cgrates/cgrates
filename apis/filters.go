@@ -82,6 +82,46 @@ func (adms *AdminSv1) GetFilter(ctx *context.Context, arg *utils.TenantIDWithAPI
 	return nil
 }
 
+func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, reply *[]engine.Filter) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = adms.cfg.GeneralCfg().DefaultTenant
+	}
+	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
+	lenPrfx := len(prfx)
+	prfx += args.ItemsPrefix
+	var keys []string
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+		return
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[lenPrfx:]
+	}
+	var limit, offset, maxItems int
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
+		return
+	}
+	var fltrIDs []string
+	fltrIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
+	if err != nil {
+		return
+	}
+	for _, fltrID := range fltrIDs {
+		var fltr *engine.Filter
+		if fltr, err = adms.dm.GetFilter(ctx, tnt, fltrID, true, true, utils.NonTransactional); err != nil {
+			return utils.APIErrorHandler(err)
+		} else {
+			fltrs := append(*reply, *fltr)
+			*reply = fltrs
+		}
+	}
+	return
+}
+
 // GetFilterIDs returns list of Filter IDs registered for a tenant
 func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs, fltrIDs *[]string) (err error) {
 	tnt := args.Tenant
