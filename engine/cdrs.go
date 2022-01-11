@@ -365,7 +365,7 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.ID)
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEventWithGet, arg.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -382,7 +382,6 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, arg *utils.CG
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-
 	var procEvs []*utils.EventsWithOpts
 	if procEvs, err = cdrS.processEvent(ctx, arg); err != nil {
 		return
