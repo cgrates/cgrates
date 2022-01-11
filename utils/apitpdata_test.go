@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -264,7 +265,15 @@ func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
 }
 
 func TestAPITPDataPaginate(t *testing.T) {
-	in := []string{"FLTR_1", "FLTR_2", "FLTR_3", "FLTR_4", "FLTR_5", "FLTR_6", "FLTR_7",
+	var in []string
+
+	if rcv, err := Paginate(in, 2, 2, 6); err != nil {
+		t.Error(err)
+	} else if rcv != nil {
+		t.Error("expected nil return")
+	}
+
+	in = []string{"FLTR_1", "FLTR_2", "FLTR_3", "FLTR_4", "FLTR_5", "FLTR_6", "FLTR_7",
 		"FLTR_8", "FLTR_9", "FLTR_10", "FLTR_11", "FLTR_12", "FLTR_13", "FLTR_14",
 		"FLTR_15", "FLTR_16", "FLTR_17", "FLTR_18", "FLTR_19", "FLTR_20"}
 
@@ -313,6 +322,95 @@ func TestAPITPDataPaginate(t *testing.T) {
 	if _, err := Paginate(in, 0, 18, 19); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
+
+}
+
+type pag struct {
+	limit    int
+	offset   int
+	maxItems int
+}
+
+func testName(p pag) string {
+	return fmt.Sprintf("limit:<%d>, offset:<%d>, maxItems:<%d>", p.limit, p.offset, p.maxItems)
+}
+
+func TestPagination(t *testing.T) {
+	in := []string{"FLTR_1", "FLTR_2", "FLTR_3", "FLTR_4", "FLTR_5"}
+	experr := "SERVER_ERROR: maximum number of items exceeded"
+	cases := []struct {
+		p   pag
+		err string
+	}{
+		{pag{limit: 0, offset: 0, maxItems: 1}, experr},
+		{pag{limit: 1, offset: 0, maxItems: 1}, ""},
+		{pag{limit: 0, offset: 1, maxItems: 1}, experr},
+		{pag{limit: 0, offset: 0, maxItems: 2}, experr},
+		{pag{limit: 0, offset: 1, maxItems: 2}, experr},
+		{pag{limit: 0, offset: 2, maxItems: 2}, experr},
+		{pag{limit: 1, offset: 0, maxItems: 2}, ""},
+		{pag{limit: 1, offset: 1, maxItems: 2}, ""},
+		{pag{limit: 2, offset: 0, maxItems: 2}, ""},
+		{pag{limit: 0, offset: 0, maxItems: 3}, experr},
+		{pag{limit: 0, offset: 1, maxItems: 3}, experr},
+		{pag{limit: 0, offset: 2, maxItems: 3}, experr},
+		{pag{limit: 0, offset: 3, maxItems: 3}, experr},
+		{pag{limit: 1, offset: 0, maxItems: 3}, ""},
+		{pag{limit: 1, offset: 1, maxItems: 3}, ""},
+		{pag{limit: 1, offset: 2, maxItems: 3}, ""},
+		{pag{limit: 2, offset: 0, maxItems: 3}, ""},
+		{pag{limit: 2, offset: 1, maxItems: 3}, ""},
+		{pag{limit: 3, offset: 0, maxItems: 3}, ""},
+		{pag{limit: 0, offset: 0, maxItems: 4}, experr},
+		{pag{limit: 0, offset: 1, maxItems: 4}, experr},
+		{pag{limit: 0, offset: 2, maxItems: 4}, experr},
+		{pag{limit: 0, offset: 3, maxItems: 4}, experr},
+		{pag{limit: 0, offset: 4, maxItems: 4}, experr},
+		{pag{limit: 1, offset: 0, maxItems: 4}, ""},
+		{pag{limit: 1, offset: 1, maxItems: 4}, ""},
+		{pag{limit: 1, offset: 2, maxItems: 4}, ""},
+		{pag{limit: 1, offset: 3, maxItems: 4}, ""},
+		{pag{limit: 2, offset: 0, maxItems: 4}, ""},
+		{pag{limit: 2, offset: 1, maxItems: 4}, ""},
+		{pag{limit: 2, offset: 2, maxItems: 4}, ""},
+		{pag{limit: 3, offset: 0, maxItems: 4}, ""},
+		{pag{limit: 3, offset: 1, maxItems: 4}, ""},
+		{pag{limit: 4, offset: 0, maxItems: 4}, ""},
+		{pag{limit: 0, offset: 0, maxItems: 5}, ""},
+		{pag{limit: 0, offset: 1, maxItems: 5}, ""},
+		{pag{limit: 0, offset: 2, maxItems: 5}, ""},
+		{pag{limit: 0, offset: 3, maxItems: 5}, ""},
+		{pag{limit: 0, offset: 4, maxItems: 5}, ""},
+		{pag{limit: 0, offset: 5, maxItems: 5}, ""},
+		{pag{limit: 1, offset: 0, maxItems: 5}, ""},
+		{pag{limit: 1, offset: 1, maxItems: 5}, ""},
+		{pag{limit: 1, offset: 2, maxItems: 5}, ""},
+		{pag{limit: 1, offset: 3, maxItems: 5}, ""},
+		{pag{limit: 1, offset: 4, maxItems: 5}, ""},
+		{pag{limit: 2, offset: 0, maxItems: 5}, ""},
+		{pag{limit: 2, offset: 1, maxItems: 5}, ""},
+		{pag{limit: 2, offset: 2, maxItems: 5}, ""},
+		{pag{limit: 2, offset: 3, maxItems: 5}, ""},
+		{pag{limit: 3, offset: 0, maxItems: 5}, ""},
+		{pag{limit: 3, offset: 1, maxItems: 5}, ""},
+		{pag{limit: 3, offset: 2, maxItems: 5}, ""},
+		{pag{limit: 4, offset: 0, maxItems: 5}, ""},
+		{pag{limit: 4, offset: 1, maxItems: 5}, ""},
+		{pag{limit: 5, offset: 0, maxItems: 5}, ""},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.p), func(t *testing.T) {
+			_, err := Paginate(in, c.p.limit, c.p.offset, c.p.maxItems)
+			if err != nil {
+				if c.err == "" {
+					t.Error("did not expect error")
+				}
+			} else if c.err != "" {
+				t.Errorf("expected error")
+			}
+		})
+	}
 }
 
 func TestAPITPDataGetPaginateOpts(t *testing.T) {
@@ -334,6 +432,18 @@ func TestAPITPDataGetPaginateOpts(t *testing.T) {
 
 	opts[PageMaxItemsOpt] = false
 	experr := `cannot convert field<bool>: false to int`
+	if _, _, _, err := GetPaginateOpts(opts); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	opts[PageOffsetOpt] = struct{}{}
+	experr = `cannot convert field<struct {}>: {} to int`
+	if _, _, _, err := GetPaginateOpts(opts); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	opts[PageLimitOpt] = true
+	experr = `cannot convert field<bool>: true to int`
 	if _, _, _, err := GetPaginateOpts(opts); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
