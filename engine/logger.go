@@ -61,14 +61,15 @@ func (el *ExportLogger) Close() (_ error) {
 }
 
 func (el *ExportLogger) call(m string, level int) error {
-	var reply string
-	return el.connMgr.Call(context.Background(), el.eesConns, utils.EeSv1ProcessEvent, &utils.CGREvent{
-		Tenant: el.tenant,
-		Event: map[string]interface{}{
-			utils.NodeID: el.nodeID,
-			"Message":    m,
-			"Severity":   level,
-		}}, &reply)
+	var reply map[string]map[string]interface{}
+	return el.connMgr.Call(context.Background(), el.eesConns, utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
+		CGREvent: &utils.CGREvent{
+			Tenant: el.tenant,
+			Event: map[string]interface{}{
+				utils.NodeID: el.nodeID,
+				"Message":    m,
+				"Severity":   level,
+			}}}, &reply)
 }
 
 func (el *ExportLogger) Write(p []byte) (n int, err error) {
