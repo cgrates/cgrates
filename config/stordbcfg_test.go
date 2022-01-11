@@ -48,6 +48,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			SQLMaxOpenConns:    utils.IntPointer(100),
 			SQLMaxIdleConns:    utils.IntPointer(10),
 			SQLConnMaxLifetime: utils.StringPointer("0"),
+			SQLDSNParams:       make(map[string]string),
 			MySQLLocation:      utils.StringPointer("UTC"),
 		},
 	}
@@ -71,6 +72,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		Opts: &StorDBOpts{
 			SQLMaxOpenConns:   100,
 			SQLMaxIdleConns:   10,
+			SQLDSNParams:      make(map[string]string),
 			MongoQueryTimeout: 10 * time.Second,
 			SSLMode:           "disable",
 			MySQLLocation:     "UTC",
@@ -258,6 +260,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.SQLMaxOpenConnsCfg:    100,
 			utils.SQLMaxIdleConnsCfg:    10,
 			utils.SQLConnMaxLifetimeCfg: "0s",
+			utils.SQLDSNParams:          make(map[string]string),
 			utils.MongoQueryTimeoutCfg:  "10s",
 			utils.SSLModeCfg:            "disable",
 			utils.MysqlLocation:         "UTC",
@@ -273,16 +276,16 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		rcv := cfgCgr.storDbCfg.AsMapInterface("").(map[string]interface{})
 		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg],
 			rcv[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg],
-				rcv[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg])
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg]),
+				utils.ToJSON(rcv[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg]))
 		} else if !reflect.DeepEqual(eMap[utils.OptsCfg], rcv[utils.OptsCfg]) {
-			t.Errorf("Expected %+v \n, received %+v", eMap[utils.OptsCfg], rcv[utils.OptsCfg])
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.OptsCfg]), utils.ToJSON(rcv[utils.OptsCfg]))
 		} else if !reflect.DeepEqual(eMap[utils.PrefixIndexedFieldsCfg], rcv[utils.PrefixIndexedFieldsCfg]) {
-			t.Errorf("Expected %+v \n, received %+v", eMap[utils.PrefixIndexedFieldsCfg], rcv[utils.PrefixIndexedFieldsCfg])
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.PrefixIndexedFieldsCfg]), utils.ToJSON(rcv[utils.PrefixIndexedFieldsCfg]))
 		} else if !reflect.DeepEqual(eMap[utils.RemoteConnsCfg], rcv[utils.RemoteConnsCfg]) {
-			t.Errorf("Expected %+v \n, received %+v", eMap[utils.RemoteConnsCfg], rcv[utils.RemoteConnsCfg])
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.RemoteConnsCfg]), utils.ToJSON(rcv[utils.RemoteConnsCfg]))
 		} else if !reflect.DeepEqual(eMap[utils.ReplicationConnsCfg], rcv[utils.ReplicationConnsCfg]) {
-			t.Errorf("Expected %+v \n, received %+v", eMap[utils.ReplicationConnsCfg], rcv[utils.ReplicationConnsCfg])
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.ReplicationConnsCfg]), utils.ToJSON(rcv[utils.ReplicationConnsCfg]))
 		}
 	}
 }

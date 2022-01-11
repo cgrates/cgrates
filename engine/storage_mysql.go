@@ -32,14 +32,13 @@ type MySQLStorage struct {
 }
 
 func NewMySQLStorage(host, port, name, user, password string,
-	maxConn, maxIdleConn int, connMaxLifetime time.Duration, location string) (*SQLStorage, error) {
+	maxConn, maxIdleConn int, connMaxLifetime time.Duration, location string, dsnParams map[string]string) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=%s&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		user, password, host, port, name, location)
-	db, err := gorm.Open(mysql.Open(connectString), &gorm.Config{AllowGlobalUpdate: true})
+	db, err := gorm.Open(mysql.Open(connectString+AppendToMysqlDSNOpts(dsnParams)), &gorm.Config{AllowGlobalUpdate: true})
 	if err != nil {
 		return nil, err
 	}
-
 	mySQLStorage := new(MySQLStorage)
 	if mySQLStorage.DB, err = db.DB(); err != nil {
 		return nil, err
@@ -58,6 +57,17 @@ func NewMySQLStorage(host, port, name, user, password string,
 		StorDB:  mySQLStorage,
 		SQLImpl: mySQLStorage,
 	}, nil
+}
+
+func AppendToMysqlDSNOpts(opts map[string]string) string {
+	if opts != nil {
+		var dsn string
+		for key, val := range opts {
+			dsn = dsn + "&" + key + "=" + val
+		}
+		return dsn
+	}
+	return utils.EmptyString
 }
 
 // SetVersions will set a slice of versions, updating existing

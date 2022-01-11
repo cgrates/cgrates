@@ -69,7 +69,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLConnMaxLifetime)
 	case utils.MySQL:
 		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
-			opts.SQLConnMaxLifetime, opts.MySQLLocation)
+			opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.SQLDSNParams)
 	case utils.Internal:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, itmsCfg)
 	default:
