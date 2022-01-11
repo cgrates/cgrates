@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -49,13 +50,18 @@ var (
 		testFilterSGetFltrBeforeSet,
 		testFilterSSetFltr,
 		testFilterSGetFilterIDs,
+		testFilterSGetFilters,
 		testFilterSGetFilterCount,
 		testGetFilterBeforeSet2,
 		testFilterSSetFilter2,
 		testFilterSGetFilterSIDs2,
+		testFilterSGetFilters2,
 		testFilterSGetFilterSCount2,
 		testFilterRemoveFilter,
 		testFilterSSetFilterS3,
+		testFilterSGetFilters3,
+		testFilterSSetGetFilterWithPrefix,
+		testFilterSGetFiltersWithPrefix,
 		testFilterSKillEngine,
 	}
 )
@@ -202,6 +208,40 @@ func testFilterSGetFilterIDs(t *testing.T) {
 	}
 }
 
+func testFilterSGetFilters(t *testing.T) {
+	var reply *[]engine.Filter
+	args := &utils.ArgsItemIDs{}
+	expectedFltr := &[]engine.Filter{
+		{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+	}
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expectedFltr) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
+	}
+}
+
 func testFilterSGetFilterCount(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
@@ -311,6 +351,65 @@ func testFilterSGetFilterSIDs2(t *testing.T) {
 	}
 }
 
+func testFilterSGetFilters2(t *testing.T) {
+	var reply *[]engine.Filter
+	args := &utils.ArgsItemIDs{}
+	expectedFltr := &[]engine.Filter{
+		{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+		{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+	}
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(*reply, func(i, j int) bool {
+		return (*reply)[i].ID < (*reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expectedFltr) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
+	}
+}
+
 func testFilterSGetFilterSCount2(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
@@ -413,6 +512,169 @@ func testFilterSSetFilterS3(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, expectedFltr) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(result))
+	}
+}
+
+func testFilterSGetFilters3(t *testing.T) {
+	var reply *[]engine.Filter
+	args := &utils.ArgsItemIDs{}
+	expectedFltr := &[]engine.Filter{
+		{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+		{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr3",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+	}
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(*reply, func(i, j int) bool {
+		return (*reply)[i].ID < (*reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expectedFltr) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
+	}
+}
+func testFilterSSetGetFilterWithPrefix(t *testing.T) {
+	fltrPrf := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: utils.CGRateSorg,
+			ID:     "afltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expectedFltr := &engine.Filter{
+		Tenant: utils.CGRateSorg,
+		ID:     "afltr_for_attr",
+		Rules: []*engine.FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Subject",
+				Values:  []string{"1004", "6774", "22312"},
+			},
+			{
+				Type:    utils.MetaString,
+				Element: "~*opts.Subsystems",
+				Values:  []string{"*attributes"},
+			},
+			{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Destinations",
+				Values:  []string{"+0775", "+442"},
+			},
+		},
+	}
+	var result *engine.Filter
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantID{
+			Tenant: utils.CGRateSorg,
+			ID:     "afltr_for_attr",
+		}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, expectedFltr) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(result))
+	}
+}
+
+func testFilterSGetFiltersWithPrefix(t *testing.T) {
+	var reply *[]engine.Filter
+	args := &utils.ArgsItemIDs{
+		ItemsPrefix: "afltr",
+	}
+	expectedFltr := &[]engine.Filter{
+		{
+			Tenant: utils.CGRateSorg,
+			ID:     "afltr_for_attr",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Subject",
+					Values:  []string{"1004", "6774", "22312"},
+				},
+				{
+					Type:    utils.MetaString,
+					Element: "~*opts.Subsystems",
+					Values:  []string{"*attributes"},
+				},
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.Destinations",
+					Values:  []string{"+0775", "+442"},
+				},
+			},
+		},
+	}
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(*reply, func(i, j int) bool {
+		return (*reply)[i].ID < (*reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expectedFltr) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedFltr), utils.ToJSON(reply))
 	}
 }
 
