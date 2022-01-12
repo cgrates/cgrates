@@ -608,7 +608,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
                   "export_path": "/tmp/testCSV",			
 			      "opts": {
 					"awsSecret": "test",
-					"sqlDSNParams": {
+					"mysqlDSNParams": {
 						"allowOldPasswords": "true",
 						"allowNativePasswords": "true",
 					},
@@ -646,7 +646,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.ExportPathCfg: "/tmp/testCSV",
 				utils.OptsCfg: map[string]interface{}{
 					utils.AWSSecret: "test",
-					utils.SQLDSNParams: map[string]string{
+					utils.MYSQLDSNParams: map[string]string{
 						"allowOldPasswords":    "true",
 						"allowNativePasswords": "true",
 					},

@@ -48,7 +48,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			SQLMaxOpenConns:    utils.IntPointer(100),
 			SQLMaxIdleConns:    utils.IntPointer(10),
 			SQLConnMaxLifetime: utils.StringPointer("0"),
-			SQLDSNParams:       make(map[string]string),
+			MYSQLDSNParams:     make(map[string]string),
 			MySQLLocation:      utils.StringPointer("UTC"),
 		},
 	}
@@ -233,7 +233,8 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			"opts": {	
 				"sqlMaxOpenConns": 100,					
 				"sqlMaxIdleConns": 10,					
-				"sqlConnMaxLifetime": "0", 			
+				"sqlConnMaxLifetime": "0", 	
+				"mysqlDSNParams": {},		
 				"mongoQueryTimeout":"10s",
 				"sslMode":"disable",		
 				"mysqlLocation": "UTC",			
@@ -260,7 +261,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.SQLMaxOpenConnsCfg:    100,
 			utils.SQLMaxIdleConnsCfg:    10,
 			utils.SQLConnMaxLifetimeCfg: "0s",
-			utils.SQLDSNParams:          make(map[string]string),
+			utils.MYSQLDSNParams:        make(map[string]string),
 			utils.MongoQueryTimeoutCfg:  "10s",
 			utils.SSLModeCfg:            "disable",
 			utils.MysqlLocation:         "UTC",

@@ -79,9 +79,9 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 			return
 		}
 	}
-	if jsnCfg.SQLDSNParams != nil {
+	if jsnCfg.MYSQLDSNParams != nil {
 		dbOpts.SQLDSNParams = make(map[string]string)
-		dbOpts.SQLDSNParams = jsnCfg.SQLDSNParams
+		dbOpts.SQLDSNParams = jsnCfg.MYSQLDSNParams
 	}
 	if jsnCfg.MongoQueryTimeout != nil {
 		if dbOpts.MongoQueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.MongoQueryTimeout); err != nil {
@@ -215,7 +215,7 @@ func (dbcfg StorDbCfg) AsMapInterface(string) interface{} {
 		utils.SQLMaxOpenConnsCfg:   dbcfg.Opts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:   dbcfg.Opts.SQLMaxIdleConns,
 		utils.SQLConnMaxLifetime:   dbcfg.Opts.SQLConnMaxLifetime.String(),
-		utils.SQLDSNParams:         dbcfg.Opts.SQLDSNParams,
+		utils.MYSQLDSNParams:       dbcfg.Opts.SQLDSNParams,
 		utils.MongoQueryTimeoutCfg: dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.SSLModeCfg:           dbcfg.Opts.SSLMode,
 		utils.MysqlLocation:        dbcfg.Opts.MySQLLocation,
@@ -260,7 +260,7 @@ func diffStorDBOptsJsonCfg(d *DBOptsJson, v1, v2 *StorDBOpts) *DBOptsJson {
 		d.SQLConnMaxLifetime = utils.StringPointer(v2.SQLConnMaxLifetime.String())
 	}
 	if !reflect.DeepEqual(v1.SQLDSNParams, v2.SQLDSNParams) {
-		d.SQLDSNParams = v2.SQLDSNParams
+		d.MYSQLDSNParams = v2.SQLDSNParams
 	}
 	if v1.MongoQueryTimeout != v2.MongoQueryTimeout {
 		d.MongoQueryTimeout = utils.StringPointer(v2.MongoQueryTimeout.String())
