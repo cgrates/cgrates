@@ -46,7 +46,7 @@ func (admS *AdminSv1) GetAccount(ctx *context.Context, arg *utils.TenantIDWithAP
 	return nil
 }
 
-// GetAccountIDs returns list of action profile IDs registered for a tenant
+// GetAccountIDs returns list of account profile IDs registered for a tenant
 func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
@@ -71,6 +71,31 @@ func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.ArgsItemID
 		return
 	}
 	*actPrfIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
+	return
+}
+
+// GetAccounts returns a list of account profiles registered for a tenant
+func (admS *AdminSv1) GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs, actPrfs *[]*utils.Account) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var actPrfIDs []string
+	if err = admS.GetAccountIDs(ctx, args, &actPrfIDs); err != nil {
+		return
+	}
+	*actPrfs = make([]*utils.Account, 0, len(actPrfIDs))
+	for _, actPrfID := range actPrfIDs {
+		var ap *utils.Account
+		ap, err = admS.dm.GetAccount(ctx, tnt, actPrfID)
+		if err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+		*actPrfs = append(*actPrfs, ap)
+	}
 	return
 }
 
