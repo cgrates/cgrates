@@ -2553,6 +2553,7 @@ const (
 
 	SQLMaxOpenConns    = "sqlMaxOpenConns"
 	SQLConnMaxLifetime = "sqlConnMaxLifetime"
+	MYSQLDSNParams     = "mysqlDSNParams"
 
 	// fileCSV
 	CSVRowLengthOpt     = "csvRowLength"

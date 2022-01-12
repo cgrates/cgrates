@@ -50,6 +50,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.SQLMaxOpenConnsCfg:    100.,
 			utils.SQLMaxIdleConnsCfg:    10.,
 			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MYSQLDSNParams:        make(map[string]string),
 			utils.MysqlLocation:         "UTC",
 		},
 	}
@@ -78,6 +79,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.SQLMaxOpenConnsCfg:    100.,
 			utils.SQLMaxIdleConnsCfg:    10.,
 			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MYSQLDSNParams:        make(map[string]string),
 			utils.MongoQueryTimeoutCfg:  "10s",
 			utils.SSLModeCfg:            "disable",
 			utils.MysqlLocation:         "UTC",
@@ -207,7 +209,8 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			"opts": {	
 				"sqlMaxOpenConns": 100,					
 				"sqlMaxIdleConns": 10,					
-				"sqlConnMaxLifetime": 0, 			
+				"sqlConnMaxLifetime": 0,
+				"mysqlDSNParams": {},  			
 				"mongoQueryTimeout":"10s",
 				"postgresSSLMode":"disable",		
 				"mysqlLocation": "UTC",			
@@ -234,6 +237,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			utils.SQLMaxOpenConnsCfg:    100.,
 			utils.SQLMaxIdleConnsCfg:    10.,
 			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MYSQLDSNParams:        make(map[string]interface{}),
 			utils.MongoQueryTimeoutCfg:  "10s",
 			utils.SSLModeCfg:            "disable",
 			utils.MysqlLocation:         "UTC",
@@ -252,7 +256,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg],
 				rcv[utils.ItemsCfg].(map[string]interface{})[utils.SessionSConnsCfg])
 		} else if !reflect.DeepEqual(eMap[utils.OptsCfg], rcv[utils.OptsCfg]) {
-			t.Errorf("Expected %+v \n, received %+v", eMap[utils.OptsCfg], rcv[utils.OptsCfg])
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.OptsCfg]), utils.ToJSON(rcv[utils.OptsCfg]))
 		} else if !reflect.DeepEqual(eMap[utils.PrefixIndexedFieldsCfg], rcv[utils.PrefixIndexedFieldsCfg]) {
 			t.Errorf("Expected %+v \n, received %+v", eMap[utils.PrefixIndexedFieldsCfg], rcv[utils.PrefixIndexedFieldsCfg])
 		} else if !reflect.DeepEqual(eMap[utils.RemoteConnsCfg], rcv[utils.RemoteConnsCfg]) {
