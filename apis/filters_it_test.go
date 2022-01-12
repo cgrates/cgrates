@@ -48,6 +48,7 @@ var (
 		testFilterSStartEngine,
 		testFilterSRPCConn,
 		testFilterSGetFltrBeforeSet,
+		testFilterSGetFiltersBeforeSet,
 		testFilterSSetFltr,
 		testFilterSGetFilterIDs,
 		testFilterSGetFilters,
@@ -131,6 +132,15 @@ func testFilterSGetFltrBeforeSet(t *testing.T) {
 	}
 }
 
+func testFilterSGetFiltersBeforeSet(t *testing.T) {
+	var reply *[]*engine.Filter
+	args := &utils.ArgsItemIDs{}
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v \n, received %+v", utils.ErrNotFound, err)
+	}
+}
+
 func testFilterSSetFltr(t *testing.T) {
 	fltrPrf := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
@@ -209,9 +219,9 @@ func testFilterSGetFilterIDs(t *testing.T) {
 }
 
 func testFilterSGetFilters(t *testing.T) {
-	var reply *[]engine.Filter
+	var reply *[]*engine.Filter
 	args := &utils.ArgsItemIDs{}
-	expectedFltr := &[]engine.Filter{
+	expectedFltr := &[](*engine.Filter){
 		{
 			Tenant: utils.CGRateSorg,
 			ID:     "fltr_for_attr",
@@ -352,9 +362,9 @@ func testFilterSGetFilterSIDs2(t *testing.T) {
 }
 
 func testFilterSGetFilters2(t *testing.T) {
-	var reply *[]engine.Filter
+	var reply *[]*engine.Filter
 	args := &utils.ArgsItemIDs{}
-	expectedFltr := &[]engine.Filter{
+	expectedFltr := &[](*engine.Filter){
 		{
 			Tenant: utils.CGRateSorg,
 			ID:     "fltr_for_attr",
@@ -516,9 +526,9 @@ func testFilterSSetFilterS3(t *testing.T) {
 }
 
 func testFilterSGetFilters3(t *testing.T) {
-	var reply *[]engine.Filter
+	var reply *[]*engine.Filter
 	args := &utils.ArgsItemIDs{}
-	expectedFltr := &[]engine.Filter{
+	expectedFltr := &[](*engine.Filter){
 		{
 			Tenant: utils.CGRateSorg,
 			ID:     "fltr_for_attr2",
@@ -639,11 +649,11 @@ func testFilterSSetGetFilterWithPrefix(t *testing.T) {
 }
 
 func testFilterSGetFiltersWithPrefix(t *testing.T) {
-	var reply *[]engine.Filter
+	var reply *[]*engine.Filter
 	args := &utils.ArgsItemIDs{
 		ItemsPrefix: "afltr",
 	}
-	expectedFltr := &[]engine.Filter{
+	expectedFltr := &[](*engine.Filter){
 		{
 			Tenant: utils.CGRateSorg,
 			ID:     "afltr_for_attr",

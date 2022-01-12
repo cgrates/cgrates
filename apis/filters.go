@@ -87,36 +87,18 @@ func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, 
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
-	lenPrfx := len(prfx)
-	prfx += args.ItemsPrefix
-	var keys []string
-	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
-		return
-	}
-	if len(keys) == 0 {
-		return utils.ErrNotFound
-	}
-	retIDs := make([]string, len(keys))
-	for i, key := range keys {
-		retIDs[i] = key[lenPrfx:]
-	}
-	var limit, offset, maxItems int
-	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
-		return
-	}
 	var fltrIDs []string
-	fltrIDs, err = utils.Paginate(retIDs, limit, offset, maxItems)
+	err = adms.GetFilterIDs(ctx, args, &fltrIDs)
 	if err != nil {
 		return
 	}
+	*reply = make([]*engine.Filter, 0, len(fltrIDs))
 	for _, fltrID := range fltrIDs {
 		var fltr *engine.Filter
 		if fltr, err = adms.dm.GetFilter(ctx, tnt, fltrID, true, true, utils.NonTransactional); err != nil {
 			return utils.APIErrorHandler(err)
 		} else {
-			fltrs := append(*reply, fltr)
-			*reply = fltrs
+			*reply = append(*reply, fltr)
 		}
 	}
 	return
