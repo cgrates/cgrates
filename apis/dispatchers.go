@@ -49,7 +49,9 @@ func (admS *AdminSv1) GetDispatcherProfileIDs(ctx *context.Context, args *utils.
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep
+	lenPrfx := len(prfx)
+	prfx += args.ItemsPrefix
 	var keys []string
 	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return
@@ -66,7 +68,7 @@ func (admS *AdminSv1) GetDispatcherProfileIDs(ctx *context.Context, args *utils.
 	}
 	*dPrfIDs = make([]string, len(keys))
 	for i, key := range keys {
-		(*dPrfIDs)[i] = key[len(prfx):]
+		(*dPrfIDs)[i] = key[lenPrfx:]
 	}
 	return
 }
@@ -163,12 +165,14 @@ func (admS *AdminSv1) GetDispatcherHost(ctx *context.Context, arg *utils.TenantI
 }
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
-func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, tenantArg *utils.ArgsItemIDs, dPrfIDs *[]string) (err error) {
-	tenant := tenantArg.Tenant
+func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, args *utils.ArgsItemIDs, dPrfIDs *[]string) (err error) {
+	tenant := args.Tenant
 	if tenant == utils.EmptyString {
 		tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.DispatcherHostPrefix + tenant + utils.ConcatenatedKeySep + tenantArg.ItemsPrefix
+	prfx := utils.DispatcherHostPrefix + tenant + utils.ConcatenatedKeySep
+	lenPrfx := len(prfx)
+	prfx += args.ItemsPrefix
 	var keys []string
 	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
@@ -177,7 +181,7 @@ func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, tenantArg *util
 		return utils.ErrNotFound
 	}
 	var limit, offset, maxItems int
-	if limit, offset, maxItems, err = utils.GetPaginateOpts(tenantArg.APIOpts); err != nil {
+	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
 		return
 	}
 	if keys, err = utils.Paginate(keys, limit, offset, maxItems); err != nil {
@@ -185,7 +189,7 @@ func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, tenantArg *util
 	}
 	*dPrfIDs = make([]string, len(keys))
 	for i, key := range keys {
-		(*dPrfIDs)[i] = key[len(prfx):]
+		(*dPrfIDs)[i] = key[lenPrfx:]
 	}
 	return
 }
