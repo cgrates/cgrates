@@ -50,7 +50,9 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
+	lenPrfx := len(prfx)
+	prfx += args.ItemsPrefix
 	var keys []string
 	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return
@@ -60,7 +62,7 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 	}
 	retIDs := make([]string, len(keys))
 	for i, key := range keys {
-		retIDs[i] = key[len(prfx):]
+		retIDs[i] = key[lenPrfx:]
 	}
 	var limit, offset, maxItems int
 	if limit, offset, maxItems, err = utils.GetPaginateOpts(args.APIOpts); err != nil {
@@ -77,7 +79,7 @@ func (admS *AdminSv1) GetChargerProfileCount(ctx *context.Context, args *utils.A
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
+	prfx := utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
 	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
