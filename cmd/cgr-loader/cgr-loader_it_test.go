@@ -112,6 +112,7 @@ func TestLoadConfig(t *testing.T) {
 			SQLMaxIdleConns:    10,
 			SSLMode:            "disable",
 			MySQLLocation:      "Local",
+			SQLDSNParams:       make(map[string]string),
 		},
 	}
 	// Loader
