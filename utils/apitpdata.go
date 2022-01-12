@@ -19,87 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
 )
 
-type PaginatorWithSearch struct {
-	*Paginator
-	Search string // Global matching pattern in items returned, partially used in some APIs
-}
-
-// Paginate stuff around items returned
-type Paginator struct {
-	Limit    *int // Limit the number of items returned
-	Offset   *int // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
-	MaxItems *int
-}
-
-func GetPaginateOpts(opts map[string]interface{}) (limit, offset, maxItems int, err error) {
-	if limitIface, has := opts[PageLimitOpt]; has {
-		if limit, err = IfaceAsTInt(limitIface); err != nil {
-			return
-		}
-	}
-	if offsetIface, has := opts[PageOffsetOpt]; has {
-		if offset, err = IfaceAsTInt(offsetIface); err != nil {
-			return
-		}
-	}
-	if maxItemsIface, has := opts[PageMaxItemsOpt]; has {
-		if maxItems, err = IfaceAsTInt(maxItemsIface); err != nil {
-			return
-		}
-	}
-	return
-}
-
-func Paginate(in []string, limit, offset, maxItems int) (out []string, err error) {
-	if len(in) == 0 {
-		return
-	}
-	if maxItems != 0 && maxItems < limit+offset {
-		return nil, fmt.Errorf("SERVER_ERROR: maximum number of items exceeded")
-	}
-	if offset > len(in) {
-		return
-	}
-	if limit == 0 && offset == 0 {
-		out = in
-	} else {
-		if offset != 0 && limit != 0 {
-			limit = limit + offset
-		}
-		if limit == 0 || limit > len(in) {
-			limit = len(in)
-		}
-		out = in[offset:limit]
-	}
-	if maxItems != 0 && maxItems < len(out)+offset {
-		return nil, fmt.Errorf("SERVER_ERROR: maximum number of items exceeded")
-	}
-	return
-}
-
-// Clone creates a clone of the object
-func (pgnt Paginator) Clone() Paginator {
-	var limit *int
-	if pgnt.Limit != nil {
-		limit = new(int)
-		*limit = *pgnt.Limit
-	}
-
-	var offset *int
-	if pgnt.Offset != nil {
-		offset = new(int)
-		*offset = *pgnt.Offset
-	}
-	return Paginator{
-		Limit:  limit,
-		Offset: offset,
-	}
+type ArgsItemIDs struct {
+	Tenant      string
+	ID          string
+	APIOpts     map[string]interface{}
+	ItemsPrefix string
 }
 
 type AttrGetCdrs struct {
