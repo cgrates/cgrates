@@ -42,7 +42,6 @@ func TestCDRsNewCDRServer(t *testing.T) {
 	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
 	expected := &CDRServer{
 		cfg:        cfg,
-		cdrDB:      sent,
 		dm:         dm,
 		guard:      guardian.Guardian,
 		fltrS:      fltrs,
@@ -51,47 +50,6 @@ func TestCDRsNewCDRServer(t *testing.T) {
 	}
 	if !reflect.DeepEqual(newCDRSrv, expected) {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", expected, newCDRSrv)
-	}
-}
-
-func TestCDRsListenAndServeCaseStorDBChanOK(t *testing.T) {
-	var sent StorDB
-	cfg := config.NewDefaultCGRConfig()
-	storDBChan := make(chan StorDB, 1)
-	storDBChan <- sent
-	dm := &DataManager{}
-	fltrs := &FilterS{}
-	connMng := &ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
-	stopChan := make(chan struct{}, 1)
-	func() {
-		storDBChan <- sent
-		time.Sleep(10 * time.Millisecond)
-		stopChan <- struct{}{}
-	}()
-	newCDRSrv.ListenAndServe(stopChan)
-	if !reflect.DeepEqual(newCDRSrv.cdrDB, sent) {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", sent, newCDRSrv.cdrDB)
-	}
-}
-
-func TestCDRsListenAndServeCaseStorDBChanNotOK(t *testing.T) {
-	var sent StorDB
-	cfg := config.NewDefaultCGRConfig()
-	storDBChan := make(chan StorDB, 1)
-	storDBChan <- sent
-	dm := &DataManager{}
-	fltrs := &FilterS{}
-	connMng := &ConnManager{}
-	newCDRSrv := NewCDRServer(cfg, storDBChan, dm, fltrs, connMng)
-	stopChan := make(chan struct{}, 1)
-	func() {
-		time.Sleep(30 * time.Millisecond)
-		close(storDBChan)
-	}()
-	newCDRSrv.ListenAndServe(stopChan)
-	if !reflect.DeepEqual(newCDRSrv.cdrDB, nil) {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", nil, newCDRSrv.cdrDB)
 	}
 }
 

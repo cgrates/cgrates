@@ -111,13 +111,9 @@ type DataDBDriver interface {
 }
 
 type StorDB interface {
-	CdrStorage
+	Storage
 	LoadReader
 	LoadWriter
-}
-
-type CdrStorage interface {
-	Storage
 }
 
 type LoadStorage interface {

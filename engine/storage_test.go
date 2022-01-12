@@ -74,6 +74,4 @@ func TestMsgpackTime(t *testing.T) {
 func TestStoreInterfaces(t *testing.T) {
 	rds := new(RedisStorage)
 	var _ DataDB = rds
-	sql := new(SQLStorage)
-	var _ CdrStorage = sql
 }
