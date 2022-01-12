@@ -310,6 +310,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
 			RoundingDecimals:     []*utils.DynamicIntOpt{},
+			PrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.StatSCfg()) {
@@ -383,6 +384,7 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 			Limit:        []*utils.DynamicIntPointerOpt{},
 			Offset:       []*utils.DynamicIntPointerOpt{},
 			Usage:        []*utils.DynamicDecimalBigOpt{},
+			MaxItems:     []*utils.DynamicIntPointerOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RouteSCfg()) {
