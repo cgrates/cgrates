@@ -117,8 +117,8 @@
             {"tag": "ActionTTL", "path": "Actions.TTL", "type": "*variable", "value": "~*req.10"},
             {"tag": "ActionType", "path": "Actions.Type", "type": "*variable", "value": "~*req.11"},
             {"tag": "ActionOpts", "path": "Actions.Opts", "type": "*variable", "value": "~*req.12"},
-            {"tag": "ActionPath", "path": "Actions.Path", "type": "*variable", "value": "~*req.13"},
-            {"tag": "ActionValue", "path": "Actions.Value", "type": "*variable", "value": "~*req.14"},
+            {"tag": "ActionPath", "path": "Actions.Diktats.Path", "type": "*variable", "value": "~*req.13"},
+            {"tag": "ActionValue", "path": "Actions.Diktats.Value", "type": "*variable", "value": "~*req.14"},
           ],
         },
       ],
@@ -128,5 +128,6 @@
   "admins": {
     "enabled": true,
   },
+
 
 }
