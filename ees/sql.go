@@ -30,6 +30,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -89,7 +90,7 @@ func (sqlEe *SQLEe) initDialector() (err error) {
 	switch u.Scheme {
 	case utils.MySQL:
 		sqlEe.dialect = mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
-			u.User.Username(), password, u.Hostname(), u.Port(), dbname))
+			u.User.Username(), password, u.Hostname(), u.Port(), dbname) + engine.AppendToMysqlDSNOpts(sqlEe.Cfg().Opts.MYSQLDSNParams))
 	case utils.Postgres:
 		sqlEe.dialect = postgres.Open(fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl))
 	default:

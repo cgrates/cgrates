@@ -545,6 +545,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			utils.SQLMaxOpenConnsCfg:    100.,
 			utils.SQLMaxIdleConnsCfg:    10.,
 			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MYSQLDSNParams:        make(map[string]interface{}),
 			utils.SSLModeCfg:            utils.PostgressSSLModeDisable,
 			utils.MysqlLocation:         "Local",
 		},

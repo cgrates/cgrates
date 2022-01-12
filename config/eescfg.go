@@ -168,6 +168,7 @@ type EventExporterOpts struct {
 	SQLMaxIdleConns          *int
 	SQLMaxOpenConns          *int
 	SQLConnMaxLifetime       *time.Duration
+	MYSQLDSNParams           map[string]string
 	SQLTableName             *string
 	SQLDBName                *string
 	SSLMode                  *string
@@ -267,6 +268,10 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 			return
 		}
 		eeOpts.SQLConnMaxLifetime = utils.DurationPointer(sqlConnMaxLifetime)
+	}
+	if jsnCfg.MYSQLDSNParams != nil {
+		eeOpts.MYSQLDSNParams = make(map[string]string)
+		eeOpts.MYSQLDSNParams = jsnCfg.MYSQLDSNParams
 	}
 	if jsnCfg.SQLTableName != nil {
 		eeOpts.SQLTableName = jsnCfg.SQLTableName
@@ -485,6 +490,10 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.SQLConnMaxLifetime != nil {
 		cln.SQLConnMaxLifetime = utils.DurationPointer(*eeOpts.SQLConnMaxLifetime)
 	}
+	if eeOpts.MYSQLDSNParams != nil {
+		cln.MYSQLDSNParams = make(map[string]string)
+		cln.MYSQLDSNParams = eeOpts.MYSQLDSNParams
+	}
 	if eeOpts.SQLTableName != nil {
 		cln.SQLTableName = utils.StringPointer(*eeOpts.SQLTableName)
 	}
@@ -649,6 +658,9 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	}
 	if eeC.Opts.SQLConnMaxLifetime != nil {
 		opts[utils.SQLConnMaxLifetime] = eeC.Opts.SQLConnMaxLifetime.String()
+	}
+	if eeC.Opts.MYSQLDSNParams != nil {
+		opts[utils.MYSQLDSNParams] = eeC.Opts.MYSQLDSNParams
 	}
 	if eeC.Opts.SQLTableName != nil {
 		opts[utils.SQLTableNameOpt] = *eeC.Opts.SQLTableName

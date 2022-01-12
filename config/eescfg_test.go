@@ -41,6 +41,10 @@ func TestEESClone(t *testing.T) {
 			"export_path": "/var/spool/cgrates/ees",			
 			"opts": {
 				"csvFieldSeparator": ";",					// separator used when reading the fields
+				"mysqlDSNParams": {
+					"allowOldPasswords": "true",
+					"allowNativePasswords": "true",
+				},
 			},											
 			"timezone": "local",										
 			"filters": ["randomFiletrs"],										
@@ -168,6 +172,10 @@ func TestEESClone(t *testing.T) {
 				},
 				Opts: &EventExporterOpts{
 					CSVFieldSeparator: utils.StringPointer(utils.InfieldSep),
+					MYSQLDSNParams: map[string]string{
+						"allowOldPasswords":    "true",
+						"allowNativePasswords": "true",
+					},
 				},
 			},
 		},
