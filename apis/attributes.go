@@ -75,6 +75,31 @@ func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.A
 	return
 }
 
+// GetAttributeProfiles returns a list of attribute profiles registered for a tenant
+func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfs *[]*engine.AttributeProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var attrPrfIDs []string
+	if err = admS.GetAttributeProfileIDs(ctx, args, &attrPrfIDs); err != nil {
+		return
+	}
+	*attrPrfs = make([]*engine.AttributeProfile, 0, len(attrPrfIDs))
+	for _, attrPrfID := range attrPrfIDs {
+		var ap *engine.AttributeProfile
+		ap, err = admS.dm.GetAttributeProfile(ctx, tnt, attrPrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+		*attrPrfs = append(*attrPrfs, ap)
+	}
+	return
+}
+
 // GetAttributeProfileCount returns the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
 func (admS *AdminSv1) GetAttributeProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {

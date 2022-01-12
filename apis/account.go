@@ -74,27 +74,27 @@ func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.ArgsItemID
 	return
 }
 
-// GetAccounts returns a list of account profiles registered for a tenant
-func (admS *AdminSv1) GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs, actPrfs *[]*utils.Account) (err error) {
+// GetAccounts returns a list of accounts registered for a tenant
+func (admS *AdminSv1) GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs, accs *[]*utils.Account) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	var actPrfIDs []string
-	if err = admS.GetAccountIDs(ctx, args, &actPrfIDs); err != nil {
+	var accIDs []string
+	if err = admS.GetAccountIDs(ctx, args, &accIDs); err != nil {
 		return
 	}
-	*actPrfs = make([]*utils.Account, 0, len(actPrfIDs))
-	for _, actPrfID := range actPrfIDs {
-		var ap *utils.Account
-		ap, err = admS.dm.GetAccount(ctx, tnt, actPrfID)
+	*accs = make([]*utils.Account, 0, len(accIDs))
+	for _, accID := range accIDs {
+		var acc *utils.Account
+		acc, err = admS.dm.GetAccount(ctx, tnt, accID)
 		if err != nil {
 			if err.Error() != utils.ErrNotFound.Error() {
 				err = utils.NewErrServerError(err)
 			}
 			return
 		}
-		*actPrfs = append(*actPrfs, ap)
+		*accs = append(*accs, acc)
 	}
 	return
 }

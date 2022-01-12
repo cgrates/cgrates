@@ -71,6 +71,28 @@ func (adms *AdminSv1) GetThresholdProfileIDs(ctx *context.Context, args *utils.A
 	return
 }
 
+// GetThresholdProfiles returns a list of threshold profiles registered for a tenant
+func (admS *AdminSv1) GetThresholdProfiles(ctx *context.Context, args *utils.ArgsItemIDs, thdPrfs *[]*engine.ThresholdProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var thdPrfIDs []string
+	if err = admS.GetThresholdProfileIDs(ctx, args, &thdPrfIDs); err != nil {
+		return
+	}
+	*thdPrfs = make([]*engine.ThresholdProfile, 0, len(thdPrfIDs))
+	for _, thdPrfID := range thdPrfIDs {
+		var thdPrf *engine.ThresholdProfile
+		thdPrf, err = admS.dm.GetThresholdProfile(ctx, tnt, thdPrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			return utils.APIErrorHandler(err)
+		}
+		*thdPrfs = append(*thdPrfs, thdPrf)
+	}
+	return
+}
+
 // GetThresholdProfileCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 ThresholdProfileIDs
 func (adms *AdminSv1) GetThresholdProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {

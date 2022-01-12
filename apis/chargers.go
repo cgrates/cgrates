@@ -72,6 +72,31 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 	return
 }
 
+// GetChargerProfiles returns a list of charger profiles registered for a tenant
+func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsItemIDs, chrgPrfs *[]*engine.ChargerProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var chrgPrfIDs []string
+	if err = admS.GetChargerProfileIDs(ctx, args, &chrgPrfIDs); err != nil {
+		return
+	}
+	*chrgPrfs = make([]*engine.ChargerProfile, 0, len(chrgPrfIDs))
+	for _, chrgPrfID := range chrgPrfIDs {
+		var chgrPrf *engine.ChargerProfile
+		chgrPrf, err = admS.dm.GetChargerProfile(ctx, tnt, chrgPrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+		*chrgPrfs = append(*chrgPrfs, chgrPrf)
+	}
+	return
+}
+
 // GetChargerProfileCount returns the total number of ChargerProfiles registered for a tenant
 // returns ErrNotFound in case of 0 ChargerProfiles
 func (admS *AdminSv1) GetChargerProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {

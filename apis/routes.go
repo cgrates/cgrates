@@ -71,6 +71,31 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 	return
 }
 
+// GetRouteProfiles returns a list of route profiles registered for a tenant
+func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*engine.RouteProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var rouPrfIDs []string
+	if err = admS.GetRouteProfileIDs(ctx, args, &rouPrfIDs); err != nil {
+		return
+	}
+	*rouPrfs = make([]*engine.RouteProfile, 0, len(rouPrfIDs))
+	for _, rouPrfID := range rouPrfIDs {
+		var rouPrf *engine.RouteProfile
+		rouPrf, err = admS.dm.GetRouteProfile(ctx, tnt, rouPrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+		*rouPrfs = append(*rouPrfs, rouPrf)
+	}
+	return
+}
+
 // GetRouteProfileCount sets in reply var the total number of RouteProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 RouteProfileIDs
 func (adms *AdminSv1) GetRouteProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
