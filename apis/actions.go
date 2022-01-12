@@ -75,6 +75,31 @@ func (admS *AdminSv1) GetActionProfileIDs(ctx *context.Context, args *utils.Args
 	return
 }
 
+// GetActionProfiles returns a list of action profiles registered for a tenant
+func (admS *AdminSv1) GetActionProfiles(ctx *context.Context, args *utils.ArgsItemIDs, actPrfs *[]*engine.ActionProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var actPrfIDs []string
+	if err = admS.GetActionProfileIDs(ctx, args, &actPrfIDs); err != nil {
+		return
+	}
+	*actPrfs = make([]*engine.ActionProfile, 0, len(actPrfIDs))
+	for _, actPrfID := range actPrfIDs {
+		var ap *engine.ActionProfile
+		ap, err = admS.dm.GetActionProfile(ctx, tnt, actPrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+		*actPrfs = append(*actPrfs, ap)
+	}
+	return
+}
+
 // GetActionProfileCount sets in reply var the total number of ActionProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 ActionProfileIDs
 func (admS *AdminSv1) GetActionProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {

@@ -71,6 +71,31 @@ func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.Ar
 	return
 }
 
+// GetResourceProfiles returns a list of resource profiles registered for a tenant
+func (admS *AdminSv1) GetResourceProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfs *[]*engine.ResourceProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var rsPrfIDs []string
+	if err = admS.GetResourceProfileIDs(ctx, args, &rsPrfIDs); err != nil {
+		return
+	}
+	*rsPrfs = make([]*engine.ResourceProfile, 0, len(rsPrfIDs))
+	for _, rsPrfID := range rsPrfIDs {
+		var rsPrf *engine.ResourceProfile
+		rsPrf, err = admS.dm.GetResourceProfile(ctx, tnt, rsPrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+		*rsPrfs = append(*rsPrfs, rsPrf)
+	}
+	return
+}
+
 // GetResourceProfileCount returns the total number of ResourceProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 ResourceProfileIDs
 func (admS *AdminSv1) GetResourceProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {

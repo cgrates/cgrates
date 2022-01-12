@@ -75,6 +75,31 @@ func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsIt
 	return
 }
 
+// GetRateProfiles returns a list of rate profiles registered for a tenant
+func (admS *AdminSv1) GetRateProfiles(ctx *context.Context, args *utils.ArgsItemIDs, ratePrfs *[]*utils.RateProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var ratePrfIDs []string
+	if err = admS.GetRateProfileIDs(ctx, args, &ratePrfIDs); err != nil {
+		return
+	}
+	*ratePrfs = make([]*utils.RateProfile, 0, len(ratePrfIDs))
+	for _, ratePrfID := range ratePrfIDs {
+		var ratePrf *utils.RateProfile
+		ratePrf, err = admS.dm.GetRateProfile(ctx, tnt, ratePrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+		*ratePrfs = append(*ratePrfs, ratePrf)
+	}
+	return
+}
+
 // GetRateProfileCount returns the total number of RateProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RateProfileIDs
 func (admS *AdminSv1) GetRateProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {

@@ -73,6 +73,31 @@ func (admS *AdminSv1) GetDispatcherProfileIDs(ctx *context.Context, args *utils.
 	return
 }
 
+// GetDispatcherProfiles returns a list of dispatcher profiles registered for a tenant
+func (admS *AdminSv1) GetDispatcherProfiles(ctx *context.Context, args *utils.ArgsItemIDs, dspPrfs *[]*engine.DispatcherProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var dspPrfIDs []string
+	if err = admS.GetDispatcherProfileIDs(ctx, args, &dspPrfIDs); err != nil {
+		return
+	}
+	*dspPrfs = make([]*engine.DispatcherProfile, 0, len(dspPrfIDs))
+	for _, dspPrfID := range dspPrfIDs {
+		var dspPrf *engine.DispatcherProfile
+		dspPrf, err = admS.dm.GetDispatcherProfile(ctx, tnt, dspPrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				err = utils.NewErrServerError(err)
+			}
+			return
+		}
+		*dspPrfs = append(*dspPrfs, dspPrf)
+	}
+	return
+}
+
 // GetDispatcherProfileCount returns the total number of DispatcherProfiles registered for a tenant
 // returns ErrNotFound in case of 0 DispatcherProfiles
 func (admS *AdminSv1) GetDispatcherProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
@@ -190,6 +215,28 @@ func (admS *AdminSv1) GetDispatcherHostIDs(ctx *context.Context, args *utils.Arg
 	*dPrfIDs = make([]string, len(keys))
 	for i, key := range keys {
 		(*dPrfIDs)[i] = key[lenPrfx:]
+	}
+	return
+}
+
+// GetDispatcherHosts returns a list of dispatcher hosts registered for a tenant
+func (admS *AdminSv1) GetDispatcherHosts(ctx *context.Context, args *utils.ArgsItemIDs, dspHosts *[]*engine.DispatcherHost) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var dspHostIDs []string
+	if err = admS.GetDispatcherHostIDs(ctx, args, &dspHostIDs); err != nil {
+		return
+	}
+	*dspHosts = make([]*engine.DispatcherHost, 0, len(dspHostIDs))
+	for _, dspHostID := range dspHostIDs {
+		var dspHost *engine.DispatcherHost
+		dspHost, err = admS.dm.GetDispatcherHost(ctx, tnt, dspHostID, true, true, utils.NonTransactional)
+		if err != nil {
+			return utils.APIErrorHandler(err)
+		}
+		*dspHosts = append(*dspHosts, dspHost)
 	}
 	return
 }

@@ -71,6 +71,28 @@ func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.A
 	return
 }
 
+// GetStatQueueProfiles returns a list of stats profiles registered for a tenant
+func (admS *AdminSv1) GetStatQueueProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*engine.StatQueueProfile) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var sqPrfIDs []string
+	if err = admS.GetStatQueueProfileIDs(ctx, args, &sqPrfIDs); err != nil {
+		return
+	}
+	*sqPrfs = make([]*engine.StatQueueProfile, 0, len(sqPrfIDs))
+	for _, sqPrfID := range sqPrfIDs {
+		var sqPrf *engine.StatQueueProfile
+		sqPrf, err = admS.dm.GetStatQueueProfile(ctx, tnt, sqPrfID, true, true, utils.NonTransactional)
+		if err != nil {
+			return utils.APIErrorHandler(err)
+		}
+		*sqPrfs = append(*sqPrfs, sqPrf)
+	}
+	return
+}
+
 // GetStatQueueProfileCount returns the total number of StatQueueProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 StatQueueProfileIDs
 func (admS *AdminSv1) GetStatQueueProfileCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
