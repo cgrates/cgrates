@@ -437,7 +437,7 @@
 				"sqlMaxIdleConns": 10,
 				"sqlMaxOpenConns": 100,
 				"sqlConnMaxLifetime": "0",
-				"sqlDSNParams": {
+				"mysqlDSNParams": {
                     "allowOldPasswords": "true",
 					"allowNativePasswords": "true",
 				},
