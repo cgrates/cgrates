@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -47,14 +48,19 @@ var (
 		testAccSStartEngine,
 		testAccSRPCConn,
 		testGetAccProfileBeforeSet,
+		testGetAccProfilesBeforeSet,
 		testAccSetAccProfile,
 		testAccGetAccIDs,
+		testAccGetAccs,
 		testAccGetAccIDsCount,
 		testGetAccBeforeSet2,
 		testAccSetAcc2,
 		testAccGetAccIDs2,
+		testAccGetAccs2,
 		testAccGetAccIDsCount2,
 		testAccRemoveAcc,
+		testAccGetAccs3,
+		testAccGetAccsWithPrefix,
 		testAccGetAccountsForEvent,
 		testAccMaxAbstracts,
 		testAccDebitAbstracts,
@@ -128,6 +134,15 @@ func testGetAccProfileBeforeSet(t *testing.T) {
 				ID:     "TEST_ACC_IT_TEST",
 			},
 		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testGetAccProfilesBeforeSet(t *testing.T) {
+	var reply *[]*utils.Account
+	args := &utils.ArgsItemIDs{}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccounts,
+		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -215,6 +230,47 @@ func testAccGetAccIDs(t *testing.T) {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func testAccGetAccs(t *testing.T) {
+	var reply *[]*utils.Account
+	args := &utils.ArgsItemIDs{}
+	expected := &[](*utils.Account){
+		{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: nil,
+							Weight:    12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: nil,
+					Weight:    10,
+				},
+			},
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccounts,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 
@@ -332,6 +388,80 @@ func testAccGetAccIDs2(t *testing.T) {
 	}
 }
 
+func testAccGetAccs2(t *testing.T) {
+	var reply *[]*utils.Account
+	args := &utils.ArgsItemIDs{}
+	expected := &[](*utils.Account){
+		{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: nil,
+							Weight:    12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: nil,
+					Weight:    10,
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST2",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: nil,
+							Weight:    12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: nil,
+					Weight:    10,
+				},
+			},
+		},
+	}
+
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccounts,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(*reply, func(i, j int) bool {
+		return (*reply)[i].ID < (*reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
 func testAccGetAccIDsCount2(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
@@ -375,6 +505,158 @@ func testAccRemoveAcc(t *testing.T) {
 	}
 }
 
+func testAccGetAccs3(t *testing.T) {
+	var reply *[]*utils.Account
+	args := &utils.ArgsItemIDs{}
+	expected := &[](*utils.Account){
+		{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: nil,
+							Weight:    12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: nil,
+					Weight:    10,
+				},
+			},
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccounts,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+func testAccGetAccsWithPrefix(t *testing.T) {
+	accPrf := &APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant: "cgrates.org",
+			ID:     "aTEST_ACC_IT_TEST2",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.APIBalance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   ";12",
+					Type:      "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: "0",
+				},
+			},
+			Weights: ";10",
+		},
+		APIOpts: nil,
+	}
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		accPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expectedAcc := utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "aTEST_ACC_IT_TEST2",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": "10",
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: nil,
+				Weight:    10,
+			},
+		},
+	}
+	var result utils.Account
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "aTEST_ACC_IT_TEST2",
+			},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, expectedAcc) {
+		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expectedAcc), utils.ToJSON(result))
+	}
+
+	var reply2 *[]*utils.Account
+	args := &utils.ArgsItemIDs{
+		ItemsPrefix: "aTEST",
+	}
+	expected := &[](*utils.Account){
+		{
+			Tenant: "cgrates.org",
+			ID:     "aTEST_ACC_IT_TEST2",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: nil,
+							Weight:    12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: nil,
+					Weight:    10,
+				},
+			},
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccounts,
+		args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expected), utils.ToJSON(reply2))
+	}
+}
 func testAccGetAccountsForEvent(t *testing.T) {
 	var reply []*utils.Account
 	expected := []*utils.Account{

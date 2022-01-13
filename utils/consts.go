@@ -1256,6 +1256,7 @@ const (
 	// APIerSv1RemoveTPRateProfile      = "APIerSv1.RemoveTPRateProfile"
 	AdminSv1SetAccount      = "AdminSv1.SetAccount"
 	AdminSv1GetAccount      = "AdminSv1.GetAccount"
+	AdminSv1GetAccounts     = "AdminSv1.GetAccounts"
 	AdminSv1GetAccountIDs   = "AdminSv1.GetAccountIDs"
 	AdminSv1RemoveAccount   = "AdminSv1.RemoveAccount"
 	AdminSv1GetAccountCount = "AdminSv1.GetAccountCount"
