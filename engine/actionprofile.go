@@ -149,7 +149,7 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 		aP.Actions = append(aP.Actions, ac)
 	}
 
-	return ac.Set(path, val, newBranch)
+	return ac.Set(path[1:], val, newBranch)
 }
 
 func (aP *APAction) Set(path []string, val interface{}, newBranch bool) (err error) {
