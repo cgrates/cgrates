@@ -76,7 +76,7 @@ func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.A
 }
 
 // GetAttributeProfiles returns a list of attribute profiles registered for a tenant
-func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfs *[]*engine.AttributeProfile) (err error) {
+func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfs *[]*engine.APIAttributeProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,14 +85,15 @@ func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.Arg
 	if err = admS.GetAttributeProfileIDs(ctx, args, &attrPrfIDs); err != nil {
 		return
 	}
-	*attrPrfs = make([]*engine.AttributeProfile, 0, len(attrPrfIDs))
+	*attrPrfs = make([]*engine.APIAttributeProfile, 0, len(attrPrfIDs))
 	for _, attrPrfID := range attrPrfIDs {
 		var ap *engine.AttributeProfile
 		ap, err = admS.dm.GetAttributeProfile(ctx, tnt, attrPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
 		}
-		*attrPrfs = append(*attrPrfs, ap)
+		attr := engine.NewAPIAttributeProfile(ap)
+		*attrPrfs = append(*attrPrfs, attr)
 	}
 	return
 }

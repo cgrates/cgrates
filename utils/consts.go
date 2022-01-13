@@ -1341,6 +1341,7 @@ const (
 const (
 	AdminSv1SetAttributeProfile      = "AdminSv1.SetAttributeProfile"
 	AdminSv1GetAttributeProfile      = "AdminSv1.GetAttributeProfile"
+	AdminSv1GetAttributeProfiles     = "AdminSv1.GetAttributeProfiles"
 	AdminSv1GetAttributeProfileIDs   = "AdminSv1.GetAttributeProfileIDs"
 	AdminSv1RemoveAttributeProfile   = "AdminSv1.RemoveAttributeProfile"
 	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
