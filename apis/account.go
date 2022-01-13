@@ -89,10 +89,7 @@ func (admS *AdminSv1) GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs,
 		var acc *utils.Account
 		acc, err = admS.dm.GetAccount(ctx, tnt, accID)
 		if err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.APIErrorHandler(err)
 		}
 		*accs = append(*accs, acc)
 	}

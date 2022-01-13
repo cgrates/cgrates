@@ -87,10 +87,7 @@ func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsI
 		var chgrPrf *engine.ChargerProfile
 		chgrPrf, err = admS.dm.GetChargerProfile(ctx, tnt, chrgPrfID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.APIErrorHandler(err)
 		}
 		*chrgPrfs = append(*chrgPrfs, chgrPrf)
 	}

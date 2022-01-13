@@ -90,10 +90,7 @@ func (admS *AdminSv1) GetActionProfiles(ctx *context.Context, args *utils.ArgsIt
 		var ap *engine.ActionProfile
 		ap, err = admS.dm.GetActionProfile(ctx, tnt, actPrfID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.APIErrorHandler(err)
 		}
 		*actPrfs = append(*actPrfs, ap)
 	}
