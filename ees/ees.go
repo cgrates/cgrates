@@ -367,8 +367,9 @@ func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEvents
 	buff := new(bytes.Buffer)
 	zBuff := zip.NewWriter(buff)
 	var wrtr io.Writer
-	// crate the file where eill be stored in zip
+	// create the file where will be stored in zip
 	if wrtr, err = zBuff.CreateHeader(&zip.FileHeader{
+		Method:   zip.Deflate, // to be compressed
 		Name:     "events.csv",
 		Modified: time.Now(),
 	}); err != nil {
