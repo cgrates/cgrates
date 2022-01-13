@@ -88,10 +88,7 @@ func (admS *AdminSv1) GetDispatcherProfiles(ctx *context.Context, args *utils.Ar
 		var dspPrf *engine.DispatcherProfile
 		dspPrf, err = admS.dm.GetDispatcherProfile(ctx, tnt, dspPrfID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.APIErrorHandler(err)
 		}
 		*dspPrfs = append(*dspPrfs, dspPrf)
 	}

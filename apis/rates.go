@@ -90,10 +90,7 @@ func (admS *AdminSv1) GetRateProfiles(ctx *context.Context, args *utils.ArgsItem
 		var ratePrf *utils.RateProfile
 		ratePrf, err = admS.dm.GetRateProfile(ctx, tnt, ratePrfID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.APIErrorHandler(err)
 		}
 		*ratePrfs = append(*ratePrfs, ratePrf)
 	}

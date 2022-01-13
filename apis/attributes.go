@@ -90,10 +90,7 @@ func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.Arg
 		var ap *engine.AttributeProfile
 		ap, err = admS.dm.GetAttributeProfile(ctx, tnt, attrPrfID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.APIErrorHandler(err)
 		}
 		*attrPrfs = append(*attrPrfs, ap)
 	}

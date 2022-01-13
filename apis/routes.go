@@ -86,10 +86,7 @@ func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsIte
 		var rouPrf *engine.RouteProfile
 		rouPrf, err = admS.dm.GetRouteProfile(ctx, tnt, rouPrfID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.APIErrorHandler(err)
 		}
 		*rouPrfs = append(*rouPrfs, rouPrf)
 	}

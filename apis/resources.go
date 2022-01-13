@@ -86,10 +86,7 @@ func (admS *AdminSv1) GetResourceProfiles(ctx *context.Context, args *utils.Args
 		var rsPrf *engine.ResourceProfile
 		rsPrf, err = admS.dm.GetResourceProfile(ctx, tnt, rsPrfID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				err = utils.NewErrServerError(err)
-			}
-			return
+			return utils.APIErrorHandler(err)
 		}
 		*rsPrfs = append(*rsPrfs, rsPrf)
 	}
