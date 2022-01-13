@@ -1547,6 +1547,7 @@ const (
 const (
 	AdminSv1SetActionProfile      = "AdminSv1.SetActionProfile"
 	AdminSv1GetActionProfile      = "AdminSv1.GetActionProfile"
+	AdminSv1GetActionProfiles     = "AdminSv1.GetActionProfiles"
 	AdminSv1GetActionProfileIDs   = "AdminSv1.GetActionProfileIDs"
 	AdminSv1GetActionProfileCount = "AdminSv1.GetActionProfileCount"
 	AdminSv1RemoveActionProfile   = "AdminSv1.RemoveActionProfile"

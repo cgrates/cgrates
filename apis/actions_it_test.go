@@ -52,14 +52,17 @@ var (
 		testActionsStartEngine,
 		testActionsRPCConn,
 		testActionsGetActionProfileBeforeSet,
+		testActionsGetActionProfilesBeforeSet,
 		testActionsGetActionProfileIDsBeforeSet,
 		testActionsGetActionProfileCountBeforeSet,
 		testActionsSetActionProfile,
 		testActionsGetActionProfileAfterSet,
+		testActionsGetActionProfilesAfterSet,
 		testActionsGetActionProfileIDsAfterSet,
 		testActionsGetActionProfileCountAfterSet,
 		testActionsRemoveActionProfile,
 		testActionsGetActionProfileAfterRemove,
+		testActionsGetActionProfilesAfterRemove,
 		testActionsPing,
 
 		// execute http_post
@@ -169,6 +172,15 @@ func testActionsGetActionProfileBeforeSet(t *testing.T) {
 	}
 }
 
+func testActionsGetActionProfilesBeforeSet(t *testing.T) {
+	var rplyAct *[]*engine.ActionProfile
+	var args *utils.ArgsItemIDs
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
+		args, &rplyAct); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
 func testActionsGetActionProfileIDsBeforeSet(t *testing.T) {
 	var rplyActIDs []string
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
@@ -266,6 +278,28 @@ func testActionsGetActionProfileIDsAfterSet(t *testing.T) {
 	}
 }
 
+func testActionsGetActionProfilesAfterSet(t *testing.T) {
+	expActs := []*engine.ActionProfile{
+		{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID: "actID",
+				},
+			},
+		},
+	}
+	var args *utils.ArgsItemIDs
+	var rplyActs []*engine.ActionProfile
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
+		args, &rplyActs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyActs, expActs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expActs, rplyActs)
+	}
+}
+
 func testActionsGetActionProfileCountAfterSet(t *testing.T) {
 	var rplyCount int
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfileCount,
@@ -303,6 +337,71 @@ func testActionsGetActionProfileAfterRemove(t *testing.T) {
 				ID:     "actPrfID",
 			}}, &rplyAct); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testActionsGetActionProfilesAfterRemove(t *testing.T) {
+	var args *utils.ArgsItemIDs
+	var rplyActs []*engine.ActionProfile
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
+		args, &rplyActs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testActionsSetActionProfilesWithPrefix(t *testing.T) {
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "aactPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID: "aactID",
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	var rplyActPrf engine.ActionProfile
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "aactPrfID",
+			}}, &rplyActPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyActPrf, *actPrf.ActionProfile) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", actPrf.ActionProfile, rplyActPrf)
+	}
+
+	expActs := []*engine.ActionProfile{
+		{
+			Tenant: "cgrates.org",
+			ID:     "aactPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID: "actID",
+				},
+			},
+		},
+	}
+	args := &utils.ArgsItemIDs{
+		ItemsPrefix: "aa",
+	}
+	var rplyActs []*engine.ActionProfile
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
+		args, &rplyActs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyActs, expActs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expActs, rplyActs)
 	}
 }
 
