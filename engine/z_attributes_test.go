@@ -4708,3 +4708,99 @@ func TestAttributesParseAttributeError(t *testing.T) {
 		t.Errorf("Expected %q, Received %q", "unsupported type: <badType>", err)
 	}
 }
+
+func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	attrS := NewAttributeService(dm, filterS, cfg)
+
+	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
+
+	attrPrf := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaPassword,
+				Value: value,
+			},
+		},
+		Weight: 10,
+	}
+
+	if err := dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
+		t.Fatal(err)
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EventHashPw",
+		Event: map[string]interface{}{
+			"Password": "321dcba",
+		},
+	}
+
+	exp := AttrSProcessEventReply{
+		MatchedProfiles: []string{"cgrates.org:ATTR_TEST"},
+		AlteredFields:   []string{"*req.Password"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventHashPw",
+			Event: map[string]interface{}{
+				"Password": "abcd123",
+			},
+			APIOpts: map[string]interface{}{},
+		},
+	}
+	var hashedPw string
+	var reply AttrSProcessEventReply
+	if err := attrS.V1ProcessEvent(context.Background(), cgrEv, &reply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(reply.MatchedProfiles, exp.MatchedProfiles) ||
+		!reflect.DeepEqual(reply.AlteredFields, exp.AlteredFields) {
+		t.Fatalf("expected: Matched Profiles:<%+v> \nAltered Fields<%+v>,\nreceived: Matched Profiles:<%+v>\nAltered Fields<%+v>",
+			utils.ToJSON(exp.MatchedProfiles), utils.ToJSON(exp.AlteredFields),
+			utils.ToJSON(reply.MatchedProfiles), utils.ToJSON(reply.AlteredFields))
+	} else {
+		hashedPw = utils.IfaceAsString(reply.Event["Password"])
+		if !utils.VerifyHash(hashedPw, "abcd123") {
+			t.Fatalf("expected: <%+v>, \nreceived: <%+v>", "abcd123", hashedPw)
+		}
+		exp.Event["Password"] = hashedPw
+		if !reflect.DeepEqual(reply.CGREvent, exp.CGREvent) {
+			t.Fatalf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp.CGREvent), utils.ToJSON(reply.CGREvent))
+		}
+	}
+
+	value = config.NewRSRParsersMustCompile(hashedPw, config.CgrConfig().GeneralCfg().RSRSep)
+	expAttrPrf := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaConstant,
+				Value: value,
+			},
+		},
+		Weight: 10,
+	}
+	if rcvAttrPrf, err := dm.GetAttributeProfile(context.Background(), attrPrf.Tenant, attrPrf.ID, true, true,
+		utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rcvAttrPrf, expAttrPrf) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAttrPrf), utils.ToJSON(rcvAttrPrf))
+	}
+}
