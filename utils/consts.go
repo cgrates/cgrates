@@ -284,6 +284,7 @@ const (
 	CreateTariffPlanTablesSQL = "create_tariffplan_tables.sql"
 	TestSQL                   = "TEST_SQL"
 	MetaConstant              = "*constant"
+	MetaPassword              = "*password"
 	MetaFiller                = "*filler"
 	MetaHTTPPost              = "*httpPost"
 	MetaHTTPjsonCDR           = "*http_json_cdr"

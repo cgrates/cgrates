@@ -163,6 +163,16 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 				continue
 			}
 		}
+		if attribute.Type == utils.MetaPassword {
+			password := attribute.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep)
+			if password, err = utils.ComputeHash(password); err != nil {
+				return
+			}
+			if attribute.Value, err = config.NewRSRParsers(password, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
+				return
+			}
+			attribute.Type = utils.MetaConstant
+		}
 		var out interface{}
 		if out, err = ParseAttribute(dynDP, utils.FirstNonEmpty(attribute.Type, utils.MetaVariable), utils.DynamicDataPrefix+attribute.Path, attribute.Value, alS.cfg.GeneralCfg().RoundingDecimals, alS.cfg.GeneralCfg().DefaultTimezone, time.RFC3339, alS.cfg.GeneralCfg().RSRSep); err != nil {
 			rply = nil
