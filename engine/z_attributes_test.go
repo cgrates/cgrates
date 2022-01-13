@@ -4804,3 +4804,60 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAttrPrf), utils.ToJSON(rcvAttrPrf))
 	}
 }
+
+func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
+	tmp := Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
+	attrPrf := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.Password",
+				Type:  utils.MetaPassword,
+				Value: value,
+			},
+		},
+		Weight: 10,
+	}
+
+	if err := dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := &AttributeProfile{
+		Tenant: "cgrates.org",
+		ID:     "ATTR_TEST",
+		Attributes: []*Attribute{
+			{
+				Path: "*req.Password",
+				Type: utils.MetaConstant,
+			},
+		},
+		Weight: 10,
+	}
+
+	if rcv, err := dm.GetAttributeProfile(context.Background(), attrPrf.Tenant, attrPrf.ID, true, true,
+		utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if hashedPw := rcv.Attributes[0].Value.GetRule(cfg.GeneralCfg().RSRSep); !utils.VerifyHash(hashedPw, "abcd123") {
+		t.Errorf("Received an incorrect password")
+	} else {
+		rcv.Attributes[0].Value = nil
+		if !reflect.DeepEqual(rcv, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	}
+}
