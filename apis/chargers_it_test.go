@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -46,15 +47,20 @@ var (
 		testChgrsSStartEngine,
 		testChgrsSRPCConn,
 		testGetChgrsProfileBeforeSet,
+		testGetChgrsProfilesBeforeSet,
 		testChgrsSetGetChargerProfile,
+		testChgrsGetChargerProfiles,
 		testChgrsGetChargerProfileIDs,
 		testGetChgrsProfileBeforeSet2,
 		testChgrsSetGetChargerProfile2,
 		testChgrsGetChargerProfileIDs2,
+		testChgrsGetChargerProfiles2,
 		testGetChgrsProfileBeforeSet3,
 		testChgrsSetGetChargerProfile3,
+		testChgrsGetChargerProfiles3,
 		testChgrsGetChargerProfileIDs3,
 		testChgrsRmvChargerProfile,
+		testChgrsGetChargerProfilesAfterRemove,
 		testChgrsRmvChargerProfile2,
 		testChgrsRmvChargerProfile3,
 		testGetChgrsProfileBeforeSet,
@@ -130,6 +136,17 @@ func testGetChgrsProfileBeforeSet(t *testing.T) {
 	}
 }
 
+func testGetChgrsProfilesBeforeSet(t *testing.T) {
+	var reply *utils.TenantIDWithAPIOpts
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		&utils.TenantID{
+			Tenant: utils.CGRateSorg,
+			ID:     "TEST_CHARGERS_IT_TEST",
+		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
 func testChgrsSetGetChargerProfile(t *testing.T) {
 	chgrsPrf := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
@@ -182,6 +199,27 @@ func testChgrsGetChargerProfileIDs(t *testing.T) {
 	}
 }
 
+func testChgrsGetChargerProfiles(t *testing.T) {
+	var reply []*engine.ChargerProfile
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []*engine.ChargerProfile{
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+	}
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
 func testGetChgrsProfileBeforeSet2(t *testing.T) {
 	var reply *utils.TenantIDWithAPIOpts
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
@@ -242,6 +280,39 @@ func testChgrsGetChargerProfileIDs2(t *testing.T) {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func testChgrsGetChargerProfiles2(t *testing.T) {
+	var reply []*engine.ChargerProfile
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []*engine.ChargerProfile{
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST2",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+	}
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply, func(i, j int) bool {
+		return (reply)[i].ID < (reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 
@@ -308,6 +379,46 @@ func testChgrsGetChargerProfileIDs3(t *testing.T) {
 	}
 }
 
+func testChgrsGetChargerProfiles3(t *testing.T) {
+	var reply []*engine.ChargerProfile
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []*engine.ChargerProfile{
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST2",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST3",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+	}
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply, func(i, j int) bool {
+		return (reply)[i].ID < (reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
 func testChgrsRmvChargerProfile(t *testing.T) {
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
@@ -342,6 +453,39 @@ func testChgrsRmvChargerProfile(t *testing.T) {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected2, reply3)
+	}
+}
+
+func testChgrsGetChargerProfilesAfterRemove(t *testing.T) {
+	var reply []*engine.ChargerProfile
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []*engine.ChargerProfile{
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST2",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+	}
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply, func(i, j int) bool {
+		return (reply)[i].ID < (reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 
@@ -413,6 +557,74 @@ func testChgrsRmvChargerProfile3(t *testing.T) {
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
 		args2, &reply3); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
+	chgrsPrf := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "aTEST_CHARGERS_IT_TEST",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		APIOpts: nil,
+	}
+	var reply string
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		chgrsPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expectedChargerPrf := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "aTEST_CHARGERS_IT_TEST",
+		RunID:        utils.MetaDefault,
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result *engine.ChargerProfile
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
+		&utils.TenantID{
+			Tenant: utils.CGRateSorg,
+			ID:     "aTEST_CHARGERS_IT_TEST",
+		}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, expectedChargerPrf) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedChargerPrf), utils.ToJSON(result))
+	}
+	var reply2 []*engine.ChargerProfile
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []*engine.ChargerProfile{
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		{
+			Tenant:       "cgrates.org",
+			ID:           "TEST_CHARGERS_IT_TEST2",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+	}
+	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply2, func(i, j int) bool {
+		return (reply2)[i].ID < (reply2)[j].ID
+	})
+	if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply2))
 	}
 }
 

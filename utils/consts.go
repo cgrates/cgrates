@@ -1355,6 +1355,7 @@ const (
 	ChargerSv1GetChargersForEvent = "ChargerSv1.GetChargersForEvent"
 	ChargerSv1ProcessEvent        = "ChargerSv1.ProcessEvent"
 	AdminSv1GetChargerProfile     = "AdminSv1.GetChargerProfile"
+	AdminSv1GetChargerProfiles    = "AdminSv1.GetChargerProfiles"
 	AdminSv1RemoveChargerProfile  = "AdminSv1.RemoveChargerProfile"
 	AdminSv1SetChargerProfile     = "AdminSv1.SetChargerProfile"
 	AdminSv1GetChargerProfileIDs  = "AdminSv1.GetChargerProfileIDs"
