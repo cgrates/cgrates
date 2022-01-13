@@ -47,15 +47,19 @@ var (
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
 		testGetAttributeProfileBeforeSet,
+		testGetAttributeProfilesBeforeSet,
 		// testAttributeSLoadFromFolder,
 		testAttributeSetAttributeProfile,
 		testAttributeGetAttributeIDs,
+		testAttributeGetAttributes,
 		testAttributeGetAttributeCount,
 		testGetAttributeProfileBeforeSet2,
 		testAttributeSetAttributeProfile2,
 		testAttributeGetAttributeIDs2,
+		testAttributeGetAttributes2,
 		testAttributeGetAttributeCount2,
 		testAttributeRemoveAttributeProfile,
+		testAttributeGetAttributesAfterRemove,
 		testAttributeGetAttributeIDs,
 		testAttributeGetAttributeCount,
 		testAttributeSetAttributeProfileBrokenReference,
@@ -143,6 +147,19 @@ func testGetAttributeProfileBeforeSet(t *testing.T) {
 	}
 }
 
+func testGetAttributeProfilesBeforeSet(t *testing.T) {
+	var reply *engine.APIAttributeProfile
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "TEST_ATTRIBUTES_IT_TEST",
+			},
+		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
 func testAttributeSetAttributeProfile(t *testing.T) {
 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
@@ -213,6 +230,36 @@ func testAttributeGetAttributeIDs(t *testing.T) {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func testAttributeGetAttributes(t *testing.T) {
+	var reply []*engine.APIAttributeProfile
+	var args *utils.ArgsItemIDs
+	expected := []*engine.APIAttributeProfile{
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_ATTRIBUTES_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.AccountField,
+					Type:  utils.MetaConstant,
+					Value: "1002",
+				},
+				{
+					Path:  "*tenant",
+					Type:  utils.MetaConstant,
+					Value: "cgrates.itsyscom",
+				},
+			},
+		},
+	}
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 
@@ -293,6 +340,52 @@ func testAttributeSetAttributeProfile2(t *testing.T) {
 	}
 }
 
+func testAttributeGetAttributes2(t *testing.T) {
+	var reply *[]*engine.APIAttributeProfile
+	var args *utils.ArgsItemIDs
+	expected := []*engine.APIAttributeProfile{
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_ATTRIBUTES_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.AccountField,
+					Type:  utils.MetaConstant,
+					Value: "1002",
+				},
+				{
+					Path:  "*tenant",
+					Type:  utils.MetaConstant,
+					Value: "cgrates.itsyscom",
+				},
+			},
+		},
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
+			FilterIDs: []string{"*string:~*opts.*context:*sessions"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  "*tenant",
+					Type:  utils.MetaConstant,
+					Value: "cgrates.itsyscom",
+				},
+			},
+		},
+	}
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(*reply, func(i, j int) bool {
+		return (*reply)[i].ID < (*reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, &expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
 func testAttributeGetAttributeIDs2(t *testing.T) {
 	var reply []string
 	args := &utils.ArgsItemIDs{
@@ -347,6 +440,114 @@ func testAttributeRemoveAttributeProfile(t *testing.T) {
 			},
 		}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v \n, received %+v", utils.ErrNotFound, err)
+	}
+}
+
+func testAttributeGetAttributesAfterRemove(t *testing.T) {
+	var reply *[]*engine.APIAttributeProfile
+	var args *utils.ArgsItemIDs
+	expected := []*engine.APIAttributeProfile{
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_ATTRIBUTES_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.AccountField,
+					Type:  utils.MetaConstant,
+					Value: "1002",
+				},
+				{
+					Path:  "*tenant",
+					Type:  utils.MetaConstant,
+					Value: "cgrates.itsyscom",
+				},
+			},
+		},
+	}
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(reply, &expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func testAttributeSGetAttributesWithPrefix(t *testing.T) {
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "aTEST_ATTRIBUTES_IT_TEST_SECOND",
+			FilterIDs: []string{"*string:~*opts.*context:*sessions"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  "*tenant",
+					Type:  utils.MetaConstant,
+					Value: "cgrates.itsyscom",
+				},
+			},
+		},
+	}
+	var reply string
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expectedAttr := &engine.APIAttributeProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "aTEST_ATTRIBUTES_IT_TEST_SECOND",
+		FilterIDs: []string{"*string:~*opts.*context:*sessions"},
+		Attributes: []*engine.ExternalAttribute{
+			{
+				Path:  "*tenant",
+				Type:  utils.MetaConstant,
+				Value: "cgrates.itsyscom",
+			},
+		},
+	}
+	var result *engine.APIAttributeProfile
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "aTEST_ATTRIBUTES_IT_TEST_SECOND",
+			},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, expectedAttr) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
+	}
+
+	var reply2 *[]*engine.APIAttributeProfile
+	var args *utils.ArgsItemIDs
+	expected := []*engine.APIAttributeProfile{
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "aTEST_ATTRIBUTES_IT_TEST_SECOND",
+			FilterIDs: []string{"*string:~*opts.*context:*sessions"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  "*tenant",
+					Type:  utils.MetaConstant,
+					Value: "cgrates.itsyscom",
+				},
+			},
+		},
+	}
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(*reply2, func(i, j int) bool {
+		return (*reply2)[i].ID < (*reply2)[j].ID
+	})
+	if !reflect.DeepEqual(reply2, &expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply2))
 	}
 }
 
