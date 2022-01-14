@@ -67,6 +67,7 @@ var (
 		testChgrsSetGetChargerProfileEvent,
 		testChgrsGetChargersForEvent,
 		testChgrsProcessEvent,
+		testChgrsGetChargerProfilesWithPrefix,
 		testChgrsSKillEngine,
 	}
 )
@@ -598,26 +599,19 @@ func testChgrsGetChargerProfilesWithPrefix(t *testing.T) {
 	}
 	var reply2 []*engine.ChargerProfile
 	args := &utils.ArgsItemIDs{
-		Tenant: "cgrates.org",
+		ItemsPrefix: "aTEST",
 	}
 	expected := []*engine.ChargerProfile{
 		{
 			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weight:       20,
-		},
-		{
-			Tenant:       "cgrates.org",
-			ID:           "TEST_CHARGERS_IT_TEST2",
+			ID:           "aTEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
 	}
 	if err := chgrsSRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
-		args, &reply); err != nil {
+		args, &reply2); err != nil {
 		t.Error(err)
 	}
 	sort.Slice(reply2, func(i, j int) bool {
