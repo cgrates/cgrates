@@ -53,10 +53,13 @@ var (
 		testStatsStartEngine,
 		testStatsRPCConn,
 		testStatsGetStatQueueBeforeSet,
+		testStatsGetStatQueueProfilesBeforeSet,
 		testStatsSetStatQueueProfiles,
 		testStatsGetStatQueueAfterSet,
 		testStatsGetStatQueueIDs,
 		testStatsGetStatQueueProfileIDs,
+		testStatsGetStatQueueProfiles1,
+		testStatsGetStatQueueProfilesWithPrefix,
 		testStatsGetStatQueueProfileCount,
 		testStatsRemoveStatQueueProfiles,
 		testStatsGetStatQueuesAfterRemove,
@@ -160,6 +163,15 @@ func testStatsGetStatQueueBeforeSet(t *testing.T) {
 	var rplySqs engine.StatQueues
 	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent,
 		args, &rplySqs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testStatsGetStatQueueProfilesBeforeSet(t *testing.T) {
+	var reply []*engine.StatQueueProfile
+	var args *utils.ArgsItemIDs
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
+		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -426,6 +438,110 @@ func testStatsGetStatQueueProfileIDs(t *testing.T) {
 	}
 }
 
+func testStatsGetStatQueueProfiles1(t *testing.T) {
+	var reply []*engine.StatQueueProfile
+	var args *utils.ArgsItemIDs
+	exp := []*engine.StatQueueProfile{
+		{
+			Tenant:      "cgrates.org",
+			ID:          "SQ_1",
+			Weight:      10,
+			QueueLength: 100,
+			TTL:         time.Duration(1 * time.Minute),
+			MinItems:    5,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACC,
+				},
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaASR,
+				},
+				{
+					MetricID: utils.MetaDDC,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "SQ_2",
+			Weight: 20,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: utils.MetaPDD,
+				},
+				{
+					MetricID: utils.MetaTCC,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply, func(i int, j int) bool {
+		return (reply)[i].ID < (reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)
+	}
+}
+
+func testStatsGetStatQueueProfilesWithPrefix(t *testing.T) {
+	var reply []*engine.StatQueueProfile
+	args := &utils.ArgsItemIDs{
+		ItemsPrefix: "SQ_2",
+	}
+	exp := []*engine.StatQueueProfile{
+		{
+			Tenant: "cgrates.org",
+			ID:     "SQ_2",
+			Weight: 20,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: utils.MetaPDD,
+				},
+				{
+					MetricID: utils.MetaTCC,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)
+	}
+}
 func testStatsGetStatQueueProfileCount(t *testing.T) {
 	var reply int
 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileCount,

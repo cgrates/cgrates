@@ -53,6 +53,8 @@ var (
 		testThresholdsGetThresholdAfterSet,
 		testThresholdsGetThresholdIDs,
 		testThresholdsGetThresholdProfileIDs,
+		testThresholdsGetThresholdProfiles,
+		testThresholdsGetThresholdProfilesWithPrefix,
 		testThresholdsGetThresholdProfileCount,
 		testThresholdsGetThresholdsForEvent,
 		testThresholdsRemoveThresholdProfiles,
@@ -320,6 +322,72 @@ func testThresholdsGetThresholdProfileIDs(t *testing.T) {
 		sort.Strings(tIDs)
 		if !reflect.DeepEqual(tIDs, expIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, tIDs)
+		}
+	}
+}
+
+func testThresholdsGetThresholdProfiles(t *testing.T) {
+	exp := []*engine.ThresholdProfile{
+		{
+			Tenant:           "cgrates.org",
+			ID:               "THD_1",
+			FilterIDs:        []string{"*string:~*req.Account:1001"},
+			ActionProfileIDs: []string{"actPrfID"},
+			MaxHits:          5,
+			MinHits:          1,
+			Weight:           10,
+		},
+		{
+			Tenant:           "cgrates.org",
+			ID:               "THD_2",
+			FilterIDs:        []string{"*string:~*req.Account:1001"},
+			ActionProfileIDs: []string{"actPrfID"},
+			MaxHits:          7,
+			MinHits:          0,
+			Weight:           20,
+		},
+	}
+	var ths []*engine.ThresholdProfile
+	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &ths); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(ths, func(i int, j int) bool {
+			return (ths)[i].ID < (ths)[j].ID
+		})
+		if !reflect.DeepEqual(ths, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, ths)
+		}
+	}
+}
+
+func testThresholdsGetThresholdProfilesWithPrefix(t *testing.T) {
+	exp := []*engine.ThresholdProfile{
+		{
+			Tenant:           "cgrates.org",
+			ID:               "THD_2",
+			FilterIDs:        []string{"*string:~*req.Account:1001"},
+			ActionProfileIDs: []string{"actPrfID"},
+			MaxHits:          7,
+			MinHits:          0,
+			Weight:           20,
+		},
+	}
+	var ths []*engine.ThresholdProfile
+	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
+		&utils.ArgsItemIDs{
+			Tenant:      "cgrates.org",
+			ItemsPrefix: "THD_2",
+		}, &ths); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(ths, func(i int, j int) bool {
+			return (ths)[i].ID < (ths)[j].ID
+		})
+		if !reflect.DeepEqual(ths, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, ths)
 		}
 	}
 }
