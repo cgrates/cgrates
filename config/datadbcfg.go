@@ -71,7 +71,7 @@ type DataDbCfg struct {
 	RplConns    []string // Replication connIDs
 	RplFiltered bool
 	RplCache    string
-	Items       map[string]*ItemOpt
+	Items       map[string]*ItemOpts
 	Opts        *DataDBOpts
 }
 
@@ -186,7 +186,7 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		for kJsn, vJsn := range jsnDbCfg.Items {
 			val, has := dbcfg.Items[kJsn]
 			if val == nil || !has {
-				val = &ItemOpt{Limit: -1}
+				val = &ItemOpts{Limit: -1}
 			}
 			if err = val.loadFromJSONCfg(vJsn); err != nil {
 				return
@@ -238,7 +238,7 @@ func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 		RplFiltered: dbcfg.RplFiltered,
 		RplCache:    dbcfg.RplCache,
 		RmtConnID:   dbcfg.RmtConnID,
-		Items:       make(map[string]*ItemOpt),
+		Items:       make(map[string]*ItemOpts),
 		Opts:        dbcfg.Opts.Clone(),
 	}
 	for k, itm := range dbcfg.Items {
@@ -292,8 +292,8 @@ func (dbcfg DataDbCfg) AsMapInterface(string) interface{} {
 	return mp
 }
 
-// ItemOpt the options for the stored items
-type ItemOpt struct {
+// ItemOpts the options for the stored items
+type ItemOpts struct {
 	Limit     int
 	TTL       time.Duration
 	StaticTTL bool
@@ -305,7 +305,7 @@ type ItemOpt struct {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
+func (itm *ItemOpts) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.RemoteCfg:    itm.Remote,
 		utils.ReplicateCfg: itm.Replicate,
@@ -324,7 +324,7 @@ func (itm *ItemOpt) AsMapInterface() (initialMP map[string]interface{}) {
 	return
 }
 
-func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) (err error) {
+func (itm *ItemOpts) loadFromJSONCfg(jsonItm *ItemOptsJson) (err error) {
 	if jsonItm == nil {
 		return
 	}
@@ -353,8 +353,8 @@ func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) (err error) {
 }
 
 // Clone returns a deep copy of ItemOpt
-func (itm *ItemOpt) Clone() *ItemOpt {
-	return &ItemOpt{
+func (itm *ItemOpts) Clone() *ItemOpts {
+	return &ItemOpts{
 		Limit:     itm.Limit,
 		TTL:       itm.TTL,
 		StaticTTL: itm.StaticTTL,
@@ -365,7 +365,7 @@ func (itm *ItemOpt) Clone() *ItemOpt {
 	}
 }
 
-func (itm *ItemOpt) Equals(itm2 *ItemOpt) bool {
+func (itm *ItemOpts) Equals(itm2 *ItemOpts) bool {
 	return (itm == nil && itm2 == nil) ||
 		(itm != nil && itm2 != nil &&
 			itm.Remote == itm2.Remote &&
@@ -377,7 +377,7 @@ func (itm *ItemOpt) Equals(itm2 *ItemOpt) bool {
 			itm.StaticTTL == itm2.StaticTTL)
 }
 
-type ItemOptJson struct {
+type ItemOptsJson struct {
 	Limit      *int
 	Ttl        *string
 	Static_ttl *bool
@@ -388,9 +388,9 @@ type ItemOptJson struct {
 	Api_key  *string
 }
 
-func diffItemOptJson(d *ItemOptJson, v1, v2 *ItemOpt) *ItemOptJson {
+func diffItemOptJson(d *ItemOptsJson, v1, v2 *ItemOpts) *ItemOptsJson {
 	if d == nil {
-		d = new(ItemOptJson)
+		d = new(ItemOptsJson)
 	}
 	if v2.Remote != v1.Remote {
 		d.Remote = utils.BoolPointer(v2.Remote)
@@ -405,7 +405,7 @@ func diffItemOptJson(d *ItemOptJson, v1, v2 *ItemOpt) *ItemOptJson {
 		d.Static_ttl = utils.BoolPointer(v2.StaticTTL)
 	}
 	if v2.TTL != v1.TTL {
-		d.Route_id = utils.StringPointer(v2.TTL.String())
+		d.Ttl = utils.StringPointer(v2.TTL.String())
 	}
 	if v2.RouteID != v1.RouteID {
 		d.Route_id = utils.StringPointer(v2.RouteID)
@@ -416,13 +416,13 @@ func diffItemOptJson(d *ItemOptJson, v1, v2 *ItemOpt) *ItemOptJson {
 	return d
 }
 
-func diffMapItemOptJson(d map[string]*ItemOptJson, v1, v2 map[string]*ItemOpt) map[string]*ItemOptJson {
+func diffMapItemOptJson(d map[string]*ItemOptsJson, v1, v2 map[string]*ItemOpts) map[string]*ItemOptsJson {
 	if d == nil {
-		d = make(map[string]*ItemOptJson)
+		d = make(map[string]*ItemOptsJson)
 	}
 	for k, val2 := range v2 {
 		if val1, has := v1[k]; !has {
-			d[k] = diffItemOptJson(d[k], new(ItemOpt), val2)
+			d[k] = diffItemOptJson(d[k], new(ItemOpts), val2)
 		} else if !val1.Equals(val2) {
 			d[k] = diffItemOptJson(d[k], val1, val2)
 		}
@@ -463,7 +463,7 @@ type DbJsonCfg struct {
 	Replication_conns     *[]string
 	Replication_filtered  *bool
 	Replication_cache     *string
-	Items                 map[string]*ItemOptJson
+	Items                 map[string]*ItemOptsJson
 	Opts                  *DBOptsJson
 }
 

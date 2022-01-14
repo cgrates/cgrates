@@ -32,7 +32,7 @@ import (
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
 	pass, marshaler string, opts *config.DataDBOpts,
-	itmsCfg map[string]*config.ItemOpt) (d DataDBDriver, err error) {
+	itmsCfg map[string]*config.ItemOpts) (d DataDBDriver, err error) {
 	switch dbType {
 	case utils.Redis:
 		var dbNo int
@@ -60,7 +60,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 // NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
 func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	stringIndexedFields, prefixIndexedFields []string,
-	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpt) (db StorDB, err error) {
+	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpts) (db StorDB, err error) {
 	switch dbType {
 	case utils.Mongo:
 		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, opts.MongoQueryTimeout)

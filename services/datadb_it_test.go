@@ -88,7 +88,7 @@ func TestDataDBReload(t *testing.T) {
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
-		Items: map[string]*config.ItemOpt{
+		Items: map[string]*config.ItemOpts{
 			utils.MetaAccounts:           {Limit: -1},
 			utils.MetaActions:            {Limit: -1},
 			utils.MetaResourceProfile:    {Limit: -1},
@@ -196,7 +196,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
-		Items: map[string]*config.ItemOpt{
+		Items: map[string]*config.ItemOpts{
 			utils.MetaAccounts:           {},
 			utils.MetaActions:            {},
 			utils.MetaCronExp:            {},
@@ -253,7 +253,7 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
-		Items: map[string]*config.ItemOpt{
+		Items: map[string]*config.ItemOpts{
 			utils.MetaAccounts:           {},
 			utils.MetaActions:            {},
 			utils.MetaCronExp:            {},
@@ -390,7 +390,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
-		Items: map[string]*config.ItemOpt{
+		Items: map[string]*config.ItemOpts{
 			utils.MetaAccounts:           {},
 			utils.MetaActions:            {},
 			utils.MetaCronExp:            {},
@@ -456,7 +456,7 @@ func TestDataDBReloadError(t *testing.T) {
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
-		Items: map[string]*config.ItemOpt{
+		Items: map[string]*config.ItemOpts{
 			utils.MetaAccounts:           {},
 			utils.MetaActions:            {},
 			utils.MetaCronExp:            {},

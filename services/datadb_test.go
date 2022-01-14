@@ -59,7 +59,7 @@ func TestDataDBCoverage(t *testing.T) {
 		},
 		RmtConns: []string{},
 		RplConns: []string{},
-		Items: map[string]*config.ItemOpt{
+		Items: map[string]*config.ItemOpts{
 			utils.MetaAccounts:           {},
 			utils.MetaActions:            {},
 			utils.MetaCronExp:            {},

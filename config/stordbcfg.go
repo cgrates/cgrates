@@ -51,7 +51,7 @@ type StorDbCfg struct {
 	PrefixIndexedFields []string
 	RmtConns            []string // Remote DataDB  connIDs
 	RplConns            []string // Replication connIDs
-	Items               map[string]*ItemOpt
+	Items               map[string]*ItemOpts
 	Opts                *StorDBOpts
 }
 
@@ -150,7 +150,7 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	}
 	if jsnDbCfg.Items != nil {
 		for kJsn, vJsn := range jsnDbCfg.Items {
-			val := new(ItemOpt)
+			val := new(ItemOpts)
 			if err = val.loadFromJSONCfg(vJsn); err != nil {
 				return
 			}
@@ -188,7 +188,7 @@ func (dbcfg StorDbCfg) Clone() (cln *StorDbCfg) {
 		User:     dbcfg.User,
 		Password: dbcfg.Password,
 
-		Items: make(map[string]*ItemOpt),
+		Items: make(map[string]*ItemOpts),
 		Opts:  dbcfg.Opts.Clone(),
 	}
 	for key, item := range dbcfg.Items {
