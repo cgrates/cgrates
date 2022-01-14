@@ -1403,7 +1403,9 @@ const (
 	ResourceSv1Ping                  = "ResourceSv1.Ping"
 	ResourceSv1GetResourceWithConfig = "ResourceSv1.GetResourceWithConfig"
 	ResourceSv1GetResource           = "ResourceSv1.GetResource"
+	ResourceSv1GetResources          = "ResourceSv1.GetResources"
 	AdminSv1SetResourceProfile       = "AdminSv1.SetResourceProfile"
+	AdminSv1GetResourceProfiles      = "AdminSv1.GetResourceProfiles"
 	AdminSv1RemoveResourceProfile    = "AdminSv1.RemoveResourceProfile"
 	AdminSv1GetResourceProfile       = "AdminSv1.GetResourceProfile"
 	AdminSv1GetResourceProfileIDs    = "AdminSv1.GetResourceProfileIDs"
@@ -1468,6 +1470,7 @@ const (
 const (
 	AdminSv1SetRateProfile         = "AdminSv1.SetRateProfile"
 	AdminSv1GetRateProfile         = "AdminSv1.GetRateProfile"
+	AdminSv1GetRateProfiles        = "AdminSv1.GetRateProfiles"
 	AdminSv1GetRateProfileIDs      = "AdminSv1.GetRateProfileIDs"
 	AdminSv1GetRateProfileCount    = "AdminSv1.GetRateProfileCount"
 	AdminSv1SetRateProfileRates    = "AdminSv1.SetRateProfileRates"

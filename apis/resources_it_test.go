@@ -54,10 +54,12 @@ var (
 		testResourceSStartEngine,
 		testResourceSRPCConn,
 		testResourceSGetResourceBeforeSet,
+		testResourceSGetResourceProfileBeforeSet,
 		testResourceSSetResourceProfiles,
 		testResourceSGetResourceAfterSet,
 		testResourceSGetResourceWithConfigAfterSet,
 		testResourceSGetResourceProfileIDs,
+		testResourceSGetResourceProfiles,
 		testResourceSGetResourceProfileCount,
 		testResourceSGetResourcesForEvent,
 		testResourceSAllocateResources,
@@ -67,6 +69,7 @@ var (
 		testResourceSRemoveResourceProfiles,
 		testResourceSGetResourceProfilesAfterRemove,
 		testResourceSPing,
+		testResourceSGetResourceProfilesWithPrefix,
 		testResourceSKillEngine,
 
 		// check threshold behaviour after allocation/release of resources
@@ -156,6 +159,15 @@ func testResourceSGetResourceBeforeSet(t *testing.T) { // cache it with not foun
 				Tenant: "cgrates.org",
 				ID:     "ResGroup1",
 			}}, &rplyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testResourceSGetResourceProfileBeforeSet(t *testing.T) { // cache it with not found
+	var rplyRes *[]*engine.ResourceProfile
+	var args *utils.ArgsItemIDs
+	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
+		args, &rplyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -322,6 +334,41 @@ func testResourceSGetResourceProfileIDs(t *testing.T) {
 		if !reflect.DeepEqual(reply, exp) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)
 		}
+	}
+}
+
+func testResourceSGetResourceProfiles(t *testing.T) {
+	var rplyRes []*engine.ResourceProfile
+	var args *utils.ArgsItemIDs
+	exp := []*engine.ResourceProfile{
+		{
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup1",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Limit:             10,
+			AllocationMessage: "Approved",
+			Weight:            20,
+			ThresholdIDs:      []string{utils.MetaNone},
+		},
+		{
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup2",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Limit:             10,
+			AllocationMessage: "Approved",
+			Weight:            10,
+			ThresholdIDs:      []string{utils.MetaNone},
+		},
+	}
+	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
+		args, &rplyRes); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(rplyRes, func(i int, j int) bool {
+		return (rplyRes)[i].ID < (rplyRes)[j].ID
+	})
+	if !reflect.DeepEqual(rplyRes, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rplyRes)
 	}
 }
 
@@ -676,5 +723,71 @@ func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
 		t.Error(err)
 	} else if result.Hits != 2 {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 2, result.Hits)
+	}
+
+}
+
+func testResourceSGetResourceProfilesWithPrefix(t *testing.T) {
+	rsPrf1 := &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                "PrefixResGroup1",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Limit:             10,
+			AllocationMessage: "Approved",
+			Weight:            20,
+			ThresholdIDs:      []string{utils.MetaNone},
+		},
+	}
+
+	var reply string
+	if err := rsRPC.Call(context.Background(), utils.AdminSv1SetResourceProfile,
+		rsPrf1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	rsPrf2 := &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup2",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Limit:             10,
+			AllocationMessage: "Approved",
+			Weight:            10,
+			ThresholdIDs:      []string{utils.MetaNone},
+		},
+	}
+
+	if err := rsRPC.Call(context.Background(), utils.AdminSv1SetResourceProfile,
+		rsPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var rplyRes []*engine.ResourceProfile
+	args := &utils.ArgsItemIDs{
+		ItemsPrefix: "PrefixRes",
+	}
+	exp := []*engine.ResourceProfile{
+		{
+			Tenant:            "cgrates.org",
+			ID:                "PrefixResGroup1",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Limit:             10,
+			AllocationMessage: "Approved",
+			Weight:            20,
+			ThresholdIDs:      []string{utils.MetaNone},
+		},
+	}
+	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
+		args, &rplyRes); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(rplyRes, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rplyRes)
 	}
 }

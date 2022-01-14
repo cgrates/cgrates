@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -48,12 +49,15 @@ var (
 		testRateSStartEngine,
 		testRateSRPCConn,
 		testGetRateProfileBeforeSet,
+		testGetRateProfilesBeforeSet,
 		testRateSetRateProfile,
 		testRateGetRateProfileIDs,
+		testRateGetRateProfiles,
 		testRateGetRateCount,
 		testGetRateProfileBeforeSet2,
 		testRateSetRateProfile2,
 		testRateGetRateIDs2,
+		testRateGetRateProfiles2,
 		testRateGetRateCount2,
 		testRateRemoveRateProfile,
 		testRateGetRateProfileIDs,
@@ -62,6 +66,7 @@ var (
 		testRateSetAttributeProfileBrokenReference,
 		testRateRemoveRateProfileRates,
 		testRateSetRateProfileRates,
+		testRateSetRateProfilesWithPrefix,
 		testRateSKillEngine,
 	}
 )
@@ -133,6 +138,14 @@ func testGetRateProfileBeforeSet(t *testing.T) {
 	}
 }
 
+func testGetRateProfilesBeforeSet(t *testing.T) {
+	var reply []*utils.RateProfile
+	var args *utils.ArgsItemIDs
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfiles,
+		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
 func testRateSetRateProfile(t *testing.T) {
 	ratePrf := &utils.APIRateProfile{
 		Tenant:          utils.CGRateSorg,
@@ -219,6 +232,54 @@ func testRateGetRateProfileIDs(t *testing.T) {
 		t.Error(err)
 	} else if len(reply) != len(expected) {
 		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func testRateGetRateProfiles(t *testing.T) {
+	var reply []*utils.RateProfile
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []*utils.RateProfile{
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: []*utils.DynamicWeight{
+				{
+					FilterIDs: nil,
+					Weight:    0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: []*utils.DynamicWeight{
+						{
+							FilterIDs: nil,
+							Weight:    0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      nil,
+							RecurrentFee:  nil,
+							Unit:          nil,
+							Increment:     nil,
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 
@@ -339,6 +400,91 @@ func testRateGetRateIDs2(t *testing.T) {
 	}
 }
 
+func testRateGetRateProfiles2(t *testing.T) {
+	var reply []*utils.RateProfile
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []*utils.RateProfile{
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: []*utils.DynamicWeight{
+				{
+					FilterIDs: nil,
+					Weight:    0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: []*utils.DynamicWeight{
+						{
+							FilterIDs: nil,
+							Weight:    0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      nil,
+							RecurrentFee:  nil,
+							Unit:          nil,
+							Increment:     nil,
+						},
+					},
+				},
+			},
+		},
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST_SECOND",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: []*utils.DynamicWeight{
+				{
+					FilterIDs: nil,
+					Weight:    0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: []*utils.DynamicWeight{
+						{
+							FilterIDs: nil,
+							Weight:    0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      nil,
+							RecurrentFee:  nil,
+							Unit:          nil,
+							Increment:     nil,
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply, func(i, j int) bool {
+		return (reply)[i].ID < (reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
 func testRateGetRateCount2(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
@@ -379,6 +525,55 @@ func testRateRemoveRateProfile(t *testing.T) {
 			},
 		}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v \n, received %+v", utils.ErrNotFound, err)
+	}
+}
+
+func testRateGetRateProfilesAfterRemove(t *testing.T) {
+	var reply []*utils.RateProfile
+	args := &utils.ArgsItemIDs{
+		Tenant: "cgrates.org",
+	}
+	expected := []*utils.RateProfile{
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_RATE_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: []*utils.DynamicWeight{
+				{
+					FilterIDs: nil,
+					Weight:    0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: []*utils.DynamicWeight{
+						{
+							FilterIDs: nil,
+							Weight:    0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      nil,
+							RecurrentFee:  nil,
+							Unit:          nil,
+							Increment:     nil,
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 
@@ -675,6 +870,128 @@ func testRateSetRateProfileRates(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result2, expectedRate) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result2))
+	}
+}
+
+func testRateSetRateProfilesWithPrefix(t *testing.T) {
+	ratePrf := &utils.APIRateProfile{
+		Tenant:          utils.CGRateSorg,
+		ID:              "PrefixTEST_RATE_IT_TEST",
+		FilterIDs:       []string{"*string:~*req.Account:dan"},
+		Weights:         ";0",
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				Weights:         ";0",
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.APIIntervalRate{
+					{
+						IntervalStart: "0",
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		ratePrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expectedRate := &utils.RateProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "PrefixTEST_RATE_IT_TEST",
+		FilterIDs: []string{"*string:~*req.Account:dan"},
+		Weights: []*utils.DynamicWeight{
+			{
+				FilterIDs: nil,
+				Weight:    0,
+			},
+		},
+		MaxCostStrategy: "*free",
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID: "RT_WEEK",
+				Weights: []*utils.DynamicWeight{
+					{
+						FilterIDs: nil,
+						Weight:    0,
+					},
+				},
+				ActivationTimes: "* * * * 1-5",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						FixedFee:      nil,
+						RecurrentFee:  nil,
+						Unit:          nil,
+						Increment:     nil,
+					},
+				},
+			},
+		},
+	}
+	var result *utils.RateProfile
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "PrefixTEST_RATE_IT_TEST",
+			},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, expectedRate) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedRate), utils.ToJSON(result))
+	}
+
+	var reply2 []*utils.RateProfile
+	args := &utils.ArgsItemIDs{
+		Tenant:      "cgrates.org",
+		ItemsPrefix: "PrefixTEST",
+	}
+	expected := []*utils.RateProfile{
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "PrefixTEST_RATE_IT_TEST",
+			FilterIDs: []string{"*string:~*req.Account:dan"},
+			Weights: []*utils.DynamicWeight{
+				{
+					FilterIDs: nil,
+					Weight:    0,
+				},
+			},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: []*utils.DynamicWeight{
+						{
+							FilterIDs: nil,
+							Weight:    0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      nil,
+							RecurrentFee:  nil,
+							Unit:          nil,
+							Increment:     nil,
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfiles,
+		args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply2))
 	}
 }
 
