@@ -38,7 +38,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		Prefix_indexed_fields: &[]string{"*req.index1"},
 		Remote_conns:          &[]string{"*conn1"},
 		Replication_conns:     &[]string{"*conn1"},
-		Items: map[string]*ItemOptJson{
+		Items: map[string]*ItemOptsJson{
 			utils.MetaCDRs: {
 				Remote:    utils.BoolPointer(true),
 				Replicate: utils.BoolPointer(false),
@@ -63,7 +63,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		PrefixIndexedFields: []string{"*req.index1"},
 		RmtConns:            []string{"*conn1"},
 		RplConns:            []string{"*conn1"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			utils.MetaCDRs: {
 				Remote:    true,
 				Replicate: false,
@@ -303,7 +303,7 @@ func TestStorDbCfgClone(t *testing.T) {
 		PrefixIndexedFields: []string{"*req.index1"},
 		RmtConns:            []string{"*conn1"},
 		RplConns:            []string{"*conn1"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			utils.MetaCDRs: {
 				Remote:    true,
 				Replicate: false,
@@ -357,7 +357,7 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 		PrefixIndexedFields: []string{"*req.index2"},
 		RmtConns:            []string{"*rmt_conn"},
 		RplConns:            []string{"*rpl_conns"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			"ITEM_1": {
 				Remote: false,
 			},
@@ -378,7 +378,7 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 		PrefixIndexedFields: []string{"*req.index22"},
 		RmtConns:            []string{"*rmt_conn2"},
 		RplConns:            []string{"*rpl_conn2"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			"ITEM_1": {
 				Remote: true,
 			},
@@ -399,7 +399,7 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 		Db_password:           utils.StringPointer("itsyscom_password"),
 		Remote_conns:          &[]string{"*rmt_conn2"},
 		Replication_conns:     &[]string{"*rpl_conn2"},
-		Items: map[string]*ItemOptJson{
+		Items: map[string]*ItemOptsJson{
 			"ITEM_1": {
 				Remote: utils.BoolPointer(true),
 			},
@@ -416,7 +416,7 @@ func TestDiffStorDBJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &DbJsonCfg{
-		Items: map[string]*ItemOptJson{},
+		Items: map[string]*ItemOptsJson{},
 		Opts:  &DBOptsJson{},
 	}
 	rcv = diffStorDBDbJsonCfg(d, v1, v2)
@@ -474,7 +474,7 @@ func TestStorDbCloneSection(t *testing.T) {
 		PrefixIndexedFields: []string{"*req.index2"},
 		RmtConns:            []string{"*rmt_conn"},
 		RplConns:            []string{"*rpl_conns"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			"ITEM_1": {
 				Remote: false,
 			},
@@ -495,7 +495,7 @@ func TestStorDbCloneSection(t *testing.T) {
 		PrefixIndexedFields: []string{"*req.index2"},
 		RmtConns:            []string{"*rmt_conn"},
 		RplConns:            []string{"*rpl_conns"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			"ITEM_1": {
 				Remote: false,
 			},

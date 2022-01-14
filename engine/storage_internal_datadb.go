@@ -44,7 +44,7 @@ type InternalDB struct {
 
 // NewInternalDB constructs an InternalDB
 func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
-	itmsCfg map[string]*config.ItemOpt) *InternalDB {
+	itmsCfg map[string]*config.ItemOpts) *InternalDB {
 	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
 	for k, cPcfg := range itmsCfg {
 		tcCfg[k] = &ltcache.CacheConfig{

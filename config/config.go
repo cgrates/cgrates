@@ -100,11 +100,11 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		templates:  make(FCTemplates),
 		generalCfg: &GeneralCfg{NodeID: utils.UUIDSha1Prefix()},
 		dataDbCfg: &DataDbCfg{
-			Items: make(map[string]*ItemOpt),
+			Items: make(map[string]*ItemOpts),
 			Opts:  &DataDBOpts{},
 		},
 		storDbCfg: &StorDbCfg{
-			Items: make(map[string]*ItemOpt),
+			Items: make(map[string]*ItemOpts),
 			Opts:  &StorDBOpts{},
 		},
 		tlsCfg:    new(TLSCfg),

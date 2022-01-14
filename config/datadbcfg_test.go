@@ -36,7 +36,7 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		Db_password:       utils.StringPointer("password"),
 		Remote_conns:      &[]string{"*conn1"},
 		Replication_conns: &[]string{"*conn1"},
-		Items: map[string]*ItemOptJson{
+		Items: map[string]*ItemOptsJson{
 			utils.MetaAccounts: {
 				Replicate: utils.BoolPointer(true),
 				Remote:    utils.BoolPointer(true),
@@ -55,7 +55,7 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		Password: "password",
 		RmtConns: []string{"*conn1"},
 		RplConns: []string{"*conn1"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			utils.MetaAccounts: {
 				Limit:     -1,
 				Replicate: true,
@@ -136,19 +136,19 @@ func TestConnsloadFromJsonCfg(t *testing.T) {
 }
 
 func TestItemCfgloadFromJson(t *testing.T) {
-	jsonCfg := &ItemOptJson{
+	jsonCfg := &ItemOptsJson{
 		Remote:    utils.BoolPointer(true),
 		Replicate: utils.BoolPointer(true),
 		Api_key:   utils.StringPointer("randomVal"),
 		Route_id:  utils.StringPointer("randomID"),
 	}
-	expected := &ItemOpt{
+	expected := &ItemOpts{
 		Remote:    true,
 		Replicate: true,
 		APIKey:    "randomVal",
 		RouteID:   "randomID",
 	}
-	rcv := new(ItemOpt)
+	rcv := new(ItemOpts)
 	rcv.loadFromJSONCfg(nil)
 	rcv.loadFromJSONCfg(jsonCfg)
 	if !reflect.DeepEqual(rcv, expected) {
@@ -339,7 +339,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		User:     "cgrates",
 		Password: "password",
 		RmtConns: []string{"Conn1"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			utils.MetaAccounts: {
 				Limit:     -1,
 				Replicate: true,
@@ -349,7 +349,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			RedisSentinel: "sentinel",
 		},
 	}
-	dbcfg.Items = make(map[string]*ItemOpt)
+	dbcfg.Items = make(map[string]*ItemOpts)
 	dbcfg.Opts = &DataDBOpts{}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -390,7 +390,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			RedisSentinel: "sentinel",
 		},
 		RmtConns: []string{"Conn1"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			utils.MetaDispatcherHosts: {
 				Limit:     -1,
 				Remote:    true,
@@ -403,7 +403,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			},
 		},
 	}
-	dbcfg.Items = make(map[string]*ItemOpt)
+	dbcfg.Items = make(map[string]*ItemOpts)
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.Load(context.Background(), jsnCfg, NewDefaultCGRConfig()); err != nil {
@@ -443,13 +443,13 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			RedisSentinel: "sentinel",
 		},
 		RmtConns: []string{"Conn1"},
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			utils.MetaResourceProfile:   {Limit: -1},
 			utils.MetaResources:         {Limit: -1},
 			utils.MetaStatQueueProfiles: {Limit: -1},
 		},
 	}
-	dbcfg.Items = make(map[string]*ItemOpt)
+	dbcfg.Items = make(map[string]*ItemOpts)
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.Load(context.Background(), jsnCfg, NewDefaultCGRConfig()); err != nil {
@@ -519,7 +519,7 @@ func TestCloneDataDB(t *testing.T) {
 		Db_password:       utils.StringPointer("password"),
 		Remote_conns:      &[]string{"*conn1"},
 		Replication_conns: &[]string{"*conn1"},
-		Items: map[string]*ItemOptJson{
+		Items: map[string]*ItemOptsJson{
 			utils.MetaAccounts: {
 				Replicate: utils.BoolPointer(true),
 				Remote:    utils.BoolPointer(true),
@@ -547,14 +547,14 @@ func TestCloneDataDB(t *testing.T) {
 }
 
 func TestDataDbEqualsTrue(t *testing.T) {
-	itm := &ItemOpt{
+	itm := &ItemOpts{
 		Remote:    true,
 		Replicate: false,
 		RouteID:   "RouteID",
 		APIKey:    "APIKey",
 	}
 
-	itm2 := &ItemOpt{
+	itm2 := &ItemOpts{
 		Remote:    true,
 		Replicate: false,
 		RouteID:   "RouteID",
@@ -567,14 +567,14 @@ func TestDataDbEqualsTrue(t *testing.T) {
 }
 
 func TestDataDbEqualsFalse(t *testing.T) {
-	itm := &ItemOpt{
+	itm := &ItemOpts{
 		Remote:    true,
 		Replicate: false,
 		RouteID:   "RouteID",
 		APIKey:    "APIKey",
 	}
 
-	itm2 := &ItemOpt{
+	itm2 := &ItemOpts{
 		Remote:    false,
 		Replicate: true,
 		RouteID:   "RouteID2",
@@ -587,23 +587,23 @@ func TestDataDbEqualsFalse(t *testing.T) {
 }
 
 func TestDiffItemOptJson(t *testing.T) {
-	var d *ItemOptJson
+	var d *ItemOptsJson
 
-	v1 := &ItemOpt{
+	v1 := &ItemOpts{
 		Remote:    true,
 		Replicate: false,
 		RouteID:   "RouteID",
 		APIKey:    "APIKey",
 	}
 
-	v2 := &ItemOpt{
+	v2 := &ItemOpts{
 		Remote:    false,
 		Replicate: true,
 		RouteID:   "RouteID2",
 		APIKey:    "APIKey2",
 	}
 
-	expected := &ItemOptJson{
+	expected := &ItemOptsJson{
 		Remote:    utils.BoolPointer(false),
 		Replicate: utils.BoolPointer(true),
 		Route_id:  utils.StringPointer("RouteID2"),
@@ -616,7 +616,7 @@ func TestDiffItemOptJson(t *testing.T) {
 	}
 
 	v2_2 := v1
-	expected2 := &ItemOptJson{}
+	expected2 := &ItemOptsJson{}
 	rcv = diffItemOptJson(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
@@ -624,9 +624,9 @@ func TestDiffItemOptJson(t *testing.T) {
 }
 
 func TestDiffMapItemOptJson(t *testing.T) {
-	var d map[string]*ItemOptJson
+	var d map[string]*ItemOptsJson
 
-	v1 := map[string]*ItemOpt{
+	v1 := map[string]*ItemOpts{
 		"ITEM_OPT1": {
 			Remote:    true,
 			Replicate: false,
@@ -635,7 +635,7 @@ func TestDiffMapItemOptJson(t *testing.T) {
 		},
 	}
 
-	v2 := map[string]*ItemOpt{
+	v2 := map[string]*ItemOpts{
 		"ITEM_OPT1": {
 			Remote:    false,
 			Replicate: true,
@@ -644,7 +644,7 @@ func TestDiffMapItemOptJson(t *testing.T) {
 		},
 	}
 
-	expected := map[string]*ItemOptJson{
+	expected := map[string]*ItemOptsJson{
 		"ITEM_OPT1": {
 			Remote:    utils.BoolPointer(false),
 			Replicate: utils.BoolPointer(true),
@@ -659,7 +659,7 @@ func TestDiffMapItemOptJson(t *testing.T) {
 	}
 
 	v2_2 := v1
-	expected2 := map[string]*ItemOptJson{}
+	expected2 := map[string]*ItemOptsJson{}
 	rcv = diffMapItemOptJson(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
@@ -681,7 +681,7 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 		RplConns:    []string{},
 		RplFiltered: true,
 		RplCache:    "RplCache",
-		Items:       map[string]*ItemOpt{},
+		Items:       map[string]*ItemOpts{},
 		Opts: &DataDBOpts{
 			RedisSentinel: "sentinel1",
 		},
@@ -699,7 +699,7 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 		RplConns:    []string{"RplConn1"},
 		RplFiltered: false,
 		RplCache:    "RplCache2",
-		Items: map[string]*ItemOpt{
+		Items: map[string]*ItemOpts{
 			"ITEM_1": {
 				Remote:    true,
 				Replicate: true,
@@ -724,7 +724,7 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 		Replication_conns:    &[]string{"RplConn1"},
 		Replication_filtered: utils.BoolPointer(false),
 		Replication_cache:    utils.StringPointer("RplCache2"),
-		Items: map[string]*ItemOptJson{
+		Items: map[string]*ItemOptsJson{
 			"ITEM_1": {
 				Remote:    utils.BoolPointer(true),
 				Replicate: utils.BoolPointer(true),
@@ -744,7 +744,7 @@ func TestDiffDataDbJsonCfg(t *testing.T) {
 
 	v2_2 := v1
 	expected2 := &DbJsonCfg{
-		Items: map[string]*ItemOptJson{},
+		Items: map[string]*ItemOptsJson{},
 		Opts:  &DBOptsJson{},
 	}
 	rcv = diffDataDbJsonCfg(d, v1, v2_2)
@@ -817,7 +817,7 @@ func TestDataDbDiff(t *testing.T) {
 		RplConns:    []string{},
 		RplFiltered: true,
 		RplCache:    "RplCache",
-		Items:       map[string]*ItemOpt{},
+		Items:       map[string]*ItemOpts{},
 		Opts: &DataDBOpts{
 			RedisSentinel: "sentinel1",
 		},
@@ -835,7 +835,7 @@ func TestDataDbDiff(t *testing.T) {
 		RplConns:    []string{},
 		RplFiltered: true,
 		RplCache:    "RplCache",
-		Items:       map[string]*ItemOpt{},
+		Items:       map[string]*ItemOpts{},
 		Opts: &DataDBOpts{
 			RedisSentinel: "sentinel1",
 		},

@@ -1632,7 +1632,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 	cfg.thresholdSCfg.Enabled = false
 
-	cfg.dataDbCfg.Items = map[string]*ItemOpt{
+	cfg.dataDbCfg.Items = map[string]*ItemOpts{
 		"test1": {
 			Remote: true,
 		},
@@ -1642,7 +1642,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dataDbCfg.Items = map[string]*ItemOpt{
+	cfg.dataDbCfg.Items = map[string]*ItemOpts{
 		"test2": {
 			Remote:    false,
 			Replicate: true,
@@ -1669,7 +1669,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.dataDbCfg.RplConns = []string{}
-	cfg.dataDbCfg.Items = map[string]*ItemOpt{}
+	cfg.dataDbCfg.Items = map[string]*ItemOpts{}
 	//RmtConns
 	cfg.dataDbCfg.RmtConns = []string{"test2"}
 	expected = "<data_db> connection with id: <test2> not defined"

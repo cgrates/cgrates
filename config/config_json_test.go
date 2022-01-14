@@ -285,7 +285,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			RedisClusterOndownDelay: utils.StringPointer("0"),
 			RedisClusterSync:        utils.StringPointer("5s"),
 		},
-		Items: map[string]*ItemOptJson{
+		Items: map[string]*ItemOptsJson{
 			utils.MetaAccounts: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
@@ -529,7 +529,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			SSLMode:            utils.StringPointer(utils.PostgressSSLModeDisable),
 			MySQLLocation:      utils.StringPointer("Local"),
 		},
-		Items: map[string]*ItemOptJson{
+		Items: map[string]*ItemOptsJson{
 			utils.CacheTBLTPResources: {
 				Limit:      utils.IntPointer(-1),
 				Ttl:        utils.StringPointer(utils.EmptyString),
