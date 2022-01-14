@@ -1372,6 +1372,7 @@ const (
 	AdminSv1GetThresholdProfileIDs    = "AdminSv1.GetThresholdProfileIDs"
 	AdminSv1GetThresholdProfileCount  = "AdminSv1.GetThresholdProfileCount"
 	AdminSv1GetThresholdProfile       = "AdminSv1.GetThresholdProfile"
+	AdminSv1GetThresholdProfiles      = "AdminSv1.GetThresholdProfiles"
 	AdminSv1RemoveThresholdProfile    = "AdminSv1.RemoveThresholdProfile"
 	AdminSv1SetThresholdProfile       = "AdminSv1.SetThresholdProfile"
 )
@@ -1390,6 +1391,7 @@ const (
 	AdminSv1GetStatQueueProfile      = "AdminSv1.GetStatQueueProfile"
 	AdminSv1RemoveStatQueueProfile   = "AdminSv1.RemoveStatQueueProfile"
 	AdminSv1SetStatQueueProfile      = "AdminSv1.SetStatQueueProfile"
+	AdminSv1GetStatQueueProfiles     = "AdminSv1.GetStatQueueProfiles"
 	AdminSv1GetStatQueueProfileIDs   = "AdminSv1.GetStatQueueProfileIDs"
 	AdminSv1GetStatQueueProfileCount = "AdminSv1.GetStatQueueProfileCount"
 )
