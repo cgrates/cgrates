@@ -72,7 +72,7 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 }
 
 // GetRouteProfiles returns a list of route profiles registered for a tenant
-func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*engine.RouteProfile) (err error) {
+func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*engine.APIRouteProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -81,14 +81,15 @@ func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsIte
 	if err = admS.GetRouteProfileIDs(ctx, args, &rouPrfIDs); err != nil {
 		return
 	}
-	*rouPrfs = make([]*engine.RouteProfile, 0, len(rouPrfIDs))
+	*rouPrfs = make([]*engine.APIRouteProfile, 0, len(rouPrfIDs))
 	for _, rouPrfID := range rouPrfIDs {
 		var rouPrf *engine.RouteProfile
 		rouPrf, err = admS.dm.GetRouteProfile(ctx, tnt, rouPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
 		}
-		*rouPrfs = append(*rouPrfs, rouPrf)
+		rouAPIPrf := engine.NewAPIRouteProfile(rouPrf)
+		*rouPrfs = append(*rouPrfs, rouAPIPrf)
 	}
 	return
 }

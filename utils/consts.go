@@ -1332,6 +1332,7 @@ const (
 	RouteSv1GetRouteProfilesForEvent = "RouteSv1.GetRouteProfilesForEvent"
 	RouteSv1Ping                     = "RouteSv1.Ping"
 	AdminSv1GetRouteProfile          = "AdminSv1.GetRouteProfile"
+	AdminSv1GetRouteProfiles         = "AdminSv1.GetRouteProfiles"
 	AdminSv1GetRouteProfileIDs       = "AdminSv1.GetRouteProfileIDs"
 	AdminSv1RemoveRouteProfile       = "AdminSv1.RemoveRouteProfile"
 	AdminSv1SetRouteProfile          = "AdminSv1.SetRouteProfile"
