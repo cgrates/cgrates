@@ -101,7 +101,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"Field":          "profile",
 	}}
-	aPrflIDs, err := MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
+	aPrflIDs, err := MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -114,7 +114,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"Field": "profilePrefix",
 	}}
-	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
+	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -127,7 +127,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"Field": "profilePrefix",
 	}}
-	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
+	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -194,7 +194,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"CallCost":       map[string]interface{}{"Account": 1001},
 	}}
-	aPrflIDs, err := MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
+	aPrflIDs, err := MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -206,7 +206,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"CallCost": map[string]interface{}{"Field": "profilePrefix"},
 	}}
-	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
+	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)

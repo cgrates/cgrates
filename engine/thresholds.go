@@ -347,6 +347,8 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 			tS.cfg.ThresholdSCfg().StringIndexedFields,
 			tS.cfg.ThresholdSCfg().PrefixIndexedFields,
 			tS.cfg.ThresholdSCfg().SuffixIndexedFields,
+			tS.cfg.ThresholdSCfg().ExistsIndexedFields,
+			tS.cfg.ThresholdSCfg().NotExistsIndexedFields,
 			tS.dm, utils.CacheThresholdFilterIndexes, tnt,
 			tS.cfg.ThresholdSCfg().IndexedSelects,
 			tS.cfg.ThresholdSCfg().NestedFields,

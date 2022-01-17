@@ -63,6 +63,8 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 			alS.cfg.AttributeSCfg().StringIndexedFields,
 			alS.cfg.AttributeSCfg().PrefixIndexedFields,
 			alS.cfg.AttributeSCfg().SuffixIndexedFields,
+			alS.cfg.AccountSCfg().ExistsIndexedFields,
+			alS.cfg.AccountSCfg().NotExistsIndexedFields,
 			alS.dm, utils.CacheAttributeFilterIndexes, tnt,
 			alS.cfg.AttributeSCfg().IndexedSelects,
 			alS.cfg.AttributeSCfg().NestedFields,
