@@ -56,6 +56,8 @@ func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt st
 		cS.cfg.ChargerSCfg().StringIndexedFields,
 		cS.cfg.ChargerSCfg().PrefixIndexedFields,
 		cS.cfg.ChargerSCfg().SuffixIndexedFields,
+		cS.cfg.ChargerSCfg().ExistsIndexedFields,
+		cS.cfg.ChargerSCfg().NotExistsIndexedFields,
 		cS.dm, utils.CacheChargerFilterIndexes, tnt,
 		cS.cfg.ChargerSCfg().IndexedSelects,
 		cS.cfg.ChargerSCfg().NestedFields,

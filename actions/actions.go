@@ -154,6 +154,8 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 			aS.cfg.ActionSCfg().StringIndexedFields,
 			aS.cfg.ActionSCfg().PrefixIndexedFields,
 			aS.cfg.ActionSCfg().SuffixIndexedFields,
+			aS.cfg.ActionSCfg().ExistsIndexedFields,
+			aS.cfg.ActionSCfg().NotExistsIndexedFields,
 			aS.dm,
 			utils.CacheActionProfilesFilterIndexes,
 			tnt,

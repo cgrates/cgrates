@@ -28,11 +28,11 @@ import (
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.GetIndexes, adding utils.MetaAny to list of fields queried
-func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs *[]string,
+func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs, existsFldIDs, notExistsFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
 	itemIDs = make(utils.StringSet)
 	var allFieldIDs []string
-	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil || suffixFldIDs == nil) {
+	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil || suffixFldIDs == nil || existsFldIDs == nil || notExistsFldIDs == nil) {
 		allFieldIDs = ev.GetKeys(nestedFields, 2, utils.EmptyString)
 	}
 	// Guard will protect the function with automatic locking
@@ -50,9 +50,9 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 			itemIDs = utils.NewStringSet(sliceIDs)
 			return
 		}
-		stringFieldVals := map[string]string{utils.MetaAny: utils.MetaAny}                                 // cache here field string values, start with default one
-		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.MetaNone} // the MetaNone is used for all items that do not have filters
-		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, suffixFldIDs, {utils.MetaAny}} {  // same routine for both string and prefix filter types
+		stringFieldVals := map[string]string{utils.MetaAny: utils.MetaAny}                                                                        // cache here field string values, start with default one
+		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix, utils.MetaExists, utils.MetaNotExists, utils.MetaNone} // the MetaNone is used for all items that do not have filters
+		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, suffixFldIDs, existsFldIDs, notExistsFldIDs, {utils.MetaAny}} {          // same routine for both string and prefix filter types
 			if fieldIDs == nil {
 				fieldIDs = &allFieldIDs
 			}

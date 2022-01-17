@@ -146,6 +146,8 @@ func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt strin
 		rpS.cfg.RouteSCfg().StringIndexedFields,
 		rpS.cfg.RouteSCfg().PrefixIndexedFields,
 		rpS.cfg.RouteSCfg().SuffixIndexedFields,
+		rpS.cfg.RouteSCfg().ExistsIndexedFields,
+		rpS.cfg.RouteSCfg().NotExistsIndexedFields,
 		rpS.dm, utils.CacheRouteFilterIndexes, tnt,
 		rpS.cfg.RouteSCfg().IndexedSelects,
 		rpS.cfg.RouteSCfg().NestedFields,

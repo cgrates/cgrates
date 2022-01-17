@@ -165,6 +165,8 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 			sS.cfg.StatSCfg().StringIndexedFields,
 			sS.cfg.StatSCfg().PrefixIndexedFields,
 			sS.cfg.StatSCfg().SuffixIndexedFields,
+			sS.cfg.StatSCfg().ExistsIndexedFields,
+			sS.cfg.StatSCfg().NotExistsIndexedFields,
 			sS.dm, utils.CacheStatFilterIndexes, tnt,
 			sS.cfg.StatSCfg().IndexedSelects,
 			sS.cfg.StatSCfg().NestedFields,

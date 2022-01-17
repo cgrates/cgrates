@@ -78,6 +78,8 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 			aS.cfg.AccountSCfg().StringIndexedFields,
 			aS.cfg.AccountSCfg().PrefixIndexedFields,
 			aS.cfg.AccountSCfg().SuffixIndexedFields,
+			aS.cfg.AccountSCfg().ExistsIndexedFields,
+			aS.cfg.AccountSCfg().NotExistsIndexedFields,
 			aS.dm,
 			utils.CacheAccountsFilterIndexes,
 			tnt,

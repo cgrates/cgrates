@@ -107,6 +107,8 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 		dS.cfg.DispatcherSCfg().SuffixIndexedFields,
+		dS.cfg.DispatcherSCfg().ExistsIndexedFields,
+		dS.cfg.DispatcherSCfg().NotExistsIndexedFields,
 		dS.dm, utils.CacheDispatcherFilterIndexes, tnt,
 		dS.cfg.DispatcherSCfg().IndexedSelects,
 		dS.cfg.DispatcherSCfg().NestedFields,
