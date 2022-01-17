@@ -24,6 +24,7 @@ package apis
 import (
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -51,8 +52,8 @@ var (
 		testRouteSSetRoute,
 		testRouteSSetRoute2,
 		testRouteSSetRoute3,
-		// testFilterSGetRoutes,
-		// testFilterSGetRoutesWithPrefix,
+		testFilterSGetRoutes,
+		testFilterSGetRoutesWithPrefix,
 		testRouteSKillEngine,
 	}
 )
@@ -283,105 +284,106 @@ func testRouteSSetRoute3(t *testing.T) {
 	}
 }
 
-// func testFilterSGetRoutes(t *testing.T) {
-// 	var reply []*engine.APIRouteProfile
-// 	args := &utils.ArgsItemIDs{}
-// 	expected := []*engine.APIRouteProfile{
-// 		{
-// 			ID:                "ROUTE_ACNT_1001",
-// 			Tenant:            "cgrates.org",
-// 			Weights:           ";10",
-// 			Sorting:           utils.MetaWeight,
-// 			SortingParameters: []string{},
-// 			Routes: []*engine.ExternalRoute{
-// 				{
-// 					ID:      "route1",
-// 					Weights: ";20",
-// 				},
-// 			},
-// 		},
-// 		{
-// 			ID:                "PrefixROUTE_ACNT_1002",
-// 			Tenant:            "cgrates.org",
-// 			Weights:           ";10",
-// 			Sorting:           utils.MetaWeight,
-// 			SortingParameters: []string{},
-// 			Routes: []*engine.ExternalRoute{
-// 				{
-// 					ID:      "route1",
-// 					Weights: ";20",
-// 				},
-// 			},
-// 		},
-// 		{
-// 			ID:                "PrefixROUTE_ACNT_1003",
-// 			Tenant:            "cgrates.org",
-// 			Weights:           ";10",
-// 			Sorting:           utils.MetaWeight,
-// 			SortingParameters: []string{},
-// 			Routes: []*engine.ExternalRoute{
-// 				{
-// 					ID:      "route1",
-// 					Weights: ";20",
-// 				},
-// 			},
-// 		},
-// 	}
-// 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
-// 		args, &reply); err != nil {
-// 		t.Error(err)
-// 	}
-// 	sort.Slice(reply, func(i, j int) bool {
-// 		return (reply)[i].ID < (reply)[j].ID
-// 	})
-// 	if !reflect.DeepEqual(reply, expected) {
-// 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-// 	}
-// }
-// func testFilterSGetRoutesWithPrefix(t *testing.T) {
-// 	var reply []*engine.APIRouteProfile
-// 	args := &utils.ArgsItemIDs{
-// 		ItemsPrefix: "PrefixROUTE",
-// 	}
-// 	expected := []*engine.APIRouteProfile{
-// 		{
-// 			ID:                "PrefixROUTE_ACNT_1002",
-// 			Tenant:            "cgrates.org",
-// 			Weights:           ";10",
-// 			Sorting:           utils.MetaWeight,
-// 			SortingParameters: []string{},
-// 			Routes: []*engine.ExternalRoute{
-// 				{
-// 					ID:      "route1",
-// 					Weights: ";20",
-// 				},
-// 			},
-// 		},
-// 		{
-// 			ID:                "PrefixROUTE_ACNT_1003",
-// 			Tenant:            "cgrates.org",
-// 			Weights:           ";10",
-// 			Sorting:           utils.MetaWeight,
-// 			SortingParameters: []string{},
-// 			Routes: []*engine.ExternalRoute{
-// 				{
-// 					ID:      "route1",
-// 					Weights: ";20",
-// 				},
-// 			},
-// 		},
-// 	}
-// 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
-// 		args, &reply); err != nil {
-// 		t.Error(err)
-// 	}
-// 	sort.Slice(reply, func(i, j int) bool {
-// 		return (reply)[i].ID < (reply)[j].ID
-// 	})
-// 	if !reflect.DeepEqual(reply, expected) {
-// 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-// 	}
-// }
+func testFilterSGetRoutes(t *testing.T) {
+	var reply []*engine.APIRouteProfile
+	args := &utils.ArgsItemIDs{}
+	expected := []*engine.APIRouteProfile{
+
+		{
+			ID:                "PrefixROUTE_ACNT_1002",
+			Tenant:            "cgrates.org",
+			Weights:           ";10",
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.ExternalRoute{
+				{
+					ID:      "route1",
+					Weights: ";20",
+				},
+			},
+		},
+		{
+			ID:                "PrefixROUTE_ACNT_1003",
+			Tenant:            "cgrates.org",
+			Weights:           ";10",
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.ExternalRoute{
+				{
+					ID:      "route1",
+					Weights: ";20",
+				},
+			},
+		},
+		{
+			ID:                "ROUTE_ACNT_1001",
+			Tenant:            "cgrates.org",
+			Weights:           ";10",
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.ExternalRoute{
+				{
+					ID:      "route1",
+					Weights: ";20",
+				},
+			},
+		},
+	}
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply, func(i, j int) bool {
+		return (reply)[i].ID < (reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+func testFilterSGetRoutesWithPrefix(t *testing.T) {
+	var reply []*engine.APIRouteProfile
+	args := &utils.ArgsItemIDs{
+		ItemsPrefix: "PrefixROUTE",
+	}
+	expected := []*engine.APIRouteProfile{
+		{
+			ID:                "PrefixROUTE_ACNT_1002",
+			Tenant:            "cgrates.org",
+			Weights:           ";10",
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.ExternalRoute{
+				{
+					ID:      "route1",
+					Weights: ";20",
+				},
+			},
+		},
+		{
+			ID:                "PrefixROUTE_ACNT_1003",
+			Tenant:            "cgrates.org",
+			Weights:           ";10",
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*engine.ExternalRoute{
+				{
+					ID:      "route1",
+					Weights: ";20",
+				},
+			},
+		},
+	}
+	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+	sort.Slice(reply, func(i, j int) bool {
+		return (reply)[i].ID < (reply)[j].ID
+	})
+	if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
 
 //Kill the engine when it is about to be finished
 func testRouteSKillEngine(t *testing.T) {
