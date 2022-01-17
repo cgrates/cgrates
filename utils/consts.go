@@ -1309,6 +1309,7 @@ const (
 	AccountSv1DebitAbstracts      = "AccountSv1.DebitAbstracts"
 	AccountSv1MaxConcretes        = "AccountSv1.MaxConcretes"
 	AccountSv1DebitConcretes      = "AccountSv1.DebitConcretes"
+	AccountSv1RefundCharges       = "AccountSv1.RefundCharges"
 	AccountSv1ActionSetBalance    = "AccountSv1.ActionSetBalance"
 	AccountSv1ActionRemoveBalance = "AccountSv1.ActionRemoveBalance"
 	AccountSv1GetAccount          = "AccountSv1.GetAccount"

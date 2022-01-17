@@ -140,6 +140,22 @@ func (cdrS *CDRServer) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGR
 	return
 }
 
+// accountSRefundCharges will refund the charges into Account
+func (cdrS *CDRServer) accountSRefundCharges(ctx *context.Context, tnt string, eChrgs *utils.EventCharges,
+	apiOpts map[string]interface{}) (err error) {
+	var rply string
+	argsRefund := &utils.APIEventCharges{
+		Tenant:       tnt,
+		APIOpts:      apiOpts,
+		EventCharges: eChrgs,
+	}
+	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().AccountSConns,
+		utils.AccountSv1RefundCharges, argsRefund, rply); err != nil {
+		return
+	}
+	return
+}
+
 // thdSProcessEvent will send the event to ThresholdS
 func (cdrS *CDRServer) thdSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
 	var tIDs []string
@@ -241,6 +257,15 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 			return
 		}
 		if acntS {
+			if ecCostIface, wasCharged := cgrEv.Event[utils.MetaAccountSCost]; wasCharged {
+				ecCost := ecCostIface.(*utils.EventCharges)
+				if err := cdrS.accountSRefundCharges(ctx, cgrEv.Tenant, ecCost, cgrEv.APIOpts); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+							utils.CDRs, err.Error(), utils.ToJSON(cgrEv), utils.AccountS))
+					partiallyExecuted = true
+				}
+			}
 			if err := cdrS.accountSDebitEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
