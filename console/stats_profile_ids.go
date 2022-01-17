@@ -23,7 +23,7 @@ import (
 )
 
 func init() {
-	c := &CmdGetStatQueueIDs{
+	c := &CmdGetStatQueueProfileIDs{
 		name:      "stats_profile_ids",
 		rpcMethod: utils.AdminSv1GetStatQueueProfileIDs,
 		rpcParams: &utils.ArgsItemIDs{},
@@ -33,33 +33,33 @@ func init() {
 }
 
 // Commander implementation
-type CmdGetStatQueueIDs struct {
+type CmdGetStatQueueProfileIDs struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.ArgsItemIDs
 	*CommandExecuter
 }
 
-func (self *CmdGetStatQueueIDs) Name() string {
+func (self *CmdGetStatQueueProfileIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdGetStatQueueIDs) RpcMethod() string {
+func (self *CmdGetStatQueueProfileIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueueIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetStatQueueProfileIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsItemIDs{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetStatQueueIDs) PostprocessRpcParams() error {
+func (self *CmdGetStatQueueProfileIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueueIDs) RpcResult() interface{} {
+func (self *CmdGetStatQueueProfileIDs) RpcResult() interface{} {
 	var atr []string
 	return &atr
 }

@@ -24,9 +24,9 @@ import (
 )
 
 func init() {
-	c := &CmdGetStatQueueProfile{
-		name:      "stats_profile",
-		rpcMethod: utils.AdminSv1GetStatQueueProfile,
+	c := &CmdGetResourceProfile{
+		name:      "resource_profile",
+		rpcMethod: utils.AdminSv1GetResourceProfile,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c
@@ -34,39 +34,39 @@ func init() {
 }
 
 // Commander implementation
-type CmdGetStatQueueProfile struct {
+type CmdGetResourceProfile struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
-func (self *CmdGetStatQueueProfile) Name() string {
+func (self *CmdGetResourceProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetStatQueueProfile) RpcMethod() string {
+func (self *CmdGetResourceProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueueProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetResourceProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetStatQueueProfile) PostprocessRpcParams() error {
+func (self *CmdGetResourceProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueueProfile) RpcResult() interface{} {
-	var atr engine.StatQueueProfile
+func (self *CmdGetResourceProfile) RpcResult() interface{} {
+	var atr engine.ResourceProfile
 	return &atr
 }
 
-func (self *CmdGetStatQueueProfile) GetFormatedResult(result interface{}) string {
+func (self *CmdGetResourceProfile) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, utils.StringSet{
-		utils.TTL: {},
+		utils.UsageTTL: {},
 	})
 }

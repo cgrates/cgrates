@@ -24,49 +24,48 @@ import (
 )
 
 func init() {
-	c := &CmdGetStatQueueProfile{
-		name:      "stats_profile",
-		rpcMethod: utils.AdminSv1GetStatQueueProfile,
+	c := &CmdGetThresholdProfile{
+		name:      "threshold_profile",
+		rpcMethod: utils.AdminSv1GetThresholdProfile,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdGetStatQueueProfile struct {
+type CmdGetThresholdProfile struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
-func (self *CmdGetStatQueueProfile) Name() string {
+func (self *CmdGetThresholdProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetStatQueueProfile) RpcMethod() string {
+func (self *CmdGetThresholdProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueueProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetThresholdProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetStatQueueProfile) PostprocessRpcParams() error {
+func (self *CmdGetThresholdProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueueProfile) RpcResult() interface{} {
-	var atr engine.StatQueueProfile
+func (self *CmdGetThresholdProfile) RpcResult() interface{} {
+	var atr engine.ThresholdProfile
 	return &atr
 }
 
-func (self *CmdGetStatQueueProfile) GetFormatedResult(result interface{}) string {
+func (self *CmdGetThresholdProfile) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, utils.StringSet{
-		utils.TTL: {},
+		utils.MinSleep: {},
 	})
 }
