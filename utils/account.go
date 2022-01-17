@@ -462,6 +462,17 @@ func (apWws AccountsWithWeight) LockIDs() (lkIDs []string) {
 	return
 }
 
+// Account returns the Account object with ID
+func (apWws AccountsWithWeight) Account(acntID string) (acnt *Account) {
+	for _, aWw := range apWws {
+		if aWw.Account.ID == acntID {
+			acnt = aWw.Account
+			break
+		}
+	}
+	return
+}
+
 // BalanceWithWeight attaches static Weight to Balance
 type BalanceWithWeight struct {
 	*Balance

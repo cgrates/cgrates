@@ -30,7 +30,8 @@ import (
 )
 
 // NewAccountS instantiates the AccountS
-func NewAccountS(cfg *config.CGRConfig, fltrS *engine.FilterS, connMgr *engine.ConnManager, dm *engine.DataManager) *AccountS {
+func NewAccountS(cfg *config.CGRConfig, fltrS *engine.FilterS,
+	connMgr *engine.ConnManager, dm *engine.DataManager) *AccountS {
 	return &AccountS{cfg, fltrS, connMgr, dm}
 }
 
@@ -90,7 +91,7 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 	for _, acntID := range acntIDs {
 		var refID string
 		if lked {
-			refID = guardian.Guardian.GuardIDs("",
+			refID = guardian.Guardian.GuardIDs(utils.EmptyString,
 				aS.cfg.GeneralCfg().LockingTimeout,
 				utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID)) // RPC caching needs to be atomic
 		}
@@ -132,14 +133,16 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 }
 
 // accountsDebit will debit an usage out of multiple accounts
+// concretes parameter limits the debits to concrete only balances
+// store is used for simulate only or complete debit
 func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
-	var usage *decimal.Big
+	var usage *decimal.Big // total event usage
 	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
 		config.AccountsUsageDftOpt, utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
 		return
 	}
-	dbted := decimal.New(0, 0)
+	dbted := decimal.New(0, 0) // amount debited so far
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))
 	for i, acnt := range acnts {
 		if usage.Cmp(decimal.New(0, 0)) == 0 {
@@ -232,6 +235,59 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 		ec.Merge(ecDbt)
 		ec.Accounts[acnt.ID] = acnt
 	}
+	return
+}
+
+// refundCharges implements the mechanism of refunding the charges into accounts
+func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.EventCharges) (err error) {
+	acnts := make(utils.AccountsWithWeight, 0, len(ecs.Accounts))
+	acntsIdxed := make(map[string]*utils.Account) // so we can access Account easier
+	alteredAcnts := make(utils.StringSet)         // hold here the list of modified accounts
+	for acntID := range ecs.Accounts {
+		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
+			aS.cfg.GeneralCfg().LockingTimeout,
+			utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID))
+		var qAcnt *utils.Account
+		if qAcnt, err = aS.dm.GetAccount(ctx, tnt, acntID); err != nil {
+			guardian.Guardian.UnguardIDs(refID)
+			if err == utils.ErrNotFound { // Account was removed in the mean time
+				err = nil
+				continue
+			}
+			unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
+			return
+		}
+		acnts = append(acnts, &utils.AccountWithWeight{qAcnt, 0, refID})
+		acntsIdxed[acntID] = qAcnt
+	}
+	acntBkps := make([]utils.AccountBalancesBackup, len(acnts)) // so we can restore in case of issues
+	for i, acnt := range acnts {
+		acntBkps[i] = acnt.AccountBalancesBackup()
+	}
+	for _, chrg := range ecs.Charges {
+		acntChrg := ecs.Accounting[chrg.ChargingID]
+		refundUnitsOnAccount(
+			acntsIdxed[acntChrg.AccountID],
+			uncompressUnits(acntChrg.Units, chrg.CompressFactor),
+			ecs.Accounts[acntChrg.AccountID].Balances[acntChrg.BalanceID])
+		alteredAcnts.Add(acntChrg.AccountID)
+		for _, chrgID := range acntChrg.JoinedChargeIDs { // refund extra charges
+			extraChrg := ecs.Accounting[chrgID]
+			refundUnitsOnAccount(
+				acntsIdxed[extraChrg.AccountID],
+				uncompressUnits(extraChrg.Units, chrg.CompressFactor),
+				ecs.Accounts[acntChrg.AccountID].Balances[extraChrg.BalanceID])
+			alteredAcnts.Add(extraChrg.AccountID)
+		}
+	}
+	for acntID := range alteredAcnts {
+		if err = aS.dm.SetAccount(ctx, acntsIdxed[acntID], false); err != nil {
+			restoreAccounts(ctx, aS.dm, acnts, acntBkps)
+			return
+		}
+	}
+
+	unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
 	return
 }
 
@@ -376,6 +432,15 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 		return
 	}
 	*eEc = *procEC
+	return
+}
+
+// V1RefundCharges will refund charges recorded inside EventCharges
+func (aS *AccountS) V1RefundCharges(ctx *context.Context, args *utils.APIEventCharges, rply *string) (err error) {
+	if err = aS.refundCharges(ctx, args.Tenant, args.EventCharges); err != nil {
+		return
+	}
+	*rply = utils.OK
 	return
 }
 

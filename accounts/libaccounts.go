@@ -352,3 +352,27 @@ func unlockAccounts(acnts utils.AccountsWithWeight) {
 		guardian.Guardian.UnguardIDs(lkID)
 	}
 }
+
+// uncompressUnits returns the uncompressed value of the units if compressFactor is provided
+func uncompressUnits(units *utils.Decimal, cmprsFctr int) (tU *utils.Decimal) {
+	tU = units
+	if cmprsFctr > 1 {
+		tU = &utils.Decimal{utils.MultiplyBig(tU.Big,
+			decimal.New(int64(cmprsFctr), 0))}
+	}
+	return
+}
+
+// refundUnitsOnAccount is responsible for returning the units back to the balance
+// origBlnc is used for both it's ID as well as as a configuration backup in case when the balance is not longer present
+func refundUnitsOnAccount(acnt *utils.Account, units *utils.Decimal, origBlnc *utils.Balance) {
+	if _, has := acnt.Balances[origBlnc.ID]; has {
+		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{
+			utils.SumBig(
+				acnt.Balances[origBlnc.ID].Units.Big,
+				units.Big)}
+	} else {
+		acnt.Balances[origBlnc.ID] = origBlnc.Clone()
+		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{utils.CloneDecimalBig(units.Big)}
+	}
+}

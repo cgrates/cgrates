@@ -213,6 +213,12 @@ func (aSv1 *AccountSv1) DebitConcretes(ctx *context.Context, args *utils.CGREven
 	return aSv1.aS.V1DebitConcretes(ctx, args, eEc)
 }
 
+// RefundCharges will refund charges recorded inside EventCharges
+func (aSv1 *AccountSv1) RefundCharges(ctx *context.Context,
+	args *utils.APIEventCharges, rply *string) (err error) {
+	return aSv1.aS.V1RefundCharges(ctx, args, rply)
+}
+
 // ActionSetBalance performs a set balance action
 func (aSv1 *AccountSv1) ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance,
 	eEc *string) (err error) {
