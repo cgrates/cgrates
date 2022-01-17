@@ -487,12 +487,6 @@ func (bWws BalancesWithWeight) Balances() (blncs []*Balance) {
 	return
 }
 
-// APIAccountWithOpts is used in API calls
-type APIAccountWithOpts struct {
-	*APIAccount
-	APIOpts map[string]interface{}
-}
-
 type AccountWithAPIOpts struct {
 	*Account
 	APIOpts map[string]interface{}

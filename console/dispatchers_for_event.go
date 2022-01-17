@@ -25,7 +25,7 @@ import (
 
 func init() {
 	c := &CmdDispatcherProfile{
-		name:      "dispatches_for_event",
+		name:      "dispatchers_for_event",
 		rpcMethod: utils.DispatcherSv1GetProfilesForEvent,
 	}
 	commands[c.Name()] = c

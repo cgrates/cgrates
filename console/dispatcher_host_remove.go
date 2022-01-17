@@ -19,14 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetStatQueueProfile{
-		name:      "stats_profile",
-		rpcMethod: utils.AdminSv1GetStatQueueProfile,
+	c := &CmdRemoveDispatcherHost{
+		name:      "dispatcher_host_remove",
+		rpcMethod: utils.AdminSv1RemoveDispatcherHost,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c
@@ -34,39 +33,33 @@ func init() {
 }
 
 // Commander implementation
-type CmdGetStatQueueProfile struct {
+type CmdRemoveDispatcherHost struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
-func (self *CmdGetStatQueueProfile) Name() string {
+func (self *CmdRemoveDispatcherHost) Name() string {
 	return self.name
 }
 
-func (self *CmdGetStatQueueProfile) RpcMethod() string {
+func (self *CmdRemoveDispatcherHost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueueProfile) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveDispatcherHost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithAPIOpts{}
+		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetStatQueueProfile) PostprocessRpcParams() error {
+func (self *CmdRemoveDispatcherHost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueueProfile) RpcResult() interface{} {
-	var atr engine.StatQueueProfile
-	return &atr
-}
-
-func (self *CmdGetStatQueueProfile) GetFormatedResult(result interface{}) string {
-	return GetFormatedResult(result, utils.StringSet{
-		utils.TTL: {},
-	})
+func (self *CmdRemoveDispatcherHost) RpcResult() interface{} {
+	var s string
+	return &s
 }

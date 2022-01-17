@@ -24,49 +24,42 @@ import (
 )
 
 func init() {
-	c := &CmdGetStatQueueProfile{
-		name:      "stats_profile",
-		rpcMethod: utils.AdminSv1GetStatQueueProfile,
+	c := &CmdGetRouteProfile{
+		name:      "route_profile",
+		rpcMethod: utils.AdminSv1GetRouteProfile,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdGetStatQueueProfile struct {
+type CmdGetRouteProfile struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
-func (self *CmdGetStatQueueProfile) Name() string {
+func (self *CmdGetRouteProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetStatQueueProfile) RpcMethod() string {
+func (self *CmdGetRouteProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueueProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetRouteProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetStatQueueProfile) PostprocessRpcParams() error {
+func (self *CmdGetRouteProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueueProfile) RpcResult() interface{} {
-	var atr engine.StatQueueProfile
+func (self *CmdGetRouteProfile) RpcResult() interface{} {
+	var atr engine.APIRouteProfile
 	return &atr
-}
-
-func (self *CmdGetStatQueueProfile) GetFormatedResult(result interface{}) string {
-	return GetFormatedResult(result, utils.StringSet{
-		utils.TTL: {},
-	})
 }
