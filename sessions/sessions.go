@@ -906,7 +906,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent, resI
 		err = errors.New("ChargerS is disabled")
 		return
 	}
-	cgrID := GetSetCGRID(cgrEv.Event)
+	cgrID := GetSetCGRID(cgrEv.Event, cgrEv.APIOpts)
 	evStart := engine.MapEvent(cgrEv.Event)
 	if !evStart.HasField(utils.Usage) && evStart.HasField(utils.LastUsed) {
 		evStart[utils.Usage] = evStart[utils.LastUsed]
@@ -1057,10 +1057,10 @@ func (sS *SessionS) relocateSession(ctx *context.Context, initOriginID, originID
 	s.Lock()
 	s.CGRID = newCGRID
 	// Overwrite initial CGRID with new one
-	s.EventStart[utils.CGRID] = newCGRID    // Overwrite CGRID for final CDR
+	s.OptsStart[utils.CGRID] = newCGRID     // Overwrite CGRID for final CDR
 	s.EventStart[utils.OriginID] = originID // Overwrite OriginID for session indexing
 	for _, sRun := range s.SRuns {
-		sRun.Event[utils.CGRID] = newCGRID // needed for CDR generation
+		//sRun.Event[utils.CGRID] = newCGRID // needed for CDR generation
 		sRun.Event[utils.OriginID] = originID
 	}
 	s.Unlock()
@@ -2001,7 +2001,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			config.SessionsDebitIntervalDftOpt, utils.OptsSesDebitInterval); err != nil {
 			return err
 		}
-		cgrID := GetSetCGRID(ev)
+		cgrID := GetSetCGRID(ev, args.APIOpts)
 		s := sS.getRelocateSession(ctx, cgrID,
 			ev.GetStringIgnoreErrors(utils.InitialOriginID),
 			ev.GetStringIgnoreErrors(utils.OriginID),
@@ -2085,7 +2085,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 
 	ev := engine.MapEvent(args.Event)
 	opts := engine.MapEvent(args.APIOpts)
-	cgrID := GetSetCGRID(ev)
+	cgrID := GetSetCGRID(ev, opts)
 	originID := ev.GetStringIgnoreErrors(utils.OriginID)
 	if termS {
 		if originID == "" {
@@ -2928,7 +2928,7 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
 
 func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string) (err error) {
 	ev := engine.MapEvent(cgrEv.Event)
-	cgrID := GetSetCGRID(ev)
+	cgrID := GetSetCGRID(ev, cgrEv.APIOpts)
 	s := sS.getRelocateSession(ctx, cgrID,
 		ev.GetStringIgnoreErrors(utils.InitialOriginID),
 		ev.GetStringIgnoreErrors(utils.OriginID),

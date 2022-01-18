@@ -52,13 +52,14 @@ func TestLibSessionSGetSetCGRID(t *testing.T) {
 		utils.OriginHost:      "127.0.0.1",
 	})
 	//Empty CGRID in event
-	cgrID := GetSetCGRID(sEv)
+	opt := map[string]interface{}{}
+	cgrID := GetSetCGRID(sEv, opt)
 	if len(cgrID) == 0 {
 		t.Errorf("Unexpected cgrID: %+v", cgrID)
 	}
 	//populate CGRID in event
-	sEv[utils.CGRID] = "someRandomVal"
-	cgrID = GetSetCGRID(sEv)
+	opt[utils.CGRID] = "someRandomVal"
+	cgrID = GetSetCGRID(sEv, opt)
 	if cgrID != "someRandomVal" {
 		t.Errorf("Expecting: someRandomVal, received: %+v", cgrID)
 	}
