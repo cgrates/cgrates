@@ -238,7 +238,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			restoreUnitsFromClones(cncrtBlncs, origConcrtUnts)
 		}
 		if i == maxItr {
-			utils.Logger.Debug(fmt.Sprintf(
+			utils.Logger.Err(fmt.Sprintf(
 				"<%s> MaximumIncrementsExceeded: %d when debitting abstract units: %s, paid units: %s, deniedUnits: %s, costIncrement: %s, event: %s",
 				utils.AccountS, i, aUnits, aPaid, aDenied, utils.ToJSON(costIcrm), utils.ToJSON(cgrEv)))
 			return nil, utils.ErrMaxIncrementsExceeded
