@@ -993,7 +993,8 @@ variable_rtp_audio_rtcp_octet_count: 0`
 		t.Error(err)
 	}
 	smGev := engine.NewMapEvent(NewFSEvent(hangUp).AsMapStringInterface(timezone))
-	sessions.GetSetCGRID(smGev)
+	opt := map[string]interface{}{}
+	sessions.GetSetCGRID(smGev, opt)
 	smCDR, err := smGev.AsCDR(fsCdrCfg, utils.EmptyString, timezone)
 	if err != nil {
 		t.Fatal(err)

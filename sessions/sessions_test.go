@@ -1312,10 +1312,12 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		utils.Route:        "supplier1",
 		utils.OriginHost:   "127.0.0.1",
 	})
-	initialCGRID := GetSetCGRID(sSEv)
+	opt := make(map[string]interface{})
+	initialCGRID := GetSetCGRID(sSEv, opt)
 	s := &Session{
 		CGRID:      initialCGRID,
 		EventStart: sSEv,
+		OptsStart:  engine.NewMapEvent(map[string]interface{}{}),
 	}
 	//register the session as active
 	sS.registerSession(s, false)
@@ -1334,7 +1336,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	ev := engine.NewMapEvent(map[string]interface{}{
 		utils.OriginID:   "222",
 		utils.OriginHost: "127.0.0.1"})
-	cgrID := GetSetCGRID(ev)
+	cgrID := GetSetCGRID(ev, opt)
 	//check the session with new CGRID
 	rcvS = sS.getSessions(cgrID, false)
 	if !reflect.DeepEqual(rcvS[0], s) {
