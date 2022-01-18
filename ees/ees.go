@@ -273,7 +273,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, ev *utils.
 			return
 		}
 	}
-	key := utils.ConcatenatedKey(utils.FirstNonEmpty(engine.MapEvent(ev.Event).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID()),
+	key := utils.ConcatenatedKey(utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.CGRID), utils.GenUUID()),
 		utils.FirstNonEmpty(engine.MapEvent(ev.APIOpts).GetStringIgnoreErrors(utils.MetaRunID), utils.MetaDefault))
 
 	return ExportWithAttempts(ctx, exp, eEv, key)
