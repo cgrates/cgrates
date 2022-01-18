@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -150,7 +151,7 @@ func (cdrS *CDRServer) accountSRefundCharges(ctx *context.Context, tnt string, e
 		EventCharges: eChrgs,
 	}
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().AccountSConns,
-		utils.AccountSv1RefundCharges, argsRefund, rply); err != nil {
+		utils.AccountSv1RefundCharges, argsRefund, &rply); err != nil {
 		return
 	}
 	return
@@ -258,7 +259,17 @@ func (cdrS *CDRServer) processEvent(ctx *context.Context, ev *utils.CGREvent) (e
 		}
 		if acntS {
 			if ecCostIface, wasCharged := cgrEv.Event[utils.MetaAccountSCost]; wasCharged {
-				ecCost := ecCostIface.(*utils.EventCharges)
+				// before converting into EventChargers, we must get the JSON encoding and Unmarshal it into an EventChargers
+				var btsEvCh []byte
+				btsEvCh, err = json.Marshal(ecCostIface.(map[string]interface{}))
+				if err != nil {
+					return
+				}
+				ecCost := new(utils.EventCharges)
+				if err = json.Unmarshal(btsEvCh, &ecCost); err != nil {
+					return
+				}
+				// call the refund
 				if err := cdrS.accountSRefundCharges(ctx, cgrEv.Tenant, ecCost, cgrEv.APIOpts); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
