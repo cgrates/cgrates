@@ -30,7 +30,7 @@ import (
 
 func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 	var err error
-	cdr := &CDR{CGRID: extCdr.CGRID, RunID: extCdr.RunID, OrderID: extCdr.OrderID, ToR: extCdr.ToR,
+	cdr := &CDR{RunID: extCdr.RunID, OrderID: extCdr.OrderID, ToR: extCdr.ToR,
 		OriginID: extCdr.OriginID, OriginHost: extCdr.OriginHost,
 		Source: extCdr.Source, RequestType: extCdr.RequestType, Tenant: extCdr.Tenant, Category: extCdr.Category,
 		Account: extCdr.Account, Subject: extCdr.Subject, Destination: extCdr.Destination,
@@ -39,9 +39,6 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime, timezone); err != nil {
 			return nil, err
 		}
-	}
-	if len(cdr.CGRID) == 0 { // Populate CGRID if not present
-		cdr.ComputeCGRID()
 	}
 	if extCdr.AnswerTime != "" {
 		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime, timezone); err != nil {
@@ -63,7 +60,6 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 }
 
 type CDR struct {
-	CGRID       string
 	RunID       string
 	OrderID     int64             // Stor order id used as export order id
 	OriginHost  string            // represents the IP address of the host generating the CDR (automatically populated by the server)
@@ -89,9 +85,7 @@ type CDR struct {
 
 // AddDefaults will add missing information based on other fields
 func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
-	if cdr.CGRID == utils.EmptyString {
-		cdr.ComputeCGRID()
-	}
+
 	if cdr.RunID == utils.EmptyString {
 		cdr.RunID = utils.MetaDefault
 	}
@@ -110,10 +104,6 @@ func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
 	if cdr.Subject == utils.EmptyString {
 		cdr.Subject = cdr.Account
 	}
-}
-
-func (cdr *CDR) ComputeCGRID() {
-	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 }
 
 // FormatCost formats the cost as string on export
@@ -150,7 +140,6 @@ func (cdr *CDR) Clone() *CDR {
 		return nil
 	}
 	cln := &CDR{
-		CGRID:       cdr.CGRID,
 		RunID:       cdr.RunID,
 		OrderID:     cdr.OrderID,
 		OriginHost:  cdr.OriginHost,
@@ -195,7 +184,6 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
 	for fld, val := range cdr.ExtraFields {
 		mp[fld] = val
 	}
-	mp[utils.CGRID] = cdr.CGRID
 	mp[utils.RunID] = cdr.RunID
 	mp[utils.OrderID] = cdr.OrderID
 	mp[utils.OriginHost] = cdr.OriginHost
@@ -227,7 +215,7 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 	default: // usage as units
 		usageStr = strconv.FormatInt(cdr.Usage.Nanoseconds(), 10)
 	}
-	return &ExternalCDR{CGRID: cdr.CGRID,
+	return &ExternalCDR{
 		RunID:       cdr.RunID,
 		OrderID:     cdr.OrderID,
 		OriginHost:  cdr.OriginHost,
@@ -259,7 +247,6 @@ func (cdr *CDR) String() string {
 // AsCDRsql converts the CDR into the format used for SQL storage
 func (cdr *CDR) AsCDRsql() (cdrSQL *CDRsql) {
 	cdrSQL = new(CDRsql)
-	cdrSQL.Cgrid = cdr.CGRID
 	cdrSQL.RunID = cdr.RunID
 	cdrSQL.OriginHost = cdr.OriginHost
 	cdrSQL.Source = cdr.Source
@@ -296,7 +283,6 @@ func (cdr *CDR) AsCGREvent() *utils.CGREvent {
 // NewCDRFromSQL converts the CDRsql into CDR
 func NewCDRFromSQL(cdrSQL *CDRsql) (cdr *CDR, err error) {
 	cdr = new(CDR)
-	cdr.CGRID = cdrSQL.Cgrid
 	cdr.RunID = cdrSQL.RunID
 	cdr.OriginHost = cdrSQL.OriginHost
 	cdr.Source = cdrSQL.Source

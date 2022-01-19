@@ -117,7 +117,7 @@ func testCsvExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
 				utils.OriginHost:   "192.168.1.1",
@@ -142,7 +142,7 @@ func testCsvExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
@@ -167,7 +167,7 @@ func testCsvExportEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
 				utils.OriginHost:   "192.168.1.1",
@@ -233,7 +233,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID:  utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:           utils.MetaVoice,
 				"ComposedOriginID1": "dsaf",
 				"ComposedOriginID2": "dsaf",
@@ -261,7 +261,7 @@ func testCsvExportComposedEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:         utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID:  utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:           utils.MetaSMS,
 				"ComposedOriginID1": "sdf",
 				"ComposedOriginID2": "wer",
@@ -327,7 +327,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 		Events: []*utils.EventsWithOpts{
 			{
 				Event: map[string]interface{}{
-					utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaOriginID:  utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 					utils.ToR:           utils.MetaVoice,
 					"ComposedOriginID1": "dsaf",
 					"ComposedOriginID2": "dsaf",
@@ -353,7 +353,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 			},
 			{
 				Event: map[string]interface{}{
-					utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 					utils.ToR:          utils.MetaData,
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -377,7 +377,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 			// this one will not match, because opts got another another ExporterID and it will be changed from the initial opt
 			{
 				Event: map[string]interface{}{
-					utils.CGRID:        utils.Sha1("qwertyiopuu", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaOriginID: utils.Sha1("qwertyiopuu", time.Unix(1383813745, 0).UTC().String()),
 					utils.AccountField: "1005",
 					utils.Subject:      "1005",
 					utils.Destination:  "103",
@@ -391,7 +391,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 			},
 			{
 				Event: map[string]interface{}{
-					utils.CGRID:         utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaOriginID:  utils.Sha1("nlllo", time.Unix(1383813745, 0).UTC().String()),
 					utils.ToR:           utils.MetaData,
 					"ComposedOriginID1": "abcdefghh",
 					utils.RequestType:   utils.MetaNone,
@@ -414,7 +414,7 @@ func testCsvExportBufferedEvent(t *testing.T) {
 			},
 			{
 				Event: map[string]interface{}{
-					utils.CGRID:        utils.Sha1("qwert", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaOriginID: utils.Sha1("qwert", time.Unix(1383813745, 0).UTC().String()),
 					utils.OriginHost:   "127.0.0.1",
 					utils.RequestType:  utils.MetaPrepaid,
 					utils.Tenant:       "dispatchers.org",
@@ -505,7 +505,7 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 		Events: []*utils.EventsWithOpts{
 			{
 				Event: map[string]interface{}{
-					utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaOriginID:  utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 					utils.ToR:           utils.MetaVoice,
 					"ComposedOriginID1": "dsaf",
 					"ComposedOriginID2": "dsaf",
@@ -518,7 +518,7 @@ func testCsvExportBufferedEventNoExports(t *testing.T) {
 			},
 			{
 				Event: map[string]interface{}{
-					utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+					utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 					utils.ToR:          utils.MetaData,
 					utils.OriginHost:   "192.168.1.1",
 					utils.RequestType:  utils.MetaRated,
@@ -543,7 +543,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
 				utils.OriginHost:   "192.168.1.1",
@@ -570,7 +570,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
@@ -597,7 +597,7 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
 				utils.OriginHost:   "192.168.1.1",
@@ -664,7 +664,7 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
 				utils.OriginHost:   "192.168.1.1",
