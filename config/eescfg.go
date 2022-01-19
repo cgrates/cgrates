@@ -192,6 +192,15 @@ type EventExporterOpts struct {
 	NATSClientCertificate    *string
 	NATSClientKey            *string
 	NATSJetStreamMaxWait     *time.Duration
+	RPCCodec                 *string
+	ServiceMethod            *string
+	KeyPath                  *string
+	CertPath                 *string
+	CAPath                   *string
+	TLS                      *bool
+	ConnIDs                  *[]string
+	RPCConnTimeout           *time.Duration
+	RPCReplyTimeout          *time.Duration
 }
 
 // EventExporterCfg the config for a Event Exporter
@@ -345,6 +354,41 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 			return
 		}
 		eeOpts.NATSJetStreamMaxWait = utils.DurationPointer(natsJetStreamMaxWait)
+	}
+	if jsnCfg.RPCCodec != nil {
+		eeOpts.RPCCodec = jsnCfg.RPCCodec
+	}
+	if jsnCfg.ServiceMethod != nil {
+		eeOpts.ServiceMethod = jsnCfg.ServiceMethod
+	}
+	if jsnCfg.KeyPath != nil {
+		eeOpts.KeyPath = jsnCfg.KeyPath
+	}
+	if jsnCfg.CertPath != nil {
+		eeOpts.CertPath = jsnCfg.CertPath
+	}
+	if jsnCfg.CAPath != nil {
+		eeOpts.CAPath = jsnCfg.CAPath
+	}
+	if jsnCfg.TLS != nil {
+		eeOpts.TLS = jsnCfg.TLS
+	}
+	if jsnCfg.ConnIDs != nil {
+		eeOpts.ConnIDs = jsnCfg.ConnIDs
+	}
+	if jsnCfg.RPCConnTimeout != nil {
+		var rpcConnTimeout time.Duration
+		if rpcConnTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RPCConnTimeout); err != nil {
+			return
+		}
+		eeOpts.RPCConnTimeout = utils.DurationPointer(rpcConnTimeout)
+	}
+	if jsnCfg.RPCReplyTimeout != nil {
+		var rpcReplyTimeout time.Duration
+		if rpcReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RPCReplyTimeout); err != nil {
+			return
+		}
+		eeOpts.RPCReplyTimeout = utils.DurationPointer(rpcReplyTimeout)
 	}
 	return
 }
@@ -563,6 +607,33 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.NATSJetStreamMaxWait != nil {
 		cln.NATSJetStreamMaxWait = utils.DurationPointer(*eeOpts.NATSJetStreamMaxWait)
 	}
+	if eeOpts.RPCCodec != nil {
+		cln.RPCCodec = utils.StringPointer(*eeOpts.RPCCodec)
+	}
+	if eeOpts.ServiceMethod != nil {
+		cln.ServiceMethod = utils.StringPointer(*eeOpts.ServiceMethod)
+	}
+	if eeOpts.KeyPath != nil {
+		cln.KeyPath = utils.StringPointer(*eeOpts.KeyPath)
+	}
+	if eeOpts.CertPath != nil {
+		cln.CertPath = utils.StringPointer(*eeOpts.CertPath)
+	}
+	if eeOpts.CAPath != nil {
+		cln.CAPath = utils.StringPointer(*eeOpts.CAPath)
+	}
+	if eeOpts.TLS != nil {
+		cln.TLS = utils.BoolPointer(*eeOpts.TLS)
+	}
+	if eeOpts.ConnIDs != nil {
+		cln.ConnIDs = utils.SliceStringPointer(*eeOpts.ConnIDs)
+	}
+	if eeOpts.RPCConnTimeout != nil {
+		cln.RPCConnTimeout = utils.DurationPointer(*eeOpts.RPCConnTimeout)
+	}
+	if eeOpts.RPCReplyTimeout != nil {
+		cln.RPCReplyTimeout = utils.DurationPointer(*eeOpts.RPCReplyTimeout)
+	}
 	return cln
 }
 
@@ -730,6 +801,33 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	}
 	if eeC.Opts.NATSJetStreamMaxWait != nil {
 		opts[utils.NatsJetStreamMaxWait] = eeC.Opts.NATSJetStreamMaxWait.String()
+	}
+	if eeC.Opts.RPCCodec != nil {
+		opts[utils.RpcCodec] = *eeC.Opts.RPCCodec
+	}
+	if eeC.Opts.ServiceMethod != nil {
+		opts[utils.ServiceMethod] = *eeC.Opts.ServiceMethod
+	}
+	if eeC.Opts.KeyPath != nil {
+		opts[utils.KeyPath] = *eeC.Opts.KeyPath
+	}
+	if eeC.Opts.CertPath != nil {
+		opts[utils.CertPath] = *eeC.Opts.CertPath
+	}
+	if eeC.Opts.CAPath != nil {
+		opts[utils.CaPath] = *eeC.Opts.CAPath
+	}
+	if eeC.Opts.TLS != nil {
+		opts[utils.Tls] = *eeC.Opts.TLS
+	}
+	if eeC.Opts.ConnIDs != nil {
+		opts[utils.ConnIDs] = *eeC.Opts.ConnIDs
+	}
+	if eeC.Opts.RPCConnTimeout != nil {
+		opts[utils.RpcConnTimeout] = eeC.Opts.RPCConnTimeout.String()
+	}
+	if eeC.Opts.RPCReplyTimeout != nil {
+		opts[utils.RpcReplyTimeout] = eeC.Opts.RPCReplyTimeout.String()
 	}
 
 	flgs := eeC.Flags.SliceFlags()
