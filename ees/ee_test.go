@@ -34,7 +34,7 @@ func TestNewEventExporter(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaFileCSV
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
-	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, nil)
 	errExpect := "open /var/spool/cgrates/ees/*default_"
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
@@ -67,7 +67,7 @@ func TestNewEventExporterCase2(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaFileFWV
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
-	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, nil)
 	errExpect := "open /var/spool/cgrates/ees/*default_"
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
@@ -97,7 +97,7 @@ func TestNewEventExporterCase3(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
-	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -122,7 +122,7 @@ func TestNewEventExporterCase4(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjsonMap
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
-	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -147,7 +147,7 @@ func TestNewEventExporterCase6(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaVirt
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
-	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -172,7 +172,7 @@ func TestNewEventExporterDefaultCase(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaNone
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
-	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, nil)
 	errExpect := fmt.Sprintf("unsupported exporter type: <%s>", utils.MetaNone)
 	if err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
@@ -186,7 +186,7 @@ func TestNewEventExporterCase7(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = "/invalid/path"
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
-	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -216,7 +216,7 @@ func TestNewEventExporterCase8(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQL
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
-	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS)
+	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, nil)
 	errExpect := "MANDATORY_IE_MISSING: [sqlTableName]"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
@@ -227,7 +227,7 @@ func TestNewEventExporterCase8(t *testing.T) {
 func TestNewEventExporterDcCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.GeneralCfg().DefaultTimezone = "invalid_timezone"
-	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil)
+	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
 	errExpect := "unknown time zone invalid_timezone"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)

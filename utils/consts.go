@@ -311,6 +311,7 @@ const (
 	MetaAMQPjsonCDR           = "*amqp_json_cdr"
 	MetaAMQPjsonMap           = "*amqp_json_map"
 	MetaAMQPV1jsonMap         = "*amqpv1_json_map"
+	MetaRPC                   = "*rpc"
 	MetaSQSjsonMap            = "*sqs_json_map"
 	MetaKafkajsonMap          = "*kafka_json_map"
 	MetaNatsjsonMap           = "*nats_json_map"
@@ -2602,6 +2603,7 @@ const (
 	ElsVersionLow          = "elsVersion"
 	ElsVersionType         = "elsVersionType"
 	ElsWaitForActiveShards = "elsWaitForActiveShards"
+
 	// nats
 	NatsSubject              = "natsSubject"
 	NatsQueueID              = "natsQueueID"
@@ -2613,6 +2615,17 @@ const (
 	NatsCertificateAuthority = "natsCertificateAuthority"
 	NatsJetStream            = "natsJetStream"
 	NatsJetStreamMaxWait     = "natsJetStreamMaxWait"
+
+	// rpc
+	RpcCodec        = "rpcCodec"
+	ServiceMethod   = "serviceMethod"
+	KeyPath         = "keyPath"
+	CertPath        = "certPath"
+	CaPath          = "caPath"
+	Tls             = "tls"
+	ConnIDs         = "connIDs"
+	RpcConnTimeout  = "rpcConnTimeout"
+	RpcReplyTimeout = "rpcReplyTimeout"
 
 	// processed opts
 	AMQPQueueIDProcessedCfg      = "amqpQueueIDProcessed"

@@ -308,6 +308,15 @@ type EventExporterOptsJson struct {
 	NATSClientCertificate    *string           `json:"natsClientCertificate"`
 	NATSClientKey            *string           `json:"natsClientKey"`
 	NATSJetStreamMaxWait     *string           `json:"natsJetStreamMaxWait"`
+	RPCCodec                 *string           `json:"rpcCodec"`
+	ServiceMethod            *string           `json:"serviceMethod"`
+	KeyPath                  *string           `json:"keyPath"`
+	CertPath                 *string           `json:"certPath"`
+	CAPath                   *string           `json:"caPath"`
+	ConnIDs                  *[]string         `json:"connIDs"`
+	TLS                      *bool             `json:"tls"`
+	RPCConnTimeout           *string           `json:"rpcConnTimeout"`
+	RPCReplyTimeout          *string           `json:"rpcReplyTimeout"`
 }
 
 // EventExporterJsonCfg is the configuration of a single EventExporter

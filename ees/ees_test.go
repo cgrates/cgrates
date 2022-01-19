@@ -292,7 +292,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 		utils.MetaHTTPPost: ltcache.NewCache(1,
 			time.Second, false, onCacheEvicted),
 	}
-	newEeS, err := NewEventExporter(cfg.EEsCfg().Exporters[0], cfg, filterS)
+	newEeS, err := NewEventExporter(cfg.EEsCfg().Exporters[0], cfg, filterS, nil)
 	if err != nil {
 		t.Error(err)
 	}
