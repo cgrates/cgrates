@@ -2523,6 +2523,7 @@ const (
 	CertPath        = "certPath"
 	CaPath          = "caPath"
 	Tls             = "tls"
+	ConnIDs         = "connIDs"
 	RpcConnTimeout  = "rpcConnTimeout"
 	RpcReplyTimeout = "rpcReplyTimeout"
 

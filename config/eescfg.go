@@ -610,6 +610,9 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.TLS != nil {
 		cln.TLS = utils.BoolPointer(*eeOpts.TLS)
 	}
+	if eeOpts.ConnIDs != nil {
+		cln.ConnIDs = utils.SliceStringPointer(*eeOpts.ConnIDs)
+	}
 	if eeOpts.RPCConnTimeout != nil {
 		cln.RPCConnTimeout = utils.DurationPointer(*eeOpts.RPCConnTimeout)
 	}
@@ -794,7 +797,10 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		opts[utils.CaPath] = *eeC.Opts.CAPath
 	}
 	if eeC.Opts.TLS != nil {
-		opts[utils.TLS] = *eeC.Opts.TLS
+		opts[utils.Tls] = *eeC.Opts.TLS
+	}
+	if eeC.Opts.ConnIDs != nil {
+		opts[utils.ConnIDs] = *eeC.Opts.ConnIDs
 	}
 	if eeC.Opts.RPCConnTimeout != nil {
 		opts[utils.RpcConnTimeout] = eeC.Opts.RPCConnTimeout.String()
@@ -1254,6 +1260,20 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 		}
 	} else {
 		d.TLS = nil
+	}
+	if v2.ConnIDs != nil {
+		equal := true
+		for i, val := range *v2.ConnIDs {
+			if (*v1.ConnIDs)[i] != val {
+				equal = false
+				break
+			}
+		}
+		if v1.ConnIDs == nil || !equal {
+			d.ConnIDs = v2.ConnIDs
+		} else {
+			d.ConnIDs = nil
+		}
 	}
 	if v2.RPCConnTimeout != nil {
 		if v1.RPCConnTimeout == nil ||
