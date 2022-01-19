@@ -86,17 +86,17 @@ func TestS3ERProcessMessage(t *testing.T) {
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.CGRID: "testCgrId",
+			utils.MetaOriginID: "testCgrId",
 		},
 		APIOpts: map[string]interface{}{},
 	}
-	body := []byte(`{"CGRID":"testCgrId"}`)
+	body := []byte(`{"*originID":"testCgrId"}`)
 	rdr.Config().Fields = []*config.FCTemplate{
 		{
-			Tag:   "CGRID",
+			Tag:   "*originID",
 			Type:  utils.MetaConstant,
 			Value: config.NewRSRParsersMustCompile("testCgrId", utils.InfieldSep),
-			Path:  "*cgreq.CGRID",
+			Path:  "*cgreq.*originID",
 		},
 	}
 	rdr.Config().Fields[0].ComputePath()
@@ -135,7 +135,7 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 	rdr.Config().Fields = []*config.FCTemplate{
 		{},
 	}
-	body := []byte(`{"CGRID":"testCgrId"}`)
+	body := []byte(`{"*originID":"testCgrId"}`)
 	errExpect := "unsupported type: <>"
 	if err := rdr.processMessage(body); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -164,7 +164,7 @@ func TestS3ERProcessMessageError2(t *testing.T) {
 		session:   nil,
 		poster:    nil,
 	}
-	body := []byte(`{"CGRID":"testCgrId"}`)
+	body := []byte(`{"*originID":"testCgrId"}`)
 	rdr.Config().Filters = []string{"Filter1"}
 	errExpect := "NOT_FOUND:Filter1"
 	if err := rdr.processMessage(body); err == nil || err.Error() != errExpect {

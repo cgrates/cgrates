@@ -58,7 +58,7 @@ func TestLibSessionSGetSetCGRID(t *testing.T) {
 		t.Errorf("Unexpected cgrID: %+v", cgrID)
 	}
 	//populate CGRID in event
-	opt[utils.CGRID] = "someRandomVal"
+	opt[utils.MetaOriginID] = "someRandomVal"
 	cgrID = GetSetCGRID(sEv, opt)
 	if cgrID != "someRandomVal" {
 		t.Errorf("Expecting: someRandomVal, received: %+v", cgrID)

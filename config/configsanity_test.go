@@ -308,12 +308,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cacheCfg.Partitions[utils.CacheClosedSessions].Limit = 1
-	expected = "<SessionS> the following protected field can't be altered by session: <CGRID>"
-	cfg.sessionSCfg.AlterableFields = utils.NewStringSet([]string{utils.CGRID})
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
+
 }
 
 func TestConfigSanityFreeSWITCHAgent(t *testing.T) {

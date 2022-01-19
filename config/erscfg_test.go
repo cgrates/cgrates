@@ -605,7 +605,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				Flags:          utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
+						Tag:    utils.MetaOriginID,
 						Path:   "*exp.CGRID",
 						Type:   utils.MetaVariable,
 						Layout: time.RFC3339,
@@ -630,7 +630,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 	msgTemplates := map[string][]*FCTemplate{
 		"randomTemplate": {
 			{
-				Tag:    utils.CGRID,
+				Tag:    utils.MetaOriginID,
 				Path:   "*exp.CGRID",
 				Type:   utils.MetaVariable,
 				Layout: time.RFC3339,
@@ -1185,7 +1185,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				Flags:               &[]string{},
 				Fields: &[]*FcTemplateJsonCfg{
 					{
-						Tag:    utils.StringPointer(utils.CGRID),
+						Tag:    utils.StringPointer(utils.MetaOriginID),
 						Path:   utils.StringPointer("*exp.CGRID"),
 						Type:   utils.StringPointer(utils.MetaVariable),
 						Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00"),
@@ -1260,7 +1260,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				Flags:          utils.FlagsWithParams{},
 				Fields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
+						Tag:    utils.MetaOriginID,
 						Path:   "*exp.CGRID",
 						Type:   utils.MetaVariable,
 						Layout: time.RFC3339,

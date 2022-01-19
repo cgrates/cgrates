@@ -129,7 +129,6 @@ func (fsCdr FSCdr) firstDefined(fldNames []string, dfltFld string) (val string) 
 
 func (fsCdr FSCdr) AsCDR(timezone string) (storCdr *CDR, err error) {
 	storCdr = &CDR{
-		CGRID:       fsCdr.getCGRID(),
 		RunID:       fsCdr.vars["cgr_runid"],
 		OriginHost:  utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[fsIPv4]),
 		Source:      fsCDRSource,

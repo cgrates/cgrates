@@ -53,16 +53,13 @@ type BiRPClient interface {
 
 // GetSetCGRID will populate the CGRID key if not present and return it
 func GetSetCGRID(ev engine.MapEvent, opt map[string]interface{}) (cgrID string) {
-	if opt == nil {
-		opt = make(map[string]interface{})
-	}
-	fldIface, has := opt[utils.CGRID]
+	fldIface, has := opt[utils.MetaOriginID]
 	if has {
 		cgrID = utils.IfaceAsString(fldIface)
 	} else {
 		cgrID = utils.Sha1(ev.GetStringIgnoreErrors(utils.OriginID),
 			ev.GetStringIgnoreErrors(utils.OriginHost))
-		opt[utils.CGRID] = cgrID
+		opt[utils.MetaOriginID] = cgrID
 	}
 	return
 }

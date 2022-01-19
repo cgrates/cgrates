@@ -77,7 +77,7 @@ const (
 )
 
 var (
-	CGRIDLow       = strings.ToLower(utils.CGRID)
+	MetaOriginLow  = strings.ToLower(utils.MetaOriginID)
 	RunIDLow       = strings.ToLower(utils.RunID)
 	OrderIDLow     = strings.ToLower(utils.OrderID)
 	OriginHostLow  = strings.ToLower(utils.OriginHost)
@@ -330,7 +330,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 			return
 		}
 	case utils.CDRsTBL:
-		if err = ms.enusureIndex(col, true, CGRIDLow, RunIDLow,
+		if err = ms.enusureIndex(col, true, MetaOriginLow, RunIDLow,
 			OriginIDLow); err != nil {
 			return
 		}
@@ -340,7 +340,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 			}
 		}
 	case utils.SessionCostsTBL:
-		if err = ms.enusureIndex(col, true, CGRIDLow,
+		if err = ms.enusureIndex(col, true, MetaOriginLow,
 			RunIDLow); err != nil {
 			return
 		}
