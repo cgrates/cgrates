@@ -76,7 +76,8 @@ func TestCDRsChrgrSProcessEventErrMsnConnIDs(t *testing.T) {
 			utils.Cost:       123.0,
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaChargers,
+			utils.Subsys:       utils.MetaChargers,
+			utils.MetaOriginID: "originID",
 		},
 	}
 	_, err := newCDRSrv.chrgrSProcessEvent(context.Background(), cgrEv)

@@ -51,10 +51,10 @@ func TestEESClone(t *testing.T) {
 			"attempts": 2,										
 			"field_separator": ",",								
 			"fields":[											
-				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-                {"tag": "CGRID", "path": "*hdr.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-                {"tag": "CGRID", "path": "*trl.CGRID", "type": "*variable", "value": "~*req.CGRID"},
-                {"tag": "CGRID", "path": "*uch.CGRID", "type": "*variable", "value": "~*req.CGRID"},
+				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*req.*originID"},
+                {"tag": "*originID", "path": "*hdr.*originID", "type": "*variable", "value": "~*req.*originID"},
+                {"tag": "*originID", "path": "*trl.*originID", "type": "*variable", "value": "~*req.*originID"},
+                {"tag": "*originID", "path": "*uch.*originID", "type": "*variable", "value": "~*req.*originID"},
 			],
 		},
 	],
@@ -104,65 +104,65 @@ func TestEESClone(t *testing.T) {
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 				Fields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
-						Path:   "*exp.CGRID",
+						Tag:    utils.MetaOriginID,
+						Path:   "*exp.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*req.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 					{
-						Tag:    utils.CGRID,
-						Path:   "*hdr.CGRID",
+						Tag:    utils.MetaOriginID,
+						Path:   "*hdr.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*req.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 					{
-						Tag:    utils.CGRID,
-						Path:   "*trl.CGRID",
+						Tag:    utils.MetaOriginID,
+						Path:   "*trl.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*req.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 					{
-						Tag:    utils.CGRID,
-						Path:   "*uch.CGRID",
+						Tag:    utils.MetaOriginID,
+						Path:   "*uch.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*req.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 				},
 				contentFields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
-						Path:   "*exp.CGRID",
+						Tag:    utils.MetaOriginID,
+						Path:   "*exp.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*req.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 					{
-						Tag:    utils.CGRID,
-						Path:   "*uch.CGRID",
+						Tag:    utils.MetaOriginID,
+						Path:   "*uch.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*req.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 				},
 				headerFields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
-						Path:   "*hdr.CGRID",
+						Tag:    utils.MetaOriginID,
+						Path:   "*hdr.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*req.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 				},
 				trailerFields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
-						Path:   "*trl.CGRID",
+						Tag:    utils.MetaOriginID,
+						Path:   "*trl.*originID",
 						Type:   utils.MetaVariable,
-						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
+						Value:  NewRSRParsersMustCompile("~*req.*originID", utils.InfieldSep),
 						Layout: time.RFC3339,
 					},
 				},
@@ -372,7 +372,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				Failed_posts_dir: utils.StringPointer("/var/spool/cgrates/failed_posts"),
 				Fields: &[]*FcTemplateJsonCfg{
 					{
-						Tag:   utils.StringPointer(utils.CGRID),
+						Tag:   utils.StringPointer(utils.MetaOriginID),
 						Path:  utils.StringPointer("*exp.CGRID"),
 						Type:  utils.StringPointer(utils.MetaVariable),
 						Value: utils.StringPointer("~*req.CGRID"),
@@ -422,7 +422,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				trailerFields: []*FCTemplate{},
 				contentFields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
+						Tag:    utils.MetaOriginID,
 						Path:   "*exp.CGRID",
 						Type:   utils.MetaVariable,
 						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
@@ -431,7 +431,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 				Opts: &EventExporterOpts{},
 				Fields: []*FCTemplate{
-					{Tag: utils.CGRID, Path: "*exp.CGRID", Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep), Layout: time.RFC3339},
+					{Tag: utils.MetaOriginID, Path: "*exp.CGRID", Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep), Layout: time.RFC3339},
 				},
 				FailedPostsDir: "/var/spool/cgrates/failed_posts",
 			},
@@ -535,7 +535,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				trailerFields: []*FCTemplate{},
 				contentFields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
+						Tag:    utils.MetaOriginID,
 						Path:   "*exp.CGRID",
 						Type:   utils.MetaVariable,
 						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
@@ -546,7 +546,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Opts:           &EventExporterOpts{},
 				Fields: []*FCTemplate{
 					{
-						Tag:    utils.CGRID,
+						Tag:    utils.MetaOriginID,
 						Path:   "*exp.CGRID",
 						Type:   utils.MetaVariable,
 						Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
@@ -566,7 +566,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 	msgTemplates := map[string][]*FCTemplate{
 		"randomVal": {
 			{
-				Tag:    utils.CGRID,
+				Tag:    utils.MetaOriginID,
 				Path:   "*exp.CGRID",
 				Type:   utils.MetaVariable,
 				Value:  NewRSRParsersMustCompile("~*req.CGRID", utils.InfieldSep),
@@ -661,7 +661,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.ConcurrentRequestsCfg: 0,
 				utils.FieldsCfg: []map[string]interface{}{
 					{
-						utils.TagCfg:   utils.CGRID,
+						utils.TagCfg:   utils.MetaOriginID,
 						utils.PathCfg:  "*exp.CGRID",
 						utils.TypeCfg:  utils.MetaVariable,
 						utils.ValueCfg: "~*req.CGRID",

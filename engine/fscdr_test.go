@@ -416,7 +416,6 @@ func TestFsCdrCDRFields(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1515666344", "")
 	answerTime, _ := utils.ParseTimeDetectLayout("1515666347", "")
 	expctCDR := &CDR{
-		CGRID:       "24b5766be325fa751fab5a0a06373e106f33a257",
 		ToR:         utils.MetaVoice,
 		OriginID:    "3da8bf84-c133-4959-9e24-e72875cb33a1",
 		OriginHost:  "",
@@ -590,7 +589,6 @@ func TestFscdrAsCDR(t *testing.T) {
 	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
 		t.Error(err)
 	} else {
-		expectedCdr.CGRID = fsCdr.getCGRID()
 		if cdr, err := fsCdr.AsCDR(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expectedCdr, cdr) {
@@ -723,7 +721,6 @@ func TestFscdrAsCdrFirstDefined(t *testing.T) {
 	if fsCdr, err := NewFSCdr(newReader, cgrCfg); err != nil {
 		t.Error(err)
 	} else {
-		expectedCdr.CGRID = fsCdr.getCGRID()
 		if cdr, err := fsCdr.AsCDR(""); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expectedCdr, cdr) {

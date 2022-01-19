@@ -1365,7 +1365,7 @@ func TestNewSession(t *testing.T) {
 		ResourceID:   "resourceID",
 		ClientConnID: "clientConnID",
 		EventStart: map[string]interface{}{
-			utils.CGRID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			utils.MetaOriginID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
 			utils.Destination: "10",
 		},
 		DebitInterval: time.Second,
@@ -1524,13 +1524,13 @@ func TestRelocateSession(t *testing.T) {
 	expected := &Session{
 		CGRID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 		EventStart: map[string]interface{}{
-			utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+			utils.MetaOriginID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 			utils.OriginID: "222",
 		},
 		SRuns: []*SRun{
 			{
 				Event: map[string]interface{}{
-					utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+					utils.MetaOriginID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 					utils.OriginID: "222",
 				},
 			},
@@ -2180,7 +2180,7 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 	}
 	sr2[utils.ToR] = utils.MetaSMS
 	sr2[utils.Subject] = "subject2"
-	sr2[utils.CGRID] = GetSetCGRID(sEv)
+	sr2[utils.MetaOriginID] = GetSetCGRID(sEv)
 	sessions.registerSession(session, false)
 
 	st, err := utils.IfaceAsTime("2015-11-09T14:21:24Z", "")
@@ -3245,7 +3245,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 							ID:     "TestID",
 							Event: map[string]interface{}{
 								utils.Usage: "10s",
-								utils.CGRID: "TEST_ID",
+								utils.MetaOriginID: "TEST_ID",
 							},
 						},
 					},
@@ -3324,7 +3324,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	cgrEvent.APIOpts[utils.OptsDebitInterval] = "1m"
 
 	//by this CGRID, there will be an empty session
-	cgrEvent.Event[utils.CGRID] = "CGR_ID"
+	cgrEvent.Event[utils.MetaOriginID] = "CGR_ID"
 	sessions.aSessions = map[string]*Session{
 		"CGR_ID": {},
 	}
@@ -3332,7 +3332,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err != nil {
 		t.Error(err)
 	}
-	cgrEvent.Event[utils.CGRID] = "CHANGED_CGRID"
+	cgrEvent.Event[utils.MetaOriginID] = "CHANGED_CGRID"
 
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
@@ -4177,14 +4177,14 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	}
 	args.APIOpts[utils.OptsDebitInterval] = "10s"
 
-	args.Event[utils.CGRID] = "test_id_new"
+	args.Event[utils.MetaOriginID] = "test_id_new"
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
 	expected = "ChargerS is disabled"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	args.Event[utils.CGRID] = utils.EmptyString
+	args.Event[utils.MetaOriginID] = utils.EmptyString
 
 	args.CGREvent.Event[utils.Usage] = "invalid_format"
 	expected = "RALS_ERROR:time: invalid duration \"invalid_format\""
@@ -4211,14 +4211,14 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	}
 	args.APIOpts[utils.OptsDebitInterval] = "10s"
 
-	args.Event[utils.CGRID] = "test_id_new"
+	args.Event[utils.MetaOriginID] = "test_id_new"
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
 	expected = "ChargerS is disabled"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	args.Event[utils.CGRID] = utils.EmptyString
+	args.Event[utils.MetaOriginID] = utils.EmptyString
 
 	engine.Cache.Clear(nil)
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
@@ -4284,7 +4284,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 			ID:     "testBiRPCv1ProcessEventStatsResources",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
-				utils.CGRID:       "TEST_CGRID",
+				utils.MetaOriginID:       "TEST_CGRID",
 				utils.Destination: "1002",
 				utils.RequestType: utils.MetaPrepaid,
 			},
@@ -4557,14 +4557,14 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 		"sess1": {
 			CGRID: "CGRATES_ID",
 			EventStart: map[string]interface{}{
-				utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
-				utils.OriginID: "222",
+				utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+				utils.OriginID:     "222",
 			},
 			SRuns: []*SRun{
 				{
 					Event: map[string]interface{}{
-						utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
-						utils.OriginID: "222",
+						utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+						utils.OriginID:     "222",
 					},
 				},
 			},
@@ -4581,8 +4581,8 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 			SRuns: []*SRun{
 				{
 					Event: map[string]interface{}{
-						utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
-						utils.OriginID: "222",
+						utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+						utils.OriginID:     "222",
 					},
 				},
 			},

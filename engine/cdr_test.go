@@ -20,7 +20,6 @@ package engine
 import (
 	"encoding/json"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 
@@ -38,7 +37,7 @@ func TestNewCDRFromExternalCDR(t *testing.T) {
 		Usage: "10", Cost: 1.01, PreRated: true,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	eStorCdr := &CDR{
 		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
@@ -56,7 +55,7 @@ func TestNewCDRFromExternalCDR(t *testing.T) {
 }
 
 func TestCDRClone(t *testing.T) {
-	storCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	storCdr := &CDR{
 		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated, Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
@@ -71,152 +70,8 @@ func TestCDRClone(t *testing.T) {
 	}
 }
 
-func TestFieldAsString(t *testing.T) {
-	cdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.MetaRated,
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
-		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
-		Usage: 10 * time.Second, Cost: 1.01,
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-	}
-	prsr := config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CGRID)
-	eFldVal := cdr.CGRID
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.OrderID)
-	eFldVal = strconv.FormatInt(cdr.OrderID, 10)
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR)
-	eFldVal = cdr.ToR
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.OriginID)
-	eFldVal = cdr.OriginID
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.OriginHost)
-	eFldVal = cdr.OriginHost
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Source)
-	eFldVal = cdr.Source
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.RequestType)
-	eFldVal = cdr.RequestType
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Category)
-	eFldVal = cdr.Category
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField)
-	eFldVal = cdr.Account
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject)
-	eFldVal = cdr.Subject
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination)
-	eFldVal = cdr.Destination
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.SetupTime)
-	eFldVal = cdr.SetupTime.Format(time.RFC3339)
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("expected: <%s>, received: <%s>", eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AnswerTime)
-	eFldVal = cdr.AnswerTime.Format(time.RFC3339)
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("expected: <%s>, received: <%s>", eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage)
-	eFldVal = "10s"
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.RunID)
-	eFldVal = cdr.RunID
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Cost)
-	eFldVal = strconv.FormatFloat(cdr.Cost, 'f', -1, 64)
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "field_extr1")
-	eFldVal = cdr.ExtraFields["field_extr1"]
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "fieldextr2")
-	eFldVal = cdr.ExtraFields["fieldextr2"]
-	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
-		t.Error(err)
-	} else if fldVal != eFldVal {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
-	}
-	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "dummy_field")
-	if fldVal, err := cdr.FieldAsString(prsr); err != utils.ErrNotFound {
-		t.Error(err)
-	} else if fldVal != utils.EmptyString {
-		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, utils.EmptyString, fldVal)
-	}
-}
-
 func TestFieldsAsString(t *testing.T) {
-	cdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+	cdr := CDR{
 		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: "test",
 		RequestType: utils.MetaRated, Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
@@ -254,7 +109,6 @@ func TestFormatCost(t *testing.T) {
 
 func TestCDRAsMapStringIface(t *testing.T) {
 	cdr := &CDR{
-		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 		OrderID:     123,
 		ToR:         utils.MetaVoice,
 		OriginID:    "dsafdsaf",
@@ -277,7 +131,6 @@ func TestCDRAsMapStringIface(t *testing.T) {
 	mp := map[string]interface{}{
 		"field_extr1":      "val_extr1",
 		"fieldextr2":       "valextr2",
-		utils.CGRID:        cdr.CGRID,
 		utils.RunID:        utils.MetaDefault,
 		utils.OrderID:      cdr.OrderID,
 		utils.OriginHost:   "192.168.1.1",
@@ -327,7 +180,7 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 		ExtraFields: utils.ToJSON(extraFields),
 	}
 
-	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+	cdr := &CDR{
 		OrderID:     123,
 		ToR:         utils.MetaVoice,
 		OriginID:    "dsafdsaf",
@@ -357,7 +210,6 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 
 func TestCDRAsCGREvent(t *testing.T) {
 	cdr := &CDR{
-		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 		OrderID:     123,
 		ToR:         utils.MetaVoice,
 		OriginID:    "dsafdsaf",
@@ -382,7 +234,6 @@ func TestCDRAsCGREvent(t *testing.T) {
 		Event: map[string]interface{}{
 			"Account":     "1001",
 			"AnswerTime":  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-			"CGRID":       cdr.CGRID,
 			"Category":    "call",
 			"Cost":        1.01,
 			"CostSource":  "",
@@ -428,7 +279,6 @@ func TestCDRAddDefaults(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	eCDR := &CDR{
-		CGRID:       "bf736fb56ce586357ab2f286b777187a1612c6e6",
 		ToR:         utils.MetaVoice,
 		RunID:       utils.MetaDefault,
 		Subject:     "1001",
@@ -498,7 +348,6 @@ func TestCDRCloneNilCDR(t *testing.T) {
 
 func TestAsExternalCDR(t *testing.T) {
 	extCdr := &ExternalCDR{
-		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
@@ -506,7 +355,7 @@ func TestAsExternalCDR(t *testing.T) {
 		Usage: "10ns", Cost: 1.01, PreRated: true,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	eStorCdr := &CDR{
 		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
@@ -525,7 +374,6 @@ func TestAsExternalCDR(t *testing.T) {
 
 func TestAsExternalCDRDefaultTOR(t *testing.T) {
 	extCdr := &ExternalCDR{
-		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID: 123, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
@@ -533,7 +381,7 @@ func TestAsExternalCDRDefaultTOR(t *testing.T) {
 		Usage: "10", Cost: 1.01, PreRated: true,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	eStorCdr := &CDR{
 		OrderID: 123, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
@@ -551,7 +399,7 @@ func TestAsExternalCDRDefaultTOR(t *testing.T) {
 }
 
 func TestCDRString(t *testing.T) {
-	testCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	testCdr := &CDR{
 		OrderID: 123, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
@@ -569,7 +417,7 @@ func TestCDRString(t *testing.T) {
 	}
 }
 func TestCDRAsCDRsql(t *testing.T) {
-	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	cdr := &CDR{
 		OrderID: 123, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated, RunID: utils.MetaDefault,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
@@ -581,7 +429,6 @@ func TestCDRAsCDRsql(t *testing.T) {
 	}
 
 	cdrSQL := new(CDRsql)
-	cdrSQL.Cgrid = cdr.CGRID
 	cdrSQL.RunID = cdr.RunID
 	cdrSQL.OriginHost = cdr.OriginHost
 	cdrSQL.Source = cdr.Source

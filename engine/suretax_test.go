@@ -28,8 +28,7 @@ import (
 )
 
 func TestNewSureTaxRequest(t *testing.T) {
-	CGRID := utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String())
-	cdr := &CDR{CGRID: CGRID, OrderID: 123, ToR: utils.MetaVoice,
+	cdr := &CDR{OrderID: 123, ToR: utils.MetaVoice,
 		OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
@@ -53,7 +52,6 @@ func TestNewSureTaxRequest(t *testing.T) {
 		DataMonth:      "11",
 		TotalRevenue:   1.01,
 		ReturnFileCode: "0",
-		ClientTracking: CGRID,
 		ResponseGroup:  "03",
 		ResponseType:   "D4",
 		ItemList: []*STRequestItem{
@@ -86,8 +84,8 @@ func TestNewSureTaxRequest(t *testing.T) {
 }
 
 func TestSuretaxNewSureTaxRequestNilCfg(t *testing.T) {
-	CGRID := utils.Sha1("testOriginID", time.Date(2021, 1, 1, 8, 42, 20, 0, time.UTC).String())
-	cdr := &CDR{CGRID: CGRID,
+
+	cdr := &CDR{
 		OrderID:     123,
 		ToR:         utils.MetaVoice,
 		OriginID:    "testOriginID",
@@ -122,8 +120,7 @@ func TestSuretaxNewSureTaxRequestNilCfg(t *testing.T) {
 }
 
 func TestSuretaxNewSureTaxRequestInvalidUnits(t *testing.T) {
-	CGRID := utils.Sha1("testOriginID", time.Date(2021, 1, 1, 8, 42, 20, 0, time.UTC).String())
-	cdr := &CDR{CGRID: CGRID, OrderID: 123, ToR: utils.MetaVoice,
+	cdr := &CDR{OrderID: 123, ToR: utils.MetaVoice,
 		OriginID: "testOriginID", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
@@ -155,9 +152,8 @@ func TestSuretaxNewSureTaxRequestInvalidUnits(t *testing.T) {
 }
 
 func TestSuretaxSureTaxProcessCdrPostErr(t *testing.T) {
-	CGRID := utils.Sha1("testOriginID", time.Date(2021, 1, 1, 8, 42, 20, 0, time.UTC).String())
 	cdr := &CDR{
-		CGRID:       CGRID,
+
 		OrderID:     123,
 		ToR:         utils.MetaVoice,
 		OriginID:    "testOriginID",

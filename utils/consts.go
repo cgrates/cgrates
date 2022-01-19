@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	MainCDRFields = NewStringSet([]string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
+	MainCDRFields = NewStringSet([]string{Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		AccountField, Subject, Destination, SetupTime, AnswerTime, Usage, Cost, Rated, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
 	PostPaidRatedSlice = []string{MetaPostpaid, MetaRated}
@@ -132,7 +132,7 @@ var (
 	}
 
 	// ProtectedSFlds are the fields that sessions should not alter
-	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
+	ProtectedSFlds = NewStringSet([]string{OriginHost, OriginID, Usage})
 
 	ConcurrentReqsLimit    int
 	ConcurrentReqsStrategy string
@@ -187,6 +187,7 @@ const (
 	MsgPack                  = "msgpack"
 	CSVLoad                  = "CSVLOAD"
 	CGRID                    = "CGRID"
+	MetaOriginID             = "*originID"
 	ToR                      = "ToR"
 	OrderID                  = "OrderID"
 	OriginID                 = "OriginID"

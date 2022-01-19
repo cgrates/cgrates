@@ -38,7 +38,7 @@ var attrs = &engine.AttrSProcessEventReply{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItAuth",
 		Event: map[string]interface{}{
-			utils.CGRID:        "5668666d6b8e44eb949042f25ce0796ec3592ff9",
+			utils.MetaOriginID: "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 			utils.Tenant:       "cgrates.org",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
@@ -1336,7 +1336,8 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	ev := engine.NewMapEvent(map[string]interface{}{
 		utils.OriginID:   "222",
 		utils.OriginHost: "127.0.0.1"})
-	cgrID := GetSetCGRID(ev, opt)
+	opt2 := make(map[string]interface{})
+	cgrID := GetSetCGRID(ev, opt2)
 	//check the session with new CGRID
 	rcvS = sS.getSessions(cgrID, false)
 	if !reflect.DeepEqual(rcvS[0], s) {
@@ -1654,7 +1655,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 	}
 	sr2[utils.ToR] = utils.MetaSMS
 	sr2[utils.Subject] = "subject2"
-	sr2[utils.CGRID] = GetSetCGRID(sEv)
+	sr2[utils.MetaOriginID] = GetSetCGRID(sEv)
 	sS.registerSession(session, false)
 	st, err := utils.IfaceAsTime("2015-11-09T14:21:24Z", "")
 	if err != nil {
@@ -1822,7 +1823,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		},
 	}
 	sEv[utils.ToR] = utils.MetaData
-	sr2[utils.CGRID] = GetSetCGRID(sEv)
+	sr2[utils.MetaOriginID] = GetSetCGRID(sEv)
 	sS.registerSession(session, false)
 	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaData)}}
 
@@ -2066,7 +2067,7 @@ func TestInitSession(t *testing.T) {
 		CGRID:  "c72b7074ef9375cd19ab7bbceb530e99808c3194",
 		Tenant: "cgrates.org",
 		EventStart: engine.MapEvent{
-			utils.CGRID:        "c72b7074ef9375cd19ab7bbceb530e99808c3194",
+			utils.MetaOriginID:        "c72b7074ef9375cd19ab7bbceb530e99808c3194",
 			utils.Category:     "call",
 			utils.ToR:          utils.MetaVoice,
 			utils.OriginID:     "TestTerminate",

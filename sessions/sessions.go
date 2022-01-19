@@ -462,7 +462,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				utils.Logger.Warning(fmt.Sprintf("<%s> can not run warning for the session: <%s> since the remaining time:<%s> is higher than the debit interval:<%s>.",
 					utils.SessionS, s.cgrID(), sS.cfg.SessionSCfg().MinDurLowBalance, dbtIvl))
 			} else if maxDebit <= sS.cfg.SessionSCfg().MinDurLowBalance {
-				go sS.warnSession(s.ClientConnID, s.EventStart.Clone())
+				go sS.warnSession(s.ClientConnID, s.EventStart.Clone(), s.OptsStart.Clone())
 			}
 		}
 		s.Unlock()
@@ -534,7 +534,7 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 
 // warnSession will send warning from SessionS to clients
 // regarding low balance
-func (sS *SessionS) warnSession(connID string, ev map[string]interface{}) (err error) {
+func (sS *SessionS) warnSession(connID string, ev map[string]interface{}, opt map[string]interface{}) (err error) {
 	clnt := sS.biJClnt(connID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
@@ -545,7 +545,7 @@ func (sS *SessionS) warnSession(connID string, ev map[string]interface{}) (err e
 		ev, &rply); err != nil {
 		if err != utils.ErrNotImplemented {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed to warn session: <%s>, err: <%s>",
-				utils.SessionS, ev[utils.CGRID], err))
+				utils.SessionS, opt[utils.MetaOriginID], err))
 			return
 		}
 		err = nil
@@ -1057,10 +1057,10 @@ func (sS *SessionS) relocateSession(ctx *context.Context, initOriginID, originID
 	s.Lock()
 	s.CGRID = newCGRID
 	// Overwrite initial CGRID with new one
-	s.OptsStart[utils.CGRID] = newCGRID     // Overwrite CGRID for final CDR
-	s.EventStart[utils.OriginID] = originID // Overwrite OriginID for session indexing
+	s.OptsStart[utils.MetaOriginID] = newCGRID // Overwrite CGRID for final CDR
+	s.EventStart[utils.OriginID] = originID    // Overwrite OriginID for session indexing
 	for _, sRun := range s.SRuns {
-		//sRun.Event[utils.CGRID] = newCGRID // needed for CDR generation
+		//sRun.Event[utils.MetaOriginID] = newCGRID // needed for CDR generation
 		sRun.Event[utils.OriginID] = originID
 	}
 	s.Unlock()
@@ -1489,7 +1489,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(ctx *context.Context,
 func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 	s *Session, reply *string) (err error) {
 	if s.CGRID == "" {
-		return utils.NewErrMandatoryIeMissing(utils.CGRID)
+		return utils.NewErrMandatoryIeMissing(utils.MetaOriginID)
 	}
 	if s.EventStart == nil { // remove
 		if ureg := sS.unregisterSession(s.CGRID, true); !ureg {
