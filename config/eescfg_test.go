@@ -1626,7 +1626,7 @@ func TestEEsAsMapInterface(t *testing.T) {
 
 	exp := map[string]interface{}{
 		"opts": map[string]interface{}{
-			"TLS":                      false,
+			"tls":                      false,
 			"amqpExchange":             "amqp_exchange",
 			"amqpExchangeType":         "amqp_exchange_type",
 			"amqpQueueID":              "queue_id",
