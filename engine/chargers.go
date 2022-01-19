@@ -115,7 +115,7 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 		clonedEv.Tenant = tnt
 		clonedEv.APIOpts[utils.MetaRunID] = cP.RunID
 		clonedEv.APIOpts[utils.Subsys] = utils.MetaChargers
-		clonedEv.APIOpts[utils.MetaChargeID] = utils.Sha1(utils.IfaceAsString(clonedEv.APIOpts[utils.CGRID]), cP.RunID)
+		clonedEv.APIOpts[utils.MetaChargeID] = utils.Sha1(utils.IfaceAsString(clonedEv.APIOpts[utils.MetaOriginID]), cP.RunID)
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,

@@ -125,7 +125,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
 				utils.OriginID:     "dsafdsaf",
 				utils.OriginHost:   "192.168.1.1",
@@ -155,7 +155,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
 				utils.OriginID:     "abcdef",
 				utils.OriginHost:   "192.168.1.1",
@@ -185,7 +185,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.OriginID:     "sdfwer",
 				utils.OriginHost:   "192.168.1.1",
@@ -215,7 +215,7 @@ func testElasticExportEvents(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
 			Event: map[string]interface{}{
-				utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",
@@ -292,7 +292,7 @@ func testElasticVerifyExports(t *testing.T) {
 			eMp := map[string]interface{}{
 				utils.AccountField: "1001",
 				utils.AnswerTime:   "2013-11-07T08:42:26Z",
-				utils.CGRID:        "2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4",
+				utils.MetaOriginID: "2478e9f18ebcd3c684f3c14596b8bfeab2b0d6d4",
 				utils.Category:     "call",
 				utils.Cost:         "0.15",
 				utils.Destination:  "1002",
@@ -312,7 +312,7 @@ func testElasticVerifyExports(t *testing.T) {
 			eMp := map[string]interface{}{
 				utils.AccountField: "1001",
 				utils.AnswerTime:   "2013-11-07T08:42:26Z",
-				utils.CGRID:        "dbafe9c8614c785a65aabd116dd3959c3c56f7f6",
+				utils.MetaOriginID: "dbafe9c8614c785a65aabd116dd3959c3c56f7f6",
 				utils.Category:     "call",
 				utils.Cost:         "1.01",
 				utils.Destination:  "1002",
@@ -330,7 +330,7 @@ func testElasticVerifyExports(t *testing.T) {
 			}
 		case utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()) + ":*default":
 			eMp := map[string]interface{}{
-				utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
+				utils.MetaOriginID: utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
 				utils.Tenant:       "cgrates.org",
 				utils.Category:     "call",

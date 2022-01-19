@@ -1869,7 +1869,7 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 		Response_group:          utils.StringPointer("03"),
 		Response_type:           utils.StringPointer("D4"),
 		Regulatory_code:         utils.StringPointer("03"),
-		Client_tracking:         utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CGRID),
+		Client_tracking:         utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.MetaOriginID),
 		Customer_number:         utils.StringPointer("~*req.Subject"),
 		Orig_number:             utils.StringPointer("~*req.Subject"),
 		Term_number:             utils.StringPointer("~*req.Destination"),

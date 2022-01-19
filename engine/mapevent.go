@@ -207,8 +207,6 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 		default:
 			// for the momment this return can not be reached because we implemented a case for every MainCDRField
 			return nil, fmt.Errorf("unimplemented CDR field: <%s>", k)
-		case utils.CGRID:
-			cdr.CGRID = utils.IfaceAsString(v)
 		case utils.RunID:
 			cdr.RunID = utils.IfaceAsString(v)
 		case utils.OriginHost:

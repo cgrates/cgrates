@@ -139,17 +139,17 @@ func TestSQSERProcessMessage(t *testing.T) {
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.CGRID: "testCgrId",
+			utils.MetaOriginID: "testCgrId",
 		},
 		APIOpts: map[string]interface{}{},
 	}
-	body := []byte(`{"CGRID":"testCgrId"}`)
+	body := []byte(`{"*originID":"testCgrId"}`)
 	rdr.Config().Fields = []*config.FCTemplate{
 		{
-			Tag:   "CGRID",
+			Tag:   "*originID",
 			Type:  utils.MetaConstant,
 			Value: config.NewRSRParsersMustCompile("testCgrId", utils.InfieldSep),
-			Path:  "*cgreq.CGRID",
+			Path:  "*cgreq.*originID",
 		},
 	}
 	rdr.Config().Fields[0].ComputePath()
