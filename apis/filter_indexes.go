@@ -214,7 +214,12 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 	if len(indexedSlice) == 0 {
 		for val, strmap := range indexes {
 			for _, value := range strmap.AsSlice() {
-				indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
+				keyID := utils.ConcatenatedKey(val, value)
+				// for this case, we will not concatenate index:ID (e.g to avoid this case *exists:~*req.Account:::ProfileID)
+				if strings.HasPrefix(val, utils.MetaExists) || strings.HasPrefix(val, utils.MetaNotExists) {
+					keyID = val + value
+				}
+				indexedSlice = append(indexedSlice, keyID)
 			}
 		}
 	}

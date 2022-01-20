@@ -118,7 +118,7 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 			// this case is only for "*exists" and "*notexists" type. These 2 types does not have values, so the key will be just type and element.
 			if len(flt.Values) == 0 {
 				var rcvIndx map[string]utils.StringSet
-				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
+				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:], utils.EmptyString)
 				// only read from cache in case if we do not find the index to not cache the negative response
 				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
 					idxKey, transactionID, true, false); err != nil {
@@ -454,7 +454,7 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
 		// this case is only for "*exists" and "*notexists" type. These 2 types does not have values, so the key will be just type and element.
 		if len(flt.Values) == 0 {
-			idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
+			idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:], utils.EmptyString)
 			if !newRules.Has(idxKey) {
 				removeRules.Add(idxKey)
 			} else {
