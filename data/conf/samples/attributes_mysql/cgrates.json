@@ -16,10 +16,11 @@
   "attributes": {
     "enabled": true,
     "prefix_indexed_fields": ["*req.Destination"],
-    "exists_indexed_fields": ["*opts.*usage"],
+    "exists_indexed_fields": ["*opts.*usage"], 
   },
 
   "admins": {
     "enabled": true,
   }
-},
+
+}
