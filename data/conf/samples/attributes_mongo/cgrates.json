@@ -18,10 +18,11 @@
   "attributes": {
     "enabled": true,
     "prefix_indexed_fields": ["*req.Destination"],
-    "exists_indexed_fields": ["*opts.*usage"],
+    "exists_indexed_fields": ["*opts.*usage"], 
+    "notexists_indexed_fields": ["*req.ToR"], 
   },
 
   "admins": {
     "enabled": true,
   }
-},
+}

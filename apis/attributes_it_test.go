@@ -590,6 +590,7 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "dan",
 			utils.Destination:  "+491511231234",
+			utils.ToR:          "*voice",
 		},
 		APIOpts: map[string]interface{}{
 			utils.MetaUsage:   10 * time.Second,
