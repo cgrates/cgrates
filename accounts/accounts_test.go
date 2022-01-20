@@ -1603,9 +1603,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						Weight: 30,
 					},
 				},
-				Opts: map[string]interface{}{
-					utils.MetaBalanceLimit: -200.0,
-				},
+
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment:    utils.NewDecimal(int64(time.Second), 0),

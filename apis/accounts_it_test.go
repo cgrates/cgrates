@@ -47,26 +47,32 @@ var (
 		testAccSResetStorDb,
 		testAccSStartEngine,
 		testAccSRPCConn,
-		testGetAccProfileBeforeSet,
-		testGetAccProfilesBeforeSet,
-		testAccSetAccProfile,
-		testAccGetAccIDs,
-		testAccGetAccs,
-		testAccGetAccIDsCount,
-		testGetAccBeforeSet2,
-		testAccSetAcc2,
-		testAccGetAccIDs2,
-		testAccGetAccs2,
-		testAccGetAccIDsCount2,
-		testAccRemoveAcc,
-		testAccGetAccs3,
-		testAccGetAccsWithPrefix,
-		testAccGetAccountsForEvent,
-		testAccMaxAbstracts,
-		testAccDebitAbstracts,
-		testAccMaxConcretes,
-		testAccDebitConcretes,
-		testAccActionSetRmvBalance,
+		/*
+			testGetAccProfileBeforeSet,
+			testGetAccProfilesBeforeSet,
+			testAccSetAccProfile,
+			testAccGetAccIDs,
+			testAccGetAccs,
+			testAccGetAccIDsCount,
+			testGetAccBeforeSet2,
+			testAccSetAcc2,
+			testAccGetAccIDs2,
+			testAccGetAccs2,
+			testAccGetAccIDsCount2,
+			testAccRemoveAcc,
+			testAccGetAccs3,
+			testAccGetAccsWithPrefix,
+			testAccGetAccountsForEvent,
+			testAccMaxAbstracts,
+			testAccDebitAbstracts,
+			testAccMaxConcretes,
+			testAccDebitConcretes,
+		*/
+		// RefundCharges test
+		testAccRefundCharges,
+		/*
+			testAccActionSetRmvBalance,
+		*/
 		testAccSKillEngine,
 	}
 )
@@ -1319,6 +1325,142 @@ func testAccDebitConcretes(t *testing.T) {
 
 	if !reflect.DeepEqual(reply3, expected2) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected2), utils.ToJSON(reply3))
+	}
+}
+
+func testAccRefundCharges(t *testing.T) {
+	// we will set an account, we will debit it (with debitAbtracts), and after that we will call refundCharges to get back our cost
+	accPrf := APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant:    "cgrates.org",
+			ID:        "AccountRefundCharges",
+			Weights:   ";0",
+			FilterIDs: []string{"*exists:~*opts.*acntUsage:", "*string:~*req.Destination:1004"},
+			Balances: map[string]*utils.APIBalance{
+				"AB": {
+					ID:      "AB",
+					Weights: ";10",
+					Type:    utils.MetaAbstract,
+					Units:   "5m",
+					UnitFactors: []*utils.APIUnitFactor{
+						{
+							Factor: 10,
+						},
+					},
+					Opts: map[string]interface{}{
+						utils.MetaBalanceLimit: -100.0,
+					},
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    "1s",
+							FixedFee:     utils.Float64Pointer(0.6),
+							RecurrentFee: utils.Float64Pointer(0.1),
+						},
+					},
+				},
+				"CB": {
+					ID:      "CB",
+					Weights: ";5",
+					Type:    utils.MetaConcrete,
+					Units:   "50",
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    "1s",
+							RecurrentFee: utils.Float64Pointer(0.1),
+						},
+					},
+				},
+			},
+		},
+	}
+	var replyStr string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		accPrf, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error(err)
+	}
+
+	var reply utils.EventCharges
+	ev := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "tesRefundCHarges",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			utils.Destination:  "1004",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAccountsUsage: "3m27s",
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitAbstracts,
+		ev, &reply); err != nil {
+		t.Error(err)
+	}
+	// we will compare the costs of the ventCharges and
+	abstractCost := utils.NewDecimal(int64(3*time.Minute+27*time.Second), 0) // all 3m27s abstract were debited
+	concreteCost := utils.NewDecimal(213, 1)                                 // 21.3 were debited of concretes
+	if !reflect.DeepEqual(abstractCost, reply.Abstracts) {
+		t.Errorf("Expected %v, received %v", abstractCost, reply.Abstracts)
+	}
+	if !reflect.DeepEqual(concreteCost, reply.Concretes) {
+		t.Errorf("Expected %v, received %v", abstractCost, reply.Charges)
+	}
+
+	// 50 - 21.3 = 28.7   3m27s --> 207 seconds -->  20.7 debit + 0.6 fixedFee = 21.3
+
+	// lets get the Account after the debit was made
+	var result utils.Account
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "AccountRefundCharges",
+			},
+		}, &result); err != nil {
+		t.Error(err)
+	} else {
+		//now we will compare the units from both balances to see that the debit took the untis from account
+		astractUnitsRemain := utils.NewDecimal(0, 0) // even if the units were 5m and the usage was 3m27s, now those units are 0 because of unitFactor that we had on balance AB
+		if !reflect.DeepEqual(result.Balances["AB"].Units, astractUnitsRemain) {
+			t.Errorf("Expected %v, received %v", astractUnitsRemain, result.Balances["AB"].Units)
+		}
+		concretesUnitsRemain := utils.NewDecimal(287, 1) // 50 - 21.3
+		if !reflect.DeepEqual(result.Balances["CB"].Units, concretesUnitsRemain) {
+			t.Errorf("Expected %v, received %v", concretesUnitsRemain, result.Balances["CB"].Units)
+		}
+	}
+
+	// now as the account was debited, we will refund those charges
+	args := &utils.APIEventCharges{
+		Tenant:       "cgrates.org",
+		EventCharges: &reply, // this reply was the eventCharges from the previous debit
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1RefundCharges,
+		args, &replyStr); err != nil {
+		t.Error(err)
+	} else if replyStr != utils.OK {
+		t.Error(err)
+	}
+
+	// now that the refund was called properly, we will check the account to see the changes
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "AccountRefundCharges",
+			},
+		}, &result); err != nil {
+		t.Error(err)
+	} else {
+		expAccPrf, err := accPrf.AsAccount() // this is the initally account that we set in the beginning of this sub-test
+		if err != nil {
+			t.Error(err)
+		}
+
+		if !reflect.DeepEqual(result, expAccPrf) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expAccPrf), utils.ToJSON(result))
+		}
 	}
 }
 
