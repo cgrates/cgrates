@@ -339,7 +339,10 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
 		"*exists:*req.NumberOfEvents::TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
+		&AttrGetFilterIndexes{
+			Tenant:   utils.CGRateSorg,
+			ItemType: utils.MetaAttributes,
+		},
 		&replyIdx); err != nil {
 		t.Error(err)
 	} else {
