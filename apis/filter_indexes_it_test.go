@@ -52,6 +52,7 @@ var (
 
 		testV1FIdxSetAttributeSProfileWithFltr,
 		testV1FIdxSetAttributeSMoreFltrsMoreIndexing,
+
 		testV1FIdxAttributesRemoveIndexes,
 		testV1FIdxAttributeComputeIndexes,
 		testV1FIdxAttributeMoreProfilesForFilters,
@@ -371,7 +372,7 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 		sort.Strings(replyIdx)
 		sort.Strings(expectedIDx)
 		if !reflect.DeepEqual(expectedIDx, replyIdx) {
-			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
 		}
 	}
 
@@ -449,7 +450,7 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 		sort.Strings(replyIdx)
 		sort.Strings(expectedIDx)
 		if !reflect.DeepEqual(expectedIDx, replyIdx) {
-			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
 		}
 	}
 }
