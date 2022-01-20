@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"strings"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -61,6 +59,9 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 			for _, fldName := range *fieldIDs {
 				var fieldValIf interface{}
 				fieldValIf, err = ev.FieldAsInterface(utils.SplitPath(fldName, utils.NestingSep[0], -1))
+				if err == nil && filterIndexTypes[i] == utils.MetaNotExists {
+					continue // field should not exist in our event in order to check index
+				}
 				if err != nil && filterIndexTypes[i] != utils.MetaNone {
 					continue
 				}
@@ -76,18 +77,14 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 					fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
 				case utils.MetaSuffix:
 					fldVals = utils.SplitSuffix(fldVal)
-					/*
-						case utils.MetaExists, utils.MetaNotExists:
-							fldVals = []string{} // for *exists, we do not need any values, just to check if the fldName
-					*/
+				case utils.MetaExists:
+					fldVals = []string{utils.MetaAny} // for *exists, we will use *any value
+				case utils.MetaNotExists:
+					fldVals = []string{utils.MetaNone} // for *notexists, we will use *notexists
 				}
 				for _, val := range fldVals {
 					var dbIndexes map[string]utils.StringSet // list of items matched in DB
 					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName, val)
-					// check filterIndexType in case of *exists or *notExistsnot
-					if filterIndexTypes[i] == utils.MetaExists || filterIndexTypes[i] == utils.MetaNotExists {
-						key = strings.TrimSuffix(key, val) // for *exists, we do not need any values, just to check if the fldName
-					}
 					if dbIndexes, err = dm.GetIndexes(ctx, cacheID, itemIDPrefix, key, utils.NonTransactional, true, true); err != nil {
 						if err == utils.ErrNotFound {
 							err = nil

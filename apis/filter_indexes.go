@@ -147,12 +147,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 			if strings.HasPrefix(val, arg.FilterType) {
 				indexesFilter[val] = strmap
 				for _, value := range strmap.AsSlice() {
-					keyID := utils.ConcatenatedKey(val, value)
-					// for this case, we will not concatenate index:ID (e.g to avoid this case *exists:~*req.Account:::ProfileID)
-					if strings.HasPrefix(val, utils.MetaExists) || strings.HasPrefix(val, utils.MetaNotExists) {
-						keyID = val + value
-					}
-					indexedSlice = append(indexedSlice, keyID)
+					indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 				}
 			}
 		}
@@ -167,12 +162,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 				if strings.Contains(val, arg.FilterField) {
 					indexesFilter[val] = strmap
 					for _, value := range strmap.AsSlice() {
-						keyID := utils.ConcatenatedKey(val, value)
-						// for this case, we will not concatenate index:ID (e.g to avoid this case *exists:~*req.Account:::ProfileID)
-						if strings.HasPrefix(val, utils.MetaExists) || strings.HasPrefix(val, utils.MetaNotExists) {
-							keyID = val + value
-						}
-						indexedSlice = append(indexedSlice, keyID)
+						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
 			}
@@ -184,12 +174,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 			for val, strmap := range indexesFilter {
 				if strings.Contains(val, arg.FilterField) {
 					for _, value := range strmap.AsSlice() {
-						keyID := utils.ConcatenatedKey(val, value)
-						// for this case, we will not concatenate index:ID (e.g to avoid this case *exists:~*req.Account:::ProfileID)
-						if strings.HasPrefix(val, utils.MetaExists) || strings.HasPrefix(val, utils.MetaNotExists) {
-							keyID = val + value
-						}
-						cloneIndexSlice = append(cloneIndexSlice, keyID)
+						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
 			}
@@ -204,12 +189,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 			for val, strmap := range indexes {
 				if strings.Contains(val, arg.FilterValue) {
 					for _, value := range strmap.AsSlice() {
-						keyID := utils.ConcatenatedKey(val, value)
-						// for this case, we will not concatenate index:ID (e.g to avoid this case *exists:~*req.Account:::ProfileID)
-						if strings.HasPrefix(val, utils.MetaExists) || strings.HasPrefix(val, utils.MetaNotExists) {
-							keyID = val + value
-						}
-						indexedSlice = append(indexedSlice, keyID)
+						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
 			}
@@ -221,12 +201,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 			for val, strmap := range indexesFilter {
 				if strings.Contains(val, arg.FilterValue) {
 					for _, value := range strmap.AsSlice() {
-						keyID := utils.ConcatenatedKey(val, value)
-						// for this case, we will not concatenate index:ID (e.g to avoid this case *exists:~*req.Account:::ProfileID)
-						if strings.HasPrefix(val, utils.MetaExists) || strings.HasPrefix(val, utils.MetaNotExists) {
-							keyID = val + value
-						}
-						cloneIndexSlice = append(cloneIndexSlice, keyID)
+						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
 			}
@@ -239,12 +214,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 	if len(indexedSlice) == 0 {
 		for val, strmap := range indexes {
 			for _, value := range strmap.AsSlice() {
-				keyID := utils.ConcatenatedKey(val, value)
-				// for this case, we will not concatenate index:ID (e.g to avoid this case *exists:~*req.Account:::ProfileID)
-				if strings.HasPrefix(val, utils.MetaExists) || strings.HasPrefix(val, utils.MetaNotExists) {
-					keyID = val + value
-				}
-				indexedSlice = append(indexedSlice, keyID)
+				indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 			}
 		}
 	}
