@@ -51,8 +51,8 @@ type BiRPClient interface {
 	V1WarnDisconnect(ctx *context.Context, args map[string]interface{}, reply *string) (err error)
 }
 
-// GetSetCGRID will populate the CGRID key if not present and return it
-func GetSetCGRID(ev engine.MapEvent, opt map[string]interface{}) (cgrID string) {
+// GetSetOptsOriginID will populate the CGRID key if not present and return it
+func GetSetOptsOriginID(ev engine.MapEvent, opt map[string]interface{}) (cgrID string) {
 	fldIface, has := opt[utils.MetaOriginID]
 	if has {
 		cgrID = utils.IfaceAsString(fldIface)
