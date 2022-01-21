@@ -602,7 +602,9 @@ func (rp *RateProfile) Set(path []string, val interface{}, newBranch bool, _ str
 		valA, err = IfaceAsStringSlice(val)
 		rp.FilterIDs = append(rp.FilterIDs, valA...)
 	case Weights:
-		rp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+		if weights := IfaceAsString(val); weights != EmptyString {
+			rp.Weights, err = NewDynamicWeightsFromString(weights, InfieldSep, ANDSep)
+		}
 	case MinCost:
 		if val != EmptyString {
 			var valB *decimal.Big
@@ -637,7 +639,9 @@ func (rt *Rate) Set(path []string, val interface{}, newBranch bool) (err error) 
 			valA, err = IfaceAsStringSlice(val)
 			rt.FilterIDs = append(rt.FilterIDs, valA...)
 		case Weights:
-			rt.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			if weights := IfaceAsString(val); weights != EmptyString {
+				rt.Weights, err = NewDynamicWeightsFromString(weights, InfieldSep, ANDSep)
+			}
 		case ActivationTimes:
 			rt.ActivationTimes = IfaceAsString(val)
 		case Blocker:
