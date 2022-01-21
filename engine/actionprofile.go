@@ -148,7 +148,6 @@ func (aP *ActionProfile) Set(path []string, val interface{}, newBranch bool, _ s
 		ac = &APAction{ID: acID, Opts: make(map[string]interface{})}
 		aP.Actions = append(aP.Actions, ac)
 	}
-
 	return ac.Set(path[1:], val, newBranch)
 }
 
@@ -215,7 +214,19 @@ func (ap *ActionProfile) Merge(v2 interface{}) {
 		ap.ID = vi.ID
 	}
 	ap.FilterIDs = append(ap.FilterIDs, vi.FilterIDs...)
-	ap.Actions = append(ap.Actions, vi.Actions...)
+	var equal bool
+	for _, actionV2 := range vi.Actions {
+		for _, action := range ap.Actions {
+			if action.ID == actionV2.ID {
+				action.Merge(actionV2)
+				equal = true
+				break
+			}
+		}
+		if !equal {
+			ap.Actions = append(ap.Actions, actionV2)
+		}
+	}
 
 	if vi.Weight != 0 {
 		ap.Weight = vi.Weight
@@ -224,8 +235,28 @@ func (ap *ActionProfile) Merge(v2 interface{}) {
 		ap.Schedule = vi.Schedule
 	}
 	for k, v := range vi.Targets {
+		if k == utils.EmptyString {
+			continue
+		}
 		ap.Targets[k] = v
 	}
+}
+
+func (apAct *APAction) Merge(v2 *APAction) {
+	if v2.Blocker {
+		apAct.Blocker = v2.Blocker
+	}
+	if v2.TTL != 0 {
+		apAct.TTL = v2.TTL
+	}
+	if len(v2.Type) != 0 {
+		apAct.Type = v2.Type
+	}
+	for key, value := range v2.Opts {
+		apAct.Opts[key] = value
+	}
+	apAct.FilterIDs = append(apAct.FilterIDs, v2.FilterIDs...)
+	apAct.Diktats = append(apAct.Diktats, v2.Diktats...)
 }
 
 func (ap *ActionProfile) String() string { return utils.ToJSON(ap) }
