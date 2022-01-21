@@ -47,32 +47,28 @@ var (
 		testAccSResetStorDb,
 		testAccSStartEngine,
 		testAccSRPCConn,
-		/*
-			testGetAccProfileBeforeSet,
-			testGetAccProfilesBeforeSet,
-			testAccSetAccProfile,
-			testAccGetAccIDs,
-			testAccGetAccs,
-			testAccGetAccIDsCount,
-			testGetAccBeforeSet2,
-			testAccSetAcc2,
-			testAccGetAccIDs2,
-			testAccGetAccs2,
-			testAccGetAccIDsCount2,
-			testAccRemoveAcc,
-			testAccGetAccs3,
-			testAccGetAccsWithPrefix,
-			testAccGetAccountsForEvent,
-			testAccMaxAbstracts,
-			testAccDebitAbstracts,
-			testAccMaxConcretes,
-			testAccDebitConcretes,
-		*/
+		testGetAccProfileBeforeSet,
+		testGetAccProfilesBeforeSet,
+		testAccSetAccProfile,
+		testAccGetAccIDs,
+		testAccGetAccs,
+		testAccGetAccIDsCount,
+		testGetAccBeforeSet2,
+		testAccSetAcc2,
+		testAccGetAccIDs2,
+		testAccGetAccs2,
+		testAccGetAccIDsCount2,
+		testAccRemoveAcc,
+		testAccGetAccs3,
+		testAccGetAccsWithPrefix,
+		testAccGetAccountsForEvent,
+		testAccMaxAbstracts,
+		testAccDebitAbstracts,
+		testAccMaxConcretes,
+		testAccDebitConcretes,
 		// RefundCharges test
 		testAccRefundCharges,
-		/*
-			testAccActionSetRmvBalance,
-		*/
+		testAccActionSetRmvBalance,
 		testAccSKillEngine,
 	}
 )
@@ -1341,7 +1337,7 @@ func testAccRefundCharges(t *testing.T) {
 					ID:      "AB",
 					Weights: ";10",
 					Type:    utils.MetaAbstract,
-					Units:   "5m",
+					Units:   "5m", // 300s
 					UnitFactors: []*utils.APIUnitFactor{
 						{
 							Factor: 10,
@@ -1363,6 +1359,11 @@ func testAccRefundCharges(t *testing.T) {
 					Weights: ";5",
 					Type:    utils.MetaConcrete,
 					Units:   "50",
+					UnitFactors: []*utils.APIUnitFactor{
+						{
+							Factor: 15,
+						},
+					},
 					CostIncrements: []*utils.APICostIncrement{
 						{
 							Increment:    "1s",
