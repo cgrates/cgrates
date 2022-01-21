@@ -31,7 +31,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func TestLibSessionSGetSetCGRID(t *testing.T) {
+func TestLibSessionSGetSetOptsOriginID(t *testing.T) {
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EventName:       "TEST_EVENT",
 		utils.ToR:             "*voice",
@@ -53,13 +53,13 @@ func TestLibSessionSGetSetCGRID(t *testing.T) {
 	})
 	//Empty CGRID in event
 	opt := map[string]interface{}{}
-	cgrID := GetSetCGRID(sEv, opt)
+	cgrID := GetSetOptsOriginID(sEv, opt)
 	if len(cgrID) == 0 {
 		t.Errorf("Unexpected cgrID: %+v", cgrID)
 	}
 	//populate CGRID in event
 	opt[utils.MetaOriginID] = "someRandomVal"
-	cgrID = GetSetCGRID(sEv, opt)
+	cgrID = GetSetOptsOriginID(sEv, opt)
 	if cgrID != "someRandomVal" {
 		t.Errorf("Expecting: someRandomVal, received: %+v", cgrID)
 	}
