@@ -297,7 +297,7 @@ func testSessionsItTerminatePassive(t *testing.T) {
 		utils.Usage:        time.Minute,
 	})
 
-	cgrID := GetSetCGRID(sEv)
+	cgrID := GetSetOptsOriginID(sEv)
 	s := &Session{
 		CGRID:      cgrID,
 		EventStart: sEv,
