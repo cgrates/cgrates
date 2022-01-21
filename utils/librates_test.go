@@ -1887,18 +1887,26 @@ func TestRateSIntervalCost(t *testing.T) {
 func TestRateProfile(t *testing.T) {
 	rp := RateProfile{Rates: make(map[string]*Rate)}
 	exp := RateProfile{
-		Tenant:          "cgrates.org",
-		ID:              ID,
-		FilterIDs:       []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:         DynamicWeights{{}},
+		Tenant:    "cgrates.org",
+		ID:        ID,
+		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
+		Weights: DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 		MinCost:         NewDecimal(10, 0),
 		MaxCost:         NewDecimal(10, 0),
 		MaxCostStrategy: "strategy",
 		Rates: map[string]*Rate{
 			"rat1": {
-				ID:              "rat1",
-				FilterIDs:       []string{"fltr1"},
-				Weights:         DynamicWeights{{}},
+				ID:        "rat1",
+				FilterIDs: []string{"fltr1"},
+				Weights: DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
 				ActivationTimes: "* * * * *",
 				Blocker:         true,
 				IntervalRates: []*IntervalRate{{
@@ -1930,7 +1938,7 @@ func TestRateProfile(t *testing.T) {
 	if err := rp.Set([]string{FilterIDs}, "fltr1;*string:~*req.Account:1001", false, EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Weights}, "", false, EmptyString); err != nil {
+	if err := rp.Set([]string{Weights}, ";10", false, EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{MinCost}, "10", false, EmptyString); err != nil {
@@ -1950,7 +1958,7 @@ func TestRateProfile(t *testing.T) {
 	if err := rp.Set([]string{Rates, "rat1", FilterIDs}, "fltr1", false, EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Rates, "rat1", Weights}, "", false, EmptyString); err != nil {
+	if err := rp.Set([]string{Rates, "rat1", Weights}, ";20", false, EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := rp.Set([]string{Rates, "rat1", ActivationTimes}, "* * * * *", false, EmptyString); err != nil {
