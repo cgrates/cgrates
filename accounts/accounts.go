@@ -268,23 +268,19 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 	}
 	for _, chrg := range ecs.Charges {
 		acntChrg := ecs.Accounting[chrg.ChargingID]
-		var ufValue *utils.Decimal
-		if uf, has := ecs.UnitFactors[acntChrg.UnitFactorID]; has {
-			ufValue = uf.Factor
-		}
 		if acntChrg.BalanceID != utils.MetaTransAbstract { // *transAbstracts is not a real balance, hence the exception
 			refundUnitsOnAccount(
 				acntsIdxed[acntChrg.AccountID],
-				uncompressUnits(acntChrg.Units, chrg.CompressFactor),
-				ecs.Accounts[acntChrg.AccountID].Balances[acntChrg.BalanceID], ufValue)
+				uncompressUnits(acntChrg.Units, chrg.CompressFactor, acntChrg, ecs.UnitFactors),
+				ecs.Accounts[acntChrg.AccountID].Balances[acntChrg.BalanceID])
 			alteredAcnts.Add(acntChrg.AccountID)
 		}
 		for _, chrgID := range acntChrg.JoinedChargeIDs { // refund extra charges
 			extraChrg := ecs.Accounting[chrgID]
 			refundUnitsOnAccount(
 				acntsIdxed[extraChrg.AccountID],
-				uncompressUnits(extraChrg.Units, chrg.CompressFactor),
-				ecs.Accounts[acntChrg.AccountID].Balances[extraChrg.BalanceID], ufValue)
+				uncompressUnits(extraChrg.Units, chrg.CompressFactor, extraChrg, ecs.UnitFactors),
+				ecs.Accounts[acntChrg.AccountID].Balances[extraChrg.BalanceID])
 			alteredAcnts.Add(extraChrg.AccountID)
 		}
 	}

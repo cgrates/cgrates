@@ -233,6 +233,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher abstracts are not possible
 	var aPaid, aDenied *decimal.Big
 	maxItr := config.CgrConfig().AccountSCfg().MaxIterations
+	//lastSuccesDebit := new(utils.EventCharges)
 	for i := 0; i <= maxItr; i++ {
 		if i != 0 {
 			restoreUnitsFromClones(cncrtBlncs, origConcrtUnts)
@@ -279,6 +280,12 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 				return
 			}
 			err = nil
+			/*
+				if lastSuccesDebit != nil {
+					ec = utils.NewEventCharges()
+					ec.Merge(lastSuccesDebit)
+				}
+			*/
 			// ErrInsufficientCredit
 			aDenied = utils.CloneDecimalBig(aUnits)
 			if aPaid == nil { // going backwards
@@ -298,6 +305,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			if ec == nil {
 				ec = utils.NewEventCharges()
 			}
+			//lastSuccesDebit = ecDbt
 			ec.Merge(ecDbt)
 			if i == 0 { // no estimation done, covering full
 				break
@@ -322,9 +330,6 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 		aPaid = decimal.New(0, 0)
 		ec = utils.NewEventCharges()
 	}
-	/*
-		utils.Logger.Debug(fmt.Sprintf("aPaid %v, incr: %v, round: %v", aPaid, costIcrm.Increment.Big, roundUnitsWithIncrements(aPaid, costIcrm.Increment.Big)))
-	*/
 	ec.Abstracts = &utils.Decimal{aPaid}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
 	return
@@ -354,26 +359,27 @@ func unlockAccounts(acnts utils.AccountsWithWeight) {
 }
 
 // uncompressUnits returns the uncompressed value of the units if compressFactor is provided
-func uncompressUnits(units *utils.Decimal, cmprsFctr int) (tU *utils.Decimal) {
+func uncompressUnits(units *utils.Decimal, cmprsFctr int, acntChrg *utils.AccountCharge, uf map[string]*utils.UnitFactor) (tU *utils.Decimal) {
 	tU = units
 	if cmprsFctr > 1 {
 		tU = &utils.Decimal{utils.MultiplyBig(tU.Big,
 			decimal.New(int64(cmprsFctr), 0))}
+	}
+	// check it this has unit factor
+	if newUf, has := uf[acntChrg.UnitFactorID]; has {
+		tU = utils.MultiplyDecimal(tU, newUf.Factor)
 	}
 	return
 }
 
 // refundUnitsOnAccount is responsible for returning the units back to the balance
 // origBlnc is used for both it's ID as well as as a configuration backup in case when the balance is not longer present
-func refundUnitsOnAccount(acnt *utils.Account, units *utils.Decimal, origBlnc *utils.Balance, ufValue *utils.Decimal) {
+func refundUnitsOnAccount(acnt *utils.Account, units *utils.Decimal, origBlnc *utils.Balance) {
 	if _, has := acnt.Balances[origBlnc.ID]; has {
 		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{
 			utils.SumBig(
 				acnt.Balances[origBlnc.ID].Units.Big,
 				units.Big)}
-		if ufValue != nil {
-			acnt.Balances[origBlnc.ID].Units = utils.MultiplyDecimal(acnt.Balances[origBlnc.ID].Units, ufValue)
-		}
 	} else {
 		acnt.Balances[origBlnc.ID] = origBlnc.Clone()
 		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{utils.CloneDecimalBig(units.Big)}
