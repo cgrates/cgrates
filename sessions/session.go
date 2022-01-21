@@ -104,18 +104,16 @@ func (s *Session) RUnlock() {
 	s.lk.RUnlock()
 }
 
-// cgrID is method to return the CGRID of a session
+// originID is method to return the originID of a session
 // not thread safe
-func (s *Session) cgrID() (cgrID string) {
-	cgrID = s.CGRID
-	return
+func (s *Session) originID() string {
+	return utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])
 }
 
 // Clone is a thread safe method to clone the sessions information
 func (s *Session) Clone() (cln *Session) {
 	s.RLock()
 	cln = &Session{
-		CGRID:         s.CGRID,
 		Tenant:        s.Tenant,
 		ResourceID:    s.ResourceID,
 		ClientConnID:  s.ClientConnID,

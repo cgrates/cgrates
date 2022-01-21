@@ -163,7 +163,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	})
 	// Index first session
 	session := &Session{
-		CGRID:      GetSetCGRID(sEv),
+		CGRID:      GetSetOptsOriginID(sEv),
 		EventStart: sEv,
 		SRuns: []*SRun{
 			{
@@ -171,7 +171,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			},
 		},
 	}
-	cgrID := GetSetCGRID(sEv)
+	cgrID := GetSetOptsOriginID(sEv)
 	sS.indexSession(session, false)
 	eIndexes := map[string]map[string]map[string]utils.StringSet{
 		"OriginID": {
@@ -227,7 +227,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		"Extra3":           "",
 		"Extra4":           "info2",
 	})
-	cgrID2 := GetSetCGRID(sSEv2)
+	cgrID2 := GetSetOptsOriginID(sSEv2)
 	session2 := &Session{
 		CGRID:      cgrID2,
 		EventStart: sSEv2,
@@ -245,7 +245,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		utils.AccountField: "account2",
 		"Extra5":           "info5",
 	})
-	cgrID3 := GetSetCGRID(sSEv3)
+	cgrID3 := GetSetOptsOriginID(sSEv3)
 	session3 := &Session{
 		CGRID:      cgrID3,
 		EventStart: sSEv3,
@@ -1313,7 +1313,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		utils.OriginHost:   "127.0.0.1",
 	})
 	opt := make(map[string]interface{})
-	initialCGRID := GetSetCGRID(sSEv, opt)
+	initialCGRID := GetSetOptsOriginID(sSEv, opt)
 	s := &Session{
 		CGRID:      initialCGRID,
 		EventStart: sSEv,
@@ -1337,7 +1337,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		utils.OriginID:   "222",
 		utils.OriginHost: "127.0.0.1"})
 	opt2 := make(map[string]interface{})
-	cgrID := GetSetCGRID(ev, opt2)
+	cgrID := GetSetOptsOriginID(ev, opt2)
 	//check the session with new CGRID
 	rcvS = sS.getSessions(cgrID, false)
 	if !reflect.DeepEqual(rcvS[0], s) {
@@ -1425,7 +1425,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	})
 	// Index first session
 	session := &Session{
-		CGRID:      GetSetCGRID(sEv),
+		CGRID:      GetSetOptsOriginID(sEv),
 		EventStart: sEv,
 		SRuns: []*SRun{
 			{
@@ -1433,7 +1433,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 			},
 		},
 	}
-	cgrID := GetSetCGRID(sEv)
+	cgrID := GetSetOptsOriginID(sEv)
 	sS.indexSession(session, false)
 	indx := map[string][]string{"ToR": {utils.MetaVoice, utils.MetaData}}
 	expCGRIDs := []string{cgrID}
@@ -1642,7 +1642,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 	sr2 := sEv.Clone()
 	// Index first session
 	session := &Session{
-		CGRID:      GetSetCGRID(sEv),
+		CGRID:      GetSetOptsOriginID(sEv),
 		EventStart: sEv,
 		SRuns: []*SRun{
 			{
@@ -1655,7 +1655,7 @@ func TestSessionSfilterSessions(t *testing.T) {
 	}
 	sr2[utils.ToR] = utils.MetaSMS
 	sr2[utils.Subject] = "subject2"
-	sr2[utils.MetaOriginID] = GetSetCGRID(sEv)
+	sr2[utils.MetaOriginID] = GetSetOptsOriginID(sEv)
 	sS.registerSession(session, false)
 	st, err := utils.IfaceAsTime("2015-11-09T14:21:24Z", "")
 	if err != nil {
@@ -1811,7 +1811,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	sr2 := sEv.Clone()
 	// Index first session
 	session := &Session{
-		CGRID:      GetSetCGRID(sEv),
+		CGRID:      GetSetOptsOriginID(sEv),
 		EventStart: sEv,
 		SRuns: []*SRun{
 			{
@@ -1823,7 +1823,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		},
 	}
 	sEv[utils.ToR] = utils.MetaData
-	sr2[utils.MetaOriginID] = GetSetCGRID(sEv)
+	sr2[utils.MetaOriginID] = GetSetOptsOriginID(sEv)
 	sS.registerSession(session, false)
 	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s|%s", utils.MetaVoice, utils.MetaData)}}
 
