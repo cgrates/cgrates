@@ -906,7 +906,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent, resI
 		err = errors.New("ChargerS is disabled")
 		return
 	}
-	cgrID := GetSetCGRID(cgrEv.Event, cgrEv.APIOpts)
+	cgrID := GetSetOptsOriginID(cgrEv.Event, cgrEv.APIOpts)
 	evStart := engine.MapEvent(cgrEv.Event)
 	if !evStart.HasField(utils.Usage) && evStart.HasField(utils.LastUsed) {
 		evStart[utils.Usage] = evStart[utils.LastUsed]
@@ -2001,7 +2001,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			config.SessionsDebitIntervalDftOpt, utils.OptsSesDebitInterval); err != nil {
 			return err
 		}
-		cgrID := GetSetCGRID(ev, args.APIOpts)
+		cgrID := GetSetOptsOriginID(ev, args.APIOpts)
 		s := sS.getRelocateSession(ctx, cgrID,
 			ev.GetStringIgnoreErrors(utils.InitialOriginID),
 			ev.GetStringIgnoreErrors(utils.OriginID),
@@ -2085,7 +2085,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 
 	ev := engine.MapEvent(args.Event)
 	opts := engine.MapEvent(args.APIOpts)
-	cgrID := GetSetCGRID(ev, opts)
+	cgrID := GetSetOptsOriginID(ev, opts)
 	originID := ev.GetStringIgnoreErrors(utils.OriginID)
 	if termS {
 		if originID == "" {
@@ -2742,7 +2742,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	// 					return err //utils.NewErrRALs(err)
 	// 				}
 	// 			}
-	// 			s := sS.getRelocateSession(GetSetCGRID(ev),
+	// 			s := sS.getRelocateSession(GetSetOptsOriginID(ev),
 	// 				ev.GetStringIgnoreErrors(utils.InitialOriginID),
 	// 				ev.GetStringIgnoreErrors(utils.OriginID),
 	// 				ev.GetStringIgnoreErrors(utils.OriginHost))
@@ -2764,7 +2764,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	// 					return err //utils.NewErrRALs(err)
 	// 				}
 	// 			}
-	// 			s := sS.getRelocateSession(GetSetCGRID(ev),
+	// 			s := sS.getRelocateSession(GetSetOptsOriginID(ev),
 	// 				ev.GetStringIgnoreErrors(utils.InitialOriginID),
 	// 				ev.GetStringIgnoreErrors(utils.OriginID),
 	// 				ev.GetStringIgnoreErrors(utils.OriginHost))
@@ -2928,7 +2928,7 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
 
 func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string) (err error) {
 	ev := engine.MapEvent(cgrEv.Event)
-	cgrID := GetSetCGRID(ev, cgrEv.APIOpts)
+	cgrID := GetSetOptsOriginID(ev, cgrEv.APIOpts)
 	s := sS.getRelocateSession(ctx, cgrID,
 		ev.GetStringIgnoreErrors(utils.InitialOriginID),
 		ev.GetStringIgnoreErrors(utils.OriginID),
