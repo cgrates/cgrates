@@ -273,7 +273,7 @@ func testSessionSRplUpdate(t *testing.T) {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToJSON(aSessions))
 	}
 
-	cgrID := GetSetCGRID(engine.NewMapEvent(argsUpdate.Event))
+	cgrID :=GetSetOptsOriginID(engine.NewMapEvent(argsUpdate.Event))
 	// Make sure session was replicated
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions,
 		new(utils.SessionFilter), &pSessions); err != nil {

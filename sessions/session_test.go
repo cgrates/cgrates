@@ -48,7 +48,7 @@ func TestSessionIDCGRID(t *testing.T) {
 func TestSessionCgrID(t *testing.T) {
 	//empty check
 	session := new(Session)
-	rcv := session.cgrID()
+	rcv := session.originID()
 	eOut := ""
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
@@ -56,7 +56,7 @@ func TestSessionCgrID(t *testing.T) {
 	//normal check
 	session.CGRID = "testID"
 	eOut = "testID"
-	rcv = session.cgrID()
+	rcv = session.originID()
 	if !reflect.DeepEqual(eOut, rcv) && session.CGRID == "testID" {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}

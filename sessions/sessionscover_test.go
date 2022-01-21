@@ -2160,7 +2160,7 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 	sr2 := sEv.Clone()
 	// Index first session
 	session := &Session{
-		CGRID:      GetSetCGRID(sEv),
+		CGRID:     GetSetOptsOriginID(sEv),
 		EventStart: sEv,
 		SRuns: []*SRun{
 			{
@@ -2180,7 +2180,7 @@ func TestBiRPCv1GetActivePassiveSessions(t *testing.T) {
 	}
 	sr2[utils.ToR] = utils.MetaSMS
 	sr2[utils.Subject] = "subject2"
-	sr2[utils.MetaOriginID] = GetSetCGRID(sEv)
+	sr2[utils.MetaOriginID] = GetSetOptsOriginID(sEv)
 	sessions.registerSession(session, false)
 
 	st, err := utils.IfaceAsTime("2015-11-09T14:21:24Z", "")

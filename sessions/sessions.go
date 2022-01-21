@@ -219,7 +219,7 @@ func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine
 		sS.cfg.SessionSCfg().Opts.TTL, config.SessionsTTLDftOpt, utils.OptsSesTTL); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTL, s.CGRID, opts, err))
+				utils.SessionS, utils.OptsSesTTL, s.OptsStart[utils.MetaOriginID], opts, err))
 		return
 	}
 	if ttl == 0 {
@@ -231,7 +231,7 @@ func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine
 		sS.cfg.SessionSCfg().Opts.TTLMaxDelay, config.SessionsTTLMaxDelayDftOpt, utils.OptsSesTTLMaxDelay); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTLMaxDelay, s.CGRID, opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSesTTLMaxDelay, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
 		return
 	}
 	if maxDelay != 0 {
@@ -246,7 +246,7 @@ func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine
 		if err != utils.ErrNotFound {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-					utils.SessionS, utils.OptsSesTTLLastUsed, s.CGRID, opts.String(), err.Error()))
+					utils.SessionS, utils.OptsSesTTLLastUsed, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
 			return
 		}
 	}
@@ -257,7 +257,7 @@ func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine
 		if err != utils.ErrNotFound {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-					utils.SessionS, utils.OptsSesTTLLastUsage, s.CGRID, opts.String(), err.Error()))
+					utils.SessionS, utils.OptsSesTTLLastUsage, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
 			return
 		}
 	}
@@ -268,7 +268,7 @@ func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine
 		if err != utils.ErrNotFound {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-					utils.SessionS, utils.OptsSesTTLUsage, s.CGRID, opts.String(), err.Error()))
+					utils.SessionS, utils.OptsSesTTLUsage, s.OptsStart[utils.MetaOriginID], opts.String(), err.Error()))
 			return
 		}
 	}
@@ -325,7 +325,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> failed debitting cgrID %s, sRunIdx: %d, err: %s",
-						utils.SessionS, s.cgrID(), i, err.Error()))
+						utils.SessionS, s.originID(), i, err.Error()))
 			}
 		}
 	}
@@ -334,7 +334,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
-				utils.SessionS, s.cgrID(), err.Error()))
+				utils.SessionS, s.originID(), err.Error()))
 	}
 	// post the CDRs
 	if len(sS.cfg.SessionSCfg().CDRsConns) != 0 {
@@ -381,7 +381,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 					utils.SessionS, err.Error(), s.ResourceID))
 		}
 	}
-	sS.replicateSessions(ctx, s.CGRID, false, sS.cfg.SessionSCfg().ReplicationConns)
+	sS.replicateSessions(ctx, utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false, sS.cfg.SessionSCfg().ReplicationConns)
 	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
 		go func() {
 			var rply string
@@ -394,7 +394,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 				if err != utils.ErrNotImplemented {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
-							utils.SessionS, err.Error(), s.CGRID))
+							utils.SessionS, err.Error(), s.OptsStart[utils.MetaOriginID]))
 				}
 			}
 		}()
@@ -430,7 +430,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		if maxDebit, err = sS.debitSession(context.TODO(), s, sRunIdx, dbtIvl, nil); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> could not complete debit operation on session: <%s>, error: <%s>",
-					utils.SessionS, s.cgrID(), err.Error()))
+					utils.SessionS, s.originID(), err.Error()))
 			dscReason := utils.ErrServerError.Error()
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 				dscReason = err.Error()
@@ -447,10 +447,10 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> could not disconnect session: %s, error: %s",
-						utils.SessionS, s.cgrID(), err.Error()))
+						utils.SessionS, s.originID(), err.Error()))
 			}
 			if err = sS.forceSTerminate(context.TODO(), s, 0, nil, nil); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.cgrID(), err))
+				utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.originID(), err))
 			}
 			s.Unlock()
 			return
@@ -460,13 +460,13 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		if maxDebit < dbtIvl && sS.cfg.SessionSCfg().MinDurLowBalance != time.Duration(0) { // warn client for low balance
 			if sS.cfg.SessionSCfg().MinDurLowBalance >= dbtIvl {
 				utils.Logger.Warning(fmt.Sprintf("<%s> can not run warning for the session: <%s> since the remaining time:<%s> is higher than the debit interval:<%s>.",
-					utils.SessionS, s.cgrID(), sS.cfg.SessionSCfg().MinDurLowBalance, dbtIvl))
+					utils.SessionS, s.originID(), sS.cfg.SessionSCfg().MinDurLowBalance, dbtIvl))
 			} else if maxDebit <= sS.cfg.SessionSCfg().MinDurLowBalance {
 				go sS.warnSession(s.ClientConnID, s.EventStart.Clone(), s.OptsStart.Clone())
 			}
 		}
 		s.Unlock()
-		sS.replicateSessions(context.TODO(), s.CGRID, false, sS.cfg.SessionSCfg().ReplicationConns)
+		sS.replicateSessions(context.TODO(), utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false, sS.cfg.SessionSCfg().ReplicationConns)
 		if maxDebit < dbtIvl { // disconnect faster
 			select {
 			case <-debitStop: // call was disconnected already
@@ -485,14 +485,14 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 					}
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> could not disconnect session: %s, error: %s",
-							utils.SessionS, s.cgrID(), err.Error()))
+							utils.SessionS, s.originID(), err.Error()))
 				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> could not disconnect session: <%s>, error: <%s>",
-						utils.SessionS, s.cgrID(), err.Error()))
+						utils.SessionS, s.originID(), err.Error()))
 				if err = sS.forceSTerminate(context.TODO(), s, 0, nil, nil); err != nil {
 					utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
-						utils.SessionS, s.cgrID(), err))
+						utils.SessionS, s.originID(), err))
 				}
 			}
 			return
@@ -553,17 +553,19 @@ func (sS *SessionS) warnSession(connID string, ev map[string]interface{}, opt ma
 	return
 }
 
-// replicateSessions will replicate sessions with or without cgrID specified
-func (sS *SessionS) replicateSessions(ctx *context.Context, cgrID string, psv bool, connIDs []string) {
+// replicateSessions will replicate sessions with or without originID specified
+func (sS *SessionS) replicateSessions(ctx *context.Context, originID string, psv bool, connIDs []string) {
 	if len(connIDs) == 0 {
 		return
 	}
-	ss := sS.getSessions(cgrID, psv)
+	ss := sS.getSessions(originID, psv)
 	if len(ss) == 0 {
 		// session scheduled to be removed from remote (initiate also the EventStart to avoid the panic)
 		ss = []*Session{{
-			CGRID:      cgrID,
 			EventStart: make(engine.MapEvent),
+			OptsStart: engine.NewMapEvent(map[string]interface{}{
+				utils.MetaOriginID: originID,
+			}),
 		}}
 	}
 	for _, s := range ss {
@@ -574,7 +576,7 @@ func (sS *SessionS) replicateSessions(ctx *context.Context, cgrID string, psv bo
 			sCln, &rply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> cannot replicate session with id <%s>, err: %s",
-					utils.SessionS, sCln.CGRID, err.Error()))
+					utils.SessionS, sCln.OptsStart[utils.MetaOriginID], err.Error()))
 		}
 	}
 }
@@ -590,7 +592,7 @@ func (sS *SessionS) registerSession(s *Session, passive bool) {
 		sMp = sS.pSessions
 	}
 	sMux.Lock()
-	sMp[s.CGRID] = s
+	sMp[utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])] = s
 	sMux.Unlock()
 	sS.indexSession(s, passive)
 }
@@ -604,7 +606,7 @@ func (sS *SessionS) isIndexed(s *Session, passive bool) (has bool) {
 		sMp = sS.pSessions
 	}
 	sMux.Lock()
-	_, has = sMp[s.CGRID]
+	_, has = sMp[utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])]
 	sMux.Unlock()
 	return
 }
@@ -656,16 +658,16 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 			if _, hasFieldVal := ssIndx[fieldName][fieldVal]; !hasFieldVal {
 				ssIndx[fieldName][fieldVal] = make(map[string]utils.StringSet)
 			}
-			if _, hasCGRID := ssIndx[fieldName][fieldVal][s.CGRID]; !hasCGRID {
-				ssIndx[fieldName][fieldVal][s.CGRID] = make(utils.StringSet)
+			if _, hasOptOriginID := ssIndx[fieldName][fieldVal][utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])]; !hasOptOriginID {
+				ssIndx[fieldName][fieldVal][utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])] = make(utils.StringSet)
 			}
-			// ssIndx[fieldName][fieldVal][s.CGRID].Add(sr.CD.RunID)
+			// ssIndx[fieldName][fieldVal][utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])].Add(sr.CD.RunID)
 
 			// reverse index
-			if _, hasIt := ssRIdx[s.CGRID]; !hasIt {
-				ssRIdx[s.CGRID] = make([]*riFieldNameVal, 0)
+			if _, hasIt := ssRIdx[utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])]; !hasIt {
+				ssRIdx[utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])] = make([]*riFieldNameVal, 0)
 			}
-			ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
+			ssRIdx[utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])] = append(ssRIdx[utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
 		}
 	}
 }
@@ -906,13 +908,12 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent, resI
 		err = errors.New("ChargerS is disabled")
 		return
 	}
-	cgrID := GetSetOptsOriginID(cgrEv.Event, cgrEv.APIOpts)
+	originID := GetSetOptsOriginID(cgrEv.Event, cgrEv.APIOpts)
 	evStart := engine.MapEvent(cgrEv.Event)
 	if !evStart.HasField(utils.Usage) && evStart.HasField(utils.LastUsed) {
 		evStart[utils.Usage] = evStart[utils.LastUsed]
 	}
 	s = &Session{
-		CGRID:         cgrID,
 		Tenant:        cgrEv.Tenant,
 		ResourceID:    resID,
 		EventStart:    evStart.Clone(), // decouple the event from the request so we can avoid concurrency with debit and ttl
@@ -920,6 +921,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent, resI
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 	}
+	s.OptsStart[utils.MetaOriginID] = originID
 	if s.Chargeable, err = engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.Chargeable,
 		config.SessionsChargeableDftOpt, utils.OptsSesChargeable); err != nil {
 		return
@@ -961,7 +963,7 @@ func (sS *SessionS) processChargerS(ctx *context.Context, cgrEv *utils.CGREvent)
 }
 
 // getSessions is used to return in a thread-safe manner active or passive sessions
-func (sS *SessionS) getSessions(cgrID string, pSessions bool) (ss []*Session) {
+func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
 	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
 	if pSessions {
@@ -970,7 +972,7 @@ func (sS *SessionS) getSessions(cgrID string, pSessions bool) (ss []*Session) {
 	}
 	ssMux.RLock()
 	defer ssMux.RUnlock()
-	if len(cgrID) == 0 {
+	if len(originID) == 0 {
 		ss = make([]*Session, len(ssMp))
 		var i int
 		for _, s := range ssMp {
@@ -979,7 +981,7 @@ func (sS *SessionS) getSessions(cgrID string, pSessions bool) (ss []*Session) {
 		}
 		return
 	}
-	if s, hasCGRID := ssMp[cgrID]; hasCGRID {
+	if s, hasOptOriginID := ssMp[originID]; hasOptOriginID {
 		ss = []*Session{s}
 	}
 	return
@@ -1042,30 +1044,29 @@ func (sS *SessionS) getActivateSession(cgrID string) (s *Session) {
 	return sS.transitSState(cgrID, false)
 }
 
-// relocateSession will change the CGRID of a session (ie: prefix based session group)
+// relocateSession will change the originID of a session (ie: prefix based session group)
 func (sS *SessionS) relocateSession(ctx *context.Context, initOriginID, originID, originHost string) (s *Session) {
 	if initOriginID == "" {
 		return
 	}
-	initCGRID := utils.Sha1(initOriginID, originHost)
-	newCGRID := utils.Sha1(originID, originHost)
-	s = sS.getActivateSession(initCGRID)
+	initOptOriginID := utils.Sha1(initOriginID, originHost)
+	newOptOriginID := utils.Sha1(originID, originHost)
+	s = sS.getActivateSession(initOptOriginID)
 	if s == nil {
 		return
 	}
 	sS.unregisterSession(s.CGRID, false)
 	s.Lock()
-	s.CGRID = newCGRID
-	// Overwrite initial CGRID with new one
-	s.OptsStart[utils.MetaOriginID] = newCGRID // Overwrite CGRID for final CDR
-	s.EventStart[utils.OriginID] = originID    // Overwrite OriginID for session indexing
+	// Overwrite initial originID with new one
+	s.OptsStart[utils.MetaOriginID] = newOptOriginID // Overwrite CGRID for final CDR
+	s.EventStart[utils.OriginID] = originID          // Overwrite OriginID for session indexing
 	for _, sRun := range s.SRuns {
-		//sRun.Event[utils.MetaOriginID] = newCGRID // needed for CDR generation
+		//sRun.Event[utils.MetaOriginID] = newOptOriginID // needed for CDR generation
 		sRun.Event[utils.OriginID] = originID
 	}
 	s.Unlock()
 	sS.registerSession(s, false)
-	sS.replicateSessions(ctx, initCGRID, false, sS.cfg.SessionSCfg().ReplicationConns)
+	sS.replicateSessions(ctx, initOptOriginID, false, sS.cfg.SessionSCfg().ReplicationConns)
 	return
 }
 
@@ -1488,7 +1489,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(ctx *context.Context,
 // BiRPCv1SetPassiveSession used for replicating Sessions
 func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 	s *Session, reply *string) (err error) {
-	if s.CGRID == "" {
+	if _, has := s.OptsStart[utils.MetaOriginID]; has {
 		return utils.NewErrMandatoryIeMissing(utils.MetaOriginID)
 	}
 	if s.EventStart == nil { // remove
@@ -2853,7 +2854,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(ctx *context.Context,
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed force-terminating session with id: <%s>, err: <%s>",
-					utils.SessionS, ss[0].cgrID(), errTerm.Error()))
+					utils.SessionS, ss[0].originID(), errTerm.Error()))
 			err = utils.ErrPartiallyExecuted
 		}
 		ss[0].Unlock()
@@ -3071,7 +3072,7 @@ func (sS *SessionS) BiRPCv1ReAuthorize(ctx *context.Context,
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed sending RAR for session with id: <%s>, err: <%s>",
-					utils.SessionS, ss[0].cgrID(), errTerm.Error()))
+					utils.SessionS, ss[0].originID(), errTerm.Error()))
 			err = utils.ErrPartiallyExecuted
 		}
 	}
