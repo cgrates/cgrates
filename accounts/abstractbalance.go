@@ -89,7 +89,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 	}
 	var hasUF bool
 	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		//dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
 		hasUF = true
 	}
 	if blncLmt != nil {
