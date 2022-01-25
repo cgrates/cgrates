@@ -353,7 +353,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 						CostIncrements: []*utils.CostIncrement{
 							{
 								Increment:    &utils.Decimal{decimal.New(1, 0)},
-								FixedFee:     &utils.Decimal{decimal.New(2, 1)},
+								FixedFee:     &utils.Decimal{decimal.New(2, 1)}, // 0.2
 								RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 							},
 						},
@@ -365,7 +365,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 
 	evChExp := &utils.EventCharges{
 		Abstracts: utils.NewDecimal(89, 0),
-		Concretes: utils.NewDecimal(1484, 1),
+		Concretes: utils.NewDecimal(892, 1),
 		Charges: []*utils.ChargeEntry{
 			{
 				ChargingID:     "CHARGING1",
@@ -378,19 +378,13 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 				BalanceID:       "*transabstract",
 				Units:           utils.NewDecimal(89, 0),
 				RatingID:        "RATING1",
-				JoinedChargeIDs: []string{"JND_CHRG1", "JND_CHRG2"},
+				JoinedChargeIDs: []string{"CHARGING1_JOINEDCHARGE"},
 			},
-			"JND_CHRG1": {
+			"CHARGING1_JOINEDCHARGE": {
 				AccountID:    "TestAccountsDebitGetUsage",
 				BalanceID:    "ConcreteBal1",
+				Units:        utils.NewDecimal(892, 1), // 89.2
 				BalanceLimit: utils.NewDecimal(0, 0),
-				Units:        utils.NewDecimal(592, 1),
-			},
-			"JND_CHRG2": {
-				AccountID:    "TestAccountsDebitGetUsage",
-				BalanceID:    "ConcreteBal1",
-				BalanceLimit: utils.NewDecimal(0, 0),
-				Units:        utils.NewDecimal(892, 1),
 			},
 		},
 		Rating: map[string]*utils.RateSInterval{
@@ -424,7 +418,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 		},
 	}
 	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
-		cgrEvent, false, false); err != nil {
+		cgrEvent, false, false); err != nil { // debit abstract
 		t.Error(err)
 	} else if !rcv.Equals(evChExp) {
 		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
@@ -432,7 +426,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 
 	// get usage from *usage
 	//firstly reset the account
-	accntsPrf[0].Account.Balances["ConcreteBal1"].Units = &utils.Decimal{decimal.New(90, 0)}
+	accntsPrf[0].Account.Balances["ConcreteBal1"].Units = utils.NewDecimal(90, 0)
 	accnts = NewAccountS(cfg, fltr, nil, dm)
 	cgrEvent = &utils.CGREvent{
 		ID:     "TEST_EVENT_get_usage",
@@ -1653,7 +1647,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			},
 			//3m20s ABSTR 2.8 CONCR
-			cb2ID: &utils.Balance{ //125s with rating from RateS (1.25/0.01 from rates)
+			cb2ID: { //125s with rating from RateS (1.25/0.01 from rates)
 				ID:   cb2ID,
 				Type: utils.MetaConcrete,
 				CostIncrements: []*utils.CostIncrement{
@@ -1675,7 +1669,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		Tenant: utils.CGRateSorg,
 		ID:     "TestV1DebitAbstractsEventCharges2",
 		Balances: map[string]*utils.Balance{
-			ab1ID: &utils.Balance{ // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10 units
+			ab1ID: { // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10 units
 				ID:   ab1ID,
 				Type: utils.MetaAbstract,
 				Weights: utils.DynamicWeights{
@@ -1697,7 +1691,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Units: utils.NewDecimal(130, 0),
 			},
 			//7m25s ABSTR, 4.05 CONCR
-			cb1ID: &utils.Balance{ // absorb all costs, standard rating used when primary debiting
+			cb1ID: { // absorb all costs, standard rating used when primary debiting
 				ID:   cb1ID,
 				Type: utils.MetaConcrete,
 				Weights: utils.DynamicWeights{
@@ -1709,7 +1703,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Units:        utils.NewDecimal(5, 1), //0.5 covering partially the AB1
 			},
 			// 7m25s ABSTR, 4.55 CONCR
-			cb2ID: &utils.Balance{ // absorb all costs, standard rating used when primary debiting
+			cb2ID: { // absorb all costs, standard rating used when primary debiting
 				ID:   cb2ID,
 				Type: utils.MetaConcrete,
 				Opts: map[string]interface{}{
@@ -1726,7 +1720,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			},
 			// 7m25s ABSTR, 4.85 CONCR to cover the AB1
 
-			// 7m26 ABSTR, 4.95 CONCR with remaining flat covered by CB2 with RateS, RP_2, -0.05 on CB2
+			// 7m26S ABSTR, 4.95 CONCR with remaining flat covered by CB2 with RateS, RP_2, -0.05 on CB2
 
 		},
 	}
@@ -1752,116 +1746,171 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		Concretes: utils.NewDecimal(495, 2),
 		Charges: []*utils.ChargeEntry{
 			{
-				ChargingID:     "GENUUID1",
+				ChargingID:     "ACCOUNT5",
 				CompressFactor: 1,
 			},
 			{
-				ChargingID:     "GENUUID2",
+				ChargingID:     "ACCOUNT6",
 				CompressFactor: 1,
 			},
 			{
-				ChargingID:     "GENUUID3",
+				ChargingID:     "ACCOUNT3",
 				CompressFactor: 1,
 			},
 			{
-				ChargingID:     "GENUUID4",
+				ChargingID:     "ACCOUNT4",
 				CompressFactor: 1,
 			},
 			{
-				ChargingID:     "GENUUID5",
+				ChargingID:     "ACCOUNT2",
 				CompressFactor: 1,
 			},
 			{
-				ChargingID:     "GENUUID6",
+				ChargingID:     "ACCOUNT1",
 				CompressFactor: 1,
 			},
 		},
 		Accounting: map[string]*utils.AccountCharge{
-			"GENUUID_GHOST1": {
-				AccountID:    "TestV1DebitAbstractsEventCharges1",
-				BalanceID:    cb1ID,
-				Units:        utils.NewDecimal(8, 1),
-				BalanceLimit: utils.NewDecimal(-200, 0), // -200
-				UnitFactorID: "GENUUID_FACTOR1",
-			},
-			"GENUUID3": {
-				AccountID:    "TestV1DebitAbstractsEventCharges1",
-				BalanceID:    ab2ID,
-				BalanceLimit: utils.NewDecimal(0, 0),
-				RatingID:     "GENUUID_RATING1",
-			},
-			"GENUUID2": {
-				AccountID:    "TestV1DebitAbstractsEventCharges1",
-				BalanceID:    cb1ID,
-				Units:        utils.NewDecimal(2, 0),
-				BalanceLimit: utils.NewDecimal(-200, 0),
-				UnitFactorID: "GENUUID_FACTOR2",
-			},
-			"GENUUID5": {
-				AccountID:       "TestV1DebitAbstractsEventCharges2",
-				BalanceID:       ab1ID,
-				BalanceLimit:    utils.NewDecimal(0, 0),
-				RatingID:        "GENUUID_RATING2",
-				JoinedChargeIDs: []string{"GENUUID_GHOST2"},
-			},
-			"GENUUID6": {
+			"account1_joinedcharges": {
 				AccountID: "TestV1DebitAbstractsEventCharges2",
-				BalanceID: cb1ID,
-				Units:     utils.NewDecimal(3, 1),
+				BalanceID: "CB2",
+				Units:     utils.NewDecimal(1, 1),
 			},
-			"GENUUID4": {
+			"ACCOUNT2": {
+				AccountID:       "TestV1DebitAbstractsEventCharges2",
+				BalanceID:       "AB1",
+				Units:           utils.NewDecimal(int64(120*time.Second), 0),
+				BalanceLimit:    utils.NewDecimal(0, 0),
+				UnitFactorID:    "UF3",
+				RatingID:        "account2_rating",
+				JoinedChargeIDs: []string{"account2_joinedcharges", "account2_joinedcharges2"},
+			},
+			"ACCOUNT3": {
 				AccountID:    "TestV1DebitAbstractsEventCharges1",
-				BalanceID:    cb2ID,
+				BalanceID:    "AB2",
+				Units:        utils.NewDecimal(int64(time.Minute), 0), //6.000000000e+10,
+				BalanceLimit: utils.NewDecimal(0, 0),
+				RatingID:     "account3_rating",
+			},
+			"account4_joinedcharges": {
+				AccountID:    "TestV1DebitAbstractsEventCharges1",
+				BalanceID:    "CB2",
 				Units:        utils.NewDecimal(125, 2),
 				BalanceLimit: utils.NewDecimal(0, 0),
 			},
-			"GENUUID_GHOST2": {
-				AccountID: "TestV1DebitAbstractsEventCharges2",
-				BalanceID: cb1ID,
-				Units:     utils.NewDecimal(6, 1),
-			},
-			"GENUUID1": {
+			"ACCOUNT5": {
 				AccountID:       "TestV1DebitAbstractsEventCharges1",
-				BalanceID:       ab1ID,
+				BalanceID:       "AB1",
+				Units:           utils.NewDecimal(int64(120*time.Second), 0),
 				BalanceLimit:    utils.NewDecimal(0, 0),
-				RatingID:        "GENUUID_RATING3",
-				JoinedChargeIDs: []string{"GENUUID_GHOST1"},
+				RatingID:        "account5_rating",
+				JoinedChargeIDs: []string{"account5_joinedcharges"},
+			},
+			"account6_joinedcharges": {
+				AccountID:    "TestV1DebitAbstractsEventCharges1",
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(2, 0),
+				BalanceLimit: utils.SubstractDecimal(utils.NewDecimal(200, 0), utils.NewDecimal(400, 0)), // this should be -200
+				UnitFactorID: "UF1",
+			},
+			"ACCOUNT4": {
+				AccountID:       "TestV1DebitAbstractsEventCharges1",
+				BalanceID:       "*transabstract",
+				Units:           utils.NewDecimal(int64(125*time.Second), 0), // 125s
+				RatingID:        "account4_rating",
+				JoinedChargeIDs: []string{"account4_joinedcharges"},
+			},
+			"account2_joinedcharges2": {
+				AccountID: "TestV1DebitAbstractsEventCharges2",
+				BalanceID: "CB2",
+				Units:     utils.NewDecimal(3, 1),
+			},
+			"account2_joinedcharges": {
+				AccountID:    "TestV1DebitAbstractsEventCharges2",
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(5, 1),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+			"account5_joinedcharges": {
+				AccountID:    "TestV1DebitAbstractsEventCharges1",
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(8, 1),
+				BalanceLimit: utils.SubstractDecimal(utils.NewDecimal(200, 0), utils.NewDecimal(400, 0)), // this should be -200
+				UnitFactorID: "UF2",
+			},
+			"ACCOUNT6": {
+				AccountID:       "TestV1DebitAbstractsEventCharges1",
+				BalanceID:       "*transabstract",
+				Units:           utils.NewDecimal(int64(20*time.Second), 0), // 2.000000000e+10,
+				RatingID:        "account6_rating",
+				JoinedChargeIDs: []string{"account6_joinedcharges"},
+			},
+			"ACCOUNT1": {
+				AccountID:       "TestV1DebitAbstractsEventCharges2",
+				BalanceID:       "*transabstract",
+				Units:           utils.NewDecimal(int64(time.Second), 0),
+				RatingID:        "account1_rating",
+				JoinedChargeIDs: []string{"account1_joinedcharges"},
 			},
 		},
 		UnitFactors: map[string]*utils.UnitFactor{
-			"GENUUID_FACTOR1": {
+			"UF1": {
 				Factor: utils.NewDecimal(100, 0),
 			},
-			"GENUUID_FACTOR2": {
+			"UF2": {
 				Factor: utils.NewDecimal(100, 0),
+			},
+			"UF3": {
+				Factor: utils.NewDecimal(1, 9), // Nanoseconds
 			},
 		},
 		Rating: map[string]*utils.RateSInterval{
-			"GENUUID_RATING1": {
-				Increments: []*utils.RateSIncrement{
-					{
-						RateIntervalIndex: 0,
-						CompressFactor:    1,
-					},
-				},
+			"account3_rating": {
+				Increments: []*utils.RateSIncrement{{
+					RateIntervalIndex: 0,
+					RateID:            "e1e936a",
+					CompressFactor:    1,
+				}},
 				CompressFactor: 1,
 			},
-			"GENUUID_RATING2": {
-				Increments: []*utils.RateSIncrement{
-					{
-						RateIntervalIndex: 0,
-						CompressFactor:    1,
-					},
-				},
+			"account2_rating": {
+				Increments: []*utils.RateSIncrement{{
+					RateIntervalIndex: 0,
+					RateID:            "9e25f2c",
+					CompressFactor:    1,
+				}},
 				CompressFactor: 1,
 			},
-			"GENUUID_RATING3": {
-				Increments: []*utils.RateSIncrement{
-					{
-						RateIntervalIndex: 0,
-						CompressFactor:    1,
-					},
-				},
+			"account1_rating": {
+				Increments: []*utils.RateSIncrement{{
+					RateIntervalIndex: 0,
+					RateID:            "57cb569",
+					CompressFactor:    1,
+				}},
+				CompressFactor: 1,
+			},
+			"account5_rating": {
+				Increments: []*utils.RateSIncrement{{
+					RateIntervalIndex: 0,
+					RateID:            "c9bfe7f",
+					CompressFactor:    1,
+				}},
+				CompressFactor: 1,
+			},
+			"account6_rating": {
+				Increments: []*utils.RateSIncrement{{
+					RateIntervalIndex: 0,
+					RateID:            "2051772",
+					CompressFactor:    1,
+				}},
+				CompressFactor: 1,
+			},
+			"account4_rating": {
+				Increments: []*utils.RateSIncrement{{
+					RateIntervalIndex: 0,
+					RateID:            "dbb8ba0",
+					CompressFactor:    1,
+				}},
 				CompressFactor: 1,
 			},
 		},
@@ -1872,54 +1921,37 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		},
 	}
 
+	acnt1.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
+	acnt1.Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
+	acnt1.Balances[ab2ID].Units = utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)) // negative 0
+	acnt1.Balances[cb2ID].Units = utils.NewDecimal(0, 0)
+	if rcv, err := dm.GetAccount(context.Background(), acnt1.Tenant, acnt1.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, acnt1) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt1), utils.ToJSON(rcv))
+	}
+
+	acnt2.Balances[ab1ID].Units = utils.NewDecimal(10000000000, 9)
+	acnt2.Balances[cb1ID].Units = utils.NewDecimal(0, 0)
+	acnt2.Balances[cb2ID].Units = utils.SubstractDecimal(utils.NewDecimal(1, 0), utils.NewDecimal(105, 2)) // -0.05
+	if rcv, err := dm.GetAccount(context.Background(), acnt2.Tenant, acnt2.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, acnt2) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt2), utils.ToJSON(rcv))
+	}
+
+	// now we will change the units because both accounts were debited
+	// compare these 2 eventCHarges
+	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
+	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
+	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[ab2ID].Units = utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)) // negative 0
+	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges1"].Balances[cb2ID].Units = utils.NewDecimal(0, 0)
+	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges2"].Balances[ab1ID].Units = utils.NewDecimal(10000000000, 9)
+	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges2"].Balances[cb1ID].Units = utils.NewDecimal(0, 0)
+	eEvChgs.Accounts["TestV1DebitAbstractsEventCharges2"].Balances[cb2ID].Units = utils.SubstractDecimal(utils.NewDecimal(1, 0), utils.NewDecimal(105, 2)) // -0.05
 	if !eEvChgs.Equals(&rcvEC) {
 		t.Errorf("expecting: %s, \nreceived: %s\n", utils.ToJSON(eEvChgs), utils.ToJSON(rcvEC))
 	}
-
-	/*
-		acnt1.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
-		acnt1.Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
-		acnt1.Balances[ab2ID].Units = &utils.Decimal{decimal.WithContext(DecimalContext).CopySign(decimal.New(0, 0), decimal.New(-1, 0))} // negative 0
-		acnt1.Balances[cb2ID].Units = utils.NewDecimal(0, 0)
-		if rcv, err := dm.GetAccount(acnt1.Tenant, acnt1.ID); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(rcv, acnt1) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt1), utils.ToJSON(rcv))
-		}
-
-
-		acnt2.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
-		acnt2.Balances[cb1ID].Units = utils.NewDecimal(-1, 1)
-		if rcv, err := dm.GetAccount(acnt2.Tenant, acnt2.ID); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(rcv, acnt2) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt2), utils.ToJSON(rcv))
-		}
-
-
-		extAcnt1, err := acnt1.AsExtAccount()
-		if err != nil {
-			t.Error(err)
-		}
-		extAcnt2, err := acnt2.AsExtAccount()
-		if err != nil {
-			t.Error(err)
-		}
-
-		//as the names of accounting, charges, UF are GENUUIDs generator, we will change their names for comparing
-		eEvChgs.Accounts = map[string]*utils.ExtAccount{
-			"TestV1DebitAbstractsEventCharges1": extAcnt1,
-			"TestV1DebitAbstractsEventCharges2": extAcnt2,
-		}
-		eEvChgs.Charges = rply.Charges
-		eEvChgs.Accounting = rply.Accounting
-		eEvChgs.UnitFactors = rply.UnitFactors
-		eEvChgs.Accounts = rply.Accounts
-		eEvChgs.Rating = rply.Rating
-		if !reflect.DeepEqual(eEvChgs, rply) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(eEvChgs), utils.ToJSON(rply))
-		}
-	*/
 }
 
 func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {

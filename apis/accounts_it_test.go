@@ -1358,7 +1358,7 @@ func testAccRefundCharges(t *testing.T) {
 					ID:      "CB",
 					Weights: ";5",
 					Type:    utils.MetaConcrete,
-					Units:   "50",
+					Units:   "50.0",
 					UnitFactors: []*utils.APIUnitFactor{
 						{
 							Factor: 15,
@@ -1391,16 +1391,18 @@ func testAccRefundCharges(t *testing.T) {
 			utils.Destination:  "1004",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAccountsUsage: "3m27s",
+			utils.OptsAccountsUsage:      "3m27s",
+			utils.OptsAccountsProfileIDs: "AccountRefundCharges",
 		},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitAbstracts,
 		ev, &reply); err != nil {
 		t.Error(err)
 	}
-	// we will compare the costs of the ventCharges and
-	abstractCost := utils.NewDecimal(int64(3*time.Minute+27*time.Second), 0) // all 3m27s abstract were debited
-	concreteCost := utils.NewDecimal(213, 1)                                 // 21.3 were debited of concretes
+	// we will compare the costs of the eventCharges and the abstracts/concretes
+	concreteCost := utils.NewDecimal(33, 1) // 3.3 were debited of concretes (3.3 intially and because of 15 unit factor of CB --> 3.3 * 15 = 49.5 units were taken from CB)
+
+	abstractCost := utils.NewDecimal(int64(27*time.Second), 0) // 27s were debited of abstracts,
 	if !reflect.DeepEqual(abstractCost, reply.Abstracts) {
 		t.Errorf("Expected %v, received %v", abstractCost, reply.Abstracts)
 	}
@@ -1408,10 +1410,10 @@ func testAccRefundCharges(t *testing.T) {
 		t.Errorf("Expected %v, received %v", abstractCost, reply.Charges)
 	}
 
-	// 50 - 21.3 = 28.7   3m27s --> 207 seconds -->  20.7 debit + 0.6 fixedFee = 21.3
+	// 50 - 49.5(3.3 * 15 uf) = 0.5   3m27s --> 207 seconds -->  2.7 debit + 0.6 fixedFee = 3.3 debited
 
-	// lets get the Account after the debit was made
-	var result utils.Account
+	// we will get the Account after the debit was made
+	var result *utils.Account
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -1422,11 +1424,11 @@ func testAccRefundCharges(t *testing.T) {
 		t.Error(err)
 	} else {
 		//now we will compare the units from both balances to see that the debit took the untis from account
-		astractUnitsRemain := utils.NewDecimal(0, 0) // even if the units were 5m and the usage was 3m27s, now those units are 0 because of unitFactor that we had on balance AB
+		astractUnitsRemain := utils.NewDecimal(int64(30*time.Second), 0) // 5m - 27s because of uf --> 300s - 270s(27 * 10uf) = 30s
 		if !reflect.DeepEqual(result.Balances["AB"].Units, astractUnitsRemain) {
 			t.Errorf("Expected %v, received %v", astractUnitsRemain, result.Balances["AB"].Units)
 		}
-		concretesUnitsRemain := utils.NewDecimal(287, 1) // 50 - 21.3
+		concretesUnitsRemain := utils.NewDecimal(5, 1) // 50 - 49.5
 		if !reflect.DeepEqual(result.Balances["CB"].Units, concretesUnitsRemain) {
 			t.Errorf("Expected %v, received %v", concretesUnitsRemain, result.Balances["CB"].Units)
 		}
@@ -1458,7 +1460,6 @@ func testAccRefundCharges(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-
 		if !reflect.DeepEqual(result, expAccPrf) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expAccPrf), utils.ToJSON(result))
 		}
