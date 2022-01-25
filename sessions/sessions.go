@@ -83,14 +83,14 @@ type SessionS struct {
 	aSessions map[string]*Session // group sessions per sessionId
 
 	aSIMux        sync.RWMutex                                     // protects aSessionsIdx
-	aSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][cgrID]utils.StringSet[runID]sID
+	aSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][originID]utils.StringSet[runID]sID
 	aSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for active sessions, used on remove
 
 	pSsMux    sync.RWMutex        // protects pSessions
-	pSessions map[string]*Session // group passive sessions based on cgrID
+	pSessions map[string]*Session // group passive sessions based on originID
 
 	pSIMux        sync.RWMutex                                     // protects pSessionsIdx
-	pSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][cgrID]utils.StringSet[runID]sID
+	pSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][originID]utils.StringSet[runID]sID
 	pSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for passive sessions, used on remove
 }
 
@@ -324,7 +324,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 			if _, err = sS.debitSession(ctx, s, i, extraUsage, lastUsed); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
-						"<%s> failed debitting cgrID %s, sRunIdx: %d, err: %s",
+						"<%s> failed debitting originID %s, sRunIdx: %d, err: %s",
 						utils.SessionS, s.originID(), i, err.Error()))
 			}
 		}
@@ -810,7 +810,7 @@ func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter
 	if len(indx) != 0 && len(originIDs) == 0 { // no sessions matched the indexed filters
 		return
 	}
-	ss := sS.getSessionsFromCGRIDs(psv, originIDs...)
+	ss := sS.getSessionsFromOriginIDs(psv, originIDs...)
 	pass := func(filterRules []*engine.FilterRule,
 		me engine.MapEvent) (pass bool) {
 		pass = true
@@ -862,11 +862,11 @@ func (sS *SessionS) filterSessionsCount(ctx *context.Context, sf *utils.SessionF
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(ctx, tenant, sf.Filters)
-	cgrIDs, _ /* matchingSRuns*/ := sS.getSessionIDsMatchingIndexes(indx, psv)
-	if len(indx) != 0 && len(cgrIDs) == 0 { // no sessions matched the indexed filters
+	originIDs, _ /* matchingSRuns*/ := sS.getSessionIDsMatchingIndexes(indx, psv)
+	if len(indx) != 0 && len(originIDs) == 0 { // no sessions matched the indexed filters
 		return
 	}
-	ss := sS.getSessionsFromCGRIDs(psv, cgrIDs...)
+	ss := sS.getSessionsFromOriginIDs(psv, originIDs...)
 	pass := func(filterRules []*engine.FilterRule,
 		me engine.MapEvent) (pass bool) {
 		pass = true
@@ -885,9 +885,9 @@ func (sS *SessionS) filterSessionsCount(ctx *context.Context, sf *utils.SessionF
 	}
 	for _, s := range ss {
 		s.RLock()
-		// runIDs := matchingSRuns[s.CGRID]
+		// runIDs := matchingSRuns[s.OptsStart[utils.MetaOriginID]]
 		for _, sr := range s.SRuns {
-			// if len(cgrIDs) != 0 && !runIDs.Has(sr.CD.RunID) {
+			// if len(originIDs) != 0 && !runIDs.Has(sr.CD.RunID) {
 			// continue
 			// }
 			if pass(unindx, sr.Event) {
@@ -988,7 +988,7 @@ func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session)
 }
 
 // getSessions is used to return in a thread-safe manner active or passive sessions
-func (sS *SessionS) getSessionsFromCGRIDs(pSessions bool, originIDs ...string) (ss []*Session) {
+func (sS *SessionS) getSessionsFromOriginIDs(pSessions bool, originIDs ...string) (ss []*Session) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
 	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
 	if pSessions {
@@ -1106,7 +1106,7 @@ func (sS *SessionS) syncSessions(ctx *context.Context) {
 			replys <- &reply
 		}(clnt)
 	}
-	queriedCGRIDs := utils.StringSet{}
+	queriedOriginIDs := utils.StringSet{}
 	for range biClnts {
 		reply := <-replys
 		if reply.err != nil {
@@ -1117,14 +1117,14 @@ func (sS *SessionS) syncSessions(ctx *context.Context) {
 			continue
 		}
 		for _, sessionID := range reply.reply {
-			queriedCGRIDs.Add(sessionID.OptsOriginID())
+			queriedOriginIDs.Add(sessionID.OptsOriginID())
 		}
 	}
 	var toBeRemoved []string
 	sS.aSsMux.RLock()
-	for cgrid := range sS.aSessions {
-		if !queriedCGRIDs.Has(cgrid) {
-			toBeRemoved = append(toBeRemoved, cgrid)
+	for optOriginID := range sS.aSessions {
+		if !queriedOriginIDs.Has(optOriginID) {
+			toBeRemoved = append(toBeRemoved, optOriginID)
 		}
 	}
 	sS.aSsMux.RUnlock()
@@ -1133,8 +1133,8 @@ func (sS *SessionS) syncSessions(ctx *context.Context) {
 
 // Extracted from syncSessions in order to test all cases
 func (sS *SessionS) terminateSyncSessions(ctx *context.Context, toBeRemoved []string) {
-	for _, cgrID := range toBeRemoved {
-		ss := sS.getSessions(cgrID, false)
+	for _, optOriginID := range toBeRemoved {
+		ss := sS.getSessions(optOriginID, false)
 		if len(ss) == 0 {
 			continue
 		}
@@ -1142,7 +1142,7 @@ func (sS *SessionS) terminateSyncSessions(ctx *context.Context, toBeRemoved []st
 		if err := sS.forceSTerminate(ctx, ss[0], 0, nil, nil); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
-					utils.SessionS, cgrID, err.Error()))
+					utils.SessionS, optOriginID, err.Error()))
 		}
 		ss[0].Unlock()
 	}
@@ -1330,7 +1330,7 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 		// 						APIOpts:        s.OptsStart,
 		// 					}, cc); err == nil {
 		// 					sr.EventCost.Merge(
-		// 						engine.NewEventCostFromCallCost(cc, s.CGRID,
+		// 						engine.NewEventCostFromCallCost(cc, s.OptsStart[utils.MetaOriginID],
 		// 							sr.Event.GetStringIgnoreErrors(utils.RunID)))
 		// 				}
 		// 			}
@@ -1339,13 +1339,13 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 		// 				utils.Logger.Warning(
 		// 					fmt.Sprintf(
 		// 						"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
-		// 						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+		// 						utils.SessionS, s.OptsStart[utils.MetaOriginID], sRunIdx, err.Error()))
 		// 			}
 		// 		}
 		// 		if err := sS.roundCost(s, sRunIdx); err != nil { // will round the cost and refund the extra increment
 		// 			utils.Logger.Warning(
 		// 				fmt.Sprintf("<%s> failed rounding  session cost for <%s>, srIdx: <%d>, error: <%s>",
-		// 					utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+		// 					utils.SessionS, s.OptsStart[utils.MetaOriginID], sRunIdx, err.Error()))
 		// 		}
 		// 	}
 		// 	// compute the event cost before saving the SessionCost
@@ -1355,7 +1355,7 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 		// 		if err := sS.storeSCost(s, sRunIdx); err != nil {
 		// 			utils.Logger.Warning(
 		// 				fmt.Sprintf("<%s> failed storing session cost for <%s>, srIdx: <%d>, error: <%s>",
-		// 					utils.SessionS, s.CGRID, sRunIdx, err.Error()))
+		// 					utils.SessionS, s.OptsStart[utils.MetaOriginID], sRunIdx, err.Error()))
 		// 		}
 		// 	}
 
@@ -1513,10 +1513,10 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 }
 
 // BiRPCv1ReplicateSessions will replicate active sessions to either args.Connections or the internal configured ones
-// args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
+// args.Filter is used to filter the sessions which are replicated, originID is the only one possible for now
 func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
 	args ArgsReplicateSessions, reply *string) (err error) {
-	sS.replicateSessions(ctx, args.CGRID, args.Passive, args.ConnIDs)
+	sS.replicateSessions(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaOriginID]), args.Passive, args.ConnIDs)
 	*reply = utils.OK
 	return
 }
@@ -2002,8 +2002,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			config.SessionsDebitIntervalDftOpt, utils.OptsSesDebitInterval); err != nil {
 			return err
 		}
-		cgrID := GetSetOptsOriginID(ev, args.APIOpts)
-		s := sS.getRelocateSession(ctx, cgrID,
+		optOriginID := GetSetOptsOriginID(ev, args.APIOpts)
+		s := sS.getRelocateSession(ctx, optOriginID,
 			ev.GetStringIgnoreErrors(utils.InitialOriginID),
 			ev.GetStringIgnoreErrors(utils.OriginID),
 			ev.GetStringIgnoreErrors(utils.OriginHost))
@@ -2086,7 +2086,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 
 	ev := engine.MapEvent(args.Event)
 	opts := engine.MapEvent(args.APIOpts)
-	cgrID := GetSetOptsOriginID(ev, opts)
+	optOriginID := GetSetOptsOriginID(ev, opts)
 	originID := ev.GetStringIgnoreErrors(utils.OriginID)
 	if termS {
 		if originID == "" {
@@ -2106,7 +2106,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			return
 		}
 		for i := 0; i < sS.cfg.SessionSCfg().TerminateAttempts; i++ {
-			if s = sS.getRelocateSession(ctx, cgrID,
+			if s = sS.getRelocateSession(ctx, optOriginID,
 				ev.GetStringIgnoreErrors(utils.InitialOriginID),
 				ev.GetStringIgnoreErrors(utils.OriginID),
 				ev.GetStringIgnoreErrors(utils.OriginHost)); s != nil {
@@ -2677,7 +2677,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	// 				}
 
 	// 				cd := &engine.CallDescriptor{
-	// 					CgrID:         cgrEv.ID,
+	// 					//CgrID:         cgrEv.ID,
 	// 					RunID:         ev.GetStringIgnoreErrors(utils.RunID),
 	// 					ToR:           ev.GetStringIgnoreErrors(utils.ToR),
 	// 					Tenant:        cgrEv.Tenant,
@@ -2844,21 +2844,21 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(ctx *context.Context,
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
-	for _, as := range aSs {
-		ss := sS.getSessions(as.CGRID, false)
-		if len(ss) == 0 {
-			continue
-		}
-		ss[0].Lock()
-		if errTerm := sS.forceSTerminate(ctx, ss[0], 0, nil, nil); errTerm != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf(
-					"<%s> failed force-terminating session with id: <%s>, err: <%s>",
-					utils.SessionS, ss[0].originID(), errTerm.Error()))
-			err = utils.ErrPartiallyExecuted
-		}
-		ss[0].Unlock()
-	}
+	// for _, as := range aSs {
+	// 	ss := sS.getSessions(as.CGRID, false)
+	// 	if len(ss) == 0 {
+	// 		continue
+	// 	}
+	// 	ss[0].Lock()
+	// 	if errTerm := sS.forceSTerminate(ctx, ss[0], 0, nil, nil); errTerm != nil {
+	// 		utils.Logger.Warning(
+	// 			fmt.Sprintf(
+	// 				"<%s> failed force-terminating session with id: <%s>, err: <%s>",
+	// 				utils.SessionS, ss[0].originID(), errTerm.Error()))
+	// 		err = utils.ErrPartiallyExecuted
+	// 	}
+	// 	ss[0].Unlock()
+	// }
 	if err == nil {
 		*reply = utils.OK
 	} else {
@@ -3058,24 +3058,24 @@ func (sS *SessionS) BiRPCv1ReAuthorize(ctx *context.Context,
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
-	cache := utils.NewStringSet(nil)
-	for _, as := range aSs {
-		if cache.Has(as.CGRID) {
-			continue
-		}
-		cache.Add(as.CGRID)
-		ss := sS.getSessions(as.CGRID, false)
-		if len(ss) == 0 {
-			continue
-		}
-		if errTerm := sS.sendRar(ctx, ss[0]); errTerm != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf(
-					"<%s> failed sending RAR for session with id: <%s>, err: <%s>",
-					utils.SessionS, ss[0].originID(), errTerm.Error()))
-			err = utils.ErrPartiallyExecuted
-		}
-	}
+	// cache := utils.NewStringSet(nil)
+	// for _, as := range aSs {
+	// 	if cache.Has(as.CGRID) {
+	// 		continue
+	// 	}
+	// 	cache.Add(as.CGRID)
+	// 	ss := sS.getSessions(as.CGRID, false)
+	// 	if len(ss) == 0 {
+	// 		continue
+	// 	}
+	// 	if errTerm := sS.sendRar(ctx, ss[0]); errTerm != nil {
+	// 		utils.Logger.Warning(
+	// 			fmt.Sprintf(
+	// 				"<%s> failed sending RAR for session with id: <%s>, err: <%s>",
+	// 				utils.SessionS, ss[0].originID(), errTerm.Error()))
+	// 		err = utils.ErrPartiallyExecuted
+	// 	}
+	// }
 	if err != nil {
 		return
 	}

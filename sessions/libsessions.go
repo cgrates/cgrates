@@ -51,15 +51,15 @@ type BiRPClient interface {
 	V1WarnDisconnect(ctx *context.Context, args map[string]interface{}, reply *string) (err error)
 }
 
-// GetSetOptsOriginID will populate the CGRID key if not present and return it
-func GetSetOptsOriginID(ev engine.MapEvent, opt map[string]interface{}) (cgrID string) {
+// GetSetOptsOriginID will populate the originID key if not present and return it
+func GetSetOptsOriginID(ev engine.MapEvent, opt map[string]interface{}) (originID string) {
 	fldIface, has := opt[utils.MetaOriginID]
 	if has {
-		cgrID = utils.IfaceAsString(fldIface)
+		originID = utils.IfaceAsString(fldIface)
 	} else {
-		cgrID = utils.Sha1(ev.GetStringIgnoreErrors(utils.OriginID),
+		originID = utils.Sha1(ev.GetStringIgnoreErrors(utils.OriginID),
 			ev.GetStringIgnoreErrors(utils.OriginHost))
-		opt[utils.MetaOriginID] = cgrID
+		opt[utils.MetaOriginID] = originID
 	}
 	return
 }
@@ -608,7 +608,6 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap() map[string]*utils.DataNode 
 
 // ArgsReplicateSessions used to specify wich Session to replicate over the given connections
 type ArgsReplicateSessions struct {
-	CGRID   string
 	Passive bool
 	ConnIDs []string
 	APIOpts map[string]interface{}

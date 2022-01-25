@@ -40,7 +40,7 @@ func (s *SessionID) OptsOriginID() string {
 
 // ExternalSession is used when displaying active sessions via RPC
 type ExternalSession struct {
-	CGRID         string
+	//CGRID         string
 	RunID         string
 	ToR           string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
 	OriginID      string            // represents the unique accounting id given by the telecom switch generating the CDR
@@ -134,7 +134,7 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 	aSs = make([]*ExternalSession, len(s.SRuns))
 	for i, sr := range s.SRuns {
 		aSs[i] = &ExternalSession{
-			CGRID:         utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]),
+			//CGRID:         utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]),
 			RunID:         sr.RunID,
 			ToR:           sr.Event.GetStringIgnoreErrors(utils.ToR),
 			OriginID:      s.EventStart.GetStringIgnoreErrors(utils.OriginID),
@@ -164,7 +164,7 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 // AsExternalSession returns the session as an ExternalSession using the SRuns given
 func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalSession) {
 	aS = &ExternalSession{
-		CGRID:         utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]),
+		//CGRID:         utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]),
 		RunID:         sr.RunID,
 		ToR:           sr.Event.GetStringIgnoreErrors(utils.ToR),
 		OriginID:      s.EventStart.GetStringIgnoreErrors(utils.OriginID),

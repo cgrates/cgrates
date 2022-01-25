@@ -32,7 +32,7 @@ type ArgsItemIDs struct {
 }
 
 type AttrGetCdrs struct {
-	CgrIds          []string // If provided, it will filter based on the cgrids present in list
+	//CgrIds          []string // If provided, it will filter based on the cgrids present in list
 	MediationRunIds []string // If provided, it will filter on mediation runid
 
 	TORs                []string // If provided, filter on TypeOfRecord
@@ -88,8 +88,8 @@ type ExportedTPStats struct {
 // RPCCDRsFilter is a filter used in Rpc calls
 // RPCCDRsFilter is slightly different than CDRsFilter by using string instead of Time filters
 type RPCCDRsFilter struct {
-	CGRIDs                 []string               // If provided, it will filter based on the cgrids present in list
-	NotCGRIDs              []string               // Filter specific CgrIds out
+	//CGRIDs                 []string               // If provided, it will filter based on the cgrids present in list
+	//NotCGRIDs              []string               // Filter specific CgrIds out
 	RunIDs                 []string               // If provided, it will filter on mediation runid
 	NotRunIDs              []string               // Filter specific runIds out
 	OriginIDs              []string               // If provided, it will filter on OriginIDs
