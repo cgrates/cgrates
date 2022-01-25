@@ -229,12 +229,8 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	origConcrtUnts := cloneUnitsFromConcretes(cncrtBlncs) // so we can revert on errors
 	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher abstracts are not possible
 	var aPaid, aDenied *decimal.Big
-
 	maxItr := config.CgrConfig().AccountSCfg().MaxIterations
-	ecBkp := utils.NewEventCharges() // so we can keep the record of the last sucessful debit
-	if ec != nil {
-		ecBkp.Merge(ec) // copy the original EC inside
-	}
+	ec = utils.NewEventCharges() //
 	for i := 0; i <= maxItr; i++ {
 		if i != 0 {
 			restoreUnitsFromClones(cncrtBlncs, origConcrtUnts)
@@ -294,18 +290,10 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 				}
 				continue
 			}
-			ec = ecBkp
-			if ecDbt != nil {
-				ec.Merge(ecDbt) // write the partial units debited
-			}
 		} else { // debit for the usage succeeded
 			aPaid = utils.CloneDecimalBig(aUnits)
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
-			if ec == nil {
-				ec = utils.NewEventCharges()
-			}
-			ec = utils.NewEventCharges() // so we can restore the backup inside
-			ec.Merge(ecBkp)              // restore the backup to avoid recording all loops
+			ec = utils.NewEventCharges() // so we can keep the record of the last sucessful debit
 			ec.Merge(ecDbt)              // merge the last debit
 			if i == 0 {                  // no estimation done, covering full
 				break
@@ -359,15 +347,15 @@ func unlockAccounts(acnts utils.AccountsWithWeight) {
 }
 
 // uncompressUnits returns the uncompressed value of the units if compressFactor is provided
-func uncompressUnits(units *utils.Decimal, cmprsFctr int, acntChrg *utils.AccountCharge, uf map[string]*utils.UnitFactor) (tU *utils.Decimal) {
+func uncompressUnits(units *utils.Decimal, cmprsFctr int, acntChrg *utils.AccountCharge, uf *utils.UnitFactor) (tU *utils.Decimal) {
 	tU = units
 	if cmprsFctr > 1 {
 		tU = &utils.Decimal{utils.MultiplyBig(tU.Big,
 			decimal.New(int64(cmprsFctr), 0))}
 	}
 	// check it this has unit factor
-	if newUf, has := uf[acntChrg.UnitFactorID]; has {
-		tU = utils.MultiplyDecimal(tU, newUf.Factor)
+	if uf != nil {
+		tU = utils.MultiplyDecimal(tU, uf.Factor)
 	}
 	return
 }
