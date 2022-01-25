@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/cgrates/cgrates/utils"
@@ -53,6 +54,8 @@ func (cps ChargerProfiles) Sort() {
 }
 
 func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ string) (err error) {
+	utils.Logger.Crit(fmt.Sprintf("path: <%+v>", path))
+	utils.Logger.Crit(fmt.Sprintf("val: <%+v>", utils.ToJSON(val)))
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}
@@ -75,6 +78,9 @@ func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ 
 		cp.AttributeIDs = append(cp.AttributeIDs, valA...)
 	case utils.Weight:
 		cp.Weight, err = utils.IfaceAsFloat64(val)
+		if err != nil && utils.IfaceAsString(val) == utils.EmptyString {
+			err = nil
+		}
 	}
 	return
 }
