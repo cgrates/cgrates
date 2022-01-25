@@ -56,29 +56,48 @@ var attrs = &engine.AttrSProcessEventReply{
 
 func TestIsIndexed(t *testing.T) {
 	sS := &SessionS{}
-	if sS.isIndexed(&Session{CGRID: "test"}, true) {
+	if sS.isIndexed(&Session{
+
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "test",
+		},
+	}, true) {
 		t.Error("Expecting: false, received: true")
 	}
-	if sS.isIndexed(&Session{CGRID: "test"}, false) {
+	if sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+		utils.MetaOriginID: "test",
+	}}, false) {
 		t.Error("Expecting: false, received: true")
 	}
 	sS = &SessionS{
-		aSessions: map[string]*Session{"test": {CGRID: "test"}},
+		aSessions: map[string]*Session{"test": {OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "test",
+		}}},
 	}
-	if !sS.isIndexed(&Session{CGRID: "test"}, false) {
+	if !sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+		utils.MetaOriginID: "test",
+	}}, false) {
 		t.Error("Expecting: true, received: false")
 	}
-	if sS.isIndexed(&Session{CGRID: "test"}, true) {
+	if sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+		utils.MetaOriginID: "test",
+	}}, true) {
 		t.Error("Expecting: true, received: false")
 	}
 
 	sS = &SessionS{
-		pSessions: map[string]*Session{"test": {CGRID: "test"}},
+		pSessions: map[string]*Session{"test": {OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "test",
+		}}},
 	}
-	if !sS.isIndexed(&Session{CGRID: "test"}, true) {
+	if !sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+		utils.MetaOriginID: "test",
+	}}, true) {
 		t.Error("Expecting: false, received: true")
 	}
-	if sS.isIndexed(&Session{CGRID: "test"}, false) {
+	if sS.isIndexed(&Session{OptsStart: map[string]interface{}{
+		utils.MetaOriginID: "test",
+	}}, false) {
 		t.Error("Expecting: false, received: true")
 	}
 }
@@ -1267,7 +1286,9 @@ func TestSessionStransitSState(t *testing.T) {
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
-		CGRID:      "session1",
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "session1",
+		},
 		EventStart: sSEv,
 	}
 	//register the session as active
@@ -1315,14 +1336,15 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	opt := make(map[string]interface{})
 	initialCGRID := GetSetOptsOriginID(sSEv, opt)
 	s := &Session{
-		CGRID:      initialCGRID,
 		EventStart: sSEv,
-		OptsStart:  engine.NewMapEvent(map[string]interface{}{}),
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: initialCGRID,
+		},
 	}
 	//register the session as active
 	sS.registerSession(s, false)
 	//verify the session
-	rcvS := sS.getSessions(s.CGRID, false)
+	rcvS := sS.getSessions(utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false)
 	if !reflect.DeepEqual(rcvS[0], s) {
 		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
 	}
@@ -1591,12 +1613,14 @@ func TestSessionSgetSession(t *testing.T) {
 		utils.OriginHost:   "127.0.0.1",
 	})
 	s := &Session{
-		CGRID:      "session1",
 		EventStart: sSEv,
 		SRuns: []*SRun{
 			{
 				Event: sSEv,
 			},
+		},
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "session1",
 		},
 	}
 	//register the session

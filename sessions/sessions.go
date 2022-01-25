@@ -611,9 +611,9 @@ func (sS *SessionS) isIndexed(s *Session, passive bool) (has bool) {
 	return
 }
 
-// uregisterSession will unregister an active or passive session based on it's CGRID
+// uregisterSession will unregister an active or passive session based on it's originID
 // called on session terminate or relocate
-func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
+func (sS *SessionS) unregisterSession(originID string, passive bool) bool {
 	sMux := &sS.aSsMux
 	sMp := sS.aSessions
 	if passive {
@@ -621,13 +621,13 @@ func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
 		sMp = sS.pSessions
 	}
 	sMux.Lock()
-	if _, has := sMp[cgrID]; !has {
+	if _, has := sMp[originID]; !has {
 		sMux.Unlock()
 		return false
 	}
-	delete(sMp, cgrID)
+	delete(sMp, originID)
 	sMux.Unlock()
-	sS.unindexSession(cgrID, passive)
+	sS.unindexSession(originID, passive)
 	return true
 }
 
@@ -674,7 +674,7 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 
 // unindexASession removes an active or passive session from indexes
 // called on terminate or relocate
-func (sS *SessionS) unindexSession(cgrID string, pSessions bool) bool {
+func (sS *SessionS) unindexSession(originID string, pSessions bool) bool {
 	idxMux := &sS.aSIMux
 	ssIndx := sS.aSessionsIdx
 	ssRIdx := sS.aSessionsRIdx
@@ -685,11 +685,11 @@ func (sS *SessionS) unindexSession(cgrID string, pSessions bool) bool {
 	}
 	idxMux.Lock()
 	defer idxMux.Unlock()
-	if _, hasIt := ssRIdx[cgrID]; !hasIt {
+	if _, hasIt := ssRIdx[originID]; !hasIt {
 		return false
 	}
-	for _, riFNV := range ssRIdx[cgrID] {
-		delete(ssIndx[riFNV.fieldName][riFNV.fieldValue], cgrID)
+	for _, riFNV := range ssRIdx[originID] {
+		delete(ssIndx[riFNV.fieldName][riFNV.fieldValue], originID)
 		if len(ssIndx[riFNV.fieldName][riFNV.fieldValue]) == 0 {
 			delete(ssIndx[riFNV.fieldName], riFNV.fieldValue)
 		}
@@ -697,7 +697,7 @@ func (sS *SessionS) unindexSession(cgrID string, pSessions bool) bool {
 			delete(ssIndx, riFNV.fieldName)
 		}
 	}
-	delete(ssRIdx, cgrID)
+	delete(ssRIdx, originID)
 	return true
 }
 
@@ -746,12 +746,12 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 			if _, hasFldVal := ssIndx[fltrName][fltrVal]; !hasFldVal {
 				continue
 			}
-			for cgrID, runIDs := range ssIndx[fltrName][fltrVal] {
-				if _, hasCGRID := matchingSessionsbyValue[cgrID]; !hasCGRID {
-					matchingSessionsbyValue[cgrID] = utils.StringSet{}
+			for originID, runIDs := range ssIndx[fltrName][fltrVal] {
+				if _, hasoriginID := matchingSessionsbyValue[originID]; !hasoriginID {
+					matchingSessionsbyValue[originID] = utils.StringSet{}
 				}
 				for runID := range runIDs {
-					matchingSessionsbyValue[cgrID].Add(runID)
+					matchingSessionsbyValue[originID].Add(runID)
 				}
 			}
 		}
@@ -765,14 +765,14 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 			continue
 		}
 		// Higher run, takes out non matching indexes
-		for cgrID, runIDs := range matchingSessions {
-			if matchedRunIDs, hasCGRID := matchedIndx[cgrID]; !hasCGRID {
-				delete(matchingSessions, cgrID)
+		for originID, runIDs := range matchingSessions {
+			if matchedRunIDs, hasoriginID := matchedIndx[originID]; !hasoriginID {
+				delete(matchingSessions, originID)
 				continue
 			} else {
 				for runID := range runIDs {
 					if !matchedRunIDs.Has(runID) {
-						delete(matchingSessions[cgrID], runID)
+						delete(matchingSessions[originID], runID)
 					}
 				}
 			}
@@ -781,12 +781,12 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 			return make([]string, 0), make(map[string]utils.StringSet)
 		}
 	}
-	cgrIDs := []string{}
-	for cgrID := range matchingSessions {
-		cgrIDs = append(cgrIDs, cgrID)
+	originIDs := []string{}
+	for originID := range matchingSessions {
+		originIDs = append(originIDs, originID)
 
 	}
-	return cgrIDs, matchingSessions
+	return originIDs, matchingSessions
 }
 
 // filterSessions will return a list of sessions in external format based on filters passed
@@ -806,11 +806,11 @@ func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(ctx, tenant, sf.Filters)
-	cgrIDs, _ /*matchingSRuns*/ := sS.getSessionIDsMatchingIndexes(indx, psv)
-	if len(indx) != 0 && len(cgrIDs) == 0 { // no sessions matched the indexed filters
+	originIDs, _ /*matchingSRuns*/ := sS.getSessionIDsMatchingIndexes(indx, psv)
+	if len(indx) != 0 && len(originIDs) == 0 { // no sessions matched the indexed filters
 		return
 	}
-	ss := sS.getSessionsFromCGRIDs(psv, cgrIDs...)
+	ss := sS.getSessionsFromCGRIDs(psv, originIDs...)
 	pass := func(filterRules []*engine.FilterRule,
 		me engine.MapEvent) (pass bool) {
 		pass = true
@@ -830,9 +830,9 @@ func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter
 	}
 	for _, s := range ss {
 		s.RLock()
-		// runIDs := matchingSRuns[s.CGRID]
+		// runIDs := matchingSRuns[s.OptsStart[utils.MetaOriginID]]
 		for _, sr := range s.SRuns {
-			// if len(cgrIDs) != 0 && !runIDs.Has(sr.CD.RunID) {
+			// if len(originIDs) != 0 && !runIDs.Has(sr.CD.RunID) {
 			// continue
 			// }
 			if pass(unindx, sr.Event) {
@@ -988,7 +988,7 @@ func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session)
 }
 
 // getSessions is used to return in a thread-safe manner active or passive sessions
-func (sS *SessionS) getSessionsFromCGRIDs(pSessions bool, cgrIDs ...string) (ss []*Session) {
+func (sS *SessionS) getSessionsFromCGRIDs(pSessions bool, originIDs ...string) (ss []*Session) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
 	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
 	if pSessions {
@@ -997,7 +997,7 @@ func (sS *SessionS) getSessionsFromCGRIDs(pSessions bool, cgrIDs ...string) (ss 
 	}
 	ssMux.RLock()
 	defer ssMux.RUnlock()
-	if len(cgrIDs) == 0 {
+	if len(originIDs) == 0 {
 		ss = make([]*Session, len(ssMp))
 		var i int
 		for _, s := range ssMp {
@@ -1006,9 +1006,9 @@ func (sS *SessionS) getSessionsFromCGRIDs(pSessions bool, cgrIDs ...string) (ss 
 		}
 		return
 	}
-	ss = make([]*Session, len(cgrIDs))
-	for i, cgrID := range cgrIDs {
-		if s, hasCGRID := ssMp[cgrID]; hasCGRID {
+	ss = make([]*Session, len(originIDs))
+	for i, originID := range originIDs {
+		if s, hasoriginID := ssMp[originID]; hasoriginID {
 			ss[i] = s
 		}
 	}
@@ -1016,14 +1016,14 @@ func (sS *SessionS) getSessionsFromCGRIDs(pSessions bool, cgrIDs ...string) (ss 
 }
 
 // transitSState will transit the sessions from one state (active/passive) to another (passive/active)
-func (sS *SessionS) transitSState(cgrID string, psv bool) (s *Session) {
-	ss := sS.getSessions(cgrID, !psv)
+func (sS *SessionS) transitSState(originID string, psv bool) (s *Session) {
+	ss := sS.getSessions(originID, !psv)
 	if len(ss) == 0 {
 		return
 	}
 	s = ss[0]
 	s.Lock()
-	sS.unregisterSession(cgrID, !psv)
+	sS.unregisterSession(originID, !psv)
 	sS.registerSession(s, psv)
 	if !psv {
 		sS.initSessionDebitLoops(s)
@@ -1036,12 +1036,12 @@ func (sS *SessionS) transitSState(cgrID string, psv bool) (s *Session) {
 }
 
 // getActivateSession returns the session from active list or moves from passive
-func (sS *SessionS) getActivateSession(cgrID string) (s *Session) {
-	ss := sS.getSessions(cgrID, false)
+func (sS *SessionS) getActivateSession(originID string) (s *Session) {
+	ss := sS.getSessions(originID, false)
 	if len(ss) != 0 {
 		return ss[0]
 	}
-	return sS.transitSState(cgrID, false)
+	return sS.transitSState(originID, false)
 }
 
 // relocateSession will change the originID of a session (ie: prefix based session group)
@@ -1055,10 +1055,10 @@ func (sS *SessionS) relocateSession(ctx *context.Context, initOriginID, originID
 	if s == nil {
 		return
 	}
-	sS.unregisterSession(s.CGRID, false)
+	sS.unregisterSession(utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false)
 	s.Lock()
 	// Overwrite initial originID with new one
-	s.OptsStart[utils.MetaOriginID] = newOptOriginID // Overwrite CGRID for final CDR
+	s.OptsStart[utils.MetaOriginID] = newOptOriginID // Overwrite optOriginID for final CDR
 	s.EventStart[utils.OriginID] = originID          // Overwrite OriginID for session indexing
 	for _, sRun := range s.SRuns {
 		//sRun.Event[utils.MetaOriginID] = newOptOriginID // needed for CDR generation
@@ -1070,10 +1070,10 @@ func (sS *SessionS) relocateSession(ctx *context.Context, initOriginID, originID
 	return
 }
 
-// getRelocateSession will relocate a session if it cannot find cgrID and initialOriginID is present
-func (sS *SessionS) getRelocateSession(ctx *context.Context, cgrID string, initOriginID,
+// getRelocateSession will relocate a session if it cannot find originID and initialOriginID is present
+func (sS *SessionS) getRelocateSession(ctx *context.Context, optOriginID string, initOriginID,
 	originID, originHost string) (s *Session) {
-	if s = sS.getActivateSession(cgrID); s != nil ||
+	if s = sS.getActivateSession(optOriginID); s != nil ||
 		initOriginID == "" {
 		return
 	}
@@ -1117,7 +1117,7 @@ func (sS *SessionS) syncSessions(ctx *context.Context) {
 			continue
 		}
 		for _, sessionID := range reply.reply {
-			queriedCGRIDs.Add(sessionID.CGRID())
+			queriedCGRIDs.Add(sessionID.OptsOriginID())
 		}
 	}
 	var toBeRemoved []string
@@ -1224,7 +1224,7 @@ func (sS *SessionS) initSession(ctx *context.Context, cgrEv *utils.CGREvent, cln
 // updateSession will reset terminator, perform debits and replicate sessions
 func (sS *SessionS) updateSession(ctx *context.Context, s *Session, updtEv, opts engine.MapEvent, isMsg bool) (maxUsage map[string]time.Duration, err error) {
 	if !isMsg {
-		defer sS.replicateSessions(ctx, s.CGRID, false, sS.cfg.SessionSCfg().ReplicationConns)
+		defer sS.replicateSessions(ctx, utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false, sS.cfg.SessionSCfg().ReplicationConns)
 		s.Lock()
 		defer s.Unlock()
 
@@ -1296,8 +1296,8 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 	aTime *time.Time, isMsg bool) (err error) {
 	if !isMsg {
 		//check if we have replicate connection and close the session there
-		defer sS.replicateSessions(ctx, s.CGRID, true, sS.cfg.SessionSCfg().ReplicationConns)
-		sS.unregisterSession(s.CGRID, false)
+		defer sS.replicateSessions(ctx, utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), true, sS.cfg.SessionSCfg().ReplicationConns)
+		sS.unregisterSession(utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false)
 		s.stopSTerminator()
 		s.stopDebitLoops()
 	}
@@ -1373,7 +1373,7 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 			sr.Event[utils.AnswerTime] = *aTime
 		}
 	}
-	if errCh := engine.Cache.Set(ctx, utils.CacheClosedSessions, s.CGRID, s,
+	if errCh := engine.Cache.Set(ctx, utils.CacheClosedSessions, utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), s,
 		nil, true, utils.NonTransactional); errCh != nil {
 		return errCh
 	}
@@ -1386,14 +1386,14 @@ func (sS *SessionS) chargeEvent(ctx *context.Context, cgrEv *utils.CGREvent, for
 	if s, err = sS.initSession(ctx, cgrEv, "", "", 0, true, forceDuration); err != nil {
 		return
 	}
-	cgrID := s.CGRID
+	originID := utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])
 	var sRunsUsage map[string]time.Duration
 	if sRunsUsage, err = sS.updateSession(ctx, s, nil, nil, true); err != nil {
 		if errEnd := sS.terminateSession(ctx, s,
 			utils.DurationPointer(time.Duration(0)), nil, nil, true); errEnd != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error when force-ending charged event: <%s>, err: <%s>",
-					utils.SessionS, cgrID, errEnd.Error()))
+					utils.SessionS, originID, errEnd.Error()))
 		}
 		// err = utils.NewErrRALs(err)
 		return
@@ -1414,7 +1414,7 @@ func (sS *SessionS) chargeEvent(ctx *context.Context, cgrEv *utils.CGREvent, for
 	if errEnd := sS.terminateSession(ctx, s, utils.DurationPointer(usage), nil, nil, true); errEnd != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error when ending charged event: <%s>, err: <%s>",
-				utils.SessionS, cgrID, errEnd.Error()))
+				utils.SessionS, originID, errEnd.Error()))
 	}
 	return // returns here the maxUsage from update
 }
@@ -1493,15 +1493,15 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 		return utils.NewErrMandatoryIeMissing(utils.MetaOriginID)
 	}
 	if s.EventStart == nil { // remove
-		if ureg := sS.unregisterSession(s.CGRID, true); !ureg {
+		if ureg := sS.unregisterSession(utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), true); !ureg {
 			return utils.ErrNotFound
 		}
 		*reply = utils.OK
 		return
 	}
-	if aSs := sS.getSessions(s.CGRID, false); len(aSs) != 0 { // found active session, transit to passive
+	if aSs := sS.getSessions(utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false); len(aSs) != 0 { // found active session, transit to passive
 		aSs[0].Lock()
-		sS.unregisterSession(s.CGRID, false)
+		sS.unregisterSession(utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false)
 		aSs[0].stopSTerminator()
 		aSs[0].stopDebitLoops()
 		aSs[0].Unlock()
@@ -2929,18 +2929,18 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
 
 func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string) (err error) {
 	ev := engine.MapEvent(cgrEv.Event)
-	cgrID := GetSetOptsOriginID(ev, cgrEv.APIOpts)
-	s := sS.getRelocateSession(ctx, cgrID,
+	originID := GetSetOptsOriginID(ev, cgrEv.APIOpts)
+	s := sS.getRelocateSession(ctx, originID,
 		ev.GetStringIgnoreErrors(utils.InitialOriginID),
 		ev.GetStringIgnoreErrors(utils.OriginID),
 		ev.GetStringIgnoreErrors(utils.OriginHost))
 	if s != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s> ProcessCDR called for active session with CGRID: <%s>",
-				utils.SessionS, cgrID))
+			fmt.Sprintf("<%s> ProcessCDR called for active session with originID: <%s>",
+				utils.SessionS, originID))
 		s.Lock() // events update session panic
 		defer s.Unlock()
-	} else if sIface, has := engine.Cache.Get(utils.CacheClosedSessions, cgrID); has {
+	} else if sIface, has := engine.Cache.Get(utils.CacheClosedSessions, originID); has {
 		// found in cache
 		s = sIface.(*Session)
 	} else { // no cached session, CDR will be handled by CDRs
@@ -2965,7 +2965,7 @@ func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply
 			cgrEv, rply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
-					utils.SessionS, err.Error(), cgrID))
+					utils.SessionS, err.Error(), originID))
 			withErrors = true
 		}
 	}

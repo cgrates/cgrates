@@ -27,10 +27,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestSessionIDCGRID(t *testing.T) {
+func TestSessionIDMetaOriginID(t *testing.T) {
 	//empty check
 	sessionID := new(SessionID)
-	rcv := sessionID.CGRID()
+	rcv := sessionID.OptsOriginID()
 	eOut := "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
@@ -38,14 +38,14 @@ func TestSessionIDCGRID(t *testing.T) {
 	//normal check
 	sessionID.OriginHost = "testhost"
 	sessionID.OriginID = "testid"
-	rcv = sessionID.CGRID()
+	rcv = sessionID.OptsOriginID()
 	eOut = "2aaff7e3e832de08b0604a79a18ccc6bba823360"
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }
 
-func TestSessionCgrID(t *testing.T) {
+func TestSessionOriginIDOpts(t *testing.T) {
 	//empty check
 	session := new(Session)
 	rcv := session.originID()
@@ -54,10 +54,14 @@ func TestSessionCgrID(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	//normal check
-	session.CGRID = "testID"
+	session = &Session{
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "testID",
+		},
+	}
 	eOut = "testID"
 	rcv = session.originID()
-	if !reflect.DeepEqual(eOut, rcv) && session.CGRID == "testID" {
+	if !reflect.DeepEqual(eOut, rcv) && session.OptsStart[utils.MetaOriginID] == "testID" {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
@@ -75,7 +79,6 @@ func TestSessionClone(t *testing.T) {
 	tTime := time.Now()
 	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	session = &Session{
-		CGRID:         "CGRID",
 		Tenant:        "cgrates.org",
 		ResourceID:    "resourceID",
 		ClientConnID:  "ClientConnID",
@@ -95,9 +98,12 @@ func TestSessionClone(t *testing.T) {
 				NextAutoDebit: &tTime2,
 			},
 		},
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "CGRID",
+		},
 	}
+
 	eOut = &Session{
-		CGRID:         "CGRID",
 		Tenant:        "cgrates.org",
 		ResourceID:    "resourceID",
 		ClientConnID:  "ClientConnID",
@@ -116,16 +122,21 @@ func TestSessionClone(t *testing.T) {
 				TotalUsage:    6,
 				NextAutoDebit: &tTime2,
 			},
+		},
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "CGRID",
 		},
 	}
 	rcv = session.Clone()
-	if !reflect.DeepEqual(eOut, rcv) && session.CGRID == "testID" {
+	if !reflect.DeepEqual(eOut, rcv) && session.OptsStart[utils.MetaOriginID] == "testID" {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	//check clone
-	rcv.CGRID = "newCGRID"
+	rcv.OptsStart = map[string]interface{}{
+		utils.MetaOriginID: "newCGRID",
+	}
 
-	if session.CGRID == "newCGRID" {
+	if session.OptsStart[utils.MetaOriginID] == "newCGRID" {
 		t.Errorf("Expecting: CGRID, received: newCGRID")
 	}
 	rcv.SRuns[1].TotalUsage = 10
@@ -158,7 +169,9 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 		utils.Cost:         12.12,
 	}
 	s := &Session{
-		CGRID:      "RandomCGRID",
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "RandomCGRID",
+		},
 		Tenant:     "cgrates.org",
 		EventStart: engine.NewMapEvent(ev),
 	}
@@ -200,7 +213,9 @@ func TestSessionAsCGREvents(t *testing.T) {
 		utils.Cost:         12.13,
 	}
 	s := &Session{
-		CGRID:      "RandomCGRID",
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "RandomCGRID",
+		},
 		Tenant:     "cgrates.org",
 		EventStart: engine.NewMapEvent(startEv),
 		SRuns: []*SRun{{
@@ -254,7 +269,9 @@ func TestSessionAsExternalSessions(t *testing.T) {
 	}
 	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	s := &Session{
-		CGRID:         "RandomCGRID",
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "RandomCGRID",
+		},
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
@@ -333,7 +350,9 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		utils.Cost:         12.13,
 	}
 	s := &Session{
-		CGRID:         "RandomCGRID",
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "RandomCGRID",
+		},
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
@@ -412,7 +431,9 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 
 	s := &Session{
-		CGRID:         "RandomCGRID",
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "RandomCGRID",
+		},
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
@@ -470,7 +491,9 @@ func TestSessiontotalUsage(t *testing.T) {
 	tTime := time.Now()
 	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	session = &Session{
-		CGRID:         "CGRID",
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "CGRID",
+		},
 		Tenant:        "cgrates.org",
 		ResourceID:    "resourceID",
 		ClientConnID:  "ClientConnID",
@@ -561,7 +584,9 @@ func TestUpdateSRuns(t *testing.T) {
 		utils.Cost:         12.13,
 	}
 	s := &Session{
-		CGRID:         "RandomCGRID",
+		OptsStart: map[string]interface{}{
+			utils.MetaOriginID: "RandomCGRID",
+		},
 		Tenant:        "cgrates.org",
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
