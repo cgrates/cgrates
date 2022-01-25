@@ -33,8 +33,8 @@ type SessionID struct {
 	OriginID   string
 }
 
-// CGRID returns the CGRID formated using the SessionID
-func (s *SessionID) CGRID() string {
+// OptsOriginID returns the OptsOriginID formated using the SessionID
+func (s *SessionID) OptsOriginID() string {
 	return utils.Sha1(s.OriginID, s.OriginHost)
 }
 
@@ -68,9 +68,7 @@ type ExternalSession struct {
 
 // Session is the main structure to describe a call
 type Session struct {
-	lk sync.RWMutex
-
-	CGRID         string
+	lk            sync.RWMutex
 	Tenant        string
 	ResourceID    string
 	ClientConnID  string          // connection ID towards the client so we can recover from passive
@@ -136,7 +134,7 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 	aSs = make([]*ExternalSession, len(s.SRuns))
 	for i, sr := range s.SRuns {
 		aSs[i] = &ExternalSession{
-			CGRID:         s.CGRID,
+			CGRID:         utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]),
 			RunID:         sr.RunID,
 			ToR:           sr.Event.GetStringIgnoreErrors(utils.ToR),
 			OriginID:      s.EventStart.GetStringIgnoreErrors(utils.OriginID),
@@ -166,7 +164,7 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 // AsExternalSession returns the session as an ExternalSession using the SRuns given
 func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalSession) {
 	aS = &ExternalSession{
-		CGRID:         s.CGRID,
+		CGRID:         utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]),
 		RunID:         sr.RunID,
 		ToR:           sr.Event.GetStringIgnoreErrors(utils.ToR),
 		OriginID:      s.EventStart.GetStringIgnoreErrors(utils.OriginID),
