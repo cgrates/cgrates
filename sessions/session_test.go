@@ -282,7 +282,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		}},
 	}
 	exp := []*ExternalSession{{
-		CGRID:    "RandomCGRID",
+		//CGRID:    "RandomCGRID",
 		ToR:      utils.MetaVoice,
 		OriginID: "123451",
 		// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),

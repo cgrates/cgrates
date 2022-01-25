@@ -29,7 +29,7 @@ import (
 
 func TestNewCDRFromExternalCDR(t *testing.T) {
 	extCdr := &ExternalCDR{
-		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		// CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
@@ -161,7 +161,7 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 	extraFields := map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	cdrSQL := &CDRsql{
 		ID:          123,
-		Cgrid:       "abecd993d06672714c4218a6dcf8278e0589a171",
+		// Cgrid:       "abecd993d06672714c4218a6dcf8278e0589a171",
 		RunID:       utils.MetaDefault,
 		OriginID:    "dsafdsaf",
 		TOR:         utils.MetaVoice,
@@ -297,7 +297,7 @@ func TestCDRAddDefaults(t *testing.T) {
 
 func TestNewCDRFromExternalCDRSetupTimeError(t *testing.T) {
 	extCdr := &ExternalCDR{
-		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		// CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UnitTest, RequestType: utils.MetaRated,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
