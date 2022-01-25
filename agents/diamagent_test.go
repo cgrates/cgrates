@@ -203,7 +203,6 @@ func TestProcessRequest(t *testing.T) {
 						ID:     "e7d35bf",
 						Event: map[string]interface{}{
 							"Account":       "1001",
-							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 							"Category":      "call",
 							"Destination":   "1003",
 							"LCRProfile":    "premium_cli",
@@ -214,6 +213,9 @@ func TestProcessRequest(t *testing.T) {
 							"RequestType":   "*prepaid",
 							"ToR":           "*voice",
 							"Usage":         "10s",
+						},
+						APIOpts: map[string]interface{}{
+							"CGRID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},
 				},
@@ -263,8 +265,8 @@ func TestProcessRequest(t *testing.T) {
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
 						Event: map[string]interface{}{
-							"Account":       "1001",
-							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+							"Account": "1001",
+
 							"Category":      "call",
 							"Destination":   "1003",
 							"LCRProfile":    "premium_cli",
@@ -275,6 +277,9 @@ func TestProcessRequest(t *testing.T) {
 							"RequestType":   "*prepaid",
 							"ToR":           "*voice",
 							"Usage":         "10s",
+						},
+						APIOpts: map[string]interface{}{
+							"CGRID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},
 				},
@@ -396,8 +401,8 @@ func TestProcessRequest(t *testing.T) {
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
 						Event: map[string]interface{}{
-							"Account":       "1001",
-							"CGRID":         "1133dc80896edf5049b46aa911cb9085eeb27f4c",
+							"Account": "1001",
+
 							"Category":      "call",
 							"Destination":   "1003",
 							"LCRProfile":    "premium_cli",
@@ -408,6 +413,9 @@ func TestProcessRequest(t *testing.T) {
 							"RequestType":   "*prepaid",
 							"ToR":           "*voice",
 							"Usage":         "10s",
+						},
+						APIOpts: map[string]interface{}{
+							"CGRID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
 						},
 					},
 				},
