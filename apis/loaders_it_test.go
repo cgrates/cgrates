@@ -188,26 +188,48 @@ func testLoadersWriteCSVs(t *testing.T) {
 		return csvAccounts.Sync()
 	}
 	// Create and populate Accounts.csv
-	if err := writeFile(utils.AccountsCsv, `#Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,ACC_PRF,,;20,,MonetaryBalance,,;10,*concrete,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none`); err != nil {
+	if err := writeFile(utils.AccountsCsv, `
+#Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
+cgrates.org,1001,,;20,,MonetaryBalance,,;10,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
+cgrates.org,1001,,,,VoiceBalance,,;10,*voice,1h,,,,,,
+cgrates.org,1002,,,,MonetaryBalance,,;20,*monetary,1h,,,,,,
+cgrates.org,1002,,;30,,VoiceBalance,,;10,*voice,14,fltr3&fltr4;150;fltr5;250,,fltr3&fltr4;1.3;2.3;3.3,attr3;attr4,,*none
+`); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create and populate ActionProfiles.csv
-	if err := writeFile(utils.ActionsCsv, `#Tenant,ID,FilterIDs,Weight,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ACT_PRF,,10,*asap,*accounts,1001,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Units,10`); err != nil {
+	if err := writeFile(utils.ActionsCsv, `
+#Tenant,ID,FilterIDs,Weight,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,10,*asap,*accounts,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
+cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
+`); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create and populate Attributes.csv
-	if err := writeFile(utils.AttributesCsv, `#Tenant,ID,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
-cgrates.org,ATTR_ACNT_1001,FLTR_ACCOUNT_1001,10,,*req.OfficeGroup,*constant,Marketing,false`); err != nil {
+	if err := writeFile(utils.AttributesCsv, `
+#Tenant,ID,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
+cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,20,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true
+cgrates.org,ALS1,*string:~*opts.*context:con2|con3,20,,*req.Field2,*variable,Sub2,true
+cgrates.org,ALS2,*string:~*opts.*context:con2|con3,20,,*req.Field2,*variable,Sub2,true
+cgrates.org,ALS2,*string:~*req.Account:1002;*string:~*opts.*context:con1,20,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,
+`); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create and populate Chargers.csv
-	if err := writeFile(utils.ChargersCsv, `#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
-cgrates.org,Raw,FLTR_ACCOUNT_1001,20,*raw,*constant:*req.RequestType:*none`); err != nil {
+	if err := writeFile(utils.ChargersCsv, `
+#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
+cgrates.org,Charger1,*string:~*req.Account:1001,20,,
+cgrates.org,Charger1,,,*rated,ATTR_1001_SIMPLEAUTH
+cgrates.org,Charger2,,,*rated,ATTR_1002_SIMPLEAUTH
+cgrates.org,Charger2,*string:~*req.Account:1002,15,,
+`); err != nil {
 		t.Fatal(err)
 	}
 
@@ -276,194 +298,301 @@ func testLoadersLoad(t *testing.T) {
 }
 
 func testLoadersGetAccount(t *testing.T) {
-	expIDs := []string{"ACC_PRF"}
-	var accIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAccountIDs,
+	expAccs := []*utils.Account{
+		{
+			Tenant: "cgrates.org",
+			ID:     "1001",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Opts: make(map[string]interface{}),
+			Balances: map[string]*utils.Balance{
+				"MonetaryBalance": {
+					ID: "MonetaryBalance",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					Type:  utils.MetaMonetary,
+					Units: utils.NewDecimal(14, 0),
+					UnitFactors: []*utils.UnitFactor{
+						{
+							FilterIDs: []string{"fltr1", "fltr2"},
+							Factor:    utils.NewDecimal(100, 0),
+						},
+						{
+							FilterIDs: []string{"fltr3"},
+							Factor:    utils.NewDecimal(200, 0),
+						},
+					},
+					Opts: map[string]interface{}{},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							FilterIDs:    []string{"fltr1", "fltr2"},
+							Increment:    utils.NewDecimal(13, 1),
+							FixedFee:     utils.NewDecimal(23, 1),
+							RecurrentFee: utils.NewDecimal(33, 1),
+						},
+					},
+					AttributeIDs: []string{"attr1", "attr2"},
+				},
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					Type:  utils.MetaVoice,
+					Units: utils.NewDecimal(int64(time.Hour), 0),
+					Opts:  make(map[string]interface{}),
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "1002",
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
+			Opts: make(map[string]interface{}),
+			Balances: map[string]*utils.Balance{
+				"MonetaryBalance": {
+					ID: "MonetaryBalance",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					Type:  utils.MetaMonetary,
+					Units: utils.NewDecimal(int64(time.Hour), 0),
+
+					Opts: map[string]interface{}{},
+				},
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					Type:  utils.MetaVoice,
+					Units: utils.NewDecimal(14, 0),
+					Opts:  make(map[string]interface{}),
+					UnitFactors: []*utils.UnitFactor{
+						{
+							FilterIDs: []string{"fltr3", "fltr4"},
+							Factor:    utils.NewDecimal(150, 0),
+						},
+						{
+							FilterIDs: []string{"fltr5"},
+							Factor:    utils.NewDecimal(250, 0),
+						},
+					},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							FilterIDs:    []string{"fltr3", "fltr4"},
+							Increment:    utils.NewDecimal(13, 1),
+							FixedFee:     utils.NewDecimal(23, 1),
+							RecurrentFee: utils.NewDecimal(33, 1),
+						},
+					},
+					AttributeIDs: []string{"attr3", "attr4"},
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	var accs []*utils.Account
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAccounts,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-		}, &accIDs); err != nil {
+		}, &accs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(accIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, accIDs)
-	}
-
-	expAccPrf := utils.Account{
-		Tenant: "cgrates.org",
-		ID:     "ACC_PRF",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
-		Opts: make(map[string]interface{}),
-		Balances: map[string]*utils.Balance{
-			"MonetaryBalance": {
-				ID:   "MonetaryBalance",
-				Opts: make(map[string]interface{}),
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				Type:  "*concrete",
-				Units: utils.NewDecimal(14, 0),
-				UnitFactors: []*utils.UnitFactor{
-					{
-						FilterIDs: []string{"fltr1", "fltr2"},
-						Factor:    utils.NewDecimal(100, 0),
-					},
-					{
-						FilterIDs: []string{"fltr3"},
-						Factor:    utils.NewDecimal(200, 0),
-					},
-				},
-				CostIncrements: []*utils.CostIncrement{
-					{
-						FilterIDs:    []string{"fltr1", "fltr2"},
-						Increment:    utils.NewDecimal(13, 1),
-						FixedFee:     utils.NewDecimal(23, 1),
-						RecurrentFee: utils.NewDecimal(33, 1),
-					},
-				},
-				AttributeIDs: []string{"attr1", "attr2"},
-			},
-		},
-		ThresholdIDs: []string{utils.MetaNone},
-	}
-
-	var rplyAccPrf utils.Account
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyAccPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rplyAccPrf, expAccPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expAccPrf), utils.ToJSON(rplyAccPrf))
+	} else if !reflect.DeepEqual(accs, expAccs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAccs), utils.ToJSON(accs))
 	}
 }
 
 func testLoadersGetActionProfile(t *testing.T) {
-	expIDs := []string{"ACT_PRF"}
-	var actIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs,
-		&utils.ArgsItemIDs{
-			Tenant: "cgrates.org",
-		}, &actIDs); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(actIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, actIDs)
-	}
-
-	expActPrf := engine.ActionProfile{
-		Tenant:   "cgrates.org",
-		ID:       "ACT_PRF",
-		Schedule: utils.MetaASAP,
-		Targets: map[string]utils.StringSet{
-			utils.MetaAccounts: {
-				"1001": {},
+	expActs := []*engine.ActionProfile{
+		{
+			Tenant:   "cgrates.org",
+			ID:       "ONE_TIME_ACT",
+			Weight:   10,
+			Schedule: utils.MetaASAP,
+			Targets: map[string]utils.StringSet{
+				"*accounts": {
+					"1001": {},
+					"1002": {},
+				},
 			},
-		},
-		Weight: 10,
-		Actions: []*engine.APAction{
-			{
-				ID:   "TOPUP",
-				Type: utils.MetaAddBalance,
-				Opts: make(map[string]interface{}),
-				Diktats: []*engine.APDiktat{
-					{
-						Path:  "*balance.TestBalance.Units",
-						Value: "10",
+			Actions: []*engine.APAction{
+				{
+					ID:   "TOPUP",
+					TTL:  0,
+					Type: utils.MetaAddBalance,
+					Opts: map[string]interface{}{},
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "*balance.TestBalance.Value",
+							Value: "10",
+						},
+					},
+				},
+				{
+					ID:   "SET_BALANCE_TEST_DATA",
+					TTL:  0,
+					Type: utils.MetaSetBalance,
+					Opts: map[string]interface{}{},
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "*balance.TestDataBalance.Type",
+							Value: utils.MetaData,
+						},
+					},
+				},
+				{
+					ID:   "TOPUP_TEST_DATA",
+					TTL:  0,
+					Type: utils.MetaAddBalance,
+					Opts: map[string]interface{}{},
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "*balance.TestDataBalance.Value",
+							Value: "1024",
+						},
+					},
+				},
+				{
+					ID:   "SET_BALANCE_TEST_VOICE",
+					TTL:  0,
+					Type: utils.MetaSetBalance,
+					Opts: map[string]interface{}{},
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "*balance.TestVoiceBalance.Type",
+							Value: utils.MetaVoice,
+						},
+					},
+				},
+				{
+					ID:   "TOPUP_TEST_VOICE",
+					TTL:  0,
+					Type: utils.MetaAddBalance,
+					Opts: map[string]interface{}{},
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "*balance.TestVoiceBalance.Value",
+							Value: "15m15s",
+						},
+						{
+							Path:  "*balance.TestVoiceBalance2.Value",
+							Value: "15m15s",
+						},
 					},
 				},
 			},
 		},
 	}
-
-	var rplyActPrf engine.ActionProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
-		utils.TenantID{
+	var acts []*engine.ActionProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyActPrf); err != nil {
+		}, &acts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyActPrf, expActPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expActPrf), utils.ToJSON(rplyActPrf))
+	} else if !reflect.DeepEqual(acts, expActs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expActs, acts)
 	}
 }
 
 func testLoadersGetAttributeProfile(t *testing.T) {
-	expIDs := []string{"ATTR_ACNT_1001"}
-	var attrIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs,
-		&utils.ArgsItemIDs{
-			Tenant: "cgrates.org",
-		}, &attrIDs); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(attrIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, attrIDs)
-	}
-
-	expAttrPrf := engine.APIAttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weight:    10,
-		Attributes: []*engine.ExternalAttribute{
-			{
-				Path:  "*req.OfficeGroup",
-				Type:  utils.MetaConstant,
-				Value: "Marketing",
+	expAttrs := []*engine.APIAttributeProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "ALS1",
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:con1", "*string:~*opts.*context:con2|con3"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					FilterIDs: []string{"*string:~*req.Field1:Initial"},
+					Path:      utils.MetaReq + utils.NestingSep + "Field1",
+					Type:      utils.MetaVariable,
+					Value:     "Sub1",
+				},
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Field2",
+					Type:  utils.MetaVariable,
+					Value: "Sub2",
+				},
 			},
+			Blocker: true,
+			Weight:  20,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "ALS2",
+			FilterIDs: []string{"*string:~*opts.*context:con2|con3", "*string:~*req.Account:1002", "*string:~*opts.*context:con1"},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Field2",
+					Type:  utils.MetaVariable,
+					Value: "Sub2",
+				},
+				{
+					FilterIDs: []string{"*string:~*req.Field1:Initial"},
+					Path:      utils.MetaReq + utils.NestingSep + "Field1",
+					Type:      utils.MetaVariable,
+					Value:     "Sub1",
+				},
+			},
+			Blocker: true,
+			Weight:  20,
 		},
 	}
-
-	var rplyAttrPrf engine.APIAttributeProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
-		utils.TenantID{
+	var attrs []*engine.APIAttributeProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyAttrPrf); err != nil {
+		}, &attrs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyAttrPrf, expAttrPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expAttrPrf), utils.ToJSON(rplyAttrPrf))
+	} else if !reflect.DeepEqual(attrs, expAttrs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAttrs), utils.ToJSON(attrs))
 	}
 }
 
 func testLoadersGetChargerProfile(t *testing.T) {
-	expIDs := []string{"Raw"}
-	var chgIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs,
+	expChrgs := []*engine.ChargerProfile{
+		{
+			Tenant:       "cgrates.org",
+			ID:           "Charger2",
+			FilterIDs:    []string{"*string:~*req.Account:1002"},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_1002_SIMPLEAUTH"},
+			Weight:       15,
+		},
+		{
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    []string{"*string:~*req.Account:1001"},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+			Weight:       20,
+		},
+	}
+	var chrgs []*engine.ChargerProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-		}, &chgIDs); err != nil {
+		}, &chrgs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(chgIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, chgIDs)
-	}
-
-	expChgPrf := engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "Raw",
-		FilterIDs:    []string{"FLTR_ACCOUNT_1001"},
-		RunID:        utils.MetaRaw,
-		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-		Weight:       20,
-	}
-
-	var rplyChgPrf engine.ChargerProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
-		utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyChgPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rplyChgPrf, expChgPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expChgPrf), utils.ToJSON(rplyChgPrf))
+	} else if !reflect.DeepEqual(chrgs, expChrgs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expChrgs), utils.ToJSON(chrgs))
 	}
 }
 
