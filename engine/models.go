@@ -106,7 +106,6 @@ func (FilterMdl) TableName() string {
 
 type CDRsql struct {
 	ID          int64
-	Cgrid       string
 	RunID       string
 	OriginHost  string
 	Source      string
@@ -138,7 +137,7 @@ func (t CDRsql) TableName() string {
 func (t CDRsql) AsMapStringInterface() (out map[string]interface{}) {
 	out = make(map[string]interface{})
 	// out["id"] = t.ID // ignore ID
-	out["cgrid"] = t.Cgrid
+
 	out["run_id"] = t.RunID
 	out["origin_host"] = t.OriginHost
 	out["source"] = t.Source
@@ -167,7 +166,6 @@ func (t CDRsql) AsMapStringInterface() (out map[string]interface{}) {
 
 type SessionCostsSQL struct {
 	ID          int64
-	Cgrid       string
 	RunID       string
 	OriginHost  string
 	OriginID    string

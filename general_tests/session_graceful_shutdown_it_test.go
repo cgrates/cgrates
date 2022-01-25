@@ -202,7 +202,7 @@ func testSessionSRplcApierGetInitateSessions(t *testing.T) {
 func testSessionSRplcApierGetActiveSessions(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
-			CGRID:         "testSessionRplCGRID",
+			//CGRID:         "testSessionRplCGRID",
 			RunID:         "*default",
 			ToR:           "",
 			OriginID:      "testSessionRplORIGINID",
@@ -241,7 +241,7 @@ func testSessionSRplcApierGetActiveSessions(t *testing.T) {
 func testSessionSRplcApierGetPassiveSessions(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
-			CGRID:         "testSessionRplCGRID",
+			//CGRID:         "testSessionRplCGRID",
 			RunID:         "",
 			ToR:           "",
 			OriginID:      "testSessionRplORIGINID",
@@ -291,7 +291,7 @@ func testSessionSRplcApierStopSession2(t *testing.T) {
 func testSessionSRplcApierGetPassiveSessionsAfterStop(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
-			CGRID:         "testSessionRplCGRID",
+			//CGRID:         "testSessionRplCGRID",
 			RunID:         "",
 			ToR:           "",
 			OriginID:      "testSessionRplORIGINID",

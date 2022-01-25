@@ -28,8 +28,8 @@ import (
 
 func TestModelsAsMapStringInterface(t *testing.T) {
 	testCdrSql := CDRsql{
-		ID:          1,
-		Cgrid:       "testCgrID1",
+		ID: 1,
+		// Cgrid:       "testCgrID1",
 		RunID:       "testRunID",
 		OriginHost:  "testOriginHost",
 		Source:      "testSource",
@@ -54,7 +54,7 @@ func TestModelsAsMapStringInterface(t *testing.T) {
 		DeletedAt:   utils.TimePointer(time.Date(2021, 3, 3, 3, 3, 3, 3, time.UTC)),
 	}
 	expected := map[string]interface{}{
-		"cgrid":        testCdrSql.Cgrid,
+		// "cgrid":        testCdrSql.Cgrid,
 		"run_id":       testCdrSql.RunID,
 		"origin_host":  testCdrSql.OriginHost,
 		"source":       testCdrSql.Source,

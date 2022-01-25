@@ -193,7 +193,7 @@ func (fsev FSEvent) MissingParameter(timezone string) string {
 func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err error) {
 	fsSTimeStr, hasKey := fsev[SETUP_TIME]
 	if hasKey && fsSTimeStr != "0" {
-		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so CGRID will not corelate
+		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so originID will not corelate
 		fsSTimeStr = fsSTimeStr[:len(fsSTimeStr)-6]
 	}
 	sTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsSTimeStr)
@@ -206,7 +206,7 @@ func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err e
 func (fsev FSEvent) GetAnswerTime(fieldName, timezone string) (t time.Time, err error) {
 	fsATimeStr, hasKey := fsev[ANSWER_TIME]
 	if hasKey && fsATimeStr != "0" {
-		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so CGRID will not corelate
+		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so originID will not corelate
 		fsATimeStr = fsATimeStr[:len(fsATimeStr)-6]
 	}
 	aTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsATimeStr)

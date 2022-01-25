@@ -139,13 +139,13 @@ func newEEMetrics(location string) (*utils.SafeMapStorage, error) {
 	}}, nil
 }
 
-func updateEEMetrics(dc *utils.SafeMapStorage, cgrID string, ev engine.MapEvent, hasError bool, timezone string) {
+func updateEEMetrics(dc *utils.SafeMapStorage, originID string, ev engine.MapEvent, hasError bool, timezone string) {
 	dc.Lock()
 	defer dc.Unlock()
 	if hasError {
-		dc.MapStorage[utils.NegativeExports].(utils.StringSet).Add(cgrID)
+		dc.MapStorage[utils.NegativeExports].(utils.StringSet).Add(originID)
 	} else {
-		dc.MapStorage[utils.PositiveExports].(utils.StringSet).Add(cgrID)
+		dc.MapStorage[utils.PositiveExports].(utils.StringSet).Add(originID)
 	}
 	if aTime, err := ev.GetTime(utils.AnswerTime, timezone); err == nil {
 		if _, has := dc.MapStorage[utils.FirstEventATime]; !has {

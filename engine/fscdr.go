@@ -69,7 +69,7 @@ type FSCdr struct {
 	body   map[string]interface{} // keeps the loaded body for extra field search
 }
 
-func (fsCdr FSCdr) getCGRID() string {
+func (fsCdr FSCdr) getOriginID() string {
 	return utils.Sha1(fsCdr.vars[fsUUID],
 		utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[fsIPv4]))
 }

@@ -391,7 +391,7 @@ func (ka *KamailioAgent) V1DisconnectSession(ctx *context.Context, args utils.At
 	return
 }
 
-// V1GetActiveSessionIDs returns a list of CGRIDs based on active sessions from agent
+// V1GetActiveSessionIDs returns a list of originIDs based on active sessions from agent
 func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx *context.Context, _ string, sessionIDs *[]*sessions.SessionID) (err error) {
 	kamEv := utils.ToJSON(map[string]string{utils.Event: CGR_DLG_LIST})
 	var sentDLG int
