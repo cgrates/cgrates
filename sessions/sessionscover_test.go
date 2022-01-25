@@ -4555,7 +4555,7 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	args.Filters = nil
 	sessions.aSessions = map[string]*Session{
 		"sess1": {
-			CGRID: "CGRATES_ID",
+
 			EventStart: map[string]interface{}{
 				utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 				utils.OriginID:     "222",
@@ -4568,9 +4568,11 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 					},
 				},
 			},
+			OptsStart: map[string]interface{}{
+				utils.MetaOriginID: "CGRATES_ID",
+			},
 		},
 		"CGRATES_ID": {
-			CGRID:  "CGRATES1_ID",
 			Tenant: "cgrates.org",
 			EventStart: map[string]interface{}{
 				utils.Usage:    7 * time.Minute,
@@ -4585,6 +4587,9 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 						utils.OriginID:     "222",
 					},
 				},
+			},
+			OptsStart: map[string]interface{}{
+				utils.MetaOriginID: "CGRATES1_ID",
 			},
 		},
 	}

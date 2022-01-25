@@ -260,7 +260,7 @@ type erEvents struct {
 
 // processPartialEvent process the event as a partial event
 func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.EventReaderCfg) (err error) {
-	// to identify the event the originID and originHost is used to create the CGRID
+	// to identify the event the originID and originHost is used to create the originID
 	orgID, err := ev.FieldAsString(utils.OriginID)
 	if err == utils.ErrNotFound { // the field is missing ignore the event
 		utils.Logger.Warning(
@@ -269,9 +269,9 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 		return
 	}
 	orgHost := utils.IfaceAsString(ev.Event[utils.OriginHost])
-	cgrID := utils.Sha1(orgID, orgHost)
+	originID := utils.Sha1(orgID, orgHost)
 
-	evs, has := erS.partialCache.Get(cgrID) // get the existing events from cache
+	evs, has := erS.partialCache.Get(originID) // get the existing events from cache
 	var cgrEvs *erEvents
 	if !has || evs == nil {
 		cgrEvs = &erEvents{
@@ -293,14 +293,14 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 	}
 	if partial := cgrEv.APIOpts[utils.PartialOpt]; !utils.IsSliceMember([]string{utils.FalseStr, utils.EmptyString},
 		utils.IfaceAsString(partial)) { // if is still partial set it back in cache
-		erS.partialCache.Set(cgrID, cgrEvs, nil)
+		erS.partialCache.Set(originID, cgrEvs, nil)
 		return
 	}
 
 	// complete event
 	if len(cgrEvs.events) != 1 { // remove it from cache if there were events in cache
-		erS.partialCache.Set(cgrID, nil, nil) // set it with nil in cache to ignore when we expire the item
-		erS.partialCache.Remove(cgrID)
+		erS.partialCache.Set(originID, nil, nil) // set it with nil in cache to ignore when we expire the item
+		erS.partialCache.Remove(originID)
 	}
 	go func() { erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: rdrCfg} }() // put the event on the complete events chanel( in a goroutine to not block the select from ListenAndServe)
 	return
