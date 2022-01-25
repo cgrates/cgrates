@@ -60,12 +60,11 @@ func (mgSQL *migratorSQL) renameV1SMCosts() (err error) {
 }
 
 func (mgSQL *migratorSQL) createV1SMCosts() (err error) {
-	qry := fmt.Sprint("CREATE TABLE sm_costs (  id int(11) NOT NULL AUTO_INCREMENT,  cgrid varchar(40) NOT NULL,  run_id  varchar(64) NOT NULL,  origin_host varchar(64) NOT NULL,  origin_id varchar(128) NOT NULL,  cost_source varchar(64) NOT NULL,  `usage` BIGINT NOT NULL,  cost_details MEDIUMTEXT,  created_at TIMESTAMP NULL,deleted_at TIMESTAMP NULL,  PRIMARY KEY (`id`),UNIQUE KEY costid (cgrid, run_id),KEY origin_idx (origin_host, origin_id),KEY run_origin_idx (run_id, origin_id),KEY deleted_at_idx (deleted_at));")
+	qry := fmt.Sprint("CREATE TABLE sm_costs (  id int(11) NOT NULL AUTO_INCREMENT,    run_id  varchar(64) NOT NULL,  origin_host varchar(64) NOT NULL,  origin_id varchar(128) NOT NULL,  cost_source varchar(64) NOT NULL,  `usage` BIGINT NOT NULL,  cost_details MEDIUMTEXT,  created_at TIMESTAMP NULL,deleted_at TIMESTAMP NULL,  PRIMARY KEY (`id`),UNIQUE KEY costid ( run_id),KEY origin_idx (origin_host, origin_id),KEY run_origin_idx (run_id, origin_id),KEY deleted_at_idx (deleted_at));")
 	if mgSQL.StorDB().GetStorageType() == utils.Postgres {
 		qry = `
 	CREATE TABLE sm_costs (
 	  id SERIAL PRIMARY KEY,
-	  cgrid VARCHAR(40) NOT NULL,
 	  run_id  VARCHAR(64) NOT NULL,
 	  origin_host VARCHAR(64) NOT NULL,
 	  origin_id VARCHAR(128) NOT NULL,
@@ -74,7 +73,7 @@ func (mgSQL *migratorSQL) createV1SMCosts() (err error) {
 	  cost_details jsonb,
 	  created_at TIMESTAMP WITH TIME ZONE,
 	  deleted_at TIMESTAMP WITH TIME ZONE NULL,
-	  UNIQUE (cgrid, run_id)
+	  UNIQUE ( run_id)
 	);
 		`
 	}

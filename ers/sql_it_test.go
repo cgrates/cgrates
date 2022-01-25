@@ -67,7 +67,6 @@ var (
 		testSQLStop2,
 	}
 	cdr = &engine.CDR{
-		CGRID: "CGRID",
 		RunID: "RunID",
 	}
 	db           *gorm.DB
@@ -173,7 +172,7 @@ func testSQLInitDBs(t *testing.T) {
 	}
 }
 func testSQLInitDB(t *testing.T) {
-	cdr.CGRID = utils.UUIDSha1Prefix()
+
 	var err error
 	if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
 		&gorm.Config{
@@ -244,11 +243,9 @@ func testSQLReader(t *testing.T) {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
 		expected := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     ev.cgrEvent.ID,
-			Event: map[string]interface{}{
-				"CGRID": cdr.CGRID,
-			},
+			Tenant:  "cgrates.org",
+			ID:      ev.cgrEvent.ID,
+			Event:   map[string]interface{}{},
 			APIOpts: map[string]interface{}{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
@@ -277,11 +274,9 @@ func testSQLReader2(t *testing.T) {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
 		expected := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     ev.cgrEvent.ID,
-			Event: map[string]interface{}{
-				"CGRID": cdr.CGRID,
-			},
+			Tenant:  "cgrates.org",
+			ID:      ev.cgrEvent.ID,
+			Event:   map[string]interface{}{},
 			APIOpts: map[string]interface{}{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
@@ -315,9 +310,6 @@ func testSQLPoster(t *testing.T) {
 			msg[colName] = columns[i]
 		}
 		db.Table("cdrs2").Delete(msg)
-		if cgrid := utils.IfaceAsString(msg["cgrid"]); cgrid != cdr.CGRID {
-			t.Errorf("Expected: %s ,receieved: %s", cgrid, cdr.CGRID)
-		}
 	}
 }
 
@@ -415,7 +407,6 @@ func testSQLInitDBs2(t *testing.T) {
 	}
 }
 func testSQLInitDB2(t *testing.T) {
-	cdr.CGRID = utils.UUIDSha1Prefix()
 	var err error
 	if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
 		&gorm.Config{
@@ -487,11 +478,9 @@ func testSQLReader3(t *testing.T) {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
 		expected := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     ev.cgrEvent.ID,
-			Event: map[string]interface{}{
-				"CGRID": cdr.CGRID,
-			},
+			Tenant:  "cgrates.org",
+			ID:      ev.cgrEvent.ID,
+			Event:   map[string]interface{}{},
 			APIOpts: map[string]interface{}{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
@@ -520,11 +509,9 @@ func testSQLReader4(t *testing.T) {
 			t.Errorf("Expected 'mysql' received `%s`", ev.rdrCfg.ID)
 		}
 		expected := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     ev.cgrEvent.ID,
-			Event: map[string]interface{}{
-				"CGRID": cdr.CGRID,
-			},
+			Tenant:  "cgrates.org",
+			ID:      ev.cgrEvent.ID,
+			Event:   map[string]interface{}{},
 			APIOpts: map[string]interface{}{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
@@ -558,9 +545,7 @@ func testSQLPoster2(t *testing.T) {
 			msg[colName] = columns[i]
 		}
 		db.Table("cdrs2").Delete(msg)
-		if cgrid := utils.IfaceAsString(msg["cgrid"]); cgrid != cdr.CGRID {
-			t.Errorf("Expected: %s ,receieved: %s", cgrid, cdr.CGRID)
-		}
+
 	}
 }
 

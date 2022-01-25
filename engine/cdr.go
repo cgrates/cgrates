@@ -312,7 +312,6 @@ func NewCDRFromSQL(cdrSQL *CDRsql) (cdr *CDR, err error) {
 }
 
 type ExternalCDR struct {
-	CGRID       string
 	RunID       string
 	OrderID     int64
 	OriginHost  string
