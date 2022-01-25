@@ -43,6 +43,48 @@ func TestConvertDecimalToFloat(t *testing.T) {
 	}
 }
 
+func TestDecimalSum(t *testing.T) {
+	dec1 := NewDecimal(495, 1)
+	dec2 := NewDecimal(5, 1)
+	x := SumBig(dec1.Big, dec2.Big)
+
+	// as decimals, 50 is different from 50.0 (decimal.Big)
+	exp := NewDecimal(500, 1)
+	if !reflect.DeepEqual(x, exp.Big) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(exp.Big), ToJSON(x))
+	}
+
+	// same for substract
+	diff := SubstractBig(dec1.Big, dec2.Big)
+	exp = NewDecimal(490, 1)
+	if !reflect.DeepEqual(diff, exp.Big) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(exp.Big), ToJSON(x))
+	}
+
+	// decimal
+	exp2 := NewDecimal(500, 1)
+	x2 := SumDecimal(dec1, dec2)
+	if !reflect.DeepEqual(x2, exp2) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(exp2), ToJSON(x2))
+	}
+
+	// same for substract
+	exp2 = NewDecimal(490, 1)
+	x2 = SubstractDecimal(dec1, dec2)
+	if !reflect.DeepEqual(x2, exp2) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(exp2), ToJSON(x2))
+	}
+
+	// to conclude, 50.0 is different from 50, same difference for 49.0 and 49
+	val1, val2 := NewDecimal(50, 0), NewDecimal(500, 1)
+	if reflect.DeepEqual(val1, val2) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(val1), ToJSON(val2))
+	}
+	if reflect.DeepEqual(val1.Big, val2.Big) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(val1.Big), ToJSON(val2.Big))
+	}
+}
+
 func TestNewDecimalDivide(t *testing.T) {
 	x := decimal.WithContext(DecimalContext).SetUint64(10)
 	y := decimal.WithContext(DecimalContext).SetUint64(5)
