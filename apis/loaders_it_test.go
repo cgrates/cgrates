@@ -234,20 +234,34 @@ cgrates.org,Charger2,*string:~*req.Account:1002,15,,
 	}
 
 	// Create and populate DispatcherProfiles.csv
-	if err := writeFile(utils.DispatcherProfilesCsv, `#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
-cgrates.org,DSP1,FLTR_ACCOUNT_1001,10,*weight,,ALL,,20,false,`); err != nil {
+	if err := writeFile(utils.DispatcherProfilesCsv, `
+#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
+cgrates.org,D1,*string:~*req.Account:1001,20,*first,,C1,fltr1,10,true,*ratio:1;param1:value1
+cgrates.org,D1,,,*first,,C1,fltr2;fltr4,,false,param2:value2
+cgrates.org,D2,,,*first,,C3,fltr2,20,true,
+cgrates.org,D2,*string:~*req.Account:1002,20,*first,,C2,fltr3,10,,param3:value3
+`); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create and populate DispatcherHosts.csv
-	if err := writeFile(utils.DispatcherHostsCsv, `#Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],ConnectTimeout[6],ReplyTimeout[7],Tls[8],ClientKey[9],ClientCertificate[10],CaCertificate[11]
-cgrates.org,DSPHOST1,*internal,,1,3,"1m","2m",false,,,`); err != nil {
+	if err := writeFile(utils.DispatcherHostsCsv, `
+#Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],ConnectTimeout[6],ReplyTimeout[7],Tls[8],ClientKey[9],ClientCertificate[10],CaCertificate[11]
+cgrates.org,ALL,127.0.0.1:6012,,1,3,1m,2m,true,,,
+cgrates.org,ALL,,*json,1,3,1m,2m,false,,,
+`); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create and populate Filters.csv
-	if err := writeFile(utils.FiltersCsv, `#Tenant[0],ID[1],Type[2],Path[3],Values[4]
-cgrates.org,FLTR_ACCOUNT_1001,*string,~*req.Account,1001`); err != nil {
+	if err := writeFile(utils.FiltersCsv, `
+#Tenant[0],ID[1],Type[2],Element[3],Values[4]
+cgrates.org,FLTR_ACCOUNT_1001,*string,~*req.Account,1001;1002
+cgrates.org,FLTR_ACCOUNT_1001,*prefix,~*req.Destination,10;20
+cgrates.org,FLTR_ACCOUNT_1001,*rsr,~*req.Subject,~^1.*1$
+cgrates.org,FLTR_ACCOUNT_1001,*rsr,~*req.Destination,1002
+cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan
+`); err != nil {
 		t.Fatal(err)
 	}
 
@@ -570,19 +584,19 @@ func testLoadersGetChargerProfile(t *testing.T) {
 	expChrgs := []*engine.ChargerProfile{
 		{
 			Tenant:       "cgrates.org",
-			ID:           "Charger2",
-			FilterIDs:    []string{"*string:~*req.Account:1002"},
-			RunID:        "*rated",
-			AttributeIDs: []string{"ATTR_1002_SIMPLEAUTH"},
-			Weight:       15,
-		},
-		{
-			Tenant:       "cgrates.org",
 			ID:           "Charger1",
 			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
 			Weight:       20,
+		},
+		{
+			Tenant:       "cgrates.org",
+			ID:           "Charger2",
+			FilterIDs:    []string{"*string:~*req.Account:1002"},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_1002_SIMPLEAUTH"},
+			Weight:       15,
 		},
 	}
 	var chrgs []*engine.ChargerProfile
@@ -597,118 +611,141 @@ func testLoadersGetChargerProfile(t *testing.T) {
 }
 
 func testLoadersGetDispatcherProfile(t *testing.T) {
-	expIDs := []string{"DSP1"}
-	var dspPrfIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs,
-		&utils.ArgsItemIDs{
-			Tenant: "cgrates.org",
-		}, &dspPrfIDs); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dspPrfIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, dspPrfIDs)
-	}
-
-	expDspPrf := engine.DispatcherProfile{
-		Tenant:         "cgrates.org",
-		ID:             "DSP1",
-		FilterIDs:      []string{"FLTR_ACCOUNT_1001"},
-		Strategy:       utils.MetaWeight,
-		StrategyParams: make(map[string]interface{}),
-		Hosts: engine.DispatcherHostProfiles{
-			{
-				ID:     "ALL",
-				Weight: 20,
-				Params: make(map[string]interface{}),
+	expDspPrfs := []*engine.DispatcherProfile{
+		{
+			Tenant:         "cgrates.org",
+			ID:             "D1",
+			FilterIDs:      []string{"*string:~*req.Account:1001"},
+			Strategy:       utils.MetaFirst,
+			StrategyParams: map[string]interface{}{},
+			Weight:         20,
+			Hosts: engine.DispatcherHostProfiles{
+				{
+					ID:        "C1",
+					FilterIDs: []string{"fltr1"},
+					Weight:    10,
+					Params: map[string]interface{}{
+						utils.MetaRatio: "1",
+						"param1":        "value1",
+						"param2":        "value2",
+					},
+					Blocker: true,
+				},
 			},
 		},
-		Weight: 10,
+		{
+			Tenant:         "cgrates.org",
+			ID:             "D2",
+			FilterIDs:      []string{"*string:~*req.Account:1002"},
+			Strategy:       utils.MetaFirst,
+			StrategyParams: map[string]interface{}{},
+			Weight:         20,
+			Hosts: engine.DispatcherHostProfiles{
+				{
+					ID:        "C3",
+					FilterIDs: []string{"*fltr2"},
+					Weight:    20,
+					Params:    map[string]interface{}{},
+					Blocker:   true,
+				},
+				{
+					ID:        "C2",
+					FilterIDs: []string{"fltr3"},
+					Weight:    10,
+					Params: map[string]interface{}{
+						"param3": "value3",
+					},
+					Blocker: false,
+				},
+			},
+		},
 	}
-
-	var rplyDspPrf engine.DispatcherProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
-		utils.TenantID{
+	var dspPrfs []*engine.DispatcherProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfiles,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyDspPrf); err != nil {
+		}, &dspPrfs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyDspPrf, expDspPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expDspPrf), utils.ToJSON(rplyDspPrf))
+	} else if !reflect.DeepEqual(dspPrfs, expDspPrfs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expDspPrfs), utils.ToJSON(dspPrfs))
 	}
 }
 
 func testLoadersGetDispatcherHost(t *testing.T) {
-	expIDs := []string{"DSPHOST1"}
-	var dspHostIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs,
-		&utils.ArgsItemIDs{
+	expDspHosts := []*engine.DispatcherHost{
+		{
 			Tenant: "cgrates.org",
-		}, &dspHostIDs); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dspHostIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, dspHostIDs)
-	}
-
-	expDspHost := engine.DispatcherHost{
-		Tenant: "cgrates.org",
-		RemoteHost: &config.RemoteHost{
-			ID:              expIDs[0],
-			Address:         utils.MetaInternal,
-			Transport:       utils.MetaJSON,
-			ConnectAttempts: 1,
-			Reconnects:      3,
-			ConnectTimeout:  time.Minute,
-			ReplyTimeout:    2 * time.Minute,
+			RemoteHost: &config.RemoteHost{
+				ID:              "ALL",
+				Address:         "127.0.0.1:6012",
+				Transport:       utils.MetaJSON,
+				ConnectAttempts: 1,
+				Reconnects:      3,
+				ConnectTimeout:  time.Minute,
+				ReplyTimeout:    2 * time.Minute,
+				TLS:             true,
+			},
 		},
 	}
-
-	var rplyDspHost engine.DispatcherHost
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
-		utils.TenantID{
+	var dspHosts []*engine.DispatcherHost
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHosts,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyDspHost); err != nil {
+		}, &dspHosts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyDspHost, expDspHost) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expDspHost), utils.ToJSON(rplyDspHost))
+	} else if !reflect.DeepEqual(dspHosts, expDspHosts) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expDspHosts), utils.ToJSON(dspHosts))
 	}
 }
 
 func testLoadersGetFilter(t *testing.T) {
-	expIDs := []string{"FLTR_ACCOUNT_1001"}
-	var fltrIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetFilterIDs,
-		&utils.ArgsItemIDs{
+	expFltrs := []*engine.Filter{
+		{
 			Tenant: "cgrates.org",
-		}, &fltrIDs); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(fltrIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, fltrIDs)
-	}
-
-	expFltrPrf := engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_ACCOUNT_1001",
-		Rules: []*engine.FilterRule{
-			{
-				Type:    utils.MetaString,
-				Element: "~*req.Account",
-				Values:  []string{"1001"},
+			ID:     "FLTR_ACCOUNT_1001",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Type:    utils.MetaString,
+					Values:  []string{"1001", "1002"},
+				},
+				{
+					Element: "~*req.Destination",
+					Type:    utils.MetaPrefix,
+					Values:  []string{"10", "20"},
+				},
+				{
+					Element: "~*req.Subject",
+					Type:    utils.MetaRSR,
+					Values:  []string{"~^1.*1$"},
+				},
+				{
+					Element: "~*req.Destination",
+					Type:    utils.MetaRSR,
+					Values:  []string{"1002"},
+				},
+			},
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_ACNT_dan",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Type:    utils.MetaString,
+					Values:  []string{"dan"},
+				},
 			},
 		},
 	}
-
-	var rplyFltrPrf engine.Filter
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetFilter,
-		utils.TenantID{
+	var fltrs []*engine.Filter
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetFilters,
+		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyFltrPrf); err != nil {
+		}, &fltrs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rplyFltrPrf, expFltrPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expFltrPrf), utils.ToJSON(rplyFltrPrf))
+	} else if !reflect.DeepEqual(fltrs, expFltrs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expFltrs), utils.ToJSON(fltrs))
 	}
 }
 
