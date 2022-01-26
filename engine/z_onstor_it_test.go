@@ -779,7 +779,11 @@ func testOnStorITAttributeProfile(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if _, rcvErr := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -854,7 +858,11 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if _, rcvErr := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {

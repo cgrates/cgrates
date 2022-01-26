@@ -499,7 +499,11 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
 		t.Error(err)
@@ -526,7 +530,11 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
 		t.Error(err)
@@ -630,7 +638,11 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	//Set AttributeProfile with 2 contexts ( con1 , con2)
 	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
@@ -658,7 +670,11 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
 		t.Error(err)
