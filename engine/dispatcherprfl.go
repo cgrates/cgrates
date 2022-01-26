@@ -214,7 +214,9 @@ func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool,
 		case utils.Strategy:
 			dP.Strategy = utils.IfaceAsString(val)
 		case utils.Weight:
-			dP.Weight, err = utils.IfaceAsFloat64(val)
+			if val != utils.EmptyString {
+				dP.Weight, err = utils.IfaceAsFloat64(val)
+			}
 		case utils.StrategyParams:
 			dP.StrategyParams, err = utils.NewMapFromCSV(utils.IfaceAsString(val))
 		}
@@ -236,7 +238,9 @@ func (dP *DispatcherProfile) Set(path []string, val interface{}, newBranch bool,
 				valA, err = utils.IfaceAsStringSlice(val)
 				dP.Hosts[len(dP.Hosts)-1].FilterIDs = append(dP.Hosts[len(dP.Hosts)-1].FilterIDs, valA...)
 			case utils.Weight:
-				dP.Hosts[len(dP.Hosts)-1].Weight, err = utils.IfaceAsFloat64(val)
+				if val != utils.EmptyString {
+					dP.Hosts[len(dP.Hosts)-1].Weight, err = utils.IfaceAsFloat64(val)
+				}
 			case utils.Blocker:
 				dP.Hosts[len(dP.Hosts)-1].Blocker, err = utils.IfaceAsBool(val)
 			case utils.Params:

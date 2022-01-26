@@ -607,7 +607,9 @@ func (tp *ThresholdProfile) Set(path []string, val interface{}, _ bool, _ string
 	case utils.Blocker:
 		tp.Blocker, err = utils.IfaceAsBool(val)
 	case utils.Weight:
-		tp.Weight, err = utils.IfaceAsFloat64(val)
+		if val != utils.EmptyString {
+			tp.Weight, err = utils.IfaceAsFloat64(val)
+		}
 	case utils.FilterIDs:
 		var valA []string
 		valA, err = utils.IfaceAsStringSlice(val)
