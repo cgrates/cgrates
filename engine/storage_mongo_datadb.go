@@ -442,27 +442,6 @@ func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
 	return resp, err
 }
 
-func (ms *MongoStorage) getField(sctx mongo.SessionContext, col, prefix, subject, field string) (result []string, err error) {
-	fieldResult := bson.D{}
-	iter, err := ms.getCol(col).Find(sctx,
-		bson.M{field: bsonx.Regex(subject, "")},
-		options.Find().SetProjection(
-			bson.M{field: 1},
-		),
-	)
-	if err != nil {
-		return
-	}
-	for iter.Next(sctx) {
-		err = iter.Decode(&fieldResult)
-		if err != nil {
-			return
-		}
-		result = append(result, prefix+fieldResult.Map()[field].(string))
-	}
-	return result, iter.Close(sctx)
-}
-
 func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subject string, tntID *utils.TenantID) (result []string, err error) {
 	idResult := struct{ Tenant, ID string }{}
 	elem := bson.M{}
@@ -470,11 +449,11 @@ func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subjec
 		elem["tenant"] = tntID.Tenant
 	}
 	if tntID.ID != "" {
-		elem["id"] = bsonx.Regex(subject, "")
+		elem["id"] = bsonx.Regex(tntID.ID, "")
 	}
+
 	iter, err := ms.getCol(col).Find(sctx, elem,
-		options.Find().SetProjection(bson.M{"tenant": 1, "id": 1}),
-	)
+		options.Find().SetProjection(bson.M{"tenant": 1, "id": 1}))
 	if err != nil {
 		return
 	}
