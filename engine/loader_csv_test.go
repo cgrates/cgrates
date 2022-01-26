@@ -411,7 +411,7 @@ func TestLoadAttributeProfiles(t *testing.T) {
 				},
 			},
 			Blocker: true,
-			Weight:  20,
+			Weights: 20,
 		},
 	}
 

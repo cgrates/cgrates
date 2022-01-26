@@ -1065,8 +1065,8 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 				Blocker: tp.Blocker,
 			}
 		}
-		if tp.Weight != 0 {
-			th.Weight = tp.Weight
+		if tp.Weights != utils.EmptyString {
+			th.Weights = tp.Weights
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[key.TenantID()]; !has {
@@ -1116,10 +1116,11 @@ func APItoModelTPAttribute(ap *utils.TPAttributeProfile) (mdls AttributeMdls) {
 				}
 				mdl.FilterIDs += val
 			}
-			if ap.Weight != 0 {
-				mdl.Weight = ap.Weight
+			if ap.Weights != utils.EmptyString {
+				mdl.Weights = ap.Weights
 			}
 		}
+
 		mdl.Path = reqAttribute.Path
 		mdl.Value = reqAttribute.Value
 		mdl.Type = reqAttribute.Type
@@ -1133,10 +1134,14 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 	attrPrf = &AttributeProfile{
 		Tenant:     tpAttr.Tenant,
 		ID:         tpAttr.ID,
-		Weight:     tpAttr.Weight,
 		Blocker:    tpAttr.Blocker,
 		FilterIDs:  make([]string, len(tpAttr.FilterIDs)),
 		Attributes: make([]*Attribute, len(tpAttr.Attributes)),
+	}
+	if tpAttr.Weights != utils.EmptyString {
+		if attrPrf.Weights, err = utils.NewDynamicWeightsFromString(tpAttr.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+			return
+		}
 	}
 	for i, fli := range tpAttr.FilterIDs {
 		attrPrf.FilterIDs[i] = fli
@@ -1167,7 +1172,7 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 		FilterIDs:  make([]string, len(attrPrf.FilterIDs)),
 		Attributes: make([]*utils.TPAttribute, len(attrPrf.Attributes)),
 		Blocker:    attrPrf.Blocker,
-		Weight:     attrPrf.Weight,
+		Weights:    attrPrf.Weights.String(utils.InfieldSep, utils.ANDSep),
 	}
 	for i, fli := range attrPrf.FilterIDs {
 		tpAttr.FilterIDs[i] = fli

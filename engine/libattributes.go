@@ -20,12 +20,16 @@ package engine
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
+
+type apWithWeight struct {
+	*AttributeProfile
+	weight float64
+}
 
 // Attribute used by AttributeProfile to describe a single attribute
 type Attribute struct {
@@ -42,7 +46,7 @@ type AttributeProfile struct {
 	FilterIDs  []string
 	Attributes []*Attribute
 	Blocker    bool // blocker flag to stop processing on multiple runs
-	Weight     float64
+	Weights    utils.DynamicWeights
 }
 
 // AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -81,10 +85,10 @@ func (ap *AttributeProfile) TenantIDInline() string {
 // AttributeProfiles is a sortable list of Attribute profiles
 type AttributeProfiles []*AttributeProfile
 
-// Sort is part of sort interface, sort based on Weight
-func (aps AttributeProfiles) Sort() {
-	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
-}
+// // Sort is part of sort interface, sort based on Weight
+// func (aps AttributeProfiles) Sort() {
+// 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weights[i] > aps[j].Weights })
+// }
 
 // ExternalAttribute the attribute for external profile
 type ExternalAttribute struct {
@@ -101,7 +105,7 @@ type APIAttributeProfile struct {
 	FilterIDs  []string
 	Attributes []*ExternalAttribute
 	Blocker    bool // blocker flag to stop processing on multiple runs
-	Weight     float64
+	Weights    string
 }
 
 type APIAttributeProfileWithAPIOpts struct {
@@ -116,7 +120,7 @@ func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
 		FilterIDs:  attr.FilterIDs,
 		Attributes: make([]*ExternalAttribute, len(attr.Attributes)),
 		Blocker:    attr.Blocker,
-		Weight:     attr.Weight,
+		Weights:    attr.Weights.String(utils.InfieldSep, utils.ANDSep),
 	}
 	for i, at := range attr.Attributes {
 		ext.Attributes[i] = &ExternalAttribute{
@@ -134,6 +138,11 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	attr = new(AttributeProfile)
 	if len(ext.Attributes) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("Attributes")
+	}
+	if ext.Weights != utils.EmptyString {
+		if attr.Weights, err = utils.NewDynamicWeightsFromString(ext.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+			return
+		}
 	}
 	attr.Attributes = make([]*Attribute, len(ext.Attributes))
 	for i, extAttr := range ext.Attributes {
@@ -154,8 +163,6 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	attr.Tenant = ext.Tenant
 	attr.ID = ext.ID
 	attr.FilterIDs = ext.FilterIDs
-	attr.Blocker = ext.Blocker
-	attr.Weight = ext.Weight
 	return
 }
 
@@ -203,7 +210,7 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 			ap.Blocker, err = utils.IfaceAsBool(val)
 		case utils.Weight:
 			if val != utils.EmptyString {
-				ap.Weight, err = utils.IfaceAsFloat64(val)
+				ap.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
 		default:
 			return utils.ErrWrongPath
@@ -248,9 +255,7 @@ func (ap *AttributeProfile) Merge(v2 interface{}) {
 	if vi.Blocker {
 		ap.Blocker = true
 	}
-	if vi.Weight != 0 {
-		ap.Weight = vi.Weight
-	}
+	ap.Weights = append(ap.Weights, vi.Weights...)
 }
 
 func (ap *AttributeProfile) String() string { return utils.ToJSON(ap) }
@@ -288,7 +293,7 @@ func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 		case utils.Blocker:
 			return ap.Blocker, nil
 		case utils.Weight:
-			return ap.Weight, nil
+			return ap.Weights, nil
 		case utils.Attributes:
 			return ap.Attributes, nil
 		}

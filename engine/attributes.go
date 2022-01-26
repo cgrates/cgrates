@@ -74,8 +74,10 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 		}
 		attrIDs = aPrflIDs.AsSlice()
 	}
+	var apWw *apWithWeight
 	for _, apID := range attrIDs {
-		aPrfl, err := alS.dm.GetAttributeProfile(ctx, tnt, apID, true, true, utils.NonTransactional)
+		var aPrfl *AttributeProfile
+		aPrfl, err = alS.dm.GetAttributeProfile(ctx, tnt, apID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -92,18 +94,24 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 				continue
 			}
 		}
-		if (matchAttrPrfl == nil || matchAttrPrfl.Weight < aPrfl.Weight) &&
+
+		var apfWeight float64
+		if apfWeight, err = WeightFromDynamics(ctx, aPrfl.Weights,
+			alS.fltrS, tnt, evNm); err != nil {
+			return
+		}
+		if (apWw == nil || apWw.weight < apfWeight) &&
 			tntID != lastID &&
 			(profileRuns <= 0 || processedPrfNo[tntID] < profileRuns) {
-			matchAttrPrfl = aPrfl
+			apWw = &apWithWeight{aPrfl, apfWeight}
 		}
 	}
 	// All good, convert from Map to Slice so we can sort
-	if matchAttrPrfl == nil {
+	if apWw == nil {
 		return nil, utils.ErrNotFound
 	}
-	(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = matchAttrPrfl.TenantIDInline()
-	return
+	(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = apWw.AttributeProfile.TenantIDInline()
+	return apWw.AttributeProfile, nil
 }
 
 // AttrSProcessEventReply reply used for proccess event
