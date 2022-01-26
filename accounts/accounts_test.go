@@ -1954,6 +1954,324 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	}
 }
 
+func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+
+	// set the internal AttributeS within connMngr
+	attrSConn := make(chan birpc.ClientConnector, 1)
+	attrSrv, _ := birpc.NewServiceWithMethodsRename(engine.NewAttributeService(dm, fltrS, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
+	attrSConn <- attrSrv
+	cfg.AccountSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	// Set the internal rateS within connMngr
+	rateSConn := make(chan birpc.ClientConnector, 1)
+	rateSrv, _ := birpc.NewServiceWithMethodsRename(rates.NewRateS(cfg, fltrS, dm), utils.RateSv1, true, func(key string) (newKey string) {
+		return strings.TrimPrefix(key, utils.V1Prfx)
+	}) // update the name of the functions
+	rateSConn <- rateSrv
+
+	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
+
+	connMngr := engine.NewConnManager(cfg)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, attrSConn)
+	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS), utils.RateSv1, rateSConn)
+
+	// provision the data
+	atrPrfl := &engine.AttributeProfile{
+		Tenant: utils.CGRateSorg,
+		ID:     "ATTR_ATTACH_RATES_PROFILE_RP_2",
+		Attributes: []*engine.Attribute{
+			{
+				Path:  "*opts.RateSProfile",
+				Type:  utils.MetaConstant,
+				Value: config.NewRSRParsersMustCompile("RP_2", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+	}
+	if err := dm.SetAttributeProfile(context.Background(), atrPrfl, true); err != nil {
+		t.Error(err)
+	}
+
+	rtPflls := []*utils.RateProfile{
+		{
+			Tenant: utils.CGRateSorg,
+			ID:     "RP_1",
+			Rates: map[string]*utils.Rate{
+				"RT_1": {
+					ID: "RT_1", // lower preference, matching always
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(1, 2), // 0.01 per second
+							Unit:          utils.NewDecimal(int64(time.Second), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+			}},
+		{
+			Tenant:    utils.CGRateSorg,
+			ID:        "RP_2", // higher preference, only matching with filter
+			FilterIDs: []string{"*string:~*opts.RateSProfile:RP_2"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Rates: map[string]*utils.Rate{
+				"RT_2": {
+					ID: "RT_2",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(2, 2), // 0.02 per second
+							Unit:          utils.NewDecimal(int64(time.Second), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+							FixedFee:      utils.NewDecimal(1, 1), // 0.1 for the rest of call
+							Unit:          utils.NewDecimal(int64(time.Second), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+			}},
+	}
+	for _, rtPfl := range rtPflls {
+		if err := dm.SetRateProfile(context.Background(), rtPfl, true); err != nil {
+			t.Error(err)
+		}
+	}
+
+	accnts := NewAccountS(cfg, fltrS, connMngr, dm)
+
+	ab1ID := "AB1"
+	ab2ID := "AB2"
+	ab3ID := "AB3"
+	cb1ID := "CB1"
+	cb2ID := "CB2"
+	// populate the Account
+	acnt1 := &utils.Account{
+		Tenant: utils.CGRateSorg,
+		ID:     "TestV1DebitAbstractsEventCharges1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Balances: map[string]*utils.Balance{
+			ab1ID: { // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10s
+				ID:   ab1ID,
+				Type: utils.MetaAbstract,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 40,
+					},
+				},
+				// RecurrentFee/Increment
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Minute), 0),
+						FixedFee:     utils.NewDecimal(4, 1), // 0.4
+						RecurrentFee: utils.NewDecimal(2, 1), // 0.2 per minute
+					},
+				},
+				Units: utils.NewDecimal(int64(130*time.Second), 0), // 2 Minute 10s, rest 10s
+			},
+			// total 0.8 needs to be debited from CB1, with UnitFactor will be 0.8 * 100
+			cb1ID: { // paying the AB1 plus own debit of 0.1 per second, limit of -200 cents
+				ID:   cb1ID,
+				Type: utils.MetaConcrete,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				Opts: map[string]interface{}{
+					utils.MetaBalanceLimit: -200.0,
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(1, 1), // 0.1 per second
+					},
+				},
+				UnitFactors: []*utils.UnitFactor{
+					{
+						Factor: utils.NewDecimal(100, 0), // EuroCents
+					},
+				},
+				Units: utils.NewDecimal(800, 1), // 80 EuroCents for the debit from AB1, rest for 20 seconds of limit
+			},
+			// 2m20s ABSTR, 2.8 CONCR
+			ab2ID: { // continues debitting after CB1, 0 cost in increments of seconds, maximum of 1 minute
+				ID:   ab2ID,
+				Type: utils.MetaAbstract,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(0, 0)},
+				},
+				Units: utils.NewDecimal(int64(1*time.Minute), 0), // 1 Minute, no cost
+			},
+			// 3m20s ABSTR, 2.8 CONCR
+			ab3ID: { // not matching due to filter
+				ID:        ab3ID,
+				Type:      utils.MetaAbstract,
+				FilterIDs: []string{"*string:*~req.Account:AnotherAccount"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(1, 0)},
+				},
+				Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
+			},
+			//3m20s ABSTR 2.8 CONCR
+			cb2ID: { //125s with rating from RateS (1.25/0.01 from rates)
+				ID:   cb2ID,
+				Type: utils.MetaConcrete,
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+				AttributeIDs: []string{utils.MetaNone},
+				Units:        utils.NewDecimal(125, 2), // 1.25
+			},
+			//5m25s ABSTR, 4.05 CONCR
+		},
+	}
+	if err := dm.SetAccount(context.Background(), acnt1, true); err != nil {
+		t.Error(err)
+	}
+
+	acnt2 := &utils.Account{
+		Tenant: utils.CGRateSorg,
+		ID:     "TestV1DebitAbstractsEventCharges2",
+		Balances: map[string]*utils.Balance{
+			ab1ID: { // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10 units
+				ID:   ab1ID,
+				Type: utils.MetaAbstract,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Minute), 0),
+						FixedFee:     utils.NewDecimal(4, 1),  // 0.4
+						RecurrentFee: utils.NewDecimal(2, 1)}, // 0.2 per minute
+				},
+				UnitFactors: []*utils.UnitFactor{
+					{
+						Factor: utils.NewDecimal(1, 9), // Nanoseconds
+					},
+				},
+				Units: utils.NewDecimal(130000000000, 9), // this is 130 units (130.000000000) for comparing this test
+			},
+			//7m25s ABSTR, 4.05 CONCR
+			cb1ID: { // absorb all costs, standard rating used when primary debiting
+				ID:   cb1ID,
+				Type: utils.MetaConcrete,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				AttributeIDs: []string{utils.MetaNone},
+				Units:        utils.NewDecimal(5, 1), //0.5 covering partially the AB1
+			},
+			// 7m25s ABSTR, 4.55 CONCR
+			cb2ID: { // absorb all costs, standard rating used when primary debiting
+				ID:   cb2ID,
+				Type: utils.MetaConcrete,
+				Opts: map[string]interface{}{
+					utils.MetaBalanceUnlimited: true,
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+				AttributeIDs: []string{"ATTR_ATTACH_RATES_PROFILE_RP_2"},
+				Units:        utils.NewDecimal(35, 2), //0.3 + 0.05 covering 5s  it's own with RateS
+				// ToDo: change rating with a lower preference here, should have multiple groups also // RateProfileIDs: ["TWOCENTS"]
+			},
+			// 7m25s ABSTR, 4.85 CONCR to cover the AB1
+
+			// 7m26S ABSTR, 4.95 CONCR with remaining flat covered by CB2 with RateS, RP_2, -0.05 on CB2
+
+		},
+	}
+	if err := dm.SetAccount(context.Background(), acnt2, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.CGREvent{
+		ID:     "TestV1DebitAbstractsEventCharges",
+		Tenant: utils.CGRateSorg,
+		APIOpts: map[string]interface{}{
+			utils.MetaUsage: "7m26s",
+		},
+	}
+	var rcvEC utils.EventCharges
+	if err := accnts.V1DebitAbstracts(context.Background(), args, &rcvEC); err != nil {
+		t.Error(err)
+	}
+
+	// as we debited our accounts, we should compare our costs (abstracts and concretes)
+
+	abstracts := utils.NewDecimal(int64(7*time.Minute+26*time.Second), 0)
+	concretes := utils.NewDecimal(495, 2)
+	if !reflect.DeepEqual(rcvEC.Abstracts, abstracts) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(abstracts), utils.ToJSON(rcvEC.Abstracts))
+	}
+	if !reflect.DeepEqual(rcvEC.Concretes, concretes) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(concretes), utils.ToJSON(rcvEC.Concretes))
+	}
+
+	// our debit was correct, now we will refund all those costs by those charges
+	var replyRefund string
+	argsRefund := &utils.APIEventCharges{
+		Tenant:       "cgrates.org",
+		EventCharges: &rcvEC,
+	}
+	if err := accnts.V1RefundCharges(context.Background(), argsRefund, &replyRefund); err != nil {
+		t.Error(err)
+	} else if replyRefund != utils.OK {
+		t.Errorf("Unexpected reply returned: %v", replyRefund)
+	}
+
+	// get both accounts and compare if those units are added back properly]
+	if rcv, err := dm.GetAccount(context.Background(), acnt1.Tenant, acnt1.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, acnt1) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt1), utils.ToJSON(rcv))
+	}
+
+	if rcv, err := dm.GetAccount(context.Background(), acnt2.Tenant, acnt2.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, acnt2) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt2), utils.ToJSON(rcv))
+	}
+}
+
 func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()

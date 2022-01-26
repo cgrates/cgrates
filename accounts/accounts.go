@@ -272,7 +272,7 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 		if _, has := ecs.UnitFactors[acntChrg.UnitFactorID]; has {
 			uf = ecs.UnitFactors[acntChrg.UnitFactorID]
 		}
-		if acntChrg.BalanceID != utils.MetaTransAbstract { // *transAbstracts is not a real balance, hence the exception
+		if acntChrg.BalanceID != utils.MetaTransAbstract { // *transabstracts is not a real balance, hence the exception
 			refundUnitsOnAccount(
 				acntsIdxed[acntChrg.AccountID],
 				uncompressUnits(acntChrg.Units, chrg.CompressFactor, acntChrg, uf),
