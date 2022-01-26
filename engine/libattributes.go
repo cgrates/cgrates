@@ -208,7 +208,7 @@ func (ap *AttributeProfile) Set(path []string, val interface{}, newBranch bool, 
 			ap.FilterIDs = append(ap.FilterIDs, valA...)
 		case utils.Blocker:
 			ap.Blocker, err = utils.IfaceAsBool(val)
-		case utils.Weight:
+		case utils.Weights:
 			if val != utils.EmptyString {
 				ap.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
 			}
@@ -292,7 +292,7 @@ func (ap *AttributeProfile) FieldAsInterface(fldPath []string) (_ interface{}, e
 			return ap.FilterIDs, nil
 		case utils.Blocker:
 			return ap.Blocker, nil
-		case utils.Weight:
+		case utils.Weights:
 			return ap.Weights, nil
 		case utils.Attributes:
 			return ap.Attributes, nil

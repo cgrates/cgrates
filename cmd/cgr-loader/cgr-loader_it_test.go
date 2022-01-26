@@ -325,6 +325,9 @@ func testLoadItCheckAttributes(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
+	}
+	eAttrPrf.Weights = make(utils.DynamicWeights, 1)
+	eAttrPrf.Weights[0] = &utils.DynamicWeight{
 		Weight: 20.0,
 	}
 	if attr, err := db.GetAttributeProfileDrv(context.Background(), "cgrates.org", "ATTR_1001_SIMPLEAUTH"); err != nil {
