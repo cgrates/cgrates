@@ -102,7 +102,6 @@
 	"chargers_conns": ["*internal"],
 },
 
-
 "migrator": {
 	"out_datadb_type": "mongo",
 	"out_datadb_port": "27017",
@@ -112,7 +111,6 @@
 	"out_stordb_name": "cgrates",
 	"users_filters":["Account"],
 },
-
 
 "admins": {
 	"enabled": true,

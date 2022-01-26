@@ -622,7 +622,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 	args := &utils.ArgsItemIDs{
 		ItemsPrefix: "aTEST",
 	}
-	expected := &[](*utils.Account){
+	expected := &[]*utils.Account{
 		{
 			Tenant: "cgrates.org",
 			ID:     "aTEST_ACC_IT_TEST2",
@@ -659,6 +659,7 @@ func testAccGetAccsWithPrefix(t *testing.T) {
 		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expected), utils.ToJSON(reply2))
 	}
 }
+
 func testAccGetAccountsForEvent(t *testing.T) {
 	var reply []*utils.Account
 	expected := []*utils.Account{
