@@ -38,7 +38,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 				Value: "1001",
 			},
 		},
-		Weight: 20,
+		Weights: ";20",
 	}
 
 	expAttr := &AttributeProfile{
@@ -51,9 +51,11 @@ func TestConvertExternalToProfile(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+	expAttr.Weights[0] = &utils.DynamicWeight{
 		Weight: 20,
 	}
-
 	rcv, err := external.AsAttributeProfile()
 	if err != nil {
 		t.Error(err)
@@ -71,7 +73,7 @@ func TestConvertExternalToProfileMissing(t *testing.T) {
 		ID:         "ATTR_ID",
 		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*ExternalAttribute{},
-		Weight:     20,
+		Weights:    ";20",
 	}
 
 	_, err := external.AsAttributeProfile()
@@ -91,7 +93,7 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 				Path: utils.MetaReq + utils.NestingSep + "Account",
 			},
 		},
-		Weight: 20,
+		Weights: ";20",
 	}
 
 	_, err := external.AsAttributeProfile()
@@ -195,11 +197,13 @@ func TestNewAttributeFromInlineWithMultipleVaslues(t *testing.T) {
 
 func TestLibAttributesTenantIDInLine(t *testing.T) {
 	ap := &AttributeProfile{
-		Tenant: "cgrates.org",
-		ID:     "AttrPrf",
-		Weight: 10,
+		Tenant:  "cgrates.org",
+		ID:      "AttrPrf",
+		Weights: make(utils.DynamicWeights, 1),
 	}
-
+	ap.Weights[0] = &utils.DynamicWeight{
+		Weight: 0,
+	}
 	exp := "cgrates.org:AttrPrf"
 	if rcv := ap.TenantIDInline(); rcv != exp {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
@@ -208,9 +212,13 @@ func TestLibAttributesTenantIDInLine(t *testing.T) {
 
 func TestLibAttributesTenantIDMetaPrefix(t *testing.T) {
 	ap := &AttributeProfile{
-		Tenant: "cgrates.org",
-		ID:     "*default",
-		Weight: 10,
+		Tenant:  "cgrates.org",
+		ID:      "*default",
+		Weights: make(utils.DynamicWeights, 1),
+	}
+	ap.Weights[0] = &utils.DynamicWeight{
+		FilterIDs: []string{""},
+		Weight:    0,
 	}
 
 	exp := "*default"
@@ -225,7 +233,6 @@ func TestAttributeProfileSet(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:    10,
 		Blocker:   true,
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
@@ -233,6 +240,10 @@ func TestAttributeProfileSet(t *testing.T) {
 			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			FilterIDs: []string{"fltr1"},
 		}},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+	exp.Weights[0] = &utils.DynamicWeight{
+		Weight: 10,
 	}
 	if err := dp.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
 		t.Error(err)
@@ -253,7 +264,7 @@ func TestAttributeProfileSet(t *testing.T) {
 	if err := dp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Weight}, 10, false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := dp.Set([]string{utils.Blocker}, true, false, utils.EmptyString); err != nil {
@@ -286,7 +297,7 @@ func TestAttributeProfileAsInterface(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:    10,
+		Weights:   make(utils.DynamicWeights, 1),
 		Blocker:   true,
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
@@ -294,6 +305,9 @@ func TestAttributeProfileAsInterface(t *testing.T) {
 			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			FilterIDs: []string{"fltr1"},
 		}},
+	}
+	ap.Weights[0] = &utils.DynamicWeight{
+		Weight: 10,
 	}
 	if _, err := ap.FieldAsInterface(nil); err != utils.ErrNotFound {
 		t.Fatal(err)
@@ -324,9 +338,9 @@ func TestAttributeProfileAsInterface(t *testing.T) {
 	} else if exp := ap.FilterIDs[0]; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{utils.Weight}); err != nil {
+	if val, err := ap.FieldAsInterface([]string{utils.Weights}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Weight; !reflect.DeepEqual(exp, val) {
+	} else if exp := ap.Weights; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
 	}
 	if val, err := ap.FieldAsInterface([]string{utils.Blocker}); err != nil {
@@ -415,7 +429,7 @@ func TestAttributeProfileMerge(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:    10,
+		Weights:   make(utils.DynamicWeights, 1),
 		Blocker:   true,
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
@@ -424,11 +438,14 @@ func TestAttributeProfileMerge(t *testing.T) {
 			FilterIDs: []string{"fltr1"},
 		}},
 	}
-	if dp.Merge(&AttributeProfile{
+	exp.Weights[0] = &utils.DynamicWeight{
+		Weight: 10,
+	}
+	dp.Merge(&AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ID",
 		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
-		Weight:    10,
+		Weights:   make(utils.DynamicWeights, 1),
 		Blocker:   true,
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
@@ -436,7 +453,11 @@ func TestAttributeProfileMerge(t *testing.T) {
 			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			FilterIDs: []string{"fltr1"},
 		}},
-	}); !reflect.DeepEqual(exp, dp) {
+	})
+	dp.Weights[0] = &utils.DynamicWeight{
+		Weight: 10,
+	}
+	if !reflect.DeepEqual(exp, dp) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }

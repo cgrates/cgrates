@@ -46,7 +46,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	attrPrf2 := &AttributeProfile{
@@ -61,7 +65,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	attrPrf3 := &AttributeProfile{
@@ -76,7 +84,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	attrPrf4 := &AttributeProfile{
@@ -91,7 +103,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	if err := dm.SetAttributeProfile(context.Background(), attrPrf1, true); err != nil {

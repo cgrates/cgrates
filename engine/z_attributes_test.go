@@ -89,7 +89,11 @@ var (
 					Value: config.NewRSRParsersMustCompile("1010", utils.InfieldSep),
 				},
 			},
-			Weight: 20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		&AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -101,7 +105,11 @@ var (
 					Value: config.NewRSRParsersMustCompile("1010", utils.InfieldSep),
 				},
 			},
-			Weight: 20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		&AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -113,7 +121,11 @@ var (
 					Value: config.NewRSRParsersMustCompile("1010", utils.InfieldSep),
 				},
 			},
-			Weight: 20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 		&AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -125,7 +137,11 @@ var (
 					Value: config.NewRSRParsersMustCompile("1010", utils.InfieldSep),
 				},
 			},
-			Weight: 20,
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
 		},
 	}
 )
@@ -162,7 +178,11 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -181,7 +201,11 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -505,7 +529,11 @@ func TestAttributeIndexer(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("1010", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
@@ -577,7 +605,11 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -589,7 +621,11 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	attrPrf3 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -601,7 +637,11 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 			},
 		},
-		Weight: 30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -679,7 +719,11 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -691,7 +735,11 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	attrPrf3 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -703,7 +751,11 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 			},
 		},
-		Weight: 30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -777,7 +829,11 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -789,7 +845,11 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	attrPrf3 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -801,7 +861,11 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 			},
 		},
-		Weight: 30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -875,7 +939,11 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -887,7 +955,11 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -959,7 +1031,11 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -972,7 +1048,11 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	attrPrf3 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -984,7 +1064,11 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 			},
 		},
-		Weight: 30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1059,7 +1143,11 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1071,7 +1159,11 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	attrPrf3 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1083,7 +1175,11 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value3", utils.InfieldSep),
 			},
 		},
-		Weight: 30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1155,7 +1251,11 @@ func TestAttributeProcessValue(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1229,7 +1329,11 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("RandomValue", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1297,7 +1401,11 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1368,7 +1476,11 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1446,7 +1558,11 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1514,7 +1630,11 @@ func TestAttributeProcessEventSum(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1584,7 +1704,11 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1656,7 +1780,11 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1732,7 +1860,11 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1785,7 +1917,11 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 			},
 		},
 		Blocker: true,
-		Weight:  10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
@@ -1855,7 +1991,11 @@ func TestProcessAttributeConstant(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Val2", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -1911,7 +2051,11 @@ func TestProcessAttributeVariable(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -1974,7 +2118,11 @@ func TestProcessAttributeComposed(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField2", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2033,7 +2181,11 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField;~*req.RandomField2", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2092,7 +2244,11 @@ func TestProcessAttributeSum(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField;~*req.RandomField2;10", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2151,7 +2307,11 @@ func TestProcessAttributeDiff(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("55;~*req.RandomField;~*req.RandomField2;10", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2210,7 +2370,11 @@ func TestProcessAttributeMultiply(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("55;~*req.RandomField;~*req.RandomField2;10", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2269,7 +2433,11 @@ func TestProcessAttributeDivide(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("55.0;~*req.RandomField;~*req.RandomField2;4", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2328,7 +2496,11 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField2;4", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2387,7 +2559,11 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField2", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2446,7 +2622,11 @@ func TestProcessAttributePrefix(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("abc_", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2504,7 +2684,11 @@ func TestProcessAttributeSuffix(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("_abc", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2575,7 +2759,11 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("1010", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
@@ -2616,7 +2804,11 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2 := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2629,7 +2821,11 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.RandomField", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
@@ -2687,7 +2883,11 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2Exists := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2699,7 +2899,11 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1Exists, true); err != nil {
@@ -2773,7 +2977,11 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2NotEmpty := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2785,7 +2993,11 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1NotEmpty, true); err != nil {
@@ -2857,7 +3069,11 @@ func TestAttributeMetaTenant(t *testing.T) {
 			Path:  utils.MetaTenant,
 			Value: config.NewRSRParsersMustCompile("prfx_", utils.InfieldSep),
 		}},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 
 	// Add attribute in DM
@@ -2928,7 +3144,11 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("ITSYS COMMUNICATIONS SRL", utils.InfieldSep),
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	// this I'll match first, no fltr and processRuns will be 1
 	attrPfr2 := &AttributeProfile{
@@ -2941,7 +3161,11 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 
 	attrPfr.Compile()
@@ -3002,7 +3226,11 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 			Path:  utils.MetaReq + utils.NestingSep + "Field1",
 			Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
 		}},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	attrPrf2Exists := &AttributeProfile{
 		Tenant:    cfg.GeneralCfg().DefaultTenant,
@@ -3012,7 +3240,11 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 			Path:  utils.MetaReq + utils.NestingSep + "Field2",
 			Value: config.NewRSRParsersMustCompile("Value2", utils.InfieldSep),
 		}},
-		Weight: 5,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 5,
+			},
+		},
 	}
 	// Add attribute in DM
 	if err := dm.SetAttributeProfile(context.TODO(), attrPrf1Exists, true); err != nil {
@@ -3137,7 +3369,11 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -3156,7 +3392,11 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -3235,7 +3475,11 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -3254,7 +3498,11 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -3315,7 +3563,11 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -3334,7 +3586,11 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -3396,7 +3652,11 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -3415,7 +3675,11 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -3475,7 +3739,11 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 				Value: postpaid,
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
@@ -3493,7 +3761,11 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 				Value: postpaid,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap2, true)
 	if err != nil {
@@ -3586,7 +3858,11 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 				Value: postpaid,
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap, true)
 	if err != nil {
@@ -3762,7 +4038,11 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 				Value: pw,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
@@ -3779,7 +4059,11 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 				Value: postpaid,
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap2, true)
 	if err != nil {
@@ -3853,7 +4137,11 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 				Value: pw,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
@@ -3871,7 +4159,11 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 				Value: postpaid,
 			},
 		},
-		Weight: 20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap2, true)
 	if err != nil {
@@ -3889,7 +4181,11 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 				Value: paypal,
 			},
 		},
-		Weight: 30,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap3, true)
 	if err != nil {
@@ -3965,7 +4261,11 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -3984,7 +4284,11 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -4025,7 +4329,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 				Value: ".co.uk",
 			},
 		},
-		Weight: 20,
+		Weights: ";20",
 	}
 
 	err = alS.V1GetAttributeForEvent(context.Background(), ev, rply)
@@ -4069,7 +4373,11 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -4088,7 +4396,11 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -4149,7 +4461,11 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -4168,7 +4484,11 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -4218,7 +4538,11 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 	err := dm.SetAttributeProfile(context.Background(), attr, true)
 	if err != nil {
@@ -4237,7 +4561,11 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  20,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	err = dm.SetAttributeProfile(context.Background(), attr2, true)
@@ -4401,7 +4729,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		ID:         "AC1",
 		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
 		Attributes: []*ExternalAttribute{},
-		Weight:     0,
+		Weights:    ";0",
 	}
 
 	err = aA.V1GetAttributeForEvent(context.Background(), ev, rply)
@@ -4430,7 +4758,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 		ID:         "AC1",
 		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
 		Attributes: []*ExternalAttribute{},
-		Weight:     0,
+		Weights:    ";0",
 	}
 	// with ignore filters on true and with bad filter
 	err = aA.V1GetAttributeForEvent(context.Background(), ev2, rply2)
@@ -4607,7 +4935,11 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 				Value: pw,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
@@ -4655,7 +4987,11 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 				Value: pw,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 	err = alS.dm.SetAttributeProfile(context.Background(), ap1, true)
 	if err != nil {
@@ -4736,7 +5072,11 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 				Value: value,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
 	}
 
 	if err := dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
@@ -4795,6 +5135,10 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 				Value: value,
 			},
 		},
+		Weights: make(utils.DynamicWeights, 1),
+	}
+	expAttrPrf.Weights[0] = &utils.DynamicWeight{
+
 		Weight: 10,
 	}
 	if rcvAttrPrf, err := dm.GetAttributeProfile(context.Background(), attrPrf.Tenant, attrPrf.ID, true, true,
@@ -4829,9 +5173,12 @@ func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
 				Value: value,
 			},
 		},
-		Weight: 10,
+		Weights: make(utils.DynamicWeights, 1),
 	}
+	attrPrf.Weights[0] = &utils.DynamicWeight{
 
+		Weight: 20,
+	}
 	if err := dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Fatal(err)
 	}
@@ -4845,7 +5192,11 @@ func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
 				Type: utils.MetaConstant,
 			},
 		},
-		Weight: 10,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
 	}
 
 	if rcv, err := dm.GetAttributeProfile(context.Background(), attrPrf.Tenant, attrPrf.ID, true, true,

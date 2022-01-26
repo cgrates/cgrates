@@ -148,7 +148,7 @@ func testAttributeSetProfile(t *testing.T) {
 				Path:  "*req.FL1",
 				Value: "Al1",
 			}},
-			Weight: 20,
+			Weights: ";20",
 		},
 	}
 	if err := attrFltrRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile, alsPrf, &result); err != nil {

@@ -179,7 +179,11 @@ func testExpVerifyAttributes(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  10.0,
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10.0,
+			},
+		},
 	}
 	var reply *engine.AttributeProfile
 	if err := expRpc.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
