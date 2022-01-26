@@ -314,7 +314,7 @@ type TPAttributeProfile struct {
 	FilterIDs  []string
 	Attributes []*TPAttribute
 	Blocker    bool
-	Weight     float64
+	Weights    string
 }
 
 // TPChargerProfile is used in APIs to manage remotely offline ChargerProfile

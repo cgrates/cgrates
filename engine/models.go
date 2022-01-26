@@ -221,7 +221,7 @@ type AttributeMdl struct {
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
 	FilterIDs          string  `index:"2" re:""`
-	Weight             float64 `index:"3" re:"\d+\.?\d*"`
+	Weights            string `index:"3" re:"\d+\.?\d*"`
 	AttributeFilterIDs string  `index:"4" re:""`
 	Path               string  `index:"5" re:""`
 	Type               string  `index:"6" re:""`
