@@ -609,7 +609,7 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 					Value: "1001",
 				},
 			},
-			Weight: 10.0,
+			Weights: ";10.0",
 		},
 	}
 	var result string
@@ -644,7 +644,7 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 				Value: "1001",
 			},
 		},
-		Weight: 10.0,
+		Weights: ";10.0",
 	}
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
@@ -680,7 +680,7 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 				Value: "1001",
 			},
 		},
-		Weight: 10.0,
+		Weights: ";10.0",
 	}
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
@@ -738,7 +738,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				FilterIDs: []string{},
 			},
 		},
-		Weight: 10.0,
+		Weights: ";10.0",
 	}
 	if *encoding == utils.MetaGOB {
 		eAttrPrf.Attributes[0].FilterIDs = nil
@@ -764,7 +764,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 					FilterIDs: []string{},
 				},
 			},
-			Weight: 10.0,
+			Weights: ";10.0",
 		},
 	}
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
@@ -854,7 +854,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 				},
 			},
 			Blocker: true,
-			Weight:  10,
+			Weights: ";10",
 		},
 	}
 	var result string
@@ -912,7 +912,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 					Value: "Value1",
 				},
 			},
-			Weight: 10,
+			Weights: ";10",
 		},
 	}
 	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
@@ -926,7 +926,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 					Value: "Value2",
 				},
 			},
-			Weight: 20,
+			Weights: ";20",
 		},
 	}
 	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
@@ -940,7 +940,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 					Value: "Value3",
 				},
 			},
-			Weight: 30,
+			Weights: ";30",
 		},
 	}
 	// Add attribute in DM
@@ -1016,7 +1016,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 					Value: "Value1",
 				},
 			},
-			Weight: 10,
+			Weights: ";10",
 		},
 	}
 	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
@@ -1030,7 +1030,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 					Value: "Value2",
 				},
 			},
-			Weight: 20,
+			Weights: ";20",
 		},
 	}
 	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
@@ -1044,7 +1044,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 					Value: "Value3",
 				},
 			},
-			Weight: 30,
+			Weights: ";30",
 		},
 	}
 	// Add attributeProfiles

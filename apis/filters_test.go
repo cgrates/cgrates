@@ -811,7 +811,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			FilterIDs: []string{"FLTR_ID"},
 			ID:        "ATTR_ID",
-			Weight:    10,
+			Weights:   ";10",
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*req.Account",
@@ -968,7 +968,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			FilterIDs: []string{"FLTR_ID"},
 			ID:        "ATTR_ID",
-			Weight:    10,
+			Weights:   ";10",
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*req.Account",

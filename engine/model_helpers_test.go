@@ -1047,7 +1047,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 				Value: "Al1",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -1080,7 +1080,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 				Value: "Al1",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -1115,7 +1115,7 @@ func TestAttributeProfileToAPI2(t *testing.T) {
 				Value: "~*req.Account",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -1150,7 +1150,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 				Value: "Al1",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	expected := AttributeMdls{
 		&AttributeMdl{
@@ -1161,7 +1161,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			AttributeFilterIDs: "filter_id1;filter_id2",
 			Path:               utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
-			Weight:             20,
+			Weights:            20,
 		},
 	}
 	rcv := APItoModelTPAttribute(tpAlsPrf)
@@ -1186,7 +1186,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 				Value: "Al2",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	expected := AttributeMdls{
 		&AttributeMdl{
@@ -1196,7 +1196,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 			FilterIDs: "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1",
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
-			Weight:    20,
+			Weights:   20,
 		},
 		&AttributeMdl{
 			Tpid:   "TP1",
@@ -1231,7 +1231,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z;*string:~*opts.*context:con1",
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
-			Weight:    20,
+			Weights:   20,
 		},
 	}
 	expected := &utils.TPAttributeProfile{
@@ -1246,7 +1246,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 				Value:     "Al1",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	expected2 := &utils.TPAttributeProfile{
 		TPid:      "TP1",
@@ -1260,7 +1260,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 				Value:     "Al1",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	rcv := models.AsTPAttributes()
 	sort.Strings(rcv[0].FilterIDs)
@@ -1278,7 +1278,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;*string:~*opts.*context:con1",
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
-			Weight:    20,
+			Weights:   20,
 		},
 	}
 	expected := &utils.TPAttributeProfile{
@@ -1293,7 +1293,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 				Value:     "Al1",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	expected2 := &utils.TPAttributeProfile{
 		TPid:      "TP1",
@@ -1307,7 +1307,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 				Value:     "Al1",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 	rcv := models.AsTPAttributes()
 	sort.Strings(rcv[0].FilterIDs)
@@ -3979,7 +3979,7 @@ func TestAPItoAttributeProfileError1(t *testing.T) {
 				Value: "Al1",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 
 	_, err := APItoAttributeProfile(tpAlsPrf, "UTC")
@@ -4001,7 +4001,7 @@ func TestAPItoAttributeProfileError2(t *testing.T) {
 				Value: "\"constant;`>;q=0.7;expires=3600constant\"",
 			},
 		},
-		Weight: 20,
+		Weights: 20,
 	}
 
 	_, err := APItoAttributeProfile(tpAlsPrf, "UTC")
