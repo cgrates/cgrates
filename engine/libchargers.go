@@ -74,9 +74,8 @@ func (cp *ChargerProfile) Set(path []string, val interface{}, newBranch bool, _ 
 		valA, err = utils.IfaceAsStringSlice(val)
 		cp.AttributeIDs = append(cp.AttributeIDs, valA...)
 	case utils.Weight:
-		cp.Weight, err = utils.IfaceAsFloat64(val)
-		if err != nil && utils.IfaceAsString(val) == utils.EmptyString {
-			err = nil
+		if val != utils.EmptyString {
+			cp.Weight, err = utils.IfaceAsFloat64(val)
 		}
 	}
 	return

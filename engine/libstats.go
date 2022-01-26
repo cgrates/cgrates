@@ -567,7 +567,9 @@ func (sqp *StatQueueProfile) Set(path []string, val interface{}, newBranch bool,
 		case utils.Blocker:
 			sqp.Blocker, err = utils.IfaceAsBool(val)
 		case utils.Weight:
-			sqp.Weight, err = utils.IfaceAsFloat64(val)
+			if val != utils.EmptyString {
+				sqp.Weight, err = utils.IfaceAsFloat64(val)
+			}
 		case utils.FilterIDs:
 			var valA []string
 			valA, err = utils.IfaceAsStringSlice(val)

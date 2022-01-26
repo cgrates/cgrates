@@ -1050,7 +1050,9 @@ func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string)
 	case utils.Stored:
 		rp.Stored, err = utils.IfaceAsBool(val)
 	case utils.Weight:
-		rp.Weight, err = utils.IfaceAsFloat64(val)
+		if val != utils.EmptyString {
+			rp.Weight, err = utils.IfaceAsFloat64(val)
+		}
 	case utils.ThresholdIDs:
 		var valA []string
 		valA, err = utils.IfaceAsStringSlice(val)
