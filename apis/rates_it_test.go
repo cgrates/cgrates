@@ -126,7 +126,7 @@ func testRateSRPCConn(t *testing.T) {
 }
 
 func testGetRateProfileBeforeSet(t *testing.T) {
-	var reply *utils.TenantIDWithAPIOpts
+	var reply *utils.RateProfile
 	if err := rateSRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{

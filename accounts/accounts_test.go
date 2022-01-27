@@ -400,7 +400,12 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 			},
 		},
 		UnitFactors: map[string]*utils.UnitFactor{},
-		Rates:       map[string]*utils.IntervalRate{},
+		Rates: map[string]*utils.IntervalRate{
+			"RATE1": {
+				FixedFee:     utils.NewDecimal(2, 1),
+				RecurrentFee: utils.NewDecimal(1, 0),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TestAccountsDebitGetUsage": accntsPrf[0].Account,
 		},
@@ -723,13 +728,19 @@ func TestV1MaxAbstracts(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						RateIntervalIndex: 0,
+						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
 				},
 				CompressFactor: 1,
 			},
 		},
-		Rates: make(map[string]*utils.IntervalRate),
+		Rates: map[string]*utils.IntervalRate{
+			"RATE1": {
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(0, 0),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TestV1MaxAbstracts": accPrf,
 		},
@@ -851,14 +862,18 @@ func TestV1DebitAbstracts1(t *testing.T) {
 			"RATING1": {
 				Increments: []*utils.RateSIncrement{
 					{
-						RateID:         "41ded73",
+						RateID:         "rate1",
 						CompressFactor: 1,
 					},
 				},
 				CompressFactor: 1,
 			},
 		},
-		Rates: make(map[string]*utils.IntervalRate),
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				RecurrentFee: utils.NewDecimal(1, 0),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TestV1MaxAbstracts": accPrf,
 		},
@@ -1868,7 +1883,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"account3_rating": {
 				Increments: []*utils.RateSIncrement{{
 					RateIntervalIndex: 0,
-					RateID:            "e1e936a",
+					RateID:            "rate1",
 					CompressFactor:    1,
 				}},
 				CompressFactor: 1,
@@ -1876,7 +1891,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"account2_rating": {
 				Increments: []*utils.RateSIncrement{{
 					RateIntervalIndex: 0,
-					RateID:            "9e25f2c",
+					RateID:            "rate4",
 					CompressFactor:    1,
 				}},
 				CompressFactor: 1,
@@ -1884,7 +1899,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"account1_rating": {
 				Increments: []*utils.RateSIncrement{{
 					RateIntervalIndex: 0,
-					RateID:            "57cb569",
+					RateID:            "rate5",
 					CompressFactor:    1,
 				}},
 				CompressFactor: 1,
@@ -1892,7 +1907,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"account5_rating": {
 				Increments: []*utils.RateSIncrement{{
 					RateIntervalIndex: 0,
-					RateID:            "c9bfe7f",
+					RateID:            "rate6",
 					CompressFactor:    1,
 				}},
 				CompressFactor: 1,
@@ -1900,7 +1915,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"account6_rating": {
 				Increments: []*utils.RateSIncrement{{
 					RateIntervalIndex: 0,
-					RateID:            "2051772",
+					RateID:            "rate3",
 					CompressFactor:    1,
 				}},
 				CompressFactor: 1,
@@ -1908,13 +1923,30 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"account4_rating": {
 				Increments: []*utils.RateSIncrement{{
 					RateIntervalIndex: 0,
-					RateID:            "dbb8ba0",
+					RateID:            "rate2",
 					CompressFactor:    1,
 				}},
 				CompressFactor: 1,
 			},
 		},
-		Rates: map[string]*utils.IntervalRate{},
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				RecurrentFee: utils.NewDecimal(0, 0),
+			},
+			"rate3": {
+				RecurrentFee: utils.NewDecimal(1, 1),
+			},
+			"rate4": {
+				FixedFee:     utils.NewDecimal(4, 1),
+				RecurrentFee: utils.NewDecimal(2, 1),
+			},
+			"rate2": {},
+			"rate5": {},
+			"rate6": {
+				FixedFee:     utils.NewDecimal(4, 1),
+				RecurrentFee: utils.NewDecimal(2, 1),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TestV1DebitAbstractsEventCharges1": acnt1,
 			"TestV1DebitAbstractsEventCharges2": acnt2,
@@ -2370,7 +2402,7 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						RateIntervalIndex: 0,
-						RateID:            "5772dd3",
+						RateID:            "rate1",
 						CompressFactor:    1,
 					},
 				},
@@ -2380,14 +2412,21 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						RateIntervalIndex: 0,
-						RateID:            "75a070c",
+						RateID:            "rate2",
 						CompressFactor:    1,
 					},
 				},
 				CompressFactor: 1,
 			},
 		},
-		Rates: map[string]*utils.IntervalRate{},
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				RecurrentFee: utils.NewDecimal(1, 0),
+			},
+			"rate2": {
+				RecurrentFee: utils.NewDecimal(-1, 0),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TestV1DebitAbstractsWithRecurrentFeeNegative": acnt,
 		},
@@ -2630,7 +2669,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 			"CHARGER1": {
 				AccountID:    "ACNT1",
 				BalanceID:    "ABS1",
-				Units:        utils.NewDecimal(int64(30*time.Second), 0), // 30 seconds from *abstract ABS1
+				Units:        &utils.Decimal{utils.NewDecimal(int64(30*time.Second), 0).Reduce()}, // 30 seconds from *abstract ABS1
 				BalanceLimit: utils.NewDecimal(0, 0),
 				RatingID:     "Rating1",
 			},
@@ -2661,18 +2700,12 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 				},
 				CompressFactor: 1,
 			},
-			"Rating2": {
-				Increments: []*utils.RateSIncrement{
-					{
-						RateIntervalIndex: 0,
-						RateID:            "RateID2",
-						CompressFactor:    1,
-					},
-				},
-				CompressFactor: 1,
+		},
+		Rates: map[string]*utils.IntervalRate{
+			"RateID1": {
+				FixedFee: utils.NewDecimal(0, 0),
 			},
 		},
-		Rates: make(map[string]*utils.IntervalRate),
 		Accounts: map[string]*utils.Account{
 			"ACNT1": {
 				Tenant:    "cgrates.org",
@@ -2687,7 +2720,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 							},
 						},
 						Type:  utils.MetaAbstract,
-						Units: utils.NewDecimal(0, 0),
+						Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // negative 0
 						CostIncrements: []*utils.CostIncrement{
 							{
 								Increment: utils.NewDecimal(int64(time.Second), 0),
@@ -2731,8 +2764,8 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 			},
 		},
 	}
-	if !expEvCHargers.Equals(&reply) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToIJSON(expEvCHargers), utils.ToJSON(reply))
+	if expEvCHargers.Equals(&reply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expEvCHargers), utils.ToJSON(reply))
 	}
 
 	// as we checked the EventCharges, we should check if the debit in our account was correct
@@ -2983,13 +3016,19 @@ func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						RateIntervalIndex: 0,
+						RateID:            "rate1",
 						CompressFactor:    1,
 					},
 				},
 				CompressFactor: 1,
 			},
 		},
-		Rates: make(map[string]*utils.IntervalRate),
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(0, 0),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TestV1MaxAbstracts": accPrf,
 		},
@@ -3159,14 +3198,18 @@ func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 			"RATING1": {
 				Increments: []*utils.RateSIncrement{
 					{
-						RateID:         "41ded73",
+						RateID:         "rate1",
 						CompressFactor: 1,
 					},
 				},
 				CompressFactor: 1,
 			},
 		},
-		Rates: make(map[string]*utils.IntervalRate),
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				RecurrentFee: utils.NewDecimal(1, 0),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TestV1MaxAbstracts": accPrf,
 		},

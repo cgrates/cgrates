@@ -66,6 +66,9 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 		for riID, rI := range nEc.Rating {
 			ec.Rating[riID] = rI
 		}
+		for rateID, rI := range nEc.Rates {
+			ec.Rates[rateID] = rI
+		}
 		for acntID, acnt := range nEc.Accounts {
 			ec.Accounts[acntID] = acnt
 		}
