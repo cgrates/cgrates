@@ -443,8 +443,13 @@ func testLoadersGetAccount(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &accs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(accs, expAccs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAccs), utils.ToJSON(accs))
+	} else {
+		sort.Slice(accs, func(i, j int) bool {
+			return accs[i].ID < accs[j].ID
+		})
+		if !reflect.DeepEqual(accs, expAccs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAccs), utils.ToJSON(accs))
+		}
 	}
 }
 
@@ -535,8 +540,13 @@ func testLoadersGetActionProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &acts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(acts, expActs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expActs, acts)
+	} else {
+		sort.Slice(acts, func(i, j int) bool {
+			return acts[i].ID < acts[j].ID
+		})
+		if !reflect.DeepEqual(acts, expActs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expActs, acts)
+		}
 	}
 }
 
@@ -589,8 +599,13 @@ func testLoadersGetAttributeProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &attrs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(attrs, expAttrs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAttrs), utils.ToJSON(attrs))
+	} else {
+		sort.Slice(attrs, func(i, j int) bool {
+			return attrs[i].ID < attrs[j].ID
+		})
+		if !reflect.DeepEqual(attrs, expAttrs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expAttrs), utils.ToJSON(attrs))
+		}
 	}
 }
 
@@ -619,8 +634,13 @@ func testLoadersGetChargerProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &chrgs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(chrgs, expChrgs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expChrgs), utils.ToJSON(chrgs))
+	} else {
+		sort.Slice(chrgs, func(i, j int) bool {
+			return chrgs[i].ID < chrgs[j].ID
+		})
+		if !reflect.DeepEqual(chrgs, expChrgs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expChrgs), utils.ToJSON(chrgs))
+		}
 	}
 }
 
@@ -680,8 +700,13 @@ func testLoadersGetDispatcherProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &dspPrfs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(dspPrfs, expDspPrfs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expDspPrfs), utils.ToJSON(dspPrfs))
+	} else {
+		sort.Slice(dspPrfs, func(i, j int) bool {
+			return dspPrfs[i].ID < dspPrfs[j].ID
+		})
+		if !reflect.DeepEqual(dspPrfs, expDspPrfs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expDspPrfs), utils.ToJSON(dspPrfs))
+		}
 	}
 }
 
@@ -758,8 +783,13 @@ func testLoadersGetFilter(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &fltrs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(fltrs, expFltrs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expFltrs), utils.ToJSON(fltrs))
+	} else {
+		sort.Slice(fltrs, func(i, j int) bool {
+			return fltrs[i].ID < fltrs[j].ID
+		})
+		if !reflect.DeepEqual(fltrs, expFltrs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expFltrs), utils.ToJSON(fltrs))
+		}
 	}
 }
 
@@ -905,8 +935,13 @@ func testLoadersGetRateProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &ratePrfs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(ratePrfs, expRatePrfs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRatePrfs), utils.ToJSON(ratePrfs))
+	} else {
+		sort.Slice(ratePrfs, func(i, j int) bool {
+			return ratePrfs[i].ID < ratePrfs[j].ID
+		})
+		if !reflect.DeepEqual(ratePrfs, expRatePrfs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRatePrfs), utils.ToJSON(ratePrfs))
+		}
 	}
 }
 
@@ -941,8 +976,13 @@ func testLoadersGetResourceProfile(t *testing.T) {
 			Tenant: "cgrates.org",
 		}, &rsPrfs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rsPrfs, expRsPrfs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRsPrfs), utils.ToJSON(rsPrfs))
+	} else {
+		sort.Slice(rsPrfs, func(i, j int) bool {
+			return rsPrfs[i].ID < rsPrfs[j].ID
+		})
+		if !reflect.DeepEqual(rsPrfs, expRsPrfs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRsPrfs), utils.ToJSON(rsPrfs))
+		}
 	}
 }
 
