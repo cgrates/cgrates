@@ -1042,7 +1042,9 @@ func (rp *ResourceProfile) Set(path []string, val interface{}, _ bool, _ string)
 	case utils.UsageTTL:
 		rp.UsageTTL, err = utils.IfaceAsDuration(val)
 	case utils.Limit:
-		rp.Limit, err = utils.IfaceAsFloat64(val)
+		if val != utils.EmptyString {
+			rp.Limit, err = utils.IfaceAsFloat64(val)
+		}
 	case utils.AllocationMessage:
 		rp.AllocationMessage = utils.IfaceAsString(val)
 	case utils.Blocker:
