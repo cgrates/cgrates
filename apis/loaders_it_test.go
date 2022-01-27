@@ -266,14 +266,28 @@ cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan
 	}
 
 	// Create and populate RateProfiles.csv
-	if err := writeFile(utils.RatesCsv, `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP1,FLTR_ACCOUNT_1001,;0,0.1,0.6,*free,RT_WEEK,FLTR_ACCOUNT_1001,"* * * * 1-5",;0,false,0s,,0.12,1m,1m`); err != nil {
+	if err := writeFile(utils.RatesCsv, `
+#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP1,*string:~*req.Subject:1001,;0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",;0,false,0s,0,0.12,1m,1m
+cgrates.org,RP1,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
+cgrates.org,RP1,,,,,,RT_WEEKEND,,,,true,,0.067,0.03,,
+cgrates.org,RP1,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,0.089,0.06,1m,1s
+cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,0.0564,0.06,1m,1s
+cgrates.org,RP1,,,,,,RT_CHRISTMAS,,,,true,,,,,
+cgrates.org,RP2,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
+cgrates.org,RP2,*string:~*req.Subject:1002,;10,0.2,0.4,*free,RT_WEEK,,"* * * * 1-5",fltr1;20,false,0s,0,0.24,2m,30s
+`); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create and populate Resources.csv
-	if err := writeFile(utils.ResourcesCsv, `#Tenant[0],Id[1],FilterIDs[2],Weight[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],ThresholdIDs[9]
-cgrates.org,RES_ACNT_1001,FLTR_ACCOUNT_1001,10,1h,1,,false,false,`); err != nil {
+	if err := writeFile(utils.ResourcesCsv, `
+#Tenant[0],Id[1],FilterIDs[2],Weight[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Thresholds[9]
+cgrates.org,ResGroup21,*string:~*req.Account:1001,10,1s,2,call,true,true,
+cgrates.org,ResGroup21,,,,,,,,
+cgrates.org,ResGroup22,,,,,,,,
+cgrates.org,ResGroup22,*string:~*req.Account:dan,10,3600s,2,premium_call,true,true,
+`); err != nil {
 		t.Fatal(err)
 	}
 
@@ -622,7 +636,7 @@ func testLoadersGetDispatcherProfile(t *testing.T) {
 			Hosts: engine.DispatcherHostProfiles{
 				{
 					ID:        "C1",
-					FilterIDs: []string{"fltr1"},
+					FilterIDs: []string{"fltr1", "fltr2", "fltr4"},
 					Weight:    10,
 					Params: map[string]interface{}{
 						utils.MetaRatio: "1",
@@ -643,7 +657,7 @@ func testLoadersGetDispatcherProfile(t *testing.T) {
 			Hosts: engine.DispatcherHostProfiles{
 				{
 					ID:        "C3",
-					FilterIDs: []string{"*fltr2"},
+					FilterIDs: []string{"fltr2"},
 					Weight:    20,
 					Params:    map[string]interface{}{},
 					Blocker:   true,
@@ -750,96 +764,185 @@ func testLoadersGetFilter(t *testing.T) {
 }
 
 func testLoadersGetRateProfile(t *testing.T) {
-	expIDs := []string{"RP1"}
-	var rateIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRateProfileIDs,
+	expRatePrfs := []*utils.RateProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "RP1",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 0,
+				},
+			},
+			MinCost:         utils.NewDecimal(1, 1),
+			MaxCost:         utils.NewDecimal(6, 1),
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
+							FixedFee:      utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(12, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Minute), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+							FixedFee:      utils.NewDecimal(1234, 3),
+							RecurrentFee:  utils.NewDecimal(6, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+				"RT_WEEKEND": {
+					ID: "RT_WEEKEND",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "* * * * 0,6",
+					Blocker:         true,
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(67, 3),
+							RecurrentFee:  utils.NewDecimal(3, 2),
+							Unit:          utils.NewDecimal(0, 0),
+							Increment:     utils.NewDecimal(0, 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
+							FixedFee:      utils.NewDecimal(89, 3),
+							RecurrentFee:  utils.NewDecimal(6, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+				"RT_CHRISTMAS": {
+					ID: "RT_CHRISTMAS",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 30,
+						},
+					},
+					Blocker:         true,
+					ActivationTimes: "* * 24 12 *",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
+							FixedFee:      utils.NewDecimal(564, 4),
+							RecurrentFee:  utils.NewDecimal(6, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(0, 0),
+							FixedFee:      utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(0, 0),
+							Unit:          utils.NewDecimal(0, 0),
+							Increment:     utils.NewDecimal(0, 0),
+						},
+					},
+				},
+			},
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "RP2",
+			FilterIDs: []string{"*string:~*req.Subject:1002"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			MinCost:         utils.NewDecimal(2, 1),
+			MaxCost:         utils.NewDecimal(4, 1),
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.Rate{
+				"RT_WEEK": {
+					ID: "RT_WEEK",
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: []string{"fltr1"},
+							Weight:    20,
+						},
+					},
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.IntervalRate{
+						{
+							IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
+							FixedFee:      utils.NewDecimal(0, 0),
+							RecurrentFee:  utils.NewDecimal(24, 2),
+							Unit:          utils.NewDecimal(int64(2*time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(30*time.Second), 0),
+						},
+						{
+							IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+							FixedFee:      utils.NewDecimal(1234, 3),
+							RecurrentFee:  utils.NewDecimal(6, 2),
+							Unit:          utils.NewDecimal(int64(time.Minute), 0),
+							Increment:     utils.NewDecimal(int64(time.Second), 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var ratePrfs []*utils.RateProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRateProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-		}, &rateIDs); err != nil {
+		}, &ratePrfs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rateIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rateIDs)
-	}
-
-	expRatePrf := utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MinCost:         utils.NewDecimal(1, 1),
-		MaxCost:         utils.NewDecimal(6, 1),
-		MaxCostStrategy: utils.MetaMaxCostFree,
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID:        "RT_WEEK",
-				FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(0, 0),
-						FixedFee:      utils.NewDecimal(0, 0),
-						RecurrentFee:  utils.NewDecimal(12, 2),
-						Unit:          utils.NewDecimal(60000000000, 0),
-						Increment:     utils.NewDecimal(60000000000, 0),
-					},
-				},
-			},
-		},
-	}
-
-	var rplyRatePrf utils.RateProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRateProfile,
-		utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyRatePrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rplyRatePrf, expRatePrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expRatePrf), utils.ToJSON(rplyRatePrf))
+	} else if !reflect.DeepEqual(ratePrfs, expRatePrfs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRatePrfs), utils.ToJSON(ratePrfs))
 	}
 }
 
 func testLoadersGetResourceProfile(t *testing.T) {
-	expIDs := []string{"RES_ACNT_1001"}
-	var rsIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfileIDs,
+	expRsPrfs := []*engine.ResourceProfile{
+		{
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup21",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			UsageTTL:          time.Second,
+			AllocationMessage: "call",
+			Weight:            10,
+			Limit:             2,
+			Blocker:           true,
+			Stored:            true,
+		},
+		{
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup22",
+			FilterIDs:         []string{"*string:~*req.Account:dan"},
+			UsageTTL:          time.Hour,
+			AllocationMessage: "premium_call",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            10,
+			Limit:             2,
+		},
+	}
+	var rsPrfs []*engine.ResourceProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
-		}, &rsIDs); err != nil {
+		}, &rsPrfs); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rsIDs, expIDs) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rsIDs)
-	}
-
-	expRsPrf := engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RES_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weight:    10,
-		UsageTTL:  3600000000000,
-		Limit:     1,
-	}
-
-	var rplyRsPrf engine.ResourceProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
-		utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     expIDs[0],
-		}, &rplyRsPrf); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rplyRsPrf, expRsPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(expRsPrf), utils.ToJSON(rplyRsPrf))
+	} else if !reflect.DeepEqual(rsPrfs, expRsPrfs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRsPrfs), utils.ToJSON(rsPrfs))
 	}
 }
 
