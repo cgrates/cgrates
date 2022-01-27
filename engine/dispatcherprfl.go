@@ -311,7 +311,20 @@ func (dP *DispatcherProfile) Merge(v2 interface{}) {
 		dP.ID = vi.ID
 	}
 	dP.FilterIDs = append(dP.FilterIDs, vi.FilterIDs...)
-	dP.Hosts = append(dP.Hosts, vi.Hosts...)
+	var equal bool
+	for _, hostV2 := range vi.Hosts {
+		for _, host := range dP.Hosts {
+			if host.ID == hostV2.ID {
+				host.Merge(hostV2)
+				equal = true
+				break
+			}
+		}
+		if !equal {
+			dP.Hosts = append(dP.Hosts, hostV2)
+		}
+	}
+	// dP.Hosts = append(dP.Hosts, vi.Hosts...)
 	if vi.Weight != 0 {
 		dP.Weight = vi.Weight
 	}
@@ -320,6 +333,22 @@ func (dP *DispatcherProfile) Merge(v2 interface{}) {
 	}
 	if len(vi.Strategy) != 0 {
 		dP.Strategy = vi.Strategy
+	}
+}
+
+func (dspHost *DispatcherHostProfile) Merge(v2 *DispatcherHostProfile) {
+	if v2.ID != utils.EmptyString {
+		dspHost.ID = v2.ID
+	}
+	if v2.Weight != 0 {
+		dspHost.Weight = v2.Weight
+	}
+	if v2.Blocker {
+		dspHost.Blocker = v2.Blocker
+	}
+	dspHost.FilterIDs = append(dspHost.FilterIDs, v2.FilterIDs...)
+	for k, v := range v2.Params {
+		dspHost.Params[k] = v
 	}
 }
 
