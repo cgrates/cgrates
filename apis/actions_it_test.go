@@ -63,6 +63,7 @@ var (
 		testActionsRemoveActionProfile,
 		testActionsGetActionProfileAfterRemove,
 		testActionsGetActionProfilesAfterRemove,
+		testActionsSetActionProfilesWithPrefix,
 		testActionsPing,
 
 		// execute http_post
@@ -388,7 +389,7 @@ func testActionsSetActionProfilesWithPrefix(t *testing.T) {
 			ID:     "aactPrfID",
 			Actions: []*engine.APAction{
 				{
-					ID: "actID",
+					ID: "aactID",
 				},
 			},
 		},

@@ -653,7 +653,7 @@ func testFilterSGetFiltersWithPrefix(t *testing.T) {
 	args := &utils.ArgsItemIDs{
 		ItemsPrefix: "afltr",
 	}
-	expectedFltr := &[](*engine.Filter){
+	expectedFltr := &[]*engine.Filter{
 		{
 			Tenant: utils.CGRateSorg,
 			ID:     "afltr_for_attr",
