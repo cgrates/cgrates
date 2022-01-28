@@ -724,7 +724,38 @@ func (rt *Rate) Merge(vi *Rate) {
 	}
 	rt.FilterIDs = append(rt.FilterIDs, vi.FilterIDs...)
 	rt.Weights = append(rt.Weights, vi.Weights...)
-	rt.IntervalRates = append(rt.IntervalRates, vi.IntervalRates...)
+	var equal bool
+	for _, ivalRateV2 := range vi.IntervalRates {
+		for _, ivalRate := range rt.IntervalRates {
+			if ivalRate.IntervalStart.Compare(ivalRateV2.IntervalStart) == 0 {
+				ivalRate.Merge(ivalRateV2)
+				equal = true
+				break
+			}
+		}
+		if !equal {
+			rt.IntervalRates = append(rt.IntervalRates, ivalRateV2)
+		}
+		equal = false
+	}
+}
+
+func (ivalRate *IntervalRate) Merge(v2 *IntervalRate) {
+	if v2.IntervalStart.Compare(NewDecimal(0, 0)) != 0 {
+		ivalRate.IntervalStart = v2.IntervalStart
+	}
+	if v2.FixedFee.Compare(NewDecimal(0, 0)) != 0 {
+		ivalRate.FixedFee = v2.FixedFee
+	}
+	if v2.RecurrentFee.Compare(NewDecimal(0, 0)) != 0 {
+		ivalRate.RecurrentFee = v2.RecurrentFee
+	}
+	if v2.Unit.Compare(NewDecimal(0, 0)) != 0 {
+		ivalRate.Unit = v2.Unit
+	}
+	if v2.Increment.Compare(NewDecimal(0, 0)) != 0 {
+		ivalRate.Increment = v2.Increment
+	}
 }
 
 func (rp *RateProfile) String() string { return ToJSON(rp) }

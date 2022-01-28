@@ -323,6 +323,7 @@ func (dP *DispatcherProfile) Merge(v2 interface{}) {
 		if !equal {
 			dP.Hosts = append(dP.Hosts, hostV2)
 		}
+		equal = false
 	}
 	// dP.Hosts = append(dP.Hosts, vi.Hosts...)
 	if vi.Weight != 0 {
