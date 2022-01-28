@@ -755,7 +755,7 @@ func testAccMaxAbstracts(t *testing.T) {
 		t.Error(err)
 	}
 
-	var reply3 utils.EventCharges
+	var reply3 *utils.EventCharges
 	ev2 := &utils.CGREvent{
 		Tenant: utils.CGRateSorg,
 		ID:     "testIDEvent",
@@ -771,54 +771,40 @@ func testAccMaxAbstracts(t *testing.T) {
 		ev2, &reply3); err != nil {
 		t.Error(err)
 	}
-
-	var crgID string
-	for _, val := range reply3.Charges {
-		crgID = val.ChargingID
-	}
-
-	var accKEy, rtID string
-	for key, val := range reply3.Accounting {
-		accKEy = key
-		rtID = val.RatingID
-	}
-	expRating := &utils.RateSInterval{
-		Increments: []*utils.RateSIncrement{
-			{
-				RateIntervalIndex: 0,
-				CompressFactor:    1,
-			},
-		},
-		CompressFactor: 1,
-	}
-	for _, val := range reply3.Rating {
-		val.Increments[0].RateID = "RateID" // changed due to Sha1Prefix
-		expRating.Increments[0].RateID = "RateID"
-		if !reflect.DeepEqual(val, expRating) {
-			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
-		}
-	}
-	reply3.Rating = map[string]*utils.RateSInterval{}
-	expected2 := utils.EventCharges{
+	expected2 := &utils.EventCharges{
 		Abstracts: utils.NewDecimal(int64(27*time.Second), 0),
 		Charges: []*utils.ChargeEntry{
 			{
-				ChargingID:     crgID,
+				ChargingID:     "charge1",
 				CompressFactor: 1,
 			},
 		},
 		Accounting: map[string]*utils.AccountCharge{
-			accKEy: &utils.AccountCharge{
+			"charge1": {
 				AccountID:    "TEST_ACC_IT_TEST4",
 				BalanceID:    "AbstractBalance1",
 				Units:        utils.NewDecimal(int64(27*time.Second), 0),
 				BalanceLimit: utils.NewDecimal(0, 0),
-				RatingID:     rtID,
+				RatingID:     "Rating1",
 			},
 		},
 		UnitFactors: map[string]*utils.UnitFactor{},
-		Rating:      map[string]*utils.RateSInterval{},
-		Rates:       map[string]*utils.IntervalRate{},
+		Rating: map[string]*utils.RateSInterval{
+			"Rating1": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "rate1",
+						CompressFactor:    1,
+					}},
+				CompressFactor: 1,
+			}},
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(0, 0),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TEST_ACC_IT_TEST4": {
 				Tenant:    "cgrates.org",
@@ -870,7 +856,7 @@ func testAccMaxAbstracts(t *testing.T) {
 		},
 	}
 
-	if !reflect.DeepEqual(reply3, expected2) {
+	if !reply3.Equals(expected2) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected2), utils.ToJSON(reply3))
 	}
 }
@@ -930,54 +916,41 @@ func testAccDebitAbstracts(t *testing.T) {
 		t.Error(err)
 	}
 
-	var crgID string
-	for _, val := range reply3.Charges {
-		crgID = val.ChargingID
-	}
-
-	var accKEy, rtID string
-	for key, val := range reply3.Accounting {
-		accKEy = key
-		rtID = val.RatingID
-	}
-	expRating := &utils.RateSInterval{
-		Increments: []*utils.RateSIncrement{
-			{
-				RateIntervalIndex: 0,
-				CompressFactor:    1,
-			},
-		},
-		CompressFactor: 1,
-	}
-	for _, val := range reply3.Rating {
-		val.Increments[0].RateID = "RateID"
-		expRating.Increments[0].RateID = "RateID"
-		if !reflect.DeepEqual(val, expRating) {
-			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expRating), utils.ToJSON(val))
-		}
-	}
-	reply3.Rating = map[string]*utils.RateSInterval{}
 	expected2 := utils.EventCharges{
 		Abstracts: utils.NewDecimal(int64(27*time.Second), 0),
 		Charges: []*utils.ChargeEntry{
 			{
-				ChargingID:     crgID,
+				ChargingID:     "charge1",
 				CompressFactor: 1,
 			},
 		},
 		Accounting: map[string]*utils.AccountCharge{
-			accKEy: &utils.AccountCharge{
+			"charge1": &utils.AccountCharge{
 				AccountID:       "TEST_ACC_IT_TEST5",
 				BalanceID:       "AbstractBalance1",
 				Units:           utils.NewDecimal(int64(27*time.Second), 0),
 				BalanceLimit:    utils.NewDecimal(0, 0),
-				RatingID:        rtID,
+				RatingID:        "rating1",
 				JoinedChargeIDs: nil,
 			},
 		},
 		UnitFactors: map[string]*utils.UnitFactor{},
-		Rating:      map[string]*utils.RateSInterval{},
-		Rates:       map[string]*utils.IntervalRate{},
+		Rating: map[string]*utils.RateSInterval{
+			"rating1": {
+				Increments: []*utils.RateSIncrement{{
+					RateIntervalIndex: 0,
+					RateID:            "rate1",
+					CompressFactor:    1,
+				}},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(0, 0),
+			},
+		},
 		Accounts: map[string]*utils.Account{
 			"TEST_ACC_IT_TEST5": {
 				Tenant:    "cgrates.org",
@@ -1022,7 +995,7 @@ func testAccDebitAbstracts(t *testing.T) {
 		},
 	}
 
-	if !reflect.DeepEqual(reply3, expected2) {
+	if !expected2.Equals(&reply3) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected2), utils.ToJSON(reply3))
 	}
 }
