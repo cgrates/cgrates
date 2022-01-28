@@ -146,6 +146,91 @@ var (
 	}
 )
 
+func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{}
+	conMng := NewConnManager(cfg)
+	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, nil, conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	aA := NewAttributeService(dm, filterS, cfg)
+	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+		{
+			Value: true,
+		},
+	}
+	acPrf := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AC1",
+		FilterIDs: []string{"*string:~*req.Attribute:testAttrValue"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+	if err := dm.SetAttributeProfile(context.Background(), acPrf, true); err != nil {
+		t.Error(err)
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AcProcessEvent1",
+		Event: map[string]interface{}{
+			"Attribute": "testAttrValue",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
+			utils.OptsAttributesProfileIDs:  []string{"AC1"},
+			utils.MetaProfileIgnoreFilters:  false,
+		},
+	}
+	rply := &APIAttributeProfile{}
+	expected := &APIAttributeProfile{
+		Tenant:     "cgrates.org",
+		ID:         "AC1",
+		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
+		Attributes: []*ExternalAttribute{},
+		Weights:    ";20",
+	}
+
+	err = aA.V1GetAttributeForEvent(context.Background(), ev, rply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+	// correct filter but ignore filters opt on false
+	ev2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AcProcessEvent2",
+		Event: map[string]interface{}{
+			"Attribute": "testAttrValue2",
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
+			utils.OptsAttributesProfileIDs:  []string{"AC1"},
+			utils.MetaProfileIgnoreFilters:  true,
+		},
+	}
+	rply2 := &APIAttributeProfile{}
+	expected2 := &APIAttributeProfile{
+		Tenant:     "cgrates.org",
+		ID:         "AC1",
+		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
+		Attributes: []*ExternalAttribute{},
+		Weights:    ";20",
+	}
+	// with ignore filters on true and with bad filter
+	err = aA.V1GetAttributeForEvent(context.Background(), ev2, rply2)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(expected2, rply2) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(rply2))
+	}
+}
+
 func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
@@ -4687,91 +4772,6 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
-	}
-}
-
-func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.FilterSCfg().ResourceSConns = []string{}
-	conMng := NewConnManager(cfg)
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
-	filterS := NewFilterS(cfg, conMng, dm)
-	aA := NewAttributeService(dm, filterS, cfg)
-	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
-		{
-			Value: true,
-		},
-	}
-	acPrf := &AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "AC1",
-		FilterIDs: []string{"*string:~*req.Attribute:testAttrValue"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
-	}
-	if err := dm.SetAttributeProfile(context.Background(), acPrf, true); err != nil {
-		t.Error(err)
-	}
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "AcProcessEvent1",
-		Event: map[string]interface{}{
-			"Attribute": "testAttrValue",
-		},
-		APIOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: 2,
-			utils.OptsAttributesProfileIDs:  []string{"AC1"},
-			utils.MetaProfileIgnoreFilters:  false,
-		},
-	}
-	rply := &APIAttributeProfile{}
-	expected := &APIAttributeProfile{
-		Tenant:     "cgrates.org",
-		ID:         "AC1",
-		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
-		Attributes: []*ExternalAttribute{},
-		Weights:    ";20",
-	}
-
-	err = aA.V1GetAttributeForEvent(context.Background(), ev, rply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
-	}
-	// correct filter but ignore filters opt on false
-	ev2 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "AcProcessEvent2",
-		Event: map[string]interface{}{
-			"Attribute": "testAttrValue2",
-		},
-		APIOpts: map[string]interface{}{
-			utils.OptsAttributesProcessRuns: 2,
-			utils.OptsAttributesProfileIDs:  []string{"AC1"},
-			utils.MetaProfileIgnoreFilters:  true,
-		},
-	}
-	rply2 := &APIAttributeProfile{}
-	expected2 := &APIAttributeProfile{
-		Tenant:     "cgrates.org",
-		ID:         "AC1",
-		FilterIDs:  []string{"*string:~*req.Attribute:testAttrValue"},
-		Attributes: []*ExternalAttribute{},
-		Weights:    ";20",
-	}
-	// with ignore filters on true and with bad filter
-	err = aA.V1GetAttributeForEvent(context.Background(), ev2, rply2)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	if !reflect.DeepEqual(expected2, rply2) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(rply2))
 	}
 }
 
